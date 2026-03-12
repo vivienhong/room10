@@ -2,80 +2,72 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Room10</title>
 
 <style>
-
-body{
+  body{
     margin:0;
     background:#000;
-}
+  }
 
-/* 首页容器 */
-#home{
+  #home{
     position:relative;
     width:100%;
     max-width:1400px;
-    margin:auto;
-}
+    margin:0 auto;
+  }
 
-/* 首页图片 */
-#home img{
+  #home img{
     width:100%;
     display:block;
-}
+  }
 
-/* 热区层 */
-#map{
+  #map{
     position:absolute;
     top:0;
     left:0;
     width:100%;
     height:100%;
-}
+    z-index:2;
+  }
 
+  #map a{
+    cursor:pointer;
+  }
 </style>
-
 </head>
 
 <body>
 
 <div id="home">
+  <img id="homeImage" src="home-day.png" alt="Room10 首页">
 
-<img id="homeImage" src="home-day.png">
+  <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none">
 
-<svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <!-- 宿管室热区：测试版，先显示红色方便确认 -->
+    <a href="manager.html">
+      <rect
+        x="66"
+        y="62"
+        width="25"
+        height="26"
+        fill="rgba(255,0,0,0.25)"
+      />
+    </a>
 
-<!-- 宿管室热区 -->
-<a href="manager.html">
-
-<rect
-x="66"
-y="62"
-width="25"
-height="26"
-fill="transparent"
-/>
-
-</a>
-
-</svg>
-
+  </svg>
 </div>
 
 <script>
+  const hour = new Date().getHours();
+  const img = document.getElementById("homeImage");
 
-/* 日夜自动切换 */
-
-const hour = new Date().getHours()
-const img = document.getElementById("homeImage")
-
-if(hour >= 18 || hour < 6){
-    img.src = "home-night.png"
-}else{
-    img.src = "home-day.png"
-}
-
+  if (hour >= 18 || hour < 6) {
+    img.src = "home-night.png";
+  } else {
+    img.src = "home-day.png";
+  }
 </script>
 
 </body>
