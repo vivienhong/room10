@@ -1,52 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
 <meta charset="UTF-8">
 <title>Room10 Studio</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+body{
+    margin:0;
+    font-family: Arial, Helvetica, sans-serif;
+    background:#f6f6f6;
+    text-align:center;
+}
+
+/* 首页容器 */
+#home{
+    position:relative;
+    max-width:1200px;
+    margin:auto;
+}
+
+/* 首页背景图 */
+#home img{
+    width:100%;
+    display:block;
+}
+
+/* 标题 */
+.title{
+    position:absolute;
+    top:20px;
+    left:0;
+    right:0;
+    font-size:36px;
+    font-weight:bold;
+    color:white;
+    text-shadow:0 2px 6px rgba(0,0,0,0.6);
+}
+
+/* 登录按钮 */
+.login-btn{
+    position:absolute;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#ffcc66;
+    padding:12px 26px;
+    border-radius:10px;
+    font-size:18px;
+    text-decoration:none;
+    color:black;
+    box-shadow:0 3px 8px rgba(0,0,0,0.3);
+}
+
+.login-btn:hover{
+    background:#ffd98f;
+}
+
+</style>
+
 </head>
 
 <body>
 
-<h1>Room10 Studio 成员</h1>
+<div id="home">
 
-<ul id="members"></ul>
+<div class="title">Room10 Studio</div>
+
+<img id="homeImage" src="home-day.png">
+
+<a class="login-btn" href="login.html">成员登录</a>
+
+</div>
 
 <script>
 
-const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co"
+/* 自动判断时间切换日夜 */
 
-const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI"
+const hour = new Date().getHours()
+const img = document.getElementById("homeImage")
 
-const client = window.supabase.createClient(supabaseUrl, supabaseKey)
-
-async function loadMembers() {
-
-  const { data, error } = await client
-    .from('members')
-    .select('*')
-
-  if(error){
-    console.log(error)
-  }
-
-  const list = document.getElementById("members")
-
-  data.forEach(member => {
-
-    const li = document.createElement("li")
-
-    li.textContent = member.name + " - " + member.role
-
-    list.appendChild(li)
-
-  })
-
+if(hour >= 18 || hour < 6){
+    img.src = "home-night.png"
+}else{
+    img.src = "home-day.png"
 }
-
-loadMembers()
 
 </script>
 
 </body>
+
 </html>
