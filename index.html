@@ -2,59 +2,36 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>Room10 Studio</title>
+<title>Room10</title>
 
 <style>
 
 body{
     margin:0;
-    font-family: Arial, Helvetica, sans-serif;
-    background:#f6f6f6;
-    text-align:center;
+    background:#000;
 }
 
 /* 首页容器 */
 #home{
     position:relative;
-    max-width:1200px;
+    width:100%;
+    max-width:1400px;
     margin:auto;
 }
 
-/* 首页背景图 */
+/* 首页图片 */
 #home img{
     width:100%;
     display:block;
 }
 
-/* 标题 */
-.title{
+/* 热区层 */
+#map{
     position:absolute;
-    top:20px;
+    top:0;
     left:0;
-    right:0;
-    font-size:36px;
-    font-weight:bold;
-    color:white;
-    text-shadow:0 2px 6px rgba(0,0,0,0.6);
-}
-
-/* 登录按钮 */
-.login-btn{
-    position:absolute;
-    bottom:30px;
-    left:50%;
-    transform:translateX(-50%);
-    background:#ffcc66;
-    padding:12px 26px;
-    border-radius:10px;
-    font-size:18px;
-    text-decoration:none;
-    color:black;
-    box-shadow:0 3px 8px rgba(0,0,0,0.3);
-}
-
-.login-btn:hover{
-    background:#ffd98f;
+    width:100%;
+    height:100%;
 }
 
 </style>
@@ -65,17 +42,30 @@ body{
 
 <div id="home">
 
-<div class="title">Room10 Studio</div>
-
 <img id="homeImage" src="home-day.png">
 
-<a class="login-btn" href="login.html">成员登录</a>
+<svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none">
+
+<!-- 宿管室热区 -->
+<a href="manager.html">
+
+<rect
+x="66"
+y="62"
+width="25"
+height="26"
+fill="transparent"
+/>
+
+</a>
+
+</svg>
 
 </div>
 
 <script>
 
-/* 自动判断时间切换日夜 */
+/* 日夜自动切换 */
 
 const hour = new Date().getHours()
 const img = document.getElementById("homeImage")
@@ -89,5 +79,4 @@ if(hour >= 18 || hour < 6){
 </script>
 
 </body>
-
 </html>
