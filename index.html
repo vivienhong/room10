@@ -4,70 +4,638 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Room10</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-  body{
-    margin:0;
-    background:#000;
-  }
+body{
+  margin:0;
+  background:#dfe9e6;
+  font-family:Arial, Helvetica, sans-serif;
+  height:100vh;
+  height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  transition:background .35s ease;
+}
 
-  #home{
-    position:relative;
-    width:100%;
-    max-width:1400px;
-    margin:0 auto;
-  }
+/* 首页外层：负责居中 */
+#home{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-  #home img{
-    width:100%;
-    display:block;
-  }
+/* 图片实际显示容器：热区必须跟它走 */
+#homeStage{
+  position:relative;
+  width:fit-content;
+  height:fit-content;
+  max-width:100vw;
+  max-height:100vh;
+}
 
-  #map{
-    position:absolute;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    z-index:2;
-  }
+/* 首页图片：完整展示 */
+#homeImage{
+  display:block;
+  max-width:100vw;
+  max-height:100vh;
+  width:auto;
+  height:auto;
+}
 
-  #map a{
-    cursor:pointer;
-  }
+/* SVG 热区：覆盖在图片本体上 */
+#map{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:2;
+}
+
+#map rect{
+  fill:transparent;
+  cursor:pointer;
+  transition:.2s;
+  pointer-events:all;
+}
+
+#map rect:hover{
+  fill:rgba(255,220,120,.25);
+  stroke:#ffd87a;
+  stroke-width:.6;
+}
+
+/* 右上角退出图标本体：绑定图片位置 */
+#logoutImg{
+  position:absolute;
+  top:-30px;
+  right:-15px;
+  z-index:5;
+  pointer-events:none;
+  display:none;
+}
+
+/* 右上角 SVG 热区层：绑定图片位置 */
+#logoutSvg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:6;
+  pointer-events:none;
+  display:none;
+}
+
+#logoutSvg rect{
+  fill:transparent;
+  pointer-events:all;
+  cursor:pointer;
+}
+
+/* 登录UI */
+#loginUI{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+
+#loginUI.show{
+  display:flex;
+}
+
+.login-panel{
+  position:relative;
+  width:720px;
+  max-width:100%;
+}
+
+.login-panel img{
+  width:100%;
+  display:block;
+  pointer-events:none;
+}
+
+/* 输入框 */
+#username{
+  position:absolute;
+  top:40%;
+  left:36.2%;
+  width:27.5%;
+  height:8.1%;
+  border:none;
+  outline:none;
+  padding:0 10px;
+  font-size:18px;
+  color:#5b3e28;
+  background:transparent;
+  box-sizing:border-box;
+}
+
+#password{
+  position:absolute;
+  top:56%;
+  left:36.2%;
+  width:20%;
+  height:8.1%;
+  border:none;
+  outline:none;
+  padding:0 10px;
+  font-size:18px;
+  color:#5b3e28;
+  background:transparent;
+  box-sizing:border-box;
+}
+
+/* 显示密码按钮 */
+#togglePassword{
+  position:absolute;
+  top:56%;
+  left:56%;
+  width:8%;
+  height:8.1%;
+  border:none;
+  cursor:pointer;
+  background:rgba(255,215,120,.15);
+  border-radius:6px;
+}
+
+#togglePassword:hover{
+  background:rgba(255,215,120,.35);
+  box-shadow:0 0 8px rgba(255,220,120,.6);
+}
+
+/* 登录按钮 */
+#loginBtn{
+  position:absolute;
+  top:68%;
+  left:40%;
+  width:20%;
+  height:9%;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+}
+
+/* 去登记页入口 */
+#registerLink{
+  position:absolute;
+  top:50%;
+  left:54%;
+  transform:translateX(-50%);
+  color:#7a4f2b;
+  font-size:14px;
+  font-weight:600;
+  text-decoration:underline;
+  cursor:pointer;
+  background:none;
+  border:none;
+  padding:0;
+}
+
+#registerLink:hover{
+  color:#9b6334;
+}
+
+/* 提示文字 */
+#loginMessage{
+  position:absolute;
+  top:34%;
+  left:53.5%;
+  transform:translateX(-50%);
+  text-align:center;
+  color:#7a4f2b;
+  font-size:16px;
+  font-weight:600;
+  min-width:220px;
+  white-space:pre-wrap;
+}
+
+/* 关闭按钮 */
+.closeBtn{
+  position:absolute;
+  top:4px;
+  right:6px;
+  border:none;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:white;
+  cursor:pointer;
+  font-size:18px;
+}
 </style>
 </head>
 
 <body>
 
 <div id="home">
-  <img id="homeImage" src="home-day.png" alt="Room10 首页">
+  <div id="homeStage">
+    <img id="homeImage" src="home-day.png" alt="Room10 首页">
 
-  <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <!-- 退出登录 -->
+    <img id="logoutImg" src="logout-on.png" alt="退出图标">
+    <svg id="logoutSvg" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <a href="#" onclick="handleLogoutHotspot();return false;">
+        <rect x="85" y="6" width="10.8" height="6"></rect>
+      </a>
+    </svg>
 
-    <!-- 宿管室热区：测试版，先显示红色方便确认 -->
-    <a href="manager.html">
-      <rect
-        x="66"
-        y="62"
-        width="25"
-        height="26"
-        fill="rgba(255,0,0,0.25)"
-      />
-    </a>
+    <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none">
 
-  </svg>
+      <a href="#" onclick="enterRoom('dorm.html', true);return false;">
+        <rect x="16.7" y="25.9" width="27.7" height="22.5"></rect>
+      </a>
+
+      <a href="#" onclick="enterRoom('studio.html', true);return false;">
+        <rect x="57" y="25.9" width="27.5" height="22.5"></rect>
+      </a>
+
+      <a href="#" onclick="enterRoom('living.html', true);return false;">
+        <rect x="16.6" y="49.4" width="27" height="21.5"></rect>
+      </a>
+
+      <a href="#" onclick="enterRoom('game.html', true);return false;">
+        <rect x="57" y="49.4" width="27.5" height="21.5"></rect>
+      </a>
+
+      <a href="#" onclick="enterRoom('honor.html', true);return false;">
+        <rect x="16.7" y="72" width="27" height="22"></rect>
+      </a>
+
+      <a href="#" onclick="enterRoom('manager.html', true);return false;">
+        <rect x="57" y="72" width="27.5" height="22"></rect>
+      </a>
+
+      <a href="#" onclick="handleDoorClick();return false;">
+        <rect x="44" y="75" width="13" height="20"></rect>
+      </a>
+
+    </svg>
+  </div>
+</div>
+
+<div id="loginUI">
+  <div class="login-panel">
+    <img src="login.png" alt="登录框">
+
+    <input id="username" type="text" autocomplete="username">
+    <input id="password" type="password" autocomplete="current-password">
+
+    <button id="togglePassword" type="button" onclick="togglePassword()"></button>
+    <button id="loginBtn" type="button" onclick="login()"></button>
+
+    <button id="registerLink" type="button" onclick="goRegisterFromIndex()">没有记录？登记一下吧</button>
+
+    <button class="closeBtn" type="button" onclick="closeLogin()">×</button>
+
+    <div id="loginMessage"></div>
+  </div>
 </div>
 
 <script>
-  const hour = new Date().getHours();
-  const img = document.getElementById("homeImage");
+const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  if (hour >= 18 || hour < 6) {
-    img.src = "home-night.png";
-  } else {
-    img.src = "home-day.png";
+const homeImg = document.getElementById("homeImage");
+const logoutImg = document.getElementById("logoutImg");
+const logoutSvg = document.getElementById("logoutSvg");
+
+function goRegisterFromIndex(){
+  sessionStorage.setItem("room10RegisterReturn", "index.html");
+  window.location.href = "register.html?from=index.html";
+}
+
+/* 首页图片 */
+function updateHomeImageByTime(){
+  const hour = new Date().getHours();
+  const nextSrc = (hour >= 18 || hour < 6) ? "home-night.png" : "home-day.png";
+  if(homeImg.getAttribute("src") !== nextSrc){
+    homeImg.src = nextSrc;
   }
+}
+
+/* 自动背景延展 */
+function clamp(v, min, max){
+  return Math.max(min, Math.min(max, v));
+}
+function mixColor(a, b, t){
+  return {
+    r: Math.round(a.r + (b.r - a.r) * t),
+    g: Math.round(a.g + (b.g - a.g) * t),
+    b: Math.round(a.b + (b.b - a.b) * t)
+  };
+}
+function colorToCss(c){
+  return `rgb(${c.r}, ${c.g}, ${c.b})`;
+}
+function lighten(c, amt){
+  return {
+    r: clamp(c.r + amt, 0, 255),
+    g: clamp(c.g + amt, 0, 255),
+    b: clamp(c.b + amt, 0, 255)
+  };
+}
+function saturate(c, factor){
+  const avg = (c.r + c.g + c.b) / 3;
+  return {
+    r: clamp(Math.round(avg + (c.r - avg) * factor), 0, 255),
+    g: clamp(Math.round(avg + (c.g - avg) * factor), 0, 255),
+    b: clamp(Math.round(avg + (c.b - avg) * factor), 0, 255)
+  };
+}
+function sampleRectAverage(ctx, x, y, w, h){
+  const data = ctx.getImageData(x, y, w, h).data;
+  let r = 0, g = 0, b = 0, count = 0;
+  for(let i = 0; i < data.length; i += 4){
+    const alpha = data[i + 3];
+    if(alpha < 8) continue;
+    r += data[i];
+    g += data[i + 1];
+    b += data[i + 2];
+    count++;
+  }
+  if(count === 0){
+    return { r:225, g:233, b:230 };
+  }
+  return {
+    r: Math.round(r / count),
+    g: Math.round(g / count),
+    b: Math.round(b / count)
+  };
+}
+function applyBetterHomeBackground(img){
+  const w = img.naturalWidth;
+  const h = img.naturalHeight;
+  if(!w || !h) return;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d", { willReadFrequently:true });
+  ctx.drawImage(img, 0, 0, w, h);
+
+  const sideW = Math.max(12, Math.round(w * 0.08));
+  const upperH = Math.max(12, Math.round(h * 0.42));
+  const lowerH = Math.max(12, Math.round(h * 0.22));
+
+  const leftSky = sampleRectAverage(ctx, 0, 0, sideW, upperH);
+  const rightSky = sampleRectAverage(ctx, w - sideW, 0, sideW, upperH);
+  const leftGround = sampleRectAverage(ctx, 0, h - lowerH, sideW, lowerH);
+  const rightGround = sampleRectAverage(ctx, w - sideW, h - lowerH, sideW, lowerH);
+
+  let skyColor = mixColor(leftSky, rightSky, 0.5);
+  let groundColor = mixColor(leftGround, rightGround, 0.5);
+
+  skyColor = saturate(lighten(skyColor, 12), 1.08);
+  groundColor = saturate(lighten(groundColor, 8), 1.05);
+
+  document.body.style.background = `
+    linear-gradient(
+      180deg,
+      ${colorToCss(skyColor)} 0%,
+      ${colorToCss(mixColor(skyColor, groundColor, 0.35))} 48%,
+      ${colorToCss(groundColor)} 100%
+    )
+  `;
+}
+function applyCurrentHomeBackground(){
+  if(homeImg.complete && homeImg.naturalWidth){
+    try{
+      applyBetterHomeBackground(homeImg);
+    }catch(err){
+      console.warn("背景采样失败：", err);
+    }
+  }else{
+    homeImg.addEventListener("load", () => {
+      try{
+        applyBetterHomeBackground(homeImg);
+      }catch(err){
+        console.warn("背景采样失败：", err);
+      }
+    }, { once:true });
+  }
+}
+
+/* 登录状态 */
+function isLoggedIn(){
+  return localStorage.getItem("room10LoggedIn") === "true";
+}
+
+function getCurrentUser(){
+  return {
+    nickname: localStorage.getItem("room10User") || "",
+    role: localStorage.getItem("room10Role") || ""
+  };
+}
+
+function updateLogoutDisplay(){
+  if(isLoggedIn()){
+    logoutImg.style.display = "block";
+    logoutSvg.style.display = "block";
+    logoutImg.src = "logout-on.png";
+  }else{
+    logoutImg.style.display = "none";
+    logoutSvg.style.display = "none";
+  }
+}
+
+function safeSyncHomeUI(){
+  try{
+    updateLogoutDisplay();
+    updateHomeImageByTime();
+    applyCurrentHomeBackground();
+  }catch(err){
+    console.warn("safeSyncHomeUI 失败：", err);
+    updateLogoutDisplay();
+  }
+}
+
+/* 返回首页 / 切回标签页时同步 */
+window.addEventListener("pageshow", safeSyncHomeUI);
+window.addEventListener("focus", safeSyncHomeUI);
+document.addEventListener("visibilitychange", () => {
+  if(!document.hidden){
+    safeSyncHomeUI();
+  }
+});
+window.addEventListener("storage", (e) => {
+  if(
+    e.key === "room10LoggedIn" ||
+    e.key === "room10User" ||
+    e.key === "room10Role"
+  ){
+    safeSyncHomeUI();
+  }
+});
+
+/* 退出 */
+function handleLogout(){
+  localStorage.removeItem("room10LoggedIn");
+  localStorage.removeItem("room10User");
+  localStorage.removeItem("room10Role");
+  safeSyncHomeUI();
+  alert("已退出登录");
+  window.location.href = "index.html";
+}
+
+function handleLogoutHotspot(){
+  handleLogout();
+}
+
+/* 退出 hover */
+logoutSvg.addEventListener("mouseenter", () => {
+  if(isLoggedIn()){
+    logoutImg.src = "logout-out.png";
+  }
+});
+
+logoutSvg.addEventListener("mouseleave", () => {
+  if(isLoggedIn()){
+    logoutImg.src = "logout-on.png";
+  }
+});
+
+/* 大门点击 */
+function handleDoorClick(){
+  if(isLoggedIn()){
+    return;
+  }
+  openLogin();
+}
+
+/* 登录 */
+async function login(){
+  const nicknameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+  const msg = document.getElementById("loginMessage");
+
+  const nickname = nicknameInput.value.trim();
+  const key = passwordInput.value.trim();
+
+  msg.innerText = "";
+  msg.style.color = "#8b4a2d";
+
+  if(!nickname || !key){
+    msg.innerText = "还没填写完整呢";
+    return;
+  }
+
+  let data = null;
+
+  try{
+    const result = await client
+      .from("members")
+      .select("nickname, member_code, role")
+      .eq("nickname", nickname)
+      .maybeSingle();
+
+    const error = result.error;
+    data = result.data;
+
+    if(error){
+      console.error("Supabase 查询失败：", error);
+      msg.innerText = "登录检查失败，请稍后再试";
+      return;
+    }
+
+    if(!data){
+      msg.innerText = "没有找到你的记录哎";
+      return;
+    }
+
+    const dbKey = String(data.member_code || "").trim();
+
+    if(dbKey !== key){
+      msg.innerText = "哎呀，钥匙好像拿错了";
+      return;
+    }
+
+  }catch(e){
+    console.error("login() 查询异常：", e);
+    msg.style.color = "#8b4a2d";
+    msg.innerText = "登录失败，请稍后再试";
+    return;
+  }
+
+  /* 验证成功后写入全站共用登录状态 */
+  localStorage.setItem("room10LoggedIn", "true");
+  localStorage.setItem("room10User", data.nickname || nickname);
+  localStorage.setItem("room10Role", data.role || "member");
+
+  let roleMessage = "欢迎业主回家";
+  if(data.role === "admin" || data.role === "creator" || data.role === "owner"){
+    roleMessage = "宿管牛马已上线";
+  }
+
+  msg.style.color = "#5f7d3a";
+  msg.innerText = roleMessage;
+
+  safeSyncHomeUI();
+
+  nicknameInput.value = "";
+  passwordInput.value = "";
+
+  setTimeout(() => {
+    closeLogin();
+  }, 900);
+}
+
+/* UI */
+function openLogin(){
+  if(isLoggedIn()){
+    return;
+  }
+  document.getElementById("loginUI").classList.add("show");
+  document.getElementById("loginMessage").innerText = "";
+}
+
+function closeLogin(){
+  document.getElementById("loginUI").classList.remove("show");
+  document.getElementById("loginMessage").innerText = "";
+}
+
+/* 房间权限：全站统一读取本地登录态 */
+function enterRoom(page, needLogin){
+  if(needLogin && !isLoggedIn()){
+    openLogin();
+    return;
+  }
+  window.location.href = page;
+}
+
+/* 显示密码 */
+function togglePassword(){
+  const p = document.getElementById("password");
+  p.type = (p.type === "password") ? "text" : "password";
+}
+
+/* 回车登录 */
+document.getElementById("username").addEventListener("keydown", (e) => {
+  if(e.key === "Enter"){
+    login();
+  }
+});
+document.getElementById("password").addEventListener("keydown", (e) => {
+  if(e.key === "Enter"){
+    login();
+  }
+});
+
+/* 初始化 */
+updateHomeImageByTime();
+applyCurrentHomeBackground();
+safeSyncHomeUI();
 </script>
 
 </body>
