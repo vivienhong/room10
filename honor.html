@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>荣誉墙</title>
+
+<style>
+body{
+  margin:0;
+  background:#000;
+  height:100vh;
+  height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  font-family:Arial, Helvetica,sans-serif;
+}
+
+#room{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+#stage{
+  position:relative;
+  width:fit-content;
+  height:fit-content;
+  max-width:100vw;
+  max-height:100vh;
+}
+
+#bg{
+  display:block;
+  max-width:100vw;
+  max-height:100vh;
+  width:auto;
+  height:auto;
+}
+
+/* 返回大厅 */
+#btnHome{
+  position:absolute;
+  left:4%;
+  bottom:5%;
+  padding:10px 16px;
+  border:none;
+  border-radius:8px;
+  background:rgba(255,255,255,.92);
+  color:#5b3e28;
+  font-size:14px;
+  cursor:pointer;
+  z-index:7;
+}
+
+#btnHome:hover{
+  background:#fff;
+}
+
+/* 翻页按钮 */
+.pageBtn{
+  position:absolute;
+  width:42px;
+  height:42px;
+  border:none;
+  border-radius:50%;
+  background:rgba(255,255,255,.92);
+  color:#5b3e28;
+  font-size:22px;
+  font-weight:bold;
+  cursor:pointer;
+  z-index:7;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.18);
+  transition:.2s;
+}
+
+.pageBtn:hover{
+  background:#fff;
+  transform:scale(1.06);
+}
+
+/* 左翻页：放在最佳尖叫鸡上方 */
+#btnPrevPage{
+  left:6.2%;
+  top:9.5%;
+}
+
+/* 右翻页：放在最刺激过山车上方 */
+#btnNextPage{
+  left:30.4%;
+  top:58.5%;
+}
+
+/* 奖杯热区 */
+#map{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:3;
+}
+
+#map rect{
+  fill:rgba(255,0,0,.25);
+  stroke:red;
+  stroke-width:.4;
+  cursor:pointer;
+  transition:.2s;
+  pointer-events:all;
+}
+
+#map rect:hover{
+  fill:rgba(255,0,0,.4);
+  stroke:#ff0000;
+  stroke-width:.6;
+}
+
+/* 退出登录 */
+#logoutImg{
+  position:absolute;
+  top:-30px;
+  right:-15px;
+  z-index:5;
+  pointer-events:none;
+  display:none;
+}
+
+#logoutSvg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:6;
+  pointer-events:none;
+  display:none;
+}
+
+#logoutSvg rect{
+  fill:rgba(0,0,255,.25);
+  stroke:blue;
+  stroke-width:.4;
+  pointer-events:all;
+  cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="room">
+  <div id="stage">
+
+    <img id="bg" src="room-honor.png" alt="荣誉墙">
+
+    <!-- 退出登录 -->
+    <img id="logoutImg" src="logout-on.png" alt="">
+    <svg id="logoutSvg" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <a href="#" onclick="handleLogoutHotspot();return false;">
+        <rect x="85.2" y="6" width="10.5" height="6"></rect>
+      </a>
+    </svg>
+
+    <!-- 返回大厅 -->
+    <button id="btnHome" onclick="goHome()">返回大厅</button>
+
+    <!-- 翻页按钮 -->
+    <button id="btnPrevPage" class="pageBtn" onclick="goPrevPage()" title="上一页">‹</button>
+    <button id="btnNextPage" class="pageBtn" onclick="goNextPage()" title="下一页">›</button>
+
+    <!-- 奖杯点击区域（9个） -->
+    <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none">
+
+      <!-- 第一排 -->
+      <rect x="3.2" y="18" width="12" height="20" onclick="showTrophy(1)"></rect>
+      <rect x="15.5" y="18" width="12" height="20" onclick="showTrophy(2)"></rect>
+      <rect x="27.5" y="18" width="12" height="20" onclick="showTrophy(3)"></rect>
+
+      <!-- 第二排 -->
+      <rect x="3.2" y="43" width="12" height="20" onclick="showTrophy(4)"></rect>
+      <rect x="15.2" y="43" width="12" height="20" onclick="showTrophy(5)"></rect>
+      <rect x="27.5" y="43" width="12" height="20" onclick="showTrophy(6)"></rect>
+
+      <!-- 第三排 -->
+      <rect x="3.2" y="67.3" width="12" height="21" onclick="showTrophy(7)"></rect>
+      <rect x="15.2" y="67.3" width="12" height="21" onclick="showTrophy(8)"></rect>
+      <rect x="27.5" y="67.3" width="12" height="21" onclick="showTrophy(9)"></rect>
+
+    </svg>
+
+  </div>
+</div>
+
+<script>
+function goHome(){
+  window.location.href = "index.html";
+}
+
+/* 点击奖杯 */
+function showTrophy(id){
+  alert("你点击了奖杯 " + id);
+}
+
+/* ===== 荣誉墙三页循环跳转 ===== */
+const honorPages = [
+  "honor.html",
+  "honor-title.html",
+  "honor-achievement.html"
+];
+
+function getCurrentHonorPageIndex(){
+  const current = window.location.pathname.split("/").pop() || "honor.html";
+  const index = honorPages.indexOf(current);
+  return index === -1 ? 0 : index;
+}
+
+function goPrevPage(){
+  const currentIndex = getCurrentHonorPageIndex();
+  const prevIndex = (currentIndex - 1 + honorPages.length) % honorPages.length;
+  window.location.href = honorPages[prevIndex];
+}
+
+function goNextPage(){
+  const currentIndex = getCurrentHonorPageIndex();
+  const nextIndex = (currentIndex + 1) % honorPages.length;
+  window.location.href = honorPages[nextIndex];
+}
+
+/* ===== 退出登录 ===== */
+const logoutImg = document.getElementById("logoutImg");
+const logoutSvg = document.getElementById("logoutSvg");
+
+function isLoggedIn(){
+  return localStorage.getItem("room10LoggedIn") === "true";
+}
+
+function updateLogoutDisplay(){
+  if(isLoggedIn()){
+    logoutImg.style.display = "block";
+    logoutSvg.style.display = "block";
+    logoutImg.src = "logout-on.png";
+  }else{
+    logoutImg.style.display = "none";
+    logoutSvg.style.display = "none";
+  }
+}
+
+function handleLogoutHotspot(){
+  if(isLoggedIn()){
+    localStorage.removeItem("room10LoggedIn");
+    localStorage.removeItem("room10User");
+    localStorage.removeItem("room10Role");
+    updateLogoutDisplay();
+    alert("已退出登录");
+    window.location.href = "index.html";
+  }
+}
+
+logoutSvg.addEventListener("mouseenter", () => {
+  if(isLoggedIn()){
+    logoutImg.src = "logout-out.png";
+  }
+});
+
+logoutSvg.addEventListener("mouseleave", () => {
+  if(isLoggedIn()){
+    logoutImg.src = "logout-on.png";
+  }
+});
+
+updateLogoutDisplay();
+</script>
+
+</body>
+</html>

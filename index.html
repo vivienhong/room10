@@ -264,15 +264,15 @@ body{
         <rect x="16.6" y="49.4" width="27" height="21.5"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('game.html', true);return false;">
+      <a href="#" onclick="enterRoom('game.html', false);return false;">
         <rect x="57" y="49.4" width="27.5" height="21.5"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('honor.html', true);return false;">
+      <a href="#" onclick="enterRoom('honor.html', false);return false;">
         <rect x="16.7" y="72" width="27" height="22"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('manager.html', true);return false;">
+      <a href="#" onclick="enterRoom('manager-visitor.html', false);return false;">
         <rect x="57" y="72" width="27.5" height="22"></rect>
       </a>
 
@@ -484,8 +484,13 @@ function handleLogout(){
   localStorage.removeItem("room10LoggedIn");
   localStorage.removeItem("room10User");
   localStorage.removeItem("room10Role");
+
+  /* 新增：清申请缓存 */
+  localStorage.removeItem("room10ApplicantSession");
+  localStorage.removeItem("room10ApplicationDraft");
+
   safeSyncHomeUI();
-  alert("已退出登录");
+  closeLogin();
   window.location.href = "index.html";
 }
 
@@ -506,7 +511,10 @@ logoutSvg.addEventListener("mouseleave", () => {
   }
 });
 
-/* 大门点击 */
+/* 大门点击
+   未登录：打开登录框
+   已登录：不做任何动作
+*/
 function handleDoorClick(){
   if(isLoggedIn()){
     return;
@@ -568,14 +576,19 @@ async function login(){
     return;
   }
 
-  /* 验证成功后写入全站共用登录状态 */
   localStorage.setItem("room10LoggedIn", "true");
   localStorage.setItem("room10User", data.nickname || nickname);
   localStorage.setItem("room10Role", data.role || "member");
 
-  let roleMessage = "欢迎业主回家";
-  if(data.role === "admin" || data.role === "creator" || data.role === "owner"){
-    roleMessage = "宿管牛马已上线";
+  let roleMessage = "欢迎回家";
+  if(data.role === "owner"){
+    roleMessage = "维修工已上线";
+  }else if(data.role === "admin"){
+    roleMessage = "宿管已上线";
+  }else if(data.role === "member"){
+    roleMessage = "欢迎室友回家";
+  }else if(data.role === "applying"){
+    roleMessage = "当前身份为申请中";
   }
 
   msg.style.color = "#5f7d3a";
@@ -583,12 +596,11 @@ async function login(){
 
   safeSyncHomeUI();
 
-  nicknameInput.value = "";
-  passwordInput.value = "";
-
   setTimeout(() => {
+    nicknameInput.value = "";
+    passwordInput.value = "";
     closeLogin();
-  }, 900);
+  }, 700);
 }
 
 /* UI */

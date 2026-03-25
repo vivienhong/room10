@@ -1,0 +1,2238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>十号房｜宿管室</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;}
+
+:root{
+  --text:#5b4632;
+  --title:#6a5038;
+  --line:#d8c2a3;
+  --line2:#e3d0b4;
+  --panel:rgba(255,249,240,.92);
+  --panel2:rgba(255,252,245,.92);
+  --btn:#c98e56;
+  --btn-hover:#b97d45;
+  --sub:#e7d3b7;
+  --sub-hover:#dcc29e;
+  --shadow:0 10px 24px rgba(0,0,0,.08);
+  --radius:16px;
+  --green:#5f7d3a;
+  --red:#a14f3f;
+  --muted:#8e7c68;
+  --info:#7b654f;
+  --info-bg:#f7eee1;
+  --success-bg:#eef6e8;
+  --error-bg:#fbeceb;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+}
+
+body{
+  font-family:Arial, Helvetica, sans-serif;
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  background:#f3ecdf;
+  color:var(--text);
+}
+
+/* ===== 舞台 ===== */
+#managerPage{
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+
+#managerStage{
+  position:relative;
+  width:min(100vw, calc(100dvh * 1.6));
+  aspect-ratio:1440 / 900;
+  max-width:100vw;
+  max-height:100dvh;
+}
+
+#managerBg{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+
+#managerUI{
+  position:absolute;
+  inset:0;
+}
+
+/* ===== 面板通用 ===== */
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(3px);
+}
+
+.hidden{
+  display:none !important;
+}
+
+/* ===== 页面提示 ===== */
+#pageNotice{
+  position:absolute;
+  left:25.7%;
+  top:4.6%;
+  width:50%;
+  min-height:42px;
+  padding:10px 14px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:var(--info-bg);
+  color:var(--info);
+  z-index:6;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  box-shadow:var(--shadow);
+  font-size:clamp(11px, .8vw, 14px);
+  line-height:1.4;
+}
+
+#pageNotice.notice-success{
+  background:var(--success-bg);
+  color:var(--green);
+}
+
+#pageNotice.notice-error{
+  background:var(--error-bg);
+  color:var(--red);
+}
+
+.notice-text{
+  flex:1 1 auto;
+}
+
+.notice-close{
+  flex:0 0 auto;
+  border:none;
+  background:transparent;
+  color:inherit;
+  cursor:pointer;
+  font-size:16px;
+  line-height:1;
+  padding:0 2px;
+}
+
+/* ===== 右上角登出 ===== */
+#topActions{
+  position:absolute;
+  right:11.5%;
+  top:15%;
+  z-index:5;
+  display:flex;
+  justify-content:flex-end;
+}
+
+.top-btn{
+  height:40px;
+  min-width:92px;
+  padding:0 16px;
+  border:none;
+  border-radius:12px;
+  background:rgba(255,248,236,.94);
+  color:var(--text);
+  font-size:clamp(12px, .82vw, 15px);
+  cursor:pointer;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  font-weight:700;
+  box-shadow:var(--shadow);
+  border:1px solid var(--line);
+}
+
+.top-btn:hover{
+  background:#f2e0c4;
+}
+
+/* ===== 左侧栏 ===== */
+#sidebar{
+  position:absolute;
+  left:4.3%;
+  top:21.8%;
+  width:14.2%;
+  padding:12px;
+  z-index:2;
+}
+
+.nav-group{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.nav-btn{
+  border:none;
+  border-radius:12px;
+  padding:10px 8px;
+  font-size:clamp(13px, .95vw, 18px);
+  background:#ead9bc;
+  cursor:pointer;
+  text-align:center;
+  color:var(--text);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  font-weight:600;
+  line-height:1.2;
+}
+
+.nav-btn:hover{ background:#e2ccaa; }
+
+#statusBox{
+  margin-top:10px;
+  padding:10px 8px;
+  text-align:center;
+  background:rgba(255,255,255,.45);
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.status-name{
+  margin:0 0 6px 0;
+  font-size:clamp(12px, .86vw, 16px);
+  font-weight:700;
+  line-height:1.3;
+  color:var(--title);
+  word-break:break-word;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+.status-role{
+  margin:0;
+  font-size:clamp(13px, .95vw, 17px);
+  font-weight:600;
+  line-height:1.3;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+/* ===== 中栏内容区 ===== */
+#contentArea{
+  position:absolute;
+  left:25.7%;
+  top:10.1%;
+  width:50%;
+  height:79.2%;
+  z-index:2;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:8px;
+  scrollbar-width:thin;
+  scrollbar-color:#cfad82 rgba(255,255,255,.35);
+}
+
+#contentArea::-webkit-scrollbar{
+  width:8px;
+}
+#contentArea::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.35);
+  border-radius:999px;
+}
+#contentArea::-webkit-scrollbar-thumb{
+  background:#cfad82;
+  border-radius:999px;
+}
+
+.card{
+  position:relative;
+  padding:14px 16px;
+  margin-bottom:10px;
+}
+
+.section-title{
+  margin:0 0 10px 0;
+  font-size:clamp(16px, 1.05vw, 22px);
+  font-weight:700;
+  color:var(--title);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  line-height:1.2;
+}
+
+/* ===== 右侧切换栏 ===== */
+#adminSwitchPanel{
+  position:absolute;
+  right:8%;
+  top:24%;
+  width:13.8%;
+  padding:10px;
+  z-index:4;
+}
+
+.switch-title{
+  margin:0 0 8px 0;
+  font-size:clamp(12px, .82vw, 15px);
+  font-weight:700;
+  color:var(--title);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  text-align:center;
+}
+
+.switch-group{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.switch-btn{
+  border:none;
+  border-radius:11px;
+  padding:8px 6px;
+  font-size:clamp(11px, .76vw, 14px);
+  background:#ead9bc;
+  cursor:pointer;
+  text-align:center;
+  color:var(--text);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  font-weight:600;
+  line-height:1.2;
+}
+
+.switch-btn:hover{
+  background:#e2ccaa;
+}
+
+.switch-btn.active{
+  background:var(--btn);
+  color:#fff;
+}
+
+/* ===== 管理视图 ===== */
+.admin-view-card{
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+.admin-block{
+  background:#fff;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid var(--line2);
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+}
+
+.admin-block:first-of-type{
+  margin-top:0;
+}
+
+.admin-view-card > .admin-block{
+  flex:1 1 auto;
+  min-height:0;
+}
+
+.admin-block h3{
+  margin:0 0 8px 0;
+  font-size:clamp(13px, .92vw, 17px);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  color:var(--title);
+}
+
+.module-note{
+  margin:0;
+  font-size:clamp(11px, .74vw, 14px);
+  line-height:1.45;
+  color:#7a6755;
+}
+
+.module-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding-right:4px;
+  scrollbar-width:thin;
+  scrollbar-color:#cfad82 rgba(255,255,255,.35);
+}
+
+.module-scroll::-webkit-scrollbar{ width:8px; }
+.module-scroll::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.35);
+  border-radius:999px;
+}
+.module-scroll::-webkit-scrollbar-thumb{
+  background:#cfad82;
+  border-radius:999px;
+}
+
+/* ===== 档案夹 ===== */
+.apply-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.apply-item{
+  background:rgba(255,252,246,.92);
+  border:1px solid var(--line2);
+  border-radius:12px;
+  padding:10px 12px;
+}
+
+.apply-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:6px;
+}
+
+.apply-head strong{
+  font-size:clamp(12px, .85vw, 16px);
+  color:var(--title);
+}
+
+.apply-time{
+  font-size:clamp(11px, .72vw, 13px);
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+.apply-body{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  font-size:clamp(11px, .76vw, 14px);
+  line-height:1.45;
+  color:#6b5a45;
+}
+
+.apply-meta{
+  margin-top:6px;
+  font-size:clamp(11px, .72vw, 13px);
+  color:#8d755d;
+}
+
+.apply-actions-row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+
+.inline-btn{
+  height:40px;
+  padding:0 18px;
+  min-width:96px;
+  border:none;
+  border-radius:10px;
+  background:var(--btn);
+  color:#fff;
+  font-size:clamp(13px, .82vw, 16px);
+  cursor:pointer;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  font-weight:600;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+
+.inline-btn:hover{ background:var(--btn-hover); }
+
+.sub-btn{
+  height:40px;
+  padding:0 14px;
+  border:none;
+  border-radius:10px;
+  background:var(--sub);
+  color:var(--text);
+  font-size:clamp(12px, .8vw, 15px);
+  cursor:pointer;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  font-weight:600;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+
+.sub-btn:hover{ background:var(--sub-hover); }
+
+.apply-actions-row .inline-btn,
+.apply-actions-row .sub-btn{
+  height:34px;
+  min-width:82px;
+  padding:0 12px;
+  font-size:clamp(11px, .76vw, 14px);
+}
+
+.inline-btn:disabled,
+.sub-btn:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+}
+
+.vote-summary{
+  margin-top:6px;
+  font-size:clamp(11px, .72vw, 13px);
+  color:#7b654f;
+  line-height:1.4;
+}
+
+.vote-wait{ color:#8b5b34; }
+.vote-pass{ color:var(--green); }
+.vote-reject{ color:var(--red); }
+
+/* ===== 钥匙保管处 ===== */
+.key-list-wrap{
+  margin-top:6px;
+  overflow:auto;
+  flex:1 1 auto;
+  min-height:0;
+  border:1px solid var(--line2);
+  border-radius:10px;
+  background:rgba(255,252,246,.75);
+}
+
+.key-list{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+
+.key-list th,
+.key-list td{
+  padding:8px 10px;
+  text-align:left;
+  border-bottom:1px solid #eee1cb;
+  font-size:clamp(11px, .78vw, 14px);
+  color:var(--text);
+  word-break:break-word;
+  vertical-align:top;
+}
+
+.key-list th{
+  position:sticky;
+  top:0;
+  background:#f5e6cc;
+  color:var(--title);
+  z-index:1;
+}
+
+.key-empty,
+.key-loading,
+.key-error{
+  padding:10px 12px;
+  font-size:clamp(11px, .74vw, 14px);
+  line-height:1.45;
+}
+
+.key-loading{ color:#7a6755; }
+.key-error{ color:#a14f3f; }
+.key-empty{ color:#7a6755; }
+
+.key-status-used{
+  color:var(--red);
+  font-weight:700;
+}
+
+.key-status-free{
+  color:var(--green);
+  font-weight:700;
+}
+
+/* ===== 维修日志 ===== */
+.log-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.log-item{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:9px 10px;
+  border:1px solid var(--line2);
+  border-radius:10px;
+  background:rgba(255,252,246,.92);
+}
+
+.log-main{
+  font-size:clamp(11px, .76vw, 14px);
+  line-height:1.4;
+  color:#6b5a45;
+}
+
+.log-time{
+  flex:0 0 auto;
+  font-size:clamp(11px, .7vw, 13px);
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+/* ===== 中等尺寸 ===== */
+@media (max-width: 1180px){
+  #sidebar{
+    left:3.6%;
+    top:20.8%;
+    width:15.8%;
+    padding:10px;
+  }
+
+  #contentArea{
+    left:23.8%;
+    top:9.3%;
+    width:47%;
+    height:81%;
+  }
+
+  #adminSwitchPanel{
+    right:9%;
+    top:24%;
+    width:14.8%;
+    padding:9px;
+  }
+
+  #pageNotice{
+    left:23.8%;
+    width:47%;
+    top:4.2%;
+  }
+
+  .switch-title{
+    font-size:12px;
+    margin-bottom:7px;
+  }
+
+  .switch-btn{
+    padding:8px 5px;
+    font-size:11px;
+    border-radius:10px;
+  }
+
+  .card{
+    padding:12px 14px;
+    margin-bottom:8px;
+  }
+}
+
+/* ===== 中小屏 / 矮屏 ===== */
+@media (max-width: 900px), (max-height: 760px){
+  body{ overflow:hidden; }
+
+  #managerPage{
+    width:100vw;
+    height:100vh;
+    height:100dvh;
+    overflow:hidden;
+  }
+
+  #managerStage{
+    width:min(100vw, calc(100dvh * 1.6));
+    aspect-ratio:1440 / 900;
+    max-width:100vw;
+    max-height:100dvh;
+  }
+
+  #managerBg{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+
+  #managerUI{
+    position:absolute;
+    inset:0;
+  }
+
+  #topActions{
+    right:7.2%;
+    top:15%;
+    width:14.8%;
+    justify-content:center;
+  }
+
+  .top-btn{
+    height:34px;
+    min-width:76px;
+    padding:0 12px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  #sidebar{
+    left:3.8%;
+    top:21.3%;
+    width:15.2%;
+    padding:10px;
+  }
+
+  .nav-group{ gap:6px; }
+
+  .nav-btn{
+    min-height:34px;
+    padding:6px 4px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  #statusBox{
+    margin-top:8px;
+    padding:8px 6px;
+  }
+
+  .status-name{
+    font-size:11px;
+    margin-bottom:5px;
+    line-height:1.2;
+  }
+
+  .status-role{
+    font-size:11px;
+    line-height:1.2;
+    white-space:nowrap;
+    word-break:normal;
+    overflow-wrap:normal;
+  }
+
+  #pageNotice{
+    left:24.2%;
+    width:49%;
+    top:3.8%;
+    min-height:38px;
+    padding:8px 10px;
+    font-size:11px;
+  }
+
+  #contentArea{
+    left:24.2%;
+    top:8.7%;
+    width:49%;
+    max-height:80%;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding-right:6px;
+  }
+
+  #adminSwitchPanel{
+    right:7.2%;
+    top:23.7%;
+    width:14.8%;
+    padding:8px;
+  }
+
+  .switch-title{
+    font-size:11px;
+    margin-bottom:6px;
+  }
+
+  .switch-group{ gap:6px; }
+
+  .switch-btn{
+    min-height:30px;
+    padding:6px 4px;
+    font-size:10px;
+    border-radius:9px;
+  }
+
+  .card{
+    padding:10px 12px;
+    margin-bottom:8px;
+    border-radius:14px;
+  }
+
+  .section-title{
+    font-size:14px !important;
+    margin-bottom:6px;
+  }
+
+  .module-scroll{
+    min-height:0;
+  }
+
+  .key-list-wrap{
+    min-height:0;
+  }
+}
+
+/* ===== 最小屏 ===== */
+@media (max-width: 672px){
+  body{
+    overflow-x:hidden;
+    overflow-y:auto;
+    display:block;
+    background:#f3ecdf;
+  }
+
+  #managerPage{
+    width:100%;
+    height:auto;
+    min-height:100vh;
+    min-height:100dvh;
+    display:block;
+    overflow:visible;
+  }
+
+  #managerStage{
+    width:100%;
+    max-width:820px;
+    margin:0 auto;
+    aspect-ratio:auto;
+    min-height:100vh;
+    min-height:100dvh;
+    padding:10px;
+    position:relative;
+  }
+
+  #managerStage::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+      linear-gradient(rgba(243,236,223,.78), rgba(243,236,223,.92)),
+      url("room-manager.png") center center / cover no-repeat;
+    z-index:-2;
+  }
+
+  #managerStage::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:linear-gradient(to bottom, rgba(255,255,255,.18), rgba(255,255,255,0));
+    z-index:-1;
+    pointer-events:none;
+  }
+
+  #managerBg{ display:none; }
+
+  #managerUI{
+    position:relative;
+    inset:auto;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  #topActions{
+    position:sticky;
+    top:10px;
+    right:auto;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    padding:0;
+    z-index:10;
+  }
+
+  .top-btn{
+    height:34px;
+    min-width:76px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  #pageNotice{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    order:1;
+    margin:0;
+  }
+
+  #sidebar,
+  #contentArea,
+  #adminSwitchPanel{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    max-width:100%;
+    max-height:none;
+    overflow:visible;
+    padding-right:0;
+    transform:none;
+  }
+
+  #sidebar{ padding:10px; }
+
+  #adminSwitchPanel{
+    order:3;
+    width:100%;
+    max-width:100%;
+    margin:0;
+    padding:10px;
+    text-align:center;
+  }
+
+  .nav-group{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:7px;
+  }
+
+  .nav-btn{
+    min-height:34px;
+    padding:6px 4px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  #statusBox{
+    margin-top:8px;
+    padding:8px 6px;
+  }
+
+  .status-name{
+    font-size:12px;
+    line-height:1.25;
+    margin-bottom:5px;
+  }
+
+  .status-role{
+    font-size:12px;
+    line-height:1.25;
+  }
+
+  .switch-title{
+    text-align:center;
+  }
+
+  .switch-group{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:7px;
+    justify-content:center;
+  }
+
+  .switch-btn{
+    min-height:34px;
+    padding:6px 4px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  #contentArea{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    order:4;
+  }
+
+  .card{
+    padding:10px 12px;
+    margin-bottom:0;
+    border-radius:12px;
+  }
+
+  .section-title{
+    font-size:14px !important;
+    margin-bottom:6px;
+  }
+
+  .module-scroll{
+    max-height:unset;
+    overflow:visible;
+    padding-right:0;
+  }
+
+  .key-list-wrap{
+    max-height:unset;
+  }
+
+  .apply-head,
+  .log-item{
+    flex-direction:column;
+    gap:4px;
+  }
+
+  .log-time,
+  .apply-time{
+    white-space:normal;
+  }
+}
+</style>
+</head>
+
+<body>
+<div id="managerPage">
+  <div id="managerStage">
+    <img id="managerBg" src="room-manager.png" alt="宿管室背景">
+
+    <div id="managerUI">
+
+      <div id="topActions">
+        <button id="logoutBtn" class="top-btn hidden" type="button" onclick="logout()">登出</button>
+      </div>
+
+      <div id="pageNotice" class="hidden">
+        <div class="notice-text" id="pageNoticeText"></div>
+        <button class="notice-close" type="button" onclick="hideNotice()">×</button>
+      </div>
+
+      <aside id="sidebar" class="panel">
+        <div class="nav-group">
+          <button class="nav-btn" onclick="location.href='index.html'">大堂</button>
+          <button class="nav-btn" onclick="location.href='honor.html'">荣誉墙</button>
+          <button class="nav-btn" onclick="location.href='game.html'">游戏房</button>
+          <button class="nav-btn" onclick="goNeedLogin('studio.html')">工作间</button>
+          <button class="nav-btn" onclick="goNeedLogin('living.html')">客厅</button>
+          <button class="nav-btn" onclick="goNeedLogin('dorm.html')">宿舍</button>
+        </div>
+
+        <div id="statusBox">
+          <p class="status-name" id="currentUserText">当前：未登录</p>
+          <p class="status-role">身份：<span id="identityText">宿管</span></p>
+        </div>
+      </aside>
+
+      <aside id="adminSwitchPanel" class="panel">
+        <h3 class="switch-title">管理切换</h3>
+        <div class="switch-group">
+          <button id="switchArchiveBtn" class="switch-btn active" type="button" onclick="setAdminTab('archive')">档案夹</button>
+          <button id="switchKeysBtn" class="switch-btn" type="button" onclick="setAdminTab('keys')">钥匙保管处</button>
+          <button id="switchLogsBtn" class="switch-btn" type="button" onclick="setAdminTab('logs')">维修日志</button>
+        </div>
+      </aside>
+
+      <main id="contentArea">
+
+        <section class="card panel admin-view-card" id="adminArchiveCard">
+          <h2 class="section-title">档案夹</h2>
+
+          <div class="admin-block">
+            <h3>入住申请</h3>
+            <div id="memberApplyList" class="apply-list module-scroll">
+              <div class="module-note">正在读取入住申请…</div>
+            </div>
+          </div>
+
+          <div class="admin-block">
+            <h3>宿管申请</h3>
+            <div id="adminApplyList" class="apply-list module-scroll">
+              <div class="module-note">正在读取宿管申请…</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card panel hidden admin-view-card" id="adminKeysCard">
+          <h2 class="section-title">钥匙保管处</h2>
+
+          <div class="admin-block">
+            <div id="keyStorageBox" style="display:flex;flex-direction:column;flex:1 1 auto;min-height:0;">
+              <div id="keyStorageLoading" class="key-loading">正在读取钥匙名单…</div>
+              <div id="keyStorageError" class="key-error hidden"></div>
+              <div id="keyStorageEmpty" class="key-empty hidden">暂时没有可显示的数据。</div>
+
+              <div id="keyListWrap" class="key-list-wrap hidden">
+                <table class="key-list">
+                  <thead>
+                    <tr>
+                      <th style="width:28%;">钥匙</th>
+                      <th style="width:18%;">状态</th>
+                      <th style="width:24%;">当前使用者</th>
+                      <th>说明</th>
+                    </tr>
+                  </thead>
+                  <tbody id="keyListBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card panel hidden admin-view-card" id="adminLogsCard">
+          <h2 class="section-title">维修日志</h2>
+
+          <div class="admin-block">
+            <div id="recentLogList" class="log-list module-scroll">
+              <div class="module-note">正在读取近期记录…</div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+const currentUserText = document.getElementById("currentUserText");
+const identityText = document.getElementById("identityText");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const switchArchiveBtn = document.getElementById("switchArchiveBtn");
+const switchKeysBtn = document.getElementById("switchKeysBtn");
+const switchLogsBtn = document.getElementById("switchLogsBtn");
+
+const adminArchiveCard = document.getElementById("adminArchiveCard");
+const adminKeysCard = document.getElementById("adminKeysCard");
+const adminLogsCard = document.getElementById("adminLogsCard");
+
+const img = document.getElementById("managerBg");
+const contentArea = document.getElementById("contentArea");
+
+const keyStorageLoading = document.getElementById("keyStorageLoading");
+const keyStorageError = document.getElementById("keyStorageError");
+const keyStorageEmpty = document.getElementById("keyStorageEmpty");
+const keyListWrap = document.getElementById("keyListWrap");
+const keyListBody = document.getElementById("keyListBody");
+const recentLogList = document.getElementById("recentLogList");
+
+const pageNotice = document.getElementById("pageNotice");
+const pageNoticeText = document.getElementById("pageNoticeText");
+
+let keyListLoaded = false;
+let archiveLoaded = false;
+let logsLoaded = false;
+let activeAdminTab = "archive";
+let actionBusyMap = {};
+
+function isTinyFlowScreen(){
+  return window.innerWidth <= 560;
+}
+
+function isMediumScrollScreen(){
+  return !isTinyFlowScreen() && (window.innerWidth <= 900 || window.innerHeight <= 760);
+}
+
+function isLoggedIn(){
+  return localStorage.getItem("room10LoggedIn") === "true";
+}
+
+function getRole(){
+  return localStorage.getItem("room10Role") || "";
+}
+
+function getCurrentUser(){
+  return localStorage.getItem("room10User") || "";
+}
+
+function isAdminRole(role){
+  return role === "admin" || role === "owner";
+}
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatTime(input){
+  if(!input) return "未知时间";
+  const d = new Date(input);
+  if(Number.isNaN(d.getTime())) return "未知时间";
+
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const h = String(d.getHours()).padStart(2, "0");
+  const min = String(d.getMinutes()).padStart(2, "0");
+
+  return `${y}-${m}-${day} ${h}:${min}`;
+}
+
+function parseKeySortValue(raw){
+  const s = String(raw || "").trim();
+  if(!s) return { num: Number.MAX_SAFE_INTEGER, text: s };
+
+  const match = s.match(/^([A-Za-z]*)(\d+)$/);
+  if(match){
+    const prefix = match[1] || "";
+    const num = Number(match[2]);
+    return { num, text: prefix + String(num).padStart(20, "0") };
+  }
+
+  const digit = s.match(/(\d+)/);
+  if(digit){
+    return { num: Number(digit[1]), text: s };
+  }
+
+  return { num: Number.MAX_SAFE_INTEGER, text: s };
+}
+
+function updateStatusUserUI(){
+  if(isLoggedIn()){
+    const user = getCurrentUser();
+    currentUserText.textContent = `当前：${user || "已登录宿管"}`;
+    logoutBtn.classList.remove("hidden");
+  }else{
+    currentUserText.textContent = "当前：未登录";
+    logoutBtn.classList.add("hidden");
+  }
+}
+
+function showNotice(message, type = "info", autoHideMs = 2600){
+  if(!message) return;
+  pageNoticeText.textContent = message;
+  pageNotice.className = "";
+  if(type === "success"){
+    pageNotice.classList.add("notice-success");
+  }else if(type === "error"){
+    pageNotice.classList.add("notice-error");
+  }
+  if(type !== "success" && type !== "error"){
+    pageNotice.classList.add("notice-info");
+  }
+  pageNotice.classList.remove("hidden");
+
+  if(showNotice._timer){
+    clearTimeout(showNotice._timer);
+  }
+  if(autoHideMs > 0){
+    showNotice._timer = setTimeout(() => {
+      hideNotice();
+    }, autoHideMs);
+  }
+}
+
+function hideNotice(){
+  pageNotice.classList.add("hidden");
+}
+
+function makeActionKey(kind, id){
+  return `${kind}:${id}`;
+}
+
+function isActionBusy(kind, id){
+  return !!actionBusyMap[makeActionKey(kind, id)];
+}
+
+function setActionBusy(kind, id, busy){
+  actionBusyMap[makeActionKey(kind, id)] = !!busy;
+}
+
+function getRequiredVoteCount(adminCount){
+  return Math.max(1, Math.ceil((Number(adminCount) || 0) / 2));
+}
+
+function goNeedLogin(page){
+  if(!isLoggedIn()){
+    window.location.href = "manager-visitor.html";
+    return;
+  }
+  window.location.href = page;
+}
+
+async function logout(){
+  localStorage.removeItem("room10LoggedIn");
+  localStorage.removeItem("room10User");
+  localStorage.removeItem("room10Role");
+  window.location.href = "manager-visitor.html";
+}
+
+async function getCurrentMemberRecord(){
+  const nickname = getCurrentUser();
+  if(!nickname) return null;
+
+  const result = await client
+    .from("members")
+    .select("id, nickname, role")
+    .eq("nickname", nickname)
+    .maybeSingle();
+
+  if(result.error){
+    console.error("读取当前成员失败：", result.error);
+    return null;
+  }
+
+  return result.data || null;
+}
+
+async function getAdminCount(){
+  const result = await client
+    .from("members")
+    .select("id", { count: "exact", head: true })
+    .in("role", ["admin", "owner"]);
+
+  if(result.error){
+    console.error("读取管理员数量失败：", result.error);
+    return 0;
+  }
+  return result.count || 0;
+}
+
+function setAdminTab(tab){
+  activeAdminTab = tab;
+
+  switchArchiveBtn.classList.remove("active");
+  switchKeysBtn.classList.remove("active");
+  switchLogsBtn.classList.remove("active");
+
+  adminArchiveCard.classList.add("hidden");
+  adminKeysCard.classList.add("hidden");
+  adminLogsCard.classList.add("hidden");
+
+  if(tab === "archive"){
+    switchArchiveBtn.classList.add("active");
+    adminArchiveCard.classList.remove("hidden");
+    loadAllApplications();
+  }else if(tab === "keys"){
+    switchKeysBtn.classList.add("active");
+    adminKeysCard.classList.remove("hidden");
+    loadKeyStorage();
+  }else if(tab === "logs"){
+    switchLogsBtn.classList.add("active");
+    adminLogsCard.classList.remove("hidden");
+    loadRecentLogs();
+  }
+
+  if(isMediumScrollScreen()){
+    contentArea.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
+function resetKeyStorageUI(){
+  keyStorageLoading.classList.remove("hidden");
+  keyStorageError.classList.add("hidden");
+  keyStorageError.textContent = "";
+  keyStorageEmpty.classList.add("hidden");
+  keyListWrap.classList.add("hidden");
+  keyListBody.innerHTML = "";
+}
+
+function renderKeyList(rows){
+  keyListBody.innerHTML = "";
+
+  rows.forEach(item => {
+    const tr = document.createElement("tr");
+
+    const tdKey = document.createElement("td");
+    tdKey.textContent = item.key_code || "";
+
+    const tdStatus = document.createElement("td");
+    tdStatus.innerHTML = item.is_used
+      ? `<span class="key-status-used">已使用</span>`
+      : `<span class="key-status-free">未使用</span>`;
+
+    const tdUser = document.createElement("td");
+    tdUser.textContent = item.display_user || "—";
+
+    const tdDesc = document.createElement("td");
+    tdDesc.textContent = item.is_used ? "该钥匙已分配给成员" : "该钥匙当前未分配";
+
+    tr.appendChild(tdKey);
+    tr.appendChild(tdStatus);
+    tr.appendChild(tdUser);
+    tr.appendChild(tdDesc);
+    keyListBody.appendChild(tr);
+  });
+}
+
+async function loadKeyStorage(force = false){
+  if(keyListLoaded && !force) return;
+
+  resetKeyStorageUI();
+
+  try{
+    const keyResult = await client
+      .from("invite_keys")
+      .select("key_code, is_used, used_by_nickname")
+      .order("key_code", { ascending: true });
+
+    if(keyResult.error){
+      console.error("读取钥匙保管处失败：", keyResult.error);
+      keyStorageLoading.classList.add("hidden");
+      keyStorageError.classList.remove("hidden");
+      keyStorageError.textContent = "钥匙名单读取失败，请稍后再试。";
+      return;
+    }
+
+    const keyRows = (keyResult.data || []).filter(item => String(item.key_code || "").trim());
+
+    const memberResult = await client
+      .from("members")
+      .select("member_code, nickname, name");
+
+    if(memberResult.error){
+      console.error("读取成员昵称失败：", memberResult.error);
+      keyStorageLoading.classList.add("hidden");
+      keyStorageError.classList.remove("hidden");
+      keyStorageError.textContent = "钥匙名单读取失败，请稍后再试。";
+      return;
+    }
+
+    const memberMap = {};
+    (memberResult.data || []).forEach(item => {
+      const code = String(item.member_code || "").trim();
+      if(!code) return;
+      memberMap[code] = item;
+    });
+
+    const rows = keyRows
+      .map(item => {
+        const code = String(item.key_code || "").trim();
+        const memberRow = memberMap[code];
+        return {
+          ...item,
+          display_user: memberRow?.nickname || item.used_by_nickname || memberRow?.name || "—"
+        };
+      })
+      .sort((a, b) => {
+        const pa = parseKeySortValue(a.key_code);
+        const pb = parseKeySortValue(b.key_code);
+        if(pa.num !== pb.num) return pa.num - pb.num;
+        return pa.text.localeCompare(pb.text, "zh-CN");
+      });
+
+    keyStorageLoading.classList.add("hidden");
+
+    if(!rows.length){
+      keyStorageEmpty.classList.remove("hidden");
+      keyListWrap.classList.add("hidden");
+      keyListLoaded = true;
+      return;
+    }
+
+    renderKeyList(rows);
+    keyListWrap.classList.remove("hidden");
+    keyListLoaded = true;
+
+  }catch(err){
+    console.error("loadKeyStorage() 异常：", err);
+    keyStorageLoading.classList.add("hidden");
+    keyStorageError.classList.remove("hidden");
+    keyStorageError.textContent = "钥匙名单读取失败，请稍后再试。";
+  }
+}
+
+function buildVoteSummaryText(votes, requiredCount){
+  const approveCount = votes.filter(v => v.vote === "approve").length;
+  const rejectCount = votes.filter(v => v.vote === "reject").length;
+
+  if(approveCount >= requiredCount){
+    return `<div class="vote-summary vote-pass">当前票数：通过 ${approveCount} / 不通过 ${rejectCount}。已满足通过条件（需 ${requiredCount} 票）。</div>`;
+  }
+
+  if(rejectCount >= requiredCount){
+    return `<div class="vote-summary vote-reject">当前票数：通过 ${approveCount} / 不通过 ${rejectCount}。已满足不通过条件（需 ${requiredCount} 票）。</div>`;
+  }
+
+  return `<div class="vote-summary vote-wait">当前票数：通过 ${approveCount} / 不通过 ${rejectCount}。达到 ${requiredCount} 票后结算。</div>`;
+}
+
+function renderMemberApplications(rows, votesMap, currentVoterId, adminCount){
+  const box = document.getElementById("memberApplyList");
+  if(!box) return;
+
+  if(!rows.length){
+    box.innerHTML = `<div class="module-note">当前没有待处理的入住申请。</div>`;
+    return;
+  }
+
+  const requiredCount = getRequiredVoteCount(adminCount);
+
+  box.innerHTML = rows.map(item => {
+    const votes = votesMap[item.id] || [];
+    const myVote = votes.find(v => String(v.voter_member_id) === String(currentVoterId));
+    const busy = isActionBusy("member", item.id);
+    const approveLabel = busy && myVote?.vote !== "approve" ? "提交中..." : "通过";
+    const rejectLabel = busy && myVote?.vote !== "reject" ? "提交中..." : "不通过";
+    const myVoteText = myVote
+      ? `<div class="apply-meta">你当前投票：${myVote.vote === "approve" ? "通过" : "不通过"}（未结算前可修改）</div>`
+      : `<div class="apply-meta">你还未投票</div>`;
+
+    return `
+      <div class="apply-item">
+        <div class="apply-head">
+          <strong>${escapeHtml(item.name || "未命名")}</strong>
+          <span class="apply-time">${formatTime(item.created_at)}</span>
+        </div>
+        <div class="apply-body">
+          <div>QQ：${escapeHtml(item.contact_qq || "未填写")}</div>
+          <div>当前状态：${escapeHtml(item.status || "pending")}</div>
+          <div>钥匙：${escapeHtml(item.member_code || "未分配")}</div>
+        </div>
+        ${myVoteText}
+        ${buildVoteSummaryText(votes, requiredCount)}
+        <div class="apply-actions-row">
+          <button class="inline-btn" type="button" ${busy ? "disabled" : ""} onclick="voteMemberApplication('${item.id}', 'approve')">${approveLabel}</button>
+          <button class="sub-btn" type="button" ${busy ? "disabled" : ""} onclick="voteMemberApplication('${item.id}', 'reject')">${rejectLabel}</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderAdminApplications(rows, votesMap, currentVoterId, adminCount){
+  const box = document.getElementById("adminApplyList");
+  if(!box) return;
+
+  if(!rows.length){
+    box.innerHTML = `<div class="module-note">当前没有待处理的宿管申请。</div>`;
+    return;
+  }
+
+  const requiredCount = getRequiredVoteCount(adminCount);
+
+  box.innerHTML = rows.map(item => {
+    const votes = votesMap[item.id] || [];
+    const myVote = votes.find(v => String(v.voter_member_id) === String(currentVoterId));
+    const busy = isActionBusy("admin", item.id);
+    const approveLabel = busy && myVote?.vote !== "approve" ? "提交中..." : "通过";
+    const rejectLabel = busy && myVote?.vote !== "reject" ? "提交中..." : "不通过";
+    const myVoteText = myVote
+      ? `<div class="apply-meta">你当前投票：${myVote.vote === "approve" ? "通过" : "不通过"}（未结算前可修改）</div>`
+      : `<div class="apply-meta">你还未投票</div>`;
+
+    return `
+      <div class="apply-item">
+        <div class="apply-head">
+          <strong>${escapeHtml(item.nickname || "未命名")}</strong>
+          <span class="apply-time">${formatTime(item.created_at)}</span>
+        </div>
+        <div class="apply-body">
+          <div>申请类型：宿管申请</div>
+          <div>当前状态：${escapeHtml(item.status || "pending")}</div>
+        </div>
+        ${myVoteText}
+        ${buildVoteSummaryText(votes, requiredCount)}
+        <div class="apply-actions-row">
+          <button class="inline-btn" type="button" ${busy ? "disabled" : ""} onclick="voteAdminApplication('${item.id}', 'approve')">${approveLabel}</button>
+          <button class="sub-btn" type="button" ${busy ? "disabled" : ""} onclick="voteAdminApplication('${item.id}', 'reject')">${rejectLabel}</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function loadAllApplications(force = false){
+  if(archiveLoaded && !force) return;
+
+  const memberApplyList = document.getElementById("memberApplyList");
+  const adminApplyList = document.getElementById("adminApplyList");
+
+  if(!memberApplyList || !adminApplyList) return;
+
+  memberApplyList.innerHTML = `<div class="module-note">正在读取入住申请…</div>`;
+  adminApplyList.innerHTML = `<div class="module-note">正在读取宿管申请…</div>`;
+
+  try{
+    const currentMember = await getCurrentMemberRecord();
+    const currentVoterId = currentMember?.id || null;
+    const adminCount = await getAdminCount();
+
+    const memberResult = await client
+      .from("applications")
+      .select("id, name, contact_qq, status, member_code, created_at")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
+
+    const adminResult = await client
+      .from("admin_applications")
+      .select("id, member_id, nickname, status, created_at, updated_at")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
+
+    if(memberResult.error){
+      console.error("读取入住申请失败：", memberResult.error);
+      memberApplyList.innerHTML = `<div class="module-note">入住申请读取失败</div>`;
+    }else{
+      const memberAppIds = (memberResult.data || []).map(item => item.id);
+      let memberVotesMap = {};
+
+      if(memberAppIds.length){
+        const memberVoteResult = await client
+          .from("application_votes")
+          .select("application_id, voter_member_id, vote")
+          .in("application_id", memberAppIds);
+
+        if(memberVoteResult.error){
+          console.error("读取入住申请投票失败：", memberVoteResult.error);
+        }else{
+          memberVotesMap = (memberVoteResult.data || []).reduce((acc, row) => {
+            const key = String(row.application_id);
+            if(!acc[key]) acc[key] = [];
+            acc[key].push(row);
+            return acc;
+          }, {});
+        }
+      }
+
+      renderMemberApplications(memberResult.data || [], memberVotesMap, currentVoterId, adminCount);
+    }
+
+    if(adminResult.error){
+      console.error("读取宿管申请失败：", adminResult.error);
+      adminApplyList.innerHTML = `<div class="module-note">宿管申请读取失败</div>`;
+    }else{
+      const appIds = (adminResult.data || []).map(item => item.id);
+      let votesMap = {};
+
+      if(appIds.length){
+        const voteResult = await client
+          .from("admin_application_votes")
+          .select("application_id, voter_member_id, vote")
+          .in("application_id", appIds);
+
+        if(voteResult.error){
+          console.error("读取宿管申请投票失败：", voteResult.error);
+        }else{
+          votesMap = (voteResult.data || []).reduce((acc, row) => {
+            const key = String(row.application_id);
+            if(!acc[key]) acc[key] = [];
+            acc[key].push(row);
+            return acc;
+          }, {});
+        }
+      }
+
+      renderAdminApplications(adminResult.data || [], votesMap, currentVoterId, adminCount);
+    }
+
+    archiveLoaded = true;
+
+  }catch(err){
+    console.error("loadAllApplications() 异常：", err);
+    memberApplyList.innerHTML = `<div class="module-note">入住申请读取失败</div>`;
+    adminApplyList.innerHTML = `<div class="module-note">宿管申请读取失败</div>`;
+  }
+}
+
+function renderRecentLogs(rows){
+  if(!rows.length){
+    recentLogList.innerHTML = `<div class="module-note">当前没有近期记录。</div>`;
+    return;
+  }
+
+  recentLogList.innerHTML = rows.map(item => `
+    <div class="log-item">
+      <div class="log-main">${escapeHtml(item.text)}</div>
+      <div class="log-time">${formatTime(item.time)}</div>
+    </div>
+  `).join("");
+}
+
+async function loadRecentLogs(force = false){
+  if(logsLoaded && !force) return;
+
+  recentLogList.innerHTML = `<div class="module-note">正在读取近期记录…</div>`;
+
+  try{
+    const memberResult = await client
+      .from("applications")
+      .select("name, status, created_at")
+      .in("status", ["approved", "rejected", "registered"])
+      .order("created_at", { ascending: false })
+      .limit(12);
+
+    const adminResult = await client
+      .from("admin_applications")
+      .select("nickname, status, created_at, updated_at")
+      .in("status", ["approved", "rejected", "cancelled"])
+      .order("updated_at", { ascending: false })
+      .limit(12);
+
+    let logs = [];
+
+    if(!memberResult.error){
+      logs = logs.concat((memberResult.data || []).map(item => {
+        let action = "申请状态已更新";
+        if(item.status === "approved") action = "入住申请已通过";
+        if(item.status === "rejected") action = "入住申请未通过";
+        if(item.status === "registered") action = "已完成正式登记";
+
+        return {
+          text: `${item.name || "未命名"}：${action}`,
+          time: item.created_at
+        };
+      }));
+    }else{
+      console.error("读取入住日志失败：", memberResult.error);
+    }
+
+    if(!adminResult.error){
+      logs = logs.concat((adminResult.data || []).map(item => {
+        let action = "宿管申请状态已更新";
+        if(item.status === "approved") action = "宿管申请已通过";
+        if(item.status === "rejected") action = "宿管申请未通过";
+        if(item.status === "cancelled") action = "取消了宿管申请";
+
+        return {
+          text: `${item.nickname || "未命名"}：${action}`,
+          time: item.updated_at || item.created_at
+        };
+      }));
+    }else{
+      console.error("读取宿管日志失败：", adminResult.error);
+    }
+
+    logs.sort((a, b) => new Date(b.time) - new Date(a.time));
+    renderRecentLogs(logs.slice(0, 12));
+    logsLoaded = true;
+
+  }catch(err){
+    console.error("loadRecentLogs() 异常：", err);
+    recentLogList.innerHTML = `<div class="module-note">近期记录读取失败</div>`;
+  }
+}
+
+async function allocateInviteKeyForApplicant(applicantName){
+  const freeKeys = await client
+    .from("invite_keys")
+    .select("key_code, is_used")
+    .eq("is_used", false)
+    .order("key_code", { ascending: true });
+
+  if(freeKeys.error){
+    console.error("读取可用钥匙失败：", freeKeys.error);
+    throw new Error("读取可用钥匙失败");
+  }
+
+  const rows = (freeKeys.data || [])
+    .filter(item => String(item.key_code || "").trim())
+    .sort((a, b) => {
+      const pa = parseKeySortValue(a.key_code);
+      const pb = parseKeySortValue(b.key_code);
+      if(pa.num !== pb.num) return pa.num - pb.num;
+      return pa.text.localeCompare(pb.text, "zh-CN");
+    });
+
+  if(!rows.length){
+    throw new Error("当前没有可分配的空闲钥匙");
+  }
+
+  const keyCode = rows[0].key_code;
+
+  const updateKey = await client
+    .from("invite_keys")
+    .update({
+      is_used: true,
+      used_by_nickname: applicantName
+    })
+    .eq("key_code", keyCode)
+    .eq("is_used", false)
+    .select()
+    .maybeSingle();
+
+  if(updateKey.error){
+    console.error("分配钥匙失败：", updateKey.error);
+    throw new Error("分配钥匙失败");
+  }
+
+  if(!updateKey.data){
+    throw new Error("钥匙分配未成功，请检查数据库权限或钥匙状态");
+  }
+
+  return keyCode;
+}
+
+async function finalizeMemberApplicationIfReady(applicationId){
+  try{
+    const appResult = await client
+      .from("applications")
+      .select("id, name, status, member_code")
+      .eq("id", applicationId)
+      .maybeSingle();
+
+    if(appResult.error || !appResult.data){
+      console.error("读取入住申请失败：", appResult.error);
+      return false;
+    }
+
+    const app = appResult.data;
+    if(String(app.status || "").toLowerCase() !== "pending"){
+      return true;
+    }
+
+    const voteResult = await client
+      .from("application_votes")
+      .select("vote")
+      .eq("application_id", applicationId);
+
+    if(voteResult.error){
+      console.error("读取入住申请投票失败：", voteResult.error);
+      return false;
+    }
+
+    const adminCount = await getAdminCount();
+    const requiredCount = getRequiredVoteCount(adminCount);
+
+    const votes = voteResult.data || [];
+    const approveCount = votes.filter(v => v.vote === "approve").length;
+    const rejectCount = votes.filter(v => v.vote === "reject").length;
+
+    if(approveCount >= requiredCount){
+      let memberCode = String(app.member_code || "").trim();
+      let newlyAllocated = false;
+
+      if(!memberCode){
+        memberCode = await allocateInviteKeyForApplicant(app.name || "");
+        newlyAllocated = true;
+      }
+
+      const updatePayload = {
+        status: "approved",
+        member_code: memberCode
+      };
+
+      const updateResult = await client
+        .from("applications")
+        .update(updatePayload)
+        .eq("id", applicationId)
+        .eq("status", "pending")
+        .select()
+        .maybeSingle();
+
+      if(updateResult.error){
+        console.error("入住申请通过更新失败：", updateResult.error);
+
+        if(newlyAllocated && memberCode){
+          await client
+            .from("invite_keys")
+            .update({
+              is_used: false,
+              used_by_nickname: null
+            })
+            .eq("key_code", memberCode)
+            .eq("used_by_nickname", app.name || "");
+        }
+        return false;
+      }
+
+      if(!updateResult.data && newlyAllocated && memberCode){
+        await client
+          .from("invite_keys")
+          .update({
+            is_used: false,
+            used_by_nickname: null
+          })
+          .eq("key_code", memberCode)
+          .eq("used_by_nickname", app.name || "");
+      }
+
+      return true;
+    }
+
+    if(rejectCount >= requiredCount){
+      const rejectResult = await client
+        .from("applications")
+        .update({ status: "rejected" })
+        .eq("id", applicationId)
+        .eq("status", "pending")
+        .select()
+        .maybeSingle();
+
+      if(rejectResult.error){
+        console.error("入住申请不通过更新失败：", rejectResult.error);
+        return false;
+      }
+      return true;
+    }
+
+    return false;
+
+  }catch(err){
+    console.error("finalizeMemberApplicationIfReady() 异常：", err);
+    return false;
+  }
+}
+
+async function voteMemberApplication(applicationId, voteValue){
+  if(!isAdminRole(getRole())){
+    showNotice("只有管理员可以投票。", "error");
+    return;
+  }
+
+  if(isActionBusy("member", applicationId)) return;
+  setActionBusy("member", applicationId, true);
+  archiveLoaded = false;
+  await loadAllApplications(true);
+
+  try{
+    const voter = await getCurrentMemberRecord();
+
+    if(!voter?.id){
+      showNotice("未读取到当前管理员信息，请重新登录。", "error");
+      return;
+    }
+
+    const appInfo = await client
+      .from("applications")
+      .select("id, status")
+      .eq("id", applicationId)
+      .maybeSingle();
+
+    if(appInfo.error || !appInfo.data){
+      console.error("读取入住申请信息失败：", appInfo.error);
+      showNotice("投票失败，请稍后再试。", "error");
+      return;
+    }
+
+    if(String(appInfo.data.status || "").toLowerCase() !== "pending"){
+      showNotice("这条入住申请已经结算。", "info");
+      archiveLoaded = false;
+      logsLoaded = false;
+      await loadAllApplications(true);
+      await loadRecentLogs(true);
+      return;
+    }
+
+    const existing = await client
+      .from("application_votes")
+      .select("id, vote")
+      .eq("application_id", applicationId)
+      .eq("voter_member_id", voter.id)
+      .maybeSingle();
+
+    if(existing.error){
+      console.error("检查入住申请投票记录失败：", existing.error);
+      showNotice("投票失败，请稍后再试。", "error");
+      return;
+    }
+
+    if(existing.data){
+      const updateResult = await client
+        .from("application_votes")
+        .update({ vote: voteValue })
+        .eq("id", existing.data.id);
+
+      if(updateResult.error){
+        console.error("更新入住申请投票失败：", updateResult.error);
+        showNotice("投票失败，请稍后再试。", "error");
+        return;
+      }
+    }else{
+      const insertResult = await client
+        .from("application_votes")
+        .insert([{
+          application_id: applicationId,
+          voter_member_id: voter.id,
+          vote: voteValue
+        }]);
+
+      if(insertResult.error){
+        console.error("提交入住申请投票失败：", insertResult.error);
+        showNotice("投票失败，请稍后再试。", "error");
+        return;
+      }
+    }
+
+    const finalized = await finalizeMemberApplicationIfReady(applicationId);
+
+    archiveLoaded = false;
+    logsLoaded = false;
+    keyListLoaded = false;
+    await loadAllApplications(true);
+    await loadRecentLogs(true);
+    if(activeAdminTab === "keys"){
+      await loadKeyStorage(true);
+    }
+
+    showNotice(finalized ? "投票已结算。" : "投票已保存，结算前可继续修改。", finalized ? "success" : "info");
+
+  }catch(err){
+    console.error("voteMemberApplication() 异常：", err);
+    showNotice("投票失败，请稍后再试。", "error");
+  }finally{
+    setActionBusy("member", applicationId, false);
+    archiveLoaded = false;
+    await loadAllApplications(true);
+  }
+}
+
+async function finalizeAdminApplicationIfReady(applicationId, applicantMemberId){
+  try{
+    const appResult = await client
+      .from("admin_applications")
+      .select("id, member_id, status")
+      .eq("id", applicationId)
+      .maybeSingle();
+
+    if(appResult.error || !appResult.data){
+      console.error("读取宿管申请失败：", appResult.error);
+      return false;
+    }
+
+    if(String(appResult.data.status || "").toLowerCase() !== "pending"){
+      return true;
+    }
+
+    const voteResult = await client
+      .from("admin_application_votes")
+      .select("vote")
+      .eq("application_id", applicationId);
+
+    if(voteResult.error){
+      console.error("读取宿管申请投票失败：", voteResult.error);
+      return false;
+    }
+
+    const adminCount = await getAdminCount();
+    const requiredCount = getRequiredVoteCount(adminCount);
+
+    const votes = voteResult.data || [];
+    const approveCount = votes.filter(v => v.vote === "approve").length;
+    const rejectCount = votes.filter(v => v.vote === "reject").length;
+
+    if(approveCount >= requiredCount){
+      const updateApp = await client
+        .from("admin_applications")
+        .update({ status: "approved" })
+        .eq("id", applicationId)
+        .eq("status", "pending")
+        .select()
+        .maybeSingle();
+
+      if(updateApp.error){
+        console.error("更新宿管申请状态失败：", updateApp.error);
+        return false;
+      }
+
+      if(updateApp.data){
+        const updateMember = await client
+          .from("members")
+          .update({ role: "admin" })
+          .eq("id", applicantMemberId);
+
+        if(updateMember.error){
+          console.error("更新成员身份失败：", updateMember.error);
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    if(rejectCount >= requiredCount){
+      const updateApp = await client
+        .from("admin_applications")
+        .update({ status: "rejected" })
+        .eq("id", applicationId)
+        .eq("status", "pending")
+        .select()
+        .maybeSingle();
+
+      if(updateApp.error){
+        console.error("更新宿管申请状态失败：", updateApp.error);
+        return false;
+      }
+      return true;
+    }
+
+    return false;
+
+  }catch(err){
+    console.error("finalizeAdminApplicationIfReady() 异常：", err);
+    return false;
+  }
+}
+
+async function voteAdminApplication(applicationId, voteValue){
+  if(isActionBusy("admin", applicationId)) return;
+  setActionBusy("admin", applicationId, true);
+  archiveLoaded = false;
+  await loadAllApplications(true);
+
+  try{
+    const voter = await getCurrentMemberRecord();
+
+    if(!voter?.id){
+      showNotice("未读取到当前管理员信息，请重新登录。", "error");
+      return;
+    }
+
+    const appInfo = await client
+      .from("admin_applications")
+      .select("id, member_id, status")
+      .eq("id", applicationId)
+      .maybeSingle();
+
+    if(appInfo.error || !appInfo.data){
+      console.error("读取宿管申请信息失败：", appInfo.error);
+      showNotice("投票失败，请稍后再试。", "error");
+      return;
+    }
+
+    if(String(appInfo.data.status || "").toLowerCase() !== "pending"){
+      showNotice("这条宿管申请已经结算。", "info");
+      archiveLoaded = false;
+      logsLoaded = false;
+      await loadAllApplications(true);
+      await loadRecentLogs(true);
+      return;
+    }
+
+    if(String(appInfo.data.member_id) === String(voter.id)){
+      showNotice("不能给自己的宿管申请投票。", "error");
+      return;
+    }
+
+    const existing = await client
+      .from("admin_application_votes")
+      .select("id, vote")
+      .eq("application_id", applicationId)
+      .eq("voter_member_id", voter.id)
+      .maybeSingle();
+
+    if(existing.error){
+      console.error("检查投票记录失败：", existing.error);
+      showNotice("投票失败，请稍后再试。", "error");
+      return;
+    }
+
+    if(existing.data){
+      const updateResult = await client
+        .from("admin_application_votes")
+        .update({ vote: voteValue })
+        .eq("id", existing.data.id);
+
+      if(updateResult.error){
+        console.error("更新投票失败：", updateResult.error);
+        showNotice("投票失败，请稍后再试。", "error");
+        return;
+      }
+    }else{
+      const insertResult = await client
+        .from("admin_application_votes")
+        .insert([{
+          application_id: applicationId,
+          voter_member_id: voter.id,
+          vote: voteValue
+        }]);
+
+      if(insertResult.error){
+        console.error("写入投票失败：", insertResult.error);
+        showNotice("投票失败，请稍后再试。", "error");
+        return;
+      }
+    }
+
+    const finalized = await finalizeAdminApplicationIfReady(appInfo.data.id, appInfo.data.member_id);
+
+    archiveLoaded = false;
+    logsLoaded = false;
+    await loadAllApplications(true);
+    await loadRecentLogs(true);
+
+    showNotice(finalized ? "投票已结算。" : "投票已保存，结算前可继续修改。", finalized ? "success" : "info");
+
+  }catch(err){
+    console.error("voteAdminApplication() 异常：", err);
+    showNotice("投票失败，请稍后再试。", "error");
+  }finally{
+    setActionBusy("admin", applicationId, false);
+    archiveLoaded = false;
+    await loadAllApplications(true);
+  }
+}
+
+async function ensureAdminPage(){
+  if(!isLoggedIn()){
+    window.location.href = "manager-visitor.html";
+    return;
+  }
+
+  const role = getRole();
+
+  if(role === "owner"){
+    window.location.href = "manager-owner.html";
+    return;
+  }
+
+  if(role === "member"){
+    window.location.href = "manager-member.html";
+    return;
+  }
+
+  if(role === "applying"){
+    window.location.href = "manager-visitor.html";
+    return;
+  }
+
+  if(role !== "admin"){
+    window.location.href = "manager-visitor.html";
+    return;
+  }
+
+  identityText.textContent = "宿管";
+  updateStatusUserUI();
+  setAdminTab(activeAdminTab);
+}
+
+img.onload = function(){
+  if(isMediumScrollScreen() || isTinyFlowScreen()) return;
+
+  try{
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    ctx.drawImage(img, 0, 0);
+
+    const sampleWidth = Math.min(50, canvas.width);
+    const data = ctx.getImageData(0, 0, sampleWidth, canvas.height).data;
+
+    let r = 0, g = 0, b = 0, count = 0;
+
+    for(let i = 0; i < data.length; i += 4){
+      r += data[i];
+      g += data[i + 1];
+      b += data[i + 2];
+      count++;
+    }
+
+    r = Math.round(r / count);
+    g = Math.round(g / count);
+    b = Math.round(b / count);
+
+    document.body.style.background = `rgb(${r},${g},${b})`;
+  }catch(err){
+    console.warn("背景采样失败：", err);
+  }
+};
+
+if(img.complete && img.naturalWidth){
+  img.onload();
+}
+
+ensureAdminPage();
+
+window.addEventListener("storage", async (e) => {
+  if(
+    e.key === "room10LoggedIn" ||
+    e.key === "room10User" ||
+    e.key === "room10Role"
+  ){
+    keyListLoaded = false;
+    archiveLoaded = false;
+    logsLoaded = false;
+    await ensureAdminPage();
+  }
+});
+
+window.addEventListener("resize", () => {
+  if(!isMediumScrollScreen() && !isTinyFlowScreen()){
+    img.onload();
+  }else{
+    document.body.style.background = "#f3ecdf";
+  }
+});
+</script>
+
+</body>
+</html>

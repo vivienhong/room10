@@ -1,0 +1,1998 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>十号房｜宿管室</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;}
+
+:root{
+  --text:#5b4632;
+  --title:#6a5038;
+  --line:#d8c2a3;
+  --line2:#e3d0b4;
+  --panel:rgba(255,249,240,.92);
+  --panel2:rgba(255,252,245,.92);
+  --btn:#c98e56;
+  --btn-hover:#b97d45;
+  --sub:#e7d3b7;
+  --sub-hover:#dcc29e;
+  --shadow:0 10px 24px rgba(0,0,0,.08);
+  --radius:16px;
+  --ok:#5f7d3a;
+  --warn:#8b5b34;
+  --bad:#a14d45;
+  --info:#7b654f;
+  --info-bg:#f7eee1;
+  --success-bg:#eef6e8;
+  --error-bg:#fbeceb;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+}
+
+body{
+  font-family:Arial, Helvetica, sans-serif;
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  background:#f3ecdf;
+  color:var(--text);
+}
+
+#managerPage{
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+
+#managerStage{
+  position:relative;
+  width:min(100vw, calc(100dvh * 1.6));
+  aspect-ratio:1440 / 900;
+  max-width:100vw;
+  max-height:100dvh;
+}
+
+#managerBg{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+
+#managerUI{
+  position:absolute;
+  inset:0;
+}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(3px);
+}
+
+.hidden{
+  display:none !important;
+}
+
+#topActions{
+  position:absolute;
+  right:11.5%;
+  top:15%;
+  z-index:5;
+  display:flex;
+  justify-content:flex-end;
+}
+
+.top-btn{
+  height:40px;
+  min-width:92px;
+  padding:0 16px;
+  border:none;
+  border-radius:12px;
+  background:rgba(255,248,236,.94);
+  color:var(--text);
+  font-size:clamp(12px, .82vw, 15px);
+  cursor:pointer;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  font-weight:700;
+  box-shadow:var(--shadow);
+  border:1px solid var(--line);
+}
+
+.top-btn:hover{
+  background:#f2e0c4;
+}
+
+#sidebar{
+  position:absolute;
+  left:4.3%;
+  top:21.8%;
+  width:14.2%;
+  padding:12px;
+  z-index:2;
+}
+
+.nav-group{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.nav-btn{
+  border:none;
+  border-radius:12px;
+  padding:10px 8px;
+  font-size:clamp(13px, .95vw, 18px);
+  background:#ead9bc;
+  cursor:pointer;
+  text-align:center;
+  color:var(--text);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  font-weight:600;
+  line-height:1.2;
+}
+
+.nav-btn:hover{ background:#e2ccaa; }
+
+#statusBox{
+  margin-top:10px;
+  padding:10px 8px;
+  text-align:center;
+  background:rgba(255,255,255,.45);
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.status-name{
+  margin:0 0 6px 0;
+  font-size:clamp(12px, .86vw, 16px);
+  font-weight:700;
+  line-height:1.3;
+  color:var(--title);
+  word-break:break-word;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+.status-role{
+  margin:0;
+  font-size:clamp(13px, .95vw, 17px);
+  font-weight:600;
+  line-height:1.3;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+#contentArea{
+  position:absolute;
+  left:25.7%;
+  top:10.1%;
+  width:50%;
+  height:79.2%;
+  z-index:2;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:8px;
+  scrollbar-width:thin;
+  scrollbar-color:#cfad82 rgba(255,255,255,.35);
+}
+
+#contentArea::-webkit-scrollbar{ width:8px; }
+#contentArea::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.35);
+  border-radius:999px;
+}
+#contentArea::-webkit-scrollbar-thumb{
+  background:#cfad82;
+  border-radius:999px;
+}
+
+.card{
+  position:relative;
+  padding:14px 16px;
+  margin-bottom:10px;
+}
+
+.title-line{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+  flex-wrap:wrap;
+}
+
+.section-title{
+  margin:0;
+  font-size:clamp(16px, 1.05vw, 22px);
+  font-weight:700;
+  color:var(--title);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  line-height:1.2;
+}
+
+.title-note{
+  margin:0;
+  font-size:clamp(11px, .72vw, 13px);
+  line-height:1.35;
+  color:#9a8a78;
+  text-align:right;
+  white-space:nowrap;
+}
+
+.mini-title{
+  margin:0 0 8px 0;
+  font-size:clamp(12px, .82vw, 15px);
+  font-weight:700;
+  color:#7a5b3f;
+  line-height:1.3;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+.quick-login-row,
+.apply-query-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:nowrap;
+}
+
+.quick-login-row input,
+.apply-query-row input{
+  flex:1 1 0;
+  min-width:0;
+  height:40px;
+  padding:0 12px;
+  border:1px solid #dfccb0;
+  border-radius:10px;
+  background:rgba(255,255,255,.96);
+  font-size:clamp(13px, .82vw, 16px);
+  color:var(--text);
+  outline:none;
+}
+
+.quick-login-row input:focus,
+.apply-query-row input:focus,
+.apply-form input:focus{
+  border-color:var(--btn);
+  box-shadow:0 0 0 2px rgba(201,142,86,.12);
+}
+
+.inline-btn{
+  height:40px;
+  padding:0 18px;
+  min-width:96px;
+  border:none;
+  border-radius:10px;
+  background:var(--btn);
+  color:#fff;
+  font-size:clamp(13px, .82vw, 16px);
+  cursor:pointer;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  font-weight:600;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+
+.inline-btn:hover{ background:var(--btn-hover); }
+
+.sub-btn{
+  height:40px;
+  padding:0 14px;
+  border:none;
+  border-radius:10px;
+  background:var(--sub);
+  color:var(--text);
+  font-size:clamp(12px, .8vw, 15px);
+  cursor:pointer;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  font-weight:600;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+
+.sub-btn:hover{ background:var(--sub-hover); }
+
+.inline-btn:disabled,
+.sub-btn:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+}
+
+#loginHint,
+#applyQueryHint{
+  margin-top:8px;
+  min-height:20px;
+  font-size:clamp(12px, .76vw, 15px);
+  color:var(--warn);
+  line-height:1.4;
+}
+
+.register-book{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 14px;
+  border-radius:14px;
+  background:var(--panel2);
+  border:1px solid var(--line2);
+}
+
+.register-book-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+  flex:1;
+}
+
+.register-book .inline-btn{
+  margin-left:auto;
+}
+
+.book-icon{
+  flex:0 0 auto;
+  width:52px;
+  height:52px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f5e6cc;
+  font-size:26px;
+}
+
+.book-text{ min-width:0; }
+
+.book-desc{
+  font-size:clamp(12px, .78vw, 15px);
+  color:#7a6755;
+  line-height:1.45;
+}
+
+.notice-box,
+.result-box{
+  background:rgba(255,252,246,.9);
+  border:1px solid var(--line2);
+  border-radius:14px;
+  padding:12px 14px;
+}
+
+.notice-list{
+  margin:0;
+  padding-left:20px;
+  color:#6b5a45;
+}
+
+.notice-list li{
+  margin:4px 0;
+  font-size:clamp(12px, .76vw, 15px);
+  line-height:1.5;
+}
+
+.notice-note-line{
+  margin:8px 0 0 0;
+  font-size:clamp(11px, .72vw, 13px);
+  line-height:1.35;
+  color:#8b5b34;
+}
+
+.result-box p{
+  margin:4px 0;
+  font-size:clamp(12px, .76vw, 15px);
+  line-height:1.45;
+  color:#6b5a45;
+}
+
+.dual-fold-row{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.fold-switch-btn{
+  width:100%;
+}
+
+.fold-switch-btn.is-active{
+  background:#d8bb93;
+}
+
+.fold-hint{
+  width:fit-content;
+  max-width:100%;
+  margin:10px auto 0 auto;
+  padding:3px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.55);
+  font-size:clamp(11px, .72vw, 13px);
+  color:#8b7864;
+  line-height:1.32;
+  text-align:center;
+}
+
+.fold-panel{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(255,255,255,.42);
+  border:1px solid #ead9bc;
+}
+
+.apply-form{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.apply-form input{
+  width:100%;
+  border:1px solid #dfccb0;
+  border-radius:10px;
+  background:rgba(255,255,255,.96);
+  color:var(--text);
+  outline:none;
+  font-size:clamp(12px, .78vw, 15px);
+  padding:10px 12px;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+.apply-actions{
+  grid-column:1 / -1;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+#applyHint{
+  min-height:20px;
+  font-size:clamp(11px, .74vw, 14px);
+  line-height:1.35;
+  color:var(--warn);
+  flex:1 1 220px;
+}
+
+.result-row{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:6px;
+}
+
+.result-label{
+  color:#9a8a78;
+  min-width:72px;
+}
+
+.result-value{
+  color:#5b4632;
+  font-weight:700;
+  word-break:break-all;
+}
+
+.result-status-pending{ color:var(--warn); font-weight:700; }
+.result-status-approved{ color:var(--ok); font-weight:700; }
+.result-status-rejected{ color:var(--bad); font-weight:700; }
+
+.result-actions{
+  margin-top:10px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.status-notice{
+  margin:10px 0 0 0;
+  padding:10px 12px;
+  border-radius:10px;
+  font-size:14px;
+  line-height:1.4;
+  border:1px solid #dcc29e;
+  background:var(--info-bg);
+  color:var(--info);
+}
+
+.status-notice.success{
+  background:var(--success-bg);
+  color:var(--ok);
+}
+
+.status-notice.error{
+  background:var(--error-bg);
+  color:var(--bad);
+}
+
+.reapply-note{
+  margin-top:8px;
+  font-size:clamp(11px, .72vw, 13px);
+  line-height:1.35;
+  color:#8b5b34;
+}
+
+@media (max-width: 1180px){
+  #sidebar{
+    left:3.6%;
+    top:20.8%;
+    width:15.8%;
+    padding:10px;
+  }
+
+  #contentArea{
+    left:23.8%;
+    top:9.3%;
+    width:47%;
+    height:81%;
+  }
+
+  .card{
+    padding:12px 14px;
+    margin-bottom:8px;
+  }
+
+  .quick-login-row,
+  .apply-query-row{
+    flex-wrap:wrap;
+  }
+
+  .quick-login-row input,
+  .apply-query-row input{
+    flex:1 1 calc(50% - 4px);
+    min-width:140px;
+  }
+
+  .register-book{
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+
+  .register-book .inline-btn{
+    margin-left:0;
+  }
+}
+
+@media (max-width: 900px), (max-height: 760px){
+  body{ overflow:hidden; }
+  #managerPage{
+    width:100vw;
+    height:100vh;
+    height:100dvh;
+    overflow:hidden;
+  }
+
+  #managerStage{
+    width:min(100vw, calc(100dvh * 1.6));
+    aspect-ratio:1440 / 900;
+    max-width:100vw;
+    max-height:100dvh;
+  }
+
+  #managerBg{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+
+  #managerUI{
+    position:absolute;
+    inset:0;
+  }
+
+  #topActions{
+    right:7.2%;
+    top:15%;
+    width:14.8%;
+    justify-content:center;
+  }
+
+  .top-btn{
+    height:34px;
+    min-width:76px;
+    padding:0 12px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  #sidebar{
+    left:3.8%;
+    top:21.3%;
+    width:15.2%;
+    padding:10px;
+  }
+
+  .nav-group{ gap:6px; }
+
+  .nav-btn{
+    min-height:34px;
+    padding:6px 4px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  #statusBox{
+    margin-top:8px;
+    padding:8px 6px;
+  }
+
+  .status-name{
+    font-size:11px;
+    margin-bottom:5px;
+    line-height:1.2;
+  }
+
+  .status-role{
+    font-size:11px;
+    line-height:1.2;
+    white-space:nowrap;
+  }
+
+  #contentArea{
+    left:24.2%;
+    top:8.7%;
+    width:49%;
+    max-height:80%;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding-right:6px;
+  }
+
+  .card{
+    padding:10px 12px;
+    margin-bottom:8px;
+    border-radius:14px;
+  }
+
+  .title-line{
+    margin-bottom:6px;
+    align-items:flex-start;
+  }
+
+  .section-title{
+    font-size:14px !important;
+  }
+
+  .title-note{
+    font-size:11px !important;
+    white-space:normal;
+    text-align:left;
+  }
+
+  .quick-login-row,
+  .apply-query-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+
+  .quick-login-row input,
+  .apply-query-row input{
+    min-width:0;
+    width:100%;
+    height:34px;
+    font-size:12px;
+    padding:0 10px;
+    border-radius:9px;
+  }
+
+  .quick-login-row .sub-btn,
+  .quick-login-row .inline-btn,
+  .apply-query-row .inline-btn{
+    width:100%;
+    min-width:0;
+    height:34px;
+    font-size:12px;
+    padding:0 10px;
+    border-radius:9px;
+  }
+
+  #loginHint,
+  #applyQueryHint{
+    margin-top:6px;
+    min-height:16px;
+    font-size:11px;
+    line-height:1.25;
+  }
+
+  .register-book{
+    flex-direction:row;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+  }
+
+  .register-book-left{
+    align-items:center;
+    gap:10px;
+  }
+
+  .register-book .inline-btn{
+    margin-left:auto;
+    width:auto;
+    height:34px;
+    font-size:12px;
+    padding:0 12px;
+    min-width:90px;
+  }
+
+  .book-icon{
+    width:42px;
+    height:42px;
+    font-size:20px;
+    border-radius:12px;
+  }
+
+  .book-desc{
+    font-size:12px;
+    line-height:1.35;
+  }
+
+  .notice-box,
+  .result-box{
+    padding:10px 12px;
+    border-radius:12px;
+  }
+
+  .notice-list{
+    padding-left:18px;
+  }
+
+  .notice-list li,
+  .result-box p{
+    font-size:12px;
+    line-height:1.35;
+  }
+
+  .notice-note-line,
+  .fold-hint{
+    font-size:11px !important;
+  }
+
+  .dual-fold-row{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .dual-fold-row .sub-btn{
+    height:32px;
+    font-size:12px;
+    padding:0 10px;
+    border-radius:9px;
+  }
+
+  .fold-panel{
+    padding:10px 12px;
+    border-radius:12px;
+  }
+
+  .apply-form{
+    grid-template-columns:1fr;
+    gap:7px;
+  }
+
+  .apply-form input{
+    height:34px;
+    font-size:12px;
+    padding:0 10px;
+    border-radius:9px;
+  }
+
+  .apply-actions{
+    grid-column:auto;
+    flex-direction:column;
+    align-items:stretch;
+    gap:8px;
+  }
+
+  .apply-actions .inline-btn{
+    width:100%;
+    height:34px;
+    font-size:12px;
+    padding:0 12px;
+    min-width:auto;
+    border-radius:9px;
+  }
+
+  #applyHint{
+    flex:none;
+    min-height:0;
+    font-size:11px;
+    line-height:1.25;
+  }
+}
+
+@media (max-width: 672px){
+  body{
+    overflow-x:hidden;
+    overflow-y:auto;
+    display:block;
+    background:#f3ecdf;
+  }
+
+  #managerPage{
+    width:100%;
+    height:auto;
+    min-height:100vh;
+    min-height:100dvh;
+    display:block;
+    overflow:visible;
+  }
+
+  #managerStage{
+    width:100%;
+    max-width:820px;
+    margin:0 auto;
+    aspect-ratio:auto;
+    min-height:100vh;
+    min-height:100dvh;
+    padding:10px;
+    position:relative;
+  }
+
+  #managerStage::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+      linear-gradient(rgba(243,236,223,.78), rgba(243,236,223,.92)),
+      url("room-manager.png") center center / cover no-repeat;
+    z-index:-2;
+  }
+
+  #managerStage::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:linear-gradient(to bottom, rgba(255,255,255,.18), rgba(255,255,255,0));
+    z-index:-1;
+    pointer-events:none;
+  }
+
+  #managerBg{ display:none; }
+
+  #managerUI{
+    position:relative;
+    inset:auto;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  #topActions{
+    position:sticky;
+    top:10px;
+    right:auto;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    padding:0;
+    z-index:10;
+  }
+
+  .top-btn{
+    height:34px;
+    min-width:76px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  #sidebar,
+  #contentArea{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    max-width:100%;
+    max-height:none;
+    overflow:visible;
+    padding-right:0;
+    transform:none;
+  }
+
+  #sidebar{ padding:10px; }
+
+  .nav-group{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:7px;
+  }
+
+  .nav-btn{
+    min-height:34px;
+    padding:6px 4px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  #statusBox{
+    margin-top:8px;
+    padding:8px 6px;
+  }
+
+  .status-name{
+    font-size:12px;
+    line-height:1.25;
+    margin-bottom:5px;
+  }
+
+  .status-role{
+    font-size:12px;
+    line-height:1.25;
+  }
+
+  #contentArea{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .card{
+    padding:10px 12px;
+    margin-bottom:0;
+    border-radius:12px;
+  }
+
+  .title-line{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:4px;
+    margin-bottom:6px;
+  }
+
+  .section-title{
+    font-size:14px !important;
+  }
+
+  .title-note{
+    font-size:11px !important;
+    text-align:left;
+    white-space:normal;
+  }
+
+  .quick-login-row,
+  .apply-query-row{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:6px;
+  }
+
+  .quick-login-row input,
+  .apply-query-row input{
+    min-width:0;
+    width:100%;
+    height:34px;
+    font-size:12px;
+    padding:0 10px;
+    border-radius:9px;
+  }
+
+  .quick-login-row .sub-btn,
+  .quick-login-row .inline-btn,
+  .apply-query-row .inline-btn{
+    width:100%;
+    min-width:0;
+    height:34px;
+    font-size:12px;
+    padding:0 10px;
+    border-radius:9px;
+  }
+
+  #loginHint,
+  #applyQueryHint{
+    margin-top:6px;
+    min-height:16px;
+    font-size:11px;
+    line-height:1.25;
+  }
+
+  .register-book{
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+    padding:10px 12px;
+  }
+
+  .register-book-left{
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .register-book .inline-btn{
+    margin-left:0;
+    width:100%;
+    height:34px;
+    font-size:12px;
+    padding:0 10px;
+    min-width:0;
+  }
+
+  .book-icon{
+    width:40px;
+    height:40px;
+    font-size:20px;
+    border-radius:12px;
+  }
+
+  .book-desc{
+    font-size:12px;
+    line-height:1.35;
+  }
+
+  .notice-box,
+  .result-box{
+    padding:10px 12px;
+    border-radius:12px;
+  }
+
+  .notice-list{
+    padding-left:18px;
+  }
+
+  .notice-list li,
+  .result-box p{
+    font-size:12px;
+    line-height:1.35;
+  }
+
+  .notice-note-line,
+  .fold-hint{
+    font-size:11px !important;
+  }
+
+  .dual-fold-row{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .dual-fold-row .sub-btn{
+    height:32px;
+    font-size:12px;
+    padding:0 10px;
+    border-radius:9px;
+  }
+
+  .fold-panel{
+    padding:10px 12px;
+    border-radius:12px;
+  }
+
+  .apply-form{
+    grid-template-columns:1fr;
+    gap:7px;
+  }
+
+  .apply-form input{
+    height:34px;
+    font-size:12px;
+    padding:0 10px;
+    border-radius:9px;
+  }
+
+  .apply-actions{
+    flex-direction:column;
+    align-items:stretch;
+    gap:8px;
+  }
+
+  .apply-actions .inline-btn{
+    width:100%;
+    height:34px;
+    font-size:12px;
+    padding:0 12px;
+    min-width:auto;
+    border-radius:9px;
+  }
+
+  #applyHint{
+    min-height:0;
+    font-size:11px;
+    line-height:1.25;
+    flex:none;
+  }
+
+  .result-actions{
+    flex-direction:column;
+  }
+
+  .result-actions .inline-btn,
+  .result-actions .sub-btn{
+    width:100%;
+  }
+}
+</style>
+</head>
+
+<body>
+<div id="managerPage">
+  <div id="managerStage">
+    <img id="managerBg" src="room-manager.png" alt="宿管室背景">
+
+    <div id="managerUI">
+      <div id="topActions">
+        <button id="logoutBtn" class="top-btn hidden" type="button" onclick="logout()">登出</button>
+      </div>
+
+      <aside id="sidebar" class="panel">
+        <div class="nav-group">
+          <button class="nav-btn" onclick="location.href='index.html'">大堂</button>
+          <button class="nav-btn" onclick="location.href='honor.html'">荣誉墙</button>
+          <button class="nav-btn" onclick="location.href='game.html'">游戏房</button>
+          <button class="nav-btn" onclick="goNeedLogin('studio.html')">工作间</button>
+          <button class="nav-btn" onclick="goNeedLogin('living.html')">客厅</button>
+          <button class="nav-btn" onclick="goNeedLogin('dorm.html')">宿舍</button>
+        </div>
+
+        <div id="statusBox">
+          <p class="status-name" id="currentUserText">当前：未登录</p>
+          <p class="status-role">身份：<span id="identityText">参观者</span></p>
+        </div>
+      </aside>
+
+      <main id="contentArea">
+        <section class="card panel" id="visitorLoginCard">
+          <div class="title-line">
+            <h2 class="section-title">钥匙验证</h2>
+            <p class="title-note">请使用宿管发放的钥匙进入十号房</p>
+          </div>
+
+          <div class="quick-login-row">
+            <input id="quickNickname" type="text" placeholder="输入你的昵称" autocomplete="username">
+            <input id="quickPassword" type="password" placeholder="输入你的钥匙" autocomplete="current-password">
+            <button class="sub-btn" type="button" onclick="toggleQuickPassword()">显示</button>
+            <button class="inline-btn" type="button" onclick="quickLogin()">验证</button>
+          </div>
+
+          <div id="loginHint"></div>
+        </section>
+
+        <section class="card panel" id="visitorRegisterCard">
+          <div class="title-line">
+            <h2 class="section-title">登记本</h2>
+          </div>
+
+          <div class="register-book">
+            <div class="register-book-left">
+              <div class="book-icon">📖</div>
+              <div class="book-text">
+                <div class="book-desc">通过考核并获得钥匙后，在此登记你的信息，正式入住十号房。</div>
+              </div>
+            </div>
+
+            <button class="inline-btn" type="button" onclick="openRegisterBook()">打开登记本</button>
+          </div>
+        </section>
+
+        <section class="card panel" id="visitorNoticeCard">
+          <div class="title-line">
+            <h2 class="section-title">十号房入住申请方式</h2>
+            <p class="title-note">通过工种考核即可加入十号房</p>
+          </div>
+
+          <div class="notice-box">
+            <ol class="notice-list">
+              <li>在小红书或抖音搜索并私信「十号房工作室」，提交考核文件</li>
+              <li>在下方留下圈名和 QQ，宿管会添加你并联系</li>
+            </ol>
+
+            <p class="notice-note-line">*考核方式二选其一，请提前开启好友添加权限，游客浏览无需登录。</p>
+
+            <div class="dual-fold-row">
+              <button id="applyToggleBtn" class="sub-btn fold-switch-btn" type="button" onclick="toggleApplyPanel()">填写圈名和QQ</button>
+              <button id="queryToggleBtn" class="sub-btn fold-switch-btn" type="button" onclick="toggleQueryPanel()">申请状态查询</button>
+            </div>
+
+            <div id="applyFoldHint" class="fold-hint">点击上方按钮展开对应内容，同一时间只会打开一个区域。</div>
+
+            <div id="applyFormWrap" class="fold-panel hidden">
+              <div class="mini-title">填写圈名和 QQ</div>
+              <div class="apply-form">
+                <input id="applyNickname" type="text" placeholder="留下圈名">
+                <input id="applyQQ" type="text" placeholder="留下 QQ 号">
+
+                <div class="apply-actions">
+                  <button class="inline-btn" type="button" onclick="submitApplication()">提交申请</button>
+                  <div id="applyHint"></div>
+                </div>
+              </div>
+            </div>
+
+            <div id="queryFormWrap" class="fold-panel hidden">
+              <div class="mini-title">申请状态查询</div>
+
+              <div class="apply-query-row">
+                <input id="applyLoginName" type="text" placeholder="输入申请时填写的圈名">
+                <input id="applyLoginQQ" type="text" placeholder="输入申请时填写的 QQ 号">
+                <button class="inline-btn" type="button" onclick="queryApplicationStatus()">查询</button>
+              </div>
+
+              <div id="applyQueryHint">可使用圈名和 QQ 查询当前审核状态。</div>
+              <div id="statusNotice" class="status-notice hidden"></div>
+
+              <div id="applicationResultWrap" class="result-box hidden" style="margin-top:8px;">
+                <p id="applicationResultTitle"><strong>申请记录</strong></p>
+
+                <div class="result-row">
+                  <div class="result-label">圈名</div>
+                  <div class="result-value" id="resultName">-</div>
+                </div>
+
+                <div class="result-row">
+                  <div class="result-label">QQ</div>
+                  <div class="result-value" id="resultQQ">-</div>
+                </div>
+
+                <div class="result-row">
+                  <div class="result-label">状态</div>
+                  <div class="result-value" id="resultStatus">-</div>
+                </div>
+
+                <div class="result-row hidden" id="resultKeyRow">
+                  <div class="result-label">钥匙</div>
+                  <div class="result-value" id="resultKey">-</div>
+                </div>
+
+                <div class="result-row" id="resultMessageRow">
+                  <div class="result-label">提示</div>
+                  <div id="resultMessage">-</div>
+                </div>
+
+                <div class="result-actions" id="resultActions">
+                  <button id="goRegisterBtn" class="inline-btn hidden" type="button" onclick="openRegisterBookFromApplication()">现在登记资料</button>
+                  <button id="saveForLaterBtn" class="sub-btn hidden" type="button" onclick="saveApplicantSessionOnly()">稍后再登记</button>
+                  <button id="reapplyBtn" class="inline-btn hidden" type="button" onclick="reapplyApplication()">再次申请</button>
+                </div>
+
+                <div id="reapplyNote" class="reapply-note hidden">再次申请会清空上一次审核投票，并恢复为申请中。</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</div>
+
+<script>
+const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+const currentUserText = document.getElementById("currentUserText");
+const identityText = document.getElementById("identityText");
+const logoutBtn = document.getElementById("logoutBtn");
+const img = document.getElementById("managerBg");
+const contentArea = document.getElementById("contentArea");
+
+const loginHint = document.getElementById("loginHint");
+const quickNicknameInput = document.getElementById("quickNickname");
+const quickPasswordInput = document.getElementById("quickPassword");
+
+const applyFormWrap = document.getElementById("applyFormWrap");
+const queryFormWrap = document.getElementById("queryFormWrap");
+const applyToggleBtn = document.getElementById("applyToggleBtn");
+const queryToggleBtn = document.getElementById("queryToggleBtn");
+const applyFoldHint = document.getElementById("applyFoldHint");
+const applyNicknameInput = document.getElementById("applyNickname");
+const applyQQInput = document.getElementById("applyQQ");
+const applyHint = document.getElementById("applyHint");
+
+const applyLoginNameInput = document.getElementById("applyLoginName");
+const applyLoginQQInput = document.getElementById("applyLoginQQ");
+const applyQueryHint = document.getElementById("applyQueryHint");
+const applicationResultWrap = document.getElementById("applicationResultWrap");
+const resultName = document.getElementById("resultName");
+const resultQQ = document.getElementById("resultQQ");
+const resultStatus = document.getElementById("resultStatus");
+const resultKeyRow = document.getElementById("resultKeyRow");
+const resultKey = document.getElementById("resultKey");
+const resultMessage = document.getElementById("resultMessage");
+const goRegisterBtn = document.getElementById("goRegisterBtn");
+const saveForLaterBtn = document.getElementById("saveForLaterBtn");
+const reapplyBtn = document.getElementById("reapplyBtn");
+const reapplyNote = document.getElementById("reapplyNote");
+const statusNotice = document.getElementById("statusNotice");
+
+const APPLY_STORAGE_KEY = "room10ApplicationDraft";
+const APPLICANT_SESSION_KEY = "room10ApplicantSession";
+
+let currentApplicationRecord = null;
+let reapplyBusy = false;
+
+function isTinyFlowScreen(){
+  return window.innerWidth <= 560;
+}
+
+function isMediumScrollScreen(){
+  return !isTinyFlowScreen() && (window.innerWidth <= 900 || window.innerHeight <= 760);
+}
+
+function isLoggedIn(){
+  return localStorage.getItem("room10LoggedIn") === "true";
+}
+
+function getRole(){
+  return localStorage.getItem("room10Role") || "";
+}
+
+function getCurrentUser(){
+  return localStorage.getItem("room10User") || "";
+}
+
+function getApplicantSession(){
+  try{
+    return JSON.parse(localStorage.getItem(APPLICANT_SESSION_KEY) || "null");
+  }catch{
+    return null;
+  }
+}
+
+function updateStatusUserUI(){
+  if(isLoggedIn()){
+    const user = getCurrentUser();
+    currentUserText.textContent = `当前：${user || "已登录室友"}`;
+    logoutBtn.classList.remove("hidden");
+    return;
+  }
+
+  const applicant = getApplicantSession();
+  if(applicant && applicant.name){
+    currentUserText.textContent = `当前：${applicant.name}`;
+    logoutBtn.classList.remove("hidden");
+    return;
+  }
+
+  currentUserText.textContent = "当前：未登录";
+  logoutBtn.classList.add("hidden");
+}
+
+function showStatusNotice(message, type = "info"){
+  if(!statusNotice) return;
+  statusNotice.textContent = message || "";
+  statusNotice.className = "status-notice";
+  if(type === "success") statusNotice.classList.add("success");
+  if(type === "error") statusNotice.classList.add("error");
+  statusNotice.classList.remove("hidden");
+
+  clearTimeout(showStatusNotice._timer);
+  showStatusNotice._timer = setTimeout(() => {
+    statusNotice.classList.add("hidden");
+  }, 2600);
+}
+
+function saveApplicationDraft(){
+  const payload = {
+    nickname: applyNicknameInput.value.trim(),
+    qq: applyQQInput.value.trim()
+  };
+  localStorage.setItem(APPLY_STORAGE_KEY, JSON.stringify(payload));
+}
+
+function loadApplicationDraft(){
+  try{
+    const raw = localStorage.getItem(APPLY_STORAGE_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    applyNicknameInput.value = data.nickname || "";
+    applyQQInput.value = data.qq || "";
+    applyLoginNameInput.value = data.nickname || "";
+    applyLoginQQInput.value = data.qq || "";
+  }catch(err){
+    console.warn("读取申请缓存失败：", err);
+  }
+}
+
+function setApplicantSession(name, qq){
+  localStorage.setItem(APPLICANT_SESSION_KEY, JSON.stringify({ name, qq }));
+}
+
+function clearApplicantSession(){
+  localStorage.removeItem(APPLICANT_SESSION_KEY);
+}
+
+function saveApplicantSessionOnly(){
+  if(!currentApplicationRecord) return;
+  setApplicantSession(currentApplicationRecord.name, currentApplicationRecord.contact_qq);
+  updateIdentityUI();
+  applyQueryHint.style.color = "#5f7d3a";
+  applyQueryHint.textContent = "已为你保留申请记录，下次可继续用圈名和 QQ 查询。";
+}
+
+function openRegisterBook(){
+  sessionStorage.setItem("room10RegisterReturn", "manager-visitor.html");
+  window.location.href = "register.html?from=manager-visitor.html";
+}
+
+function openRegisterBookFromApplication(){
+  if(!currentApplicationRecord) return;
+
+  const params = new URLSearchParams({
+    from: "manager-visitor.html",
+    application_id: currentApplicationRecord.id || "",
+    apply_name: currentApplicationRecord.name || "",
+    apply_qq: currentApplicationRecord.contact_qq || "",
+    member_code: currentApplicationRecord.member_code || ""
+  });
+
+  sessionStorage.setItem("room10RegisterReturn", "manager-visitor.html");
+  window.location.href = `register.html?${params.toString()}`;
+}
+
+function scrollContentToBottomPart(targetEl){
+  if(!isMediumScrollScreen() || !targetEl) return;
+  requestAnimationFrame(() => {
+    targetEl.scrollIntoView({ behavior:"smooth", block:"nearest" });
+  });
+}
+
+function setFoldState(type){
+  const openApply = type === "apply";
+  const openQuery = type === "query";
+
+  applyFormWrap.classList.toggle("hidden", !openApply);
+  queryFormWrap.classList.toggle("hidden", !openQuery);
+
+  applyToggleBtn.classList.toggle("is-active", openApply);
+  queryToggleBtn.classList.toggle("is-active", openQuery);
+
+  if(openApply){
+    applyFoldHint.textContent = "正在填写申请信息。";
+    setTimeout(() => {
+      scrollContentToBottomPart(applyFormWrap);
+    }, 60);
+    return;
+  }
+
+  if(openQuery){
+    applyFoldHint.textContent = "正在查询申请状态。";
+    setTimeout(() => {
+      scrollContentToBottomPart(queryFormWrap);
+    }, 60);
+    return;
+  }
+
+  applyFoldHint.textContent = "点击上方按钮展开对应内容，同一时间只会打开一个区域。";
+}
+
+function toggleApplyPanel(){
+  const isOpen = !applyFormWrap.classList.contains("hidden");
+  setFoldState(isOpen ? null : "apply");
+}
+
+function toggleQueryPanel(){
+  const isOpen = !queryFormWrap.classList.contains("hidden");
+  setFoldState(isOpen ? null : "query");
+}
+
+function renderApplicationResult(record){
+  currentApplicationRecord = record;
+  applicationResultWrap.classList.remove("hidden");
+
+  resultName.textContent = record.name || "-";
+  resultQQ.textContent = record.contact_qq || "-";
+  resultKey.textContent = "-";
+  resultKeyRow.classList.add("hidden");
+  goRegisterBtn.classList.add("hidden");
+  saveForLaterBtn.classList.add("hidden");
+  reapplyBtn.classList.add("hidden");
+  reapplyNote.classList.add("hidden");
+
+  const status = String(record.status || "").trim().toLowerCase();
+
+  if(status === "pending"){
+    resultStatus.textContent = "审核中";
+    resultStatus.className = "result-value result-status-pending";
+    resultMessage.textContent = "审核进行中，请耐心等待~";
+  }else if(status === "approved"){
+    resultStatus.textContent = "审核通过";
+    resultStatus.className = "result-value result-status-approved";
+    resultKey.textContent = record.member_code || "暂未分配";
+    resultKeyRow.classList.remove("hidden");
+    resultMessage.textContent = record.member_code
+      ? "这是你的钥匙。你现在可以去登记资料，也可以稍后再登记。"
+      : "已通过，但钥匙尚未生成。";
+    if(record.member_code){
+      goRegisterBtn.classList.remove("hidden");
+      saveForLaterBtn.classList.remove("hidden");
+    }
+  }else if(status === "rejected"){
+    resultStatus.textContent = "未通过";
+    resultStatus.className = "result-value result-status-rejected";
+    resultMessage.textContent = "本次申请未通过。你现在的身份是参观者，如需继续加入可再次申请。";
+    reapplyBtn.classList.remove("hidden");
+    reapplyNote.classList.remove("hidden");
+  }else if(status === "registered"){
+    resultStatus.textContent = "已登记";
+    resultStatus.className = "result-value result-status-approved";
+    resultMessage.textContent = "你已完成正式登记，请使用正式昵称和钥匙登录。";
+  }else{
+    resultStatus.textContent = record.status || "未知";
+    resultStatus.className = "result-value";
+    resultMessage.textContent = "当前记录状态暂未识别。";
+  }
+
+  scrollContentToBottomPart(applicationResultWrap);
+}
+
+async function updateIdentityUI(){
+  updateStatusUserUI();
+
+  if(!isLoggedIn()){
+    const applicant = getApplicantSession();
+
+    if(applicant && currentApplicationRecord){
+      const status = String(currentApplicationRecord.status || "").toLowerCase();
+      if(status === "pending"){
+        identityText.textContent = "申请中";
+        return;
+      }
+      if(status === "rejected"){
+        identityText.textContent = "参观者";
+        return;
+      }
+      if(status === "approved"){
+        identityText.textContent = "申请通过";
+        return;
+      }
+    }
+
+    identityText.textContent = applicant ? "申请中" : "参观者";
+    return;
+  }
+
+  const role = getRole();
+
+  if(role === "owner"){
+    window.location.href = "manager-owner.html";
+    return;
+  }
+
+  if(role === "admin"){
+    window.location.href = "manager-admin.html";
+    return;
+  }
+
+  if(role === "member"){
+    window.location.href = "manager-member.html";
+    return;
+  }
+
+  if(role === "applying"){
+    identityText.textContent = "申请中";
+    return;
+  }
+
+  identityText.textContent = "参观者";
+}
+
+async function quickLogin(){
+  const nickname = quickNicknameInput.value.trim();
+  const key = quickPasswordInput.value.trim();
+
+  loginHint.textContent = "";
+  loginHint.style.color = "#8b5b34";
+
+  if(!nickname || !key){
+    loginHint.textContent = "你似乎还没有准备好钥匙";
+    return;
+  }
+
+  try{
+    const memberResult = await client
+      .from("members")
+      .select("nickname, member_code, role")
+      .eq("nickname", nickname)
+      .maybeSingle();
+
+    if(memberResult.error){
+      console.error("members 查询失败：", memberResult.error);
+      loginHint.textContent = "钥匙核对失败，请稍后再试";
+      return;
+    }
+
+    const member = memberResult.data;
+
+    if(member){
+      const dbKey = String(member.member_code || "").trim();
+      if(dbKey !== key){
+        loginHint.textContent = "钥匙无法开启这扇门";
+        return;
+      }
+
+      localStorage.setItem("room10LoggedIn", "true");
+      localStorage.setItem("room10User", member.nickname || nickname);
+      localStorage.setItem("room10Role", member.role || "member");
+      clearApplicantSession();
+
+      loginHint.style.color = "#5f7d3a";
+      loginHint.textContent = "验证通过，正在进入对应界面…";
+
+      quickNicknameInput.value = "";
+      quickPasswordInput.value = "";
+
+      await updateIdentityUI();
+      return;
+    }
+
+    const appResult = await client
+      .from("applications")
+      .select("id, name, contact_qq, status, member_code")
+      .eq("name", nickname)
+      .maybeSingle();
+
+    if(appResult.error){
+      console.error("applications 查询失败：", appResult.error);
+      loginHint.textContent = "钥匙核对失败，请稍后再试";
+      return;
+    }
+
+    const app = appResult.data;
+
+    if(!app){
+      loginHint.textContent = "这里还没有你的记录";
+      return;
+    }
+
+    const appStatus = String(app.status || "").toLowerCase();
+    const appKey = String(app.member_code || "").trim();
+
+    if(appStatus === "approved" && appKey && appKey === key){
+      loginHint.textContent = "你已通过审核，但还没完成登记，请先去登记资料。";
+      loginHint.style.color = "#8b5b34";
+      setApplicantSession(app.name, app.contact_qq);
+      setFoldState("query");
+      renderApplicationResult(app);
+      await updateIdentityUI();
+      return;
+    }
+
+    if(appStatus === "pending"){
+      loginHint.textContent = "你的申请还在审核中，暂时还不能用钥匙进入。";
+      return;
+    }
+
+    if(appStatus === "rejected"){
+      loginHint.textContent = "你的申请未通过，当前身份为参观者。可在申请状态查询里再次申请。";
+      return;
+    }
+
+    if(appStatus === "registered"){
+      loginHint.textContent = "你已经登记完成，请使用正式昵称和钥匙登录。";
+      return;
+    }
+
+    loginHint.textContent = "你当前还不能使用这把钥匙，请先查询申请状态。";
+
+  }catch(err){
+    console.error("quickLogin() 异常：", err);
+    loginHint.textContent = "钥匙核对失败，请稍后再试";
+  }
+}
+
+async function queryApplicationStatus(){
+  const name = applyLoginNameInput.value.trim();
+  const qq = applyLoginQQInput.value.trim();
+
+  applyQueryHint.textContent = "";
+  applyQueryHint.style.color = "#8b5b34";
+  statusNotice.classList.add("hidden");
+
+  if(!name || !qq){
+    applyQueryHint.textContent = "请先填写圈名和 QQ 号";
+    return;
+  }
+
+  const qqValid = /^[0-9]{5,20}$/.test(qq);
+  if(!qqValid){
+    applyQueryHint.textContent = "QQ 号格式好像不太对";
+    return;
+  }
+
+  try{
+    const result = await client
+      .from("applications")
+      .select("id, name, contact_qq, status, member_code")
+      .eq("name", name)
+      .eq("contact_qq", qq)
+      .maybeSingle();
+
+    if(result.error){
+      console.error("查询申请状态失败：", result.error);
+      applyQueryHint.textContent = "查询失败，请稍后再试";
+      return;
+    }
+
+    const data = result.data;
+    if(!data){
+      currentApplicationRecord = null;
+      applicationResultWrap.classList.add("hidden");
+      clearApplicantSession();
+      await updateIdentityUI();
+      applyQueryHint.textContent = "没有找到对应申请记录";
+      return;
+    }
+
+    setApplicantSession(name, qq);
+    saveApplicationDraft();
+    setFoldState("query");
+    renderApplicationResult(data);
+    applyQueryHint.style.color = "#5f7d3a";
+    applyQueryHint.textContent = "已找到你的申请记录";
+    await updateIdentityUI();
+
+  }catch(err){
+    console.error("queryApplicationStatus() 异常：", err);
+    applyQueryHint.textContent = "查询失败，请稍后再试";
+  }
+}
+
+async function reapplyApplication(){
+  if(!currentApplicationRecord?.id || reapplyBusy) return;
+
+  const applicationId = currentApplicationRecord.id;
+  reapplyBusy = true;
+  const oldText = reapplyBtn.textContent;
+
+  try{
+    reapplyBtn.disabled = true;
+    reapplyBtn.textContent = "恢复中...";
+    statusNotice.classList.add("hidden");
+
+    const appResult = await client
+      .from("applications")
+      .select("id, name, contact_qq, status, member_code")
+      .eq("id", applicationId)
+      .maybeSingle();
+
+    if(appResult.error || !appResult.data){
+      console.error("读取申请失败：", appResult.error);
+      showStatusNotice("恢复失败，请稍后再试。", "error");
+      return;
+    }
+
+    if(String(appResult.data.status || "").toLowerCase() !== "rejected"){
+      currentApplicationRecord = appResult.data;
+      renderApplicationResult(appResult.data);
+      await updateIdentityUI();
+      showStatusNotice("只有未通过的申请才可以再次申请。", "error");
+      return;
+    }
+
+    const deleteVotes = await client
+      .from("application_votes")
+      .delete()
+      .eq("application_id", applicationId);
+
+    if(deleteVotes.error){
+      console.error("清除旧投票失败：", deleteVotes.error);
+      showStatusNotice("恢复失败，请稍后再试。", "error");
+      return;
+    }
+
+    const updateApp = await client
+      .from("applications")
+      .update({
+        status: "pending",
+        member_code: null
+      })
+      .eq("id", applicationId)
+      .eq("status", "rejected")
+      .select()
+      .maybeSingle();
+
+    if(updateApp.error || !updateApp.data){
+      console.error("恢复申请失败：", updateApp.error);
+      showStatusNotice("恢复失败，请稍后再试。", "error");
+      return;
+    }
+
+    localStorage.setItem("room10Role", "applying");
+    setApplicantSession(updateApp.data.name, updateApp.data.contact_qq);
+
+    currentApplicationRecord = updateApp.data;
+    renderApplicationResult(updateApp.data);
+    await updateIdentityUI();
+
+    applyQueryHint.style.color = "#5f7d3a";
+    applyQueryHint.textContent = "已恢复为申请中，请等待重新审批。";
+    showStatusNotice("已恢复为申请中，请等待重新审批。", "success");
+
+  }catch(err){
+    console.error("reapplyApplication() 异常：", err);
+    showStatusNotice("恢复失败，请稍后再试。", "error");
+  }finally{
+    reapplyBtn.disabled = false;
+    reapplyBtn.textContent = oldText;
+    reapplyBusy = false;
+  }
+}
+
+function toggleQuickPassword(){
+  const p = document.getElementById("quickPassword");
+  p.type = (p.type === "password") ? "text" : "password";
+}
+
+function goNeedLogin(page){
+  if(!isLoggedIn()){
+    loginHint.style.color = "#8b5b34";
+    loginHint.textContent = "这扇门需要钥匙";
+    if(isMediumScrollScreen()){
+      contentArea.scrollTo({ top:0, behavior:"smooth" });
+    }
+    return;
+  }
+  window.location.href = page;
+}
+
+async function logout(){
+  localStorage.removeItem("room10LoggedIn");
+  localStorage.removeItem("room10User");
+  localStorage.removeItem("room10Role");
+  clearApplicantSession();
+  currentApplicationRecord = null;
+  applicationResultWrap.classList.add("hidden");
+  statusNotice.classList.add("hidden");
+  await updateIdentityUI();
+}
+
+async function submitApplication(){
+  const name = applyNicknameInput.value.trim();
+  const contactQQ = applyQQInput.value.trim();
+
+  applyHint.textContent = "";
+  applyHint.style.color = "#8b5b34";
+
+  if(!name || !contactQQ){
+    applyHint.textContent = "请先填写圈名和 QQ 号";
+    setFoldState("apply");
+    scrollContentToBottomPart(applyHint);
+    return;
+  }
+
+  const qqValid = /^[0-9]{5,20}$/.test(contactQQ);
+  if(!qqValid){
+    applyHint.textContent = "QQ 号格式好像不太对";
+    setFoldState("apply");
+    scrollContentToBottomPart(applyHint);
+    return;
+  }
+
+  try{
+    const [appNameRes, appQQRes, memberNameRes, memberNickRes, memberQQRes] = await Promise.all([
+      client.from("applications").select("id").eq("name", name).maybeSingle(),
+      client.from("applications").select("id").eq("contact_qq", contactQQ).maybeSingle(),
+      client.from("members").select("id").eq("name", name).maybeSingle(),
+      client.from("members").select("id").eq("nickname", name).maybeSingle(),
+      client.from("members").select("id").eq("contact_qq", contactQQ).maybeSingle()
+    ]);
+
+    const queryErrors = [appNameRes, appQQRes, memberNameRes, memberNickRes, memberQQRes]
+      .map(item => item.error)
+      .filter(Boolean);
+
+    if(queryErrors.length){
+      console.error("申请查重失败：", queryErrors);
+      applyHint.textContent = "申请检查失败，请稍后再试";
+      setFoldState("apply");
+      scrollContentToBottomPart(applyHint);
+      return;
+    }
+
+    if(appNameRes.data || memberNameRes.data || memberNickRes.data){
+      applyHint.textContent = "这个圈名已经有人使用了，请换一个圈名";
+      setFoldState("apply");
+      scrollContentToBottomPart(applyHint);
+      return;
+    }
+
+    if(appQQRes.data || memberQQRes.data){
+      applyHint.textContent = "这个 QQ 号已经有记录了，请确认后再提交";
+      setFoldState("apply");
+      scrollContentToBottomPart(applyHint);
+      return;
+    }
+
+    const insertResult = await client
+      .from("applications")
+      .insert([{
+        name: name,
+        contact_qq: contactQQ,
+        status: "pending"
+      }])
+      .select()
+      .single();
+
+    if(insertResult.error){
+      console.error("申请提交失败：", insertResult.error);
+      const msg = String(insertResult.error.message || "").toLowerCase();
+
+      if(msg.includes("duplicate") || msg.includes("unique")){
+        applyHint.textContent = "圈名或 QQ 已存在，请检查后重新提交";
+      }else{
+        applyHint.textContent = "申请提交失败，请稍后再试";
+      }
+      setFoldState("apply");
+      scrollContentToBottomPart(applyHint);
+      return;
+    }
+
+    localStorage.setItem(APPLY_STORAGE_KEY, JSON.stringify({
+      nickname: name,
+      qq: contactQQ
+    }));
+
+    setApplicantSession(name, contactQQ);
+    localStorage.setItem("room10Role", "applying");
+    applyLoginNameInput.value = name;
+    applyLoginQQInput.value = contactQQ;
+
+    applyHint.style.color = "#5f7d3a";
+    applyHint.textContent = "申请已提交，当前状态为审核中。下次可用圈名和 QQ 查询结果。";
+
+    renderApplicationResult(insertResult.data);
+    await updateIdentityUI();
+
+    setTimeout(() => {
+      setFoldState("query");
+      scrollContentToBottomPart(applicationResultWrap);
+    }, 500);
+
+  }catch(err){
+    console.error("submitApplication() 异常：", err);
+    applyHint.textContent = "申请提交失败，请稍后再试";
+    setFoldState("apply");
+    scrollContentToBottomPart(applyHint);
+  }
+}
+
+img.onload = function(){
+  if(isMediumScrollScreen() || isTinyFlowScreen()) return;
+
+  try{
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = 32;
+    canvas.height = 32;
+    ctx.drawImage(img, 0, 0, 32, 32);
+  }catch(err){
+    console.warn("背景采样跳过：", err);
+  }
+};
+
+applyNicknameInput.addEventListener("input", saveApplicationDraft);
+applyQQInput.addEventListener("input", saveApplicationDraft);
+
+document.addEventListener("DOMContentLoaded", async () => {
+  loadApplicationDraft();
+  await updateIdentityUI();
+
+  const applicant = getApplicantSession();
+  if(applicant && applicant.name && applicant.qq && !isLoggedIn()){
+    applyLoginNameInput.value = applicant.name;
+    applyLoginQQInput.value = applicant.qq;
+    setFoldState("query");
+    queryApplicationStatus();
+  }
+});
+</script>
+</body>
+</html>
