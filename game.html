@@ -1,12 +1,511 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>游戏房</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>小游戏｜命运之轮</title>
+
+<style>
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  }
+
+  :root{
+    --bg-left:#fff3e7;
+    --bg-right:#f4dfc8;
+    --bg-top:#fff7ef;
+    --bg-bottom:#edd8c1;
+    --panel-bg:rgba(255,255,255,0.34);
+    --panel-border:rgba(255,255,255,0.62);
+    --panel-shadow:rgba(112,78,45,0.16);
+    --text-main:#7a5030;
+    --text-sub:#8a6241;
+    --btn-bg:rgba(255,252,248,0.82);
+    --btn-border:rgba(255,255,255,0.92);
+    --btn-shadow:rgba(129,90,54,0.16);
+  }
+
+  body{
+    position:relative;
+    min-height:100vh;
+    min-height:100dvh;
+    background:
+      radial-gradient(circle at center, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 62%),
+      linear-gradient(90deg, var(--bg-left) 0%, var(--bg-right) 100%);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:var(--text-main);
+  }
+
+  /* 自动扩展底图颜色的背景层 */
+  #bgColorFill{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    background:
+      linear-gradient(180deg, var(--bg-top) 0%, rgba(255,255,255,0) 18%, rgba(255,255,255,0) 82%, var(--bg-bottom) 100%),
+      linear-gradient(90deg, var(--bg-left) 0%, var(--bg-right) 100%);
+  }
+
+  /* 模糊放大的底图，用来让黑边区域更自然 */
+  #bgBleed{
+    position:fixed;
+    inset:-8vh -8vw;
+    z-index:1;
+    background:url("room-game.png") center center / cover no-repeat;
+    filter:blur(30px) saturate(1.05);
+    transform:scale(1.08);
+    opacity:.72;
+    pointer-events:none;
+  }
+
+  /* 轻微柔光 */
+  #bgLight{
+    position:fixed;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 50% 35%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0) 58%),
+      linear-gradient(180deg, rgba(255,248,240,0.08), rgba(255,248,240,0.08));
+  }
+
+  .room{
+    position:relative;
+    z-index:3;
+    width:100vw;
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+  }
+
+  /* 和 index 一样的“整张图完整显示，自适应，不裁切” */
+  .stage{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+  }
+
+  #bg{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    max-width:100vw;
+    max-height:100vh;
+    max-height:100dvh;
+    width:auto;
+    height:auto;
+    display:block;
+    user-select:none;
+    -webkit-user-drag:none;
+    pointer-events:none;
+  }
+
+  .overlay{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:clamp(16px, 2.2vw, 34px);
+    pointer-events:none;
+  }
+
+  .panel{
+    position:relative;
+    pointer-events:auto;
+    width:min(92vw, 760px);
+    padding:clamp(22px, 3vw, 42px);
+    border-radius:30px;
+    background:var(--panel-bg);
+    border:1.5px solid var(--panel-border);
+    box-shadow:
+      0 12px 36px var(--panel-shadow),
+      inset 0 1px 0 rgba(255,255,255,0.72),
+      inset 0 0 28px rgba(255,255,255,0.10);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    text-align:center;
+  }
+
+  .title{
+    margin:0 0 10px;
+    color:var(--text-main);
+    font-size:clamp(28px, 4vw, 46px);
+    font-weight:800;
+    letter-spacing:1px;
+    text-shadow:0 1px 0 rgba(255,255,255,0.35);
+  }
+
+  .subtitle{
+    margin:0 0 clamp(22px, 3vw, 34px);
+    color:var(--text-sub);
+    font-size:clamp(14px, 1.7vw, 18px);
+    line-height:1.6;
+  }
+
+  .menu{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:clamp(14px, 2vw, 20px);
+  }
+
+  .game-btn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    width:100%;
+    min-height:clamp(120px, 18vw, 160px);
+    border-radius:24px;
+    padding:18px;
+    text-decoration:none;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    background:var(--btn-bg);
+    border:1.5px solid var(--btn-border);
+    box-shadow:
+      0 8px 22px var(--btn-shadow),
+      inset 0 1px 0 rgba(255,255,255,0.92);
+    transition:
+      transform .18s ease,
+      box-shadow .18s ease,
+      background .18s ease,
+      border-color .18s ease;
+  }
+
+  .game-btn:hover{
+    transform:translateY(-3px);
+    background:rgba(255,252,248,0.92);
+    box-shadow:
+      0 12px 28px rgba(129,90,54,0.22),
+      inset 0 1px 0 rgba(255,255,255,0.96);
+    border-color:rgba(255,255,255,1);
+  }
+
+  .game-btn:active{
+    transform:translateY(0);
+  }
+
+  .game-name{
+    color:#744a2a;
+    font-size:clamp(22px, 2.5vw, 30px);
+    font-weight:800;
+    line-height:1.2;
+    margin-bottom:10px;
+  }
+
+  .game-desc{
+    color:#8a6547;
+    font-size:clamp(13px, 1.4vw, 16px);
+    line-height:1.55;
+    max-width:22em;
+  }
+
+  .footer-note{
+    margin-top:clamp(18px, 2.2vw, 24px);
+    color:#916b4b;
+    font-size:clamp(12px, 1.3vw, 14px);
+    opacity:.92;
+  }
+
+  /* 房间切换按钮 */
+  .room-nav{
+    position:absolute;
+    top:clamp(12px, 2vw, 22px);
+    right:clamp(12px, 2vw, 22px);
+    z-index:5;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    gap:clamp(8px, 1vw, 12px);
+    width:min(72vw, 700px);
+    pointer-events:auto;
+  }
+
+  .room-link{
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:clamp(78px, 8vw, 108px);
+    min-height:clamp(38px, 4.2vw, 48px);
+    padding:0 clamp(12px, 1.4vw, 18px);
+    border-radius:999px;
+    background:rgba(255,255,255,0.46);
+    border:1.4px solid rgba(255,255,255,0.72);
+    color:#7b5233;
+    font-size:clamp(13px, 1.1vw, 15px);
+    font-weight:700;
+    letter-spacing:.4px;
+    box-shadow:
+      0 6px 18px rgba(112,78,45,0.12),
+      inset 0 1px 0 rgba(255,255,255,0.78);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    transition:
+      transform .18s ease,
+      background .18s ease,
+      box-shadow .18s ease,
+      border-color .18s ease;
+  }
+
+  .room-link:hover{
+    transform:translateY(-2px);
+    background:rgba(255,255,255,0.58);
+    border-color:rgba(255,255,255,0.9);
+    box-shadow:
+      0 10px 24px rgba(112,78,45,0.17),
+      inset 0 1px 0 rgba(255,255,255,0.88);
+  }
+
+  .room-link.current{
+    background:rgba(255,248,241,0.74);
+    border-color:rgba(255,255,255,0.95);
+  }
+
+  .fallback-tip{
+    position:absolute;
+    left:50%;
+    bottom:14px;
+    transform:translateX(-50%);
+    z-index:6;
+    font-size:12px;
+    color:rgba(122,80,48,.78);
+    background:rgba(255,255,255,.34);
+    border:1px solid rgba(255,255,255,.56);
+    border-radius:999px;
+    padding:6px 12px;
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease;
+  }
+
+  .fallback-tip.show{
+    opacity:1;
+  }
+
+  @media (max-width: 860px){
+    .panel{
+      width:min(94vw, 620px);
+      border-radius:26px;
+      padding:clamp(20px, 4vw, 30px);
+    }
+
+    .menu{
+      grid-template-columns:1fr;
+    }
+
+    .room-nav{
+      width:min(92vw, 520px);
+      top:12px;
+      right:12px;
+      gap:8px;
+    }
+
+    .room-link{
+      min-width:auto;
+      flex:0 0 auto;
+      min-height:40px;
+      padding:0 14px;
+    }
+  }
+
+  @media (max-width: 560px){
+    .overlay{
+      align-items:flex-end;
+      padding:14px;
+    }
+
+    .panel{
+      width:min(96vw, 560px);
+      border-radius:22px;
+    }
+
+    .room-nav{
+      width:calc(100vw - 24px);
+      justify-content:center;
+      right:12px;
+      left:12px;
+    }
+
+    .room-link{
+      font-size:13px;
+      min-height:38px;
+      padding:0 12px;
+    }
+
+    .title{
+      font-size:clamp(24px, 7vw, 34px);
+    }
+
+    .subtitle{
+      font-size:14px;
+    }
+  }
+</style>
 </head>
 <body>
-  <h1>游戏房</h1>
-  <a href="index.html">返回首页</a>
+  <div id="bgColorFill"></div>
+  <div id="bgBleed"></div>
+  <div id="bgLight"></div>
+
+  <div class="room">
+    <div class="stage" id="stage">
+      <img id="bg" src="room-game.png" alt="十号房游戏房背景" />
+
+      <nav class="room-nav" aria-label="房间切换">
+        <a class="room-link" href="index.html">首页</a>
+        <a class="room-link" href="manager.html">宿管室</a>
+        <a class="room-link" href="honor.html">荣誉墙</a>
+        <a class="room-link current" href="game.html">游戏房</a>
+        <a class="room-link" href="living.html">客厅</a>
+        <a class="room-link" href="studio.html">工作间</a>
+        <a class="room-link" href="dorm.html">宿舍</a>
+      </nav>
+
+      <div class="overlay">
+        <div class="panel">
+          <h1 class="title">小游戏｜小工具</h1>
+
+
+          <div class="menu">
+            <a class="game-btn" href="game-name.html">
+              <div class="game-name">脸萌挑战</div>
+              <div class="game-desc">一个简单的小挑战</div>
+            </a>
+
+            <a class="game-btn" href="game-wheel.html">
+              <div class="game-name">命运之轮</div>
+              <div class="game-desc">你命不由我不由天</div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="fallbackTip" class="fallback-tip">未能读取图片边缘颜色，已使用默认柔和背景。</div>
+
+<script>
+(function(){
+  const img = document.getElementById('bg');
+  const root = document.documentElement;
+  const fallbackTip = document.getElementById('fallbackTip');
+
+  function clamp(v,min,max){
+    return Math.max(min, Math.min(max, v));
+  }
+
+  function avgColor(data){
+    let r = 0, g = 0, b = 0, count = 0;
+    for(let i=0;i<data.length;i+=4){
+      const alpha = data[i+3];
+      if(alpha === 0) continue;
+      r += data[i];
+      g += data[i+1];
+      b += data[i+2];
+      count++;
+    }
+    if(!count) return [245, 233, 220];
+    return [
+      Math.round(r / count),
+      Math.round(g / count),
+      Math.round(b / count)
+    ];
+  }
+
+  function mix(color, target, ratio){
+    return [
+      Math.round(color[0] * (1 - ratio) + target[0] * ratio),
+      Math.round(color[1] * (1 - ratio) + target[1] * ratio),
+      Math.round(color[2] * (1 - ratio) + target[2] * ratio)
+    ];
+  }
+
+  function rgbToCss(arr){
+    return `rgb(${arr[0]}, ${arr[1]}, ${arr[2]})`;
+  }
+
+  function applyEdgeColors(){
+    try{
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently:true });
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+
+      if(!w || !h) throw new Error('图片尺寸无效');
+
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+
+      const bandX = Math.max(8, Math.floor(w * 0.03));
+      const bandY = Math.max(8, Math.floor(h * 0.03));
+
+      const leftData = ctx.getImageData(0, 0, bandX, h).data;
+      const rightData = ctx.getImageData(w - bandX, 0, bandX, h).data;
+      const topData = ctx.getImageData(0, 0, w, bandY).data;
+      const bottomData = ctx.getImageData(0, h - bandY, w, bandY).data;
+
+      let left = avgColor(leftData);
+      let right = avgColor(rightData);
+      let top = avgColor(topData);
+      let bottom = avgColor(bottomData);
+
+      /* 轻微提亮，避免黑边替换后显得脏暗 */
+      left = mix(left, [255,255,255], 0.14);
+      right = mix(right, [255,255,255], 0.12);
+      top = mix(top, [255,255,255], 0.16);
+      bottom = mix(bottom, [255,255,255], 0.10);
+
+      /* 避免过暗 */
+      left = left.map(v => clamp(v, 120, 255));
+      right = right.map(v => clamp(v, 120, 255));
+      top = top.map(v => clamp(v, 130, 255));
+      bottom = bottom.map(v => clamp(v, 110, 255));
+
+      root.style.setProperty('--bg-left', rgbToCss(left));
+      root.style.setProperty('--bg-right', rgbToCss(right));
+      root.style.setProperty('--bg-top', rgbToCss(top));
+      root.style.setProperty('--bg-bottom', rgbToCss(bottom));
+    }catch(err){
+      fallbackTip.classList.add('show');
+      setTimeout(() => fallbackTip.classList.remove('show'), 2600);
+      console.warn('读取底图边缘颜色失败：', err);
+    }
+  }
+
+  if(img.complete){
+    applyEdgeColors();
+  }else{
+    img.addEventListener('load', applyEdgeColors, { once:true });
+    img.addEventListener('error', () => {
+      fallbackTip.classList.add('show');
+      setTimeout(() => fallbackTip.classList.remove('show'), 2600);
+    }, { once:true });
+  }
+})();
+</script>
 </body>
 </html>

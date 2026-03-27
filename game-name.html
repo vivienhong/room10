@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>十号房｜脸萌挑战</title>
+
+<style>
+*{box-sizing:border-box;}
+
+:root{
+  --bg1:#fff3e0;
+  --bg2:#f8e3c8;
+  --text:#5b3e28;
+  --text2:#7d5c3c;
+  --line:rgba(255,255,255,.78);
+  --ok:#6fa463;
+  --okBg:rgba(191,234,186,.52);
+  --bad:#d86a6a;
+  --badBg:rgba(255,193,193,.42);
+  --zone:rgba(255,176,72,.28);
+  --zoneStroke:rgba(235,120,20,.95);
+  --zoneHover:rgba(255,145,40,.42);
+  --zoneHoverStroke:#d96a00;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+  background:linear-gradient(to right, var(--bg1), var(--bg2));
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+#room{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+
+#bgShade{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(0,0,0,0) 56%,
+      rgba(210,186,160,0.10) 72%,
+      rgba(190,160,130,0.16) 86%,
+      rgba(170,138,108,0.22) 100%
+    );
+}
+
+#stage{
+  position:relative;
+  width:fit-content;
+  height:fit-content;
+  max-width:100vw;
+  max-height:100vh;
+  z-index:2;
+}
+
+#bgWrap{
+  position:relative;
+  display:block;
+  line-height:0;
+}
+
+#bg{
+  display:block;
+  max-width:100vw;
+  max-height:100vh;
+  width:auto;
+  height:auto;
+  position:relative;
+  z-index:0;
+}
+
+#map{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:4;
+}
+
+#labelLayer{
+  position:absolute;
+  inset:0;
+  z-index:5;
+  pointer-events:none;
+}
+
+/* 左侧主面板 */
+#leftPanel{
+  position:absolute;
+  left:2.2%;
+  top:3%;
+  width:30%;
+  min-width:330px;
+  max-width:430px;
+  height:94%;
+  z-index:6;
+  pointer-events:auto;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.42) 0%,
+      rgba(255,255,255,.30) 45%,
+      rgba(255,255,255,.18) 100%
+    );
+  backdrop-filter:blur(16px) saturate(120%);
+  -webkit-backdrop-filter:blur(16px) saturate(120%);
+  border:1px solid var(--line);
+  border-radius:24px;
+  box-shadow:
+    0 12px 34px rgba(92,63,37,.15),
+    inset 0 1px 0 rgba(255,255,255,.92),
+    inset 0 -2px 8px rgba(255,255,255,.12);
+  display:flex;
+  flex-direction:column;
+  padding:14px 12px 12px;
+  gap:10px;
+}
+
+#titleRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+
+#gameTitle{
+  font-size:24px;
+  font-weight:900;
+  color:var(--text);
+  line-height:1.1;
+  margin:0;
+}
+
+#backBtnInline{
+  flex:0 0 auto;
+  min-width:38px;
+  height:38px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,244,225,.96);
+  color:#6a4b2f;
+  font-size:20px;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:
+    0 6px 18px rgba(92,63,37,.18),
+    inset 0 1px 0 rgba(255,255,255,.82);
+}
+
+#backBtnInline:hover{
+  background:rgba(255,249,240,.99);
+}
+
+#gameSub{
+  font-size:11px;
+  line-height:1.5;
+  color:var(--text2);
+  margin:0;
+}
+
+/* 名字区：一行3个 */
+#nameListWrap{
+  flex:1;
+  min-height:0;
+  overflow:auto;
+  padding-right:2px;
+}
+
+#nameListWrap::-webkit-scrollbar{
+  width:7px;
+}
+#nameListWrap::-webkit-scrollbar-thumb{
+  background:rgba(131,96,63,.28);
+  border-radius:999px;
+}
+
+#nameList{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:6px;
+}
+
+.nameCard{
+  user-select:none;
+  cursor:grab;
+  padding:6px 4px;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:800;
+  color:#6a4b2f;
+  text-align:center;
+  line-height:1.15;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  background:rgba(255,249,240,.94);
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:
+    0 4px 12px rgba(92,63,37,.12),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease, background .15s ease;
+}
+
+.nameCard:hover{
+  transform:translateY(-1px);
+  box-shadow:
+    0 6px 16px rgba(92,63,37,.16),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.nameCard:active{
+  cursor:grabbing;
+}
+
+.nameCard.correct{
+  background:rgba(233,248,231,.96);
+  color:#4c7d45;
+  opacity:.82;
+  cursor:default;
+}
+
+.nameCard.dragging{
+  opacity:.55;
+}
+
+@keyframes flashBad{
+  0%{box-shadow:0 0 0 rgba(216,106,106,0);}
+  50%{box-shadow:0 0 0 3px rgba(216,106,106,.35);}
+  100%{box-shadow:0 0 0 rgba(216,106,106,0);}
+}
+.nameCard.bad{
+  animation:flashBad .45s ease;
+}
+
+/* 底部信息框 */
+#infoBox{
+  flex:0 0 auto;
+  padding:10px 10px 10px;
+  background:rgba(255,250,242,.76);
+  border:1px solid rgba(255,255,255,.86);
+  border-radius:16px;
+  color:var(--text);
+  box-shadow:
+    0 6px 16px rgba(92,63,37,.10),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.statusRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  line-height:1.5;
+}
+
+.statusRow b{
+  color:var(--text);
+}
+
+#resultText{
+  margin-top:7px;
+  font-size:13px;
+  font-weight:800;
+  color:var(--text);
+  min-height:19px;
+}
+
+#bottomBtns{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.ctrlBtn{
+  flex:1;
+  height:38px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,246,232,.96);
+  color:#6a4b2f;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:
+    0 6px 18px rgba(92,63,37,.16),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  transition:transform .18s ease, background .18s ease;
+}
+
+.ctrlBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,250,242,.99);
+}
+
+/* 热区 */
+.dropZone{
+  fill:rgba(255,176,72,.18);
+  stroke:rgba(235,120,20,.55);
+  stroke-width:.55;
+  stroke-dasharray:1.4 1.1;
+  rx:1.2;
+  ry:1.2;
+  transition:.18s;
+}
+.dropZone.hover{
+  fill:var(--zoneHover);
+  stroke:var(--zoneHoverStroke);
+  stroke-width:.8;
+}
+
+.dropZone.correct{
+  fill:var(--okBg);
+  stroke:var(--ok);
+  stroke-width:.8;
+}
+
+.dropZone.wrong{
+  fill:var(--badBg);
+  stroke:var(--bad);
+  stroke-width:.84;
+}
+
+.zoneDebug{
+  pointer-events:none;
+  font-size:.78px;
+  fill:#d85700;
+  font-weight:900;
+  text-anchor:middle;
+  dominant-baseline:middle;
+}
+
+.zoneAnimal{
+  pointer-events:none;
+  font-size:.82px;
+  fill:#7a5a3c;
+  font-weight:700;
+  text-anchor:middle;
+  dominant-baseline:middle;
+}
+
+/* HTML 标签层：不会再被 SVG 拉扁 */
+.nameLabel{
+  position:absolute;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+
+  background:rgba(255,248,238,.96);
+  border:1px solid rgba(255,255,255,.95);
+  border-radius:999px;
+  box-shadow:
+    0 2px 6px rgba(92,63,37,.08),
+    inset 0 1px 0 rgba(255,255,255,.9);
+
+  color:#4f3a29;
+  font-weight:900;
+  line-height:1;
+  padding:0 .2em;
+}
+
+@keyframes shakeZone{
+  0%{transform:translateX(0);}
+  20%{transform:translateX(-1.1px);}
+  40%{transform:translateX(1.1px);}
+  60%{transform:translateX(-1px);}
+  80%{transform:translateX(.9px);}
+  100%{transform:translateX(0);}
+}
+.shake{
+  animation:shakeZone .36s ease;
+}
+
+@media (max-width:1100px){
+  #leftPanel{
+    width:32%;
+    min-width:280px;
+  }
+}
+
+@media (max-width:860px){
+  body{overflow:auto;}
+  #room{
+    min-height:100vh;
+    min-height:100dvh;
+    align-items:flex-start;
+    padding:10px 0;
+  }
+  #stage{
+    max-width:100vw;
+    max-height:none;
+  }
+  #bg{
+    width:100vw;
+    height:auto;
+    max-width:none;
+    max-height:none;
+  }
+  #leftPanel{
+    left:2%;
+    top:2%;
+    width:34%;
+    min-width:210px;
+    height:94%;
+    padding:10px 8px 8px;
+  }
+  #gameTitle{
+    font-size:18px;
+  }
+  #nameList{
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:5px;
+  }
+  .nameCard{
+    font-size:10px;
+    padding:5px 3px;
+  }
+  .statusRow{
+    font-size:11px;
+  }
+  .ctrlBtn{
+    font-size:12px;
+    height:34px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="room">
+  <div id="bgShade"></div>
+
+  <div id="stage">
+    <div id="bgWrap">
+      <img id="bg" src="game-name.png" alt="脸萌挑战题图">
+    </div>
+
+    <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+    <div id="labelLayer"></div>
+
+    <div id="leftPanel">
+      <div id="titleRow">
+        <h1 id="gameTitle">脸萌挑战</h1>
+        <button id="backBtnInline" onclick="window.location.href='game.html'" title="返回上一层">‹</button>
+      </div>
+
+      <p id="gameSub">把左边的人名拖到右侧图片中对应角色的框里。实时判定正误，填错会累计罚时。</p>
+
+      <div id="nameListWrap">
+        <div id="nameList"></div>
+      </div>
+
+      <div id="infoBox">
+        <div class="statusRow"><span>已完成</span><b id="doneCount">0 / 34</b></div>
+        <div class="statusRow"><span>错误次数</span><b id="wrongCount">0</b></div>
+        <div class="statusRow"><span>罚时</span><b id="penaltyText">0 秒</b></div>
+        <div class="statusRow"><span>计时</span><b id="timerText">00:00</b></div>
+        <div class="statusRow"><span>总用时</span><b id="totalTimeText">00:00</b></div>
+        <div id="resultText">请开始拖动</div>
+
+        <div id="bottomBtns">
+          <button class="ctrlBtn" onclick="clearPlacedNames()">清空</button>
+          <button class="ctrlBtn" onclick="resetGame()">重新开始</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEBUG = true;
+
+const peopleData = [
+  { code:"N-01", animal:"德牧",   name:"李克勤"   },
+  { code:"N-02", animal:"棕熊",   name:"林依轮"   },
+  { code:"N-03", animal:"孔雀",   name:"梁龙"     },
+  { code:"N-04", animal:"小熊猫", name:"王铮亮"   },
+  { code:"N-05", animal:"白狮",   name:"严屹宽"   },
+  { code:"N-06", animal:"黑豹",   name:"黑泽良平" },
+  { code:"N-07", animal:"猞猁",   name:"雅"       },
+  { code:"N-08", animal:"浣熊",   name:"袁成杰"   },
+  { code:"N-09", animal:"北极狐", name:"徐海乔"   },
+  { code:"N-10", animal:"袋鼠",   name:"沈震轩"   },
+  { code:"N-11", animal:"梅花鹿", name:"李泽锋"   },
+  { code:"N-12", animal:"鬣狗",   name:"向佐"     },
+  { code:"N-13", animal:"树懒",   name:"秦昊"     },
+  { code:"N-14", animal:"柴犬",   name:"蔡旻佑"   },
+  { code:"N-15", animal:"大灰狼", name:"付辛博"   },
+  { code:"N-16", animal:"蓝色小鸟", name:"韦礼安" },
+  { code:"N-17", animal:"海象",   name:"杜海涛"   },
+  { code:"N-18", animal:"雪豹",   name:"凤小岳"   },
+  { code:"N-19", animal:"花豹",   name:"符龙飞"   },
+  { code:"N-20", animal:"猫鼬",   name:"黄潇"     },
+  { code:"N-21", animal:"红狐狸", name:"胡夏"     },
+  { code:"N-22", animal:"黑熊",   name:"熊梓淇"   },
+  { code:"N-23", animal:"水獭",   name:"李佳琦"   },
+  { code:"N-24", animal:"rap橘猫", name:"早安"    },
+  { code:"N-25", animal:"考拉",   name:"宁桓宇"   },
+  { code:"N-26", animal:"牦牛",   name:"阿如那"   },
+  { code:"N-27", animal:"缅因猫", name:"朱星杰"   },
+  { code:"N-28", animal:"白鹭",   name:"王一哲"   },
+  { code:"N-29", animal:"白兔",   name:"尤长靖"   },
+  { code:"N-30", animal:"松鼠",   name:"焦迈奇"   },
+  { code:"N-31", animal:"企鹅",   name:"井胧"     },
+  { code:"N-32", animal:"小猪",   name:"高卿尘"   },
+  { code:"N-33", animal:"萨摩耶", name:"石凯"     },
+  { code:"N-34", animal:"小猴子", name:"庆怜"     }
+];
+
+/*
+  N-01 到 N-05 保持不变
+  其余编号按当前这版排布
+*/
+const zoneLayout = [
+  /* 第一排 7 个 */
+  { code:"N-02", x:48.0, y:22.0, w:5, h:4 },
+  { code:"N-05", x:56.0, y:22.0, w:5, h:4 },
+  { code:"N-12", x:62.0, y:22.0, w:5, h:4 },
+  { code:"N-10", x:68.0, y:22.0, w:5, h:4 },
+  { code:"N-26", x:76.0, y:21.0, w:5, h:4 },
+  { code:"N-28", x:82.5, y:21.0, w:5, h:4 },
+  { code:"N-11", x:88.5, y:22.0, w:5, h:4 },
+
+  /* 第二排 9 个 */
+  { code:"N-08", x:45.0, y:37.0, w:5, h:4 },
+  { code:"N-17", x:53.4, y:36.0, w:5, h:4 },
+  { code:"N-25", x:59.0, y:40.0, w:5, h:4 },
+  { code:"N-09", x:65.5, y:37.0, w:5, h:4 },
+  { code:"N-16", x:69.0, y:36.0, w:5, h:4 },
+  { code:"N-14", x:73.5, y:37.0, w:5, h:4 },
+  { code:"N-22", x:79.4, y:36.0, w:5, h:4 },
+  { code:"N-19", x:85.8, y:36.0, w:5, h:4 },
+  { code:"N-06", x:92.0, y:36.0, w:5, h:4 },
+
+  /* 第三排 9 个 */
+  { code:"N-18", x:44.0, y:54.0, w:5, h:4 },
+  { code:"N-03", x:52.0, y:55.0, w:5, h:4 },
+  { code:"N-27", x:57.5, y:54.0, w:5, h:4 },
+  { code:"N-13", x:63.0, y:54.0, w:5, h:4 },
+  { code:"N-01", x:69.0, y:54.0, w:5, h:4 },
+  { code:"N-04", x:75.0, y:56.0, w:5, h:4 },
+  { code:"N-21", x:81.0, y:55.0, w:5, h:4 },
+  { code:"N-15", x:85.4, y:54.0, w:5, h:4 },
+  { code:"N-24", x:91.0, y:54.0, w:5, h:4 },
+
+  /* 第四排 9 个 */
+  { code:"N-30", x:45.0, y:78.0, w:5, h:4 },
+  { code:"N-31", x:51.5, y:77.0, w:5, h:4 },
+  { code:"N-32", x:57.6, y:75.0, w:5, h:4 },
+  { code:"N-33", x:64.5, y:75.0, w:5, h:4 },
+  { code:"N-23", x:71.0, y:74.0, w:5, h:4 },
+  { code:"N-20", x:77.0, y:74.0, w:5, h:4 },
+  { code:"N-29", x:83.0, y:80.0, w:5, h:4 },
+  { code:"N-07", x:88.0, y:73.0, w:5, h:4 },
+  { code:"N-34", x:93.0, y:78.0, w:5, h:4 }
+];
+
+const codeToItem = Object.fromEntries(peopleData.map(item => [item.code, item]));
+const placedCorrect = new Set();
+
+let wrongCount = 0;
+let penaltySeconds = 0;
+let timerStarted = false;
+let finished = false;
+let timerHandle = null;
+let startTimestamp = 0;
+let finalRawSeconds = 0;
+
+const map = document.getElementById("map");
+const labelLayer = document.getElementById("labelLayer");
+const stage = document.getElementById("stage");
+const nameList = document.getElementById("nameList");
+const doneCountEl = document.getElementById("doneCount");
+const wrongCountEl = document.getElementById("wrongCount");
+const penaltyTextEl = document.getElementById("penaltyText");
+const timerTextEl = document.getElementById("timerText");
+const totalTimeTextEl = document.getElementById("totalTimeText");
+const resultTextEl = document.getElementById("resultText");
+
+function formatTime(sec){
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+}
+
+function getElapsedSeconds(){
+  if(!timerStarted) return 0;
+  if(finished) return finalRawSeconds;
+  return Math.floor((Date.now() - startTimestamp) / 1000);
+}
+
+function updateStatus(){
+  const raw = getElapsedSeconds();
+  const total = raw + penaltySeconds;
+  doneCountEl.textContent = `${placedCorrect.size} / ${peopleData.length}`;
+  wrongCountEl.textContent = String(wrongCount);
+  penaltyTextEl.textContent = `${penaltySeconds} 秒`;
+  timerTextEl.textContent = formatTime(raw);
+  totalTimeTextEl.textContent = formatTime(total);
+}
+
+function setResult(text, color){
+  resultTextEl.textContent = text;
+  resultTextEl.style.color = color || "#5b3e28";
+}
+
+function startTimerIfNeeded(){
+  if(timerStarted) return;
+  timerStarted = true;
+  startTimestamp = Date.now();
+  timerHandle = setInterval(updateStatus, 200);
+}
+
+function stopTimer(){
+  if(timerHandle){
+    clearInterval(timerHandle);
+    timerHandle = null;
+  }
+}
+
+function finishGame(){
+  if(finished) return;
+  finished = true;
+  finalRawSeconds = Math.floor((Date.now() - startTimestamp) / 1000);
+  stopTimer();
+  updateStatus();
+  const total = finalRawSeconds + penaltySeconds;
+  setResult(`完成！原始用时 ${formatTime(finalRawSeconds)}，罚时 ${penaltySeconds} 秒，总用时 ${formatTime(total)}`, "#4c7d45");
+}
+
+function triggerWrong(zoneRect, cardEl){
+  wrongCount += 1;
+  penaltySeconds += 3;
+  updateStatus();
+  setResult("错误，已加 3 秒罚时", "#b85a5a");
+
+  zoneRect.classList.remove("correct");
+  zoneRect.classList.add("wrong", "shake");
+  cardEl.classList.add("bad");
+
+  setTimeout(() => zoneRect.classList.remove("wrong"), 520);
+  setTimeout(() => zoneRect.classList.remove("shake"), 420);
+  setTimeout(() => cardEl.classList.remove("bad"), 420);
+}
+
+function fitLabelText(el){
+  if(!el || !el.textContent.trim()) return;
+
+  const width = el.clientWidth;
+  const height = el.clientHeight;
+  let fontSize = Math.max(9, Math.min(16, width * 0.22, height * 0.68));
+
+  el.style.fontSize = fontSize + "px";
+
+  while ((el.scrollWidth > el.clientWidth - 4 || el.scrollHeight > el.clientHeight - 2) && fontSize > 8){
+    fontSize -= 0.5;
+    el.style.fontSize = fontSize + "px";
+  }
+}
+
+function fitAllLabels(){
+  document.querySelectorAll(".nameLabel").forEach(el => {
+    if(el.textContent.trim()){
+      fitLabelText(el);
+    }
+  });
+}
+
+function triggerCorrect(zoneRect, placedTextEl, cardEl, item){
+  zoneRect.classList.remove("wrong");
+  zoneRect.classList.add("correct");
+  placedTextEl.textContent = item.name;
+  fitLabelText(placedTextEl);
+
+  cardEl.classList.add("correct");
+  cardEl.draggable = false;
+  placedCorrect.add(item.code);
+
+  updateStatus();
+  setResult(`正确：${item.name}（${item.animal}）`, "#4c7d45");
+
+  if(placedCorrect.size === peopleData.length){
+    finishGame();
+  }
+}
+
+function renderNameCards(){
+  nameList.innerHTML = "";
+
+  peopleData.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "nameCard";
+    div.id = `card-${item.code}`;
+    div.draggable = true;
+    div.textContent = item.name;
+    div.dataset.code = item.code;
+
+    div.addEventListener("dragstart", e => {
+      if(finished || placedCorrect.has(item.code)){
+        e.preventDefault();
+        return;
+      }
+      startTimerIfNeeded();
+      div.classList.add("dragging");
+      e.dataTransfer.setData("text/plain", item.code);
+      e.dataTransfer.effectAllowed = "move";
+    });
+
+    div.addEventListener("dragend", () => {
+      div.classList.remove("dragging");
+    });
+
+    nameList.appendChild(div);
+  });
+}
+
+function createZoneElements(){
+  map.innerHTML = "";
+  labelLayer.innerHTML = "";
+
+  zoneLayout.forEach((zone) => {
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("class", "dropZone");
+    rect.setAttribute("id", `zone-${zone.code}`);
+    rect.setAttribute("x", zone.x);
+    rect.setAttribute("y", zone.y);
+    rect.setAttribute("width", zone.w);
+    rect.setAttribute("height", zone.h);
+
+    const label = document.createElement("div");
+    label.className = "nameLabel";
+    label.id = `placed-${zone.code}`;
+    label.style.left = `${zone.x + zone.w * 0.05}%`;
+    label.style.top = `${zone.y + zone.h * 0.24}%`;
+    label.style.width = `${zone.w * 0.90}%`;
+    label.style.height = `${zone.h * 0.52}%`;
+
+    rect.addEventListener("dragover", e => {
+      if(finished) return;
+      e.preventDefault();
+      rect.classList.add("hover");
+    });
+
+    rect.addEventListener("dragleave", () => {
+      rect.classList.remove("hover");
+    });
+
+    rect.addEventListener("drop", e => {
+      if(finished) return;
+      e.preventDefault();
+      rect.classList.remove("hover");
+      startTimerIfNeeded();
+
+      const draggedCode = e.dataTransfer.getData("text/plain");
+      if(!draggedCode) return;
+      if(placedCorrect.has(draggedCode)) return;
+
+      const draggedItem = codeToItem[draggedCode];
+      const cardEl = document.getElementById(`card-${draggedCode}`);
+      const placedTextEl = document.getElementById(`placed-${zone.code}`);
+
+      if(!draggedItem || !cardEl || !placedTextEl) return;
+
+      if(draggedCode === zone.code){
+        triggerCorrect(rect, placedTextEl, cardEl, draggedItem);
+      }else{
+        triggerWrong(rect, cardEl);
+      }
+    });
+
+    map.appendChild(rect);
+    labelLayer.appendChild(label);
+  });
+
+  requestAnimationFrame(fitAllLabels);
+}
+
+function clearPlacedNames(){
+  if(finished){
+    return;
+  }
+
+  placedCorrect.clear();
+
+  document.querySelectorAll(".nameLabel").forEach(el => {
+    el.textContent = "";
+    el.style.fontSize = "";
+  });
+
+  document.querySelectorAll(".dropZone").forEach(el => {
+    el.classList.remove("correct", "wrong", "hover", "shake");
+  });
+
+  document.querySelectorAll(".nameCard").forEach(el => {
+    el.classList.remove("correct", "bad", "dragging");
+    el.draggable = true;
+  });
+
+  updateStatus();
+  setResult("已清空当前填写", "#5b3e28");
+}
+
+function resetGame(){
+  placedCorrect.clear();
+  wrongCount = 0;
+  penaltySeconds = 0;
+  timerStarted = false;
+  finished = false;
+  finalRawSeconds = 0;
+  startTimestamp = 0;
+  stopTimer();
+
+  renderNameCards();
+  createZoneElements();
+  updateStatus();
+  setResult("请开始拖动", "#5b3e28");
+}
+
+window.addEventListener("resize", () => {
+  fitAllLabels();
+});
+
+renderNameCards();
+createZoneElements();
+updateStatus();
+setResult("请开始拖动");
+</script>
+
+</body>
+</html>

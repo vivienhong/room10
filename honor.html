@@ -8,7 +8,7 @@
 <style>
 body{
   margin:0;
-  background:#000;
+  background:linear-gradient(to right, #fff3e0, #f8e3c8);
   height:100vh;
   height:100dvh;
   display:flex;
@@ -26,6 +26,23 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
+  overflow:hidden;
+}
+
+/* ===== 新增：边缘压暗层，不影响底图 ===== */
+#bgShade{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(0,0,0,0) 58%,
+      rgba(210,186,160,0.10) 72%,
+      rgba(190,160,130,0.16) 86%,
+      rgba(170,138,108,0.22) 100%
+    );
 }
 
 #stage{
@@ -34,6 +51,13 @@ body{
   height:fit-content;
   max-width:100vw;
   max-height:100vh;
+  z-index:2;
+}
+
+#bgWrap{
+  position:relative;
+  display:block;
+  line-height:0;
 }
 
 #bg{
@@ -42,65 +66,313 @@ body{
   max-height:100vh;
   width:auto;
   height:auto;
+  position:relative;
+  z-index:0;
 }
 
-/* 返回大厅 */
-#btnHome{
-  position:absolute;
-  left:4%;
-  bottom:5%;
-  padding:10px 16px;
-  border:none;
-  border-radius:8px;
-  background:rgba(255,255,255,.92);
-  color:#5b3e28;
-  font-size:14px;
-  cursor:pointer;
-  z-index:7;
-}
-
-#btnHome:hover{
-  background:#fff;
-}
-
-/* 翻页按钮 */
+/* ===== 翻页按钮：自适应尺寸 ===== */
 .pageBtn{
   position:absolute;
-  width:42px;
-  height:42px;
+  width:clamp(34px, 4.4vw, 64px);
+  height:clamp(34px, 4.4vw, 64px);
   border:none;
   border-radius:50%;
-  background:rgba(255,255,255,.92);
-  color:#5b3e28;
-  font-size:22px;
+  background:rgba(255,244,225,.96);
+  color:#6a4b2f;
+  font-size:clamp(18px, 2.2vw, 32px);
   font-weight:bold;
   cursor:pointer;
-  z-index:7;
+  z-index:8;
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 2px 8px rgba(0,0,0,.18);
-  transition:.2s;
+  box-shadow:
+    0 6px 18px rgba(92,63,37,.18),
+    inset 0 1px 0 rgba(255,255,255,.82);
+  transform:translate(-50%, -50%);
+  transition:
+    transform .22s ease,
+    background .22s ease,
+    box-shadow .22s ease;
 }
 
 .pageBtn:hover{
-  background:#fff;
-  transform:scale(1.06);
+  transform:translate(-50%, -50%) scale(1.08);
+  background:rgba(255,249,240,.99);
+  box-shadow:
+    0 8px 22px rgba(92,63,37,.24),
+    inset 0 1px 0 rgba(255,255,255,.88);
 }
 
-/* 左翻页：放在最佳尖叫鸡上方 */
 #btnPrevPage{
-  left:6.2%;
-  top:9.5%;
+  left:7.5%;
+  top:6%;
 }
 
-/* 右翻页：放在最刺激过山车上方 */
 #btnNextPage{
-  left:30.4%;
-  top:58.5%;
+  left:35%;
+  top:6%;
 }
 
-/* 奖杯热区 */
+/* ===== 顶部导航 ===== */
+.roomNav{
+  position:absolute;
+  left:70%;
+  top:4.6%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:20px;
+  z-index:8;
+}
+
+.roomNav button{
+  padding:7px 14px;
+  border:2px solid #b89266;
+  border-radius:12px;
+  background:#ead3b1;
+  color:#5b3e28;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  white-space:nowrap;
+  text-shadow:0 1px 1px rgba(255,255,255,.28);
+  box-shadow:
+    0 3px 8px rgba(0,0,0,.12),
+    inset 0 1px 0 rgba(255,255,255,.4),
+    inset 0 -2px 3px rgba(0,0,0,.10);
+  transition:.2s;
+}
+
+.roomNav button:hover{
+  background:#f5e2c8;
+  transform:translateY(-2px);
+  border-color:#a67c52;
+}
+
+/* ===== 右侧磨砂排行榜面板 ===== */
+#rankPanel{
+  position:absolute;
+  left:45%;
+  top:13%;
+  width:50%;
+  height:72%;
+  z-index:7;
+  display:none;
+  opacity:0;
+  transform:translateX(-42px) translateY(8px) scale(.985);
+  transition:
+    opacity .34s ease,
+    transform .38s cubic-bezier(.22,.8,.2,1);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.30) 0%,
+      rgba(255,255,255,.20) 35%,
+      rgba(255,255,255,.13) 100%
+    );
+  backdrop-filter:blur(18px) saturate(125%);
+  -webkit-backdrop-filter:blur(18px) saturate(125%);
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.78);
+
+  box-shadow:
+    0 14px 40px rgba(0,0,0,.18),
+    0 0 24px rgba(255,255,255,.22),
+    inset 0 1px 0 rgba(255,255,255,.92),
+    inset 0 -2px 8px rgba(255,255,255,.10),
+    inset 0 0 22px rgba(255,255,255,.14);
+
+  overflow:hidden;
+}
+
+#rankPanel.show{
+  display:block;
+  opacity:1;
+  transform:translateX(0) translateY(0) scale(1);
+}
+
+#rankPanel.closing{
+  opacity:0;
+  transform:translateX(-30px) translateY(6px) scale(.985);
+}
+
+#rankPanel::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,.36) 0%, rgba(255,255,255,0) 34%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 30%);
+  pointer-events:none;
+}
+
+#rankPanel::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:24px;
+  background:linear-gradient(
+    120deg,
+    rgba(255,255,255,.62) 0%,
+    rgba(255,255,255,.16) 26%,
+    rgba(255,255,255,.05) 58%,
+    rgba(255,255,255,.42) 100%
+  );
+  opacity:0.42;
+  pointer-events:none;
+  animation:glassGlow 4s ease-in-out infinite;
+}
+
+@keyframes glassGlow{
+  0%{opacity:0.34;}
+  50%{opacity:0.48;}
+  100%{opacity:0.34;}
+}
+
+#rankPanelInner{
+  position:relative;
+  width:100%;
+  height:100%;
+  padding:22px 20px 18px;
+  box-sizing:border-box;
+  overflow:auto;
+}
+
+#rankPanelInner::-webkit-scrollbar{
+  width:8px;
+}
+
+#rankPanelInner::-webkit-scrollbar-thumb{
+  background:rgba(145,106,70,.22);
+  border-radius:99px;
+}
+
+#rankClose{
+  position:absolute;
+  top:12px;
+  right:14px;
+  width:28px;
+  height:28px;
+  border:none;
+  border-radius:50%;
+  background:rgba(255,255,255,.62);
+  color:#7b5635;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:2;
+}
+
+#rankClose:hover{
+  background:rgba(255,255,255,.82);
+}
+
+#rankTitle{
+  font-size:24px;
+  font-weight:700;
+  color:#4a3422;
+  line-height:1.25;
+  margin:0 34px 8px 0;
+}
+
+#rankDesc{
+  font-size:13px;
+  line-height:1.65;
+  color:#6d5036;
+  margin-bottom:14px;
+}
+
+#rankSince{
+  font-size:12px;
+  color:#8a6849;
+  margin-bottom:14px;
+}
+
+#rankList{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+
+.rankItem{
+  display:grid;
+  grid-template-columns:58px 1fr auto;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.34);
+  border:1px solid rgba(255,255,255,.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.58),
+    0 4px 10px rgba(0,0,0,.05);
+}
+
+.rankNo{
+  font-size:13px;
+  font-weight:700;
+  color:#9b6f44;
+}
+
+.rankName{
+  font-size:15px;
+  font-weight:700;
+  color:#5b3e28;
+}
+
+.rankScore{
+  font-size:14px;
+  font-weight:700;
+  color:#7a5432;
+}
+
+#rankEmpty{
+  padding:16px 12px;
+  border:1px dashed rgba(176,140,103,.35);
+  border-radius:14px;
+  color:#7a5c41;
+  background:rgba(255,255,255,.22);
+  font-size:13px;
+  line-height:1.7;
+}
+
+/* ===== 奖杯铭牌获奖者 ===== */
+#trophyLabels{
+  position:absolute;
+  inset:0;
+  z-index:5;
+  pointer-events:none;
+}
+
+.label{
+  position:absolute;
+  transform:translate(-50%, -50%);
+  min-width:44px;
+  max-width:74px;
+  font-size:11px;
+  font-weight:600;
+  color:#7a5432;
+  white-space:nowrap;
+  text-align:center;
+  line-height:1;
+  letter-spacing:.2px;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.45),
+    0 -1px 1px rgba(0,0,0,.12);
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.label.multi{
+  font-size:10px;
+}
+
+/* ===== 奖杯热区 ===== */
 #map{
   position:absolute;
   inset:0;
@@ -109,22 +381,29 @@ body{
   z-index:3;
 }
 
-#map rect{
-  fill:rgba(255,0,0,.25);
-  stroke:red;
-  stroke-width:.4;
+.trophyRect{
+  fill:rgba(255,0,0,.14);
+  stroke:rgba(180,0,0,.75);
+  stroke-width:.45;
   cursor:pointer;
   transition:.2s;
   pointer-events:all;
 }
 
-#map rect:hover{
-  fill:rgba(255,0,0,.4);
-  stroke:#ff0000;
-  stroke-width:.6;
+.trophyRect:hover{
+  fill:rgba(255,160,80,.22);
+  stroke:#cc5a00;
+  stroke-width:.75;
 }
 
-/* 退出登录 */
+.trophyRect.active{
+  fill:rgba(255,218,130,.26);
+  stroke:#ffb24c;
+  stroke-width:1.1;
+  filter:drop-shadow(0 0 5px rgba(255,196,108,.85));
+}
+
+/* ===== 退出登录 ===== */
 #logoutImg{
   position:absolute;
   top:-30px;
@@ -152,15 +431,119 @@ body{
   cursor:pointer;
 }
 
+/* ===== 小屏微调 ===== */
+@media (max-width:980px){
+  .roomNav{
+    left:69%;
+    top:4.2%;
+    gap:10px;
+  }
+
+  .roomNav button{
+    padding:6px 10px;
+    font-size:12px;
+  }
+
+  #rankPanel{
+    left:58.5%;
+    top:14%;
+    width:38%;
+    height:70%;
+  }
+
+  #rankTitle{
+    font-size:20px;
+  }
+
+  .rankItem{
+    grid-template-columns:50px 1fr auto;
+    gap:8px;
+    padding:9px 10px;
+  }
+
+  #btnPrevPage{
+    left:7.8%;
+    top:6.2%;
+  }
+
+  #btnNextPage{
+    left:35.2%;
+    top:6.2%;
+  }
+}
+
+@media (max-width:780px){
+  .roomNav{
+    left:68%;
+    top:3.9%;
+    gap:8px;
+    flex-wrap:wrap;
+    width:42%;
+    justify-content:center;
+  }
+
+  .roomNav button{
+    font-size:11px;
+    padding:5px 8px;
+  }
+
+  #rankPanel{
+    left:57%;
+    top:15.5%;
+    width:39%;
+    height:68%;
+  }
+
+  #rankPanelInner{
+    padding:14px 14px 12px;
+  }
+
+  #rankTitle{
+    font-size:17px;
+  }
+
+  #rankDesc{
+    font-size:12px;
+  }
+
+  .rankName,
+  .rankScore,
+  .rankNo{
+    font-size:12px;
+  }
+
+  .label{
+    font-size:10px;
+    max-width:62px;
+  }
+
+  .label.multi{
+    font-size:9px;
+  }
+
+  #btnPrevPage{
+    left:8.2%;
+    top:6.5%;
+  }
+
+  #btnNextPage{
+    left:35.5%;
+    top:6.5%;
+  }
+}
 </style>
 </head>
 
 <body>
 
 <div id="room">
+  <div id="bgShade"></div>
+
   <div id="stage">
 
-    <img id="bg" src="room-honor.png" alt="荣誉墙">
+    <div id="bgWrap">
+      <img id="bg" src="room-honor.png" alt="荣誉墙">
+    </div>
 
     <!-- 退出登录 -->
     <img id="logoutImg" src="logout-on.png" alt="">
@@ -170,31 +553,61 @@ body{
       </a>
     </svg>
 
-    <!-- 返回大厅 -->
-    <button id="btnHome" onclick="goHome()">返回大厅</button>
+    <!-- 顶部导航 -->
+    <div class="roomNav">
+      <button onclick="goHome()">大堂</button>
+      <button onclick="goRoom('dorm.html')">宿舍</button>
+      <button onclick="goRoom('living.html')">客厅</button>
+      <button onclick="goRoom('studio.html')">工作间</button>
+      <button onclick="goRoom('game.html')">游戏房</button>
+      <button onclick="goRoom('manager.html')">宿管室</button>
+    </div>
 
     <!-- 翻页按钮 -->
     <button id="btnPrevPage" class="pageBtn" onclick="goPrevPage()" title="上一页">‹</button>
     <button id="btnNextPage" class="pageBtn" onclick="goNextPage()" title="下一页">›</button>
 
-    <!-- 奖杯点击区域（9个） -->
+    <!-- 右侧磨砂排行榜 -->
+    <div id="rankPanel">
+      <div id="rankPanelInner">
+        <button id="rankClose" onclick="closeRank()" title="关闭">×</button>
+        <div id="rankTitle">点击左侧奖杯查看排行榜</div>
+        <div id="rankDesc">这里会展示对应奖杯的排行榜、说明和统计起始时间。</div>
+        <div id="rankSince">统计时间：待设置</div>
+        <div id="rankList">
+          <div id="rankEmpty">请先点击左侧奖杯柜中的任意奖杯。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 奖杯铭牌获奖者 -->
+    <div id="trophyLabels">
+      <div class="label" id="label1" style="left:9.2%; top:40.4%;">-</div>
+      <div class="label" id="label2" style="left:21.5%; top:40.4%;">-</div>
+      <div class="label" id="label3" style="left:33.5%; top:40.4%;">-</div>
+
+      <div class="label" id="label4" style="left:9.2%; top:65%;">-</div>
+      <div class="label" id="label5" style="left:21.5%; top:65%;">-</div>
+      <div class="label" id="label6" style="left:33.5%; top:65%;">-</div>
+
+      <div class="label" id="label7" style="left:9.2%; top:91.1%;">-</div>
+      <div class="label" id="label8" style="left:21.5%; top:91.1%;">-</div>
+      <div class="label" id="label9" style="left:33.5%; top:91.1%;">-</div>
+    </div>
+
+    <!-- 奖杯点击区域（热区不改） -->
     <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <rect id="trophy1" class="trophyRect" x="3.2" y="18" width="12" height="20" onclick="showTrophy(1)"></rect>
+      <rect id="trophy2" class="trophyRect" x="15.5" y="18" width="12" height="20" onclick="showTrophy(2)"></rect>
+      <rect id="trophy3" class="trophyRect" x="27.5" y="18" width="12" height="20" onclick="showTrophy(3)"></rect>
 
-      <!-- 第一排 -->
-      <rect x="3.2" y="18" width="12" height="20" onclick="showTrophy(1)"></rect>
-      <rect x="15.5" y="18" width="12" height="20" onclick="showTrophy(2)"></rect>
-      <rect x="27.5" y="18" width="12" height="20" onclick="showTrophy(3)"></rect>
+      <rect id="trophy4" class="trophyRect" x="3.2" y="43" width="12" height="20" onclick="showTrophy(4)"></rect>
+      <rect id="trophy5" class="trophyRect" x="15.2" y="43" width="12" height="20" onclick="showTrophy(5)"></rect>
+      <rect id="trophy6" class="trophyRect" x="27.5" y="43" width="12" height="20" onclick="showTrophy(6)"></rect>
 
-      <!-- 第二排 -->
-      <rect x="3.2" y="43" width="12" height="20" onclick="showTrophy(4)"></rect>
-      <rect x="15.2" y="43" width="12" height="20" onclick="showTrophy(5)"></rect>
-      <rect x="27.5" y="43" width="12" height="20" onclick="showTrophy(6)"></rect>
-
-      <!-- 第三排 -->
-      <rect x="3.2" y="67.3" width="12" height="21" onclick="showTrophy(7)"></rect>
-      <rect x="15.2" y="67.3" width="12" height="21" onclick="showTrophy(8)"></rect>
-      <rect x="27.5" y="67.3" width="12" height="21" onclick="showTrophy(9)"></rect>
-
+      <rect id="trophy7" class="trophyRect" x="3.2" y="67.3" width="12" height="21" onclick="showTrophy(7)"></rect>
+      <rect id="trophy8" class="trophyRect" x="15.2" y="67.3" width="12" height="21" onclick="showTrophy(8)"></rect>
+      <rect id="trophy9" class="trophyRect" x="27.5" y="67.3" width="12" height="21" onclick="showTrophy(9)"></rect>
     </svg>
 
   </div>
@@ -205,37 +618,264 @@ function goHome(){
   window.location.href = "index.html";
 }
 
-/* 点击奖杯 */
-function showTrophy(id){
-  alert("你点击了奖杯 " + id);
+function goRoom(url){
+  window.location.href = url;
 }
 
-/* ===== 荣誉墙三页循环跳转 ===== */
 const honorPages = [
+  "titles.html",
   "honor.html",
-  "honor-title.html",
-  "honor-achievement.html"
+  "achievements.html",
+  "gallery.html"
 ];
 
-function getCurrentHonorPageIndex(){
-  const current = window.location.pathname.split("/").pop() || "honor.html";
-  const index = honorPages.indexOf(current);
-  return index === -1 ? 0 : index;
+const trophyData = {
+  1:{
+    title:"最佳尖叫鸡",
+    desc:"统计成员在作品中达成的最高音表现，用于展示当前高音表现最突出的成员排行。",
+    since:"统计时间：自荣誉墙启用起累计",
+    list:[
+      {name:"夏", score:"#C6"},
+      {name:"扬", score:"#C6"},
+      {name:"桃", score:"#A5"},
+      {name:"罐", score:"#G5"},
+      {name:"糖", score:"#F5"}
+    ]
+  },
+  2:{
+    title:"觉醒狮子王",
+    desc:"统计成员在作品中达成的最低音表现，用于展示低音表现最突出的成员排行。",
+    since:"统计时间：自荣誉墙启用起累计",
+    list:[
+      {name:"扬", score:"E2"},
+      {name:"夏", score:"F2"},
+      {name:"罐", score:"G2"},
+      {name:"桃", score:"A2"},
+      {name:"糖", score:"B2"}
+    ]
+  },
+  3:{
+    title:"最刺激过山车",
+    desc:"统计单曲中的最大音域跨度，用于展示在单首作品里跨度最夸张的成员排行。",
+    since:"统计时间：按作品音域记录累计",
+    list:[
+      {name:"夏", score:"19度"},
+      {name:"桃", score:"17度"},
+      {name:"扬", score:"16度"},
+      {name:"罐", score:"15度"},
+      {name:"糖", score:"13度"}
+    ]
+  },
+  4:{
+    title:"好多人啊",
+    desc:"统计成员演唱过的不同角色数量，用于展示角色覆盖最广的成员排行。",
+    since:"统计时间：按角色记录累计",
+    list:[
+      {name:"桃", score:"12角"},
+      {name:"夏", score:"10角"},
+      {name:"扬", score:"9角"},
+      {name:"糖", score:"7角"},
+      {name:"罐", score:"6角"}
+    ]
+  },
+  5:{
+    title:"最佳双子星",
+    desc:"统计固定双人合作组合的合作次数，用于展示最常见和最默契的双人搭档。",
+    since:"统计时间：按双人合作项目累计",
+    list:[
+      {name:"夏 × 扬", score:"9次"},
+      {name:"桃 × 罐", score:"7次"},
+      {name:"夏 × 桃", score:"6次"},
+      {name:"扬 × 糖", score:"5次"},
+      {name:"罐 × 糖", score:"4次"}
+    ]
+  },
+  6:{
+    title:"闲工夫不负有心人",
+    desc:"统计报歌参与次数，展示在项目中最积极报名和参与的成员排行。",
+    since:"统计时间：按已记录报名数据累计",
+    list:[
+      {name:"桃", score:"32次"},
+      {name:"夏", score:"28次"},
+      {name:"扬", score:"24次"},
+      {name:"糖", score:"20次"},
+      {name:"罐", score:"18次"}
+    ]
+  },
+  7:{
+    title:"还要再战五百年",
+    desc:"统计当前未交音或积压任务数量，用于展示当前欠债最多的成员排行。",
+    since:"统计时间：按当前任务状态实时计算",
+    list:[
+      {name:"夏", score:"7项"},
+      {name:"桃", score:"5项"},
+      {name:"罐", score:"4项"},
+      {name:"扬", score:"3项"},
+      {name:"糖", score:"2项"}
+    ]
+  },
+  8:{
+    title:"送你一朵小红花",
+    desc:"统计成功补交、还债、完成积压任务的次数，用于展示还债最多成员排行。",
+    since:"统计时间：按补交记录累计",
+    list:[
+      {name:"扬", score:"14次"},
+      {name:"夏", score:"12次"},
+      {name:"糖", score:"10次"},
+      {name:"桃", score:"8次"},
+      {name:"罐", score:"6次"}
+    ]
+  },
+  9:{
+    title:"音之炼金术师",
+    desc:"统计后期完成数量，用于展示完成后期作品最多的成员排行。",
+    since:"统计时间：按已完成后期记录累计",
+    list:[
+      {name:"扬", score:"26首"},
+      {name:"夏", score:"22首"},
+      {name:"桃", score:"17首"},
+      {name:"糖", score:"11首"},
+      {name:"罐", score:"8首"}
+    ]
+  }
+};
+
+const rankPanel = document.getElementById("rankPanel");
+const rankTitle = document.getElementById("rankTitle");
+const rankDesc = document.getElementById("rankDesc");
+const rankSince = document.getElementById("rankSince");
+const rankList = document.getElementById("rankList");
+const trophyRects = document.querySelectorAll(".trophyRect");
+let rankPanelHideTimer = null;
+
+function getCurrentPageName(){
+  const current = window.location.pathname.split("/").pop();
+  return current || "honor.html";
 }
 
 function goPrevPage(){
-  const currentIndex = getCurrentHonorPageIndex();
-  const prevIndex = (currentIndex - 1 + honorPages.length) % honorPages.length;
+  const current = getCurrentPageName();
+  const currentIndex = honorPages.indexOf(current);
+  const safeIndex = currentIndex === -1 ? 1 : currentIndex;
+  const prevIndex = (safeIndex - 1 + honorPages.length) % honorPages.length;
   window.location.href = honorPages[prevIndex];
 }
 
 function goNextPage(){
-  const currentIndex = getCurrentHonorPageIndex();
-  const nextIndex = (currentIndex + 1) % honorPages.length;
+  const current = getCurrentPageName();
+  const currentIndex = honorPages.indexOf(current);
+  const safeIndex = currentIndex === -1 ? 1 : currentIndex;
+  const nextIndex = (safeIndex + 1) % honorPages.length;
   window.location.href = honorPages[nextIndex];
 }
 
-/* ===== 退出登录 ===== */
+function clearActiveTrophies(){
+  trophyRects.forEach(rect => rect.classList.remove("active"));
+}
+
+function setActiveTrophy(id){
+  clearActiveTrophies();
+  const target = document.getElementById("trophy" + id);
+  if(target){
+    target.classList.add("active");
+  }
+}
+
+function renderRankList(list){
+  rankList.innerHTML = "";
+  if(!list || !list.length){
+    rankList.innerHTML = '<div id="rankEmpty">当前还没有可展示的数据。</div>';
+    return;
+  }
+
+  list.forEach((item, index) => {
+    const row = document.createElement("div");
+    row.className = "rankItem";
+    row.innerHTML = `
+      <div class="rankNo">第 ${index + 1} 名</div>
+      <div class="rankName">${item.name}</div>
+      <div class="rankScore">${item.score}</div>
+    `;
+    rankList.appendChild(row);
+  });
+}
+
+function openRankPanel(){
+  clearTimeout(rankPanelHideTimer);
+  rankPanel.classList.remove("closing");
+  rankPanel.style.display = "block";
+
+  requestAnimationFrame(() => {
+    rankPanel.classList.add("show");
+  });
+}
+
+function showTrophy(id){
+  const data = trophyData[id];
+  if(!data) return;
+
+  setActiveTrophy(id);
+  rankTitle.textContent = data.title;
+  rankDesc.textContent = data.desc;
+  rankSince.textContent = data.since;
+  renderRankList(data.list);
+
+  openRankPanel();
+}
+
+function closeRank(){
+  clearActiveTrophies();
+  rankPanel.classList.remove("show");
+  rankPanel.classList.add("closing");
+
+  rankPanelHideTimer = setTimeout(() => {
+    rankPanel.classList.remove("closing");
+    rankPanel.style.display = "none";
+  }, 380);
+}
+
+function getPlaqueText(id){
+  const list = trophyData[id]?.list || [];
+  if(!list.length) return "-";
+
+  const first = list[0];
+  if(!first || first.score === undefined || first.score === null) return "-";
+
+  const topScore = String(first.score).trim();
+  if(!topScore) return "-";
+
+  const tiedNames = list
+    .filter(item => String(item.score).trim() === topScore)
+    .map(item => String(item.name || "").trim())
+    .filter(Boolean);
+
+  if(!tiedNames.length) return "-";
+
+  return tiedNames.join(" / ");
+}
+
+function renderPlaqueWinners(){
+  for(let i = 1; i <= 9; i++){
+    const el = document.getElementById("label" + i);
+    if(!el) continue;
+
+    const text = getPlaqueText(i);
+    el.textContent = text;
+
+    if(
+      text.includes("/") ||
+      text.includes("×") ||
+      text.length >= 6
+    ){
+      el.classList.add("multi");
+    }else{
+      el.classList.remove("multi");
+    }
+  }
+}
+
+renderPlaqueWinners();
+
 const logoutImg = document.getElementById("logoutImg");
 const logoutSvg = document.getElementById("logoutSvg");
 
