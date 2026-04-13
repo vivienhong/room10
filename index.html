@@ -77,53 +77,274 @@ body{
   -webkit-user-drag:none;
 }
 
-/* ===== 右上角登出：宿管室成员页同风格 ===== */
+/* ===== 右上角身份组件 ===== */
 #topActions{
   position:absolute;
-  right:5%;
-  top:10%;
-  z-index:8;
+  right:3.2%;
+  top:8.1%;
+  z-index:20;
   display:none;
   justify-content:flex-end;
   pointer-events:none;
+  --topbar-scale:1;
 }
 
-.top-btn{
-  height:40px;
-  min-width:92px;
-  padding:0 16px;
-  border:none;
-  border-radius:12px;
-  background:rgba(255,248,236,.94);
-  color:var(--text);
-  font-size:clamp(13px, 1.02vw, 17px);
-  cursor:pointer;
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-  font-weight:700;
-  box-shadow:var(--shadow);
-  border:1px solid var(--line);
+#topActions.show{
+  display:flex;
+}
+
+#topUserWrap{
+  position:relative;
   pointer-events:auto;
+  transform:scale(var(--topbar-scale));
+  transform-origin:top right;
+}
+
+#topUserBar{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  padding:4px;
+  border-radius:18px;
+  background:rgba(255,248,239,.9);
+  border:1px solid rgba(186,146,103,.24);
+  box-shadow:
+    0 10px 24px rgba(116,86,54,.12),
+    inset 0 1px 0 rgba(255,255,255,.86);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+#currentUserBadge{
+  min-width:0;
+  max-width:118px;
+  height:34px;
+  padding:0 10px;
+  border-radius:999px;
+  background:rgba(255,252,247,.86);
+  color:#6c4523;
+  font-size:12px;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  border:1px solid rgba(160,116,78,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.96),
+    0 3px 10px rgba(110,84,58,.08);
   white-space:nowrap;
+  overflow:hidden;
+}
+
+#currentUserBadge .roleDot{
+  width:8px;
+  height:8px;
+  border-radius:999px;
+  background:#d9a364;
+  box-shadow:0 0 0 3px rgba(217,163,100,.16);
+  flex:0 0 auto;
+}
+
+#currentUserBadge .identityText{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  min-width:0;
+}
+
+#bellBtn,
+#logoutBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  height:34px;
+  border-radius:999px;
+  background:rgba(255,252,247,.86);
+  color:#67401f;
+  font-weight:800;
+  border:1px solid rgba(160,116,78,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.96),
+    0 3px 10px rgba(110,84,58,.08);
+  white-space:nowrap;
+  transition:background .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+#bellBtn{
+  position:relative;
+  min-width:34px;
+  width:34px;
+  padding:0;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   line-height:1;
 }
 
-.top-btn:hover{
+#bellBtn:hover,
+#bellBtn.active,
+#logoutBtn:hover{
   background:#f2e0c4;
+  transform:translateY(-1px);
 }
 
-.top-btn:active{
-  transform:translateY(1px);
+#bellBtn.has-notice::after{
+  content:"";
+  position:absolute;
+  top:6px;
+  right:6px;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#e47957;
+  box-shadow:0 0 0 2px rgba(255,252,247,.96);
 }
 
-.top-btn:focus-visible{
-  outline:none;
+#logoutBtn{
+  min-width:50px;
+  padding:0 10px;
+  font-size:12px;
+}
+
+/* ===== 铃铛通知弹窗 ===== */
+#noticePanel{
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  width:220px;
+  display:none;
+  padding:9px;
+  border-radius:16px;
+  background:rgba(255,248,239,.96);
+  border:1px solid rgba(186,146,103,.24);
   box-shadow:
-    0 0 0 2px rgba(255,248,236,.85),
-    0 0 0 4px rgba(201,142,86,.28),
-    var(--shadow);
+    0 14px 30px rgba(116,86,54,.16),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
 }
 
-/* ===== SVG 热区：覆盖在图片本体上 ===== */
+#noticePanel.show{
+  display:block;
+}
+
+#noticePanel::before{
+  content:"";
+  position:absolute;
+  top:-7px;
+  right:46px;
+  width:14px;
+  height:14px;
+  background:rgba(255,248,239,.96);
+  border-left:1px solid rgba(186,146,103,.24);
+  border-top:1px solid rgba(186,146,103,.24);
+  transform:rotate(45deg);
+}
+
+.noticeHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:1px 1px 7px;
+}
+
+.noticeTitle{
+  font-size:12px;
+  font-weight:900;
+  color:#6c4523;
+  letter-spacing:.2px;
+}
+
+.noticeClear{
+  appearance:none;
+  border:none;
+  background:transparent;
+  color:#9a7957;
+  font-size:10px;
+  font-weight:700;
+  cursor:pointer;
+  padding:2px 4px;
+  border-radius:8px;
+}
+
+.noticeClear:hover{
+  background:rgba(201,142,86,.12);
+  color:#7c5834;
+}
+
+.noticeList{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  max-height:260px;
+  overflow:auto;
+}
+
+.noticeItem{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  padding:9px 9px;
+  border-radius:13px;
+  background:rgba(255,252,247,.88);
+  border:1px solid rgba(160,116,78,.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.96),
+    0 3px 10px rgba(110,84,58,.05);
+}
+
+.noticeIcon{
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  font-size:11px;
+  background:rgba(217,163,100,.16);
+  color:#8a5a2c;
+}
+
+.noticeText{
+  min-width:0;
+  flex:1;
+}
+
+.noticeMain{
+  font-size:11px;
+  line-height:1.42;
+  color:#69482a;
+  font-weight:700;
+  word-break:break-word;
+}
+
+.noticeSub{
+  margin-top:2px;
+  font-size:10px;
+  line-height:1.3;
+  color:#9a7b5d;
+  word-break:break-word;
+}
+
+.noticeEmpty{
+  padding:14px 12px;
+  border-radius:13px;
+  text-align:center;
+  background:rgba(255,252,247,.88);
+  border:1px solid rgba(160,116,78,.10);
+  color:#8f7257;
+  font-size:11px;
+  line-height:1.45;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.96),
+    0 3px 10px rgba(110,84,58,.05);
+}
+
+/* ===== SVG 热区 ===== */
 #map{
   position:absolute;
   inset:0;
@@ -133,16 +354,15 @@ body{
 }
 
 #map rect{
-  fill:rgba(255,120,120,.16);
-  stroke:rgba(255,70,70,.95);
-  stroke-width:.45;
+  fill:transparent;
+  stroke:transparent;
   cursor:pointer;
-  transition:.2s;
   pointer-events:all;
+  transition:.2s;
 }
 
 #map rect:hover{
-  fill:rgba(255,220,120,.28);
+  fill:rgba(255,220,120,.22);
   stroke:#ffd87a;
   stroke-width:.6;
 }
@@ -164,8 +384,7 @@ body{
 
 .login-panel{
   position:relative;
-  width:720px;
-  max-width:100%;
+  width:min(720px, 94vw);
 }
 
 .login-panel img{
@@ -174,7 +393,6 @@ body{
   pointer-events:none;
 }
 
-/* 输入框 */
 #username{
   position:absolute;
   top:40%;
@@ -188,6 +406,7 @@ body{
   color:#5b3e28;
   background:transparent;
   box-sizing:border-box;
+  line-height:1.1;
 }
 
 #password{
@@ -203,9 +422,9 @@ body{
   color:#5b3e28;
   background:transparent;
   box-sizing:border-box;
+  line-height:1.1;
 }
 
-/* 显示密码按钮 */
 #togglePassword{
   position:absolute;
   top:56%;
@@ -223,7 +442,6 @@ body{
   box-shadow:0 0 8px rgba(255,220,120,.6);
 }
 
-/* 登录按钮 */
 #loginBtn{
   position:absolute;
   top:68%;
@@ -235,14 +453,13 @@ body{
   cursor:pointer;
 }
 
-/* 去登记页入口 */
 #registerLink{
   position:absolute;
   top:50%;
   left:52%;
   transform:translateX(-50%);
   color:#7a4f2b;
-  font-size:clamp(10px, 1.6vw, 15px);
+  font-size:14px;
   font-weight:600;
   text-decoration:underline;
   cursor:pointer;
@@ -256,7 +473,6 @@ body{
   color:#9b6334;
 }
 
-/* 提示文字 */
 #loginMessage{
   position:absolute;
   top:34.8%;
@@ -264,15 +480,14 @@ body{
   transform:translateX(-50%);
   text-align:center;
   color:#7a4f2b;
-  font-size:clamp(11px, 1.8vw, 16px);
+  font-size:14px;
   font-weight:600;
   width:42%;
   max-width:320px;
-  white-space:pre-wrap;
-  line-height:1.35;
+  white-space:normal;
+  line-height:1.25;
 }
 
-/* 关闭按钮 */
 .closeBtn{
   position:absolute;
   top:4px;
@@ -286,45 +501,59 @@ body{
   font-size:18px;
 }
 
-/* ===== 中屏：按钮略收、略缩 ===== */
-@media (max-width: 1100px){
+/* ===== 响应式 ===== */
+@media (max-width: 1400px){
   #topActions{
-    top:8%;
-    right:4%;
-  }
-
-  .top-btn{
-    height:36px;
-    min-width:82px;
-    padding:0 14px;
-    font-size:clamp(12px, .95vw, 15px);
+    right:3.1%;
+    top:7.9%;
+    --topbar-scale:.92;
   }
 }
 
-/* ===== 小屏：继续往右上角收，避免挡建筑 ===== */
+@media (max-width: 1200px){
+  #topActions{
+    right:2.8%;
+    top:7.4%;
+    --topbar-scale:.84;
+  }
+}
+
+@media (max-width: 1000px){
+  #topActions{
+    right:2.2%;
+    top:6.8%;
+    --topbar-scale:.74;
+  }
+}
+
+@media (max-width: 920px){
+  #loginMessage{
+    top:35.6%;
+    width:44%;
+    max-width:none;
+    font-size:13px;
+    line-height:1.22;
+  }
+
+  #registerLink{
+    font-size:13px;
+  }
+
+  #username,
+  #password{
+    font-size:17px;
+  }
+}
+
 @media (max-width: 760px){
   #loginMessage{
-    top:34.8%;
+    top:35.2%;
     width:48%;
     max-width:none;
-    font-size:clamp(11px, 2vw, 14px);
-  }
-
-  #topActions{
-    top:6%;
-    right:2.5%;
-  }
-
-  .top-btn{
-    height:32px;
-    min-width:68px;
-    padding:0 12px;
     font-size:11px;
-    border-radius:10px;
+    line-height:1.2;
   }
-}
 
-@media (max-width: 520px){
   #registerLink{
     top:49.5%;
     font-size:11px;
@@ -336,49 +565,155 @@ body{
     padding:0 8px;
   }
 
-  #loginMessage{
-    top:35%;
-    width:43%;
-    max-width:none;
-    font-size:clamp(9px, 2.8vw, 11px);
-  }
-
   #topActions{
-    top:4.5%;
-    right:1.5%;
-  }
-
-  .top-btn{
-    height:28px;
-    min-width:58px;
-    padding:0 10px;
-    font-size:10px;
-    border-radius:9px;
+    right:1.6%;
+    top:5.8%;
+    --topbar-scale:.62;
   }
 }
 
-@media (max-width: 380px){
+@media (max-width: 520px){
   #registerLink{
-    top:50%;
-    font-size:9px;
+    top:49.2%;
+    font-size:10px;
   }
 
   #username,
   #password{
-    font-size:14px;
+    font-size:15px;
+    padding:0 7px;
   }
 
   #loginMessage{
-    top:35%;
-    width:26%;
-    font-size:clamp(8px, 3.2vw, 8px);
+    top:34.1%;
+    width:46%;
+    max-width:none;
+    font-size:9px;
+    line-height:1.18;
   }
 
-  .top-btn{
-    height:26px;
-    min-width:54px;
-    padding:0 8px;
-    font-size:9px;
+  #topActions{
+    right:1.2%;
+    top:4.8%;
+    --topbar-scale:.54;
+  }
+}
+
+@media (max-width: 380px){
+  .login-panel{
+    width:95vw;
+  }
+
+  #registerLink{
+    top:48.8%;
+    font-size:8px;
+  }
+
+  #username,
+  #password{
+    font-size:12px;
+    padding:0 5px;
+  }
+
+  #username{
+    top:40.1%;
+    left:36.25%;
+    width:27.1%;
+    height:7.9%;
+  }
+
+  #password{
+    top:56.05%;
+    left:36.25%;
+    width:19.7%;
+    height:7.9%;
+  }
+
+  #togglePassword{
+    top:56.05%;
+    left:55.9%;
+    width:8.2%;
+    height:7.9%;
+  }
+
+  #loginMessage{
+    top:34.8%;
+    left:53.4%;
+    width:44%;
+    max-width:none;
+    font-size:7.8px;
+    line-height:1.16;
+    letter-spacing:0;
+  }
+
+  .closeBtn{
+    width:28px;
+    height:28px;
+    font-size:16px;
+    top:2px;
+    right:2px;
+  }
+
+  #topActions{
+    right:.8%;
+    top:4.2%;
+    --topbar-scale:.48;
+  }
+}
+
+@media (max-width: 340px){
+  .login-panel{
+    width:96vw;
+  }
+
+  #registerLink{
+    top:48.5%;
+    font-size:7px;
+  }
+
+  #username,
+  #password{
+    font-size:11px;
+    padding:0 4px;
+  }
+
+  #username{
+    top:40.15%;
+    left:36.35%;
+    width:26.9%;
+    height:7.8%;
+  }
+
+  #password{
+    top:56.1%;
+    left:36.35%;
+    width:19.5%;
+    height:7.8%;
+  }
+
+  #togglePassword{
+    top:56.1%;
+    left:55.85%;
+    width:8.25%;
+    height:7.8%;
+  }
+
+  #loginMessage{
+    top:35.5%;
+    left:53.35%;
+    width:43%;
+    font-size:7px;
+    line-height:1.12;
+  }
+
+  #loginBtn{
+    top:67.8%;
+  }
+
+  #topActions{
+    right:.4%;
+    top:3.8%;
+    --topbar-scale:.44;
   }
 }
 </style>
@@ -391,16 +726,35 @@ body{
     <img id="homeImage" src="home-day.png" alt="Room10 首页">
 
     <div id="topActions">
-      <button class="top-btn" type="button" onclick="handleLogoutHotspot()">登出</button>
+      <div id="topUserWrap">
+        <div id="topUserBar">
+          <div id="currentUserBadge">
+            <span class="roleDot"></span>
+            <span class="identityText">未登录｜游客</span>
+          </div>
+          <button id="bellBtn" type="button" aria-label="消息通知" title="消息通知">🔔</button>
+          <button id="logoutBtn" type="button" onclick="handleLogoutHotspot()">登出</button>
+        </div>
+
+        <div id="noticePanel">
+          <div class="noticeHeader">
+            <div class="noticeTitle">通知中心</div>
+            <button id="noticeClearBtn" class="noticeClear" type="button">全部已读</button>
+          </div>
+
+          <div id="noticeList" class="noticeList">
+            <div class="noticeEmpty">暂时还没有新的通知</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none">
-
       <a href="#" onclick="enterRoom('dorm.html', true);return false;">
         <rect x="16.7" y="25.9" width="27.7" height="22.5"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('studio.html', true);return false;">
+      <a href="#" onclick="enterRoom('studio-claim.html', true);return false;">
         <rect x="57" y="25.9" width="27.5" height="22.5"></rect>
       </a>
 
@@ -420,12 +774,10 @@ body{
         <rect x="57" y="72" width="27.5" height="22"></rect>
       </a>
 
-      <!-- 左侧花房区 -->
       <a href="#" onclick="enterRoom('flower.html', false);return false;">
         <rect x="5.3" y="50.2" width="11" height="42.6"></rect>
       </a>
 
-      <!-- 右侧宠物区 -->
       <a href="#" onclick="enterRoom('pets.html', false);return false;">
         <rect x="84.8" y="47" width="11" height="45"></rect>
       </a>
@@ -433,7 +785,6 @@ body{
       <a href="#" onclick="handleDoorClick();return false;">
         <rect x="44" y="75" width="13" height="20"></rect>
       </a>
-
     </svg>
   </div>
 </div>
@@ -450,7 +801,7 @@ body{
 
     <button id="registerLink" type="button" onclick="goRegisterFromIndex()">新成员先登记哦</button>
 
-    <button class="closeBtn" type="button" onclick="closeLogin()">×</button>
+    <button class="closeBtn" type="button" onclick="closeLogin(false)">×</button>
 
     <div id="loginMessage"></div>
   </div>
@@ -463,13 +814,35 @@ const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 const homeImg = document.getElementById("homeImage");
 const topActions = document.getElementById("topActions");
+const currentUserBadge = document.getElementById("currentUserBadge");
+const bellBtn = document.getElementById("bellBtn");
+const noticePanel = document.getElementById("noticePanel");
+const noticeList = document.getElementById("noticeList");
+const noticeClearBtn = document.getElementById("noticeClearBtn");
+
+const NOTICE_STORAGE_KEY = "room10_global_notices_v1";
+const PENDING_REDIRECT_KEY = "room10_pending_redirect";
+
+
+function getPendingRedirect(){
+  return sessionStorage.getItem(PENDING_REDIRECT_KEY) || "";
+}
+
+function setPendingRedirect(page){
+  const safePage = String(page || "").trim();
+  if(!safePage) return;
+  sessionStorage.setItem(PENDING_REDIRECT_KEY, safePage);
+}
+
+function clearPendingRedirect(){
+  sessionStorage.removeItem(PENDING_REDIRECT_KEY);
+}
 
 function goRegisterFromIndex(){
   sessionStorage.setItem("room10RegisterReturn", "index.html");
   window.location.href = "register.html?from=index.html";
 }
 
-/* 首页图片 */
 function updateHomeImageByTime(){
   const hour = new Date().getHours();
   const nextSrc = (hour >= 18 || hour < 6) ? "home-night.png" : "home-day.png";
@@ -478,7 +851,6 @@ function updateHomeImageByTime(){
   }
 }
 
-/* 自动背景延展 */
 function clamp(v, min, max){
   return Math.max(min, Math.min(max, v));
 }
@@ -580,7 +952,6 @@ function applyCurrentHomeBackground(){
   }
 }
 
-/* 登录状态 */
 function isLoggedIn(){
   return localStorage.getItem("room10LoggedIn") === "true";
 }
@@ -588,16 +959,182 @@ function isLoggedIn(){
 function getCurrentUser(){
   return {
     nickname: localStorage.getItem("room10User") || "",
-    role: localStorage.getItem("room10Role") || ""
+    role: localStorage.getItem("room10Role") || "",
+    memberId: localStorage.getItem("room10MemberId") || ""
   };
+}
+
+function getRoleLabel(role){
+  const map = {
+    owner: "维修工",
+    admin: "管理员",
+    member: "成员",
+    applying: "申请中",
+    visitor: "游客"
+  };
+  return map[String(role || "visitor").toLowerCase()] || "游客";
+}
+
+function updateIdentityDisplay(){
+  const textEl = currentUserBadge?.querySelector(".identityText");
+  if(!textEl) return;
+  if(isLoggedIn()){
+    const user = getCurrentUser();
+    textEl.textContent = `${user.nickname || "未登录"} · ${getRoleLabel(user.role)}`;
+  }else{
+    textEl.textContent = "未登录 · 游客";
+  }
+}
+
+function escapeHtml(str){
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+/* ===== 全站通知：统一存储 ===== */
+function normalizeNoticeItem(item){
+  return {
+    id: String(item?.id || `notice_${Date.now()}_${Math.random().toString(36).slice(2,8)}`),
+    icon: String(item?.icon || "🔔"),
+    main: String(item?.main || ""),
+    sub: String(item?.sub || ""),
+    time: Number(item?.time || Date.now()),
+    read: Boolean(item?.read)
+  };
+}
+
+function readStoredNotices(){
+  try{
+    const raw = localStorage.getItem(NOTICE_STORAGE_KEY);
+    if(!raw) return [];
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed)) return [];
+    return parsed.map(normalizeNoticeItem).sort((a,b) => b.time - a.time);
+  }catch(err){
+    console.warn("读取通知失败：", err);
+    return [];
+  }
+}
+
+function writeStoredNotices(list){
+  try{
+    localStorage.setItem(NOTICE_STORAGE_KEY, JSON.stringify(list));
+  }catch(err){
+    console.warn("写入通知失败：", err);
+  }
+}
+
+function ensureDefaultNotice(){
+  if(!isLoggedIn()) return;
+
+  const user = getCurrentUser();
+  const current = readStoredNotices();
+
+  const exists = current.some(item =>
+    item.main === `欢迎回来，${user.nickname || "室友"}` &&
+    item.sub === `当前身份：${getRoleLabel(user.role)}`
+  );
+
+  if(exists) return;
+
+  const next = [
+    normalizeNoticeItem({
+      icon:"🏠",
+      main:`欢迎回来，${user.nickname || "室友"}`,
+      sub:`当前身份：${getRoleLabel(user.role)}`,
+      time:Date.now(),
+      read:false
+    }),
+    ...current
+  ].slice(0, 50);
+
+  writeStoredNotices(next);
+}
+
+function getNotices(){
+  if(!isLoggedIn()) return [];
+  return readStoredNotices();
+}
+
+function markAllNoticesRead(){
+  const current = readStoredNotices();
+  const next = current.map(item => ({ ...item, read:true }));
+  writeStoredNotices(next);
+  renderNotices();
+}
+
+function addGlobalNotice({icon="🔔", main="", sub="", read=false}){
+  const current = readStoredNotices();
+  const next = [
+    normalizeNoticeItem({
+      icon,
+      main,
+      sub,
+      read,
+      time:Date.now()
+    }),
+    ...current
+  ].slice(0, 50);
+
+  writeStoredNotices(next);
+  renderNotices();
+}
+
+function renderNotices(){
+  const notices = getNotices();
+
+  if(!Array.isArray(notices) || notices.length === 0){
+    noticeList.innerHTML = `<div class="noticeEmpty">暂时还没有新的通知</div>`;
+    bellBtn.classList.remove("has-notice");
+    return;
+  }
+
+  const hasUnread = notices.some(item => !item.read);
+  bellBtn.classList.toggle("has-notice", hasUnread);
+
+  noticeList.innerHTML = notices.map(item => `
+    <div class="noticeItem">
+      <div class="noticeIcon">${escapeHtml(item.icon || "🔔")}</div>
+      <div class="noticeText">
+        <div class="noticeMain">${escapeHtml(item.main || "")}</div>
+        <div class="noticeSub">${escapeHtml(item.sub || "")}</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openNoticePanel(){
+  noticePanel.classList.add("show");
+  bellBtn.classList.add("active");
+}
+
+function closeNoticePanel(){
+  noticePanel.classList.remove("show");
+  bellBtn.classList.remove("active");
+}
+
+function toggleNoticePanel(){
+  if(noticePanel.classList.contains("show")){
+    closeNoticePanel();
+  }else{
+    openNoticePanel();
+  }
 }
 
 function updateLogoutDisplay(){
   if(isLoggedIn()){
-    topActions.style.display = "flex";
+    topActions.classList.add("show");
+    ensureDefaultNotice();
   }else{
-    topActions.style.display = "none";
+    topActions.classList.remove("show");
+    closeNoticePanel();
   }
+  updateIdentityDisplay();
+  renderNotices();
 }
 
 function safeSyncHomeUI(){
@@ -611,7 +1148,6 @@ function safeSyncHomeUI(){
   }
 }
 
-/* 返回首页 / 切回标签页时同步 */
 window.addEventListener("pageshow", safeSyncHomeUI);
 window.addEventListener("focus", safeSyncHomeUI);
 document.addEventListener("visibilitychange", () => {
@@ -623,21 +1159,50 @@ window.addEventListener("storage", (e) => {
   if(
     e.key === "room10LoggedIn" ||
     e.key === "room10User" ||
-    e.key === "room10Role"
+    e.key === "room10Role" ||
+    e.key === "room10MemberId" ||
+    e.key === NOTICE_STORAGE_KEY
   ){
     safeSyncHomeUI();
   }
 });
 
-/* 退出 */
+if(bellBtn){
+  bellBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleNoticePanel();
+  });
+}
+
+if(noticePanel){
+  noticePanel.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
+}
+
+if(noticeClearBtn){
+  noticeClearBtn.addEventListener("click", () => {
+    markAllNoticesRead();
+  });
+}
+
+document.addEventListener("click", (e) => {
+  const wrap = document.getElementById("topUserWrap");
+  if(!wrap) return;
+  if(!wrap.contains(e.target)){
+    closeNoticePanel();
+  }
+});
+
 function handleLogout(){
   localStorage.removeItem("room10LoggedIn");
   localStorage.removeItem("room10User");
   localStorage.removeItem("room10Role");
-
+  localStorage.removeItem("room10MemberId");
   localStorage.removeItem("room10ApplicantSession");
   localStorage.removeItem("room10ApplicationDraft");
 
+  closeNoticePanel();
   safeSyncHomeUI();
   closeLogin();
   window.location.href = "index.html";
@@ -647,10 +1212,6 @@ function handleLogoutHotspot(){
   handleLogout();
 }
 
-/* 大门点击
-   未登录：打开登录框
-   已登录：不做任何动作
-*/
 function handleDoorClick(){
   if(isLoggedIn()){
     return;
@@ -658,7 +1219,6 @@ function handleDoorClick(){
   openLogin();
 }
 
-/* 登录 */
 async function login(){
   const nicknameInput = document.getElementById("username");
   const passwordInput = document.getElementById("password");
@@ -675,88 +1235,101 @@ async function login(){
     return;
   }
 
-  let data = null;
-
   try{
-    const result = await client
-      .from("members")
-      .select("nickname, member_code, role")
-      .eq("nickname", nickname)
-      .maybeSingle();
-
-    const error = result.error;
-    data = result.data;
+    const { data, error } = await client.rpc("verify_member_login", {
+      input_nickname: nickname,
+      input_code: key
+    });
 
     if(error){
-      console.error("Supabase 查询失败：", error);
+      console.error("KEY 登录失败：", error);
       msg.innerText = "登录检查失败，请稍后再试";
       return;
     }
 
-    if(!data){
+    if(!Array.isArray(data) || !data.length){
       msg.innerText = "没有找到你的记录哎";
       return;
     }
 
-    const dbKey = String(data.member_code || "").trim();
+    const user = data[0];
 
-    if(dbKey !== key){
-      msg.innerText = "哎呀，钥匙好像拿错了";
-      return;
+    localStorage.setItem("room10LoggedIn", "true");
+    localStorage.setItem("room10User", user.nickname || nickname);
+    localStorage.setItem("room10Role", user.role || "member");
+    localStorage.setItem("room10MemberId", user.member_id || "");
+
+    let roleMessage = "欢迎回家";
+    if(user.role === "owner"){
+      roleMessage = "维修工已上线";
+    }else if(user.role === "admin"){
+      roleMessage = "宿管已上线";
+    }else if(user.role === "member"){
+      roleMessage = "欢迎室友回家";
+    }else if(user.role === "applying"){
+      roleMessage = "当前身份为申请中";
     }
 
+    msg.style.color = "#5f7d3a";
+    msg.innerText = roleMessage;
+
+    addGlobalNotice({
+      icon:"✨",
+      main: roleMessage,
+      sub:`欢迎你回来，${user.nickname || "室友"}`
+    });
+
+    safeSyncHomeUI();
+
+    setTimeout(() => {
+      const targetPage = getPendingRedirect();
+
+      nicknameInput.value = "";
+      passwordInput.value = "";
+      closeLogin(true);
+
+      if(targetPage){
+        clearPendingRedirect();
+        window.location.href = targetPage;
+        return;
+      }
+    }, 700);
   }catch(e){
     console.error("login() 查询异常：", e);
     msg.style.color = "#8b4a2d";
     msg.innerText = "登录失败，请稍后再试";
-    return;
   }
-
-  localStorage.setItem("room10LoggedIn", "true");
-  localStorage.setItem("room10User", data.nickname || nickname);
-  localStorage.setItem("room10Role", data.role || "member");
-
-  let roleMessage = "欢迎回家";
-  if(data.role === "owner"){
-    roleMessage = "维修工已上线";
-  }else if(data.role === "admin"){
-    roleMessage = "宿管已上线";
-  }else if(data.role === "member"){
-    roleMessage = "欢迎室友回家";
-  }else if(data.role === "applying"){
-    roleMessage = "当前身份为申请中";
-  }
-
-  msg.style.color = "#5f7d3a";
-  msg.innerText = roleMessage;
-
-  safeSyncHomeUI();
-
-  setTimeout(() => {
-    nicknameInput.value = "";
-    passwordInput.value = "";
-    closeLogin();
-  }, 700);
 }
 
-/* UI */
-function openLogin(){
+function openLogin(targetPage = ""){
   if(isLoggedIn()){
+    if(targetPage){
+      window.location.href = targetPage;
+    }
     return;
   }
+
+  if(targetPage){
+    setPendingRedirect(targetPage);
+  }
+
   document.getElementById("loginUI").classList.add("show");
   document.getElementById("loginMessage").innerText = "";
 }
 
-function closeLogin(){
+function closeLogin(keepRedirect = true){
   document.getElementById("loginUI").classList.remove("show");
   document.getElementById("loginMessage").innerText = "";
+
+  if(!keepRedirect){
+    clearPendingRedirect();
+  }
 }
 
-/* 房间权限：全站统一读取本地登录态 */
 function enterRoom(page, needLogin){
   if(needLogin && !isLoggedIn()){
-    openLogin();
+    setPendingRedirect(page);
+    openLogin(page);
     return;
   }
 
@@ -767,16 +1340,15 @@ function enterRoom(page, needLogin){
     }
   }
 
+  clearPendingRedirect();
   window.location.href = page;
 }
 
-/* 显示密码 */
 function togglePassword(){
   const p = document.getElementById("password");
   p.type = (p.type === "password") ? "text" : "password";
 }
 
-/* 回车登录 */
 document.getElementById("username").addEventListener("keydown", (e) => {
   if(e.key === "Enter"){
     login();
@@ -788,7 +1360,6 @@ document.getElementById("password").addEventListener("keydown", (e) => {
   }
 });
 
-/* 初始化 */
 updateHomeImageByTime();
 applyCurrentHomeBackground();
 safeSyncHomeUI();

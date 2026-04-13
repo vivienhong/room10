@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜花房</title>
+
+<style>
+*{box-sizing:border-box;}
+
+:root{
+  --text:#5b4632;
+  --title:#6a5038;
+  --line:#d8c2a3;
+  --panel:rgba(255,249,240,.88);
+  --panel-strong:rgba(255,252,246,.93);
+  --btn:#c98e56;
+  --btn-hover:#b97d45;
+  --sub:#e7d3b7;
+  --sub-hover:#dcc29e;
+  --shadow:0 12px 28px rgba(0,0,0,.10);
+  --green:#5f7d3a;
+  --muted:#8e7c68;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  min-height:100%;
+}
+
+body{
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  min-height:100vh;
+  min-height:100dvh;
+  color:var(--text);
+  overflow:hidden;
+  background:
+    linear-gradient(rgba(255,248,240,.12), rgba(255,248,240,.12)),
+    url("room-flower.png") center center / cover no-repeat,
+    linear-gradient(180deg,#f2e8d9 0%, #f8f0e6 100%);
+}
+
+#page{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  overflow:hidden;
+}
+
+.top-bar{
+  position:absolute;
+  top:3.5%;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.top-btn{
+  border:none;
+  border-radius:999px;
+  background:rgba(255,249,240,.94);
+  color:var(--text);
+  padding:10px 18px;
+  min-width:108px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:var(--shadow);
+  border:1px solid rgba(216,194,163,.95);
+  transition:.2s ease;
+}
+
+.top-btn:hover{
+  background:#f3e3c8;
+  transform:translateY(-1px);
+}
+
+.main-panel{
+  position:absolute;
+  left:50%;
+  top:53%;
+  transform:translate(-50%,-50%);
+  width:min(900px, 90vw);
+  padding:30px 30px 26px;
+  background:var(--panel);
+  border:1px solid rgba(216,194,163,.9);
+  border-radius:26px;
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(8px);
+}
+
+.title{
+  margin:0 0 10px;
+  text-align:center;
+  font-size:clamp(24px,2.8vw,36px);
+  color:var(--title);
+  font-weight:800;
+  letter-spacing:.5px;
+}
+
+.subtitle{
+  margin:0 auto 20px;
+  text-align:center;
+  font-size:clamp(13px,1.5vw,16px);
+  color:#7a624c;
+  max-width:700px;
+  line-height:1.7;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+  margin-top:10px;
+}
+
+.card{
+  background:var(--panel-strong);
+  border:1px solid rgba(216,194,163,.95);
+  border-radius:20px;
+  padding:18px 18px 16px;
+  box-shadow:0 8px 18px rgba(0,0,0,.06);
+}
+
+.card h3{
+  margin:0 0 10px;
+  font-size:18px;
+  color:#6d5238;
+}
+
+.card p{
+  margin:0;
+  font-size:14px;
+  line-height:1.75;
+  color:#6f5a45;
+}
+
+.notice{
+  margin-top:18px;
+  background:rgba(255,255,255,.45);
+  border:1px dashed rgba(95,125,58,.55);
+  border-radius:18px;
+  padding:14px 16px;
+  font-size:14px;
+  line-height:1.8;
+  color:#6f5a45;
+}
+
+.bottom-actions{
+  margin-top:22px;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.action-btn{
+  border:none;
+  border-radius:14px;
+  background:var(--btn);
+  color:#fffdf8;
+  padding:11px 20px;
+  min-width:138px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 8px 18px rgba(201,142,86,.24);
+  transition:.2s ease;
+}
+
+.action-btn:hover{
+  background:var(--btn-hover);
+  transform:translateY(-1px);
+}
+
+.action-btn.sub{
+  background:var(--sub);
+  color:#6a5038;
+  box-shadow:none;
+}
+
+.action-btn.sub:hover{
+  background:var(--sub-hover);
+}
+
+.corner-badge{
+  position:absolute;
+  right:18px;
+  bottom:18px;
+  z-index:20;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,250,244,.88);
+  border:1px solid rgba(216,194,163,.9);
+  font-size:12px;
+  color:#7d6853;
+  box-shadow:0 6px 16px rgba(0,0,0,.08);
+}
+
+@media (max-width: 760px){
+  .top-bar{
+    top:2.4%;
+    gap:8px;
+  }
+
+  .top-btn{
+    min-width:92px;
+    padding:9px 14px;
+    font-size:12px;
+  }
+
+  .main-panel{
+    width:min(92vw, 92vw);
+    top:54%;
+    padding:22px 18px 20px;
+    border-radius:22px;
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+  .card h3{
+    font-size:16px;
+  }
+
+  .card p,
+  .notice{
+    font-size:13px;
+  }
+
+  .action-btn{
+    min-width:124px;
+    font-size:13px;
+  }
+
+  .corner-badge{
+    right:12px;
+    bottom:12px;
+    font-size:11px;
+  }
+}
+
+@media (max-width: 420px){
+  .main-panel{
+    top:55%;
+    padding:18px 14px 16px;
+  }
+
+  .subtitle{
+    font-size:12px;
+  }
+
+  .card{
+    padding:14px;
+    border-radius:16px;
+  }
+
+  .notice{
+    padding:12px 13px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="page">
+  <div class="top-bar">
+    <button class="top-btn" onclick="goHome()">返回首页</button>
+    <button class="top-btn" onclick="goPets()">去宠物区</button>
+  </div>
+
+  <main class="main-panel">
+    <h1 class="title">十号房花房</h1>
+    <p class="subtitle">
+      这里是十号房的临时花房页面。后续可以扩展成花卉交易市场、随机价格系统、入仓持有、成员买卖记录、金币变化统计和每日行情展示。
+    </p>
+
+    <section class="grid">
+      <div class="card">
+        <h3>花卉市场</h3>
+        <p>
+          以后这里可以展示当前可买卖花卉、今日价格、涨跌趋势、稀有花种和库存情况。也可以做成你之前想要的类似股票的花卉交易玩法。
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>金币系统联动</h3>
+        <p>
+          后续可接入演唱任务、后期任务、称号奖励带来的金币收入，再将成员金币用于买花、卖花、囤仓、回收和临时行情活动。
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>成员操作区</h3>
+        <p>
+          以后这里可以增加“买入”“卖出”“查看持仓”“今日结算”“历史记录”“排行榜”等按钮，也可以做成公共市场或个人仓库双模式。
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>扩展方向</h3>
+        <p>
+          后续可增加节日限定花、随机新闻事件、价格波动原因、系统刷新时间、特殊任务奖励花种，以及和宠物区互相联动的装饰道具。
+        </p>
+      </div>
+    </section>
+
+    <div class="notice">
+      当前为临时占位页。你可以先把这个页面上线，等你后面确定花卉系统的字段、价格逻辑和金币规则后，再接数据库和真实交易功能。
+    </div>
+
+    <div class="bottom-actions">
+      <button class="action-btn" onclick="goHome()">返回首页</button>
+      <button class="action-btn sub" onclick="goPets()">切换到宠物区</button>
+    </div>
+  </main>
+
+  <div class="corner-badge">临时页面 · Flower</div>
+</div>
+
+<script>
+function goHome(){
+  window.location.href = "index.html";
+}
+
+function goPets(){
+  window.location.href = "pets.html";
+}
+</script>
+
+</body>
+</html>

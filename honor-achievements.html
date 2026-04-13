@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜成就页</title>
+
+<style>
+*{box-sizing:border-box;}
+
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+  font-family:Arial, Helvetica, sans-serif;
+  color:#5b4632;
+}
+
+/* ===== 背景改成 titles 风格 ===== */
+body{
+  min-height:100vh;
+  min-height:100dvh;
+  position:relative;
+  overflow-x:hidden;
+  padding:28px 18px 40px;
+
+  background:
+    linear-gradient(rgba(245,240,232,0.72), rgba(232,223,209,0.78)),
+    url("room-titles.png") center center / cover no-repeat fixed;
+}
+
+/* 轻微白雾 */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,0.14);
+  pointer-events:none;
+  z-index:0;
+}
+
+.page{
+  position:relative;
+  z-index:1;
+  width:min(1200px, 100%);
+  margin:0 auto;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:22px;
+}
+
+.back-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:110px;
+  height:42px;
+  padding:0 18px;
+  border:none;
+  border-radius:999px;
+  background:rgba(139,107,75,.92);
+  color:#fff;
+  font-size:15px;
+  cursor:pointer;
+  box-shadow:0 6px 14px rgba(91,70,50,.18);
+  backdrop-filter:blur(4px);
+}
+
+.back-btn:hover{
+  filter:brightness(1.05);
+}
+
+.title-wrap{
+  flex:1;
+  min-width:240px;
+}
+
+.page-title{
+  margin:0;
+  font-size:34px;
+  line-height:1.2;
+  color:#6a5038;
+}
+
+.page-subtitle{
+  margin:8px 0 0;
+  font-size:15px;
+  color:#866a4e;
+}
+
+/* ===== 成就卡片 ===== */
+.achievement-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:18px;
+}
+
+.achievement-card{
+  background:rgba(255,249,240,.84);
+  border:1px solid rgba(227,208,180,.95);
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 10px 24px rgba(91,70,50,.08);
+  backdrop-filter:blur(10px);
+}
+
+.card-top{
+  padding:18px 20px 14px;
+  border-bottom:1px solid #ebdecc;
+  background:linear-gradient(180deg, rgba(255,255,255,.6), rgba(248,240,229,.8));
+}
+
+.card-title{
+  margin:0;
+  font-size:23px;
+  color:#6a5038;
+}
+
+.card-desc{
+  margin:8px 0 0;
+  font-size:14px;
+  line-height:1.6;
+  color:#8b6f54;
+}
+
+.card-body{
+  padding:18px 20px 20px;
+}
+
+.progress-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.progress-label{
+  font-size:14px;
+  color:#8b6c4e;
+}
+
+.progress-value{
+  font-size:14px;
+  font-weight:700;
+  color:#6a5038;
+}
+
+.progress-track{
+  width:100%;
+  height:12px;
+  border-radius:999px;
+  overflow:hidden;
+  background:#efe2d2;
+  margin-bottom:12px;
+}
+
+.progress-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#dcb88a 0%, #b48758 100%);
+}
+
+.extra{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.badge{
+  padding:8px 12px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid #e6d7c5;
+  font-size:13px;
+}
+
+.note{
+  font-size:13px;
+  color:#a08262;
+}
+
+/* ===== 翻页按钮（新增） ===== */
+.page-turn{
+  position:fixed;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:20;
+
+  width:clamp(42px, 5vw, 68px);
+  height:clamp(42px, 5vw, 68px);
+
+  border:none;
+  border-radius:999px;
+  background:rgba(255,255,255,.45);
+  color:#6a5038;
+  font-size:clamp(20px, 2.2vw, 32px);
+  font-weight:700;
+  cursor:pointer;
+
+  backdrop-filter:blur(10px);
+  box-shadow:
+    0 8px 18px rgba(91,70,50,.16),
+    inset 0 1px 0 rgba(255,255,255,.55);
+}
+
+.page-turn.left{
+  left:clamp(10px, 2vw, 24px);
+}
+
+.page-turn.right{
+  right:clamp(10px, 2vw, 24px);
+}
+
+@media (max-width: 860px){
+  .achievement-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width: 640px){
+  body{
+    padding:20px 12px 30px;
+  }
+  .page-title{
+    font-size:28px;
+  }
+
+  .page-turn{
+    top:auto;
+    bottom:16px;
+    transform:none;
+  }
+
+  .page-turn.left{left:16px;}
+  .page-turn.right{right:16px;}
+}
+</style>
+</head>
+
+<body>
+
+<!-- 四页循环 -->
+<!-- honor → titles → achievements → gallery → honor -->
+
+<button class="page-turn left" onclick="location.href='titles.html'">‹</button>
+<button class="page-turn right" onclick="location.href='gallery.html'">›</button>
+
+<div class="page">
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()">返回</button>
+    <div class="title-wrap">
+      <h1 class="page-title">十号房｜成就页</h1>
+      <p class="page-subtitle">展示全体成就及解锁比例（后续可接数据库）</p>
+    </div>
+  </div>
+
+  <section class="achievement-grid">
+
+    <!-- 保持你原内容 -->
+    <!-- 下面不动 -->
+
+    <article class="achievement-card">
+      <div class="card-top">
+        <h2 class="card-title">初来乍到</h2>
+        <p class="card-desc">成功加入十号房，完成登记并留下第一份个人资料。</p>
+      </div>
+      <div class="card-body">
+        <div class="progress-row">
+          <span class="progress-label">解锁比例</span>
+          <span class="progress-value">100%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="extra">
+          <span class="badge">6 / 6 人已获得</span>
+          <span class="note">基础成就</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- 其余保持原样 -->
+    
+  </section>
+</div>
+
+</body>
+</html>

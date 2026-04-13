@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜作品展览页</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;}
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+  font-family:"Microsoft YaHei","PingFang SC",Arial,Helvetica,sans-serif;
+  color:#5b4632;
+}
+body{
+  min-height:100vh;
+  min-height:100dvh;
+  position:relative;
+  overflow-x:hidden;
+  padding:28px 18px 40px;
+  background:
+    linear-gradient(rgba(245,240,232,0.72), rgba(232,223,209,0.78)),
+    url("room-titles.png") center center / cover no-repeat fixed;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,0.14);
+  pointer-events:none;
+  z-index:0;
+}
+.page{
+  position:relative;
+  z-index:1;
+  width:min(1380px,100%);
+  margin:0 auto;
+}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:18px;
+}
+.back-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:110px;
+  height:42px;
+  padding:0 18px;
+  border:none;
+  border-radius:999px;
+  background:rgba(139,107,75,.92);
+  color:#fff;
+  font-size:15px;
+  cursor:pointer;
+  box-shadow:0 6px 14px rgba(91,70,50,.18);
+  backdrop-filter:blur(4px);
+}
+.back-btn:hover{filter:brightness(1.05);}
+.title-wrap{flex:1;min-width:240px;}
+.page-title{margin:0;font-size:34px;line-height:1.2;color:#6a5038;}
+.page-subtitle{margin:8px 0 0;font-size:15px;color:#866a4e;}
+.gallery-layout{
+  display:grid;
+  grid-template-columns:400px minmax(0,1fr);
+  gap:18px;
+  align-items:start;
+}
+.left-panel,.right-panel{
+  background:rgba(255,249,240,.84);
+  border:1px solid rgba(227,208,180,.95);
+  border-radius:24px;
+  box-shadow:0 10px 24px rgba(91,70,50,.08);
+  backdrop-filter:blur(10px);
+  overflow:hidden;
+}
+.panel-head,.player-head{
+  padding:18px 18px 14px;
+  border-bottom:1px solid #ebdecc;
+  background:linear-gradient(180deg, rgba(255,255,255,.6), rgba(248,240,229,.8));
+}
+.panel-title,.player-title{margin:0;font-size:22px;color:#6a5038;}
+.panel-subtitle,.player-subtitle{margin:8px 0 0;font-size:13px;color:#8c6e50;line-height:1.5;}
+.search-area{padding:14px 18px 12px;border-bottom:1px solid rgba(227,208,180,.8);}
+.search-input{
+  width:100%;height:42px;border:none;outline:none;border-radius:14px;padding:0 14px;
+  font-size:14px;color:#5b4632;background:rgba(255,255,255,.92);border:1px solid #eadcc9;
+}
+.filter-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.filter-btn{
+  height:34px;padding:0 14px;border:none;border-radius:999px;background:rgba(255,255,255,.88);
+  border:1px solid #e6d7c5;color:#6a5038;font-size:13px;cursor:pointer;transition:.18s ease;
+}
+.filter-btn:hover{background:rgba(255,255,255,1);}
+.filter-btn.active{background:#8b6b4b;border-color:#8b6b4b;color:#fff;}
+.list-wrap{padding:12px;max-height:70vh;overflow:auto;}
+.work-item{
+  width:100%;text-align:left;border:none;cursor:pointer;display:block;padding:14px;margin-bottom:10px;
+  border-radius:18px;background:rgba(255,255,255,.7);border:1px solid #eadcc9;color:#5b4632;transition:.18s ease;
+}
+.work-item:hover{background:rgba(255,255,255,.94);transform:translateY(-1px);}
+.work-item.active{background:rgba(243,231,215,.96);border-color:#cfa878;box-shadow:0 6px 16px rgba(91,70,50,.08);}
+.work-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.work-no,.work-type,.info-type,.meta-pill{
+  display:inline-flex;align-items:center;justify-content:center;border-radius:999px;font-size:12px;
+}
+.work-no{min-width:62px;padding:6px 10px;background:#f3e6d6;color:#7a5a3b;font-weight:700;}
+.work-type{min-width:54px;padding:6px 10px;background:#fff;border:1px solid #eadcc9;color:#8b6c4e;}
+.work-title{margin:0 0 6px;font-size:18px;color:#6a5038;line-height:1.35;}
+.work-meta{font-size:13px;color:#8e7154;line-height:1.55;}
+.empty-state,.loading-state{
+  padding:28px 14px;text-align:center;color:#9e8060;font-size:14px;line-height:1.7;
+}
+.player-body{padding:18px;}
+.video-shell{
+  width:100%;aspect-ratio:16 / 9;border-radius:20px;overflow:hidden;background:rgba(255,255,255,.72);
+  border:1px solid #eadcc9;box-shadow:inset 0 1px 0 rgba(255,255,255,.45);
+}
+.video-shell iframe{width:100%;height:100%;border:none;display:block;}
+.placeholder{
+  width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;text-align:center;color:#9a7b5b;padding:24px;
+}
+.placeholder-icon{
+  width:68px;height:68px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+  font-size:28px;background:rgba(255,255,255,.75);border:1px solid #eadcc9;
+}
+.info-card{margin-top:16px;background:rgba(255,255,255,.7);border:1px solid #eadcc9;border-radius:18px;padding:16px;}
+.info-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.info-title{margin:0;font-size:24px;color:#6a5038;line-height:1.35;}
+.info-type{min-width:64px;padding:7px 12px;background:#f3e6d6;color:#7a5a3b;font-weight:700;}
+.info-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;margin-top:8px;}
+.meta-item{background:rgba(255,255,255,.78);border:1px solid #eadcc9;border-radius:14px;padding:10px 12px;}
+.meta-label{font-size:12px;color:#a08262;margin-bottom:6px;}
+.meta-value{font-size:14px;color:#6a5038;line-height:1.5;word-break:break-word;}
+.tip{margin-top:14px;font-size:13px;color:#9a7b5b;line-height:1.6;}
+.meta-pill{padding:6px 10px;background:#f8efe4;color:#8b6c4e;border:1px solid #eadcc9;}
+.page-turn{
+  position:fixed;top:50%;transform:translateY(-50%);z-index:20;width:clamp(42px,5vw,68px);height:clamp(42px,5vw,68px);
+  border:none;border-radius:999px;background:rgba(255,255,255,.45);color:#6a5038;font-size:clamp(20px,2.2vw,32px);
+  font-weight:700;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 8px 18px rgba(91,70,50,.16), inset 0 1px 0 rgba(255,255,255,.55);
+  transition:transform .18s ease, background .18s ease;
+}
+.page-turn:hover{background:rgba(255,255,255,.62);transform:translateY(-50%) scale(1.05);}
+.page-turn.left{left:clamp(10px,2vw,24px);}
+.page-turn.right{right:clamp(10px,2vw,24px);}
+@media (max-width:1100px){.gallery-layout{grid-template-columns:1fr;}.list-wrap{max-height:420px;}}
+@media (max-width:640px){
+  body{padding:20px 12px 30px;}
+  .page-title{font-size:28px;}
+  .panel-title,.player-title{font-size:20px;}
+  .work-title{font-size:17px;}
+  .info-title{font-size:22px;}
+  .info-meta{grid-template-columns:1fr;}
+  .page-turn{top:auto;bottom:16px;transform:none;}
+  .page-turn:hover{transform:scale(1.05);}
+  .page-turn.left{left:16px;}
+  .page-turn.right{right:16px;}
+}
+</style>
+</head>
+<body>
+<button class="page-turn left" onclick="location.href='achievements.html'" aria-label="上一页">‹</button>
+<button class="page-turn right" onclick="location.href='honor.html'" aria-label="下一页">›</button>
+
+<div class="page">
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()">返回</button>
+    <div class="title-wrap">
+      <h1 class="page-title">十号房｜作品展览页</h1>
+      <p class="page-subtitle">自动读取已达到预计发布日期、且资料完整并已全部交音的作品。</p>
+    </div>
+  </div>
+
+  <div class="gallery-layout">
+    <section class="left-panel">
+      <div class="panel-head">
+        <h2 class="panel-title">作品列表</h2>
+        <p class="panel-subtitle">可按分类筛选，也可搜索歌名、演唱者或编号。</p>
+      </div>
+
+      <div class="search-area">
+        <input id="searchInput" class="search-input" type="text" placeholder="搜索作品（歌名 / 演唱者 / 编号）" />
+        <div class="filter-row" id="filterRow">
+          <button class="filter-btn active" data-type="全部">全部</button>
+          <button class="filter-btn" data-type="披4">披4</button>
+          <button class="filter-btn" data-type="披哥">披哥</button>
+          <button class="filter-btn" data-type="浪姐">浪姐</button>
+          <button class="filter-btn" data-type="其他">其他</button>
+          <button class="filter-btn" data-type="游戏">游戏</button>
+        </div>
+      </div>
+
+      <div id="workList" class="list-wrap">
+        <div class="loading-state">正在读取作品...</div>
+      </div>
+    </section>
+
+    <section class="right-panel">
+      <div class="player-head">
+        <h2 class="player-title">播放器</h2>
+        <p class="player-subtitle">点击左侧作品后载入视频。优先读取项目里的展示链接。</p>
+      </div>
+
+      <div class="player-body">
+        <div class="video-shell" id="videoShell">
+          <div class="placeholder">
+            <div class="placeholder-icon">▶</div>
+            <div>请选择左侧作品开始播放</div>
+          </div>
+        </div>
+
+        <div class="info-card" id="infoCard">
+          <div class="info-top">
+            <h3 class="info-title">尚未选择作品</h3>
+            <span class="info-type">待选择</span>
+          </div>
+          <div class="info-meta">
+            <div class="meta-item"><div class="meta-label">编号</div><div class="meta-value">—</div></div>
+            <div class="meta-item"><div class="meta-label">分类</div><div class="meta-value">—</div></div>
+            <div class="meta-item"><div class="meta-label">演唱者</div><div class="meta-value">—</div></div>
+            <div class="meta-item"><div class="meta-label">发布日期</div><div class="meta-value">—</div></div>
+            <div class="meta-item"><div class="meta-label">混音</div><div class="meta-value">—</div></div>
+            <div class="meta-item"><div class="meta-label">备注</div><div class="meta-value">点击左侧作品后显示</div></div>
+          </div>
+          <div class="tip">若展示链接不是嵌入链接，页面会尝试自动转换。暂不支持的平台会显示占位提示。</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const workList = document.getElementById("workList");
+const searchInput = document.getElementById("searchInput");
+const videoShell = document.getElementById("videoShell");
+const infoCard = document.getElementById("infoCard");
+const filterButtons = () => document.querySelectorAll(".filter-btn");
+
+let WORKS = [];
+let currentType = "全部";
+let currentKeyword = "";
+let currentSelectedId = null;
+
+function escapeHtml(str){
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function formatDateText(dateString){
+  if (!dateString) return "—";
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return String(dateString);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function normalizeName(value){
+  return String(value || "").trim().toLowerCase();
+}
+
+function uniqueBy(items, getKey){
+  const seen = new Set();
+  const result = [];
+  items.forEach(item => {
+    const key = getKey(item);
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    result.push(item);
+  });
+  return result;
+}
+
+function getUniqueAssignedSingerCount(task){
+  const partIds = uniqueBy((task.parts || []).map(part => String(part.assigned_member_id || "").trim()).filter(Boolean), v => v);
+  const singerIds = uniqueBy((task.singers || []).map(singer => String(singer.member_id || "").trim()).filter(Boolean), v => v);
+  return uniqueBy([...partIds, ...singerIds], v => v).length;
+}
+
+function isAllSingersSubmitted(task){
+  const singers = task.singers || [];
+  return singers.length > 0 && singers.every(item => !!item.is_submitted);
+}
+
+function isTaskInfoComplete(task){
+  const rows = task.parts || [];
+  const singerQuota = Math.max(1, Number(task.singer_quota) || 1);
+  const assignedSingerCount = getUniqueAssignedSingerCount(task);
+  const hasProducer = !!String(task.producer_member_id || "").trim();
+  const hasTone = !!String(task.project_tone || "").trim();
+
+  const allRowsComplete = rows.length > 0 && rows.every(row => {
+    const partText = String(row.original_name || "").trim();
+    const assignedId = String(row.assigned_member_id || "").trim();
+    return !!partText && !!assignedId;
+  });
+
+  return assignedSingerCount >= singerQuota && hasProducer && hasTone && allRowsComplete;
+}
+
+function isReadyForHonorShow(task){
+  if (!isTaskInfoComplete(task)) return false;
+  if (!isAllSingersSubmitted(task)) return false;
+
+  const releaseDateText = String(task.release_date || "").trim();
+  if (!releaseDateText) return false;
+
+  const releaseDate = new Date(releaseDateText + "T00:00:00");
+  if (Number.isNaN(releaseDate.getTime())) return false;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today >= releaseDate;
+}
+
+function deriveSingersText(task){
+  const names = [];
+  (task.singers || []).forEach(item => {
+    const name = String(item.member_name || "").trim();
+    if (name) names.push(name);
+  });
+  (task.parts || []).forEach(item => {
+    const name = String(item.assigned_member_name || "").trim();
+    if (name) names.push(name);
+  });
+  const uniqueNames = uniqueBy(names, normalizeName);
+  return uniqueNames.join(" / ") || "—";
+}
+
+function transformDisplayLink(raw){
+  const link = String(raw || "").trim();
+  if (!link) return "";
+
+  if (/player\.bilibili\.com\/player\.html/i.test(link)) return link;
+
+  const bvidMatch = link.match(/BV[0-9A-Za-z]+/i);
+  if (bvidMatch) {
+    const pageMatch = link.match(/[?&]p=(\d+)/i);
+    const page = pageMatch ? pageMatch[1] : "1";
+    return `https://player.bilibili.com/player.html?bvid=${bvidMatch[0]}&page=${page}`;
+  }
+
+  const youtubeWatchMatch = link.match(/[?&]v=([A-Za-z0-9_-]{6,})/);
+  if (youtubeWatchMatch) {
+    return `https://www.youtube.com/embed/${youtubeWatchMatch[1]}`;
+  }
+
+  const youtubeShortMatch = link.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/);
+  if (youtubeShortMatch) {
+    return `https://www.youtube.com/embed/${youtubeShortMatch[1]}`;
+  }
+
+  if (/youtube\.com\/embed\//i.test(link)) return link;
+  return link;
+}
+
+function canEmbed(link){
+  if (!link) return false;
+  return /player\.bilibili\.com\/player\.html/i.test(link) || /youtube\.com\/embed\//i.test(link);
+}
+
+function buildWorkRecord(task){
+  return {
+    id: String(task.id || ""),
+    no: String(task.task_code || "").trim() || "—",
+    type: String(task.task_type || "").trim() || "其他",
+    title: String(task.task_name || "").trim() || "未命名作品",
+    singers: deriveSingersText(task),
+    mixer: String(task.producer_name || "").trim() || "—",
+    note: String(task.project_tone || "").trim() ? `调：${String(task.project_tone).trim()}` : "",
+    releaseDate: formatDateText(task.release_date),
+    embedUrl: transformDisplayLink(task.display_link),
+    rawLink: String(task.display_link || "").trim(),
+    createdAt: String(task.created_at || "")
+  };
+}
+
+async function loadWorksFromSupabase(){
+  workList.innerHTML = '<div class="loading-state">正在读取作品...</div>';
+
+  try {
+    const { data: projectsData, error: projectsError } = await supabaseClient
+      .from("projects")
+      .select(`
+        *,
+        producer_member:members!projects_producer_member_id_fkey (
+          id,
+          nickname,
+          name
+        )
+      `);
+
+    if (projectsError) throw projectsError;
+
+    const projectIds = (projectsData || []).map(item => item.id);
+    let partsData = [];
+    let singersData = [];
+
+    if (projectIds.length) {
+      const { data: partRows, error: partsError } = await supabaseClient
+        .from("project_parts")
+        .select(`
+          id,
+          project_id,
+          part_order,
+          original_name,
+          assigned_member_id,
+          members!project_parts_assigned_member_id_fkey (
+            id,
+            nickname,
+            name
+          )
+        `)
+        .in("project_id", projectIds)
+        .order("part_order", { ascending: true });
+      if (partsError) throw partsError;
+      partsData = partRows || [];
+
+      const { data: singerRows, error: singersError } = await supabaseClient
+        .from("project_singers")
+        .select(`
+          id,
+          project_id,
+          member_id,
+          is_submitted,
+          submitted_at,
+          members!project_singers_member_id_fkey (
+            id,
+            nickname,
+            name
+          )
+        `)
+        .in("project_id", projectIds);
+      if (singersError) throw singersError;
+      singersData = singerRows || [];
+    }
+
+    const partMap = new Map();
+    const singerMap = new Map();
+
+    partsData.forEach(part => {
+      const key = String(part.project_id);
+      if (!partMap.has(key)) partMap.set(key, []);
+      partMap.get(key).push({
+        id: part.id,
+        part_order: part.part_order,
+        original_name: part.original_name,
+        assigned_member_id: part.assigned_member_id ? String(part.assigned_member_id) : "",
+        assigned_member_name: part.members?.nickname || part.members?.name || ""
+      });
+    });
+
+    singersData.forEach(singer => {
+      const key = String(singer.project_id);
+      if (!singerMap.has(key)) singerMap.set(key, []);
+      singerMap.get(key).push({
+        id: singer.id,
+        member_id: singer.member_id ? String(singer.member_id) : "",
+        member_name: singer.members?.nickname || singer.members?.name || "",
+        is_submitted: !!singer.is_submitted,
+        submitted_at: singer.submitted_at || null
+      });
+    });
+
+    const projectTasks = (projectsData || []).map(project => {
+      const id = String(project.id);
+      return {
+        ...project,
+        id,
+        task_code: project.task_code || "",
+        task_name: project.task_name || "",
+        task_type: project.task_type || "",
+        singer_quota: project.singer_quota ?? 1,
+        producer_member_id: project.producer_member_id ? String(project.producer_member_id) : "",
+        producer_name: project.producer_member?.nickname || project.producer_member?.name || "",
+        release_date: project.release_date || null,
+        display_link: project.display_link || "",
+        project_tone: project.project_tone || "",
+        created_at: project.created_at || null,
+        parts: (partMap.get(id) || []).sort((a, b) => (a.part_order || 0) - (b.part_order || 0)),
+        singers: singerMap.get(id) || []
+      };
+    });
+
+    WORKS = projectTasks
+      .filter(isReadyForHonorShow)
+      .map(buildWorkRecord)
+      .sort((a, b) => {
+        const aNo = parseInt(String(a.no).match(/\d+/)?.[0] || "0", 10);
+        const bNo = parseInt(String(b.no).match(/\d+/)?.[0] || "0", 10);
+        if (aNo !== bNo) return aNo - bNo;
+        return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
+      });
+
+    if (currentSelectedId && !WORKS.some(item => item.id === currentSelectedId)) {
+      currentSelectedId = null;
+    }
+
+    renderList();
+    if (currentSelectedId) {
+      const currentWork = WORKS.find(item => item.id === currentSelectedId);
+      if (currentWork) selectWork(currentWork, false);
+    }
+  } catch (err) {
+    console.error("读取作品失败：", err);
+    workList.innerHTML = '<div class="empty-state">读取作品失败，请检查 projects / project_parts / project_singers 的读取权限。</div>';
+    videoShell.innerHTML = `
+      <div class="placeholder">
+        <div class="placeholder-icon">!</div>
+        <div>作品读取失败</div>
+      </div>
+    `;
+    infoCard.innerHTML = `
+      <div class="info-top">
+        <h3 class="info-title">读取失败</h3>
+        <span class="info-type">异常</span>
+      </div>
+      <div class="tip">请检查数据库表权限、外键名称和展示链接字段。</div>
+    `;
+  }
+}
+
+function getFilteredWorks(){
+  return WORKS.filter(work => {
+    const matchType = currentType === "全部" || work.type === currentType;
+    const keyword = currentKeyword.trim().toLowerCase();
+    const combined = `${work.no} ${work.type} ${work.title} ${work.singers} ${work.mixer} ${work.note || ""}`.toLowerCase();
+    const matchKeyword = !keyword || combined.includes(keyword);
+    return matchType && matchKeyword;
+  });
+}
+
+function renderList(){
+  const works = getFilteredWorks();
+
+  if (!WORKS.length) {
+    workList.innerHTML = `
+      <div class="empty-state">
+        当前还没有满足展览条件的作品。<br>
+        需要资料完整、全员交音、已填写预计发布日期，且日期已到。
+      </div>
+    `;
+    return;
+  }
+
+  if (!works.length) {
+    workList.innerHTML = `
+      <div class="empty-state">
+        没有找到符合条件的作品。<br>
+        可以换个关键词，或切换分类试试。
+      </div>
+    `;
+    return;
+  }
+
+  workList.innerHTML = works.map(work => `
+    <button class="work-item ${work.id === currentSelectedId ? "active" : ""}" data-id="${escapeHtml(work.id)}">
+      <div class="work-top">
+        <span class="work-no">#${escapeHtml(work.no)}</span>
+        <span class="work-type">${escapeHtml(work.type)}</span>
+      </div>
+      <h3 class="work-title">${escapeHtml(work.title)}</h3>
+      <div class="work-meta">演唱者：${escapeHtml(work.singers)}</div>
+      <div class="work-meta">发布日期：${escapeHtml(work.releaseDate)}</div>
+    </button>
+  `).join("");
+
+  document.querySelectorAll(".work-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const work = WORKS.find(item => item.id === id);
+      if (work) selectWork(work);
+    });
+  });
+}
+
+function renderPlayerUnavailable(work){
+  videoShell.innerHTML = `
+    <div class="placeholder">
+      <div class="placeholder-icon">♪</div>
+      <div>${work.rawLink ? '该链接暂不支持直接嵌入，请点击下方信息中的备注查看。' : '该作品还没有填写展示链接。'}</div>
+    </div>
+  `;
+}
+
+function selectWork(work, rerenderList = true){
+  currentSelectedId = work.id;
+
+  if (work.embedUrl && canEmbed(work.embedUrl)) {
+    videoShell.innerHTML = `
+      <iframe
+        src="${escapeHtml(work.embedUrl)}"
+        scrolling="no"
+        frameborder="0"
+        allowfullscreen="true"
+        allow="autoplay; fullscreen; picture-in-picture">
+      </iframe>
+    `;
+  } else {
+    renderPlayerUnavailable(work);
+  }
+
+  infoCard.innerHTML = `
+    <div class="info-top">
+      <h3 class="info-title">${escapeHtml(work.title)}</h3>
+      <span class="info-type">${escapeHtml(work.type)}</span>
+    </div>
+
+    <div class="info-meta">
+      <div class="meta-item">
+        <div class="meta-label">编号</div>
+        <div class="meta-value">#${escapeHtml(work.no)}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">分类</div>
+        <div class="meta-value">${escapeHtml(work.type)}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">演唱者</div>
+        <div class="meta-value">${escapeHtml(work.singers)}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">发布日期</div>
+        <div class="meta-value">${escapeHtml(work.releaseDate)}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">混音</div>
+        <div class="meta-value">${escapeHtml(work.mixer)}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">备注</div>
+        <div class="meta-value">${escapeHtml(work.note || (work.rawLink ? `展示链接：${work.rawLink}` : '—'))}</div>
+      </div>
+    </div>
+
+    <div class="tip">
+      ${work.rawLink ? '已读取项目中的展示链接。' : '当前项目未填写展示链接，右侧仅显示占位提示。'}
+    </div>
+  `;
+
+  if (rerenderList) renderList();
+}
+
+searchInput.addEventListener("input", (e) => {
+  currentKeyword = e.target.value || "";
+  renderList();
+});
+
+filterButtons().forEach(btn => {
+  btn.addEventListener("click", () => {
+    filterButtons().forEach(item => item.classList.remove("active"));
+    btn.classList.add("active");
+    currentType = btn.dataset.type;
+    renderList();
+  });
+});
+
+loadWorksFromSupabase();
+</script>
+</body>
+</html>
