@@ -1,0 +1,5885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜工作间任务</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+    background:
+      radial-gradient(circle at top left, color-mix(in srgb, var(--bg-side-left) 82%, white 18%) 0%, transparent 36%),
+      radial-gradient(circle at top right, color-mix(in srgb, var(--bg-side-right) 80%, white 20%) 0%, transparent 38%),
+      linear-gradient(180deg,var(--bg-top) 0%, var(--bg-mid) 52%, var(--bg-bottom) 100%);
+  }
+
+  body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+
+  #room{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    height:100dvh;
+    overflow:hidden;
+    background:#e7dfd4;
+  }
+
+  #bgFrame{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    overflow:hidden;
+    background:none;
+  }
+
+  #bg{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    object-position:center center;
+    display:block;
+    user-select:none;
+    pointer-events:none;
+    -webkit-user-drag:none;
+    opacity:1;
+    transition:none;
+  }
+
+  #overlay{
+    position:absolute;
+    inset:0;
+    z-index:1;
+    overflow:hidden;
+    pointer-events:none;
+    --nav-scale:1;
+    --top-ui-scale:1;
+    --topbar-left:28.2%;
+    --topbar-top:8.15%;
+    --topbar-width:65.4%;
+    --topbar-gap:1.2%;
+    --user-right:140px;
+    --user-top:7.5%;
+    --topbar-safe-gap:18px;
+  }
+  #overlay *{
+    pointer-events:auto;
+  }
+
+  :root{
+    --bg-top:#e7dfd4;
+    --bg-mid:#e2d8cb;
+    --bg-bottom:#ddd4c8;
+    --bg-side-left:#e5ddd1;
+    --bg-side-right:#e1d7ca;
+    --top-chip-bg: rgba(255,252,247,0.86);
+    --top-chip-border: rgba(160,116,78,0.12);
+    --top-chip-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.96),
+      0 3px 10px rgba(110,84,58,0.08);
+  }
+
+
+  #topBar{
+    position:absolute;
+    left:var(--topbar-left);
+    top:var(--topbar-top);
+    width:var(--topbar-width);
+    max-width:calc(100% - var(--topbar-left) - var(--topbar-safe-gap));
+    display:flex;
+    align-items:flex-start;
+    justify-content:flex-start;
+    gap:var(--topbar-gap);
+  }
+
+  #navOuter{
+    flex:1 1 auto;
+    min-width:0;
+    overflow:hidden;
+  }
+
+  #navScroll{
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    white-space:nowrap;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+    padding-bottom:2px;
+  }
+  #navScroll::-webkit-scrollbar{
+    display:none;
+  }
+
+  #roomNav{
+    display:inline-flex;
+    align-items:center;
+    gap:calc(10px * var(--nav-scale));
+    min-width:max-content;
+    max-width:100%;
+  }
+
+  .navBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    height:calc(42px * var(--nav-scale));
+    padding:0 calc(18px * var(--nav-scale));
+    border-radius:calc(14px * var(--nav-scale));
+    background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
+    color:#704724;
+    font-size:calc(15px * var(--nav-scale));
+    font-weight:700;
+    white-space:nowrap;
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,230,0.95),
+      inset 0 -2px 0 rgba(150,105,60,0.10),
+      0 2px 8px rgba(112,83,52,0.12);
+    border:1px solid rgba(159,114,69,0.18);
+    transition:transform .18s ease, filter .18s ease, box-shadow .18s ease;
+  }
+
+  .navBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.04);
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,230,0.98),
+      inset 0 -2px 0 rgba(150,105,60,0.12),
+      0 4px 10px rgba(112,83,52,0.16);
+  }
+
+  #logoutBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    flex:0 0 auto;
+    min-width:clamp(52px, 3.8vw, 64px);
+    height:clamp(34px, 3vw, 38px);
+    padding:0 clamp(12px, 1.1vw, 16px);
+    border-radius:999px;
+    background:var(--top-chip-bg);
+    color:#67401f;
+    font-size:clamp(12px, 0.82vw, 14px);
+    font-weight:800;
+    box-shadow:var(--top-chip-shadow);
+    border:1px solid var(--top-chip-border);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+    order:3;
+    align-self:center;
+  }
+
+  #logoutBtn:hover{
+    transform:translateY(-1px);
+    background:rgba(255,255,255,0.94);
+  }
+
+  #topBarUserArea{
+    position:absolute;
+    right:var(--user-right);
+    top:var(--user-top);
+    transform:scale(var(--top-ui-scale));
+    transform-origin:right top;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    width:max-content;
+    min-width:max-content;
+    max-width:none;
+    padding:6px;
+    border-radius:20px;
+    background:rgba(255,248,239,0.9);
+    border:1px solid rgba(186,146,103,0.24);
+    box-shadow:
+      0 10px 24px rgba(116,86,54,0.12),
+      inset 0 1px 0 rgba(255,255,255,0.86);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    text-align:center;
+    z-index:65;
+  }
+
+  #currentUserBadge{
+    order:1;
+    flex:1 1 auto;
+    min-width:clamp(116px, 8.6vw, 142px);
+    min-height:clamp(34px, 3vw, 38px);
+    padding:0 clamp(12px, 1vw, 16px);
+    border-radius:999px;
+    background:var(--top-chip-bg);
+    color:#6c4523;
+    font-size:clamp(13px, 0.95vw, 15px);
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    box-shadow:var(--top-chip-shadow);
+    border:1px solid var(--top-chip-border);
+    white-space:nowrap;
+  }
+
+  #currentUserBadge .roleDot{
+    width:8px;
+    height:8px;
+    border-radius:999px;
+    background:#d9a364;
+    box-shadow:0 0 0 3px rgba(217,163,100,0.16);
+    flex:0 0 auto;
+  }
+
+  #currentUserBadge .identityText{
+    flex:0 1 auto;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    text-align:center;
+  }
+
+  @media (max-width: 980px){
+    .filterTagsWrap{
+      gap:5px;
+    }
+
+    .filterTagBtn{
+      min-width:auto;
+      height:24px;
+      padding:0 7px;
+      font-size:10px;
+    }
+
+    .pickerBtn.mixerOptionBtn{
+      height:26px;
+      padding:0 8px;
+      font-size:10px;
+    }
+  }
+
+  #taskPanel{
+    position:absolute;
+    left:43%;
+    top:22.3%;
+    transform:translateX(-50%);
+    width:68%;
+    height:70.6%;
+    min-height:360px;
+    border-radius:30px;
+    background:rgba(255,255,255,0.34);
+    border:1px solid rgba(255,255,255,0.52);
+    box-shadow:
+      0 16px 42px rgba(122,96,68,0.10),
+      inset 0 1px 0 rgba(255,255,255,0.62),
+      inset 0 -1px 0 rgba(255,255,255,0.20);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    overflow:visible;
+  }
+
+  #taskPanel::before{
+    content:"";
+    position:absolute;
+    inset:10px;
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,0.22);
+    pointer-events:none;
+  }
+
+  #panelSwitch{
+    position:absolute;
+    right:-194px;
+    top:26%;
+    transform:translateY(-50%);
+    width:170px;
+    padding:18px 14px;
+    border-radius:20px;
+    background:rgba(255,248,239,0.9);
+    border:1px solid rgba(186,146,103,0.24);
+    box-shadow:
+      0 10px 24px rgba(116,86,54,0.12),
+      inset 0 1px 0 rgba(255,255,255,0.86);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    z-index:30;
+  }
+
+  .switchBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    width:100%;
+    min-height:40px;
+    padding:8px 12px;
+    border-radius:13px;
+    background:rgba(231,214,185,0.92);
+    color:#744b25;
+    font-size:14px;
+    font-weight:700;
+    line-height:1.2;
+    text-align:center;
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,233,0.95),
+      0 2px 6px rgba(116,86,54,0.08);
+    transition:transform .18s ease, filter .18s ease, background .18s ease;
+  }
+
+  .switchBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .switchBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  .panelView{
+    position:absolute;
+    inset:0;
+    padding:0;
+  }
+
+  #browsePanelInner{
+    position:relative;
+    z-index:1;
+    width:100%;
+    height:100%;
+    display:grid;
+    grid-template-columns:26.5% 73.5%;
+  }
+
+  #browseListPane{
+    padding:16px 10px 14px 14px;
+    border-right:1px solid rgba(255,255,255,0.20);
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    background:transparent;
+  }
+
+  #musicNotesLayer{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .musicNote{
+    position:absolute;
+    left:0;
+    top:0;
+    pointer-events:none;
+    user-select:none;
+    opacity:0;
+    color:rgba(165,115,66,0.34);
+    text-shadow:0 2px 10px rgba(255,255,255,0.22);
+    animation:musicFloat linear forwards;
+    will-change:transform, opacity;
+  }
+
+  @keyframes musicFloat{
+    0%{
+      transform:translate3d(0, 16px, 0) scale(.82) rotate(0deg);
+      opacity:0;
+    }
+    12%{
+      opacity:.85;
+    }
+    72%{
+      opacity:.42;
+    }
+    100%{
+      transform:translate3d(var(--float-x, 36px), calc(-1 * var(--float-y, 180px)), 0) scale(1.18) rotate(var(--float-rotate, 14deg));
+      opacity:0;
+    }
+  }
+
+  #browseListTitle{
+    flex:0 0 auto;
+    color:#6f4726;
+    font-size:16px;
+    font-weight:800;
+    margin:2px 0 8px;
+    padding-left:2px;
+  }
+
+  .filterTagsWrap{
+    flex:0 0 auto;
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:0 0 10px;
+    padding-right:4px;
+    overflow:visible;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+    align-items:center;
+  }
+  .filterTagsWrap::-webkit-scrollbar{
+    display:none;
+  }
+
+  .filterTagBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    flex:0 0 auto;
+    min-width:56px;
+    height:28px;
+    padding:0 10px;
+    border-radius:10px;
+    background:rgba(255,252,247,0.9);
+    color:#7c4d25;
+    font-size:11px;
+    font-weight:800;
+    white-space:nowrap;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 2px 6px rgba(112,83,52,0.06);
+    transition:transform .18s ease, filter .18s ease, background .18s ease, color .18s ease;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    line-height:1;
+    vertical-align:middle;
+  }
+
+  .filterTagBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .filterTagBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  .filterTagBtn.altToggle{
+    background:rgba(255,252,247,0.42);
+    border:1.5px dashed rgba(188,144,99,0.72);
+    box-shadow:none;
+    color:#8a5b30;
+  }
+
+  .filterTagBtn.altToggle:hover{
+    background:rgba(255,252,247,0.62);
+  }
+
+  .filterTagBtn.altToggle.active{
+    background:rgba(217,163,100,0.18);
+    color:#8a5b30;
+    border:1.5px dashed rgba(201,140,79,0.95);
+    box-shadow:0 0 0 2px rgba(217,163,100,0.12) inset;
+  }
+
+  .taskItem{
+    width:100%;
+    text-align:left;
+    padding:8px 10px;
+    margin:0 0 6px;
+    border-radius:13px;
+    background:rgba(255,252,247,0.34);
+    color:#6c4523;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.52),
+      0 3px 10px rgba(120,92,63,0.05);
+    transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+    position:relative;
+    border:1px solid transparent;
+    isolation:isolate;
+    overflow:hidden;
+  }
+
+.taskItem.active{
+  border-color:rgba(233,193,139,0.32);
+  background:linear-gradient(180deg, rgba(252,242,223,0.98) 0%, rgba(246,229,202,0.98) 100%);
+  color:#5c3819;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(231,190,132,0.18),
+    inset 0 2px 6px rgba(255,255,255,0.65),
+    0 6px 14px rgba(120,92,63,0.06);
+}
+
+.taskItem.active::after{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-40%;
+  width:30%;
+  height:100%;
+
+  background:linear-gradient(90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.25) 40%,
+    rgba(255,255,255,0.55) 50%,
+    rgba(255,255,255,0.25) 60%,
+    rgba(255,255,255,0) 100%
+  );
+
+  transform:skewX(-18deg);
+  filter:blur(0.8px);
+
+  pointer-events:none;
+  animation:flowSweep 4.5s ease-in-out infinite;
+
+  z-index:1;
+}
+
+.taskItem.active::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:13px;
+
+  box-shadow:
+    inset 0 0 12px rgba(255,210,150,0.35);
+
+  pointer-events:none;
+  z-index:0;
+}
+
+@keyframes flowSweep{
+  0%{
+    left:-40%;
+    opacity:0;
+  }
+  20%{
+    opacity:.6;
+  }
+  60%{
+    left:120%;
+    opacity:.15;
+  }
+  100%{
+    left:120%;
+    opacity:0;
+  }
+}
+
+  .taskItem.active .taskNameText{
+    text-shadow:none;
+  }
+
+  .taskItem.active .taskTypeMini{
+    box-shadow:none;
+  }
+
+  .activeSparkles{
+    display:none;
+  }
+
+  .bonusValue{
+    font-size:18px;
+    letter-spacing:0;
+  }
+
+  .bonusValue small{
+    font-size:.64em;
+  }
+
+  .searchWrap{
+    flex:0 0 auto;
+    margin:0 0 8px;
+    padding-right:4px;
+  }
+
+  .searchInput{
+    width:100%;
+    height:34px;
+    border:none;
+    outline:none;
+    border-radius:12px;
+    padding:0 12px;
+    background:rgba(255,252,247,0.62);
+    color:#5f3b1d;
+    font-size:12px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.75),
+      0 2px 8px rgba(120,92,63,0.05);
+  }
+
+  .searchInput::placeholder{
+    color:#9a7b5b;
+  }
+
+#browseList{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:4px;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(175,135,98,0.55) transparent;
+}
+
+  #browseList::-webkit-scrollbar{
+    width:8px;
+  }
+  #browseList::-webkit-scrollbar-track{
+    background:transparent;
+  }
+  #browseList::-webkit-scrollbar-thumb{
+    background:rgba(175,135,98,0.55);
+    border-radius:999px;
+  }
+
+  .taskItem:hover{
+    transform:translateY(-1px);
+    background:rgba(255,252,247,0.52);
+  }
+
+  .taskItem.active:hover{
+    transform:none;
+    background:linear-gradient(180deg, rgba(250,238,217,0.98) 0%, rgba(244,224,194,0.98) 100%);
+  }
+
+  .taskItemCardBtn{
+    all:unset;
+    display:block;
+    width:100%;
+    cursor:pointer;
+  }
+
+  .taskItemName{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:8px;
+    min-width:0;
+    font-size:13px;
+    font-weight:800;
+    line-height:1.3;
+    color:inherit;
+  }
+
+  .taskItemTitleMain{
+    min-width:0;
+    display:flex;
+    align-items:flex-start;
+    gap:5px;
+    flex-wrap:wrap;
+    flex:1 1 auto;
+  }
+
+  .taskItemHeadActions{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  .taskNameText{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:normal;
+    line-height:1.35;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    word-break:break-word;
+  }
+
+  .taskTypeMini{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    height:17px;
+    padding:0 5px;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:700;
+    line-height:1;
+    background:rgba(255,248,238,0.88);
+    color:#8a5b30;
+    border:1px solid rgba(194,151,108,0.22);
+    flex:0 0 auto;
+  }
+
+  .taskItemInfo{
+    display:block;
+    margin-top:3px;
+    font-size:11px;
+    font-weight:600;
+    line-height:1.35;
+    color:#8b6947;
+  }
+
+  .taskEmpty{
+    padding:16px 12px;
+    border-radius:15px;
+    background:rgba(255,252,247,0.28);
+    color:#8b6947;
+    font-size:12px;
+    line-height:1.6;
+    text-align:center;
+  }
+
+  #browseDetailPane{
+    padding:16px 16px 12px;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    background:transparent;
+  }
+
+  #browseDetailHeader{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:8px;
+  }
+
+  .detailTitleWrap{
+    min-width:0;
+  }
+
+  #browseDetailTitle{
+    color:#6f4726;
+    font-size:18px;
+    font-weight:800;
+    line-height:1.2;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:4px;
+    min-width:0;
+  }
+
+  .detailTitleMain{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    min-width:0;
+    word-break:break-word;
+  }
+
+  .detailTitleText{
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+
+  .detailTitleStatus{
+    color:#8a6644;
+    font-size:11px;
+    font-weight:700;
+    line-height:1.45;
+  }
+
+  .topRightStatus{
+    display:none;
+  }
+
+  .autoSaveBadge{
+    flex:0 0 auto;
+    min-height:30px;
+    padding:6px 12px;
+    border-radius:999px;
+    background:rgba(255,252,247,0.56);
+    color:#7a5231;
+    font-size:11px;
+    font-weight:700;
+    white-space:nowrap;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .autoSaveBadge.saving{
+    background:rgba(240,226,200,0.9);
+    color:#8a5a2d;
+  }
+
+  .autoSaveBadge.saved{
+    background:rgba(222,238,212,0.95);
+    color:#55763a;
+  }
+
+  .autoSaveBadge.error{
+    background:rgba(245,219,213,0.96);
+    color:#934d3f;
+  }
+
+  .headerRight{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+
+  .saveNowBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-height:30px;
+    padding:6px 12px;
+    border-radius:999px;
+    background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
+    color:#6a4120;
+    font-size:11px;
+    font-weight:800;
+    white-space:nowrap;
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,230,0.95),
+      0 4px 12px rgba(112,83,52,0.10);
+    transition:transform .18s ease, filter .18s ease;
+  }
+
+  .saveNowBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .saveNowBtn:disabled{
+    cursor:not-allowed;
+    opacity:.55;
+    transform:none;
+    filter:none;
+  }
+
+  .undoBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-height:30px;
+    padding:6px 12px;
+    border-radius:999px;
+    background:rgba(255,252,247,0.86);
+    color:#7a5231;
+    font-size:11px;
+    font-weight:800;
+    white-space:nowrap;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 2px 8px rgba(112,83,52,0.08);
+    transition:transform .18s ease, filter .18s ease;
+  }
+
+  .undoBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .undoBtn:disabled{
+    cursor:not-allowed;
+    opacity:.5;
+    transform:none;
+    filter:none;
+  }
+
+  #browseDetailBody{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    padding-right:4px;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(175,135,98,0.55) transparent;
+  }
+
+  #browseDetailBody::-webkit-scrollbar{
+    width:8px;
+  }
+  #browseDetailBody::-webkit-scrollbar-track{
+    background:transparent;
+  }
+  #browseDetailBody::-webkit-scrollbar-thumb{
+    background:rgba(175,135,98,0.55);
+    border-radius:999px;
+  }
+
+  .editBlock{
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:16px;
+    background:rgba(255,252,247,0.36);
+    border:1px solid rgba(255,255,255,0.34);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.5),
+      0 2px 8px rgba(120,92,63,0.04);
+  }
+
+  .editGrid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+  }
+
+  .editGrid.four{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+
+  .editField{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    min-width:0;
+  }
+
+  .editLabel{
+    color:#8a6644;
+    font-size:11px;
+    font-weight:700;
+  }
+
+  .sectionTitle{
+    color:#6f4726;
+    font-size:14px;
+    font-weight:800;
+    margin-bottom:10px;
+  }
+
+  .editInput,
+  .editSelect{
+    width:100%;
+    min-height:38px;
+    border:none;
+    outline:none;
+    border-radius:12px;
+    padding:0 12px;
+    background:rgba(255,252,247,0.82);
+    color:#5f3b1d;
+    font-size:13px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.75),
+      0 2px 8px rgba(120,92,63,0.05);
+  }
+
+  .editInput::placeholder{
+    color:#9a7b5b;
+  }
+
+  .rowList{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .lyricsAssignWrap{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 210px;
+    gap:12px;
+    align-items:start;
+  }
+
+  .lyricsAssignWrap.noCandidates{
+    grid-template-columns:1fr;
+  }
+
+  .rowCard{
+    display:grid;
+    grid-template-columns:minmax(0,1.25fr) minmax(0,1.2fr) 32px;
+    gap:8px;
+    align-items:center;
+    padding:8px;
+    border-radius:13px;
+    background:rgba(255,252,247,0.48);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.65),
+      0 2px 8px rgba(120,92,63,0.04);
+    transition:box-shadow .18s ease, background .18s ease, transform .18s ease;
+    position:relative;
+  }
+
+  .rowCard.openTarget{
+    cursor:pointer;
+  }
+
+  .rowCard.openTarget:hover{
+    transform:translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.75),
+      0 4px 12px rgba(120,92,63,0.08);
+  }
+
+  .rowCard.dropHover{
+    background:rgba(248,233,202,0.78);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.85),
+      0 0 0 2px rgba(201,140,79,0.35);
+  }
+
+  .candidatePane{
+    padding:10px;
+    border-radius:14px;
+    background:rgba(255,252,247,0.46);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.65),
+      0 2px 8px rgba(120,92,63,0.04);
+    min-height:100%;
+  }
+
+  .candidateTitle{
+    color:#7a5231;
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:8px;
+  }
+
+  .candidateList{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .miniBtn,
+  .pickerBtn,
+  .candidateBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-width:96px;
+    height:36px;
+    padding:0 14px;
+    border-radius:12px;
+    background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
+    color:#6a4120;
+    font-size:12px;
+    font-weight:800;
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,230,0.95),
+      0 4px 12px rgba(112,83,52,0.10);
+    transition:transform .18s ease, filter .18s ease, background .18s ease, color .18s ease;
+  }
+
+  .miniBtn:hover,
+  .pickerBtn:hover,
+  .candidateBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .miniBtn.ghost{
+    background:rgba(255,252,247,0.9);
+    color:#7c4d25;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 2px 6px rgba(112,83,52,0.06);
+  }
+
+  .miniBtn.active,
+  .pickerBtn.active,
+  .candidateBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  .miniBtn.dangerWide{
+    background:linear-gradient(180deg, #d99072 0%, #c97556 100%);
+    color:#fff7f1;
+  }
+
+  .miniBtn:disabled,
+  .pickerBtn:disabled,
+  .candidateBtn:disabled{
+    cursor:not-allowed;
+    opacity:.55;
+    transform:none;
+    filter:none;
+  }
+
+  .toolbarLine{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+
+  .bonusSectionTitle{
+    color:#7d5731;
+    font-size:14px;
+    font-weight:800;
+    margin-bottom:10px;
+  }
+
+  .bonusWrap{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px;
+    padding:4px 2px 0;
+  }
+
+  .bonusCard{
+    min-width:0;
+  }
+
+  .bonusLabel{
+    color:#9a7146;
+    font-size:12px;
+    font-weight:700;
+    margin-bottom:2px;
+  }
+
+  .bonusValue{
+    color:#8a5b2f;
+    font-size:20px;
+    font-weight:900;
+    line-height:1.1;
+    letter-spacing:.2px;
+  }
+
+  .bonusValue small{
+    font-size:.7em;
+    font-weight:800;
+  }
+
+  .bonusHint{
+    margin-top:4px;
+    color:#8a6644;
+    font-size:12px;
+    font-weight:700;
+    line-height:1.5;
+  }
+
+  .lyricsToolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+
+  .lyricsToolBtns{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .addPartRowBtn,
+  .roleToolBtn{
+    min-width:auto;
+    height:30px;
+    padding:0 12px;
+    font-size:11px;
+    border-radius:10px;
+  }
+
+  .taskDangerBar{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:10px;
+  }
+
+  #deleteTaskBtn{
+    background:transparent;
+    box-shadow:none;
+    border:none;
+    padding:0 2px;
+    min-width:auto;
+    height:auto;
+    color:#a05547;
+  }
+
+  #deleteTaskBtn:hover{
+    background:transparent;
+    filter:none;
+    transform:none;
+    text-decoration:underline;
+  }
+
+  .disabledWrap{
+    opacity:.72;
+    pointer-events:none;
+  }
+
+  .loadingText{
+    color:#8b6947;
+    font-size:13px;
+    line-height:1.6;
+    text-align:center;
+    padding:20px 12px;
+  }
+
+  .pickerGroup{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .pickerGroup.singerPicker{
+    margin-top:10px;
+    gap:10px;
+  }
+
+  .joinTaskBtn{
+    width:28px;
+    height:28px;
+    min-width:28px;
+    padding:0;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.2px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.96);
+    color:#7c4d25;
+    border:1px solid rgba(194,151,108,0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.96),
+      0 2px 8px rgba(112,83,52,0.06);
+  }
+
+  .joinTaskBtn:hover{
+    background:rgba(255,255,255,1);
+  }
+
+  .joinTaskBtn.ghost{
+    background:rgba(255,255,255,0.86);
+    color:#9a7b5b;
+    border:1px solid rgba(194,151,108,0.14);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.94),
+      0 2px 6px rgba(112,83,52,0.04);
+  }
+
+  .joinTaskBtn.joined{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    border-color:rgba(194,151,108,0.12);
+  }
+
+  .taskModeToggleBtn{
+    width:32px;
+    height:32px;
+    min-width:32px;
+    padding:0;
+    border-radius:8px;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.2px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.96);
+    color:#7c4d25;
+    border:1px solid rgba(194,151,108,0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.96),
+      0 2px 8px rgba(112,83,52,0.06);
+  }
+
+  .taskModeToggleBtn:hover{
+    background:rgba(255,255,255,1);
+  }
+
+  .taskModeToggleBtn.special{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    border-color:rgba(194,151,108,0.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  .taskModeToggleBtn:disabled{
+    cursor:not-allowed;
+    opacity:.55;
+    transform:none;
+    filter:none;
+  }
+
+  .songNameFieldWrap{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+
+  .songNameFieldWrap .editInput{
+    flex:1 1 auto;
+    min-width:0;
+  }
+
+  .taskBasicGrid{
+    grid-template-columns:minmax(88px,0.82fr) minmax(240px,1.9fr) minmax(118px,1fr) !important;
+    align-items:end;
+  }
+
+  .taskMetaGrid{
+    grid-template-columns:minmax(96px,0.95fr) minmax(120px,1fr) minmax(158px,1.25fr) !important;
+  }
+
+  .pickerBtn.singerOptionBtn{
+    min-width:auto;
+    height:34px;
+    padding:0 14px;
+    border-radius:999px;
+    background:rgba(255,252,247,0.92);
+    color:#7a4d25;
+    border:1px solid rgba(194,151,108,0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.96),
+      0 2px 6px rgba(112,83,52,0.06);
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .pickerBtn.mixerOptionBtn{
+    min-width:auto;
+    height:28px;
+    padding:0 10px;
+    border-radius:10px;
+    font-size:11px;
+    font-weight:700;
+    background:rgba(255,252,247,0.92);
+    color:#7a4d25;
+    border:1px solid rgba(194,151,108,0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.96),
+      0 2px 6px rgba(112,83,52,0.06);
+  }
+
+  .pickerBtn.mixerOptionBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    border-color:rgba(194,151,108,0.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  .pickerBtn.singerOptionBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.02);
+  }
+
+  .pickerBtn.singerOptionBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    border-color:rgba(194,151,108,0.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  .rowDeleteBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    width:32px;
+    height:32px;
+    border-radius:10px;
+    background:rgba(217,144,114,0.16);
+    color:#934d3f;
+    font-size:16px;
+    font-weight:800;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.75);
+    transition:transform .18s ease, filter .18s ease, background .18s ease;
+  }
+
+  .rowDeleteBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+    background:rgba(217,144,114,0.24);
+  }
+
+  .rowDeleteBtn:disabled{
+    cursor:not-allowed;
+    opacity:.55;
+    transform:none;
+    filter:none;
+  }
+
+  .partRow{
+    position:relative;
+    z-index:1;
+  }
+
+  .partRow.suggestOpen{
+    z-index:220;
+  }
+
+  .partMemberField{
+    position:relative;
+    min-width:0;
+    z-index:2;
+  }
+
+  .partRow.suggestOpen .partMemberField{
+    z-index:230;
+  }
+
+  .memberSuggestBox{
+    position:absolute;
+    left:0;
+    right:0;
+    top:calc(100% + 6px);
+    z-index:80;
+    display:none;
+    max-height:188px;
+    overflow-y:auto;
+    padding:6px;
+    border-radius:12px;
+    background:rgba(255,249,241,0.98);
+    border:1px solid rgba(203,167,123,0.34);
+    box-shadow:
+      0 10px 24px rgba(85,58,34,0.12),
+      inset 0 1px 0 rgba(255,255,255,0.92);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+  }
+
+  .memberSuggestBox.show{
+    display:block;
+  }
+
+  .memberSuggestEmpty{
+    padding:9px 10px;
+    color:#9a7b5b;
+    font-size:12px;
+    line-height:1.4;
+    text-align:center;
+  }
+
+  .memberSuggestItem{
+    width:100%;
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    min-height:34px;
+    padding:0 10px;
+    border-radius:9px;
+    background:transparent;
+    color:#6a4120;
+    font-size:12px;
+    font-weight:700;
+    text-align:left;
+  }
+
+  .memberSuggestItem:hover,
+  .memberSuggestItem.active{
+    background:rgba(217,163,100,0.18);
+  }
+
+  #siteNoticeWrap{
+    position:relative;
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    order:2;
+  }
+
+  #siteNoticeBtn{
+    position:relative;
+    width:clamp(34px, 3vw, 38px);
+    min-width:clamp(34px, 3vw, 38px);
+    height:clamp(34px, 3vw, 38px);
+    padding:0;
+    border:none;
+    cursor:pointer;
+    border-radius:999px;
+    background:var(--top-chip-bg);
+    color:#6c4523;
+    font-size:clamp(14px, 1vw, 16px);
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:var(--top-chip-shadow);
+    border:1px solid var(--top-chip-border);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+  }
+
+  #siteNoticeBtn:hover{
+    transform:translateY(-1px);
+    background:rgba(255,255,255,0.94);
+  }
+
+  #siteNoticeBtn.hasNotice{
+    background:var(--top-chip-bg);
+    box-shadow:var(--top-chip-shadow);
+  }
+
+  #siteNoticeIcon{
+    display:block;
+    line-height:1;
+    filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
+  }
+
+  #siteNoticeText{
+    display:none;
+  }
+
+  #siteNoticeCount{
+    position:absolute;
+    right:-2px;
+    top:-2px;
+    min-width:18px;
+    height:18px;
+    padding:0 5px;
+    border-radius:999px;
+    background:#c98c4f;
+    color:#fff9f1;
+    font-size:10px;
+    font-weight:900;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 8px rgba(116,86,54,0.16);
+  }
+
+  #siteNoticeBtn.hasNotice #siteNoticeCount{
+    display:flex;
+  }
+
+  #siteNoticePanel{
+    position:absolute;
+    top:calc(100% + 10px);
+    right:0;
+    width:min(360px, 72vw);
+    max-height:320px;
+    overflow:auto;
+    padding:12px;
+    border-radius:16px;
+    background:rgba(255,249,241,0.98);
+    border:1px solid rgba(203,167,123,0.28);
+    box-shadow:0 16px 36px rgba(85,58,34,0.16);
+    display:none;
+    z-index:80;
+    text-align:left;
+  }
+
+  #siteNoticePanel.show{
+    display:block;
+  }
+
+  .siteNoticeTitle{
+    color:#6f4726;
+    font-size:13px;
+    font-weight:900;
+    margin-bottom:8px;
+  }
+
+  .siteNoticeEmpty{
+    color:#8a6644;
+    font-size:12px;
+    line-height:1.6;
+    padding:6px 2px 2px;
+  }
+
+  .siteNoticeList{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .siteNoticeItem{
+    padding:10px;
+    border-radius:12px;
+    background:rgba(255,252,247,0.82);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.92), 0 2px 8px rgba(120,92,63,0.05);
+  }
+
+  .siteNoticeItemTitle{
+    color:#6f4726;
+    font-size:12px;
+    font-weight:800;
+    line-height:1.5;
+    margin-bottom:4px;
+  }
+
+  .siteNoticeItemDesc{
+    color:#8a6644;
+    font-size:11px;
+    line-height:1.55;
+    margin-bottom:8px;
+  }
+
+  .siteNoticeAction{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-height:30px;
+    padding:0 12px;
+    border-radius:10px;
+    background:linear-gradient(180deg,#efd5ab 0%, #dfbd8a 100%);
+    color:#6a4120;
+    font-size:11px;
+    font-weight:800;
+    box-shadow:inset 0 1px 0 rgba(255,247,230,0.95), 0 4px 12px rgba(112,83,52,0.10);
+  }
+
+  #miniNotice{
+    position:fixed;
+    top:22px;
+    left:50%;
+    transform:translateX(-50%) translateY(-10px);
+    min-width:220px;
+    max-width:min(420px, 88vw);
+    padding:10px 16px;
+    border-radius:14px;
+    background:rgba(255,249,241,0.96);
+    color:#6a4525;
+    font-size:13px;
+    font-weight:800;
+    text-align:center;
+    box-shadow:
+      0 10px 28px rgba(85,58,34,0.16),
+      inset 0 1px 0 rgba(255,255,255,0.92);
+    border:1px solid rgba(203,167,123,0.28);
+    opacity:0;
+    pointer-events:none;
+    z-index:10020;
+    transition:opacity .22s ease, transform .22s ease;
+  }
+
+  #miniNotice.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  #toastMask{
+    position:fixed;
+    inset:0;
+    background:rgba(60,42,23,0.18);
+    backdrop-filter:blur(3px);
+    -webkit-backdrop-filter:blur(3px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    padding:20px;
+  }
+
+  #toastMask.show{
+    display:flex;
+  }
+
+  #toastBox{
+    width:min(420px, 92vw);
+    border-radius:22px;
+    background:rgba(255,249,241,0.95);
+    border:1px solid rgba(203,167,123,0.28);
+    box-shadow:
+      0 18px 45px rgba(85,58,34,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.92);
+    padding:22px 20px 18px;
+    text-align:center;
+  }
+
+  #toastTitle{
+    color:#6f4726;
+    font-size:19px;
+    font-weight:800;
+    margin-bottom:10px;
+  }
+
+  #toastMessage{
+    color:#6a4525;
+    font-size:14px;
+    line-height:1.75;
+    white-space:pre-line;
+    word-break:break-word;
+    margin-bottom:14px;
+  }
+
+  .toastActions{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  #toastCloseBtn,
+  #toastConfirmBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-width:100px;
+    height:38px;
+    padding:0 16px;
+    border-radius:12px;
+    background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
+    color:#6a4120;
+    font-size:13px;
+    font-weight:800;
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,230,0.95),
+      0 4px 12px rgba(112,83,52,0.10);
+  }
+
+  #toastConfirmBtn{
+    background:linear-gradient(180deg, #d99072 0%, #c97556 100%);
+    color:#fff7f1;
+  }
+
+  @media (max-width: 1180px){
+    #browsePanelInner{
+      grid-template-columns:26.5% 73.5%;
+    }
+
+    .taskBasicGrid{
+      grid-template-columns:minmax(82px,0.85fr) minmax(185px,1.6fr) minmax(100px,0.95fr) !important;
+    }
+
+    .taskMetaGrid{
+      grid-template-columns:minmax(84px,0.9fr) minmax(112px,0.95fr) minmax(136px,1.12fr) !important;
+    }
+  }
+
+  @media (max-width: 980px){
+    #taskPanel{
+      width:68%;
+    }
+
+    #panelSwitch{
+      right:-168px;
+      width:150px;
+      padding:18px 14px;
+    }
+
+    #browsePanelInner{
+      grid-template-columns:26.5% 73.5%;
+    }
+
+    .rowCard{
+      grid-template-columns:minmax(0,1.25fr) minmax(0,1.2fr) 32px;
+    }
+
+    .editGrid{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .editGrid.four{
+      grid-template-columns:0.8fr 1.35fr 0.95fr 0.9fr;
+    }
+
+    .bonusWrap{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .filterTagsWrap{
+      gap:5px;
+    }
+
+    .filterTagBtn{
+      min-width:auto;
+      height:24px;
+      padding:0 7px;
+      font-size:10px;
+    }
+
+    .pickerBtn.mixerOptionBtn{
+      height:26px;
+      padding:0 8px;
+      font-size:10px;
+    }
+
+    .taskItem{
+      padding:8px 9px;
+    }
+
+    .taskNameText{
+      -webkit-line-clamp:3;
+      font-size:12px;
+    }
+
+    .taskItemInfo{
+      font-size:10px;
+    }
+
+    .taskBasicGrid{
+      grid-template-columns:minmax(72px,0.92fr) minmax(170px,1.7fr) minmax(92px,0.95fr) !important;
+    }
+
+    .taskMetaGrid{
+      grid-template-columns:minmax(78px,0.92fr) minmax(108px,1fr) minmax(124px,1.18fr) !important;
+    }
+
+    #browseDetailContentClaim .editGrid[style*="grid-template-columns:0.9fr 1fr 1fr"]{
+      grid-template-columns:0.9fr 1fr 1fr !important;
+    }
+  }
+
+  @media (max-width: 720px){
+    .filterTagsWrap{
+      gap:4px;
+    }
+
+    .filterTagBtn{
+      height:22px;
+      padding:0 6px;
+      font-size:9px;
+      border-radius:8px;
+    }
+
+    .joinTaskBtn{
+      width:26px;
+      height:26px;
+      min-width:26px;
+      font-size:10px;
+    }
+
+    .pickerBtn.mixerOptionBtn{
+      height:24px;
+      padding:0 7px;
+      font-size:9px;
+      border-radius:8px;
+    }
+  }
+
+  @media (max-width: 760px){
+    .taskBasicGrid,
+    .taskMetaGrid{
+      grid-template-columns:1fr !important;
+    }
+
+    #browseDetailContentClaim .editGrid[style*="grid-template-columns:0.9fr 1fr 1fr"]{
+      grid-template-columns:1fr !important;
+    }
+  }
+
+
+  #wheelModalMask{
+    position:fixed;
+    inset:0;
+    background:rgba(60,42,23,0.26);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9997;
+    padding:18px;
+  }
+
+  #wheelModalMask.show{
+    display:flex;
+  }
+
+  #wheelModalBox{
+    position:relative;
+    width:min(1120px, 96vw);
+    height:min(86vh, 820px);
+    border-radius:24px;
+    overflow:hidden;
+    background:rgba(255,249,241,0.98);
+    border:1px solid rgba(203,167,123,0.28);
+    box-shadow:0 20px 48px rgba(85,58,34,0.22);
+  }
+
+  #wheelModalCloseBtn{
+    position:absolute;
+    top:14px;
+    right:14px;
+    z-index:2;
+    min-width:86px;
+    height:36px;
+    border-radius:12px;
+  }
+
+  #wheelModalFrame{
+    width:100%;
+    height:100%;
+    border:none;
+    background:#fffaf4;
+  }
+
+  #roleSetupMask{
+    position:fixed;
+    inset:0;
+    background:rgba(60,42,23,0.18);
+    backdrop-filter:blur(3px);
+    -webkit-backdrop-filter:blur(3px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9998;
+    padding:20px;
+  }
+
+  #roleSetupMask.show{
+    display:flex;
+  }
+
+  #roleSetupBox{
+    width:min(720px, 94vw);
+    max-height:min(88vh, 860px);
+    overflow:auto;
+    border-radius:22px;
+    background:rgba(255,249,241,0.97);
+    border:1px solid rgba(203,167,123,0.28);
+    box-shadow:
+      0 18px 45px rgba(85,58,34,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.92);
+    padding:22px 20px 18px;
+  }
+
+  .roleSetupTitle{
+    color:#6f4726;
+    font-size:19px;
+    font-weight:800;
+    margin-bottom:8px;
+  }
+
+  .roleSetupDesc{
+    color:#6a4525;
+    font-size:13px;
+    line-height:1.7;
+    margin-bottom:14px;
+    white-space:pre-line;
+  }
+
+  .roleSetupRows{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:14px;
+  }
+
+  .roleSetupRow{
+    display:grid;
+    grid-template-columns:92px minmax(0,1fr) 130px;
+    gap:8px;
+    align-items:center;
+    padding:8px;
+    border-radius:13px;
+    background:rgba(255,252,247,0.72);
+  }
+
+  .roleSetupRowLabel,
+  .roleSetupMemberLabel{
+    color:#8a6644;
+    font-size:11px;
+    font-weight:700;
+  }
+
+  .roleSetupMemberText{
+    color:#6f4726;
+    font-size:12px;
+    font-weight:800;
+  }
+
+  .roleSetupActions{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+@media (max-width: 640px){
+  .roleSetupRow{
+    grid-template-columns:1fr;
+  }
+}
+
+/* ===== 👇 在这里加 👇 ===== */
+
+/* 大屏默认 */
+#overlay{
+  --user-right:190px;
+  --user-top:7.5%;
+  --top-ui-scale:1;
+}
+
+/* 中大屏 */
+@media (max-width: 1400px){
+  #overlay{
+    --user-right:150px;
+    --user-top:7.2%;
+    --top-ui-scale:0.95;
+  }
+}
+
+/* 中屏 */
+@media (max-width: 1200px){
+  #overlay{
+    --user-right:105px;
+    --user-top:7.5%;
+    --top-ui-scale:0.9;
+  }
+}
+
+/* 小屏 */
+@media (max-width: 1000px){
+  #overlay{
+    --user-right:85px;
+    --user-top:7%;
+    --top-ui-scale:0.84;
+  }
+}
+
+/* 平板 */
+@media (max-width: 820px){
+  #overlay{
+    --user-right:65px;
+    --user-top:7%;
+    --top-ui-scale:0.78;
+  }
+}
+
+/* 手机 */
+@media (max-width: 640px){
+  #overlay{
+    --user-right:42px;
+    --user-top:6%;
+    --top-ui-scale:0.72;
+  }
+}
+</style>
+</head>
+<body>
+  <div id="room">
+    <div id="bgFrame" aria-hidden="true">
+      <img id="bg" src="./room-studio.png" alt="十号房工作间背景" />
+    </div>
+    <div id="musicNotesLayer" aria-hidden="true"></div>
+
+    <div id="overlay">
+      <div id="topBar">
+        <div id="navOuter">
+          <div id="navScroll">
+            <nav id="roomNav" aria-label="房间切换">
+              <button class="navBtn" data-room="hall">大堂</button>
+              <button class="navBtn" data-room="manager">宿管室</button>
+              <button class="navBtn" data-room="honor">荣誉墙</button>
+              <button class="navBtn" data-room="game">游戏房</button>
+              <button class="navBtn" data-room="living">客厅</button>
+              <button class="navBtn" data-room="dorm">宿舍</button>
+              <button class="navBtn" data-room="pets">宠物区</button>
+              <button class="navBtn" data-room="garden">花房区</button>
+            </nav>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="topBarUserArea">
+          <div id="currentUserBadge"><span class="roleDot"></span><span class="identityText">未登录</span></div>
+          <div id="siteNoticeWrap">
+            <button id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="站内通知">
+              <span id="siteNoticeIcon" aria-hidden="true">🔔</span>
+              <span id="siteNoticeText">站内通知</span>
+              <span id="siteNoticeCount">0</span>
+            </button>
+            <div id="siteNoticePanel" aria-hidden="true">
+              <div class="siteNoticeTitle">待处理提醒</div>
+              <div id="siteNoticeBody" class="siteNoticeEmpty">暂无提醒</div>
+            </div>
+          </div>
+          <button id="logoutBtn" type="button">登出</button>
+      </div>
+
+      <section id="taskPanel" aria-label="工作间任务面板">
+        <div id="panelSwitch">
+          <button class="switchBtn" type="button" data-page="studio-claim.html">待处理</button>
+          <button class="switchBtn" type="button" data-page="studio-task.html">任务详情</button>
+          <button class="switchBtn" type="button" data-page="studio-project.html">项目委托</button>
+        </div>
+
+        <div id="claimView" class="panelView">
+          <div id="browsePanelInner">
+            <div id="browseListPane">
+              
+
+              <div class="filterTagsWrap">
+                <button id="filterClaimBtn" class="filterTagBtn primaryFilterBtn" type="button" data-filter="待认领">待认领</button>
+                <button id="filterLyricsBtn" class="filterTagBtn primaryFilterBtn" type="button" data-filter="待分词">待分词</button>
+                <button id="filterToneBtn" class="filterTagBtn primaryFilterBtn" type="button" data-filter="待定调">待定调</button>
+                <button id="filterPublishBtn" class="filterTagBtn primaryFilterBtn" type="button" data-filter="待发布">待发布</button>
+                <button id="filterNoMeBtn" class="filterTagBtn altToggle" type="button" data-filter="没有我" hidden>没有我</button>
+                <button id="filterHasMeBtn" class="filterTagBtn altToggle" type="button" data-filter="有我在" hidden>有我在</button>
+              </div>
+
+              <div class="searchWrap">
+                <input id="taskSearch" class="searchInput" type="text" placeholder="搜索歌名或编号" />
+              </div>
+
+              <div id="browseList"></div>
+            </div>
+
+            <div id="browseDetailPane">
+              <div id="browseDetailHeader">
+                <div class="detailTitleWrap">
+                  <div id="browseDetailTitle"></div>
+                </div>
+                <div class="headerRight">
+                  <div id="topStatus" class="topRightStatus">任务状态</div>
+                  <button id="undoBtn" class="undoBtn" type="button" disabled>撤回上一步</button><button id="saveNowBtn" class="saveNowBtn" type="button">保存</button>
+                  <div id="autoSaveStatus" class="autoSaveBadge">已同步</div>
+                </div>
+              </div>
+
+              <div id="browseDetailBody">
+                <div id="browseDetailContentClaim"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="toastMask" aria-hidden="true">
+    <div id="toastBox">
+      <div id="toastTitle">提示</div>
+      <div id="toastMessage"></div>
+      <div class="toastActions">
+        <button id="toastCloseBtn" type="button">知道了</button>
+        <button id="toastConfirmBtn" type="button" hidden>确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="miniNotice" aria-hidden="true"></div>
+
+  <div id="roleSetupMask" aria-hidden="true">
+    <div id="roleSetupBox">
+      <div class="roleSetupTitle" id="roleSetupTitle">随机分配设置</div>
+      <div class="roleSetupDesc" id="roleSetupDesc"></div>
+      <div class="roleSetupRows" id="roleSetupRows"></div>
+      <div class="editField" style="margin-bottom:14px;">
+        <label class="editLabel">参与成员</label>
+        <div class="pickerGroup singerPicker" id="roleSetupSingerPicker"></div>
+      </div>
+      <div class="roleSetupActions">
+        <button id="roleSetupCancelBtn" class="miniBtn ghost" type="button">取消</button>
+        <button id="roleSetupConfirmBtn" class="miniBtn" type="button">开始随机</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="wheelModalMask" aria-hidden="true">
+    <div id="wheelModalBox">
+      <button id="wheelModalCloseBtn" class="miniBtn ghost" type="button">关闭</button>
+      <iframe id="wheelModalFrame" title="角色转盘工具" src="about:blank"></iframe>
+    </div>
+  </div>
+
+  <datalist id="memberOptionsAll"></datalist>
+
+<script>
+  const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const STORAGE_KEYS = {
+    loggedIn: "room10LoggedIn",
+    user: "room10User",
+    role: "room10Role",
+    memberId: "room10MemberId",
+    memberCode: "room10MemberCode"
+  };
+
+  const TASK_TYPE_OPTIONS = ["披4", "披哥", "浪姐", "游戏", "其他"];
+  const TASK_PAYOUT = {
+    onSubmitRatio: 0.7,
+    onPublishRatio: 0.3
+  };
+  const SINGING_REWARD_TABLE = {
+    1: 40, 2: 38, 3: 35, 4: 32, 5: 30, 6: 28, 7: 26, 8: 25, 9: 24,
+    10: 23, 11: 22, 12: 21, 13: 20, 14: 19, 15: 18, 16: 18, 17: 17
+  };
+
+  const authState = {
+    initialized: false,
+    loggedIn: false,
+    nickname: "",
+    role: "visitor",
+    memberId: null,
+    memberCode: ""
+  };
+
+  const links = {
+    hall: "index.html",
+    honor: "honor.html",
+    game: "game.html",
+    living: "living.html",
+    dorm: "dorm.html",
+    pets: "pets.html",
+    garden: "flower.html"
+  };
+
+  const IS_FILE_PROTOCOL = window.location.protocol === "file:";
+
+  let tasks = [];
+  let membersCache = [];
+  let mixerMembersCache = [];
+  let activeClaimTaskId = "";
+  let claimSearchKeyword = "";
+  let activeMainFilter = "";
+  let activeSecondaryFilter = "";
+  let autoSaveTimer = null;
+  let saveInFlight = false;
+  let pendingSaveAfterCurrent = false;
+  let pendingSaveMode = "auto";
+  let activeRoleToolType = "lottery";
+  let roleSetupContext = null;
+  let suppressAutoSave = false;
+  let selectedCandidateMemberId = "";
+  let selectedCandidateName = "";
+  let detailUndoStack = [];
+  let isApplyingUndoSnapshot = false;
+  let lastLotteryReminderKey = "";
+  let hasPendingLocalChanges = false;
+  let preserveActiveTaskInCurrentView = true;
+  let personalLotteryInFlight = false;
+
+  const room = document.getElementById("room");
+  const bg = document.getElementById("bg");
+  const BG_CANDIDATE_PATHS = ["./room-studio.png", "room-studio.png", "./images/room-studio.png", "images/room-studio.png"];
+  let bgPathIndex = 0;
+  let bgLoaded = false;
+  if (bg && !IS_FILE_PROTOCOL) bg.crossOrigin = "anonymous";
+  const overlay = document.getElementById("overlay");
+  const musicNotesLayer = document.getElementById("musicNotesLayer");
+  const claimSearchInput = document.getElementById("taskSearch");
+  const autoSaveStatus = document.getElementById("autoSaveStatus");
+  const saveNowBtn = document.getElementById("saveNowBtn");
+  const undoBtn = document.getElementById("undoBtn");
+  const currentUserBadge = document.getElementById("currentUserBadge");
+  const siteNoticeBtn = document.getElementById("siteNoticeBtn");
+  const siteNoticeText = document.getElementById("siteNoticeText");
+  const siteNoticeCount = document.getElementById("siteNoticeCount");
+  const siteNoticePanel = document.getElementById("siteNoticePanel");
+  const siteNoticeBody = document.getElementById("siteNoticeBody");
+
+  const roleSetupMask = document.getElementById("roleSetupMask");
+  const roleSetupTitle = document.getElementById("roleSetupTitle");
+  const roleSetupDesc = document.getElementById("roleSetupDesc");
+  const roleSetupRows = document.getElementById("roleSetupRows");
+  const roleSetupSingerPicker = document.getElementById("roleSetupSingerPicker");
+  const roleSetupCancelBtn = document.getElementById("roleSetupCancelBtn");
+  const roleSetupConfirmBtn = document.getElementById("roleSetupConfirmBtn");
+  const topStatus = document.getElementById("topStatus");
+  const wheelModalMask = document.getElementById("wheelModalMask");
+  const wheelModalFrame = document.getElementById("wheelModalFrame");
+  const wheelModalCloseBtn = document.getElementById("wheelModalCloseBtn");
+
+  const toastMask = document.getElementById("toastMask");
+  const toastTitle = document.getElementById("toastTitle");
+  const toastMessage = document.getElementById("toastMessage");
+  const toastCloseBtn = document.getElementById("toastCloseBtn");
+  const toastConfirmBtn = document.getElementById("toastConfirmBtn");
+  const miniNotice = document.getElementById("miniNotice");
+  let toastResolve = null;
+  applyDefaultBackgroundBlend();
+  markBackgroundFailed();
+  let toastMode = "alert";
+  let miniNoticeTimer = null;
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function formatDateForInput(dateString) {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) {
+      const text = String(dateString).trim();
+      return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : "";
+    }
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function isLoggedIn() {
+    return localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
+  }
+
+  function getCurrentRole() {
+    const role = String(localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
+    return ["owner", "admin", "member", "visitor", "applying"].includes(role) ? role : "visitor";
+  }
+
+  function canEditCurrentPage() {
+    return ["owner", "admin", "member"].includes(getCurrentRole());
+  }
+
+  function canEditTaskCode() {
+    return ["owner", "admin"].includes(getCurrentRole());
+  }
+
+  function getCurrentMemberId() {
+    return String(authState.memberId || localStorage.getItem(STORAGE_KEYS.memberId) || "").trim();
+  }
+
+  function getCurrentMemberName() {
+    return String(authState.nickname || localStorage.getItem(STORAGE_KEYS.user) || "").trim();
+  }
+
+  function getCurrentRoleLabel(roleValue = authState.role) {
+    const role = String(roleValue || "").toLowerCase();
+    if (role === "owner") return "创建者";
+    if (role === "admin") return "管理员";
+    if (role === "member") return "成员";
+    if (role === "applying") return "申请中";
+    return "游客";
+  }
+
+  function updateTopBarIdentity() {
+    if (!currentUserBadge) return;
+    currentUserBadge.innerHTML = `<span class="roleDot"></span><span class="identityText">${escapeHtml(getCurrentMemberName() || "未登录")}｜${escapeHtml(getCurrentRoleLabel())}</span>`;
+  }
+
+  async function ensureAuthState() {
+    authState.loggedIn = isLoggedIn();
+    authState.nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
+    authState.role = getCurrentRole();
+    authState.memberId = localStorage.getItem(STORAGE_KEYS.memberId) || null;
+    authState.memberCode = String(localStorage.getItem(STORAGE_KEYS.memberCode) || "").trim();
+
+    if (!authState.loggedIn || !authState.nickname) {
+      handleLogout();
+      return false;
+    }
+
+    if (authState.memberId) {
+      authState.initialized = true;
+      updateTopBarIdentity();
+      return true;
+    }
+
+    try {
+      const { data, error } = await supabaseClient
+        .from("members")
+        .select("id, nickname, role, member_code")
+        .eq("nickname", authState.nickname)
+        .maybeSingle();
+
+      if (error || !data) {
+        handleLogout();
+        return false;
+      }
+
+      authState.memberId = String(data.id);
+      authState.role = String(data.role || authState.role || "member").toLowerCase();
+      authState.memberCode = String(data.member_code || "");
+
+      localStorage.setItem(STORAGE_KEYS.memberId, authState.memberId);
+      localStorage.setItem(STORAGE_KEYS.role, authState.role);
+      if (authState.memberCode) {
+        localStorage.setItem(STORAGE_KEYS.memberCode, authState.memberCode);
+      }
+
+      authState.initialized = true;
+      updateTopBarIdentity();
+      return true;
+    } catch (err) {
+      console.error("同步登录状态失败：", err);
+      handleLogout();
+      return false;
+    }
+  }
+
+  async function handleLogout() {
+    if (hasPendingLocalChanges) {
+      await saveCurrentTaskEdits("manual");
+    }
+    localStorage.removeItem(STORAGE_KEYS.loggedIn);
+    localStorage.removeItem(STORAGE_KEYS.user);
+    localStorage.removeItem(STORAGE_KEYS.role);
+    localStorage.removeItem(STORAGE_KEYS.memberId);
+    localStorage.removeItem(STORAGE_KEYS.memberCode);
+    window.location.href = "index.html";
+  }
+
+  function showToast(title, message) {
+    toastMode = "alert";
+    toastResolve = null;
+    toastTitle.textContent = title || "提示";
+    toastMessage.textContent = message || "";
+    toastCloseBtn.textContent = "知道了";
+    toastCloseBtn.hidden = false;
+    toastConfirmBtn.hidden = true;
+    toastMask.classList.add("show");
+    toastMask.setAttribute("aria-hidden", "false");
+  }
+
+  function showConfirmToast(title, message, confirmText = "确认", cancelText = "取消") {
+    return new Promise(resolve => {
+      toastMode = "confirm";
+      toastResolve = resolve;
+      toastTitle.textContent = title || "请确认";
+      toastMessage.textContent = message || "";
+      toastCloseBtn.textContent = cancelText;
+      toastCloseBtn.hidden = false;
+      toastConfirmBtn.textContent = confirmText;
+      toastConfirmBtn.hidden = false;
+      toastMask.classList.add("show");
+      toastMask.setAttribute("aria-hidden", "false");
+    });
+  }
+
+  function closeToast(result = false) {
+    toastMask.classList.remove("show");
+    toastMask.setAttribute("aria-hidden", "true");
+    if (toastMode === "confirm" && toastResolve) {
+      const resolve = toastResolve;
+      toastResolve = null;
+      toastMode = "alert";
+      resolve(!!result);
+      return;
+    }
+    toastResolve = null;
+    toastMode = "alert";
+  }
+
+  function showMiniNotice(message, duration = 1800) {
+    if (!miniNotice) return;
+    clearTimeout(miniNoticeTimer);
+    miniNotice.textContent = String(message || "");
+    miniNotice.classList.add("show");
+    miniNotice.setAttribute("aria-hidden", "false");
+    miniNoticeTimer = setTimeout(() => {
+      miniNotice.classList.remove("show");
+      miniNotice.setAttribute("aria-hidden", "true");
+    }, duration);
+  }
+
+
+  function buildWheelToolUrl(taskId = activeClaimTaskId) {
+    const params = new URLSearchParams();
+    if (taskId) params.set('task_id', String(taskId));
+    if (getCurrentMemberId()) params.set('member_id', getCurrentMemberId());
+    params.set('embed', '1');
+    return `studio-wheel.html${params.toString() ? `?${params.toString()}` : ''}`;
+  }
+
+  function openWheelToolModal(taskId = activeClaimTaskId) {
+    const task = getCurrentTaskSafe(taskId);
+    const isCollective = document.getElementById("editIsCollectiveBtn")?.classList.contains("special")
+      || String(document.getElementById("editIsCollective")?.value || "") === "1";
+    if (!task || !isCollective) return;
+
+    const wheelUrl = buildWheelToolUrl(task.id);
+
+    if (IS_FILE_PROTOCOL) {
+      window.location.href = wheelUrl;
+      return;
+    }
+
+    if (!wheelModalMask || !wheelModalFrame) return;
+    wheelModalFrame.src = wheelUrl;
+    wheelModalMask.classList.add('show');
+    wheelModalMask.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeWheelToolModal() {
+    if (!wheelModalMask || !wheelModalFrame) return;
+    wheelModalMask.classList.remove('show');
+    wheelModalMask.setAttribute('aria-hidden', 'true');
+    wheelModalFrame.src = 'about:blank';
+    document.body.style.overflow = '';
+  }
+
+  toastCloseBtn.addEventListener("click", () => closeToast(false));
+  toastConfirmBtn.addEventListener("click", () => closeToast(true));
+  toastMask.addEventListener("click", (e) => {
+    if (e.target === toastMask) closeToast(false);
+  });
+
+  if (wheelModalCloseBtn) {
+    wheelModalCloseBtn.addEventListener("click", closeWheelToolModal);
+  }
+  if (wheelModalMask) {
+    wheelModalMask.addEventListener("click", (e) => {
+      if (e.target === wheelModalMask) closeWheelToolModal();
+    });
+  }
+
+
+  function setAutoSaveStatus(type, text) {
+    autoSaveStatus.className = "autoSaveBadge";
+    if (type) autoSaveStatus.classList.add(type);
+    autoSaveStatus.textContent = text;
+  }
+
+  function makeDisplayTaskName(taskCode, taskName) {
+    const code = String(taskCode || "").trim();
+    const name = String(taskName || "").trim();
+    if (!code) return name;
+    if (!name) return code;
+    return `${code}.${name}`;
+  }
+
+  function normalizeNameForLookup(text) {
+    return String(text || "").trim().toLowerCase();
+  }
+
+  function findMemberByName(name) {
+    const key = normalizeNameForLookup(name);
+    if (!key) return null;
+    return membersCache.find(member => {
+      return normalizeNameForLookup(member.display) === key
+        || normalizeNameForLookup(member.nickname) === key
+        || normalizeNameForLookup(member.name) === key;
+    }) || null;
+  }
+
+  function findMixerByName(name) {
+    const key = normalizeNameForLookup(name);
+    if (!key) return null;
+    return mixerMembersCache.find(member => {
+      return normalizeNameForLookup(member.display) === key
+        || normalizeNameForLookup(member.nickname) === key
+        || normalizeNameForLookup(member.name) === key;
+    }) || null;
+  }
+
+  function uniqueAssignedIds(parts) {
+    return [...new Set((parts || []).map(part => part.assigned_member_id).filter(Boolean).map(String))];
+  }
+
+  function getParticipantSingerIds(task) {
+    const partIds = uniqueAssignedIds(task.parts || []);
+    const singerIds = (task.singers || []).map(item => String(item.member_id || "").trim()).filter(Boolean);
+    return [...new Set([...partIds, ...singerIds])];
+  }
+
+  function getUniqueAssignedSingerCount(task) {
+    return (task.singers || []).length;
+  }
+
+  function isCurrentUserInTask(task) {
+    const currentId = getCurrentMemberId();
+    if (!currentId) return false;
+    const isSinger = getParticipantSingerIds(task).includes(currentId);
+    const isProducer = String(task.producer_member_id || "").trim() === currentId;
+    return isSinger || isProducer;
+  }
+
+  function isCurrentUserSingerInTask(task) {
+    const currentId = getCurrentMemberId();
+    if (!currentId) return false;
+    return (task.singers || []).some(item => String(item.member_id || "").trim() === currentId)
+      || (task.parts || []).some(row => String(row.assigned_member_id || "").trim() === currentId);
+  }
+
+
+  function getCurrentTaskSafe(taskId = activeClaimTaskId) {
+    const task = tasks.find(item => String(item.id) === String(taskId || ""));
+    return task || null;
+  }
+
+  function isActiveTaskRendered(task) {
+    return !!task
+      && !!document.getElementById("browseDetailContentClaim")
+      && String(task.id || "") === String(activeClaimTaskId || "")
+      && !!document.getElementById("partRows");
+  }
+
+  function getLivePartsFromDom(task) {
+    if (!isActiveTaskRendered(task)) return Array.isArray(task?.parts) ? task.parts : [];
+    return [...document.querySelectorAll(".partRow")].map((row, index) => {
+      const roleName = String(row.querySelector(".partNameInput")?.value || "").trim();
+      const memberName = String(row.querySelector(".partMemberInput")?.value || "").trim();
+      const matched = findMemberByName(memberName);
+      return {
+        id: String(row.dataset.partId || "").trim(),
+        part_order: index + 1,
+        original_name: roleName,
+        assigned_member_id: matched?.id ? String(matched.id) : "",
+        assigned_member_name: memberName
+      };
+    });
+  }
+
+  function getTaskForLiveUi(task) {
+    if (!task) return null;
+    if (!isActiveTaskRendered(task)) return task;
+    const specialValue = String(document.getElementById("editIsCollective")?.value || "").trim();
+    const singerQuotaValue = Math.max(1, parseInt(String(document.getElementById("editSingerQuota")?.value || task.singer_quota || 1), 10) || 1);
+    return {
+      ...task,
+      is_collective_task: specialValue === "1",
+      singer_quota: singerQuotaValue,
+      parts: getLivePartsFromDom(task)
+    };
+  }
+
+  function getUnassignedRoleRows(task) {
+    const liveTask = getTaskForLiveUi(task);
+    if (!liveTask || !Array.isArray(liveTask.parts)) return [];
+    return liveTask.parts.filter(row => {
+      const roleName = String(row.original_name || "").trim();
+      const assignedId = String(row.assigned_member_id || "").trim();
+      return !!roleName && !assignedId;
+    });
+  }
+
+  function getAssignedRoleRowsForMember(task, memberId) {
+    const liveTask = getTaskForLiveUi(task);
+    const id = String(memberId || "").trim();
+    if (!liveTask || !Array.isArray(liveTask.parts) || !id) return [];
+    return liveTask.parts.filter(row => String(row.assigned_member_id || "").trim() === id);
+  }
+
+  function canCurrentUserUseLottery(task) {
+    const currentId = getCurrentMemberId();
+    if (!task || !currentId) return false;
+    if (!isCurrentUserSingerInTask(task)) return false;
+    if (!getUnassignedRoleRows(task).length) return false;
+    return true;
+  }
+
+  function shouldCurrentUserDrawNow(task) {
+    const currentId = getCurrentMemberId();
+    if (!currentId || !canCurrentUserUseLottery(task)) return false;
+    if (!task.lyrics_lottery_enabled) return false;
+    return getAssignedRoleRowsForMember(task, currentId).length === 0;
+  }
+
+  function getPersonalLotteryButtonText(task) {
+    if (!task) return "开始抽签";
+    if (!canCurrentUserUseLottery(task)) return "开始抽签";
+    if (!task.lyrics_lottery_enabled) return "开启抽签";
+    if (shouldCurrentUserDrawNow(task)) return "开始抽签";
+    return "已抽签";
+  }
+
+  async function setLyricsLotteryEnabled(taskId, enabled) {
+    const payload = enabled
+      ? { lyrics_lottery_enabled: true, lyrics_lottery_opened_at: new Date().toISOString() }
+      : { lyrics_lottery_enabled: false, lyrics_lottery_opened_at: null, lyrics_lottery_opened_by: null };
+
+    const currentMemberId = getCurrentMemberId();
+    if (enabled && currentMemberId) payload.lyrics_lottery_opened_by = currentMemberId;
+
+    const { error } = await supabaseClient
+      .from("projects")
+      .update(payload)
+      .eq("id", taskId);
+
+    if (error) {
+      const detailText = String(error?.message || error?.details || error?.hint || "").toLowerCase();
+      if (detailText.includes("game_type")) {
+        error.message = '保存失败：数据库中的 projects 表缺少 game_type 列，请先执行补充列的 SQL。';
+      }
+      throw error;
+    }
+  }
+
+  async function assignRandomRoleToCurrentMember(task) {
+    const currentMemberId = getCurrentMemberId();
+    const currentMemberName = getCurrentMemberName();
+
+    if (!currentMemberId || !currentMemberName) {
+      showToast("无法抽签", "当前登录信息不完整，请重新登录后再试。");
+      return false;
+    }
+
+    if (!isCurrentUserSingerInTask(task)) {
+      showToast("无法抽签", "只有参与这首歌演唱的成员才可以抽签。");
+      return false;
+    }
+
+    autoFillLastRemainingSinger();
+    refreshCandidateRowState();
+
+    const alreadyAssigned = getAssignedRoleRowsForMember(task, currentMemberId);
+    if (alreadyAssigned.length) {
+      const firstRoleName = String(alreadyAssigned[0]?.original_name || "").trim();
+      showToast("你已经抽过签了", firstRoleName ? `你抽到的是：${firstRoleName}` : "你已经分到角色了。");
+      return false;
+    }
+
+    const { error: clearStaleAssignError } = await supabaseClient
+      .from("project_parts")
+      .update({ assigned_member_id: null })
+      .eq("project_id", task.id)
+      .eq("assigned_member_id", currentMemberId);
+    if (clearStaleAssignError) throw clearStaleAssignError;
+
+    await loadProjectsFromSupabase({ keepSelection: true });
+    const latestTask = getCurrentTaskSafe(task.id) || task;
+    const unassignedRows = getUnassignedRoleRows(latestTask).filter(row => String(row.id || "").trim());
+
+    if (!unassignedRows.length) {
+      showToast("无需抽签", "当前已经没有可抽取的角色了。");
+      return false;
+    }
+
+    const pickedRow = unassignedRows[Math.floor(Math.random() * unassignedRows.length)];
+    const pickedRoleName = String(pickedRow?.original_name || "").trim();
+
+    pushUndoSnapshot();
+    setAutoSaveStatus("saving", "抽签中...");
+
+    const { error } = await supabaseClient
+      .from("project_parts")
+      .update({ assigned_member_id: currentMemberId })
+      .eq("id", pickedRow.id)
+      .eq("project_id", task.id)
+      .eq("original_name", pickedRoleName)
+      .is("assigned_member_id", null);
+    if (error) throw error;
+
+    await loadProjectsFromSupabase({ keepSelection: true });
+
+    setAutoSaveStatus("saved", "已抽签");
+    showToast("抽签成功", pickedRoleName ? `你抽到的是：${pickedRoleName}` : "你已经抽到角色了。");
+    return true;
+  }
+
+  async function ensureLotteryRowsPersisted(taskId = activeClaimTaskId) {
+    const task = getCurrentTaskSafe(taskId);
+    if (!task) return null;
+
+    const pendingRowsWithoutId = [...document.querySelectorAll(".partRow")].filter(row => {
+      const roleName = String(row.querySelector(".partNameInput")?.value || "").trim();
+      const partId = String(row.dataset.partId || "").trim();
+      return !!roleName && !partId;
+    });
+
+    if (!pendingRowsWithoutId.length) return task;
+
+    await saveCurrentTaskEdits("manual");
+    await loadProjectsFromSupabase({ keepSelection: true });
+    return getCurrentTaskSafe(taskId);
+  }
+
+  async function handlePersonalLotteryClick(taskId = activeClaimTaskId) {
+    if (personalLotteryInFlight) return;
+
+    autoFillLastRemainingSinger();
+    const autoFillState = getAutoFillLastSingerState();
+    if (autoFillState.shouldAutoFill) {
+      refreshCandidateRowState();
+      scheduleAutoSave();
+      return;
+    }
+
+    const task = getCurrentTaskSafe(taskId);
+    if (!task) {
+      showToast("错误", "当前任务未加载，请重新选择任务后再试。");
+      return;
+    }
+
+    const liveTask = getTaskForLiveUi(task) || task;
+    if (!canCurrentUserUseLottery(liveTask)) {
+      if (!isCurrentUserSingerInTask(liveTask)) {
+        showToast("无法抽签", "只有参与这首歌演唱的成员才可以抽签。");
+      } else {
+        showToast("无需抽签", "当前没有可抽取的未分配角色。");
+      }
+      return;
+    }
+
+    personalLotteryInFlight = true;
+    try {
+      const persistedTask = await ensureLotteryRowsPersisted(task.id);
+      const workingTask = persistedTask || getCurrentTaskSafe(task.id) || task;
+
+      if (!workingTask.lyrics_lottery_enabled) {
+        setAutoSaveStatus("saving", "开启抽签中...");
+        await setLyricsLotteryEnabled(workingTask.id, true);
+        await loadProjectsFromSupabase({ keepSelection: true });
+      }
+
+      const latestTask = getCurrentTaskSafe(workingTask.id) || workingTask;
+      await assignRandomRoleToCurrentMember(latestTask);
+    } catch (err) {
+      console.error("个人抽签失败：", err);
+      setAutoSaveStatus("error", "抽签失败");
+      const detail = String(err?.message || err?.details || err?.hint || "").trim();
+      showToast("抽签失败", detail ? `抽签失败：${detail}` : "请检查 projects / project_parts 的更新权限，以及是否有其他人同时抽中了该角色。");
+    } finally {
+      personalLotteryInFlight = false;
+    }
+  }
+
+  function getPendingPersonalLotteryTasks() {
+    const currentMemberId = getCurrentMemberId();
+    if (!currentMemberId) return [];
+
+    return tasks.filter(task => {
+      if (!shouldCurrentUserDrawNow(task)) return false;
+      const openedBy = String(task.lyrics_lottery_opened_by || '').trim();
+      if (openedBy && openedBy === currentMemberId) return false;
+      return true;
+    });
+  }
+
+  function getSiteNotificationItems() {
+    return getPendingPersonalLotteryTasks().map(task => ({
+      id: `lottery:${task.id}`,
+      type: 'lottery',
+      taskId: task.id,
+      title: task.displayName || task.task_name || '未命名任务',
+      desc: '这首歌已经开启抽签，且当前还需要你本人完成抽签。'
+    }));
+  }
+
+  function renderSiteNotifications() {
+    if (!siteNoticeBtn || !siteNoticeBody || !siteNoticeText || !siteNoticeCount || !siteNoticePanel) return;
+
+    const items = getSiteNotificationItems();
+    const count = items.length;
+    siteNoticeBtn.classList.toggle('hasNotice', count > 0);
+    siteNoticeText.textContent = count ? `站内通知（${count}）` : '站内通知';
+    siteNoticeCount.textContent = String(count);
+
+    if (!count) {
+      siteNoticeBody.className = 'siteNoticeEmpty';
+      siteNoticeBody.innerHTML = '暂无提醒';
+      return;
+    }
+
+    siteNoticeBody.className = 'siteNoticeList';
+    siteNoticeBody.innerHTML = items.map(item => `
+      <div class="siteNoticeItem">
+        <div class="siteNoticeItemTitle">${escapeHtml(item.title)}</div>
+        <div class="siteNoticeItemDesc">${escapeHtml(item.desc)}</div>
+        <button type="button" class="siteNoticeAction" data-task-id="${escapeHtml(item.taskId)}">前往处理</button>
+      </div>
+    `).join('');
+
+    siteNoticeBody.querySelectorAll('.siteNoticeAction').forEach(btn => {
+      btn.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        const taskId = String(btn.dataset.taskId || '').trim();
+        if (!taskId) return;
+        await switchActiveTask(taskId);
+        toggleSiteNoticePanel(false);
+      });
+    });
+  }
+
+  function toggleSiteNoticePanel(force) {
+    if (!siteNoticePanel || !siteNoticeBtn) return;
+    const shouldShow = typeof force === 'boolean' ? force : !siteNoticePanel.classList.contains('show');
+    siteNoticePanel.classList.toggle('show', shouldShow);
+    siteNoticePanel.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
+    siteNoticeBtn.setAttribute('aria-expanded', shouldShow ? 'true' : 'false');
+  }
+
+  async function saveBeforeContextSwitch() {
+    if (!hasPendingLocalChanges) return true;
+    await saveCurrentTaskEdits('manual');
+    return !hasPendingLocalChanges;
+  }
+
+  async function switchActiveTask(taskId) {
+    const nextId = String(taskId || '').trim();
+    if (!nextId || nextId === String(activeClaimTaskId || '').trim()) return;
+    const ok = await saveBeforeContextSwitch();
+    if (!ok) return;
+    activeClaimTaskId = nextId;
+    setAutoSaveStatus('saved', '已同步');
+    renderBrowseList();
+    renderBrowseDetail();
+    renderSiteNotifications();
+  }
+
+  async function applyFilterAndRefresh(nextFilter) {
+    const ok = await saveBeforeContextSwitch();
+    if (!ok) return;
+    updateFilterState(nextFilter);
+    const filtered = getFilteredTasks(claimSearchKeyword);
+    if (!filtered.some(task => task.id === activeClaimTaskId)) {
+      activeClaimTaskId = filtered.length ? filtered[0].id : '';
+    }
+    renderBrowseList();
+    renderBrowseDetail();
+    renderSiteNotifications();
+  }
+
+  function maybeShowLotteryReminder() {
+    const currentMemberId = getCurrentMemberId();
+    if (!currentMemberId || personalLotteryInFlight) return;
+
+    const pendingTasks = getPendingPersonalLotteryTasks().filter(task => {
+      if (String(activeClaimTaskId || '') === String(task.id || '') && isActiveTaskRendered(task)) return false;
+      return true;
+    });
+
+    renderSiteNotifications();
+
+    const nextKey = pendingTasks.map(task => String(task.id)).sort().join('|');
+    if (!nextKey) {
+      lastLotteryReminderKey = '';
+      return;
+    }
+    if (nextKey === lastLotteryReminderKey) return;
+
+    lastLotteryReminderKey = nextKey;
+    const names = pendingTasks.map(task => task.displayName).slice(0, 3).join('、');
+    const suffix = pendingTasks.length > 3 ? ' 等任务' : '';
+    showToast('抽签提醒', `有需要你本人抽签的未完成项目，请尽早处理。
+${names}${suffix}`);
+  }
+
+  function hasFilledPartText(task) {
+    return (task.parts || []).some(row => String(row.original_name || "").trim());
+  }
+
+  function getCandidatePool(task) {
+    const liveTask = getTaskForLiveUi(task);
+    const assignedIds = uniqueAssignedIds(liveTask?.parts || []);
+    return (liveTask?.singers || []).filter(item => {
+      const memberId = String(item.member_id || "").trim();
+      return memberId && !assignedIds.includes(memberId);
+    });
+  }
+
+  function canCurrentUserJoinTask(task) {
+    const currentId = getCurrentMemberId();
+    if (!currentId) return false;
+    if (isCurrentUserSingerInTask(task)) return true;
+
+    const singerQuota = Math.max(1, Number(task.singer_quota) || 1);
+    const assignedCount = getUniqueAssignedSingerCount(task);
+    return assignedCount < singerQuota;
+  }
+
+  function isAllSingersSubmitted(task) {
+    const singers = task.singers || [];
+    return singers.length > 0 && singers.every(item => !!item.is_submitted);
+  }
+
+  function isTaskInfoComplete(task) {
+    const rows = task.parts || [];
+    const singerQuota = Math.max(1, Number(task.singer_quota) || 1);
+    const assignedSingerCount = getUniqueAssignedSingerCount(task);
+    const hasProducer = !!String(task.producer_member_id || "").trim();
+    const hasTone = !!String(task.project_tone || "").trim();
+
+    const allRowsComplete = rows.length >= singerQuota && rows.every(row => {
+      const partText = String(row.original_name || "").trim();
+      const assignedId = String(row.assigned_member_id || "").trim();
+      return !!partText && !!assignedId;
+    });
+
+    return assignedSingerCount >= singerQuota && hasProducer && hasTone && allRowsComplete;
+  }
+
+  function isReadyForHonorShow(task) {
+    if (!isTaskInfoComplete(task)) return false;
+    if (!isAllSingersSubmitted(task)) return false;
+
+    const releaseDateText = String(task.release_date || "").trim();
+    if (!releaseDateText) return false;
+
+    const releaseDate = new Date(`${releaseDateText}T00:00:00`);
+    if (Number.isNaN(releaseDate.getTime())) return false;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today >= releaseDate;
+  }
+
+  function getClaimPendingState(task) {
+    const singerQuota = Math.max(1, Number(task.singer_quota) || 1);
+    const hasProducer = !!String(task.producer_member_id || "").trim();
+    const uniqueAssignedCount = getUniqueAssignedSingerCount(task);
+    return uniqueAssignedCount < singerQuota || !hasProducer;
+  }
+
+  function getSupplementTags(task) {
+    const rows = task.parts || [];
+    const singerQuota = Math.max(1, Number(task.singer_quota) || 1);
+    const assignedSingerCount = getUniqueAssignedSingerCount(task);
+    const hasProducer = !!String(task.producer_member_id || "").trim();
+    const hasTone = !!String(task.project_tone || "").trim();
+    const hasReleaseDate = !!String(task.release_date || "").trim();
+
+    const needClaim = assignedSingerCount < singerQuota || !hasProducer;
+
+    const hasAnySinger = assignedSingerCount > 0;
+    const rowsShort = rows.length < singerQuota;
+    const noRowsYet = rows.length === 0;
+    const hasIncompleteRow = rows.some(row => {
+      const partText = String(row.original_name || "").trim();
+      const assignedId = String(row.assigned_member_id || "").trim();
+      return !partText || !assignedId;
+    });
+    const needLyricsAssign = hasAnySinger && (noRowsYet || rowsShort || hasIncompleteRow);
+
+    const allInfoComplete = isTaskInfoComplete(task);
+    const allSubmitted = isAllSingersSubmitted(task);
+
+    const tags = [];
+
+    if (needClaim) tags.push("待认领");
+    if (needLyricsAssign) tags.push("待分词");
+    if (!hasTone) tags.push("待定调");
+    if (allInfoComplete && allSubmitted && !hasReleaseDate) tags.push("待发布");
+
+    return tags;
+  }
+
+  function getSkillText(row) {
+    const keys = [
+      "skill","skills","extra_skill","extra_skills","custom_skill","custom_skills",
+      "other_skill","other_skills","specialty","specialties","ability","abilities"
+    ];
+    return keys.map(key => String(row?.[key] || "")).join(" | ");
+  }
+
+  function isMixerMember(row) {
+    const skillText = getSkillText(row);
+    return /混音|后期|mix|mixer|mixing/i.test(skillText);
+  }
+
+  function transformProjectsToTasks(projectRows, partsRows, singersRows) {
+    const partMap = new Map();
+    const singerMap = new Map();
+
+    (partsRows || []).forEach(part => {
+      const key = String(part.project_id);
+      if (!partMap.has(key)) partMap.set(key, []);
+      partMap.get(key).push({
+        id: part.id,
+        part_order: part.part_order,
+        original_name: part.original_name,
+        assigned_member_id: part.assigned_member_id ? String(part.assigned_member_id) : "",
+        assigned_member_name: part.members?.nickname || part.members?.name || ""
+      });
+    });
+
+    (singersRows || []).forEach(singer => {
+      const key = String(singer.project_id);
+      if (!singerMap.has(key)) singerMap.set(key, []);
+      singerMap.get(key).push({
+        id: singer.id,
+        member_id: singer.member_id ? String(singer.member_id) : "",
+        member_name: singer.members?.nickname || singer.members?.name || "",
+        is_submitted: !!singer.is_submitted,
+        submitted_at: singer.submitted_at || null
+      });
+    });
+
+    return (projectRows || [])
+      .map(project => {
+        const id = String(project.id);
+        const parts = (partMap.get(id) || []).sort((a, b) => (a.part_order || 0) - (b.part_order || 0));
+        const singers = singerMap.get(id) || [];
+        const producerName = project.producer_member?.nickname || project.producer_member?.name || "";
+
+        const task = {
+          ...project,
+          id,
+          task_code: project.task_code || "",
+          task_name: project.task_name || "",
+          displayName: makeDisplayTaskName(project.task_code, project.task_name),
+          task_type: project.task_type || "",
+          status: project.status || "",
+          singer_quota: project.singer_quota ?? 1,
+          singer_bonus: getSingerRewardByRule(project.singer_quota, !!project.is_collective_task),
+          producer_bonus: getProducerRewardByRule(project.task_type, project.singer_quota, !!project.is_collective_task),
+          producer_member_id: project.producer_member_id ? String(project.producer_member_id) : "",
+          producer_name: producerName,
+          producer_completed: !!project.producer_completed,
+          producer_completed_at: project.producer_completed_at || null,
+          release_date: project.release_date || null,
+          display_link: project.display_link || "",
+          project_tone: project.project_tone || "",
+          is_collective_task: !!project.is_collective_task,
+          created_by: project.created_by || null,
+          created_at: project.created_at || null,
+          parts,
+          singers
+        };
+
+        task.supplementTags = getSupplementTags(task);
+        task.readyForHonorShow = isReadyForHonorShow(task);
+        task.computedStatus = task.supplementTags.join("｜");
+        return task;
+      })
+      .filter(task => task.supplementTags.length > 0)
+      .sort((a, b) => {
+        const aCode = parseInt(String(a.task_code).match(/\d+/)?.[0] || "0", 10);
+        const bCode = parseInt(String(b.task_code).match(/\d+/)?.[0] || "0", 10);
+        return aCode - bCode;
+      });
+  }
+
+  function extractNumberFromValue(value) {
+    const raw = String(value ?? "").trim();
+    if (!raw) return Number.POSITIVE_INFINITY;
+    const match = raw.match(/\d+/);
+    return match ? parseInt(match[0], 10) : Number.POSITIVE_INFINITY;
+  }
+
+  function getMemberOrderNumber(member) {
+    const candidates = [
+      member?.member_code,
+      member?.key_code,
+      member?.invite_code,
+      member?.display_order,
+      member?.member_order,
+      member?.order_no,
+      member?.member_no,
+      member?.member_number,
+      member?.no,
+      member?.code,
+      member?.nickname,
+      member?.name
+    ];
+
+    for (const item of candidates) {
+      const num = extractNumberFromValue(item);
+      if (Number.isFinite(num)) return num;
+    }
+    return Number.POSITIVE_INFINITY;
+  }
+
+  async function loadMembersList() {
+    try {
+      const { data, error } = await supabaseClient
+        .from("members")
+        .select("*");
+
+      if (error) throw error;
+
+      membersCache = (data || [])
+        .filter(item => String(item.role || "").toLowerCase() !== "applying")
+        .map(item => ({
+          ...item,
+          id: String(item.id),
+          nickname: String(item.nickname || "").trim(),
+          name: String(item.name || "").trim(),
+          display: item.nickname || item.name || "未命名成员",
+          memberOrderNo: getMemberOrderNumber(item)
+        }))
+        .sort((a, b) => {
+          if (a.memberOrderNo !== b.memberOrderNo) return a.memberOrderNo - b.memberOrderNo;
+          return String(a.display || "").localeCompare(String(b.display || ""), "zh-CN");
+        });
+
+      mixerMembersCache = membersCache.filter(isMixerMember);
+
+      document.getElementById("memberOptionsAll").innerHTML = membersCache
+        .map(member => `<option value="${escapeHtml(member.display)}"></option>`)
+        .join("");
+    } catch (err) {
+      console.error("读取成员列表失败：", err);
+      membersCache = [];
+      mixerMembersCache = [];
+      document.getElementById("memberOptionsAll").innerHTML = "";
+      showToast("读取失败", "成员列表读取失败，请检查 members 表权限。");
+    }
+  }
+
+  async function loadProjectsFromSupabase({keepSelection = true} = {}) {
+    const claimList = document.getElementById("browseList");
+    claimList.innerHTML = '<div class="loadingText">正在读取任务...</div>';
+
+    try {
+      const { data: projectsData, error: projectsError } = await supabaseClient
+        .from("projects")
+        .select("id, task_code, task_name, task_type, status, singer_quota, singer_bonus, producer_bonus, producer_member_id, producer_completed, producer_completed_at, release_date, display_link, project_tone, is_collective_task, created_by, created_at, lyrics_lottery_enabled, lyrics_lottery_opened_at, lyrics_lottery_opened_by");
+
+      if (projectsError) throw projectsError;
+
+      const projectIds = (projectsData || []).map(item => item.id);
+
+      let partsData = [];
+      let singersData = [];
+      let memberIds = new Set();
+
+      (projectsData || []).forEach(project => {
+        if (project?.producer_member_id) memberIds.add(String(project.producer_member_id));
+      });
+
+      if (projectIds.length) {
+        const { data: partRows, error: partsError } = await supabaseClient
+          .from("project_parts")
+          .select("id, project_id, part_order, original_name, assigned_member_id")
+          .in("project_id", projectIds)
+          .order("part_order", { ascending: true });
+
+        if (partsError) throw partsError;
+        partsData = partRows || [];
+        partsData.forEach(row => {
+          if (row?.assigned_member_id) memberIds.add(String(row.assigned_member_id));
+        });
+
+        const { data: singerRows, error: singersError } = await supabaseClient
+          .from("project_singers")
+          .select("id, project_id, member_id, is_submitted, submitted_at")
+          .in("project_id", projectIds);
+
+        if (singersError) throw singersError;
+        singersData = singerRows || [];
+        singersData.forEach(row => {
+          if (row?.member_id) memberIds.add(String(row.member_id));
+        });
+      }
+
+      const memberIdList = [...memberIds];
+      let memberMap = new Map();
+      if (memberIdList.length) {
+        const { data: memberRows, error: membersError } = await supabaseClient
+          .from("members")
+          .select("id, nickname, name")
+          .in("id", memberIdList);
+
+        if (membersError) throw membersError;
+        memberMap = new Map((memberRows || []).map(row => [String(row.id), row]));
+      }
+
+      const normalizedProjects = (projectsData || []).map(project => ({
+        ...project,
+        producer_member: project?.producer_member_id ? memberMap.get(String(project.producer_member_id)) || null : null
+      }));
+
+      const normalizedParts = (partsData || []).map(row => ({
+        ...row,
+        members: row?.assigned_member_id ? memberMap.get(String(row.assigned_member_id)) || null : null
+      }));
+
+      const normalizedSingers = (singersData || []).map(row => ({
+        ...row,
+        members: row?.member_id ? memberMap.get(String(row.member_id)) || null : null
+      }));
+
+      tasks = transformProjectsToTasks(normalizedProjects, normalizedParts, normalizedSingers);
+
+      const filtered = getFilteredTasks(claimSearchKeyword);
+      if (!keepSelection || !filtered.some(task => task.id === activeClaimTaskId)) {
+        activeClaimTaskId = filtered.length ? filtered[0].id : "";
+      }
+
+      syncFilterButtons();
+      renderBrowseList();
+      renderBrowseDetail();
+      maybeShowLotteryReminder();
+    } catch (err) {
+      console.error("读取 projects 失败：", err);
+      claimList.innerHTML = '<div class="taskEmpty">任务读取失败，请检查表结构、字段名或 RLS 权限</div>';
+      setBrowseDetailEmpty("任务读取失败");
+      setAutoSaveStatus("error", "读取失败");
+      const detail = String(err?.message || err?.details || err?.hint || "").trim();
+      showToast("读取失败", detail ? `任务读取失败：${detail}` : "任务读取失败，请检查 projects / project_parts / project_singers / members 四张表的读取权限。");
+    }
+  }
+
+  function syncOverlayToImage() {
+    const roomRect = room.getBoundingClientRect();
+    const roomW = roomRect.width;
+    const roomH = roomRect.height;
+
+    const naturalW = bg.naturalWidth || 1600;
+    const naturalH = bg.naturalHeight || 900;
+    const imgRatio = naturalW / naturalH;
+    const roomRatio = roomW / roomH;
+
+    let drawW, drawH, drawLeft, drawTop;
+
+    if (roomRatio > imgRatio) {
+      drawH = roomH;
+      drawW = drawH * imgRatio;
+      drawLeft = (roomW - drawW) / 2;
+      drawTop = 0;
+    } else {
+      drawW = roomW;
+      drawH = drawW / imgRatio;
+      drawLeft = 0;
+      drawTop = (roomH - drawH) / 2;
+    }
+
+    overlay.style.left = drawLeft + "px";
+    overlay.style.top = drawTop + "px";
+    overlay.style.width = drawW + "px";
+    overlay.style.height = drawH + "px";
+
+    const BASE_SCREEN_W = 1600;
+    const BASE_SCREEN_H = 900;
+    const BASE_TOPBAR_LEFT = 28.2;
+    const BASE_TOPBAR_TOP = 8.15;
+    const BASE_TOPBAR_WIDTH = 65.4;
+    const BASE_TOPBAR_GAP = 1.2;
+
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+    const fitW = drawW / BASE_SCREEN_W;
+    const fitH = drawH / BASE_SCREEN_H;
+    const fit = Math.min(fitW, fitH);
+
+    let navScale = clamp(fit, 0.46, 1);
+    let topUiScale = clamp(fit * 0.96, 0.72, 1);
+
+    const smallerDelta = Math.max(0, 1 - fit);
+    const topbarLeft = BASE_TOPBAR_LEFT - smallerDelta * 1.1;
+    const topbarTop = BASE_TOPBAR_TOP;
+    const topbarGap = clamp(BASE_TOPBAR_GAP * (0.92 + fit * 0.08), 0.82, 1.2);
+    const safeGapPx = clamp(12, drawW * 0.012, 24);
+    const overlayStyles = window.getComputedStyle(overlay);
+    const userRight = parseFloat(overlayStyles.getPropertyValue("--user-right")) || 180;
+
+    overlay.style.setProperty("--top-ui-scale", topUiScale.toFixed(4));
+    overlay.style.setProperty("--topbar-left", `${topbarLeft.toFixed(3)}%`);
+    overlay.style.setProperty("--topbar-top", `${topbarTop.toFixed(3)}%`);
+    overlay.style.setProperty("--topbar-gap", `${topbarGap.toFixed(3)}%`);
+    overlay.style.setProperty("--topbar-safe-gap", `${safeGapPx.toFixed(2)}px`);
+    overlay.style.setProperty("--nav-scale", navScale.toFixed(4));
+
+    const leftPx = drawW * (topbarLeft / 100);
+    const userBoxWidth = topBarUserArea ? topBarUserArea.offsetWidth * topUiScale : 0;
+    const availableWidthPx = Math.max(180, drawW - leftPx - userRight - userBoxWidth - safeGapPx);
+    const desiredTopbarWidthPx = drawW * (BASE_TOPBAR_WIDTH / 100);
+    const topbarWidthPx = Math.min(desiredTopbarWidthPx, availableWidthPx);
+    overlay.style.setProperty("--topbar-width", `${(topbarWidthPx / drawW * 100).toFixed(3)}%`);
+
+    requestAnimationFrame(() => {
+      if (!navOuter || !roomNav) return;
+      const navVisible = Math.max(160, navOuter.clientWidth - 2);
+      let navNeeded = roomNav.scrollWidth;
+      if (navNeeded > navVisible) {
+        let ratio = navVisible / navNeeded;
+        navScale = clamp(navScale * ratio * 0.985, 0.40, 1);
+        overlay.style.setProperty("--nav-scale", navScale.toFixed(4));
+        requestAnimationFrame(() => {
+          navNeeded = roomNav.scrollWidth;
+          if (navNeeded > navVisible) {
+            ratio = navVisible / navNeeded;
+            navScale = clamp(navScale * ratio * 0.992, 0.34, 1);
+            overlay.style.setProperty("--nav-scale", navScale.toFixed(4));
+          }
+        });
+      }
+    });
+  }
+
+  function applyDefaultBackgroundBlend() {
+    const root = document.documentElement;
+    root.style.setProperty('--bg-top', '#e7dfd4');
+    root.style.setProperty('--bg-mid', '#e2d8cb');
+    root.style.setProperty('--bg-bottom', '#ddd4c8');
+    root.style.setProperty('--bg-side-left', '#e5ddd1');
+    root.style.setProperty('--bg-side-right', '#e1d7ca');
+  }
+
+  function markBackgroundReady() {
+    room?.classList.remove('bg-failed');
+  }
+
+  function markBackgroundFailed() {
+    room?.classList.add('bg-failed');
+  }
+
+  function tryLoadNextBackground() {
+    if (!bg) return;
+    bgPathIndex += 1;
+    if (bgPathIndex >= BG_CANDIDATE_PATHS.length) {
+      markBackgroundFailed();
+      applyDefaultBackgroundBlend();
+      syncOverlayToImage();
+      return;
+    }
+    bg.src = BG_CANDIDATE_PATHS[bgPathIndex];
+  }
+
+  function syncBackgroundBlendFromImage() {
+    if (!bg?.naturalWidth || !bg?.naturalHeight) {
+      applyDefaultBackgroundBlend();
+      return;
+    }
+
+    if (IS_FILE_PROTOCOL) {
+      applyDefaultBackgroundBlend();
+      return;
+    }
+
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently:true });
+      if (!ctx) {
+        applyDefaultBackgroundBlend();
+        return;
+      }
+      const sampleW = 48;
+      const sampleH = 48;
+      canvas.width = sampleW;
+      canvas.height = sampleH;
+      ctx.drawImage(bg, 0, 0, sampleW, sampleH);
+
+      let data;
+      try {
+        data = ctx.getImageData(0, 0, sampleW, sampleH).data;
+      } catch (err) {
+        applyDefaultBackgroundBlend();
+        return;
+      }
+
+      function avgColor(points) {
+        let r = 0, g = 0, b = 0, count = 0;
+        for (const [x, y] of points) {
+          const i = (y * sampleW + x) * 4;
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+          count += 1;
+        }
+        if (!count) return 'rgb(226,216,203)';
+        return `rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`;
+      }
+
+      const topPoints = [];
+      const bottomPoints = [];
+      const leftPoints = [];
+      const rightPoints = [];
+      for (let x = 4; x < sampleW - 4; x += 2) {
+        topPoints.push([x, 4], [x, 6]);
+        bottomPoints.push([x, sampleH - 5], [x, sampleH - 7]);
+      }
+      for (let y = 6; y < sampleH - 6; y += 2) {
+        leftPoints.push([4, y], [6, y]);
+        rightPoints.push([sampleW - 5, y], [sampleW - 7, y]);
+      }
+
+      const root = document.documentElement;
+      root.style.setProperty('--bg-top', avgColor(topPoints));
+      root.style.setProperty('--bg-bottom', avgColor(bottomPoints));
+      root.style.setProperty('--bg-side-left', avgColor(leftPoints));
+      root.style.setProperty('--bg-side-right', avgColor(rightPoints));
+      root.style.setProperty('--bg-mid', avgColor([...topPoints.slice(0, 10), ...bottomPoints.slice(0, 10), [24, 24], [22, 24], [26, 24]]));
+    } catch (err) {
+      applyDefaultBackgroundBlend();
+    }
+  }
+
+  function normalizeSearchQuery(text) {
+    return String(text || "")
+      .toLowerCase()
+      .replace(/[｜|,，/]/g, " ")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+  }
+
+  
+  function getCurrentMainFilter() {
+    return String(activeMainFilter || "").trim();
+  }
+
+  function shouldShowNoMeFilter() {
+    return getCurrentMainFilter() === "待认领";
+  }
+
+  function shouldShowHasMeFilter() {
+    return ["待分词", "待定调", "待发布"].includes(getCurrentMainFilter());
+  }
+
+  function syncFilterButtons() {
+    document.querySelectorAll(".primaryFilterBtn").forEach(btn => {
+      btn.classList.toggle("active", String(btn.dataset.filter || "").trim() === getCurrentMainFilter());
+    });
+
+    const noMeBtn = document.getElementById("filterNoMeBtn");
+    const hasMeBtn = document.getElementById("filterHasMeBtn");
+
+    if (noMeBtn) {
+      const visible = shouldShowNoMeFilter();
+      noMeBtn.hidden = !visible;
+      noMeBtn.style.display = visible ? "inline-flex" : "none";
+      noMeBtn.classList.toggle("active", visible && activeSecondaryFilter === "没有我");
+    }
+
+    if (hasMeBtn) {
+      const visible = shouldShowHasMeFilter();
+      hasMeBtn.hidden = !visible;
+      hasMeBtn.style.display = visible ? "inline-flex" : "none";
+      hasMeBtn.classList.toggle("active", visible && activeSecondaryFilter === "有我在");
+    }
+  }
+
+  function updateFilterState(nextFilter) {
+    const normalized = String(nextFilter || "").trim();
+    if (!normalized) return;
+
+    if (normalized === "没有我") {
+      if (!shouldShowNoMeFilter()) return;
+      activeSecondaryFilter = activeSecondaryFilter === "没有我" ? "" : "没有我";
+    } else if (normalized === "有我在") {
+      if (!shouldShowHasMeFilter()) return;
+      activeSecondaryFilter = activeSecondaryFilter === "有我在" ? "" : "有我在";
+    } else {
+      activeMainFilter = normalized;
+      activeSecondaryFilter = "";
+    }
+
+    syncFilterButtons();
+  }
+
+  function getFilteredTasks(keyword) {
+    const tokens = normalizeSearchQuery(keyword);
+    const currentFilter = getCurrentMainFilter();
+
+    return tasks.filter(task => {
+      const isActiveTask = preserveActiveTaskInCurrentView && task.id === activeClaimTaskId;
+      const haystack = [
+        task.displayName,
+        task.task_name,
+        task.task_code
+      ].join(" ").toLowerCase();
+
+      const hitSearch = tokens.every(token => haystack.includes(token));
+      if (!hitSearch && !isActiveTask) return false;
+
+      if (!isActiveTask && currentFilter && !(task.supplementTags || []).includes(currentFilter)) {
+        return false;
+      }
+
+      if (!isActiveTask && activeSecondaryFilter === "没有我" && isCurrentUserInTask(task)) {
+        return false;
+      }
+
+      if (!isActiveTask && activeSecondaryFilter === "有我在" && !isCurrentUserInTask(task)) {
+        return false;
+      }
+
+      if (!isActiveTask && ["待分词", "待定调", "待发布"].includes(currentFilter) && activeSecondaryFilter !== "有我在" && !isCurrentUserInTask(task)) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+function renderBrowseList() {
+    const list = document.getElementById("browseList");
+    const listData = getFilteredTasks(claimSearchKeyword);
+    const activeId = activeClaimTaskId;
+
+    list.innerHTML = "";
+
+    if (!listData.length) {
+      list.innerHTML = `<div class="taskEmpty">暂无待补充项目</div>`;
+      return;
+    }
+
+    listData.forEach(task => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "taskItem" + (task.id === activeId ? " active" : "");
+
+      const joined = isCurrentUserSingerInTask(task);
+      const canJoin = canCurrentUserJoinTask(task);
+      const canClickJoin = joined || canJoin;
+
+      const joinText = joined ? "已" : (canJoin ? "加" : "满");
+      wrapper.innerHTML = `
+        <button type="button" class="taskItemCardBtn" data-task-id="${escapeHtml(task.id)}">
+          <span class="taskItemName">
+            <span class="taskItemTitleMain">
+              <span class="taskNameText">${escapeHtml(task.displayName)}</span>
+            </span>
+            <span class="taskItemHeadActions">
+              <span class="taskTypeMini">${escapeHtml(task.task_type || "未分类")}</span>
+              <button
+                type="button"
+                class="miniBtn joinTaskBtn ${canClickJoin ? "" : "ghost"} ${joined ? "joined" : ""}"
+                data-task-id="${escapeHtml(task.id)}"
+                title="${joined ? "取消加入" : (canJoin ? "加入" : "满员")}"
+                ${canClickJoin ? "" : "disabled"}
+              >${joinText}</button>
+            </span>
+          </span>
+          <span class="taskItemInfo">${escapeHtml(task.computedStatus || "待补充")}</span>
+        </button>
+      `;
+
+      list.appendChild(wrapper);
+    });
+
+    list.querySelectorAll(".taskItemCardBtn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        await switchActiveTask(btn.dataset.taskId || "");
+      });
+    });
+
+    list.querySelectorAll(".joinTaskBtn").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const taskId = btn.dataset.taskId || "";
+        if (!taskId || btn.disabled) return;
+        const task = tasks.find(item => item.id === taskId);
+        if (!task) return;
+        if (isCurrentUserSingerInTask(task)) {
+          await handleLeaveTask(taskId);
+        } else {
+          await handleJoinTask(taskId);
+        }
+      });
+    });
+  }
+
+  function setBrowseDetailEmpty(message = "暂无任务") {
+    document.getElementById("browseDetailTitle").textContent = message;
+    document.getElementById("browseDetailContentClaim").innerHTML = `<div class="taskEmpty">${escapeHtml(message)}</div>`;
+    topStatus.textContent = "";
+  }
+
+  function getToneDisplayValue(raw) {
+    const text = String(raw || "").trim();
+    if (!text) return "";
+    if (text === "原调") return "原调";
+    if (/^[+-]\d+$/.test(text)) return text;
+    if (text === "+" || text === "-") return text;
+    return text;
+  }
+
+  function splitGold(totalGold) {
+    const total = Math.max(0, Math.floor(Number(totalGold) || 0));
+    const submit = Math.floor(total * TASK_PAYOUT.onSubmitRatio);
+    const publish = total - submit;
+    return { total, submit, publish };
+  }
+
+  function normalizeSingerCount(value) {
+    const num = Math.floor(Number(value) || 1);
+    return Math.min(99, Math.max(1, num));
+  }
+
+  function getSingerRewardByCount(singerCount) {
+    const count = normalizeSingerCount(singerCount);
+    if (SINGING_REWARD_TABLE[count] != null) {
+      return SINGING_REWARD_TABLE[count];
+    }
+    return Math.max(12, Math.floor(17 - 0.5 * (count - 17)));
+  }
+
+  function getSingerRewardByRule(rawQuota, isSpecialTask = false) {
+    const base = getSingerRewardByCount(rawQuota);
+    return base + (isSpecialTask ? 10 : 0);
+  }
+
+  function getProducerRewardByRule(taskType, rawQuota, isSpecialTask = false) {
+    const count = normalizeSingerCount(rawQuota);
+    if (String(taskType || "").trim() === "游戏") return 0;
+    const base = Math.min(48 + Math.min(count - 1, 12), 60);
+    return base + (isSpecialTask ? 10 : 0);
+  }
+
+  function getBonusValue(task, keys) {
+    if (keys.includes("singer_bonus") || keys.includes("vocal_bonus") || keys.includes("singer_reward") || keys.includes("vocal_reward")) {
+      return String(getSingerRewardByRule(task.singer_quota, !!task.is_collective_task));
+    }
+    if (keys.includes("producer_bonus") || keys.includes("mix_bonus") || keys.includes("mixing_bonus") || keys.includes("producer_reward")) {
+      return String(getProducerRewardByRule(task.task_type, task.singer_quota, !!task.is_collective_task));
+    }
+    for (const key of keys) {
+      if (task[key] !== undefined && task[key] !== null && String(task[key]).trim() !== "") {
+        return String(task[key]);
+      }
+    }
+    return "--";
+  }
+
+  function buildBonusBreakdownText(totalValue, breakdownValue) {
+    const total = Number(totalValue);
+    if (!Number.isFinite(total) || total < 0) return "";
+    if (total === 0) return "游戏混音不发金币，仅记称号进度";
+    const breakdown = String(breakdownValue || "").trim();
+    if (breakdown && breakdown !== "--") return breakdown;
+    const split = splitGold(total);
+    return `交音 ${split.submit} / 发布 ${split.publish}`;
+  }
+
+  function updateRewardPreviewFromDom() {
+    const singerValueEl = document.getElementById("detailSingerBonusValue");
+    const singerHintEl = document.getElementById("detailSingerBonusHint");
+    const producerValueEl = document.getElementById("detailMixerBonusValue");
+    const producerHintEl = document.getElementById("detailMixerBonusHint");
+    if (!singerValueEl || !singerHintEl || !producerValueEl || !producerHintEl) return;
+
+    const singerQuota = getValidSingerQuotaValue();
+    const taskType = String(document.getElementById("editTaskType")?.value || "").trim();
+    const isSpecialTask = document.getElementById("editIsCollectiveBtn")?.classList.contains("special");
+    const singerTotal = getSingerRewardByRule(singerQuota, isSpecialTask);
+    const producerTotal = getProducerRewardByRule(taskType, singerQuota, isSpecialTask);
+
+    singerValueEl.textContent = `${singerTotal} 金币`;
+    singerHintEl.textContent = buildBonusBreakdownText(singerTotal, "");
+    producerValueEl.textContent = `${producerTotal} 金币`;
+    producerHintEl.textContent = buildBonusBreakdownText(producerTotal, "");
+  }
+
+  function buildTaskTypeOptions(currentType) {
+    const normalized = String(currentType || "").trim();
+    const all = normalized && !TASK_TYPE_OPTIONS.includes(normalized)
+      ? [normalized, ...TASK_TYPE_OPTIONS]
+      : [...TASK_TYPE_OPTIONS];
+
+    return all.map(type => {
+      const selected = type === normalized ? "selected" : "";
+      return `<option value="${escapeHtml(type)}" ${selected}>${escapeHtml(type)}</option>`;
+    }).join("");
+  }
+
+  function buildMixerPickerHtml(currentName, disabledAttr) {
+    const current = String(currentName || "").trim();
+    const isDisabled = disabledAttr.includes("disabled");
+    const mixerCandidates = mixerMembersCache.length ? mixerMembersCache : membersCache;
+
+    return `
+      <div class="pickerGroup" id="producerPicker">
+        ${mixerCandidates.map(member => {
+          const display = String(member.display || "").trim();
+          const active = display === current ? "active" : "";
+          return `
+            <button
+              type="button"
+              class="pickerBtn mixerOptionBtn ${active}"
+              data-value="${escapeHtml(display)}"
+              ${isDisabled ? "disabled" : ""}
+            >${escapeHtml(display)}</button>
+          `;
+        }).join("")}
+      </div>
+      <input id="editProducerName" class="autoSaveField" type="hidden" value="${escapeHtml(current)}" />
+    `;
+  }
+
+  function buildSingerPickerHtml(task, disabledAttr, singerQuota) {
+    const currentSingerIds = getOrderedSelectedSingerIds(task, singerQuota);
+    const isDisabled = disabledAttr.includes("disabled");
+
+    return `
+      <div class="editField">
+        <label class="editLabel">演唱者</label>
+        <div class="pickerGroup singerPicker" id="singerPicker">
+          ${membersCache.map(member => {
+            const memberId = String(member.id || "").trim();
+            const display = String(member.display || "").trim();
+            const active = currentSingerIds.includes(memberId) ? "active" : "";
+            return `
+              <button
+                type="button"
+                class="pickerBtn singerOptionBtn ${active}"
+                data-member-id="${escapeHtml(memberId)}"
+                data-member-name="${escapeHtml(display)}"
+                ${isDisabled ? "disabled" : ""}
+              >${escapeHtml(display)}</button>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  function buildPartRowsHtml(task, disabledAttr, singerQuota) {
+    const existingRows = (task.parts || []).slice().sort((a, b) => (a.part_order || 0) - (b.part_order || 0));
+    const isDisabled = disabledAttr.includes("disabled");
+    const normalizedRows = existingRows.slice(0, singerQuota);
+
+    while (normalizedRows.length < singerQuota) {
+      normalizedRows.push({
+        original_name: "",
+        assigned_member_name: ""
+      });
+    }
+
+    const rows = normalizedRows.map((item, index) => {
+      const originalName = String(item.original_name || "").trim();
+      const assignedName = String(item.assigned_member_name || "").trim();
+      const rowOpenTarget = originalName && !assignedName ? "openTarget candidateTargetRow" : "";
+
+      return `
+        <div class="rowCard partRow ${rowOpenTarget}" data-row-index="${index}" data-part-id="${escapeHtml(item.id || "")}">
+          <input class="editInput partNameInput autoSaveField" type="text" value="${escapeHtml(originalName)}" placeholder="填写歌词分配 / 原唱名字" ${disabledAttr} />
+          <div class="partMemberField">
+            <input class="editInput partMemberInput autoSaveField" autocomplete="off" type="text" value="${escapeHtml(assignedName)}" placeholder="填写成员名字或下拉选择" ${disabledAttr} />
+            <div class="memberSuggestBox"></div>
+          </div>
+          <button type="button" class="rowDeleteBtn deletePartRowBtn" title="清空成员名字" ${isDisabled ? "disabled" : ""}>×</button>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <div class="rowList" id="partRows">${rows}</div>
+    `;
+  }
+
+  function buildClaimDetailHtml(task) {
+    const editable = canEditCurrentPage();
+    const disabledAttr = editable ? "" : "disabled";
+    const wrapClass = editable ? "" : "disabledWrap";
+    const songName = String(task.task_name || "").trim();
+    const singerQuota = Math.max(1, Number(task.singer_quota) || 1);
+
+    const singerBonus = getBonusValue(task, ["singer_bonus","vocal_bonus","singer_reward","vocal_reward"]);
+    const mixerBonus = getBonusValue(task, ["producer_bonus","mix_bonus","mixing_bonus","producer_reward"]);
+    const singerBreakdown = buildBonusBreakdownText(singerBonus, getBonusValue(task, ["singer_bonus_breakdown","vocal_bonus_breakdown","singer_reward_breakdown","vocal_reward_breakdown"]));
+    const mixerBreakdown = buildBonusBreakdownText(mixerBonus, getBonusValue(task, ["producer_bonus_breakdown","mix_bonus_breakdown","mixing_bonus_breakdown","producer_reward_breakdown"]));
+
+    return `
+      <div class="${wrapClass}">
+        <div class="editBlock">
+          <input id="editIsCollective" class="autoSaveField" type="hidden" value="${task.is_collective_task ? "1" : "0"}" />
+
+          <div class="editGrid taskBasicGrid">
+            <div class="editField">
+              <label class="editLabel">编号</label>
+              <input id="editTaskCode" class="editInput" type="text" value="${escapeHtml(task.task_code || "")}" ${canEditTaskCode() ? "" : "disabled"} />
+            </div>
+
+            <div class="editField">
+              <label class="editLabel">歌曲名</label>
+              <div class="songNameFieldWrap">
+                <input id="editSongName" class="editInput autoSaveField" type="text" value="${escapeHtml(songName)}" placeholder="填写歌曲名" ${disabledAttr} />
+              </div>
+            </div>
+
+            <div class="editField">
+              <label class="editLabel">任务类型</label>
+              <select id="editTaskType" class="editSelect autoSaveField" ${disabledAttr}>
+                <option value="">请选择</option>
+                ${buildTaskTypeOptions(task.task_type)}
+              </select>
+            </div>
+          </div>
+
+          <div style="height:10px;"></div>
+
+          <div class="editGrid taskMetaGrid">
+            <div class="editField">
+              <label class="editLabel">演唱人数</label>
+              <input id="editSingerQuota" class="editInput autoSaveField" type="number" min="1" step="1" value="${escapeHtml(String(singerQuota))}" ${disabledAttr} />
+            </div>
+
+            <div class="editField">
+              <label class="editLabel">调</label>
+              <input id="editTone" class="editInput autoSaveField" type="text" value="${escapeHtml(getToneDisplayValue(task.project_tone || ""))}" placeholder="-2 / 原调 / +6" ${disabledAttr} />
+            </div>
+
+            <div class="editField">
+              <label class="editLabel">预计发布</label>
+              <input id="editReleaseDate" class="editInput autoSaveField" type="date" value="${escapeHtml(formatDateForInput(task.release_date))}" ${disabledAttr} />
+            </div>
+          </div>
+        </div>
+
+        <div class="editBlock">
+          ${buildSingerPickerHtml(task, disabledAttr, singerQuota)}
+        </div>
+
+        <div class="editBlock">
+          <div class="sectionTitle">歌词分配</div>
+          ${buildPartRowsHtml(task, disabledAttr, singerQuota)}
+          ${editable ? `
+            <div class="lyricsToolbar" id="lyricsToolbar" style="display:none;">
+              <div class="lyricsToolBtns" id="lyricsToolBtns"></div>
+            </div>
+          ` : ``}
+        </div>
+
+        <div class="editBlock">
+          <div class="editField">
+            <label class="editLabel">混音</label>
+            ${buildMixerPickerHtml(task.producer_name || "", disabledAttr)}
+          </div>
+        </div>
+
+        <div class="editBlock">
+          <div class="bonusSectionTitle">任务奖金</div>
+          <div class="bonusWrap">
+            <div class="bonusCard">
+              <div class="bonusLabel">演唱</div>
+              <div class="bonusValue" id="detailSingerBonusValue">${escapeHtml(singerBonus)} 金币</div>
+              <div class="bonusHint" id="detailSingerBonusHint">${escapeHtml(singerBreakdown)}</div>
+            </div>
+            <div class="bonusCard">
+              <div class="bonusLabel">混音</div>
+              <div class="bonusValue" id="detailMixerBonusValue">${escapeHtml(mixerBonus)} 金币</div>
+              <div class="bonusHint" id="detailMixerBonusHint">${escapeHtml(mixerBreakdown)}</div>
+            </div>
+          </div>
+        </div>
+
+        ${editable ? `
+        <div class="taskDangerBar">
+            <button class="miniBtn dangerWide" id="deleteTaskBtn" type="button">删除整个任务</button>
+          </div>
+        ` : ``}
+      </div>
+    `;
+  }
+
+  function renderBrowseDetail() {
+    const listData = getFilteredTasks(claimSearchKeyword);
+    const task = listData.find(item => item.id === activeClaimTaskId) || listData[0];
+
+    if (!task) {
+      setBrowseDetailEmpty("暂无任务");
+      return;
+    }
+
+    activeClaimTaskId = task.id;
+    selectedCandidateMemberId = "";
+    selectedCandidateName = "";
+    clearUndoSnapshots();
+
+    suppressAutoSave = true;
+    const titleTaskModeDisabledAttr = canEditCurrentPage() ? "" : "disabled";
+    document.getElementById("browseDetailTitle").innerHTML = `
+      <span class="detailTitleMain">
+        <span class="detailTitleText">${escapeHtml(task.displayName)}</span>
+        <button id="editIsCollectiveBtn" class="miniBtn taskModeToggleBtn ${task.is_collective_task ? "special" : ""}" type="button" title="${task.is_collective_task ? "特殊任务，每人额外+10金币" : "普通任务"}" ${titleTaskModeDisabledAttr}>${task.is_collective_task ? "特" : "普"}</button>
+      </span>
+      <span class="detailTitleStatus">${escapeHtml(task.computedStatus || "任务状态")}</span>
+    `;
+    topStatus.textContent = "";
+    document.getElementById("browseDetailContentClaim").innerHTML = buildClaimDetailHtml(task);
+    renderBrowseList();
+    bindDetailEditorEvents();
+    suppressAutoSave = false;
+    renderSiteNotifications();
+  }
+
+  function createPartRowHtml(partName = "", memberName = "", rowIndex = 0) {
+    const originalName = String(partName || "").trim();
+    const assignedName = String(memberName || "").trim();
+    const rowOpenTarget = originalName && !assignedName ? "openTarget candidateTargetRow" : "";
+
+    return `
+      <div class="rowCard partRow ${rowOpenTarget}" data-row-index="${rowIndex}" data-part-id="">
+        <input class="editInput partNameInput autoSaveField" type="text" value="${escapeHtml(partName)}" placeholder="填写歌词分配 / 原唱名字" />
+        <input class="editInput partMemberInput autoSaveField" list="partMemberOptions" type="text" value="${escapeHtml(memberName)}" placeholder="填写成员名字或下拉选择" />
+        <button type="button" class="rowDeleteBtn deletePartRowBtn" title="清空成员名字">×</button>
+      </div>
+    `;
+  }
+
+  function getValidSingerQuotaValue() {
+    const quotaInput = document.getElementById("editSingerQuota");
+    let singerQuota = Math.max(1, parseInt(String(quotaInput?.value || "1"), 10) || 1);
+    if (quotaInput) quotaInput.value = singerQuota;
+    return singerQuota;
+  }
+
+  function getSingerPickerButtons() {
+    return [...document.querySelectorAll(".singerOptionBtn")];
+  }
+
+  function getSelectedSingerButtons() {
+    return getSingerPickerButtons().filter(btn => btn.classList.contains("active"));
+  }
+
+  function getSelectedSingerIdsFromDom() {
+    return getSelectedSingerButtons().map(btn => String(btn.dataset.memberId || "").trim()).filter(Boolean);
+  }
+
+  function getSelectedSingerNamesFromDom() {
+    return getSelectedSingerButtons().map(btn => String(btn.dataset.memberName || "").trim()).filter(Boolean);
+  }
+
+  function getAssignedMemberNamesFromRows(excludeRow = null) {
+    return [...document.querySelectorAll(".partRow")].flatMap(row => {
+      if (excludeRow && row === excludeRow) return [];
+      const name = String(row.querySelector(".partMemberInput")?.value || "").trim();
+      return name ? [name] : [];
+    });
+  }
+
+  function getAvailableSingerNamesForRow(row) {
+    const selectedSingerNames = [...new Set(getSelectedSingerNamesFromDom().filter(Boolean))];
+    const currentName = String(row?.querySelector('.partMemberInput')?.value || '').trim();
+    const assignedElsewhere = new Set(getAssignedMemberNamesFromRows(row));
+    const available = selectedSingerNames.filter(name => !assignedElsewhere.has(name));
+    if (currentName && !available.includes(currentName)) available.unshift(currentName);
+    return [...new Set(available.filter(Boolean))];
+  }
+
+  function getMemberSuggestBox(row) {
+    return row?.querySelector('.memberSuggestBox') || null;
+  }
+
+  function hidePartMemberSuggestions(row) {
+    const box = getMemberSuggestBox(row);
+    if (!box) return;
+    box.classList.remove('show');
+    box.innerHTML = '';
+    row?.classList?.remove('suggestOpen');
+  }
+
+  function hideAllPartMemberSuggestions(exceptRow = null) {
+    document.querySelectorAll('.partRow').forEach(row => {
+      if (exceptRow && row === exceptRow) return;
+      hidePartMemberSuggestions(row);
+    });
+  }
+
+  function applyPartMemberSelection(row, memberName) {
+    const input = row?.querySelector('.partMemberInput');
+    if (!row || !input) return;
+    const nextName = String(memberName || '').trim();
+    const prevName = String(input.dataset.prevMemberName || input.value || '').trim();
+
+    if (prevName && prevName !== nextName) {
+      clearSingerIfUnused(prevName, row);
+    }
+
+    input.value = nextName;
+    input.dataset.prevMemberName = nextName;
+    if (nextName) {
+      toggleSingerButtonByName(nextName, true);
+    }
+    syncSingerPickerFromRows();
+    updateSingerPickerDisabledState();
+    updatePartMemberOptionsForRow(row, true);
+    updatePartMemberOptionsFromSelectedSingers();
+    refreshCandidateRowState();
+    scheduleAutoSave();
+  }
+
+  function updatePartMemberOptionsForRow(row, forceShow = false) {
+    const targetRow = row || document.activeElement?.closest?.('.partRow') || document.querySelector('.partRow');
+    if (!targetRow) return;
+    const input = targetRow.querySelector('.partMemberInput');
+    const box = getMemberSuggestBox(targetRow);
+    if (!input || !box) return;
+
+    const keyword = String(input.value || '').trim().toLowerCase();
+    const names = getAvailableSingerNamesForRow(targetRow).filter(name => {
+      if (!keyword) return true;
+      return String(name || '').trim().toLowerCase().includes(keyword);
+    });
+
+    hideAllPartMemberSuggestions(targetRow);
+
+    if (!names.length) {
+      box.innerHTML = forceShow ? '<div class="memberSuggestEmpty">暂无可选成员</div>' : '';
+      box.classList.toggle('show', !!forceShow);
+      targetRow.classList.toggle('suggestOpen', !!forceShow);
+      return;
+    }
+
+    box.innerHTML = names.map(name => `
+      <button type="button" class="memberSuggestItem" data-member-name="${escapeHtml(name)}">${escapeHtml(name)}</button>
+    `).join('');
+
+    box.querySelectorAll('.memberSuggestItem').forEach(btn => {
+      btn.addEventListener('mousedown', (event) => {
+        event.preventDefault();
+        applyPartMemberSelection(targetRow, String(btn.dataset.memberName || '').trim());
+        hidePartMemberSuggestions(targetRow);
+        input.focus();
+      });
+    });
+
+    targetRow.classList.add('suggestOpen');
+    box.classList.add('show');
+  }
+
+  function bindPartMemberOptionEvents() {
+    document.querySelectorAll('.partMemberInput').forEach(input => {
+      if (input.dataset.optionBound === '1') return;
+      input.dataset.optionBound = '1';
+      const row = input.closest('.partRow');
+      const showHandler = () => window.setTimeout(() => updatePartMemberOptionsForRow(row, true), 0);
+      const blurHandler = () => window.setTimeout(() => {
+        if (!row?.contains(document.activeElement)) hidePartMemberSuggestions(row);
+      }, 140);
+
+      input.addEventListener('focus', showHandler);
+      input.addEventListener('click', showHandler);
+      input.addEventListener('mousedown', showHandler);
+      input.addEventListener('input', showHandler);
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          showHandler();
+          const first = getMemberSuggestBox(row)?.querySelector('.memberSuggestItem');
+          first?.focus();
+          return;
+        }
+        if (event.key === 'Escape') {
+          hidePartMemberSuggestions(row);
+        }
+      });
+      input.addEventListener('blur', blurHandler);
+    });
+  }
+
+  function updatePartMemberOptionsFromSelectedSingers() {
+    const activeInput = document.activeElement?.classList?.contains('partMemberInput')
+      ? document.activeElement
+      : null;
+    const row = activeInput?.closest('.partRow') || null;
+    if (row) {
+      updatePartMemberOptionsForRow(row, true);
+    } else {
+      hideAllPartMemberSuggestions();
+    }
+  }
+
+  function autoFillLastRemainingSinger() {
+    const selectedSingerNames = [...new Set(getSelectedSingerNamesFromDom().filter(Boolean))];
+    if (!selectedSingerNames.length) return false;
+
+    const rows = [...document.querySelectorAll(".partRow")];
+    const assignedNames = rows
+      .map(row => String(row.querySelector(".partMemberInput")?.value || "").trim())
+      .filter(Boolean);
+
+    const pendingRows = rows.filter(row => {
+      const roleName = String(row.querySelector(".partNameInput")?.value || "").trim();
+      const memberName = String(row.querySelector(".partMemberInput")?.value || "").trim();
+      return !!roleName && !memberName;
+    });
+
+    const remainingNames = selectedSingerNames.filter(name => !assignedNames.includes(name));
+    if (remainingNames.length !== 1 || pendingRows.length !== 1) return false;
+
+    const targetRow = pendingRows[0];
+    const memberInput = targetRow.querySelector(".partMemberInput");
+    if (!memberInput) return false;
+
+    const finalName = remainingNames[0];
+    memberInput.value = finalName;
+    memberInput.dataset.prevMemberName = finalName;
+    toggleSingerButtonByName(finalName, true);
+    return true;
+  }
+
+  function getAutoFillLastSingerState() {
+    const selectedSingerNames = [...new Set(getSelectedSingerNamesFromDom().filter(Boolean))];
+    const rows = [...document.querySelectorAll('.partRow')];
+    const assignedNames = rows
+      .map(row => String(row.querySelector('.partMemberInput')?.value || '').trim())
+      .filter(Boolean);
+    const pendingRows = rows.filter(row => {
+      const roleName = String(row.querySelector('.partNameInput')?.value || '').trim();
+      const memberName = String(row.querySelector('.partMemberInput')?.value || '').trim();
+      return !!roleName && !memberName;
+    });
+    const remainingNames = selectedSingerNames.filter(name => !assignedNames.includes(name));
+    return {
+      shouldAutoFill: remainingNames.length === 1 && pendingRows.length === 1,
+      remainingNames,
+      pendingRows
+    };
+  }
+
+  function applyDeferredLastRemainingSingerFill() {
+    const state = getAutoFillLastSingerState();
+    if (!state.shouldAutoFill) return false;
+    const targetRow = state.pendingRows[0] || null;
+    const finalName = state.remainingNames[0] || '';
+    const memberInput = targetRow?.querySelector('.partMemberInput') || null;
+    if (!memberInput || !finalName) return false;
+
+    memberInput.value = finalName;
+    memberInput.dataset.prevMemberName = finalName;
+    toggleSingerButtonByName(finalName, true);
+    hidePartMemberSuggestions(targetRow);
+    return true;
+  }
+
+  function getOrderedSelectedSingerIds(task, singerQuota) {
+    const rowIds = (task.parts || [])
+      .map(row => String(row.assigned_member_id || "").trim())
+      .filter(Boolean);
+
+    const singerIds = (task.singers || [])
+      .map(item => String(item.member_id || "").trim())
+      .filter(Boolean);
+
+    const result = [];
+    [...rowIds, ...singerIds].forEach(id => {
+      if (id && !result.includes(id) && result.length < singerQuota) {
+        result.push(id);
+      }
+    });
+    return result;
+  }
+
+  function updateSingerPickerDisabledState() {
+    const quota = getValidSingerQuotaValue();
+    const selectedCount = getSelectedSingerIdsFromDom().length;
+    getSingerPickerButtons().forEach(btn => {
+      if (btn.classList.contains("active")) {
+        btn.disabled = false;
+      } else {
+        btn.disabled = selectedCount >= quota;
+      }
+    });
+  }
+
+  function syncSingerPickerFromRowMembers() {
+    const memberNames = [...document.querySelectorAll(".partRow .partMemberInput")]
+      .map(input => String(input.value || "").trim())
+      .filter(Boolean);
+
+    getSingerPickerButtons().forEach(btn => {
+      const memberName = String(btn.dataset.memberName || "").trim();
+      if (memberNames.includes(memberName)) {
+        btn.classList.add("active");
+      }
+    });
+
+    trimSelectedSingersToQuota();
+    updateSingerPickerDisabledState();
+  }
+
+  function getUnusedSelectedSingerNames() {
+    const selectedNames = getSelectedSingerNamesFromDom();
+    const rowNames = [...document.querySelectorAll(".partRow .partMemberInput")]
+      .map(input => String(input.value || "").trim())
+      .filter(Boolean);
+
+    return selectedNames.filter(name => !rowNames.includes(name));
+  }
+
+  function findFirstReusableBlankRow() {
+    return [...document.querySelectorAll(".partRow")].find(row => {
+      const partText = String(row.querySelector(".partNameInput")?.value || "").trim();
+      const memberText = String(row.querySelector(".partMemberInput")?.value || "").trim();
+      return !memberText && !partText;
+    }) || null;
+  }
+
+  function appendPartRow(partName = "", memberName = "") {
+    const partWrap = document.getElementById("partRows");
+    if (!partWrap) return null;
+    const nextIndex = partWrap.querySelectorAll(".partRow").length;
+    const temp = document.createElement("div");
+    temp.innerHTML = createPartRowHtml(partName, memberName, nextIndex);
+    const row = temp.firstElementChild;
+    partWrap.appendChild(row);
+    bindAutoSaveEventsToDetail();
+    bindPartRowDeleteEvents();
+    bindPartMemberOptionEvents();
+    refreshCandidateRowState();
+    return row;
+  }
+
+  function trimRowsToQuota() {
+    const partWrap = document.getElementById("partRows");
+    const quota = getValidSingerQuotaValue();
+    if (!partWrap) return;
+    let rows = [...partWrap.querySelectorAll(".partRow")];
+    while (rows.length > quota) {
+      rows[rows.length - 1].remove();
+      rows = [...partWrap.querySelectorAll(".partRow")];
+    }
+    reindexPartRows();
+    syncSingerPickerFromRows();
+  }
+
+  function trimSelectedSingersToQuota() {
+    const quota = getValidSingerQuotaValue();
+    const selectedButtons = getSelectedSingerButtons();
+    if (selectedButtons.length <= quota) return;
+
+    const removableNames = getUnusedSelectedSingerNames();
+    const removableSet = new Set(removableNames);
+    for (const btn of selectedButtons) {
+      if (getSelectedSingerButtons().length <= quota) break;
+      const name = String(btn.dataset.memberName || "").trim();
+      if (removableSet.has(name)) {
+        btn.classList.remove("active");
+      }
+    }
+
+    const selectedAgain = getSelectedSingerButtons();
+    while (selectedAgain.length > quota) {
+      selectedAgain[selectedAgain.length - 1].classList.remove("active");
+      selectedAgain.pop();
+    }
+    syncSingerPickerFromRows();
+  }
+
+  function ensurePartRowsMatchQuota() {
+    const partWrap = document.getElementById("partRows");
+    if (!partWrap) return;
+
+    trimRowsToQuota();
+
+    const quota = getValidSingerQuotaValue();
+    let rows = [...partWrap.querySelectorAll(".partRow")];
+
+    while (rows.length < quota) {
+      const temp = document.createElement("div");
+      temp.innerHTML = createPartRowHtml("", "", rows.length);
+      const row = temp.firstElementChild;
+      partWrap.appendChild(row);
+      rows = [...partWrap.querySelectorAll(".partRow")];
+    }
+
+    reindexPartRows();
+    syncSingerPickerFromRows();
+    bindAutoSaveEventsToDetail();
+    bindPartRowDeleteEvents();
+  }
+
+  function enforceQuotaLimitFromInput() {
+    trimRowsToQuota();
+    ensurePartRowsMatchQuota();
+    trimSelectedSingersToQuota();
+    updateSingerPickerDisabledState();
+    refreshCandidateRowState();
+  }
+
+  function getRowMemberUsageCount(memberName, excludingRow = null) {
+    const target = String(memberName || "").trim();
+    if (!target) return 0;
+    return [...document.querySelectorAll(".partRow")]
+      .filter(row => row !== excludingRow)
+      .filter(row => String(row.querySelector(".partMemberInput")?.value || "").trim() === target)
+      .length;
+  }
+
+  function toggleSingerButtonByName(memberName, active) {
+    const target = String(memberName || "").trim();
+    getSingerPickerButtons().forEach(btn => {
+      if (String(btn.dataset.memberName || "").trim() === target) {
+        btn.classList.toggle("active", !!active);
+      }
+    });
+    updateSingerPickerDisabledState();
+  }
+
+  function clearSingerIfUnused(memberName, excludingRow = null) {
+    const target = String(memberName || "").trim();
+    if (!target) return;
+    const stillUsed = getRowMemberUsageCount(target, excludingRow) > 0;
+    if (!stillUsed) {
+      toggleSingerButtonByName(target, false);
+    }
+    updateSingerPickerDisabledState();
+    updatePartMemberOptionsFromSelectedSingers();
+  }
+
+  function syncSingerPickerFromRows() {
+    const rowNames = [...document.querySelectorAll(".partRow .partMemberInput")]
+      .map(input => String(input.value || "").trim())
+      .filter(Boolean);
+    const rowNameSet = new Set(rowNames);
+
+    getSingerPickerButtons().forEach(btn => {
+      const memberName = String(btn.dataset.memberName || "").trim();
+      if (rowNameSet.has(memberName)) {
+        btn.classList.add("active");
+      }
+    });
+
+    trimSelectedSingersToQuota();
+    updateSingerPickerDisabledState();
+    updatePartMemberOptionsFromSelectedSingers();
+  }
+
+  function fillSingerIntoRows(memberName) {
+    const targetName = String(memberName || "").trim();
+    if (!targetName) return false;
+
+    const existingRows = [...document.querySelectorAll(".partRow")];
+    if (existingRows.some(row => String(row.querySelector(".partMemberInput")?.value || "").trim() === targetName)) {
+      return true;
+    }
+
+    let targetRow = findFirstReusableBlankRow();
+    if (!targetRow) {
+      const quota = getValidSingerQuotaValue();
+      if (existingRows.length >= quota) return false;
+      targetRow = appendPartRow("", "");
+    }
+
+    const memberInput = targetRow?.querySelector(".partMemberInput");
+    if (!memberInput) return false;
+    memberInput.value = targetName;
+    refreshCandidateRowState();
+    return true;
+  }
+
+  function removeSingerFromRows(memberName) {
+    const target = String(memberName || "").trim();
+    if (!target) return;
+
+    const rows = [...document.querySelectorAll(".partRow")];
+    rows.forEach(row => {
+      const memberInput = row.querySelector(".partMemberInput");
+      if (!memberInput || String(memberInput.value || "").trim() !== target) return;
+      memberInput.value = "";
+      memberInput.dataset.prevMemberName = "";
+    });
+
+    ensurePartRowsMatchQuota();
+    refreshCandidateRowState();
+  }
+
+  function reindexPartRows() {
+    document.querySelectorAll(".partRow").forEach((row, index) => {
+      row.dataset.rowIndex = String(index);
+    });
+  }
+
+  function captureDetailSnapshot() {
+    const task = getCurrentTaskSafe();
+    if (!task || !document.getElementById("browseDetailContentClaim")) return null;
+    const singerButtons = getSingerPickerButtons();
+    return {
+      taskId: String(task.id || ""),
+      taskCode: String(document.getElementById("editTaskCode")?.value || ""),
+      taskName: String(document.getElementById("editSongName")?.value || ""),
+      releaseDate: String(document.getElementById("editReleaseDate")?.value || ""),
+      taskType: String(document.getElementById("editTaskType")?.value || ""),
+      singerQuota: String(document.getElementById("editSingerQuota")?.value || ""),
+      tone: String(document.getElementById("editTone")?.value || ""),
+      producerName: String(document.getElementById("editProducerName")?.value || ""),
+      selectedSingerIds: singerButtons.filter(btn => btn.classList.contains("active")).map(btn => String(btn.dataset.memberId || "").trim()).filter(Boolean),
+      rows: [...document.querySelectorAll(".partRow")].map((row, index) => ({
+        partId: String(row.dataset.partId || "").trim(),
+        rowIndex: index,
+        partName: String(row.querySelector(".partNameInput")?.value || ""),
+        memberName: String(row.querySelector(".partMemberInput")?.value || "")
+      }))
+    };
+  }
+
+  function updateUndoButtonState() {
+    if (!undoBtn) return;
+    undoBtn.disabled = !detailUndoStack.length;
+  }
+
+  function pushUndoSnapshot() {
+    if (isApplyingUndoSnapshot) return;
+    const snapshot = captureDetailSnapshot();
+    if (!snapshot) return;
+    const serialized = JSON.stringify(snapshot);
+    const lastSerialized = detailUndoStack.length ? JSON.stringify(detailUndoStack[detailUndoStack.length - 1]) : "";
+    if (serialized === lastSerialized) return;
+    detailUndoStack.push(snapshot);
+    if (detailUndoStack.length > 40) detailUndoStack.shift();
+    updateUndoButtonState();
+  }
+
+  function clearUndoSnapshots() {
+    detailUndoStack = [];
+    updateUndoButtonState();
+  }
+
+  function applyDetailSnapshot(snapshot) {
+    if (!snapshot || String(snapshot.taskId || "") !== String(activeClaimTaskId || "")) return;
+    isApplyingUndoSnapshot = true;
+    try {
+      const setValue = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value ?? "";
+      };
+      setValue("editTaskCode", snapshot.taskCode || "");
+      setValue("editSongName", snapshot.taskName || "");
+      setValue("editReleaseDate", snapshot.releaseDate || "");
+      setValue("editTaskType", snapshot.taskType || "");
+      setValue("editSingerQuota", snapshot.singerQuota || "");
+      setValue("editTone", snapshot.tone || "");
+      setValue("editProducerName", snapshot.producerName || "");
+
+      const partWrap = document.getElementById("partRows");
+      if (partWrap) {
+        partWrap.innerHTML = (snapshot.rows || []).map((row, index) => {
+          const temp = document.createElement("div");
+          temp.innerHTML = createPartRowHtml(row.partName || "", row.memberName || "", index);
+          const node = temp.firstElementChild;
+          if (node) node.dataset.partId = String(row.partId || "");
+          return node ? node.outerHTML : "";
+        }).join("");
+      }
+
+      getSingerPickerButtons().forEach(btn => {
+        const memberId = String(btn.dataset.memberId || "").trim();
+        btn.classList.toggle("active", (snapshot.selectedSingerIds || []).includes(memberId));
+      });
+
+      bindAutoSaveEventsToDetail();
+      bindPartRowDeleteEvents();
+      bindSingerPickerEvents();
+      bindMixerPickerEvents();
+
+      document.querySelectorAll(".partMemberInput").forEach(input => {
+        input.dataset.prevMemberName = String(input.value || "").trim();
+      });
+
+      enforceQuotaLimitFromInput();
+      syncSingerPickerFromRows();
+      refreshCandidateRowState();
+      updateSingerPickerDisabledState();
+      updatePartMemberOptionsFromSelectedSingers();
+      updateRewardPreviewFromDom();
+
+      const currentTask = getCurrentTaskSafe();
+      if (currentTask) {
+        const previewTask = buildTaskFromDom(currentTask).task;
+        topStatus.textContent = "";
+      }
+      setAutoSaveStatus("saved", "已撤回");
+    } finally {
+      isApplyingUndoSnapshot = false;
+    }
+  }
+
+  function undoLastDetailChange() {
+    const snapshot = detailUndoStack.pop();
+    updateUndoButtonState();
+    if (!snapshot) return;
+    applyDetailSnapshot(snapshot);
+  }
+
+
+  function buildTaskFromDom(existingTask) {
+    const taskCode = String(document.getElementById("editTaskCode")?.value || "").trim();
+    const songName = String(document.getElementById("editSongName")?.value || "").trim();
+    const releaseDate = String(document.getElementById("editReleaseDate")?.value || "").trim();
+    const taskType = String(document.getElementById("editTaskType")?.value || "").trim();
+    const gameType = taskType === "游戏" ? String(document.getElementById("editGameType")?.value || "").trim() : "";
+    const isCollectiveTask = String(document.getElementById("editIsCollective")?.value || "") === "1";
+    const toneRaw = String(document.getElementById("editTone")?.value || "").trim();
+    const producerName = String(document.getElementById("editProducerName")?.value || "").trim();
+    const singerQuota = getValidSingerQuotaValue();
+
+    const toneResult = validateToneInput(toneRaw);
+    const partResult = collectPartPayload(existingTask);
+    const singerPayload = buildSingerPayloadFromParts(existingTask, partResult.payload);
+
+    const nextTask = {
+      ...existingTask,
+      task_code: taskCode || null,
+      task_name: songName || null,
+      displayName: makeDisplayTaskName(taskCode, songName),
+      release_date: releaseDate || null,
+      task_type: taskType || null,
+      is_collective_task: isCollectiveTask,
+      project_tone: toneResult.value,
+      singer_quota: singerQuota,
+      producer_name: producerName,
+      producer_member_id: (findMixerByName(producerName) || findMemberByName(producerName) || {}).id ? String((findMixerByName(producerName) || findMemberByName(producerName)).id) : "",
+      singer_bonus: getSingerRewardByRule(singerQuota, isCollectiveTask),
+      producer_bonus: getProducerRewardByRule(taskType, singerQuota, isCollectiveTask),
+      parts: partResult.payload.map(item => ({
+        id: item.id || "",
+        part_order: item.part_order,
+        original_name: item.original_name,
+        assigned_member_id: item.assigned_member_id ? String(item.assigned_member_id) : "",
+        assigned_member_name: item.assigned_member_name || ""
+      })),
+      singers: singerPayload.map(item => {
+        const matched = membersCache.find(member => String(member.id) === String(item.member_id));
+        return {
+          id: item.id || "",
+          member_id: String(item.member_id || ""),
+          member_name: matched?.display || "",
+          is_submitted: !!item.is_submitted,
+          submitted_at: item.submitted_at || null
+        };
+      })
+    };
+
+    nextTask.supplementTags = getSupplementTags(nextTask);
+    nextTask.readyForHonorShow = isReadyForHonorShow(nextTask);
+    nextTask.computedStatus = nextTask.supplementTags.join("｜");
+    return { task: nextTask, partResult, singerPayload, toneResult, taskCode, songName, releaseDate, taskType, gameType, isCollectiveTask, producerName, singerQuota };
+  }
+
+  function patchTaskInMemory(nextTask) {
+    tasks = tasks
+      .map(item => item.id === nextTask.id ? nextTask : item)
+      .sort((a, b) => {
+        const aCode = parseInt(String(a.task_code).match(/\d+/)?.[0] || "0", 10);
+        const bCode = parseInt(String(b.task_code).match(/\d+/)?.[0] || "0", 10);
+        return aCode - bCode;
+      });
+  }
+
+function closeRoleSetupModal() {
+    roleSetupMask.classList.remove("show");
+    roleSetupMask.setAttribute("aria-hidden", "true");
+    roleSetupContext = null;
+  }
+
+  function openRoleSetupModal(context, type) {
+    roleSetupContext = context;
+    activeRoleToolType = type;
+    roleSetupTitle.textContent = type === "wheel" ? "角色转盘设置" : (type === "dice" ? "角色骰子设置" : "角色抽签设置");
+    roleSetupDesc.textContent = "只会处理还没配对完成的歌词分配行。已配对完成的行不会再次参与随机，参与随机的人也只会是当前已选中的演唱者。";
+
+    roleSetupRows.innerHTML = context.rows.map((item, index) => `
+      <div class="roleSetupRow" data-role-setup-index="${index}">
+        <div class="roleSetupRowLabel">原唱</div>
+        <input class="editInput roleSetupPartInput" type="text" value="${escapeHtml(item.roleName || "")}" placeholder="填写原唱 / 部分" />
+        <div>
+          <div class="roleSetupMemberLabel">待随机分配</div>
+        </div>
+      </div>
+    `).join("");
+
+    const selectedSet = new Set(context.selectedSingerNames);
+    roleSetupSingerPicker.innerHTML = context.selectedSingerNames.map(name => {
+      const active = selectedSet.has(name) ? "active" : "";
+      return `
+        <button
+          type="button"
+          class="pickerBtn singerOptionBtn roleSetupSingerBtn ${active}"
+          data-member-name="${escapeHtml(name)}"
+        >${escapeHtml(name)}</button>
+      `;
+    }).join("");
+
+    roleSetupSingerPicker.querySelectorAll('.roleSetupSingerBtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
+      });
+    });
+
+    roleSetupMask.classList.add("show");
+    roleSetupMask.setAttribute("aria-hidden", "false");
+  }
+
+  function prepareRoleSetupContext() {
+    const rows = [...document.querySelectorAll('.partRow')];
+    const selectedSingerNames = getSelectedSingerNamesFromDom().filter(Boolean);
+
+    const fixedRows = [];
+    const editableRows = [];
+
+    rows.forEach((row, index) => {
+      const roleName = String(row.querySelector('.partNameInput')?.value || '').trim();
+      const memberName = String(row.querySelector('.partMemberInput')?.value || '').trim();
+
+      if (roleName && memberName) {
+        fixedRows.push({ row, index, roleName, memberName });
+        return;
+      }
+
+      if (roleName && !memberName) {
+        editableRows.push({ row, index, roleName, memberName: '' });
+      }
+    });
+
+    return { rows: editableRows, fixedRows, selectedSingerNames };
+  }
+
+  function applyRoleSetupAndRun(type) {
+    if (!roleSetupContext) return;
+    const setupRows = [...roleSetupRows.querySelectorAll('.roleSetupRow')];
+    const chosenSingerNames = [...roleSetupSingerPicker.querySelectorAll('.roleSetupSingerBtn.active')]
+      .map(btn => String(btn.dataset.memberName || '').trim())
+      .filter(Boolean);
+
+    const normalizedRows = roleSetupContext.rows.map((item, index) => ({
+      ...item,
+      roleName: String(setupRows[index]?.querySelector('.roleSetupPartInput')?.value || '').trim()
+    }));
+
+    if (!normalizedRows.some(item => item.roleName)) {
+      showToast('无法创建', '请至少填写一行原唱 / 部分。');
+      return;
+    }
+
+    const missingNamedRows = normalizedRows.filter(item => !item.roleName);
+    if (missingNamedRows.length) {
+      showToast('无法创建', '还有空白的原唱 / 部分，请先补全后再随机。');
+      return;
+    }
+
+    const fixedNames = roleSetupContext.fixedRows.map(item => item.memberName).filter(Boolean);
+    const memberFixedInRows = normalizedRows.map(item => item.memberName).filter(Boolean);
+    const usedNames = new Set([...fixedNames, ...memberFixedInRows]);
+    const pendingRows = normalizedRows.filter(item => !item.memberName);
+    const availableSingerNames = chosenSingerNames.filter(name => !usedNames.has(name));
+
+    if (pendingRows.length && !availableSingerNames.length) {
+      showToast('无法创建', '请先选择参与随机的演唱者。');
+      return;
+    }
+
+    const assignCount = Math.min(pendingRows.length, availableSingerNames.length);
+    let assignments = [];
+
+    if (type === 'lottery') {
+      const shuffled = shuffleArray(availableSingerNames).slice(0, assignCount);
+      assignments = pendingRows.slice(0, assignCount).map((item, index) => ({ row: item.row, roleName: item.roleName, memberName: shuffled[index] }));
+    } else if (type === 'dice') {
+      const pool = [...availableSingerNames];
+      assignments = pendingRows.slice(0, assignCount).map(item => {
+        const diceNo = Math.floor(Math.random() * pool.length);
+        const memberName = pool.splice(diceNo, 1)[0];
+        return { row: item.row, roleName: item.roleName, memberName, diceNo: diceNo + 1 };
+      });
+    } else {
+      const previews = shuffleArray(availableSingerNames);
+      let tick = 0;
+      const total = Math.max(10, previews.length * 3);
+      setAutoSaveStatus('saving', '转盘转动中...');
+      const timer = setInterval(() => {
+        const preview = previews[tick % previews.length] || previews[0] || '';
+        setAutoSaveStatus('saving', `转盘转动中：${preview}`);
+        tick += 1;
+        if (tick >= total) {
+          clearInterval(timer);
+          const shuffled = shuffleArray(availableSingerNames).slice(0, assignCount);
+          const result = pendingRows.slice(0, assignCount).map((item, index) => ({ row: item.row, roleName: item.roleName, memberName: shuffled[index] }));
+          normalizedRows.forEach(item => {
+            const input = item.row?.querySelector('.partNameInput');
+            if (input) input.value = item.roleName;
+          });
+          chosenSingerNames.forEach(name => toggleSingerButtonByName(name, true));
+          applyRoleAssignments(result);
+          setAutoSaveStatus('saved', '已同步');
+          const lines = result.map(item => `${item.roleName}：${item.memberName}`).join('\n');
+          showToast('角色转盘', lines ? `已完成角色转盘\n\n${lines}` : '已更新原唱内容。');
+        }
+      }, 90);
+      closeRoleSetupModal();
+      return;
+    }
+
+    normalizedRows.forEach(item => {
+      const partInput = item.row?.querySelector('.partNameInput');
+      const memberInput = item.row?.querySelector('.partMemberInput');
+      if (partInput) partInput.value = item.roleName;
+      if (memberInput && item.memberName) {
+        memberInput.value = item.memberName;
+        memberInput.dataset.prevMemberName = item.memberName;
+      }
+    });
+
+    getSingerPickerButtons().forEach(btn => btn.classList.remove('active'));
+    chosenSingerNames.forEach(name => toggleSingerButtonByName(name, true));
+
+    if (assignments.length) applyRoleAssignments(assignments);
+    else {
+      syncSingerPickerFromRows();
+      refreshCandidateRowState();
+      scheduleAutoSave();
+    }
+
+    closeRoleSetupModal();
+
+    const lines = assignments.map(item => `${item.roleName}：${item.memberName}${item.diceNo ? `（骰子 ${item.diceNo}）` : ''}`).join('\n');
+    const title = type === 'dice' ? '角色骰子' : '角色抽签';
+    showToast(title, lines ? `已完成${title}\n\n${lines}` : '已更新原唱内容。');
+  }
+
+  function bindMixerPickerEvents() {
+    const hiddenInput = document.getElementById("editProducerName");
+    const buttons = document.querySelectorAll(".mixerOptionBtn");
+    if (!hiddenInput || !buttons.length) return;
+
+    buttons.forEach(btn => {
+      if (btn.dataset.bound === "1") return;
+      btn.dataset.bound = "1";
+
+      btn.addEventListener("click", () => {
+        const value = String(btn.dataset.value || "").trim();
+        const currentValue = String(hiddenInput.value || "").trim();
+
+        if (currentValue === value) {
+          hiddenInput.value = "";
+          buttons.forEach(b => b.classList.remove("active"));
+        } else {
+          hiddenInput.value = value;
+          buttons.forEach(b => b.classList.toggle("active", b === btn));
+        }
+
+        scheduleAutoSave();
+      });
+    });
+  }
+
+  function bindCandidateAssignEvents() {
+  }
+
+  function assignCandidateToRow(row, memberName) {
+    const memberInput = row?.querySelector(".partMemberInput");
+    if (!memberInput) return;
+    memberInput.value = String(memberName || "").trim();
+    syncSingerPickerFromRows();
+    refreshCandidateRowState();
+    scheduleAutoSave();
+  }
+
+  function shouldShowRoleToolButtons() {
+    const task = getCurrentTaskSafe();
+    const liveTask = getTaskForLiveUi(task);
+    const state = getRoleToolState();
+    if (!liveTask) return false;
+    return state.pendingRows.length > 0 && state.availableSingerNames.length > 0;
+  }
+
+  function refreshCandidateRowState() {
+    document.querySelectorAll(".partRow").forEach((row, index) => {
+      row.dataset.rowIndex = String(index);
+      const partText = String(row.querySelector(".partNameInput")?.value || "").trim();
+      const memberText = String(row.querySelector(".partMemberInput")?.value || "").trim();
+      const open = !!partText && !memberText;
+
+      row.classList.toggle("openTarget", open);
+      row.classList.toggle("candidateTargetRow", open);
+    });
+
+    bindPartMemberOptionEvents();
+    updatePartMemberOptionsFromSelectedSingers();
+
+    const toolbar = document.getElementById("lyricsToolbar");
+    const btnWrap = document.getElementById("lyricsToolBtns");
+    if (!toolbar || !btnWrap) return;
+
+    const autoFillState = getAutoFillLastSingerState();
+    const domIsCollective = document.getElementById("editIsCollectiveBtn")?.classList.contains("special")
+      || String(document.getElementById("editIsCollective")?.value || "") === "1";
+    const roleState = getRoleToolState();
+    const liveTask = getTaskForLiveUi(getCurrentTaskSafe());
+    const personalLotteryButtonText = getPersonalLotteryButtonText(liveTask);
+    const canShowLottery = !autoFillState.shouldAutoFill && !!liveTask && isCurrentUserSingerInTask(liveTask) && roleState.pendingRows.length > 0;
+    const canOpenWheel = !!domIsCollective && !autoFillState.shouldAutoFill && roleState.pendingRows.length > 0 && roleState.selectedSingerNames.length > 0;
+
+    if (!canShowLottery && !canOpenWheel) {
+      toolbar.style.display = "none";
+      btnWrap.innerHTML = "";
+      return;
+    }
+
+    toolbar.style.display = "";
+    btnWrap.innerHTML = `
+      ${canShowLottery ? `<button id="roleLotteryBtn" class="miniBtn roleToolBtn" type="button" ${personalLotteryButtonText === "已抽签" ? "disabled" : ""}>${personalLotteryButtonText}</button>` : ''}
+      ${canOpenWheel ? '<button id="openWheelBtn" class="miniBtn ghost roleToolBtn" type="button">转盘工具</button>' : ''}
+    `;
+
+    const roleLotteryBtn = document.getElementById("roleLotteryBtn");
+    if (roleLotteryBtn && roleLotteryBtn.dataset.bound !== "1") {
+      roleLotteryBtn.dataset.bound = "1";
+      roleLotteryBtn.addEventListener("click", () => handlePersonalLotteryClick(activeClaimTaskId));
+    }
+
+    const openWheelBtn = document.getElementById("openWheelBtn");
+    if (openWheelBtn && openWheelBtn.dataset.bound !== "1") {
+      openWheelBtn.dataset.bound = "1";
+      openWheelBtn.addEventListener("click", async () => {
+        const task = getCurrentTaskSafe();
+        const currentIsCollective = document.getElementById("editIsCollectiveBtn")?.classList.contains("special")
+          || String(document.getElementById("editIsCollective")?.value || "") === "1";
+        if (!task || !currentIsCollective) return;
+        if (hasPendingLocalChanges) {
+          await saveCurrentTaskEdits("manual");
+        }
+        openWheelToolModal(task.id);
+      });
+    }
+  }
+
+  function bindSingerPickerEvents() {
+    const buttons = getSingerPickerButtons();
+    if (!buttons.length) return;
+
+    buttons.forEach(btn => {
+      if (btn.dataset.boundSinger === "1") return;
+      btn.dataset.boundSinger = "1";
+
+      btn.addEventListener("click", () => {
+        pushUndoSnapshot();
+        const isActive = btn.classList.contains("active");
+        const clickedName = String(btn.dataset.memberName || '').trim();
+
+        if (isActive) {
+          btn.classList.remove("active");
+        } else {
+          const quota = getValidSingerQuotaValue();
+          const selectedCount = getSelectedSingerButtons().length;
+          if (selectedCount >= quota) {
+            const focusRow = document.activeElement?.closest?.('.partRow') || null;
+            const focusInput = focusRow?.querySelector('.partMemberInput') || null;
+            const focusName = String(focusInput?.value || '').trim();
+            const canSwapFocusedRow = !!focusRow && !!focusName && focusName !== clickedName;
+            if (canSwapFocusedRow) {
+              clearSingerIfUnused(focusName, focusRow);
+              if (focusInput) {
+                focusInput.value = clickedName;
+                focusInput.dataset.prevMemberName = clickedName;
+              }
+            } else {
+              showToast("人数已满", "当前已选中的演唱者数量已达到演唱人数上限。");
+              updateSingerPickerDisabledState();
+              return;
+            }
+          }
+          btn.classList.add("active");
+        }
+
+        syncSingerPickerFromRows();
+        updateSingerPickerDisabledState();
+        updatePartMemberOptionsFromSelectedSingers();
+        refreshCandidateRowState();
+        scheduleAutoSave();
+      });
+    });
+
+    updateSingerPickerDisabledState();
+    updatePartMemberOptionsFromSelectedSingers();
+  }
+
+  function bindPartRowDeleteEvents() {
+    document.querySelectorAll(".deletePartRowBtn").forEach(btn => {
+      if (btn.dataset.boundDelete === "1") return;
+      btn.dataset.boundDelete = "1";
+
+      btn.addEventListener("click", () => {
+        const row = btn.closest(".partRow");
+        if (!row) return;
+
+        const memberInput = row.querySelector(".partMemberInput");
+        const memberName = String(memberInput?.value || "").trim();
+        if (!memberInput || !memberName) return;
+
+        pushUndoSnapshot();
+        memberInput.value = "";
+        memberInput.dataset.prevMemberName = "";
+        syncSingerPickerFromRows();
+        updateSingerPickerDisabledState();
+        updatePartMemberOptionsForRow(row);
+        updatePartMemberOptionsFromSelectedSingers();
+        refreshCandidateRowState();
+        memberInput.focus();
+        scheduleAutoSave();
+      });
+    });
+  }
+
+  function bindDetailEditorEvents() {
+    const editable = canEditCurrentPage();
+    if (!editable) return;
+
+    ensurePartRowsMatchQuota();
+    bindAutoSaveEventsToDetail();
+    bindMixerPickerEvents();
+    bindSingerPickerEvents();
+    bindPartRowDeleteEvents();
+    bindPartMemberOptionEvents();
+    bindCandidateAssignEvents();
+    refreshCandidateRowState();
+    updateSingerPickerDisabledState();
+    updatePartMemberOptionsFromSelectedSingers();
+    updateRewardPreviewFromDom();
+
+    const singerQuotaInput = document.getElementById("editSingerQuota");
+    if (singerQuotaInput && singerQuotaInput.dataset.quotaBound !== "1") {
+      singerQuotaInput.dataset.quotaBound = "1";
+      const quotaHandler = () => {
+        enforceQuotaLimitFromInput();
+        updateRewardPreviewFromDom();
+        scheduleAutoSave();
+      };
+      singerQuotaInput.addEventListener("change", quotaHandler);
+      singerQuotaInput.addEventListener("input", quotaHandler);
+    }
+
+    const collectiveBtn = document.getElementById("editIsCollectiveBtn");
+    const collectiveInput = document.getElementById("editIsCollective");
+    if (collectiveBtn && collectiveInput && collectiveBtn.dataset.bound !== "1") {
+      collectiveBtn.dataset.bound = "1";
+      collectiveBtn.addEventListener("click", () => {
+        if (collectiveBtn.disabled) return;
+        const nextSpecial = !collectiveBtn.classList.contains("special");
+        collectiveBtn.classList.toggle("special", nextSpecial);
+        collectiveBtn.textContent = nextSpecial ? "特" : "普";
+        collectiveBtn.title = nextSpecial ? "特殊任务，每人额外+10金币" : "普通任务";
+        collectiveInput.value = nextSpecial ? "1" : "0";
+        refreshCandidateRowState();
+        updateRewardPreviewFromDom();
+        renderBrowseList();
+        scheduleAutoSave();
+      });
+    }
+
+    const taskTypeInput = document.getElementById("editTaskType");
+    if (taskTypeInput && taskTypeInput.dataset.rewardBound !== "1") {
+      taskTypeInput.dataset.rewardBound = "1";
+      const typeHandler = () => {
+        const gameField = document.getElementById("editGameTypeField");
+        const gameInput = document.getElementById("editGameType");
+        const isGame = String(taskTypeInput.value || "").trim() === "游戏";
+        if (gameField) gameField.style.display = isGame ? "" : "none";
+        if (!isGame && gameInput) gameInput.value = "";
+        updateRewardPreviewFromDom();
+        scheduleAutoSave();
+      };
+      taskTypeInput.addEventListener("change", typeHandler);
+      taskTypeInput.addEventListener("input", typeHandler);
+    }
+
+
+    const deleteBtn = document.getElementById("deleteTaskBtn");
+    if (deleteBtn && deleteBtn.dataset.bound !== "1") {
+      deleteBtn.dataset.bound = "1";
+      deleteBtn.addEventListener("click", deleteCurrentTask);
+    }
+
+  }
+
+
+  function getRoleToolState() {
+    const rows = [...document.querySelectorAll(".partRow")];
+    const selectedSingerNames = getSelectedSingerNamesFromDom();
+
+    const fixedRows = [];
+    const pendingRows = [];
+    rows.forEach((row, index) => {
+      const roleName = String(row.querySelector(".partNameInput")?.value || "").trim();
+      const memberName = String(row.querySelector(".partMemberInput")?.value || "").trim();
+      if (!roleName) return;
+      const rowInfo = { row, index, roleName, memberName };
+      if (memberName) fixedRows.push(rowInfo);
+      else pendingRows.push(rowInfo);
+    });
+
+    const usedMemberNames = fixedRows.map(item => item.memberName).filter(Boolean);
+    const availableSingerNames = selectedSingerNames.filter(name => !usedMemberNames.includes(name));
+
+    return { fixedRows, pendingRows, availableSingerNames, selectedSingerNames };
+  }
+
+  function shuffleArray(list) {
+    const arr = [...list];
+    for (let i = arr.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function applyRoleAssignments(assignments) {
+    assignments.forEach(({ row, memberName }) => {
+      const input = row.querySelector(".partMemberInput");
+      if (input) {
+        input.value = memberName;
+        input.dataset.prevMemberName = memberName;
+      }
+      toggleSingerButtonByName(memberName, true);
+    });
+    syncSingerPickerFromRows();
+    refreshCandidateRowState();
+    scheduleAutoSave();
+  }
+
+  function createRoleTool(type) {
+    const context = prepareRoleSetupContext();
+    if (!context || !context.rows.length || !context.selectedSingerNames.length) {
+      showToast("无法创建", "请先填写待分配的原唱，并勾选参与本轮分配的演唱者。");
+      return;
+    }
+    if (type === "wheel") {
+      const task = getCurrentTaskSafe();
+      const isCollective = document.getElementById("editIsCollectiveBtn")?.classList.contains("special")
+        || String(document.getElementById("editIsCollective")?.value || "") === "1";
+      if (!task || !isCollective) return;
+      if (hasPendingLocalChanges) {
+        saveCurrentTaskEdits("manual");
+      }
+      openWheelToolModal(task.id);
+      return;
+    }
+    openRoleSetupModal(context, type);
+  }
+
+  function bindAutoSaveEventsToDetail() {
+    document.querySelectorAll("#browseDetailContentClaim .autoSaveField, #browseDetailContentClaim #editTaskCode").forEach(el => {
+      if (el.dataset.autoSaveBound === "1") return;
+      el.dataset.autoSaveBound = "1";
+
+      const eventName = (el.tagName === "SELECT" || el.type === "date" || el.type === "number" || el.type === "hidden")
+        ? "change"
+        : "input";
+
+      const handler = () => {
+        if (el.id === "editTaskCode" && !canEditTaskCode()) return;
+
+        if (el.classList.contains("partNameInput")) {
+          syncSingerPickerFromRows();
+          refreshCandidateRowState();
+          const currentTask = getCurrentTaskSafe();
+          if (currentTask) topStatus.textContent = "";
+          scheduleAutoSave();
+          return;
+        }
+
+        if (el.classList.contains("partMemberInput")) {
+          const row = el.closest(".partRow");
+          const currentName = String(el.value || "").trim();
+          const prevName = String(el.dataset.prevMemberName || "").trim();
+
+          if (prevName && prevName !== currentName) {
+            clearSingerIfUnused(prevName, row);
+          }
+
+          if (currentName) {
+            toggleSingerButtonByName(currentName, true);
+          }
+
+          el.dataset.prevMemberName = currentName;
+          syncSingerPickerFromRows();
+          updatePartMemberOptionsForRow(row);
+          refreshCandidateRowState();
+          const currentTask = getCurrentTaskSafe();
+          if (currentTask) topStatus.textContent = "";
+          scheduleAutoSave();
+          return;
+        }
+
+        scheduleAutoSave();
+      };
+
+      el.addEventListener(eventName, handler);
+
+      if (el.dataset.undoFocusBound !== "1") {
+        el.dataset.undoFocusBound = "1";
+        el.addEventListener("focus", () => {
+          pushUndoSnapshot();
+        });
+      }
+
+      if (eventName !== "change") {
+        el.addEventListener("change", handler);
+      }
+
+      if (el.classList.contains("partMemberInput")) {
+        el.dataset.prevMemberName = String(el.value || "").trim();
+      }
+
+      if (el.classList.contains("partNameInput") && el.dataset.enterAddBound !== "1") {
+        el.dataset.enterAddBound = "1";
+        el.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          const row = el.closest('.partRow');
+          const rows = [...document.querySelectorAll('.partRow')];
+          const currentIndex = rows.indexOf(row);
+          const nextRow = currentIndex >= 0 ? rows[currentIndex + 1] : null;
+          if (nextRow) {
+            nextRow.querySelector('.partNameInput')?.focus();
+            nextRow.querySelector('.partNameInput')?.select();
+          } else {
+            el.blur();
+          }
+          scheduleAutoSave();
+        });
+      }
+    });
+  }
+
+  function collectPartPayload(existingTask) {
+    const rows = [...document.querySelectorAll(".partRow")];
+    const unresolved = [];
+    const singerQuota = getValidSingerQuotaValue();
+    const selectedSingerIds = new Set(getSelectedSingerIdsFromDom());
+
+    if (rows.length > singerQuota) {
+      return { payload: [], unresolved, validationError: "歌词分配行数不能超过演唱人数" };
+    }
+
+    const payload = rows.map((row, index) => {
+      const originalName = String(row.querySelector(".partNameInput")?.value || "").trim();
+      const typedName = String(row.querySelector(".partMemberInput")?.value || "").trim();
+
+      let assignedMemberId = null;
+      let assignedMemberName = "";
+
+      if (typedName) {
+        const matched = findMemberByName(typedName);
+        if (!matched) {
+          unresolved.push(typedName);
+        } else {
+          assignedMemberId = matched.id;
+          assignedMemberName = matched.display;
+        }
+      }
+
+      return {
+        id: String(row.dataset.partId || "").trim(),
+        project_id: existingTask.id,
+        part_order: index + 1,
+        original_name: originalName,
+        assigned_member_id: assignedMemberId,
+        assigned_member_name: assignedMemberName
+      };
+    }).filter(item => item.original_name || item.assigned_member_id);
+
+    for (const item of payload) {
+      if (item.assigned_member_id && !selectedSingerIds.has(String(item.assigned_member_id))) {
+        return { payload, unresolved, validationError: "歌词分配中的成员必须来自已勾选的演唱者" };
+      }
+    }
+
+    const seenMemberIds = new Set();
+    for (const item of payload) {
+      const memberId = String(item.assigned_member_id || "").trim();
+      if (!memberId) continue;
+      if (seenMemberIds.has(memberId)) {
+        return { payload, unresolved, validationError: "同一成员不能在同一项目里占多个歌词分配行" };
+      }
+      seenMemberIds.add(memberId);
+    }
+
+    const seenRoleNames = new Set();
+    for (const item of payload) {
+      const roleName = String(item.original_name || "").trim().toLowerCase();
+      if (!roleName) continue;
+      if (seenRoleNames.has(roleName)) {
+        return { payload, unresolved, validationError: "同一个原唱在同一个项目里不能重复出现" };
+      }
+      seenRoleNames.add(roleName);
+    }
+
+    return { payload, unresolved, validationError: "" };
+  }
+
+  function validateToneInput(raw) {
+    const text = String(raw || "").trim();
+    if (!text) return { ok: true, value: null };
+    if (text === "原调") return { ok: true, value: "原调" };
+    if (/^[+-]\d+$/.test(text)) return { ok: true, value: text };
+    if (text === "+" || text === "-") return { ok: true, value: text };
+    return { ok: false, value: text };
+  }
+
+  function buildSingerPayloadFromParts(existingTask, partPayload) {
+    const existingSingerState = new Map(
+      (existingTask.singers || [])
+        .filter(item => item.member_id)
+        .map(item => [
+          String(item.member_id),
+          {
+            is_submitted: !!item.is_submitted,
+            submitted_at: item.submitted_at || null
+          }
+        ])
+    );
+
+    const uniqueMemberIds = [...new Set(getSelectedSingerIdsFromDom().filter(Boolean).map(String))];
+
+    return uniqueMemberIds.map(memberId => {
+      const prev = existingSingerState.get(memberId) || { is_submitted: false, submitted_at: null };
+      return {
+        project_id: existingTask.id,
+        member_id: memberId,
+        is_submitted: prev.is_submitted,
+        submitted_at: prev.submitted_at
+      };
+    });
+  }
+
+  function shouldFallbackFromRpcError(err) {
+    const detail = String(err?.message || err?.details || err?.hint || err?.code || "").toLowerCase();
+    return detail.includes("save_project_bundle")
+      || detail.includes("pgrst202")
+      || detail.includes("404")
+      || detail.includes("400")
+      || detail.includes("does not exist")
+      || detail.includes("could not find")
+      || detail.includes("not find");
+  }
+
+  async function saveProjectPayloadDirectly(projectId, projectPayload) {
+    const preferredKeys = [
+      "task_code",
+      "task_name",
+      "release_date",
+      "task_type",
+      "is_collective_task",
+      "project_tone",
+      "producer_member_id",
+      "singer_quota",
+      "singer_bonus",
+      "producer_bonus"
+    ];
+
+    const payload = {};
+    preferredKeys.forEach(key => {
+      if (Object.prototype.hasOwnProperty.call(projectPayload, key)) {
+        payload[key] = projectPayload[key];
+      }
+    });
+
+    let { error } = await supabaseClient
+      .from("projects")
+      .update(payload)
+      .eq("id", projectId);
+
+    if (!error) return;
+
+    const detail = String(error?.message || error?.details || error?.hint || "").toLowerCase();
+    const relaxedPayload = { ...payload };
+    delete relaxedPayload.singer_bonus;
+    delete relaxedPayload.producer_bonus;
+    if (detail.includes("is_collective_task")) {
+      delete relaxedPayload.is_collective_task;
+    }
+
+    ({ error } = await supabaseClient
+      .from("projects")
+      .update(relaxedPayload)
+      .eq("id", projectId));
+
+    if (error) throw error;
+  }
+
+  async function saveTaskBundleWithRpc(task, projectPayload, partResult, singerPayload) {
+    const partRows = partResult.payload.map(({ assigned_member_name, ...rest }) => ({
+      original_name: rest.original_name || "",
+      assigned_member_id: rest.assigned_member_id || null,
+      part_order: Number(rest.part_order) || null
+    }));
+    const singerRows = singerPayload.map(item => ({
+      member_id: item.member_id || null,
+      is_submitted: !!item.is_submitted,
+      submitted_at: item.submitted_at || null
+    }));
+
+    const args = {
+      p_project_id: task.id,
+      p_task_code: projectPayload.task_code,
+      p_task_name: projectPayload.task_name,
+      p_release_date: projectPayload.release_date,
+      p_task_type: projectPayload.task_type,
+      p_is_collective_task: projectPayload.is_collective_task,
+      p_project_tone: projectPayload.project_tone,
+      p_producer_member_id: projectPayload.producer_member_id,
+      p_singer_quota: projectPayload.singer_quota,
+      p_singer_bonus: projectPayload.singer_bonus,
+      p_producer_bonus: projectPayload.producer_bonus,
+      p_parts: partRows,
+      p_singers: singerRows
+    };
+
+    const { error } = await supabaseClient.rpc('save_project_bundle', args);
+    if (error) throw error;
+  }
+
+  function scheduleAutoSave(mode = "auto") {
+    if (suppressAutoSave || !canEditCurrentPage()) return;
+    clearTimeout(autoSaveTimer);
+    pendingSaveMode = mode;
+    hasPendingLocalChanges = true;
+    if (mode === "manual") {
+      setAutoSaveStatus("saving", "保存中...");
+      saveCurrentTaskEdits(mode);
+      return;
+    }
+    setAutoSaveStatus("", "有未保存修改");
+  }
+
+  async function saveCurrentTaskEdits(mode = "auto") {
+    if (!canEditCurrentPage()) return;
+    const task = tasks.find(item => item.id === activeClaimTaskId);
+    if (!task) return;
+
+    applyDeferredLastRemainingSingerFill();
+
+    if (saveInFlight) {
+      pendingSaveAfterCurrent = true;
+      pendingSaveMode = mode === "manual" ? "manual" : pendingSaveMode;
+      return;
+    }
+
+    const snapshot = buildTaskFromDom(task);
+    const { task: nextTask, partResult, singerPayload, toneResult, taskCode, songName, releaseDate, taskType, isCollectiveTask, producerName, singerQuota } = snapshot;
+
+    if (!toneResult.ok) {
+      setAutoSaveStatus("error", "调只能填 -2 / 原调 / +6 这种格式");
+      return;
+    }
+
+    if (partResult.validationError) {
+      setAutoSaveStatus("error", partResult.validationError);
+      return;
+    }
+    if (partResult.unresolved.length) {
+      setAutoSaveStatus("error", `成员未匹配：${partResult.unresolved[0]}`);
+      return;
+    }
+
+    const selectedSingerIds = new Set(getSelectedSingerIdsFromDom().filter(Boolean).map(String));
+    if (selectedSingerIds.size > singerQuota) {
+      setAutoSaveStatus("error", "演唱者数量不能超过演唱人数");
+      return;
+    }
+
+    let producerMemberId = null;
+    if (producerName) {
+      const mixerMatched = findMixerByName(producerName) || findMemberByName(producerName);
+      if (!mixerMatched) {
+        setAutoSaveStatus("error", `混音负责人未匹配：${producerName}`);
+        return;
+      }
+      producerMemberId = mixerMatched.id;
+      nextTask.producer_member_id = String(mixerMatched.id);
+    }
+
+    const projectPayload = {
+      task_code: taskCode || null,
+      task_name: songName || null,
+      release_date: releaseDate || null,
+      task_type: taskType || null,
+      is_collective_task: isCollectiveTask,
+      project_tone: toneResult.value,
+      producer_member_id: producerMemberId,
+      singer_quota: singerQuota,
+      singer_bonus: getSingerRewardByRule(singerQuota, isCollectiveTask),
+      producer_bonus: getProducerRewardByRule(taskType, singerQuota, isCollectiveTask)
+    };
+
+    saveInFlight = true;
+    try {
+      setAutoSaveStatus("saving", mode === "manual" ? "保存中..." : "自动保存中...");
+
+      try {
+        await saveTaskBundleWithRpc(task, projectPayload, partResult, singerPayload);
+      } catch (rpcErr) {
+        if (!shouldFallbackFromRpcError(rpcErr)) throw rpcErr;
+
+        await saveProjectPayloadDirectly(task.id, projectPayload);
+
+        const { error: deleteSingerError } = await supabaseClient
+          .from("project_singers")
+          .delete()
+          .eq("project_id", task.id);
+        if (deleteSingerError) throw deleteSingerError;
+
+        if (singerPayload.length) {
+          const { error: insertSingerError } = await supabaseClient
+            .from("project_singers")
+            .insert(singerPayload);
+          if (insertSingerError) throw insertSingerError;
+        }
+
+        const { error: deletePartError } = await supabaseClient
+          .from("project_parts")
+          .delete()
+          .eq("project_id", task.id);
+        if (deletePartError) throw deletePartError;
+
+        if (partResult.payload.length) {
+          const insertRows = partResult.payload.map(({ assigned_member_name, id, ...rest }) => rest);
+          const { error: insertPartError } = await supabaseClient
+            .from("project_parts")
+            .insert(insertRows);
+          if (insertPartError) throw insertPartError;
+        }
+      }
+
+      await loadProjectsFromSupabase({ keepSelection: true });
+      hasPendingLocalChanges = false;
+      setAutoSaveStatus("saved", mode === "manual" ? "已保存" : "已同步");
+      renderBrowseList();
+      renderBrowseDetail();
+    } catch (err) {
+      console.error("保存失败：", err);
+      const detail = String(err?.message || err?.details || err?.hint || "").trim();
+      setAutoSaveStatus("error", detail || "保存失败");
+      if (mode === "manual") {
+        showToast("保存失败", detail ? `保存失败：${detail}` : "保存失败，请检查数据库约束、RLS 或保存函数。");
+      }
+    } finally {
+      saveInFlight = false;
+      if (pendingSaveAfterCurrent) {
+        const nextMode = pendingSaveMode;
+        pendingSaveAfterCurrent = false;
+        pendingSaveMode = "auto";
+        scheduleAutoSave(nextMode);
+      }
+    }
+  }
+
+  async function handleLeaveTask(taskId) {
+    const task = tasks.find(item => item.id === taskId);
+    if (!task) return;
+
+    const currentMemberId = getCurrentMemberId();
+    if (!currentMemberId) {
+      showToast("无法退出", "当前登录信息不完整，请重新登录后再试。");
+      return;
+    }
+
+    if (!isCurrentUserSingerInTask(task)) return;
+
+    const ok = await showConfirmToast("确认退出", "确定要取消加入这个任务吗？", "确认退出", "取消");
+    if (!ok) return;
+
+    try {
+      setAutoSaveStatus("saving", "退出中...");
+
+      const { error: deleteSingerError } = await supabaseClient
+        .from("project_singers")
+        .delete()
+        .eq("project_id", task.id)
+        .eq("member_id", currentMemberId);
+      if (deleteSingerError) throw deleteSingerError;
+
+      const assignedRows = (task.parts || []).filter(row => String(row.assigned_member_id || "").trim() === currentMemberId);
+      for (const row of assignedRows) {
+        if (!row.id) continue;
+        const keepOriginal = !!String(row.original_name || "").trim();
+        const payload = keepOriginal
+          ? { assigned_member_id: null }
+          : { assigned_member_id: null, original_name: null };
+        const { error: clearPartError } = await supabaseClient
+          .from("project_parts")
+          .update(payload)
+          .eq("id", row.id);
+        if (clearPartError) throw clearPartError;
+      }
+
+      await loadProjectsFromSupabase({keepSelection:true});
+
+      const latestTask = tasks.find(item => item.id === taskId);
+      if (latestTask) {
+        activeClaimTaskId = latestTask.id;
+        renderBrowseList();
+        renderBrowseDetail();
+      }
+
+      setAutoSaveStatus("saved", "已退出");
+    } catch (err) {
+      console.error("退出任务失败：", err);
+      setAutoSaveStatus("error", "退出失败");
+      const detail = String(err?.message || err?.details || err?.hint || "").trim();
+      showToast("退出失败", detail ? `退出失败：${detail}` : "退出失败，请检查 project_singers / project_parts 表是否允许当前页面执行删除或更新。");
+    }
+  }
+
+  async function handleJoinTask(taskId) {
+    const task = tasks.find(item => item.id === taskId);
+    if (!task) return;
+
+    const currentMemberId = getCurrentMemberId();
+    const currentMemberName = getCurrentMemberName();
+
+    if (!currentMemberId || !currentMemberName) {
+      showToast("无法加入", "当前登录信息不完整，请重新登录后再试。");
+      return;
+    }
+
+    if (!canCurrentUserJoinTask(task)) return;
+
+    try {
+      setAutoSaveStatus("saving", "加入中...");
+
+      const { error: singerUpsertError } = await supabaseClient
+        .from("project_singers")
+        .upsert({
+          project_id: task.id,
+          member_id: currentMemberId,
+          is_submitted: false,
+          submitted_at: null
+        }, {
+          onConflict: "project_id,member_id",
+          ignoreDuplicates: false
+        });
+      if (singerUpsertError) throw singerUpsertError;
+
+      await loadProjectsFromSupabase({keepSelection:true});
+
+      const joinedTask = tasks.find(item => item.id === taskId);
+      if (joinedTask) {
+        activeClaimTaskId = joinedTask.id;
+        renderBrowseList();
+        renderBrowseDetail();
+      }
+
+      setAutoSaveStatus("saved", "已加入");
+    } catch (err) {
+      console.error("加入任务失败：", err);
+      setAutoSaveStatus("error", "加入失败");
+      const detail = String(err?.message || err?.details || err?.hint || "").trim();
+      showToast("加入失败", detail ? `加入失败：${detail}` : "加入失败，请检查 project_singers 表是否允许当前页面执行新增或更新。\n如果你开了 RLS，需要放行 anon 的 insert / update。");
+    }
+  }
+
+  async function deleteCurrentTask() {
+    if (!canEditCurrentPage()) return;
+    const task = tasks.find(item => item.id === activeClaimTaskId);
+    if (!task) return;
+
+    const ok = await showConfirmToast("确认删除", `确认删除任务「${task.displayName || "未命名任务"}」吗？
+删除后不可恢复。`, "确认删除", "取消");
+    if (!ok) return;
+
+    try {
+      setAutoSaveStatus("saving", "删除中...");
+
+      const { error: deleteSingerError } = await supabaseClient
+        .from("project_singers")
+        .delete()
+        .eq("project_id", task.id);
+      if (deleteSingerError) throw deleteSingerError;
+
+      const { error: deletePartError } = await supabaseClient
+        .from("project_parts")
+        .delete()
+        .eq("project_id", task.id);
+      if (deletePartError) throw deletePartError;
+
+      const { error: deleteProjectError } = await supabaseClient
+        .from("projects")
+        .delete()
+        .eq("id", task.id);
+      if (deleteProjectError) throw deleteProjectError;
+
+      const remainingTasks = tasks.filter(item => item.id !== task.id);
+      activeClaimTaskId = remainingTasks.length ? remainingTasks[0].id : "";
+      setAutoSaveStatus("saved", "已删除");
+
+      await loadProjectsFromSupabase({keepSelection:false});
+    } catch (err) {
+      console.error("删除任务失败：", err);
+      setAutoSaveStatus("error", "删除失败");
+      showToast("删除失败", "任务删除失败，请检查数据库权限或表关联设置。");
+    }
+  }
+
+  function syncPanelSwitchActive() {
+    const current = window.location.pathname.split("/").pop() || "";
+    document.querySelectorAll("#panelSwitch .switchBtn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.page === current);
+    });
+  }
+
+  async function goStudioPage(page) {
+    if (!page) return;
+    const current = window.location.pathname.split("/").pop() || "";
+    if (current === page) return;
+    if (hasPendingLocalChanges) {
+      await saveCurrentTaskEdits("manual");
+    }
+    window.location.href = page;
+  }
+
+  claimSearchInput.addEventListener("input", (e) => {
+    claimSearchKeyword = e.target.value;
+    const filtered = getFilteredTasks(claimSearchKeyword);
+    if (!filtered.some(task => task.id === activeClaimTaskId)) {
+      activeClaimTaskId = filtered.length ? filtered[0].id : "";
+    }
+    renderBrowseList();
+    renderBrowseDetail();
+    renderSiteNotifications();
+  });
+
+  
+  document.querySelectorAll(".primaryFilterBtn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const filterKey = String(btn.dataset.filter || "").trim();
+      if (!filterKey) return;
+      await applyFilterAndRefresh(filterKey);
+    });
+  });
+
+  document.getElementById("filterNoMeBtn")?.addEventListener("click", async () => {
+    await applyFilterAndRefresh("没有我");
+  });
+
+  document.getElementById("filterHasMeBtn")?.addEventListener("click", async () => {
+    await applyFilterAndRefresh("有我在");
+  });
+
+  document.querySelectorAll("#panelSwitch .switchBtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      goStudioPage(btn.dataset.page);
+    });
+  });
+
+  document.querySelectorAll(".navBtn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const roomKey = btn.dataset.room;
+
+      if (roomKey === "manager") {
+        const role = getCurrentRole();
+        const page = role === "owner"
+          ? "manager-owner.html"
+          : role === "admin"
+            ? "manager-admin.html"
+            : "manager.html";
+        await goStudioPage(page);
+        return;
+      }
+
+      if (links[roomKey]) {
+        await goStudioPage(links[roomKey]);
+      }
+    });
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.partMemberField')) {
+      hideAllPartMemberSuggestions();
+    }
+    if (!event.target.closest('#siteNoticeWrap')) {
+      toggleSiteNoticePanel(false);
+    }
+  });
+
+  siteNoticeBtn?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    renderSiteNotifications();
+    toggleSiteNoticePanel();
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => { await handleLogout(); });
+  if (undoBtn) undoBtn.addEventListener("click", undoLastDetailChange);
+
+  if (saveNowBtn) {
+    saveNowBtn.addEventListener("click", () => {
+      clearTimeout(autoSaveTimer);
+      scheduleAutoSave("manual");
+    });
+  }
+
+  window.addEventListener("pagehide", () => {
+    preserveActiveTaskInCurrentView = false;
+    if (!hasPendingLocalChanges) return;
+    try {
+      saveCurrentTaskEdits("manual");
+    } catch (err) {
+      console.error("离页保存失败：", err);
+    }
+  });
+
+  roleSetupCancelBtn?.addEventListener("click", closeRoleSetupModal);
+  roleSetupConfirmBtn?.addEventListener("click", () => applyRoleSetupAndRun(activeRoleToolType));
+  roleSetupMask?.addEventListener("click", (e) => {
+    if (e.target === roleSetupMask) closeRoleSetupModal();
+  });
+
+  function resetTransientUiState() {
+    hideAllPartMemberSuggestions();
+    toggleSiteNoticePanel(false);
+    const activeEl = document.activeElement;
+    if (activeEl?.classList?.contains('partMemberInput')) {
+      try { activeEl.blur(); } catch (err) {}
+    }
+  }
+
+  if (bg) {
+    bg.addEventListener("load", () => {
+      bgLoaded = true;
+      markBackgroundReady();
+      syncOverlayToImage();
+      syncBackgroundBlendFromImage();
+    });
+
+    bg.addEventListener("error", () => {
+      bgLoaded = false;
+      tryLoadNextBackground();
+    });
+
+    if (!bg.getAttribute('src')) {
+      bg.src = BG_CANDIDATE_PATHS[0];
+    }
+  }
+
+  window.addEventListener("resize", syncOverlayToImage);
+  window.addEventListener("orientationchange", syncOverlayToImage);
+  window.addEventListener("pageshow", () => {
+    resetTransientUiState();
+  });
+
+  function spawnMusicNote() {
+    if (!musicNotesLayer) return;
+    if (document.hidden) return;
+
+    const note = document.createElement('span');
+    const symbols = ['♪','♫','♩','♬','♭','♮'];
+    const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+    const layerWidth = musicNotesLayer.clientWidth || window.innerWidth || 1200;
+    const layerHeight = musicNotesLayer.clientHeight || window.innerHeight || 800;
+    const startX = Math.random() * layerWidth;
+    const startY = Math.max(layerHeight * 0.45, Math.random() * layerHeight);
+    const size = 14 + Math.random() * 24;
+    const driftX = (Math.random() * 180 - 90).toFixed(0) + 'px';
+    const floatY = (160 + Math.random() * 260).toFixed(0) + 'px';
+    const rotate = (Math.random() * 32 - 16).toFixed(0) + 'deg';
+    const duration = (5.2 + Math.random() * 4.2).toFixed(2) + 's';
+
+    note.className = 'musicNote';
+    note.textContent = symbol;
+    note.style.left = `${startX}px`;
+    note.style.top = `${startY}px`;
+    note.style.fontSize = `${size}px`;
+    note.style.animationDuration = duration;
+    note.style.setProperty('--float-x', driftX);
+    note.style.setProperty('--float-y', floatY);
+    note.style.setProperty('--float-rotate', rotate);
+
+    musicNotesLayer.appendChild(note);
+    note.addEventListener('animationend', () => note.remove(), { once: true });
+  }
+
+  function startMusicNotes() {
+    if (!musicNotesLayer) return;
+    for (let i = 0; i < 12; i += 1) {
+      window.setTimeout(spawnMusicNote, i * 180);
+    }
+    window.setInterval(() => {
+      if (musicNotesLayer.childElementCount > 42) return;
+      spawnMusicNote();
+    }, 260);
+  }
+
+  (async function init() {
+    applyDefaultBackgroundBlend();
+    syncOverlayToImage();
+    syncPanelSwitchActive();
+    syncFilterButtons();
+    startMusicNotes();
+
+    const ok = await ensureAuthState();
+    if (!ok) return;
+
+    updateTopBarIdentity();
+    await loadMembersList();
+    await loadProjectsFromSupabase({keepSelection:false});
+    renderSiteNotifications();
+    setAutoSaveStatus("saved", "已同步");
+  })();
+</script>
+</body>
+</html

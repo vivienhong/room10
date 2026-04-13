@@ -1,0 +1,4133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜项目详情</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+    background:linear-gradient(180deg,#e7dfd4 0%, #ddd4c8 100%);
+  }
+
+  body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+
+  #room{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    height:100dvh;
+    overflow:hidden;
+    background:linear-gradient(180deg,#e7dfd4 0%, #ddd4c8 100%);
+  }
+
+  #bg{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    object-position:center center;
+    display:block;
+    user-select:none;
+    pointer-events:none;
+    -webkit-user-drag:none;
+  }
+
+  #overlay{
+    position:absolute;
+    inset:0;
+    z-index:1;
+    overflow:hidden;
+    pointer-events:none;
+    --nav-scale:1;
+    --top-ui-scale:1;
+    --topbar-left:28.2%;
+    --topbar-top:8.15%;
+    --topbar-width:65.4%;
+    --topbar-gap:1.2%;
+    --user-right:214px;
+    --user-top:7.5%;
+    --topbar-safe-gap:18px;
+  }
+  #overlay *{
+    pointer-events:auto;
+  }
+
+  :root{
+    --top-chip-bg:rgba(255,252,247,0.86);
+    --top-chip-border:rgba(160,116,78,0.12);
+    --top-chip-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.96),
+      0 3px 10px rgba(110,84,58,0.08);
+  }
+
+  #topBar{
+    position:absolute;
+    left:var(--topbar-left);
+    top:var(--topbar-top);
+    width:var(--topbar-width);
+    max-width:calc(100% - var(--topbar-left) - var(--topbar-safe-gap));
+    display:flex;
+    align-items:flex-start;
+    justify-content:flex-start;
+    gap:var(--topbar-gap);
+  }
+
+  #navOuter{
+    flex:1 1 auto;
+    min-width:0;
+    overflow:hidden;
+  }
+
+  #navScroll{
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    white-space:nowrap;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+    padding-bottom:2px;
+  }
+  #navScroll::-webkit-scrollbar{
+    display:none;
+  }
+
+  #roomNav{
+    display:inline-flex;
+    align-items:center;
+    gap:calc(10px * var(--nav-scale));
+    min-width:max-content;
+    max-width:100%;
+  }
+
+  .navBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    height:calc(46px * var(--nav-scale));
+    padding:0 calc(20px * var(--nav-scale));
+    border-radius:calc(15px * var(--nav-scale));
+    background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
+    color:#704724;
+    font-size:calc(16px * var(--nav-scale));
+    font-weight:700;
+    white-space:nowrap;
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,230,0.95),
+      inset 0 -2px 0 rgba(150,105,60,0.10),
+      0 2px 8px rgba(112,83,52,0.12);
+    border:1px solid rgba(159,114,69,0.18);
+    transition:transform .18s ease, filter .18s ease, box-shadow .18s ease;
+  }
+
+  .navBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.04);
+  }
+
+  #topBarUserArea{
+    position:absolute;
+    right:var(--user-right);
+    top:var(--user-top);
+    transform:scale(var(--top-ui-scale));
+    transform-origin:right top;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    width:max-content;
+    min-width:max-content;
+    max-width:none;
+    padding:6px;
+    border-radius:20px;
+    background:rgba(255,248,239,0.9);
+    border:1px solid rgba(186,146,103,0.24);
+    box-shadow:
+      0 10px 24px rgba(116,86,54,0.12),
+      inset 0 1px 0 rgba(255,255,255,0.86);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    text-align:center;
+    z-index:65;
+  }
+
+  #currentUserBadge{
+    order:1;
+    flex:1 1 auto;
+    min-width:clamp(116px, 8.6vw, 142px);
+    min-height:clamp(34px, 3vw, 38px);
+    padding:0 clamp(12px, 1vw, 16px);
+    border-radius:999px;
+    background:var(--top-chip-bg);
+    color:#6c4523;
+    font-size:clamp(13px, 0.95vw, 15px);
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    box-shadow:var(--top-chip-shadow);
+    border:1px solid var(--top-chip-border);
+    white-space:nowrap;
+  }
+
+  #currentUserBadge .roleDot{
+    width:8px;
+    height:8px;
+    border-radius:999px;
+    background:#d9a364;
+    box-shadow:0 0 0 3px rgba(217,163,100,0.16);
+    flex:0 0 auto;
+  }
+
+  #currentUserBadge .identityText{
+    flex:0 1 auto;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    text-align:center;
+  }
+
+  #logoutBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    flex:0 0 auto;
+    min-width:clamp(52px, 3.8vw, 64px);
+    height:clamp(34px, 3vw, 38px);
+    padding:0 clamp(12px, 1.1vw, 16px);
+    border-radius:999px;
+    background:var(--top-chip-bg);
+    color:#67401f;
+    font-size:clamp(12px, 0.82vw, 14px);
+    font-weight:800;
+    box-shadow:var(--top-chip-shadow);
+    border:1px solid var(--top-chip-border);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+    order:3;
+    align-self:center;
+  }
+
+  #logoutBtn:hover{
+    transform:translateY(-1px);
+    background:rgba(255,255,255,0.94);
+  }
+
+  #siteNoticeWrap{
+    position:relative;
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    order:2;
+  }
+
+  #siteNoticeBtn{
+    position:relative;
+    width:clamp(34px, 3vw, 38px);
+    min-width:clamp(34px, 3vw, 38px);
+    height:clamp(34px, 3vw, 38px);
+    padding:0;
+    border:none;
+    cursor:pointer;
+    border-radius:999px;
+    background:var(--top-chip-bg);
+    color:#6c4523;
+    font-size:clamp(14px, 1vw, 16px);
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:var(--top-chip-shadow);
+    border:1px solid var(--top-chip-border);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+  }
+
+  #siteNoticeBtn:hover{
+    transform:translateY(-1px);
+    background:rgba(255,255,255,0.94);
+  }
+
+  #siteNoticeIcon{display:block;line-height:1;filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));}
+  #siteNoticeText{display:none;}
+  #siteNoticeCount{
+    position:absolute;
+    right:-2px;
+    top:-2px;
+    min-width:18px;
+    height:18px;
+    padding:0 5px;
+    border-radius:999px;
+    background:#c98c4f;
+    color:#fff9f1;
+    font-size:10px;
+    font-weight:900;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 8px rgba(116,86,54,0.16);
+  }
+  #siteNoticeBtn.hasNotice #siteNoticeCount{display:flex;}
+
+  #siteNoticePanel{
+    position:absolute;
+    top:calc(100% + 12px);
+    right:0;
+    left:auto;
+    width:min(320px, 70vw);
+    max-height:320px;
+    overflow:auto;
+    padding:12px;
+    border-radius:16px;
+    background:rgba(255,249,241,0.98);
+    border:1px solid rgba(203,167,123,0.28);
+    box-shadow:0 16px 36px rgba(85,58,34,0.16);
+    display:none;
+    z-index:80;
+    text-align:left;
+  }
+
+  #siteNoticePanel.show{display:block;}
+  .siteNoticeTitle{color:#6f4726;font-size:14px;font-weight:800;margin-bottom:8px;}
+  .siteNoticeEmpty{color:#8b6947;font-size:12px;line-height:1.6;padding:4px 2px;}
+  .siteNoticeList{display:flex;flex-direction:column;gap:8px;}
+  .siteNoticeItem{padding:10px 10px 11px;border-radius:12px;background:rgba(255,252,247,0.72);box-shadow:inset 0 1px 0 rgba(255,255,255,0.88),0 2px 8px rgba(120,92,63,0.05);}
+  .siteNoticeItemTitle{color:#6f4726;font-size:12px;font-weight:800;line-height:1.45;}
+  .siteNoticeItemDesc{color:#8b6947;font-size:11px;line-height:1.55;margin-top:3px;}
+
+  #taskPanel{
+    position:absolute;
+    left:43%;
+    top:22.3%;
+    transform:translateX(-50%);
+    width:68%;
+    height:70.6%;
+    min-height:360px;
+    border-radius:30px;
+    background:rgba(255,255,255,0.34);
+    border:1px solid rgba(255,255,255,0.52);
+    box-shadow:
+      0 16px 42px rgba(122,96,68,0.10),
+      inset 0 1px 0 rgba(255,255,255,0.62),
+      inset 0 -1px 0 rgba(255,255,255,0.20);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    overflow:visible;
+  }
+
+  #taskPanel::before{
+    content:"";
+    position:absolute;
+    inset:10px;
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,0.22);
+    pointer-events:none;
+  }
+
+  #panelSwitch{
+    position:absolute;
+    right:-194px;
+    top:26%;
+    transform:translateY(-50%);
+    width:170px;
+    padding:18px 14px;
+    border-radius:20px;
+    background:rgba(255,248,239,0.9);
+    border:1px solid rgba(186,146,103,0.24);
+    box-shadow:
+      0 10px 24px rgba(116,86,54,0.12),
+      inset 0 1px 0 rgba(255,255,255,0.86);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    z-index:30;
+  }
+
+  .switchBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    width:100%;
+    min-height:40px;
+    padding:8px 12px;
+    border-radius:13px;
+    background:rgba(231,214,185,0.92);
+    color:#744b25;
+    font-size:14px;
+    font-weight:700;
+    line-height:1.2;
+    text-align:center;
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,233,0.95),
+      0 2px 6px rgba(116,86,54,0.08);
+    transition:transform .18s ease, filter .18s ease, background .18s ease;
+  }
+
+  .switchBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .switchBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  #taskView{
+    position:absolute;
+    inset:0;
+    padding:0;
+  }
+
+  #browsePanelInner{
+    position:relative;
+    z-index:1;
+    width:100%;
+    height:100%;
+    display:grid;
+    grid-template-columns:26.5% 73.5%;
+    min-width:0;
+  }
+
+  #browseListPane{
+    padding:16px 10px 14px 14px;
+    border-right:1px solid rgba(255,255,255,0.20);
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    background:transparent;
+    min-width:0;
+  }
+
+  #browseListTitleTask{
+    display:none;
+  }
+
+  .taskFilterRow{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    margin:0 0 8px;
+    padding-right:4px;
+  }
+
+  .taskFilterBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-width:52px;
+    height:28px;
+    padding:0 10px;
+    border-radius:9px;
+    background:rgba(255,252,247,0.62);
+    color:#6a4120;
+    font-size:11px;
+    font-weight:700;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.78),
+      0 2px 6px rgba(116,86,54,0.06);
+    transition:transform .18s ease, filter .18s ease, background .18s ease;
+    white-space:nowrap;
+  }
+
+  .taskFilterBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .taskFilterBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+  }
+
+  .searchWrap{
+    flex:0 0 auto;
+    margin:0 0 8px;
+    padding-right:4px;
+  }
+
+  .searchInput{
+    width:100%;
+    height:36px;
+    border:none;
+    outline:none;
+    border-radius:12px;
+    padding:0 12px;
+    background:rgba(255,252,247,0.62);
+    color:#5f3b1d;
+    font-size:12px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.75),
+      0 2px 8px rgba(120,92,63,0.05);
+  }
+
+  .searchInput::placeholder{
+    color:#9a7b5b;
+  }
+
+  #browseListTask{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    padding-right:4px;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(175,135,98,0.55) transparent;
+  }
+
+  #browseListTask::-webkit-scrollbar{
+    width:8px;
+  }
+  #browseListTask::-webkit-scrollbar-track{
+    background:transparent;
+  }
+  #browseListTask::-webkit-scrollbar-thumb{
+    background:rgba(175,135,98,0.55);
+    border-radius:999px;
+  }
+
+  .taskItem{
+    width:100%;
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    text-align:left;
+    padding:9px 10px;
+    margin:0 0 6px;
+    border-radius:13px;
+    background:rgba(255,252,247,0.34);
+    color:#6c4523;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.52),
+      0 3px 10px rgba(120,92,63,0.05);
+    transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+    position:relative;
+    min-width:0;
+    overflow:hidden;
+    isolation:isolate;
+  }
+
+  .taskItem:hover{
+    transform:translateY(-1px);
+    background:rgba(255,252,247,0.52);
+  }
+
+  .taskItem.active{
+    background:linear-gradient(180deg, rgba(240,219,185,0.98) 0%, rgba(230,200,157,0.98) 100%);
+    color:#5c3819;
+    border:1px solid rgba(217,163,100,0.90);
+    box-shadow:
+      inset 0 0 0 1px rgba(255,247,229,0.96),
+      0 0 0 2px rgba(217,163,100,0.22),
+      0 6px 14px rgba(120,92,63,0.12);
+  }
+
+  .taskItem.active::after{
+    content:"";
+    position:absolute;
+    inset:2px;
+    border-radius:11px;
+    pointer-events:none;
+    background:
+      linear-gradient(115deg,
+        rgba(255,255,255,0) 18%,
+        rgba(255,251,241,0.18) 34%,
+        rgba(255,255,255,0.62) 50%,
+        rgba(255,244,221,0.20) 64%,
+        rgba(255,255,255,0) 82%);
+    background-size:220% 100%;
+    mix-blend-mode:screen;
+    opacity:.92;
+    animation:taskActiveShine 2.8s linear infinite;
+    z-index:0;
+  }
+
+  .taskItem.active.unsubmittedWarn{
+    background:linear-gradient(180deg, rgba(240,219,185,0.98) 0%, rgba(230,200,157,0.98) 100%);
+    border:1px solid rgba(217,163,100,0.90);
+    box-shadow:
+      inset 0 0 0 1px rgba(255,247,229,0.96),
+      0 0 0 2px rgba(217,163,100,0.22),
+      0 6px 14px rgba(120,92,63,0.12);
+  }
+
+  .taskItem.unsubmittedWarn{
+    box-shadow:
+      inset 0 0 0 1px rgba(211,119,54,0.22),
+      0 3px 10px rgba(120,92,63,0.05);
+    background:rgba(255,245,235,0.72);
+  }
+  @keyframes taskActiveShine{
+    0%{background-position:160% 0;}
+    100%{background-position:-60% 0;}
+  }
+
+  .taskTitleLine{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:6px;
+    position:relative;
+    z-index:1;
+  }
+
+  .taskItemName{
+    display:flex;
+    align-items:center;
+    flex-wrap:nowrap;
+    gap:5px;
+    min-width:0;
+    width:100%;
+    font-size:13px;
+    font-weight:800;
+    line-height:1.35;
+    color:inherit;
+  }
+
+  .taskNameText{
+    flex:1 1 auto;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  .taskBadgeLine{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    flex-wrap:nowrap;
+    margin-top:5px;
+    min-height:18px;
+    position:relative;
+    z-index:1;
+    overflow:hidden;
+  }
+
+  .taskBadgeLine:empty{
+    display:none;
+  }
+
+  .taskTypeMini{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:18px;
+    padding:1px 6px;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:700;
+    line-height:1;
+    background:rgba(255,248,238,0.88);
+    color:#8a5b30;
+    border:1px solid rgba(194,151,108,0.22);
+    flex:0 0 auto;
+  }
+
+  .taskMiniBadge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:18px;
+    padding:1px 6px;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:700;
+    line-height:1;
+    flex:0 0 auto;
+    white-space:nowrap;
+  }
+
+  .taskMiniBadge.mine{
+    background:linear-gradient(180deg,#ffcf8a 0%, #f5a95e 100%);
+    color:#5a3515;
+  }
+
+  .taskMiniBadge.warn{
+    background:linear-gradient(180deg,#ffb18c 0%, #ec7e54 100%);
+    color:#fff7f1;
+  }
+
+  .taskMiniBadge.onlyme{
+    background:linear-gradient(180deg,#f1ca79 0%, #d8a33c 100%);
+    color:#fff9f1;
+  }
+
+  .taskItemInfo{
+    display:block;
+    margin-top:4px;
+    position:relative;
+    z-index:1;
+    font-size:10px;
+    font-weight:600;
+    line-height:1.4;
+    color:#8b6947;
+    word-break:break-word;
+  }
+
+  .taskEmpty{
+    padding:16px 12px;
+    border-radius:15px;
+    background:rgba(255,252,247,0.28);
+    color:#8b6947;
+    font-size:12px;
+    line-height:1.6;
+    text-align:center;
+  }
+
+  #browseDetailPane{
+    padding:12px 12px 8px;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    background:transparent;
+  }
+
+  #browseDetailHeader{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:8px;
+  }
+
+  .detailTitleWrap{
+    min-width:0;
+  }
+
+  #browseDetailTitleTask{
+    color:#6f4726;
+    font-size:19px;
+    font-weight:900;
+    line-height:1.2;
+    display:flex;
+    align-items:flex-end;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .detailTitleType{
+    font-size:11px;
+    font-weight:700;
+    color:#8a6644;
+  }
+
+  #browseDetailStatusTask{
+    flex:0 0 auto;
+    padding:4px 8px;
+    border-radius:999px;
+    background:rgba(255,252,247,0.52);
+    color:#7a5231;
+    font-size:11px;
+    font-weight:700;
+    white-space:nowrap;
+  }
+
+  #browseDetailBody{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    padding-right:4px;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(175,135,98,0.55) transparent;
+  }
+
+  #browseDetailBody::-webkit-scrollbar{
+    width:8px;
+  }
+  #browseDetailBody::-webkit-scrollbar-track{
+    background:transparent;
+  }
+  #browseDetailBody::-webkit-scrollbar-thumb{
+    background:rgba(175,135,98,0.55);
+    border-radius:999px;
+  }
+
+  .detailTopGrid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+    margin-bottom:10px;
+  }
+
+  .detailMetaCard{
+    padding:9px 10px;
+    border-radius:16px;
+    background:rgba(255,248,240,0.72);
+    border:1px solid rgba(214,186,149,0.28);
+    box-shadow:0 4px 12px rgba(118,86,54,0.04);
+    min-width:0;
+  }
+
+  .detailMetaLabel{
+    color:#8a6644;
+    font-size:11px;
+    font-weight:800;
+    margin-bottom:6px;
+  }
+
+  .detailMetaValue{
+    color:#5f3b1d;
+    font-size:15px;
+    font-weight:900;
+    word-break:break-word;
+    line-height:1.3;
+  }
+
+  .sectionCard{
+    padding:8px 9px 8px;
+    border-radius:18px;
+    background:rgba(255,250,244,0.60);
+    border:1px solid rgba(214,186,149,0.32);
+    box-shadow:0 4px 14px rgba(118,86,54,0.05);
+    margin-bottom:14px;
+    min-width:0;
+  }
+
+  .sectionHeader{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    padding-bottom:5px;
+    margin-bottom:6px;
+    border-bottom:1px solid rgba(188,154,117,0.18);
+  }
+
+  .sectionTitle{
+    color:#6f4726;
+    font-size:14px;
+    font-weight:900;
+    line-height:1.2;
+    margin:0;
+  }
+
+  .sectionMeta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    justify-content:flex-end;
+  }
+
+  .sectionMetaText{
+    color:#7a5231;
+    font-size:10px;
+    font-weight:800;
+    line-height:1.2;
+    white-space:nowrap;
+  }
+
+  .assignmentList{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(96px,1fr));
+    gap:5px;
+    max-height:186px;
+    overflow-y:auto;
+    padding-right:2px;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(175,135,98,0.55) transparent;
+  }
+
+  .assignmentList::-webkit-scrollbar{
+    width:7px;
+  }
+  .assignmentList::-webkit-scrollbar-track{
+    background:transparent;
+  }
+  .assignmentList::-webkit-scrollbar-thumb{
+    background:rgba(175,135,98,0.55);
+    border-radius:999px;
+  }
+
+  .assignmentCompactRow{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    gap:2px;
+    padding:5px 4px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.42);
+    border:1px solid rgba(255,255,255,0.30);
+    text-align:center;
+    min-height:74px;
+    min-width:0;
+  }
+
+  .assignmentCompactRow.warn{
+    background:rgba(255,244,235,0.86);
+    border-color:rgba(220,146,99,0.20);
+  }
+
+  .assignmentCompactRow.mineCard{
+    background:linear-gradient(180deg, rgba(255,236,191,0.96) 0%, rgba(243,213,156,0.96) 100%);
+    border-color:rgba(213,146,65,0.32);
+    box-shadow:0 0 0 2px rgba(229,177,96,0.22);
+  }
+
+  .assignmentNameInline{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:4px;
+    min-width:0;
+    text-align:center;
+    width:100%;
+  }
+
+  .assignmentNameText{
+    color:#5f3b1d;
+    font-size:11px;
+    font-weight:900;
+    line-height:1.25;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+    text-align:center;
+    max-width:100%;
+  }
+
+  .assignmentPartText{
+    color:#7a5a3a;
+    font-size:9px;
+    font-weight:800;
+    line-height:1.3;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+    text-align:center;
+    width:100%;
+  }
+
+  .assignmentSubLine{
+    color:#8b6947;
+    font-size:10px;
+    font-weight:800;
+    line-height:1.2;
+    text-align:center;
+    word-break:break-word;
+  }
+
+  .tinyActionBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-width:52px;
+    min-height:22px;
+    padding:2px 7px;
+    border-radius:8px;
+    background:rgba(255,252,247,0.82);
+    color:#6a4120;
+    font-size:10px;
+    font-weight:800;
+    line-height:1.2;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.8),
+      0 2px 6px rgba(112,83,52,0.08);
+    transition:transform .18s ease, filter .18s ease, opacity .18s ease;
+  }
+
+  .tinyActionBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .tinyActionBtn.done{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+  }
+
+  .tinyActionBtn.readonly{
+    background:rgba(255,252,247,0.72);
+    color:#9d7a56;
+  }
+
+  .tinyActionBtn.waiting{
+    background:rgba(244,236,222,0.95);
+    color:#8b6a46;
+  }
+
+  .tinyActionBtn:disabled{
+    opacity:.72;
+    cursor:not-allowed;
+    transform:none;
+  }
+
+  .bottomGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:2px;
+  }
+
+  .producerCard{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-height:50px;
+    padding:8px 9px;
+    border-radius:16px;
+    background:rgba(255,248,240,0.78);
+    border:1px solid rgba(214,186,149,0.28);
+  }
+
+  .producerNameInline{
+    color:#5f3b1d;
+    font-size:13px;
+    font-weight:900;
+    line-height:1.25;
+    word-break:break-word;
+  }
+
+  .producerRight{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+    flex-wrap:wrap;
+    flex:0 0 auto;
+  }
+
+  .goldGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .goldCard{
+    min-width:0;
+    padding:9px 10px;
+    border-radius:16px;
+    background:rgba(255,248,240,0.78);
+    border:1px solid rgba(214,186,149,0.28);
+  }
+
+  .goldLabel{
+    color:#8a6644;
+    font-size:10px;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+
+  .goldMain{
+    color:#5f3b1d;
+    font-size:15px;
+    font-weight:900;
+    line-height:1.1;
+  white-space:nowrap;
+}
+
+  .goldSub{
+    margin-top:3px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    color:#8a6644;
+    font-size:9px;
+    font-weight:700;
+    line-height:1.2;
+  }
+
+  #browseDetailFooter{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    margin-top:6px;
+  }
+
+  .detailActionBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-width:70px;
+    height:28px;
+    padding:0 12px;
+    border-radius:10px;
+    background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
+    color:#6a4120;
+    font-size:12px;
+    font-weight:800;
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,230,0.95),
+      0 4px 12px rgba(112,83,52,0.10);
+    transition:transform .18s ease, filter .18s ease;
+  }
+
+  .detailActionBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .loadingText{
+    color:#8b6947;
+    font-size:13px;
+    line-height:1.6;
+    text-align:center;
+    padding:20px 12px;
+  }
+
+  #toastMask{
+    position:fixed;
+    inset:0;
+    background:rgba(60,42,23,0.18);
+    backdrop-filter:blur(3px);
+    -webkit-backdrop-filter:blur(3px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    padding:20px;
+  }
+
+  #toastMask.show{
+    display:flex;
+  }
+
+  #toastBox{
+    width:min(420px, 92vw);
+    border-radius:22px;
+    background:rgba(255,249,241,0.95);
+    border:1px solid rgba(203,167,123,0.28);
+    box-shadow:
+      0 18px 45px rgba(85,58,34,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.92);
+    padding:22px 20px 18px;
+    text-align:center;
+  }
+
+  #toastTitle{
+    color:#6f4726;
+    font-size:19px;
+    font-weight:800;
+    margin-bottom:10px;
+  }
+
+  #toastMessage{
+    color:#6a4525;
+    font-size:14px;
+    line-height:1.75;
+    white-space:pre-line;
+    word-break:break-word;
+    margin-bottom:14px;
+  }
+
+  #toastCloseBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-width:100px;
+    height:38px;
+    padding:0 16px;
+    border-radius:12px;
+    background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
+    color:#6a4120;
+    font-size:13px;
+    font-weight:800;
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,230,0.95),
+      0 4px 12px rgba(112,83,52,0.10);
+  }
+
+  #taskEditMask{
+    position:fixed;
+    inset:0;
+    z-index:9998;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(58,40,22,0.22);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+  }
+
+  #taskEditMask.show{
+    display:flex;
+  }
+
+  #taskEditDialog{
+    width:min(980px, 96vw);
+    max-height:min(88vh, 920px);
+    overflow:hidden;
+    border-radius:28px;
+    background:rgba(255,249,241,0.97);
+    border:1px solid rgba(203,167,123,0.30);
+    box-shadow:
+      0 22px 60px rgba(85,58,34,0.22),
+      inset 0 1px 0 rgba(255,255,255,0.92);
+    display:flex;
+    flex-direction:column;
+  }
+
+  .taskEditHeader{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    padding:20px 22px 14px;
+    border-bottom:1px solid rgba(188,154,117,0.18);
+  }
+
+  .taskEditTitleWrap{min-width:0;}
+  #taskEditTitle{
+    color:#6f4726;
+    font-size:24px;
+    font-weight:900;
+    line-height:1.2;
+  }
+  #taskEditSubtitle{
+    margin-top:4px;
+    color:#8b6947;
+    font-size:12px;
+    line-height:1.5;
+  }
+
+  #taskEditCloseBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    width:38px;
+    height:38px;
+    border-radius:12px;
+    background:rgba(255,252,247,0.84);
+    color:#744b25;
+    font-size:22px;
+    line-height:1;
+    font-weight:700;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.9),0 2px 8px rgba(112,83,52,0.08);
+  }
+
+  #taskEditBody{
+    flex:1 1 auto;
+    min-height:0;
+    overflow:auto;
+    padding:18px 22px 18px;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(175,135,98,0.55) transparent;
+  }
+
+  #taskEditBody::-webkit-scrollbar{width:8px;}
+  #taskEditBody::-webkit-scrollbar-thumb{background:rgba(175,135,98,0.55);border-radius:999px;}
+  #taskEditBody::-webkit-scrollbar-track{background:transparent;}
+
+  .taskEditSection{
+    margin-bottom:16px;
+    padding:14px;
+    border-radius:20px;
+    background:rgba(255,252,247,0.70);
+    border:1px solid rgba(214,186,149,0.28);
+    box-shadow:0 4px 14px rgba(118,86,54,0.04);
+  }
+
+  .taskEditSectionHead{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:10px;
+  }
+
+  .taskEditSectionTitle{
+    color:#6f4726;
+    font-size:17px;
+    font-weight:900;
+    line-height:1.2;
+    margin-bottom:10px;
+  }
+
+  .taskEditSectionHead .taskEditSectionTitle{margin-bottom:0;}
+
+  .taskEditGrid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+  }
+
+  .taskEditField{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:0;
+  }
+
+  .taskEditFieldWide{
+    grid-column:1 / -1;
+  }
+
+  .taskEditLabel{
+    color:#7a5231;
+    font-size:12px;
+    font-weight:800;
+    line-height:1.2;
+  }
+
+  .taskEditInput,
+  .taskEditSelect{
+    width:100%;
+    min-height:40px;
+    border:1px solid rgba(194,151,108,0.24);
+    outline:none;
+    border-radius:12px;
+    padding:0 12px;
+    background:rgba(255,255,255,0.90);
+    color:#5f3b1d;
+    font-size:13px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.85);
+  }
+
+  .taskEditInput[readonly]{
+    background:rgba(246,239,230,0.85);
+    color:#8b6947;
+  }
+
+  .taskEditInput:focus,
+  .taskEditSelect:focus{
+    border-color:rgba(201,140,79,0.72);
+    box-shadow:0 0 0 3px rgba(201,140,79,0.12);
+  }
+
+  .memberCheckGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+    gap:8px;
+  }
+
+  .memberCheckItem{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-height:38px;
+    padding:8px 10px;
+    border-radius:12px;
+    background:rgba(255,255,255,0.82);
+    border:1px solid rgba(214,186,149,0.26);
+    color:#5f3b1d;
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .memberCheckItem input{
+    accent-color:#c98c4f;
+  }
+
+  .taskEditHint{
+    margin-top:8px;
+    color:#8b6947;
+    font-size:11px;
+    line-height:1.6;
+  }
+
+  .taskEditRows{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .taskEditRow{
+    display:grid;
+    grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) auto;
+    gap:10px;
+    align-items:end;
+    padding:10px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.72);
+    border:1px solid rgba(214,186,149,0.24);
+  }
+
+  .taskEditInlineBtns{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .taskEditTinyBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-width:74px;
+    height:32px;
+    padding:0 10px;
+    border-radius:10px;
+    background:rgba(255,252,247,0.88);
+    color:#6a4120;
+    font-size:11px;
+    font-weight:800;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.82),0 2px 8px rgba(112,83,52,0.06);
+  }
+
+  .taskEditRemoveBtn{
+    min-width:62px;
+    height:40px;
+    border-radius:12px;
+  }
+
+  .taskEditFooter{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:10px;
+    padding:14px 22px 20px;
+    border-top:1px solid rgba(188,154,117,0.18);
+  }
+
+  .taskEditGhostBtn{
+    background:rgba(255,252,247,0.88);
+  }
+
+  .detailActionBtn[disabled],
+  .taskEditTinyBtn[disabled]{
+    opacity:.6;
+    cursor:not-allowed;
+    transform:none;
+    filter:none;
+  }
+
+
+  @media (max-width: 1280px){
+    .assignmentList{
+      grid-template-columns:repeat(auto-fit,minmax(96px,1fr));
+    }
+  }
+
+  @media (max-width: 1100px){
+    #browsePanelInner{
+      grid-template-columns:31% 69%;
+    }
+    .assignmentList{
+      grid-template-columns:repeat(auto-fit,minmax(92px,1fr));
+    }
+  }
+
+
+  @media (max-width: 1400px){
+    #overlay{
+      --user-right:168px;
+      --user-top:7.1%;
+      --top-ui-scale:1.05;
+    }
+  }
+
+  @media (max-width: 1200px){
+    #overlay{
+      --user-right:56px;
+      --user-top:6.75%;
+      --top-ui-scale:1.08;
+      --topbar-left:21.8%;
+      --topbar-width:49.8%;
+    }
+
+    #browseDetailFooter{
+      justify-content:center;
+      transform:translateX(108px);
+    }
+  }
+
+  @media (max-width: 1000px){
+    #overlay{
+      --user-right:78px;
+      --user-top:6.95%;
+      --top-ui-scale:0.96;
+    }
+
+    #browseDetailFooter{
+      transform:none;
+    }
+  }
+
+  @media (max-width: 820px){
+    #overlay{
+      --user-right:65px;
+      --user-top:7%;
+      --top-ui-scale:0.86;
+    }
+  }
+
+  @media (max-width: 640px){
+    #overlay{
+      --user-right:42px;
+      --user-top:6%;
+      --top-ui-scale:0.72;
+    }
+  }
+
+  @media (max-width: 980px){
+    #panelSwitch{
+      right:-168px;
+      width:150px;
+    }
+    .bottomGrid{
+      grid-template-columns:1fr;
+    }
+  }
+
+  @media (max-width: 860px){
+    .assignmentList{
+      grid-template-columns:repeat(auto-fit,minmax(88px,1fr));
+    }
+    .producerCard{
+      flex-direction:column;
+      align-items:flex-start;
+    }
+    .producerRight{
+      justify-content:flex-start;
+    }
+    .sectionHeader{
+      align-items:flex-start;
+      flex-direction:column;
+    }
+    .sectionMeta{
+      justify-content:flex-start;
+    }
+  }
+
+  @media (max-width: 700px){
+    #browsePanelInner{
+      grid-template-columns:35% 65%;
+    }
+    #browseDetailTitleTask{
+      font-size:18px;
+    }
+    .assignmentCompactRow{
+      min-height:76px;
+    }
+    .assignmentNameText{
+      font-size:11px;
+    }
+    .assignmentPartText{
+      font-size:9px;
+    }
+    .assignmentSubLine{
+      font-size:9px;
+    }
+    .detailTopGrid{
+      grid-template-columns:1fr;
+    }
+    .detailMetaValue{
+      font-size:17px;
+    }
+  }
+
+  @media (max-width: 640px){
+    .assignmentList{
+      grid-template-columns:repeat(auto-fit,minmax(82px,1fr));
+      max-height:180px;
+    }
+    .taskFilterRow{
+      gap:4px;
+    }
+    .taskFilterBtn{
+      min-width:48px;
+      padding:0 8px;
+      font-size:10px;
+    }
+  }
+  @media (max-width: 780px){
+    #taskEditDialog{
+      width:min(98vw, 98vw);
+      max-height:92vh;
+    }
+    .taskEditGrid{
+      grid-template-columns:1fr;
+    }
+    .taskEditFieldWide{
+      grid-column:auto;
+    }
+    .taskEditRow{
+      grid-template-columns:1fr;
+    }
+    .taskEditRemoveBtn{
+      width:100%;
+    }
+  }
+
+
+  @media (max-width: 900px){
+    html,body{
+      overflow:auto;
+    }
+
+    #room{
+      min-height:100vh;
+      min-height:100dvh;
+      overflow:hidden;
+    }
+
+    #overlay{
+      overflow:auto;
+      --topbar-left:4%;
+      --topbar-top:2.2%;
+      --topbar-width:62%;
+      --topbar-gap:8px;
+      --nav-scale:0.82;
+      --user-right:4%;
+      --user-top:2.2%;
+      --top-ui-scale:0.82;
+      --topbar-safe-gap:12px;
+    }
+
+    #topBar{
+      width:calc(100% - 180px);
+      max-width:none;
+    }
+
+    #topBarUserArea{
+      max-width:172px;
+      padding:4px;
+      gap:4px;
+    }
+
+    #currentUserBadge{
+      min-width:88px;
+      min-height:30px;
+      padding:0 10px;
+      font-size:12px;
+    }
+
+    #siteNoticeBtn,
+    #logoutBtn{
+      min-width:30px;
+      height:30px;
+      font-size:11px;
+      padding:0 10px;
+    }
+
+    #siteNoticeBtn{
+      width:30px;
+    }
+
+    #taskPanel{
+      left:50%;
+      top:12%;
+      transform:translateX(-50%);
+      width:94vw;
+      height:calc(100dvh - 120px);
+      min-height:0;
+      border-radius:24px;
+    }
+
+    #panelSwitch{
+      left:14px;
+      right:14px;
+      top:12px;
+      transform:none;
+      width:auto;
+      padding:10px;
+      border-radius:16px;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px;
+    }
+
+    .switchBtn{
+      min-height:36px;
+      padding:8px 6px;
+      font-size:12px;
+      border-radius:11px;
+    }
+
+    #taskView{
+      inset:74px 0 0 0;
+    }
+
+    #browsePanelInner{
+      grid-template-columns:1fr;
+      grid-template-rows:minmax(220px, 38%) 1fr;
+    }
+
+    #browseListPane{
+      border-right:none;
+      border-bottom:1px solid rgba(255,255,255,0.20);
+      padding:12px 12px 10px;
+    }
+
+    #browseListTask{
+      padding-right:2px;
+    }
+
+    #browseDetailPane{
+      padding:10px 12px 12px;
+    }
+
+    #browseDetailBody{
+      padding-right:2px;
+    }
+
+    .taskTitleLine,
+    #browseDetailHeader,
+    .sectionHeader{
+      gap:8px;
+    }
+
+    .goldGrid,
+    .bottomGrid,
+    .detailTopGrid{
+      grid-template-columns:1fr;
+    }
+
+    .assignmentList{
+      grid-template-columns:repeat(auto-fit,minmax(92px,1fr));
+      max-height:none;
+    }
+
+    #siteNoticePanel{
+      width:min(280px, 82vw);
+    }
+  }
+
+  @media (max-width: 640px){
+    #overlay{
+      --topbar-left:3%;
+      --topbar-top:1.4%;
+      --topbar-width:54%;
+      --nav-scale:0.7;
+      --user-right:3%;
+      --user-top:1.4%;
+      --top-ui-scale:0.68;
+    }
+
+    #topBar{
+      width:calc(100% - 154px);
+    }
+
+    #topBarUserArea{
+      max-width:146px;
+    }
+
+    #currentUserBadge{
+      min-width:76px;
+      font-size:11px;
+    }
+
+    #taskPanel{
+      top:10%;
+      width:96vw;
+      height:calc(100dvh - 96px);
+      border-radius:20px;
+    }
+
+    #panelSwitch{
+      left:10px;
+      right:10px;
+      top:10px;
+      padding:8px;
+      gap:6px;
+    }
+
+    .switchBtn{
+      min-height:34px;
+      font-size:11px;
+      padding:7px 4px;
+    }
+
+    #taskView{
+      inset:66px 0 0 0;
+    }
+
+    #browsePanelInner{
+      grid-template-rows:minmax(208px, 40%) 1fr;
+    }
+
+    .taskFilterRow{
+      gap:4px;
+      overflow-x:auto;
+      flex-wrap:nowrap;
+      padding-bottom:2px;
+      scrollbar-width:none;
+    }
+    .taskFilterRow::-webkit-scrollbar{display:none;}
+
+    .taskFilterBtn{
+      flex:0 0 auto;
+      min-width:auto;
+      padding:0 10px;
+      font-size:10px;
+    }
+
+    #browseDetailTitleTask{
+      font-size:16px;
+    }
+
+    #browseDetailStatusTask{
+      font-size:10px;
+      padding:3px 7px;
+    }
+
+    .detailMetaValue,
+    .goldMain{
+      font-size:14px;
+      white-space:normal;
+    }
+
+    .sectionCard{
+      padding:8px;
+      border-radius:16px;
+    }
+
+    .assignmentList{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:6px;
+    }
+
+    .assignmentCompactRow{
+      min-height:70px;
+    }
+
+    #browseDetailFooter{
+      flex-wrap:wrap;
+    }
+
+    .detailActionBtn{
+      flex:1 1 0;
+      min-width:0;
+    }
+  }
+
+
+
+  @media (max-width: 820px){
+    #room{
+      background:#ddd4c8;
+    }
+
+    #bg{
+      object-fit:cover;
+      object-position:center center;
+    }
+
+    #overlay{
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    #taskPanel{
+      top:11%;
+      height:calc(100dvh - 104px);
+      max-height:none;
+    }
+  }
+
+  @media (max-width: 640px){
+    #bg{
+      object-position:center top;
+    }
+
+    #taskPanel{
+      top:9%;
+      height:calc(100dvh - 84px);
+    }
+  }
+
+
+  @media (max-width: 760px){
+    html,body{
+      overflow:auto;
+      background:#ddd4c8;
+    }
+
+    body{
+      display:block;
+      min-height:100vh;
+      min-height:100dvh;
+    }
+
+    #room{
+      min-height:100vh;
+      min-height:100dvh;
+      height:auto;
+      overflow:visible;
+    }
+
+    #bg{
+      object-fit:cover;
+      object-position:center top;
+      opacity:.42;
+    }
+
+    #overlay{
+      position:relative;
+      inset:auto;
+      min-height:100vh;
+      min-height:100dvh;
+      overflow:visible;
+      padding:12px 10px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      --nav-scale:0.74;
+      --top-ui-scale:1;
+      --topbar-left:auto;
+      --topbar-top:auto;
+      --topbar-width:auto;
+      --topbar-gap:8px;
+      --user-right:auto;
+      --user-top:auto;
+      --topbar-safe-gap:0;
+    }
+
+    #topBar,
+    #topBarUserArea{
+      position:relative;
+      left:auto;
+      right:auto;
+      top:auto;
+      transform:none;
+      width:100%;
+      max-width:none;
+    }
+
+    #topBar{
+      order:1;
+    }
+
+    #navOuter{
+      width:100%;
+      padding:8px;
+      border-radius:18px;
+      background:rgba(255,248,239,0.88);
+      border:1px solid rgba(186,146,103,0.2);
+      box-shadow:0 8px 22px rgba(116,86,54,0.10), inset 0 1px 0 rgba(255,255,255,0.86);
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+    }
+
+    #roomNav{
+      gap:8px;
+    }
+
+    .navBtn{
+      height:40px;
+      padding:0 14px;
+      font-size:13px;
+      border-radius:13px;
+    }
+
+    #topBarUserArea{
+      order:2;
+      padding:8px;
+      gap:6px;
+      border-radius:18px;
+      justify-content:flex-end;
+      margin-left:auto;
+      width:fit-content;
+      max-width:100%;
+    }
+
+    #currentUserBadge{
+      min-width:0;
+      max-width:48vw;
+      font-size:12px;
+      padding:0 12px;
+    }
+
+    #siteNoticePanel{
+      width:min(300px, 84vw);
+      right:0;
+    }
+
+    #taskPanel{
+      order:3;
+      position:relative;
+      left:auto;
+      top:auto;
+      transform:none;
+      width:100%;
+      height:auto;
+      min-height:0;
+      overflow:hidden;
+      border-radius:24px;
+      margin:0;
+      background:rgba(255,249,241,0.58);
+      box-shadow:0 16px 42px rgba(122,96,68,0.12), inset 0 1px 0 rgba(255,255,255,0.65);
+    }
+
+    #taskPanel::before{
+      inset:8px;
+      border-radius:18px;
+    }
+
+    #panelSwitch{
+      position:relative;
+      left:auto;
+      right:auto;
+      top:auto;
+      transform:none;
+      width:100%;
+      padding:10px;
+      border-radius:18px;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px;
+      box-shadow:none;
+      border:none;
+      background:transparent;
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
+    }
+
+    .switchBtn{
+      min-height:38px;
+      font-size:12px;
+      border-radius:12px;
+      padding:8px 6px;
+    }
+
+    #taskView{
+      position:relative;
+      inset:auto;
+      padding:0 10px 12px;
+    }
+
+    #browsePanelInner{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      height:auto;
+    }
+
+    #browseListPane,
+    #browseDetailPane{
+      border:none;
+      padding:12px;
+      border-radius:18px;
+      background:rgba(255,252,247,0.58);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.78), 0 4px 14px rgba(118,86,54,0.05);
+    }
+
+    #browseListPane{
+      order:1;
+    }
+
+    #browseDetailPane{
+      order:2;
+      min-height:0;
+    }
+
+    .taskFilterRow{
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      padding-bottom:2px;
+      margin-bottom:10px;
+      scrollbar-width:none;
+    }
+    .taskFilterRow::-webkit-scrollbar{display:none;}
+
+    .taskFilterBtn{
+      flex:0 0 auto;
+      min-width:auto;
+      height:30px;
+      padding:0 12px;
+      font-size:11px;
+    }
+
+    .searchWrap{
+      margin-bottom:10px;
+      padding-right:0;
+    }
+
+    .searchInput{
+      height:40px;
+      border-radius:14px;
+      font-size:13px;
+    }
+
+    #browseListTask,
+    #browseDetailBody{
+      overflow:visible;
+      max-height:none;
+      padding-right:0;
+    }
+
+    .taskItem{
+      padding:11px 12px;
+      border-radius:15px;
+      margin-bottom:8px;
+    }
+
+    .taskItemName{
+      font-size:14px;
+    }
+
+    .taskNameText{
+      white-space:normal;
+      line-height:1.4;
+    }
+
+    .taskBadgeLine{
+      flex-wrap:wrap;
+      overflow:visible;
+      row-gap:4px;
+    }
+
+    .taskItemInfo{
+      font-size:11px;
+      line-height:1.5;
+    }
+
+    #browseDetailHeader{
+      flex-direction:column;
+      align-items:flex-start;
+      gap:6px;
+      margin-bottom:10px;
+    }
+
+    #browseDetailTitleTask{
+      font-size:18px;
+    }
+
+    #browseDetailStatusTask{
+      align-self:flex-start;
+    }
+
+    .detailTopGrid,
+    .bottomGrid,
+    .goldGrid{
+      grid-template-columns:1fr;
+      gap:8px;
+    }
+
+    .detailMetaCard,
+    .sectionCard,
+    .producerCard,
+    .goldCard{
+      border-radius:16px;
+    }
+
+    .sectionHeader{
+      flex-direction:column;
+      align-items:flex-start;
+      gap:6px;
+    }
+
+    .sectionMeta{
+      justify-content:flex-start;
+    }
+
+    .assignmentList{
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      max-height:none;
+      overflow:visible;
+    }
+
+    .assignmentCompactRow{
+      min-height:82px;
+      padding:8px 6px;
+    }
+
+    .producerCard{
+      flex-direction:column;
+      align-items:flex-start;
+    }
+
+    .producerRight{
+      justify-content:flex-start;
+      width:100%;
+    }
+
+    #browseDetailFooter{
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .detailActionBtn{
+      flex:1 1 0;
+      min-width:120px;
+      height:36px;
+      font-size:13px;
+      border-radius:12px;
+    }
+  }
+
+  @media (max-width: 520px){
+    #overlay{
+      padding:10px 8px 14px;
+    }
+
+    #navOuter,
+    #topBarUserArea,
+    #taskPanel,
+    #browseListPane,
+    #browseDetailPane{
+      border-radius:16px;
+    }
+
+    .navBtn{
+      height:38px;
+      padding:0 12px;
+      font-size:12px;
+    }
+
+    #topBarUserArea{
+      width:100%;
+      justify-content:space-between;
+    }
+
+    #currentUserBadge{
+      max-width:58vw;
+      min-height:32px;
+      font-size:11px;
+    }
+
+    #logoutBtn,
+    #siteNoticeBtn{
+      height:32px;
+      min-width:32px;
+      font-size:11px;
+    }
+
+    #panelSwitch{
+      grid-template-columns:1fr;
+    }
+
+    .switchBtn{
+      min-height:36px;
+      font-size:12px;
+    }
+
+    #taskView{
+      padding:0 8px 10px;
+    }
+
+    .taskItemName{
+      font-size:13px;
+    }
+
+    .assignmentList{
+      grid-template-columns:1fr;
+    }
+
+    .detailActionBtn{
+      width:100%;
+      min-width:0;
+    }
+
+    #taskEditMask{
+      padding:10px;
+    }
+
+    #taskEditDialog{
+      width:100%;
+      max-height:94vh;
+      border-radius:20px;
+    }
+
+    .taskEditHeader,
+    #taskEditBody,
+    .taskEditFooter{
+      padding-left:14px;
+      padding-right:14px;
+    }
+
+    .taskEditSection{
+      padding:12px;
+      border-radius:16px;
+    }
+  }
+
+</style>
+</head>
+<body>
+  <div id="room">
+    <img id="bg" src="room-studio.png" alt="十号房工作间背景" />
+
+    <div id="overlay">
+      <div id="topBar">
+        <div id="navOuter">
+          <div id="navScroll">
+            <nav id="roomNav" aria-label="房间切换">
+              <button class="navBtn" data-room="hall">大堂</button>
+              <button class="navBtn" data-room="manager">宿管室</button>
+              <button class="navBtn" data-room="honor">荣誉墙</button>
+              <button class="navBtn" data-room="game">游戏房</button>
+              <button class="navBtn" data-room="living">客厅</button>
+              <button class="navBtn" data-room="dorm">宿舍</button>
+              <button class="navBtn" data-room="pets">宠物区</button>
+              <button class="navBtn" data-room="garden">花房区</button>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <div id="topBarUserArea">
+        <div id="currentUserBadge"><span class="roleDot"></span><span class="identityText">未登录｜游客</span></div>
+        <div id="siteNoticeWrap">
+          <button id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="站内通知">
+            <span id="siteNoticeIcon" aria-hidden="true">🔔</span>
+            <span id="siteNoticeText">站内通知</span>
+            <span id="siteNoticeCount">0</span>
+          </button>
+          <div id="siteNoticePanel" aria-hidden="true">
+            <div class="siteNoticeTitle">代办事项</div>
+            <div id="siteNoticeBody" class="siteNoticeEmpty">暂无提醒</div>
+          </div>
+        </div>
+        <button id="logoutBtn" type="button">登出</button>
+      </div>
+
+      <section id="taskPanel" aria-label="项目详情面板">
+        <div id="panelSwitch">
+          <button class="switchBtn" id="goClaimBtn" type="button">报歌页</button>
+          <button class="switchBtn active" id="goProjectBtn" type="button">项目详情</button>
+          <button class="switchBtn" id="goTaskBtn" type="button">待处理</button>
+        </div>
+
+        <div id="taskView">
+          <div id="browsePanelInner">
+            <div id="browseListPane">
+              <div id="browseListTitleTask">制作中</div>
+
+              <div class="taskFilterRow">
+                <button class="taskFilterBtn active" data-task-filter="all">全部</button>
+                <button class="taskFilterBtn" data-task-filter="mine">我参与</button>
+                <button class="taskFilterBtn" data-task-filter="unsubmitted">未交音</button>
+                <button class="taskFilterBtn" data-task-filter="onlyme">只等我</button>
+              </div>
+
+              <div class="searchWrap">
+                <input id="taskSearchTask" class="searchInput" type="text" placeholder="搜索编号、歌名、类型、成员" />
+              </div>
+              <div id="browseListTask"></div>
+            </div>
+
+            <div id="browseDetailPane">
+              <div id="browseDetailHeader">
+                <div class="detailTitleWrap">
+                  <div id="browseDetailTitleTask"></div>
+                </div>
+                <div id="browseDetailStatusTask"></div>
+              </div>
+
+              <div id="browseDetailBody">
+                <div id="browseDetailContentTask"></div>
+              </div>
+
+              <div id="browseDetailFooter">
+                <button class="detailActionBtn" id="browseEditBtnTask" type="button">编辑</button>
+                <button class="detailActionBtn" id="browsePrimaryBtnTask" type="button">刷新</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="taskEditMask" aria-hidden="true">
+    <div id="taskEditDialog" role="dialog" aria-modal="true" aria-labelledby="taskEditTitle">
+      <div class="taskEditHeader">
+        <div class="taskEditTitleWrap">
+          <div id="taskEditTitle">编辑项目</div>
+          <div id="taskEditSubtitle">保存后会自动按最新数据重新归类状态</div>
+        </div>
+        <button id="taskEditCloseBtn" type="button" aria-label="关闭">×</button>
+      </div>
+
+      <div id="taskEditBody">
+        <div class="taskEditSection">
+          <div class="taskEditSectionTitle">基础信息</div>
+          <div class="taskEditGrid">
+            <label class="taskEditField">
+              <span class="taskEditLabel">编号</span>
+              <input id="editTaskCode" class="taskEditInput" type="text" readonly />
+            </label>
+
+            <label class="taskEditField taskEditFieldWide">
+              <span class="taskEditLabel">歌名</span>
+              <input id="editTaskName" class="taskEditInput" type="text" />
+            </label>
+
+            <label class="taskEditField">
+              <span class="taskEditLabel">类型</span>
+              <select id="editTaskType" class="taskEditSelect"></select>
+            </label>
+
+            <label class="taskEditField">
+              <span class="taskEditLabel">演唱人数</span>
+              <input id="editSingerQuota" class="taskEditInput" type="number" min="1" max="20" />
+            </label>
+
+            <label class="taskEditField">
+              <span class="taskEditLabel">调</span>
+              <input id="editProjectTone" class="taskEditInput" type="text" placeholder="例如：+3 / 原调" />
+            </label>
+
+            <label class="taskEditField">
+              <span class="taskEditLabel">预计发布日期</span>
+              <input id="editReleaseDate" class="taskEditInput" type="date" />
+            </label>
+
+            <label class="taskEditField taskEditFieldWide">
+              <span class="taskEditLabel">混音负责人</span>
+              <select id="editProducerMemberId" class="taskEditSelect"></select>
+            </label>
+          </div>
+        </div>
+
+        <div class="taskEditSection">
+          <div class="taskEditSectionTitle">演唱者</div>
+          <div id="editSingerMemberList" class="memberCheckGrid"></div>
+          <div class="taskEditHint">勾选参与本项目的演唱者，人数不能超过“演唱人数”。</div>
+        </div>
+
+        <div class="taskEditSection">
+          <div class="taskEditSectionHead">
+            <div class="taskEditSectionTitle">歌词分配</div>
+            <div class="taskEditInlineBtns">
+              <button id="editAddPartRowBtn" class="taskEditTinyBtn" type="button">增加一行</button>
+            </div>
+          </div>
+          <div id="editPartRows" class="taskEditRows"></div>
+          <div class="taskEditHint">原唱可以先填写，演唱成员可以后补；保存后会按当前填写结果重新计算是否仍属于“制作中”。</div>
+        </div>
+      </div>
+
+      <div class="taskEditFooter">
+        <button id="taskEditCancelBtn" class="detailActionBtn taskEditGhostBtn" type="button">取消</button>
+        <button id="taskEditSaveBtn" class="detailActionBtn" type="button">保存</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="toastMask" aria-hidden="true">
+    <div id="toastBox">
+      <div id="toastTitle">提示</div>
+      <div id="toastMessage"></div>
+      <button id="toastCloseBtn" type="button">知道了</button>
+    </div>
+  </div>
+
+<script>
+  const SUPABASE_CONFIG = {
+    url: "https://tfevitwoqmxwaguvtyms.supabase.co",
+    key: "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI"
+  };
+
+  const supabaseClient = window.supabase.createClient(
+    SUPABASE_CONFIG.url,
+    SUPABASE_CONFIG.key
+  );
+
+const STORAGE_KEYS = {
+  loggedIn: "room10LoggedIn",
+  user: "room10User",
+  role: "room10Role",
+  memberId: "room10MemberId"
+};
+
+const authState = {
+  initialized: false,
+  loggedIn: false,
+  nickname: "",
+  role: "visitor",
+  memberId: null
+};
+
+  const PAGE_LINKS = {
+    hall: "index.html",
+    managerOwner: "manager-owner.html",
+    managerAdmin: "manager-admin.html",
+    managerMember: "manager-member.html",
+    managerVisitor: "manager-visitor.html",
+    honor: "honor.html",
+    game: "game.html",
+    living: "living.html",
+    dorm: "dorm.html",
+    pets: "pets.html",
+    garden: "flower.html",
+    gameName: "game-name.html",
+    gameWheel: "game-wheel.html",
+    gallery: "gallery.html",
+    register: "register.html",
+    titles: "titles.html",
+    achievements: "achievements.html",
+    studioSubmit: "studio-Submit.html",
+    studioProject: "studio-project.html",
+    studioTodo: "studio-to do.html"
+  };
+
+  let members = [];
+  let memberOrderMap = new Map();
+  let memberDirectoryMap = new Map();
+  let tasks = [];
+  let activeDetailTaskId = "";
+  let detailSearchKeyword = "";
+  let taskFilterMode = "all";
+
+  const TASK_PAYOUT = {
+    onSubmitRatio: 0.7,
+    onPublishRatio: 0.3
+  };
+
+  const SINGING_REWARD_TABLE = {
+    1: 40,
+    2: 38,
+    3: 35,
+    4: 32,
+    5: 30,
+    6: 28,
+    7: 26,
+    8: 25,
+    9: 24,
+    10: 23,
+    11: 22,
+    12: 21,
+    13: 20,
+    14: 19,
+    15: 18,
+    16: 18,
+    17: 17
+  };
+
+  const room = document.getElementById("room");
+  const bg = document.getElementById("bg");
+  const overlay = document.getElementById("overlay");
+  const navOuter = document.getElementById("navOuter");
+  const roomNav = document.getElementById("roomNav");
+  const topBarUserArea = document.getElementById("topBarUserArea");
+  const currentUserBadge = document.getElementById("currentUserBadge");
+  const siteNoticeBtn = document.getElementById("siteNoticeBtn");
+  const siteNoticePanel = document.getElementById("siteNoticePanel");
+  const siteNoticeBody = document.getElementById("siteNoticeBody");
+  const siteNoticeCount = document.getElementById("siteNoticeCount");
+  const detailSearchInput = document.getElementById("taskSearchTask");
+
+  const toastMask = document.getElementById("toastMask");
+  const toastTitle = document.getElementById("toastTitle");
+  const toastMessage = document.getElementById("toastMessage");
+  const toastCloseBtn = document.getElementById("toastCloseBtn");
+
+  const browseEditBtnTask = document.getElementById("browseEditBtnTask");
+  const taskEditMask = document.getElementById("taskEditMask");
+  const taskEditTitle = document.getElementById("taskEditTitle");
+  const taskEditSubtitle = document.getElementById("taskEditSubtitle");
+  const taskEditCloseBtn = document.getElementById("taskEditCloseBtn");
+  const taskEditCancelBtn = document.getElementById("taskEditCancelBtn");
+  const taskEditSaveBtn = document.getElementById("taskEditSaveBtn");
+  const editTaskCode = document.getElementById("editTaskCode");
+  const editTaskName = document.getElementById("editTaskName");
+  const editTaskType = document.getElementById("editTaskType");
+  const editSingerQuota = document.getElementById("editSingerQuota");
+  const editProjectTone = document.getElementById("editProjectTone");
+  const editReleaseDate = document.getElementById("editReleaseDate");
+  const editProducerMemberId = document.getElementById("editProducerMemberId");
+  const editSingerMemberList = document.getElementById("editSingerMemberList");
+  const editPartRows = document.getElementById("editPartRows");
+  const editAddPartRowBtn = document.getElementById("editAddPartRowBtn");
+
+  let currentEditingTaskId = "";
+  let editPartDraftRows = [];
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function safeText(value, fallback = "未填写") {
+    const text = String(value ?? "").trim();
+    return text || fallback;
+  }
+
+  function formatDate(dateString) {
+    if (!dateString) return "未定";
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return String(dateString);
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function isLoggedIn() {
+    return localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
+  }
+
+  function getCurrentRole() {
+    const role = String(localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
+    return ["owner", "admin", "member", "visitor", "applying"].includes(role) ? role : "visitor";
+  }
+
+  function isManagerRole(role) {
+    return role === "owner" || role === "admin";
+  }
+
+  function getCurrentMemberId() {
+    return authState.memberId || localStorage.getItem(STORAGE_KEYS.memberId) || null;
+  }
+
+  async function ensureAuthState() {
+    authState.loggedIn = isLoggedIn();
+    authState.nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
+    authState.role = getCurrentRole();
+    authState.memberId = localStorage.getItem(STORAGE_KEYS.memberId) || null;
+
+    if (!authState.loggedIn || !authState.nickname || !authState.memberId) {
+      handleLogout();
+      return false;
+    }
+
+    try {
+      let verifiedMember = null;
+
+      const directResult = await supabaseClient
+        .from("members")
+        .select("id, nickname, role")
+        .eq("id", authState.memberId)
+        .maybeSingle();
+
+      if (!directResult.error && directResult.data) {
+        verifiedMember = directResult.data;
+      } else {
+        const rpcResult = await supabaseClient.rpc("get_member_directory_for_app");
+        if (!rpcResult.error && Array.isArray(rpcResult.data)) {
+          verifiedMember = rpcResult.data.find(item => String(item.id || "") === String(authState.memberId || "")) || null;
+        }
+      }
+
+      const verifiedNickname = String(verifiedMember?.nickname || "").trim();
+      const verifiedRole = String(verifiedMember?.role || authState.role || "visitor").toLowerCase();
+
+      if (!verifiedMember || !verifiedNickname || verifiedNickname !== authState.nickname) {
+        handleLogout();
+        return false;
+      }
+
+      authState.nickname = verifiedNickname;
+      authState.role = ["owner", "admin", "member", "visitor", "applying"].includes(verifiedRole)
+        ? verifiedRole
+        : authState.role;
+      authState.initialized = true;
+
+      localStorage.setItem(STORAGE_KEYS.user, authState.nickname);
+      localStorage.setItem(STORAGE_KEYS.role, authState.role);
+      localStorage.setItem(STORAGE_KEYS.memberId, String(authState.memberId));
+
+      return true;
+    } catch (err) {
+      console.error("登录状态校验失败：", err);
+      handleLogout();
+      return false;
+    }
+  }
+
+  async function loginWithKey(nickname, key) {
+    const safeNickname = String(nickname || "").trim();
+    const safeKey = String(key || "").trim();
+
+    if (!safeNickname || !safeKey) {
+      return { ok: false, message: "请输入昵称和KEY" };
+    }
+
+    try {
+      const { data, error } = await supabaseClient.rpc("verify_member_login", {
+        input_nickname: safeNickname,
+        input_code: safeKey
+      });
+
+      if (error) {
+        console.error("KEY 登录失败：", error);
+        return { ok: false, message: error.message || "登录失败，请稍后再试" };
+      }
+
+      if (!Array.isArray(data) || !data.length) {
+        return { ok: false, message: "昵称或KEY错误" };
+      }
+
+      const user = data[0];
+      authState.loggedIn = true;
+      authState.nickname = String(user.nickname || safeNickname).trim();
+      authState.role = String(user.role || "member").toLowerCase();
+      authState.memberId = String(user.member_id || "");
+      authState.initialized = true;
+
+      localStorage.setItem(STORAGE_KEYS.loggedIn, "true");
+      localStorage.setItem(STORAGE_KEYS.user, authState.nickname);
+      localStorage.setItem(STORAGE_KEYS.role, authState.role);
+      localStorage.setItem(STORAGE_KEYS.memberId, authState.memberId);
+
+      return { ok: true, user };
+    } catch (err) {
+      console.error("KEY 登录异常：", err);
+      return { ok: false, message: err?.message || "登录失败，请稍后再试" };
+    }
+  }
+
+  window.loginWithKey = loginWithKey;
+
+  function handleLogout() {
+    localStorage.removeItem(STORAGE_KEYS.loggedIn);
+    localStorage.removeItem(STORAGE_KEYS.user);
+    localStorage.removeItem(STORAGE_KEYS.role);
+    localStorage.removeItem(STORAGE_KEYS.memberId);
+    window.location.href = PAGE_LINKS.hall;
+  }
+
+  function getRoleLabel(role) {
+    const map = {
+      owner: "维修工",
+      admin: "管理员",
+      member: "成员",
+      applying: "申请中",
+      visitor: "游客"
+    };
+    return map[String(role || "visitor").toLowerCase()] || "游客";
+  }
+
+  function updateTopBarIdentity() {
+    if (!currentUserBadge) return;
+    const nickname = String(authState.nickname || localStorage.getItem(STORAGE_KEYS.user) || "未登录").trim() || "未登录";
+    const roleLabel = getRoleLabel(authState.role || getCurrentRole());
+    const textEl = currentUserBadge.querySelector('.identityText');
+    if (textEl) textEl.textContent = `${nickname}｜${roleLabel}`;
+  }
+
+  function getTaskAlerts() {
+    const currentUserId = getCurrentMemberId();
+    if (!currentUserId) return [];
+
+    return tasks.reduce((arr, task) => {
+      if (isMySingerPending(task)) {
+        arr.push({
+          title: `${getTaskDisplayName(task)}  演唱  待交音`,
+          desc: getSingerPendingNoticeText(task)
+        });
+      }
+      if (isMyProducerPending(task)) {
+        arr.push({
+          title: `${getTaskDisplayName(task)}  混音  待完成`,
+          desc: getProducerPendingNoticeText(task)
+        });
+      }
+      return arr;
+    }, []);
+  }
+
+  function renderSiteNotifications() {
+    if (!siteNoticeBody || !siteNoticeBtn || !siteNoticeCount) return;
+    const items = getTaskAlerts();
+    siteNoticeBtn.classList.toggle('hasNotice', items.length > 0);
+    siteNoticeCount.textContent = String(items.length);
+
+    if (!items.length) {
+      siteNoticeBody.className = 'siteNoticeEmpty';
+      siteNoticeBody.innerHTML = '暂无提醒';
+      return;
+    }
+
+    siteNoticeBody.className = 'siteNoticeList';
+    siteNoticeBody.innerHTML = items.map(item => `
+      <div class="siteNoticeItem">
+        <div class="siteNoticeItemTitle">${escapeHtml(item.title)}</div>
+        <div class="siteNoticeItemDesc">${escapeHtml(item.desc)}</div>
+      </div>
+    `).join('');
+  }
+
+  function toggleSiteNoticePanel(force) {
+    if (!siteNoticePanel || !siteNoticeBtn) return;
+    const shouldShow = typeof force === 'boolean' ? force : !siteNoticePanel.classList.contains('show');
+    siteNoticePanel.classList.toggle('show', shouldShow);
+    siteNoticePanel.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
+    siteNoticeBtn.setAttribute('aria-expanded', shouldShow ? 'true' : 'false');
+  }
+
+  function showToast(title, message) {
+    toastTitle.textContent = title || "提示";
+    toastMessage.textContent = message || "";
+    toastMask.classList.add("show");
+    toastMask.setAttribute("aria-hidden", "false");
+  }
+
+  function closeToast() {
+    toastMask.classList.remove("show");
+    toastMask.setAttribute("aria-hidden", "true");
+  }
+
+  toastCloseBtn.addEventListener("click", closeToast);
+  toastMask.addEventListener("click", (e) => {
+    if (e.target === toastMask) closeToast();
+  });
+
+  function splitGold(totalGold) {
+    const total = Math.max(0, Math.floor(Number(totalGold) || 0));
+    const submit = Math.floor(total * TASK_PAYOUT.onSubmitRatio);
+    const publish = total - submit;
+    return { total, submit, publish };
+  }
+
+  function normalizeSingerCount(value) {
+    return Math.max(1, Math.floor(Number(value) || 1));
+  }
+
+  function getSingerRewardByRule(singerQuota) {
+    const count = normalizeSingerCount(singerQuota);
+
+    if (SINGING_REWARD_TABLE[count] != null) {
+      return SINGING_REWARD_TABLE[count];
+    }
+
+    return Math.max(12, Math.floor(17 - 0.5 * (count - 17)));
+  }
+
+  function getProducerRewardByRule(taskType, singerQuota) {
+    const count = normalizeSingerCount(singerQuota);
+
+    if (String(taskType || "") === "游戏") return 0;
+
+    return Math.min(48 + Math.min(count - 1, 12), 60);
+  }
+
+  function extractNumberFromValue(value) {
+    const str = String(value ?? "");
+    const match = str.match(/\d+/);
+    return match ? parseInt(match[0], 10) : Number.POSITIVE_INFINITY;
+  }
+
+  function getMemberOrderNumber(memberRaw) {
+    const candidates = [
+      memberRaw.display_order,
+      memberRaw.member_order,
+      memberRaw.order_no,
+      memberRaw.member_no,
+      memberRaw.member_number,
+      memberRaw.no,
+      memberRaw.code,
+      memberRaw.member_code,
+      memberRaw.invite_code,
+      memberRaw.key_code,
+      memberRaw.nickname,
+      memberRaw.name
+    ];
+
+    for (const item of candidates) {
+      const num = extractNumberFromValue(item);
+      if (Number.isFinite(num)) return num;
+    }
+    return Number.POSITIVE_INFINITY;
+  }
+
+  function normalizeMemberName(memberRaw, index) {
+    return memberRaw.nickname || memberRaw.name || `成员${index + 1}`;
+  }
+
+  function normalizeMembers(data) {
+    return (data || [])
+      .map((item, index) => {
+        const orderNumber = getMemberOrderNumber(item);
+        return {
+          id: String(item.id ?? index),
+          name: item.name || normalizeMemberName(item, index),
+          nickname: item.nickname || item.name || normalizeMemberName(item, index),
+          skills: item.skills || "",
+          orderNumber
+        };
+      })
+      .sort((a, b) => {
+        if (a.orderNumber !== b.orderNumber) return a.orderNumber - b.orderNumber;
+        return a.name.localeCompare(b.name, "zh-CN");
+      });
+  }
+
+  function rebuildMemberOrderMap() {
+    memberOrderMap = new Map();
+    members.forEach((member, index) => {
+      memberOrderMap.set(String(member.id), {
+        orderNumber: Number.isFinite(member.orderNumber) ? member.orderNumber : (999999 + index),
+        name: member.name || ""
+      });
+    });
+  }
+
+  function rebuildMemberDirectoryMap() {
+    memberDirectoryMap = new Map();
+    members.forEach(member => {
+      memberDirectoryMap.set(String(member.id), {
+        id: String(member.id),
+        name: member.name || "",
+        nickname: member.nickname || member.name || "",
+        skills: member.skills || "",
+        orderNumber: Number.isFinite(member.orderNumber) ? member.orderNumber : Number.POSITIVE_INFINITY
+      });
+    });
+  }
+
+  function getMemberDisplayNameById(memberId, fallback = "") {
+    const hit = memberDirectoryMap.get(String(memberId || ""));
+    return hit?.nickname || hit?.name || fallback || "";
+  }
+
+  function hydrateTaskNamesFromDirectory(taskList) {
+    (taskList || []).forEach(task => {
+      task.producer_name = getMemberDisplayNameById(task.producer_member_id, task.producer_name || "");
+
+      (task.parts || []).forEach(part => {
+        part.assigned_member_name = getMemberDisplayNameById(part.assigned_member_id, part.assigned_member_name || "");
+      });
+
+      (task.singers || []).forEach(singer => {
+        singer.member_name = getMemberDisplayNameById(singer.member_id, singer.member_name || "");
+      });
+    });
+  }
+
+  function getSortInfoByMemberId(memberId, fallbackName = "") {
+    const info = memberOrderMap.get(String(memberId));
+    return {
+      orderNumber: info?.orderNumber ?? Number.POSITIVE_INFINITY,
+      name: info?.name || fallbackName || ""
+    };
+  }
+
+  function sortSingersByMemberOrder(singers) {
+    return [...(singers || [])].sort((a, b) => {
+      const aInfo = getSortInfoByMemberId(a.member_id, a.member_name);
+      const bInfo = getSortInfoByMemberId(b.member_id, b.member_name);
+      if (aInfo.orderNumber !== bInfo.orderNumber) return aInfo.orderNumber - bInfo.orderNumber;
+      return String(a.member_name || "").localeCompare(String(b.member_name || ""), "zh-CN");
+    });
+  }
+
+  function makeDisplayTaskName(taskCode, taskName) {
+    const code = safeText(taskCode, "");
+    const name = safeText(taskName, "");
+    if (!code) return name;
+    if (!name) return code;
+    return `${code}.${name}`;
+  }
+
+  function uniqueAssignedIds(parts) {
+    return [...new Set((parts || []).map(part => part.assigned_member_id).filter(Boolean).map(String))];
+  }
+
+  function getSubmittedCount(task) {
+    return (task.singers || []).filter(item => !!item.is_submitted).length;
+  }
+
+  function getProgressText(task) {
+    const total = Math.max(1, Number(task.singer_quota) || 1);
+    return `${getSubmittedCount(task)}/${total}`;
+  }
+
+  function getSingerPendingNoticeText(task) {
+    const total = Math.max(1, Number(task.singer_quota) || 1);
+    const submitted = getSubmittedCount(task);
+    if (submitted === total - 1 && isOnlyWaitingMe(task)) {
+      return `当前进度 ${getProgressText(task)}，只剩你未交音`;
+    }
+    return `当前进度 ${getProgressText(task)}，你还有演唱部分未交音。`;
+  }
+
+  function getProducerPendingNoticeText(task) {
+    const allSingersDone = (task.singers || []).length > 0 && (task.singers || []).every(item => !!item.is_submitted);
+    return allSingersDone
+      ? "你是本项目混音负责人，请开始后期"
+      : "你是本项目混音负责人，等待交音中";
+  }
+
+  function getPartsForMember(task, memberId) {
+    return (task.parts || [])
+      .filter(part => String(part.assigned_member_id || "") === String(memberId))
+      .map(part => String(part.original_name || "").trim())
+      .filter(Boolean);
+  }
+
+  function isMyProject(task) {
+    const currentUserId = getCurrentMemberId();
+    if (!currentUserId) return false;
+
+    const isSinger = (task.singers || []).some(item => String(item.member_id) === String(currentUserId));
+    const isProducer = String(task.producer_member_id || "") === String(currentUserId);
+    return isSinger || isProducer;
+  }
+
+  function isMySingerPending(task) {
+    const currentUserId = getCurrentMemberId();
+    if (!currentUserId) return false;
+
+    const singer = (task.singers || []).find(item => String(item.member_id) === String(currentUserId));
+    if (!singer) return false;
+    return !singer.is_submitted;
+  }
+
+  function isMyProducerPending(task) {
+    const currentUserId = getCurrentMemberId();
+    if (!currentUserId) return false;
+    if (String(task.producer_member_id || "") !== String(currentUserId)) return false;
+
+    const allSingersDone = (task.singers || []).length > 0 && (task.singers || []).every(item => !!item.is_submitted);
+    if (!allSingersDone) return true;
+    return !task.producer_completed;
+  }
+
+  function isMyUnsubmitted(task) {
+    return isMySingerPending(task) || isMyProducerPending(task);
+  }
+
+  function isOnlyWaitingMe(task) {
+    const currentUserId = getCurrentMemberId();
+    if (!currentUserId) return false;
+
+    const mySinger = (task.singers || []).find(item => String(item.member_id) === String(currentUserId));
+    const isProducer = String(task.producer_member_id || "") === String(currentUserId);
+
+    if (mySinger && !mySinger.is_submitted) {
+      const otherSingersDone = (task.singers || [])
+        .filter(item => String(item.member_id) !== String(currentUserId))
+        .every(item => !!item.is_submitted);
+      return otherSingersDone;
+    }
+
+    if (isProducer) {
+      const allSingersDone = (task.singers || []).length > 0 && (task.singers || []).every(item => !!item.is_submitted);
+      return allSingersDone && !task.producer_completed;
+    }
+
+    return false;
+  }
+
+  function canEditSingerRecord(singerRecord, task) {
+    const role = getCurrentRole();
+    if (isManagerRole(role)) return true;
+
+    const currentUserId = getCurrentMemberId();
+    if (!currentUserId) return false;
+
+    if (String(task.created_by || "") === String(currentUserId)) return true;
+    return String(singerRecord.member_id) === String(currentUserId);
+  }
+
+  function canEditProducerTask(task) {
+    const role = getCurrentRole();
+    if (isManagerRole(role)) return true;
+
+    const currentUserId = getCurrentMemberId();
+    if (!currentUserId) return false;
+
+    if (String(task.created_by || "") === String(currentUserId)) return true;
+    return String(task.producer_member_id || "") === String(currentUserId);
+  }
+
+  function getComputedTaskStatus(task) {
+    const stored = String(task.status || "").trim();
+    const singerQuota = Math.max(1, Number(task.singer_quota) || 1);
+    const singerCount = (task.singers || []).length;
+    const assignedIds = uniqueAssignedIds(task.parts || []);
+    const hasPartText = (task.parts || []).some(part => String(part.original_name || "").trim());
+    const hasTone = !!String(task.project_tone || "").trim();
+    const allSubmitted = singerCount > 0 && (task.singers || []).every(item => !!item.is_submitted);
+
+    if (stored === "已发布") return "已发布";
+    if (stored === "待发布") return "待发布";
+    if (singerCount < singerQuota) return "待认领";
+    if (!hasTone) return "未定调";
+    if (!hasPartText || assignedIds.length < singerCount) return "未分词";
+    if (allSubmitted && !task.producer_member_id) return "缺后期";
+    return "制作中";
+  }
+
+  function buildShortInfo(task) {
+    const parts = [];
+    parts.push(task.task_type || "未分类");
+    if (task.release_date) parts.push(`预计 ${formatDate(task.release_date)}`);
+    else parts.push("预计未定");
+    return parts.join("｜");
+  }
+
+  function transformProjectsToTasks(projectRows, partsRows, singersRows) {
+    const partMap = new Map();
+    const singerMap = new Map();
+
+    (partsRows || []).forEach(part => {
+      const key = String(part.project_id);
+      if (!partMap.has(key)) partMap.set(key, []);
+      partMap.get(key).push({
+        id: part.id,
+        part_order: part.part_order,
+        original_name: part.original_name,
+        assigned_member_id: part.assigned_member_id,
+        assigned_member_name: part.members?.nickname || part.members?.name || ""
+      });
+    });
+
+    (singersRows || []).forEach(singer => {
+      const key = String(singer.project_id);
+      if (!singerMap.has(key)) singerMap.set(key, []);
+      singerMap.get(key).push({
+        id: singer.id,
+        member_id: singer.member_id,
+        member_name: singer.members?.nickname || singer.members?.name || "",
+        is_submitted: !!singer.is_submitted,
+        submitted_at: singer.submitted_at || null
+      });
+    });
+
+    return (projectRows || []).map(project => {
+      const id = String(project.id);
+      const parts = (partMap.get(id) || []).sort((a, b) => (a.part_order || 0) - (b.part_order || 0));
+      const singers = sortSingersByMemberOrder(singerMap.get(id) || []);
+      const producerName = project.producer_member?.nickname || project.producer_member?.name || "";
+
+      const computedSingerBonus = getSingerRewardByRule(project.singer_quota);
+      const computedProducerBonus = getProducerRewardByRule(project.task_type, project.singer_quota);
+
+      return {
+        id,
+        task_code: project.task_code || "",
+        task_name: project.task_name || "",
+        displayName: makeDisplayTaskName(project.task_code, project.task_name),
+        task_type: project.task_type || "",
+        status: project.status || "",
+        singer_quota: project.singer_quota ?? 1,
+        singer_bonus: computedSingerBonus,
+        producer_bonus: computedProducerBonus,
+        producer_member_id: project.producer_member_id || null,
+        producer_name: producerName,
+        producer_completed: !!project.producer_completed,
+        producer_completed_at: project.producer_completed_at || null,
+        release_date: project.release_date || null,
+        display_link: project.display_link || "",
+        project_tone: project.project_tone || "",
+        created_by: project.created_by || null,
+        created_at: project.created_at || null,
+        parts,
+        singers
+      };
+    }).map(task => {
+      task.computedStatus = getComputedTaskStatus(task);
+      task.shortInfo = buildShortInfo(task);
+      return task;
+    }).filter(task => task.computedStatus === "制作中")
+      .sort((a, b) => {
+        const aCode = parseInt(String(a.task_code).match(/\d+/)?.[0] || "0", 10);
+        const bCode = parseInt(String(b.task_code).match(/\d+/)?.[0] || "0", 10);
+        return aCode - bCode;
+      });
+  }
+
+  async function loadMembersFromSupabase() {
+    try {
+      let data = [];
+      let error = null;
+
+      const rpcResult = await supabaseClient.rpc("get_member_directory_for_app");
+      if (!rpcResult.error && Array.isArray(rpcResult.data)) {
+        data = rpcResult.data;
+      } else {
+        error = rpcResult.error || null;
+        const fallbackResult = await supabaseClient
+          .from("members")
+          .select("id, nickname, name, skills");
+
+        if (!fallbackResult.error && Array.isArray(fallbackResult.data)) {
+          data = fallbackResult.data;
+          error = null;
+        } else {
+          error = fallbackResult.error || error;
+        }
+      }
+
+      if (error && !data.length) {
+        console.error("读取成员目录失败：", error);
+      }
+
+      members = normalizeMembers(data || []);
+      rebuildMemberOrderMap();
+      rebuildMemberDirectoryMap();
+    } catch (err) {
+      members = [];
+      rebuildMemberOrderMap();
+      rebuildMemberDirectoryMap();
+      console.error("成员目录读取失败：", err);
+    }
+  }
+
+  async function loadProjectsFromSupabase() {
+    const detailList = document.getElementById("browseListTask");
+    detailList.innerHTML = '<div class="loadingText">正在读取任务...</div>';
+
+    try {
+      const { data: projectsData, error: projectsError } = await supabaseClient
+        .from("projects")
+        .select(`
+          *,
+          producer_member:members!projects_producer_member_id_fkey (
+            id,
+            nickname,
+            name
+          )
+        `);
+
+      if (projectsError) throw projectsError;
+
+      const projectIds = (projectsData || []).map(item => item.id);
+
+      let partsData = [];
+      let singersData = [];
+
+      if (projectIds.length) {
+        const { data: partRows, error: partsError } = await supabaseClient
+          .from("project_parts")
+          .select(`
+            id,
+            project_id,
+            part_order,
+            original_name,
+            assigned_member_id,
+            members!project_parts_assigned_member_id_fkey (
+              id,
+              nickname,
+              name
+            )
+          `)
+          .in("project_id", projectIds)
+          .order("part_order", { ascending: true });
+
+        if (partsError) throw partsError;
+        partsData = partRows || [];
+
+        const { data: singerRows, error: singersError } = await supabaseClient
+          .from("project_singers")
+          .select(`
+            id,
+            project_id,
+            member_id,
+            is_submitted,
+            submitted_at,
+            members!project_singers_member_id_fkey (
+              id,
+              nickname,
+              name
+            )
+          `)
+          .in("project_id", projectIds);
+
+        if (singersError) throw singersError;
+        singersData = singerRows || [];
+      }
+
+      tasks = transformProjectsToTasks(projectsData || [], partsData, singersData);
+      hydrateTaskNamesFromDirectory(tasks);
+
+      const detailTasks = getFilteredTasks(detailSearchKeyword);
+      if (!detailTasks.some(task => task.id === activeDetailTaskId)) {
+        activeDetailTaskId = detailTasks.length ? detailTasks[0].id : "";
+      }
+
+      renderBrowseList();
+      renderBrowseDetail();
+    } catch (err) {
+      console.error("读取 projects 失败：", err);
+      detailList.innerHTML = '<div class="taskEmpty">任务读取失败，请检查表结构或权限</div>';
+      setBrowseDetailEmpty("任务读取失败");
+    }
+  }
+
+  function syncOverlayToImage() {
+    const roomRect = room.getBoundingClientRect();
+    const roomW = roomRect.width;
+    const roomH = roomRect.height;
+
+    const naturalW = bg.naturalWidth || 1600;
+    const naturalH = bg.naturalHeight || 900;
+
+    const imgRatio = naturalW / naturalH;
+    const roomRatio = roomW / roomH;
+
+    let drawW, drawH, drawLeft, drawTop;
+
+    if (roomRatio > imgRatio) {
+      drawH = roomH;
+      drawW = drawH * imgRatio;
+      drawLeft = (roomW - drawW) / 2;
+      drawTop = 0;
+    } else {
+      drawW = roomW;
+      drawH = drawW / imgRatio;
+      drawLeft = 0;
+      drawTop = (roomH - drawH) / 2;
+    }
+
+    overlay.style.left = drawLeft + "px";
+    overlay.style.top = drawTop + "px";
+    overlay.style.width = drawW + "px";
+    overlay.style.height = drawH + "px";
+
+    const BASE_SCREEN_W = 1600;
+    const BASE_SCREEN_H = 900;
+    const BASE_TOPBAR_LEFT = 28.2;
+    const BASE_TOPBAR_TOP = 8.15;
+    const BASE_TOPBAR_WIDTH = 65.4;
+    const BASE_TOPBAR_GAP = 1.2;
+
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+    const fitW = drawW / BASE_SCREEN_W;
+    const fitH = drawH / BASE_SCREEN_H;
+    const fit = Math.min(fitW, fitH);
+
+    let navScale = clamp(fit, 0.52, 1.18);
+    let topUiScale = clamp(fit * 0.96, 0.72, 1.06);
+
+    const smallerDelta = Math.max(0, 1 - fit);
+    let topbarLeft = BASE_TOPBAR_LEFT - smallerDelta * 1.1;
+    const topbarTop = BASE_TOPBAR_TOP;
+    const topbarGap = clamp(BASE_TOPBAR_GAP * (0.92 + fit * 0.08), 0.82, 1.2);
+    const safeGapPx = clamp(12, drawW * 0.012, 24);
+    const overlayStyles = window.getComputedStyle(overlay);
+    const userRight = parseFloat(overlayStyles.getPropertyValue("--user-right")) || 180;
+
+    overlay.style.setProperty("--top-ui-scale", topUiScale.toFixed(4));
+    overlay.style.setProperty("--topbar-left", `${topbarLeft.toFixed(3)}%`);
+    overlay.style.setProperty("--topbar-top", `${topbarTop.toFixed(3)}%`);
+    overlay.style.setProperty("--topbar-gap", `${topbarGap.toFixed(3)}%`);
+    overlay.style.setProperty("--topbar-safe-gap", `${safeGapPx.toFixed(2)}px`);
+    overlay.style.setProperty("--nav-scale", navScale.toFixed(4));
+
+    const leftPx = drawW * (topbarLeft / 100);
+    const userBoxWidth = topBarUserArea ? topBarUserArea.offsetWidth * topUiScale : 0;
+    const availableWidthPx = Math.max(180, drawW - leftPx - userRight - userBoxWidth - safeGapPx);
+    const desiredTopbarWidthPx = drawW * (BASE_TOPBAR_WIDTH / 100);
+    const topbarWidthPx = Math.min(desiredTopbarWidthPx, availableWidthPx);
+    overlay.style.setProperty("--topbar-width", `${(topbarWidthPx / drawW * 100).toFixed(3)}%`);
+
+    requestAnimationFrame(() => {
+      if (!navOuter || !roomNav) return;
+      const navVisible = Math.max(160, navOuter.clientWidth - 2);
+      let navNeeded = roomNav.scrollWidth;
+      const minNavScale = 0.40;
+      if (navNeeded > navVisible) {
+        let ratio = navVisible / navNeeded;
+        navScale = clamp(navScale * ratio * 0.985, minNavScale, 1.18);
+        overlay.style.setProperty("--nav-scale", navScale.toFixed(4));
+        requestAnimationFrame(() => {
+          navNeeded = roomNav.scrollWidth;
+          if (navNeeded > navVisible) {
+            ratio = navVisible / navNeeded;
+            navScale = clamp(navScale * ratio * 0.992, minNavScale, 1.18);
+            overlay.style.setProperty("--nav-scale", navScale.toFixed(4));
+          }
+        });
+      }
+    });
+  }
+
+  function normalizeSearchQuery(text) {
+    return String(text || "")
+      .toLowerCase()
+      .replace(/[｜|,，/]/g, " ")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+  }
+
+  function getFilteredTasks(keyword) {
+    const tokens = normalizeSearchQuery(keyword);
+
+    return tasks.filter(task => {
+      if (taskFilterMode === "mine" && !isMyProject(task)) return false;
+      if (taskFilterMode === "unsubmitted" && !isMyUnsubmitted(task)) return false;
+      if (taskFilterMode === "onlyme" && !isOnlyWaitingMe(task)) return false;
+
+      if (!tokens.length) return true;
+
+      const partText = (task.parts || [])
+        .map(item => `${item.original_name || ""} ${item.assigned_member_name || ""}`)
+        .join(" ");
+
+      const singerText = (task.singers || [])
+        .map(item => item.member_name || "")
+        .join(" ");
+
+      const haystack = [
+        task.displayName,
+        task.task_name,
+        task.task_code,
+        task.task_type,
+        task.producer_name,
+        task.project_tone,
+        task.release_date ? formatDate(task.release_date) : "",
+        singerText,
+        partText
+      ].join(" ").toLowerCase();
+
+      return tokens.every(token => haystack.includes(token));
+    });
+  }
+
+  function renderBrowseList() {
+    const list = document.getElementById("browseListTask");
+    const listData = getFilteredTasks(detailSearchKeyword);
+    const activeId = activeDetailTaskId;
+
+    list.innerHTML = "";
+
+    if (!listData.length) {
+      list.innerHTML = `<div class="taskEmpty">暂无制作中项目</div>`;
+      return;
+    }
+
+    listData.forEach(task => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "taskItem" + (task.id === activeId ? " active" : "");
+
+      if (isMyProject(task)) btn.classList.add("myProject");
+      if (isMyUnsubmitted(task)) btn.classList.add("unsubmittedWarn");
+
+      const singerText = task.singers.length ? task.singers.map(s => s.member_name).join("、") : "暂无";
+
+      const badgeHtml = [
+        isMyProject(task) ? `<span class="taskMiniBadge mine">我参与</span>` : ``,
+        isMyUnsubmitted(task) ? `<span class="taskMiniBadge warn">未交音</span>` : ``,
+        isOnlyWaitingMe(task) ? `<span class="taskMiniBadge onlyme">只等我</span>` : ``
+      ].filter(Boolean).join("");
+
+      btn.innerHTML = `
+        <div class="taskTitleLine">
+          <span class="taskItemName">
+            <span class="taskNameText">${escapeHtml(task.displayName)}</span>
+            <span class="taskTypeMini">${escapeHtml(task.task_type || "未分类")}</span>
+          </span>
+        </div>
+        <div class="taskBadgeLine">${badgeHtml}</div>
+        <span class="taskItemInfo">演唱者：${escapeHtml(singerText)}</span>
+      `;
+
+      btn.addEventListener("click", () => {
+        activeDetailTaskId = task.id;
+        renderBrowseList();
+        renderBrowseDetail();
+      });
+
+      list.appendChild(btn);
+    });
+  }
+
+  function setBrowseDetailEmpty(message = "暂无任务") {
+    document.getElementById("browseDetailTitleTask").textContent = message;
+    document.getElementById("browseDetailStatusTask").textContent = "";
+    document.getElementById("browseDetailContentTask").innerHTML = `<div class="taskEmpty">${escapeHtml(message)}</div>`;
+    if (browseEditBtnTask) {
+      browseEditBtnTask.style.display = "none";
+      browseEditBtnTask.disabled = true;
+    }
+  }
+
+  function buildSingerCardHtml(item, task) {
+    const canEdit = canEditSingerRecord(item, task);
+    const isMe = String(item.member_id) === String(getCurrentMemberId());
+    const isPending = !item.is_submitted;
+    const parts = getPartsForMember(task, item.member_id);
+    const partText = parts.length ? parts.join(" / ") : "未分配部分";
+
+    return `
+      <div class="assignmentCompactRow ${isMe ? "mineCard" : ""} ${isPending ? "warn" : ""}">
+        <div class="assignmentNameInline">
+          <span class="assignmentNameText">${escapeHtml(item.member_name || "未命名成员")}</span>
+        </div>
+        <div class="assignmentPartText">${escapeHtml(partText)}</div>
+        ${
+          canEdit
+            ? `<button class="tinyActionBtn ${item.is_submitted ? "done" : ""}" data-singer-record-id="${escapeHtml(item.id)}" data-current="${item.is_submitted ? "1" : "0"}">${item.is_submitted ? "撤回" : "交音"}</button>`
+            : `<button class="tinyActionBtn readonly" type="button" disabled>${item.is_submitted ? "已交音" : "未交音"}</button>`
+        }
+      </div>
+    `;
+  }
+
+  function buildProducerCardHtml(task) {
+    if (!task.producer_member_id) {
+      return `
+        <div class="producerCard">
+          <div class="producerNameInline">暂无负责人</div>
+        </div>
+      `;
+    }
+
+    const canEdit = canEditProducerTask(task);
+    const allSingersDone = (task.singers || []).length > 0 && (task.singers || []).every(item => !!item.is_submitted);
+
+    let buttonHtml = "";
+
+    if (!allSingersDone) {
+      buttonHtml = `<button class="tinyActionBtn waiting" type="button" disabled>等待交音</button>`;
+    } else if (task.producer_completed) {
+      buttonHtml = canEdit
+        ? `<button class="tinyActionBtn done" data-project-id="${escapeHtml(task.id)}" data-current="1">撤回</button>`
+        : `<button class="tinyActionBtn readonly" type="button" disabled>已交付</button>`;
+    } else {
+      buttonHtml = canEdit
+        ? `<button class="tinyActionBtn" data-project-id="${escapeHtml(task.id)}" data-current="0">交付</button>`
+        : `<button class="tinyActionBtn readonly" type="button" disabled>未交付</button>`;
+    }
+
+    return `
+      <div class="producerCard">
+        <div class="producerNameInline">${escapeHtml(task.producer_name || "未命名成员")}</div>
+        <div class="producerRight">
+          ${buttonHtml}
+        </div>
+      </div>
+    `;
+  }
+
+
+  function canEditTaskFromDetail(task) {
+    const role = getCurrentRole();
+    if (isManagerRole(role)) return true;
+
+    const currentUserId = getCurrentMemberId();
+    if (!currentUserId || !task) return false;
+
+    if (String(task.created_by || "") === String(currentUserId)) return true;
+    if (String(task.producer_member_id || "") === String(currentUserId)) return true;
+    return (task.singers || []).some(item => String(item.member_id) === String(currentUserId));
+  }
+
+  function getTaskById(taskId) {
+    return tasks.find(item => String(item.id) === String(taskId)) || null;
+  }
+
+  function getTaskDisplayName(task) {
+    return task?.displayName || makeDisplayTaskName(task?.task_code, task?.task_name);
+  }
+
+  function getTaskTypeOptions(currentValue = "") {
+    const fixed = ["披4", "披哥", "其他", "游戏"];
+    const current = String(currentValue || "").trim();
+    return current && !fixed.includes(current) ? [current, ...fixed] : fixed;
+  }
+
+  function formatDateForInput(dateString) {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "";
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function getEditableSingerIds() {
+    return Array.from(editSingerMemberList.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value);
+  }
+
+  function buildMemberSelectOptions(selectedId = "", singerIdPool = null, includeEmpty = true) {
+    const selected = String(selectedId || "");
+    const allowed = singerIdPool ? new Set(singerIdPool.map(String)) : null;
+
+    const optionHtml = members
+      .filter(member => !allowed || allowed.has(String(member.id)))
+      .map(member => `<option value="${escapeHtml(member.id)}" ${String(member.id) === selected ? "selected" : ""}>${escapeHtml(member.name)}</option>`)
+      .join("");
+
+    return `${includeEmpty ? `<option value="">未分配</option>` : ""}${optionHtml}`;
+  }
+
+  function renderEditSingerMemberList(selectedIds = []) {
+    const selectedSet = new Set((selectedIds || []).map(String));
+    editSingerMemberList.innerHTML = members.map(member => `
+      <label class="memberCheckItem">
+        <input type="checkbox" value="${escapeHtml(member.id)}" ${selectedSet.has(String(member.id)) ? "checked" : ""} />
+        <span>${escapeHtml(member.name)}</span>
+      </label>
+    `).join("");
+  }
+
+  function getCurrentPartDraftFromDom() {
+    return Array.from(editPartRows.querySelectorAll(".taskEditRow")).map((row, index) => ({
+      original_name: String(row.querySelector('[data-field="original_name"]')?.value || "").trim(),
+      assigned_member_id: String(row.querySelector('[data-field="assigned_member_id"]')?.value || "").trim(),
+      part_order: index + 1
+    }));
+  }
+
+  function renderEditPartRows() {
+    const singerIds = getEditableSingerIds();
+
+    editPartRows.innerHTML = editPartDraftRows.map((row, index) => {
+      const assignedId = singerIds.includes(String(row.assigned_member_id || "")) ? String(row.assigned_member_id || "") : "";
+      return `
+        <div class="taskEditRow" data-row-index="${index}">
+          <label class="taskEditField">
+            <span class="taskEditLabel">原唱 / 部分 ${index + 1}</span>
+            <input class="taskEditInput" data-field="original_name" type="text" value="${escapeHtml(row.original_name || "")}" placeholder="填写原唱或部分名" />
+          </label>
+          <label class="taskEditField">
+            <span class="taskEditLabel">演唱成员</span>
+            <select class="taskEditSelect" data-field="assigned_member_id">
+              ${buildMemberSelectOptions(assignedId, singerIds, true)}
+            </select>
+          </label>
+          <button class="taskEditTinyBtn taskEditRemoveBtn" type="button" data-remove-part-row="${index}">删除</button>
+        </div>
+      `;
+    }).join("");
+
+    if (!editPartDraftRows.length) {
+      editPartRows.innerHTML = `<div class="taskEmpty">暂无歌词分配行，请先增加一行。</div>`;
+    }
+  }
+
+  function syncEditPartDraftFromDomAndRender() {
+    const currentRows = getCurrentPartDraftFromDom();
+    if (currentRows.length) {
+      editPartDraftRows = currentRows;
+    }
+    renderEditPartRows();
+    bindEditPartRowButtons();
+  }
+
+  function bindEditPartRowButtons() {
+    editPartRows.querySelectorAll("[data-remove-part-row]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.dataset.removePartRow);
+        const domRows = getCurrentPartDraftFromDom();
+        editPartDraftRows = domRows.filter((_, i) => i !== idx);
+        renderEditPartRows();
+        bindEditPartRowButtons();
+      });
+    });
+
+    editPartRows.querySelectorAll('[data-field="assigned_member_id"]').forEach(select => {
+      select.addEventListener("change", () => {
+        editPartDraftRows = getCurrentPartDraftFromDom();
+      });
+    });
+
+    editPartRows.querySelectorAll('[data-field="original_name"]').forEach(input => {
+      input.addEventListener("input", () => {
+        editPartDraftRows = getCurrentPartDraftFromDom();
+      });
+    });
+  }
+
+  function populateTaskTypeSelect(currentValue) {
+    const options = getTaskTypeOptions(currentValue);
+    editTaskType.innerHTML = options.map(item => `<option value="${escapeHtml(item)}" ${item === currentValue ? "selected" : ""}>${escapeHtml(item)}</option>`).join("");
+  }
+
+  function populateProducerSelect(selectedId = "") {
+    editProducerMemberId.innerHTML = `<option value="">未分配</option>` + members.map(member => `
+      <option value="${escapeHtml(member.id)}" ${String(member.id) === String(selectedId || "") ? "selected" : ""}>${escapeHtml(member.name)}</option>
+    `).join("");
+  }
+
+  function openTaskEditModal(taskId = activeDetailTaskId) {
+    const task = getTaskById(taskId);
+    if (!task) {
+      showToast("无法编辑", "当前未找到可编辑的项目。");
+      return;
+    }
+
+    if (!canEditTaskFromDetail(task)) {
+      showToast("暂无权限", "当前账号不能修改这个项目。");
+      return;
+    }
+
+    currentEditingTaskId = String(task.id);
+    taskEditTitle.textContent = `编辑｜${getTaskDisplayName(task)}`;
+    taskEditSubtitle.textContent = "保存后会自动按最新数据重新归类状态";
+    editTaskCode.value = task.task_code || "";
+    editTaskName.value = task.task_name || "";
+    populateTaskTypeSelect(task.task_type || "其他");
+    editSingerQuota.value = String(Math.max(1, Number(task.singer_quota) || 1));
+    editProjectTone.value = task.project_tone || "";
+    editReleaseDate.value = formatDateForInput(task.release_date);
+    populateProducerSelect(task.producer_member_id || "");
+
+    renderEditSingerMemberList((task.singers || []).map(item => item.member_id));
+    editPartDraftRows = (task.parts || []).length
+      ? (task.parts || []).map((part, index) => ({
+          original_name: part.original_name || "",
+          assigned_member_id: part.assigned_member_id || "",
+          part_order: index + 1
+        }))
+      : Array.from({ length: Math.max(1, Number(task.singer_quota) || 1) }, (_, index) => ({
+          original_name: "",
+          assigned_member_id: "",
+          part_order: index + 1
+        }));
+
+    renderEditPartRows();
+    bindEditPartRowButtons();
+
+    taskEditMask.classList.add("show");
+    taskEditMask.setAttribute("aria-hidden", "false");
+  }
+
+  function closeTaskEditModal() {
+    taskEditMask.classList.remove("show");
+    taskEditMask.setAttribute("aria-hidden", "true");
+    currentEditingTaskId = "";
+    editPartDraftRows = [];
+  }
+
+  function collectTaskEditPayload() {
+    const task = getTaskById(currentEditingTaskId);
+    const singerQuota = Math.max(1, Math.floor(Number(editSingerQuota.value) || 1));
+    const selectedSingerIds = getEditableSingerIds();
+
+    if (!task) {
+      throw new Error("未找到正在编辑的项目。");
+    }
+
+    if (!String(editTaskName.value || "").trim()) {
+      throw new Error("请先填写歌名。");
+    }
+
+    if (selectedSingerIds.length > singerQuota) {
+      throw new Error("已勾选的演唱者人数不能超过“演唱人数”。");
+    }
+
+    const partRows = getCurrentPartDraftFromDom()
+      .map((row, index) => ({
+        original_name: String(row.original_name || "").trim(),
+        assigned_member_id: String(row.assigned_member_id || "").trim() || null,
+        part_order: index + 1
+      }))
+      .filter(row => row.original_name || row.assigned_member_id);
+
+    return {
+      projectId: task.id,
+      projectPayload: {
+        task_name: String(editTaskName.value || "").trim(),
+        task_type: String(editTaskType.value || "").trim() || "其他",
+        singer_quota: singerQuota,
+        project_tone: String(editProjectTone.value || "").trim() || null,
+        release_date: editReleaseDate.value || null,
+        producer_member_id: String(editProducerMemberId.value || "").trim() || null
+      },
+      selectedSingerIds,
+      existingSingerRecords: task.singers || [],
+      partRows
+    };
+  }
+
+  async function saveTaskEditModal() {
+    try {
+      const payload = collectTaskEditPayload();
+
+      taskEditSaveBtn.disabled = true;
+      taskEditSaveBtn.textContent = "保存中...";
+
+      const { error: projectError } = await supabaseClient
+        .from("projects")
+        .update(payload.projectPayload)
+        .eq("id", payload.projectId);
+
+      if (projectError) throw projectError;
+
+      const existingSingerMap = new Map((payload.existingSingerRecords || []).map(item => [String(item.member_id), item]));
+      const selectedSet = new Set(payload.selectedSingerIds.map(String));
+
+      const removeSingerRecordIds = (payload.existingSingerRecords || [])
+        .filter(item => !selectedSet.has(String(item.member_id)))
+        .map(item => item.id);
+
+      if (removeSingerRecordIds.length) {
+        const { error: deleteSingerError } = await supabaseClient
+          .from("project_singers")
+          .delete()
+          .in("id", removeSingerRecordIds);
+
+        if (deleteSingerError) throw deleteSingerError;
+      }
+
+      const insertSingerRows = payload.selectedSingerIds
+        .filter(memberId => !existingSingerMap.has(String(memberId)))
+        .map(memberId => ({
+          project_id: payload.projectId,
+          member_id: memberId,
+          is_submitted: false,
+          submitted_at: null
+        }));
+
+      if (insertSingerRows.length) {
+        const { error: insertSingerError } = await supabaseClient
+          .from("project_singers")
+          .insert(insertSingerRows);
+
+        if (insertSingerError) throw insertSingerError;
+      }
+
+      const { error: deletePartsError } = await supabaseClient
+        .from("project_parts")
+        .delete()
+        .eq("project_id", payload.projectId);
+
+      if (deletePartsError) throw deletePartsError;
+
+      if (payload.partRows.length) {
+        const insertPartRows = payload.partRows.map(row => ({
+          project_id: payload.projectId,
+          part_order: row.part_order,
+          original_name: row.original_name || null,
+          assigned_member_id: row.assigned_member_id || null
+        }));
+
+        const { error: insertPartsError } = await supabaseClient
+          .from("project_parts")
+          .insert(insertPartRows);
+
+        if (insertPartsError) throw insertPartsError;
+      }
+
+      const editedProjectId = payload.projectId;
+      closeTaskEditModal();
+      await loadProjectsFromSupabase();
+      renderSiteNotifications();
+
+      if (tasks.some(item => String(item.id) === String(editedProjectId))) {
+        activeDetailTaskId = editedProjectId;
+        renderBrowseDetail();
+        showToast("保存成功", "项目内容已更新。");
+      } else {
+        showToast("保存成功", "项目已更新，但根据最新填写内容，它已不再属于“制作中”，会自动移回待处理。");
+      }
+    } catch (err) {
+      console.error("保存编辑弹窗失败：", err);
+      showToast("保存失败", err?.message || "保存时出现问题。");
+    } finally {
+      taskEditSaveBtn.disabled = false;
+      taskEditSaveBtn.textContent = "保存";
+    }
+  }
+
+
+  function buildTaskDetailHtml(task) {
+    const singerSplit = splitGold(task.singer_bonus || 0);
+    const producerSplit = splitGold(task.producer_bonus || 0);
+
+    const singersHtml = (task.singers || []).length
+      ? sortSingersByMemberOrder(task.singers).map(item => buildSingerCardHtml(item, task)).join("")
+      : `<div class="taskEmpty">暂无演唱分配</div>`;
+
+    return `
+      <div class="sectionCard">
+        <div class="sectionHeader">
+          <h3 class="sectionTitle">演唱分配</h3>
+          <div class="sectionMeta">
+            <span class="sectionMetaText">调：${escapeHtml(task.project_tone || "未定调")}</span>
+            <span class="sectionMetaText">演唱进度：${escapeHtml(getProgressText(task))}</span>
+          </div>
+        </div>
+        <div class="assignmentList">${singersHtml}</div>
+      </div>
+
+      <div class="bottomGrid">
+        <div class="sectionCard">
+          <div class="sectionHeader">
+            <h3 class="sectionTitle">混音负责人</h3>
+          </div>
+          ${buildProducerCardHtml(task)}
+        </div>
+
+        <div class="sectionCard">
+          <div class="sectionHeader">
+            <h3 class="sectionTitle">奖金</h3>
+          </div>
+          <div class="goldGrid">
+            <div class="goldCard">
+              <div class="goldLabel">演唱</div>
+              <div class="goldMain">${escapeHtml(String(singerSplit.total))} 金币</div>
+              <div class="goldSub">
+                <span>交音 ${escapeHtml(String(singerSplit.submit))}</span>
+                <span>发布 ${escapeHtml(String(singerSplit.publish))}</span>
+              </div>
+            </div>
+
+            <div class="goldCard">
+              <div class="goldLabel">混音</div>
+              <div class="goldMain">${escapeHtml(String(producerSplit.total))} 金币</div>
+              <div class="goldSub">
+                <span>交付 ${escapeHtml(String(producerSplit.submit))}</span>
+                <span>发布 ${escapeHtml(String(producerSplit.publish))}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function bindTaskDetailActionButtons() {
+    const currentTask = getTaskById(activeDetailTaskId);
+
+    if (browseEditBtnTask) {
+      const canEdit = !!currentTask && canEditTaskFromDetail(currentTask);
+      browseEditBtnTask.disabled = !canEdit;
+      browseEditBtnTask.style.display = currentTask ? "" : "none";
+      browseEditBtnTask.textContent = canEdit ? "编辑" : "不可编辑";
+    }
+
+    document.querySelectorAll("[data-singer-record-id]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const singerRecordId = btn.dataset.singerRecordId;
+        const current = btn.dataset.current === "1";
+        await toggleSingerSubmitted(singerRecordId, current);
+      });
+    });
+
+    document.querySelectorAll("[data-project-id]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const projectId = btn.dataset.projectId;
+        const current = btn.dataset.current === "1";
+        await toggleProducerCompleted(projectId, current);
+      });
+    });
+  }
+
+  function renderBrowseDetail() {
+    const listData = getFilteredTasks(detailSearchKeyword);
+    const task = listData.find(item => item.id === activeDetailTaskId) || listData[0];
+
+    if (!task) {
+      setBrowseDetailEmpty("暂无制作中项目");
+      return;
+    }
+
+    activeDetailTaskId = task.id;
+    document.getElementById("browseDetailTitleTask").innerHTML = `
+      ${escapeHtml(task.displayName)}
+      <span class="detailTitleType">${escapeHtml(task.task_type || "")}</span>
+    `;
+    document.getElementById("browseDetailStatusTask").textContent = task.release_date ? `预计发布：${formatDate(task.release_date)}` : "预计发布：未定";
+    document.getElementById("browseDetailContentTask").innerHTML = buildTaskDetailHtml(task);
+    bindTaskDetailActionButtons();
+    renderBrowseList();
+  }
+
+  function updateTaskFilterButtons() {
+    document.querySelectorAll(".taskFilterBtn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.taskFilter === taskFilterMode);
+    });
+  }
+
+  async function toggleSingerSubmitted(singerRecordId, currentValue) {
+    try {
+      const payload = currentValue
+        ? { is_submitted: false, submitted_at: null }
+        : { is_submitted: true, submitted_at: new Date().toISOString() };
+
+      const { error } = await supabaseClient
+        .from("project_singers")
+        .update(payload)
+        .eq("id", singerRecordId);
+
+      if (error) throw error;
+
+      await loadProjectsFromSupabase();
+    } catch (err) {
+      console.error("更新交音状态失败：", err);
+      showToast("操作失败", err?.message || "更新交音状态失败");
+    }
+  }
+
+  async function toggleProducerCompleted(projectId, currentValue) {
+    try {
+      const task = tasks.find(item => String(item.id) === String(projectId));
+      const allSingersDone = task && (task.singers || []).length > 0 && (task.singers || []).every(item => !!item.is_submitted);
+
+      if (!allSingersDone && !currentValue) {
+        showToast("暂不能交付", "演唱尚未全部交音，暂时不能交付混音。");
+        return;
+      }
+
+      const payload = currentValue
+        ? { producer_completed: false, producer_completed_at: null }
+        : { producer_completed: true, producer_completed_at: new Date().toISOString() };
+
+      const { error } = await supabaseClient
+        .from("projects")
+        .update(payload)
+        .eq("id", projectId);
+
+      if (error) throw error;
+
+      await loadProjectsFromSupabase();
+    } catch (err) {
+      console.error("更新混音状态失败：", err);
+      showToast("操作失败", err?.message || "更新混音状态失败");
+    }
+  }
+
+
+  if (browseEditBtnTask) {
+    browseEditBtnTask.addEventListener("click", () => {
+      openTaskEditModal(activeDetailTaskId);
+    });
+  }
+
+  taskEditCloseBtn.addEventListener("click", closeTaskEditModal);
+  taskEditCancelBtn.addEventListener("click", closeTaskEditModal);
+  taskEditMask.addEventListener("click", (event) => {
+    if (event.target === taskEditMask) closeTaskEditModal();
+  });
+  taskEditSaveBtn.addEventListener("click", saveTaskEditModal);
+
+  editAddPartRowBtn.addEventListener("click", () => {
+    editPartDraftRows = getCurrentPartDraftFromDom();
+    editPartDraftRows.push({
+      original_name: "",
+      assigned_member_id: "",
+      part_order: editPartDraftRows.length + 1
+    });
+    renderEditPartRows();
+    bindEditPartRowButtons();
+  });
+
+  editSingerQuota.addEventListener("change", () => {
+    const quota = Math.max(1, Math.floor(Number(editSingerQuota.value) || 1));
+    editSingerQuota.value = String(quota);
+  });
+
+  editSingerMemberList.addEventListener("change", (event) => {
+    if (event.target.matches('input[type="checkbox"]')) {
+      const checkedIds = getEditableSingerIds();
+      const quota = Math.max(1, Math.floor(Number(editSingerQuota.value) || 1));
+
+      if (checkedIds.length > quota) {
+        event.target.checked = false;
+        showToast("人数超出", "勾选的演唱者人数不能超过“演唱人数”。");
+        return;
+      }
+
+      syncEditPartDraftFromDomAndRender();
+    }
+  });
+
+
+  document.getElementById("browsePrimaryBtnTask").addEventListener("click", async () => {
+    await loadProjectsFromSupabase();
+  });
+
+  detailSearchInput.addEventListener("input", (e) => {
+    detailSearchKeyword = e.target.value;
+    const filtered = getFilteredTasks(detailSearchKeyword);
+    if (!filtered.some(task => task.id === activeDetailTaskId)) {
+      activeDetailTaskId = filtered.length ? filtered[0].id : "";
+    }
+    renderBrowseList();
+    renderBrowseDetail();
+  });
+
+  document.querySelectorAll(".taskFilterBtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      taskFilterMode = btn.dataset.taskFilter;
+      updateTaskFilterButtons();
+      const filtered = getFilteredTasks(detailSearchKeyword);
+      if (!filtered.some(task => task.id === activeDetailTaskId)) {
+        activeDetailTaskId = filtered.length ? filtered[0].id : "";
+      }
+      renderBrowseList();
+      renderBrowseDetail();
+    });
+  });
+
+  document.getElementById("goClaimBtn").addEventListener("click", () => {
+    window.location.href = PAGE_LINKS.studioSubmit;
+  });
+
+document.getElementById("goProjectBtn").addEventListener("click", () => {
+  window.location.href = PAGE_LINKS.studioProject;
+});
+
+document.getElementById("goTaskBtn").addEventListener("click", () => {
+  window.location.href = PAGE_LINKS.studioTodo;
+});
+
+  document.querySelectorAll(".navBtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const roomKey = btn.dataset.room;
+
+      if (roomKey === "manager") {
+        const role = getCurrentRole();
+        const page =
+          role === "owner" ? PAGE_LINKS.managerOwner :
+          role === "admin" ? PAGE_LINKS.managerAdmin :
+          role === "member" ? PAGE_LINKS.managerMember :
+          PAGE_LINKS.managerVisitor;
+
+        window.location.href = page;
+        return;
+      }
+
+      if (PAGE_LINKS[roomKey]) {
+        window.location.href = PAGE_LINKS[roomKey];
+      }
+    });
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+
+  bg.addEventListener("load", syncOverlayToImage);
+
+  window.addEventListener("storage", async (e) => {
+    if ([STORAGE_KEYS.loggedIn, STORAGE_KEYS.user, STORAGE_KEYS.role, STORAGE_KEYS.memberId].includes(e.key)) {
+      const ok = await ensureAuthState();
+      if (!ok) return;
+      updateTopBarIdentity();
+      await loadProjectsFromSupabase();
+      renderSiteNotifications();
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("#siteNoticeWrap")) {
+      toggleSiteNoticePanel(false);
+    }
+  });
+
+  siteNoticeBtn?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    renderSiteNotifications();
+    toggleSiteNoticePanel();
+  });
+
+  window.addEventListener("load", async () => {
+    const ok = await ensureAuthState();
+    if (!ok) return;
+    updateTopBarIdentity();
+    syncOverlayToImage();
+    updateTaskFilterButtons();
+    await loadMembersFromSupabase();
+    await loadProjectsFromSupabase();
+    renderSiteNotifications();
+  });
+
+  window.addEventListener("resize", syncOverlayToImage);
+
+  if ("ResizeObserver" in window) {
+    const ro = new ResizeObserver(syncOverlayToImage);
+    ro.observe(room);
+  }
+</script>
+</body>
+</html>
