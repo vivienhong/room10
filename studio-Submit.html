@@ -64,23 +64,15 @@
     z-index:1;
     overflow:hidden;
     pointer-events:none;
-    --nav-scale:1;
-    --top-ui-scale:1;
-    --topbar-left:28.2%;
-    --topbar-top:8.15%;
-    --topbar-width:65.4%;
-    --topbar-gap:1.2%;
-    --user-right:214px;
-    --user-top:7.5%;
-    --topbar-safe-gap:18px;
+    --overlay-ui-scale:1;
   }
   #overlay *{
     pointer-events:auto;
   }
 
   :root{
-    --top-chip-bg:rgba(255,252,247,0.86);
-    --top-chip-border:rgba(160,116,78,0.12);
+    --top-chip-bg: rgba(255,252,247,0.86);
+    --top-chip-border: rgba(160,116,78,0.12);
     --top-chip-shadow:
       inset 0 1px 0 rgba(255,255,255,0.96),
       0 3px 10px rgba(110,84,58,0.08);
@@ -88,25 +80,25 @@
 
   #topBar{
     position:absolute;
-    left:var(--topbar-left);
-    top:var(--topbar-top);
-    width:var(--topbar-width);
-    max-width:calc(100% - var(--topbar-left) - var(--topbar-safe-gap));
+    left:28.2%;
+    top:8.15%;
+    width:65.4%;
     display:flex;
     align-items:flex-start;
     justify-content:flex-start;
-    gap:var(--topbar-gap);
+    z-index:40;
+    overflow:visible;
   }
 
   #navOuter{
-    flex:1 1 auto;
+    flex:0 0 auto;
     min-width:0;
-    overflow:hidden;
+    overflow:visible;
   }
 
   #navScroll{
     width:100%;
-    overflow-x:auto;
+    overflow:hidden;
     overflow-y:hidden;
     white-space:nowrap;
     scrollbar-width:none;
@@ -120,21 +112,23 @@
   #roomNav{
     display:inline-flex;
     align-items:center;
-    gap:calc(10px * var(--nav-scale));
+    gap:var(--nav-gap, 10px);
     min-width:max-content;
-    max-width:100%;
+    max-width:none;
+    transform-origin:left top;
+    will-change:transform;
   }
 
   .navBtn{
     appearance:none;
     border:none;
     cursor:pointer;
-    height:calc(46px * var(--nav-scale));
-    padding:0 calc(20px * var(--nav-scale));
-    border-radius:calc(15px * var(--nav-scale));
+    height:var(--nav-btn-height, 42px);
+    padding:0 var(--nav-btn-px, 18px);
+    border-radius:var(--nav-btn-radius, 14px);
     background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
     color:#704724;
-    font-size:calc(16px * var(--nav-scale));
+    font-size:var(--nav-btn-font, 15px);
     font-weight:700;
     white-space:nowrap;
     box-shadow:
@@ -143,6 +137,7 @@
       0 2px 8px rgba(112,83,52,0.12);
     border:1px solid rgba(159,114,69,0.18);
     transition:transform .18s ease, filter .18s ease, box-shadow .18s ease;
+    flex:0 0 auto;
   }
 
   .navBtn:hover{
@@ -154,87 +149,142 @@
       0 4px 10px rgba(112,83,52,0.16);
   }
 
-  #topBarUserArea{
+  #topBarUserAnchor{
     position:absolute;
-    right:var(--user-right);
-    top:var(--user-top);
-    transform:scale(var(--top-ui-scale));
-    transform-origin:right top;
-    display:flex;
+    left:0;
+    top:0;
+    width:0;
+    height:0;
+    z-index:65;
+    pointer-events:none;
+  }
+
+  #topBarUserArea{
+    --identity-control:28px;
+    --identity-logout-w:34px;
+    --identity-gap:4px;
+    --identity-font:11px;
+    --identity-icon-font:11px;
+    --identity-logout-font:10px;
+    --identity-inner-h:calc(100% - 8px);
+
+    position:absolute;
+    left:0;
+    top:0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) var(--identity-control) var(--identity-logout-w);
     align-items:center;
-    gap:6px;
-    width:max-content;
-    min-width:max-content;
-    max-width:none;
-    padding:6px;
-    border-radius:20px;
-    background:rgba(255,248,239,0.9);
+    gap:var(--identity-gap);
+    width:170px;
+    min-width:170px;
+    max-width:170px;
+    height:40px;
+    min-height:40px;
+    max-height:40px;
+    padding:4px;
+    border-radius:13px;
+    background:rgba(255,248,239,0.92);
     border:1px solid rgba(186,146,103,0.24);
     box-shadow:
       0 10px 24px rgba(116,86,54,0.12),
-      inset 0 1px 0 rgba(255,255,255,0.86);
+      inset 0 1px 0 rgba(255,255,255,0.9);
     backdrop-filter:blur(8px);
     -webkit-backdrop-filter:blur(8px);
     text-align:center;
-    z-index:65;
+    pointer-events:auto;
+    box-sizing:border-box;
+    overflow:hidden;
+  }
+
+  @media (min-width: 1400px){
+    #topBarUserArea{
+      --identity-control:30px;
+      --identity-logout-w:38px;
+      --identity-gap:5px;
+      --identity-font:12px;
+      --identity-icon-font:12px;
+      --identity-logout-font:11px;
+      --identity-inner-h:calc(100% - 8px);
+
+      width:188px;
+      min-width:188px;
+      max-width:188px;
+      height:44px;
+      min-height:44px;
+      max-height:44px;
+    }
   }
 
   #currentUserBadge{
     order:1;
-    flex:1 1 auto;
-    min-width:clamp(116px, 8.6vw, 142px);
-    min-height:clamp(34px, 3vw, 38px);
-    padding:0 clamp(12px, 1vw, 16px);
-    border-radius:999px;
-    background:var(--top-chip-bg);
+    min-width:0;
+    width:100%;
+    height:var(--identity-inner-h);
+    min-height:var(--identity-inner-h);
+    padding:0 8px;
+    border-radius:9px;
+    background:rgba(255,252,247,0.96);
     color:#6c4523;
-    font-size:clamp(13px, 0.95vw, 15px);
+    font-size:var(--identity-font);
     font-weight:800;
     display:flex;
     align-items:center;
-    justify-content:center;
-    gap:6px;
-    box-shadow:var(--top-chip-shadow);
-    border:1px solid var(--top-chip-border);
+    justify-content:flex-start;
+    gap:5px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 1px 4px rgba(112,83,52,0.05);
+    border:1px solid rgba(160,116,78,0.12);
     white-space:nowrap;
+    overflow:hidden;
+    box-sizing:border-box;
   }
 
   #currentUserBadge .roleDot{
-    width:8px;
-    height:8px;
+    width:7px;
+    height:7px;
     border-radius:999px;
     background:#d9a364;
-    box-shadow:0 0 0 3px rgba(217,163,100,0.16);
+    box-shadow:0 0 0 2px rgba(217,163,100,0.14);
     flex:0 0 auto;
   }
 
   #currentUserBadge .identityText{
-    flex:0 1 auto;
+    flex:1 1 auto;
+    min-width:0;
     overflow:hidden;
-    text-overflow:ellipsis;
-    text-align:center;
+    text-overflow:clip;
+    text-align:left;
+    white-space:nowrap;
+    line-height:1;
+    font-size:inherit;
   }
 
   #logoutBtn{
     appearance:none;
     border:none;
     cursor:pointer;
-    flex:0 0 auto;
-    min-width:clamp(52px, 3.8vw, 64px);
-    height:clamp(34px, 3vw, 38px);
-    padding:0 clamp(12px, 1.1vw, 16px);
-    border-radius:999px;
-    background:var(--top-chip-bg);
+    width:var(--identity-logout-w);
+    min-width:var(--identity-logout-w);
+    height:var(--identity-inner-h);
+    min-height:var(--identity-inner-h);
+    padding:0;
+    border-radius:9px;
+    background:rgba(255,252,247,0.96);
     color:#67401f;
-    font-size:clamp(12px, 0.82vw, 14px);
+    font-size:var(--identity-logout-font, 10px);
     font-weight:800;
-    box-shadow:var(--top-chip-shadow);
-    border:1px solid var(--top-chip-border);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 1px 4px rgba(112,83,52,0.05);
+    border:1px solid rgba(160,116,78,0.12);
     backdrop-filter:blur(8px);
     -webkit-backdrop-filter:blur(8px);
     transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
     order:3;
     align-self:center;
+    overflow:hidden;
+    line-height:1;
   }
 
   #logoutBtn:hover{
@@ -244,7 +294,8 @@
 
   #siteNoticeWrap{
     position:relative;
-    flex:0 0 auto;
+    width:var(--identity-control);
+    height:var(--identity-inner-h);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -253,30 +304,39 @@
 
   #siteNoticeBtn{
     position:relative;
-    width:clamp(34px, 3vw, 38px);
-    min-width:clamp(34px, 3vw, 38px);
-    height:clamp(34px, 3vw, 38px);
+    width:100%;
+    min-width:0;
+    height:100%;
     padding:0;
     border:none;
     cursor:pointer;
-    border-radius:999px;
-    background:var(--top-chip-bg);
+    border-radius:9px;
+    background:rgba(255,252,247,0.96);
     color:#6c4523;
-    font-size:clamp(14px, 1vw, 16px);
+    font-size:var(--identity-icon-font, 11px);
     font-weight:800;
     display:flex;
     align-items:center;
     justify-content:center;
-    box-shadow:var(--top-chip-shadow);
-    border:1px solid var(--top-chip-border);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 1px 4px rgba(112,83,52,0.05);
+    border:1px solid rgba(160,116,78,0.12);
     backdrop-filter:blur(8px);
     -webkit-backdrop-filter:blur(8px);
     transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+    overflow:hidden;
+    box-sizing:border-box;
   }
 
   #siteNoticeBtn:hover{
     transform:translateY(-1px);
     background:rgba(255,255,255,0.94);
+  }
+
+  #siteNoticeBtn.hasNotice{
+    background:var(--top-chip-bg);
+    box-shadow:var(--top-chip-shadow);
   }
 
   #siteNoticeIcon{display:block;line-height:1;filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));}
@@ -302,10 +362,9 @@
 
   #siteNoticePanel{
     position:absolute;
-    top:calc(100% + 12px);
+    top:calc(100% + 10px);
     right:0;
-    left:auto;
-    width:min(320px, 70vw);
+    width:min(360px, 72vw);
     max-height:320px;
     overflow:auto;
     padding:12px;
@@ -319,13 +378,13 @@
   }
 
   #siteNoticePanel.show{display:block;}
-  .siteNoticeTitle{color:#6f4726;font-size:14px;font-weight:800;margin-bottom:8px;}
-  .siteNoticeEmpty{color:#8b6947;font-size:12px;line-height:1.6;padding:4px 2px;}
+  .siteNoticeTitle{color:#6f4726;font-size:13px;font-weight:900;margin-bottom:8px;}
+  .siteNoticeEmpty{color:#8a6644;font-size:12px;line-height:1.6;padding:6px 2px 2px;}
   .siteNoticeList{display:flex;flex-direction:column;gap:8px;}
-  .siteNoticeItem{padding:10px 10px 11px;border-radius:12px;background:rgba(255,252,247,0.72);box-shadow:inset 0 1px 0 rgba(255,255,255,0.88),0 2px 8px rgba(120,92,63,0.05);}
-  .siteNoticeItemTitle{color:#6f4726;font-size:12px;font-weight:800;line-height:1.45;}
-  .siteNoticeItemDesc{color:#8b6947;font-size:11px;line-height:1.55;margin-top:3px;}
-  .siteNoticeAction{margin-top:8px;appearance:none;border:none;cursor:pointer;min-width:90px;height:30px;padding:0 12px;border-radius:999px;background:linear-gradient(180deg,#efd5ab 0%, #dfbd8a 100%);color:#6a4120;font-size:11px;font-weight:800;box-shadow:inset 0 1px 0 rgba(255,247,230,0.95),0 4px 12px rgba(112,83,52,0.10);}
+  .siteNoticeItem{padding:10px;border-radius:12px;background:rgba(255,252,247,0.82);box-shadow:inset 0 1px 0 rgba(255,255,255,0.92), 0 2px 8px rgba(120,92,63,0.05);}
+  .siteNoticeItemTitle{color:#6f4726;font-size:12px;font-weight:800;line-height:1.5;margin-bottom:4px;}
+  .siteNoticeItemDesc{color:#8a6644;font-size:11px;line-height:1.55;margin-bottom:8px;}
+  .siteNoticeAction{appearance:none;border:none;cursor:pointer;min-height:30px;padding:0 12px;border-radius:10px;background:linear-gradient(180deg,#efd5ab 0%, #dfbd8a 100%);color:#6a4120;font-size:11px;font-weight:800;box-shadow:inset 0 1px 0 rgba(255,247,230,0.95), 0 4px 12px rgba(112,83,52,0.10);}
 
   #taskPanel{
     position:absolute;
@@ -389,8 +448,11 @@
     color:#744b25;
     font-size:14px;
     font-weight:700;
-    line-height:1.2;
+    line-height:1.1;
     text-align:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     box-shadow:
       inset 0 1px 0 rgba(255,247,233,0.95),
       0 2px 6px rgba(116,86,54,0.08);
@@ -891,56 +953,6 @@
     }
   }
 
-  @media (max-width: 1400px){
-    #overlay{
-      --user-right:168px;
-      --user-top:7.1%;
-      --top-ui-scale:1.05;
-    }
-  }
-
-  @media (max-width: 1200px){
-    #overlay{
-      --user-right:56px;
-      --user-top:6.75%;
-      --top-ui-scale:1.08;
-      --topbar-left:21.8%;
-      --topbar-width:49.8%;
-    }
-
-    #browseDetailFooter{
-      justify-content:center;
-      transform:translateX(108px);
-    }
-  }
-
-  @media (max-width: 1000px){
-    #overlay{
-      --user-right:78px;
-      --user-top:6.95%;
-      --top-ui-scale:0.96;
-    }
-
-    #browseDetailFooter{
-      transform:none;
-    }
-  }
-
-  @media (max-width: 820px){
-    #overlay{
-      --user-right:65px;
-      --user-top:7%;
-      --top-ui-scale:0.86;
-    }
-  }
-
-  @media (max-width: 640px){
-    #overlay{
-      --user-right:42px;
-      --user-top:6%;
-      --top-ui-scale:0.72;
-    }
-  }
 
 </style>
 </head>
@@ -968,8 +980,9 @@
         </div>
       </div>
 
-      <div id="topBarUserArea">
-        <div id="currentUserBadge"><span class="roleDot"></span><span class="identityText">未登录｜游客</span></div>
+      <div id="topBarUserAnchor">
+        <div id="topBarUserArea">
+          <div id="currentUserBadge"><span class="roleDot"></span><span class="identityText">未登录</span></div>
         <div id="siteNoticeWrap">
           <button id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="站内通知">
             <span id="siteNoticeIcon" aria-hidden="true">🔔</span>
@@ -977,18 +990,19 @@
             <span id="siteNoticeCount">0</span>
           </button>
           <div id="siteNoticePanel" aria-hidden="true">
-            <div class="siteNoticeTitle">站内通知</div>
+            <div class="siteNoticeTitle">待处理提醒</div>
             <div id="siteNoticeBody" class="siteNoticeEmpty">暂无提醒</div>
           </div>
         </div>
-        <button id="logoutBtn" type="button">登出</button>
+          <button id="logoutBtn" type="button">登出</button>
+        </div>
       </div>
 
       <section id="taskPanel" aria-label="项目委托面板">
         <div id="panelSwitch">
-          <button class="switchBtn" type="button" onclick="window.location.href='studio-claim.html'">待处理</button>
-          <button class="switchBtn" type="button" onclick="window.location.href='studio-task.html'">任务详情</button>
-          <button class="switchBtn active" type="button">项目委托</button>
+          <button class="switchBtn" type="button" data-page="studio-todo.html">待处理</button>
+          <button class="switchBtn" type="button" data-page="studio-project.html">任务详情</button>
+          <button class="switchBtn active" type="button" data-page="studio-Submit.html">项目委托</button>
         </div>
 
         <div id="signupView" class="panelView">
@@ -1143,6 +1157,8 @@
     memberCode: ""
   };
 
+  const ALLOWED_STUDIO_SUBMIT_ROLES = new Set(['owner', 'admin', 'member']);
+
   const links = {
     hall: "index.html",
     honor: "honor.html",
@@ -1165,7 +1181,9 @@
   const overlay = document.getElementById("overlay");
   const topBar = document.getElementById("topBar");
   const navOuter = document.getElementById("navOuter");
+  const navScroll = document.getElementById("navScroll");
   const roomNav = document.getElementById("roomNav");
+  const topBarUserAnchor = document.getElementById("topBarUserAnchor");
   const topBarUserArea = document.getElementById("topBarUserArea");
   const currentUserBadge = document.getElementById("currentUserBadge");
   const siteNoticeBtn = document.getElementById("siteNoticeBtn");
@@ -1306,11 +1324,15 @@
 
   function getCurrentRoleLabel(roleValue = authState.role) {
     const role = String(roleValue || "").toLowerCase();
-    if (role === "owner") return "创建者";
+    if (role === "owner") return "维修工";
     if (role === "admin") return "管理员";
     if (role === "member") return "成员";
     if (role === "applying") return "申请中";
     return "游客";
+  }
+
+  function canAccessStudioSubmit(roleValue = authState.role) {
+    return ALLOWED_STUDIO_SUBMIT_ROLES.has(String(roleValue || '').toLowerCase());
   }
 
   function updateTopBarIdentity() {
@@ -1387,6 +1409,13 @@
       localStorage.setItem(STORAGE_KEYS.user, authState.nickname);
       localStorage.setItem(STORAGE_KEYS.role, authState.role);
       localStorage.setItem(STORAGE_KEYS.memberId, String(authState.memberId));
+
+      updateTopBarIdentity();
+
+      if (!canAccessStudioSubmit(authState.role)) {
+        handleLogout();
+        return false;
+      }
 
       return true;
     } catch (err) {
@@ -1606,17 +1635,21 @@
     `).join("");
   }
 
-  function buildSingerOptions(selectedId) {
+  function buildSingerOptions(rowId, selectedId) {
+    const usedSingerIds = new Set(getUsedSingerIds(rowId));
+
     return ['<option value="">未选择</option>']
       .concat(selectedSingerIds.map(memberId => {
         const member = getMemberById(memberId);
         if (!member) return "";
+        if (memberId !== selectedId && usedSingerIds.has(memberId)) return "";
         return `<option value="${escapeHtml(member.id)}" ${selectedId === member.id ? "selected" : ""}>${escapeHtml(member.name)}</option>`;
       }))
       .join("");
   }
 
   function renderOriginalRows() {
+    syncRowsToQuota();
     syncOriginalAssignedNames();
 
     originalRoleList.innerHTML = originalRows.map(row => `
@@ -1629,16 +1662,17 @@
           placeholder="填写原唱名或部分"
         />
         <select class="originalInput" data-field="assignedSingerId">
-          ${buildSingerOptions(row.assignedSingerId)}
+          ${buildSingerOptions(row.id, row.assignedSingerId)}
         </select>
         <button class="rowActionBtn" type="button" data-action="delete">删除</button>
       </div>
     `).join("");
   }
 
-  function getUsedSingerIds() {
+  function getUsedSingerIds(excludeRowId = "") {
     return Array.from(new Set(
       originalRows
+        .filter(row => !excludeRowId || row.id !== excludeRowId)
         .map(row => String(row.assignedSingerId || "").trim())
         .filter(Boolean)
     ));
@@ -1648,6 +1682,20 @@
     if (!originalRows.length) {
       originalRows = [createRow()];
     }
+  }
+
+  function syncRowsToQuota() {
+    const quota = getSingerQuota();
+
+    if (originalRows.length > quota) {
+      originalRows = originalRows.slice(0, quota);
+    }
+
+    while (originalRows.length < quota) {
+      originalRows.push(createRow());
+    }
+
+    keepAtLeastOneRow();
   }
 
   function removeSingerFromLyricRows(memberId) {
@@ -1673,14 +1721,8 @@
   }
 
   function trimRowsToQuota(quota) {
-    while (originalRows.length > quota) {
-      const removedRow = originalRows.pop();
-      if (removedRow?.assignedSingerId) {
-        const stillUsed = originalRows.some(row => row.assignedSingerId === removedRow.assignedSingerId);
-        if (!stillUsed) {
-          selectedSingerIds = selectedSingerIds.filter(id => id !== removedRow.assignedSingerId);
-        }
-      }
+    if (originalRows.length > quota) {
+      originalRows = originalRows.slice(0, quota);
     }
     keepAtLeastOneRow();
   }
@@ -1698,41 +1740,12 @@
     }
 
     trimRowsToQuota(quota);
+    syncRowsToQuota();
     syncOriginalAssignedNames();
     renderSingerMembers();
     renderProducerMembers();
     renderOriginalRows();
     updateRewardPreview();
-  }
-
-  function addSingerIntoLyricRows(memberId) {
-    const member = getMemberById(memberId);
-    if (!member) return false;
-
-    const alreadyExists = originalRows.some(row => row.assignedSingerId === memberId);
-    if (alreadyExists) return true;
-
-    const quota = getSingerQuota();
-    const availableIndex = originalRows.findIndex(row => !String(row.assignedSingerId || "").trim());
-
-    if (availableIndex >= 0) {
-      originalRows[availableIndex] = {
-        ...originalRows[availableIndex],
-        assignedSingerId: member.id,
-        assignedSingerName: member.name
-      };
-      return true;
-    }
-
-    if (originalRows.length < quota) {
-      originalRows.push(createRow({
-        assignedSingerId: member.id,
-        assignedSingerName: member.name
-      }));
-      return true;
-    }
-
-    return false;
   }
 
   function handleSingerMemberToggle(memberId) {
@@ -1749,14 +1762,9 @@
       }
 
       selectedSingerIds.push(memberId);
-      const filled = addSingerIntoLyricRows(memberId);
-      if (!filled) {
-        selectedSingerIds = selectedSingerIds.filter(id => id !== memberId);
-        showToast("超过上限", "歌词分配行数已达到演唱人数上限。");
-        return;
-      }
     }
 
+    syncRowsToQuota();
     syncOriginalAssignedNames();
     renderSingerMembers();
     renderProducerMembers();
@@ -1811,8 +1819,17 @@
       String(row.original || "").trim() || String(row.assignedSingerId || "").trim()
     );
 
-    const badRow = nonEmptyRows.find(row => String(row.original || "").trim() && !String(row.assignedSingerId || "").trim());
-    if (badRow) {
+    const missingOriginalRow = nonEmptyRows.find(row =>
+      String(row.assignedSingerId || "").trim() && !String(row.original || "").trim()
+    );
+    if (missingOriginalRow) {
+      throw new Error("歌词分配中存在已选择认领成员但未填写原唱 / 部分的行。");
+    }
+
+    const missingSingerRow = nonEmptyRows.find(row =>
+      String(row.original || "").trim() && !String(row.assignedSingerId || "").trim()
+    );
+    if (missingSingerRow) {
       throw new Error("歌词分配中存在已填写原唱 / 部分但未选择认领成员的行。");
     }
 
@@ -1821,6 +1838,14 @@
     );
     if (invalidAssigned) {
       throw new Error("歌词分配中的成员必须来自已勾选的演唱者。");
+    }
+
+    const usedSingerIds = nonEmptyRows
+      .map(row => String(row.assignedSingerId || "").trim())
+      .filter(Boolean);
+
+    if (new Set(usedSingerIds).size !== usedSingerIds.length) {
+      throw new Error("同一个成员不能在歌词分配中被重复选择。");
     }
   }
 
@@ -1879,10 +1904,10 @@
         .map((row, index) => ({
           project_id: projectId,
           part_order: index + 1,
-          original_name: String(row.original || "").trim() || null,
+          original_name: String(row.original || "").trim(),
           assigned_member_id: row.assignedSingerId || null
         }))
-        .filter(row => row.original_name || row.assigned_member_id);
+        .filter(row => row.original_name);
 
       if (validParts.length) {
         const { error: partError } = await supabaseClient
@@ -1906,6 +1931,131 @@
     }
   }
 
+function fitTopBarIdentityContent() {
+    if (!topBarUserArea || !currentUserBadge) return;
+    const textEl = currentUserBadge.querySelector(".identityText");
+    if (!textEl) return;
+
+    const totalWidth = Math.round(topBarUserArea.getBoundingClientRect().width || parseFloat(topBarUserArea.style.width) || 170);
+    const totalHeight = Math.round(topBarUserArea.getBoundingClientRect().height || parseFloat(topBarUserArea.style.height) || 40);
+
+    let gap = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-gap")) || Math.max(4, Math.round(totalWidth * 0.03));
+    let control = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-control")) || Math.max(22, Math.round(totalHeight - 10));
+    let logoutW = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-logout-w")) || Math.max(30, Math.round(totalWidth * 0.18));
+    let font = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-font")) || Math.max(10, Math.min(12, Math.round(totalHeight * 0.28)));
+    let logoutFont = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-logout-font")) || Math.max(8, font - 1);
+    let iconFont = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-icon-font")) || Math.max(10, font);
+    let innerH = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-inner-h")) || Math.max(24, totalHeight - 8);
+    let pad = 4;
+    let badgePad = 8;
+
+    const applyIdentityVars = () => {
+      const badgeW = Math.max(42, totalWidth - pad * 2 - gap * 2 - control - logoutW);
+      topBarUserArea.style.setProperty("--identity-gap", `${gap}px`);
+      topBarUserArea.style.setProperty("--identity-control", `${control}px`);
+      topBarUserArea.style.setProperty("--identity-logout-w", `${logoutW}px`);
+      topBarUserArea.style.setProperty("--identity-font", `${font}px`);
+      topBarUserArea.style.setProperty("--identity-logout-font", `${logoutFont}px`);
+      topBarUserArea.style.setProperty("--identity-icon-font", `${iconFont}px`);
+      topBarUserArea.style.setProperty("--identity-inner-h", `${innerH}px`);
+      topBarUserArea.style.padding = `${pad}px`;
+      topBarUserArea.style.gap = `${gap}px`;
+      topBarUserArea.style.gridTemplateColumns = `${badgeW}px ${control}px ${logoutW}px`;
+      currentUserBadge.style.padding = `0 ${badgePad}px`;
+    };
+
+    applyIdentityVars();
+
+    for (let i = 0; i < 24; i++) {
+      if (textEl.scrollWidth <= textEl.clientWidth + 1) break;
+
+      if (logoutW > 24) {
+        logoutW -= 1;
+      } else if (control > 22) {
+        control -= 1;
+      } else if (gap > 2) {
+        gap -= 0.5;
+      } else if (badgePad > 4) {
+        badgePad -= 1;
+      } else if (font > 8) {
+        font -= 0.5;
+        logoutFont = Math.max(8, font - 1);
+        iconFont = Math.max(9, font);
+      } else {
+        break;
+      }
+
+      applyIdentityVars();
+    }
+  }
+
+  
+  function syncTopUiLayout() {
+    if (!overlay || !topBar || !navOuter || !navScroll || !roomNav || !panelSwitch || !topBarUserAnchor || !topBarUserArea) return;
+
+    const overlayRect = overlay.getBoundingClientRect();
+    const topBarRect = topBar.getBoundingClientRect();
+    const panelSwitchRect = panelSwitch.getBoundingClientRect();
+    const switchBtn = panelSwitch.querySelector(".switchBtn");
+
+    const targetWidth = Math.round(panelSwitchRect.width || 170);
+    const targetHeight = Math.round((switchBtn?.getBoundingClientRect().height) || 40);
+    const targetLeft = panelSwitchRect.left - overlayRect.left;
+
+    topBarUserArea.style.width = `${targetWidth}px`;
+    topBarUserArea.style.minWidth = `${targetWidth}px`;
+    topBarUserArea.style.maxWidth = `${targetWidth}px`;
+    topBarUserArea.style.height = `${targetHeight}px`;
+    topBarUserArea.style.minHeight = `${targetHeight}px`;
+    topBarUserArea.style.maxHeight = `${targetHeight}px`;
+
+    const gap = Math.max(4, Math.round(targetWidth * 0.03));
+    const paddingX = Math.max(5, Math.round(targetWidth * 0.035));
+    const control = Math.max(22, Math.round(targetHeight - 10));
+    const logoutW = Math.max(30, Math.round(targetWidth * 0.18));
+    const badgeW = Math.max(44, targetWidth - paddingX * 2 - gap * 2 - control - logoutW);
+
+    topBarUserArea.style.setProperty("--identity-gap", `${gap}px`);
+    topBarUserArea.style.setProperty("--identity-control", `${control}px`);
+    topBarUserArea.style.setProperty("--identity-logout-w", `${logoutW}px`);
+    topBarUserArea.style.setProperty("--identity-font", `${Math.max(10, Math.min(12, Math.round(targetHeight * 0.28)))}px`);
+    topBarUserArea.style.setProperty("--identity-inner-h", `${Math.max(24, targetHeight - 8)}px`);
+    topBarUserArea.style.padding = `4px`;
+    topBarUserArea.style.gap = `${gap}px`;
+    topBarUserArea.style.gridTemplateColumns = `${badgeW}px ${control}px ${logoutW}px`;
+
+    const topBarLeft = topBarRect.left - overlayRect.left;
+    const safeGap = Math.max(10, Math.round(targetWidth * 0.08));
+    const availableWidth = Math.max(120, targetLeft - safeGap - topBarLeft);
+
+    topBar.style.width = `${availableWidth}px`;
+
+    roomNav.style.transform = "scale(1)";
+    navScroll.scrollLeft = 0;
+
+    const requiredWidth = roomNav.scrollWidth || 1;
+    const navScale = Math.max(0.55, Math.min(1, availableWidth / requiredWidth));
+    roomNav.style.transform = `scale(${navScale})`;
+    roomNav.style.transformOrigin = "left top";
+
+    const scaledNavRect = roomNav.getBoundingClientRect();
+    navOuter.style.height = `${Math.ceil(scaledNavRect.height)}px`;
+
+    const firstNavBtn = roomNav.querySelector('.navBtn');
+    let targetTop = topBarRect.top - overlayRect.top;
+    if (firstNavBtn) {
+      const navBtnRect = firstNavBtn.getBoundingClientRect();
+      targetTop = (navBtnRect.top + navBtnRect.height / 2) - overlayRect.top - targetHeight / 2;
+    } else if (scaledNavRect.height > 0) {
+      targetTop = (topBarRect.top + scaledNavRect.height / 2) - overlayRect.top - targetHeight / 2;
+    }
+
+    topBarUserAnchor.style.left = `${targetLeft}px`;
+    topBarUserAnchor.style.top = `${Math.round(targetTop)}px`;
+
+    requestAnimationFrame(fitTopBarIdentityContent);
+  }
+
   function syncOverlayToImage() {
     const roomRect = room.getBoundingClientRect();
     const roomW = roomRect.width;
@@ -1913,7 +2063,6 @@
 
     const naturalW = bg.naturalWidth || 1600;
     const naturalH = bg.naturalHeight || 900;
-
     const imgRatio = naturalW / naturalH;
     const roomRatio = roomW / roomH;
 
@@ -1931,52 +2080,26 @@
       drawTop = (roomH - drawH) / 2;
     }
 
-    overlay.style.left = drawLeft + "px";
-    overlay.style.top = drawTop + "px";
-    overlay.style.width = drawW + "px";
-    overlay.style.height = drawH + "px";
+    overlay.style.left = `${drawLeft}px`;
+    overlay.style.top = `${drawTop}px`;
+    overlay.style.width = `${drawW}px`;
+    overlay.style.height = `${drawH}px`;
 
-    const BASE_TOPBAR_LEFT = 28.2;
-    const BASE_TOPBAR_TOP = 6.55;
-    const BASE_TOPBAR_WIDTH = 65.4;
-    const BASE_TOPBAR_GAP = 1.2;
+    const BASE_SCREEN_W = 1600;
+    const BASE_SCREEN_H = 900;
+    const fitW = drawW / BASE_SCREEN_W;
+    const fitH = drawH / BASE_SCREEN_H;
+    const fit = Math.min(fitW, fitH);
+    const uiScale = clamp(fit, 0.58, 1);
 
-    let fit = drawW / 1280;
-    let navScale = clamp(fit, 0.52, 1);
-    let topUiScale = clamp(fit * 0.96, 0.72, 1);
+    overlay.style.setProperty("--overlay-ui-scale", uiScale.toFixed(4));
+    overlay.style.setProperty("--nav-btn-height", `${Math.round(42 * uiScale)}px`);
+    overlay.style.setProperty("--nav-btn-px", `${Math.round(18 * uiScale)}px`);
+    overlay.style.setProperty("--nav-btn-radius", `${Math.round(14 * uiScale)}px`);
+    overlay.style.setProperty("--nav-btn-font", `${Math.max(11, Math.round(15 * uiScale))}px`);
+    overlay.style.setProperty("--nav-gap", `${Math.max(4, Math.round(10 * uiScale))}px`);
 
-    const smallerDelta = Math.max(0, 1 - fit);
-    const topbarLeft = BASE_TOPBAR_LEFT - smallerDelta * 1.1;
-    const topbarTop = BASE_TOPBAR_TOP;
-    const topbarGap = clamp(BASE_TOPBAR_GAP * (0.92 + fit * 0.08), 0.82, 1.2);
-    const safeGapPx = clamp(drawW * 0.012, 12, 24);
-    const overlayStyles = window.getComputedStyle(overlay);
-    const userRight = parseFloat(overlayStyles.getPropertyValue("--user-right")) || 140;
-
-    overlay.style.setProperty("--top-ui-scale", topUiScale.toFixed(4));
-    overlay.style.setProperty("--topbar-left", `${topbarLeft.toFixed(3)}%`);
-    overlay.style.setProperty("--topbar-top", `${topbarTop.toFixed(3)}%`);
-    overlay.style.setProperty("--topbar-gap", `${topbarGap.toFixed(3)}%`);
-    overlay.style.setProperty("--topbar-safe-gap", `${safeGapPx.toFixed(2)}px`);
-    overlay.style.setProperty("--nav-scale", navScale.toFixed(4));
-
-    const leftPx = drawW * (topbarLeft / 100);
-    const userBoxWidth = topBarUserArea ? topBarUserArea.offsetWidth * topUiScale : 0;
-    const availableWidthPx = Math.max(180, drawW - leftPx - userRight - userBoxWidth - safeGapPx);
-    const desiredTopbarWidthPx = drawW * (BASE_TOPBAR_WIDTH / 100);
-    const topbarWidthPx = Math.min(desiredTopbarWidthPx, availableWidthPx);
-    overlay.style.setProperty("--topbar-width", `${(topbarWidthPx / drawW * 100).toFixed(3)}%`);
-
-    requestAnimationFrame(() => {
-      if (!navOuter || !roomNav) return;
-      const navVisible = Math.max(160, navOuter.clientWidth - 2);
-      let navNeeded = roomNav.scrollWidth;
-      if (navNeeded > navVisible) {
-        let ratio = navVisible / navNeeded;
-        let refinedScale = clamp(navScale * ratio, 0.46, navScale);
-        overlay.style.setProperty("--nav-scale", refinedScale.toFixed(4));
-      }
-    });
+    requestAnimationFrame(syncTopUiLayout);
   }
 
   typeBtnGroup.addEventListener("click", (e) => {
@@ -2032,15 +2155,18 @@
 
     const previousSingerId = row.assignedSingerId;
     const nextSingerId = String(e.target.value || "").trim();
-    const quota = getSingerQuota();
+    const usedSingerIds = new Set(getUsedSingerIds(rowId));
+
+    if (nextSingerId && usedSingerIds.has(nextSingerId)) {
+      e.target.value = previousSingerId || "";
+      showToast("重复选择", "同一个成员不能在歌词分配中被重复选择。");
+      return;
+    }
 
     if (nextSingerId && !selectedSingerIds.includes(nextSingerId)) {
-      if (selectedSingerIds.length >= quota) {
-        e.target.value = previousSingerId || "";
-        showToast("超过上限", "当前演唱者数量不能超过演唱人数。");
-        return;
-      }
-      selectedSingerIds.push(nextSingerId);
+      e.target.value = previousSingerId || "";
+      showToast("无效选择", "请先在左侧勾选演唱者，再在右侧分配。");
+      return;
     }
 
     originalRows = originalRows.map(item => {
@@ -2053,14 +2179,10 @@
       };
     });
 
-    if (previousSingerId && previousSingerId !== nextSingerId) {
-      const stillUsed = originalRows.some(item => item.assignedSingerId === previousSingerId);
-      if (!stillUsed) {
-        selectedSingerIds = selectedSingerIds.filter(id => id !== previousSingerId);
-      }
-    }
-
-    applyQuotaConstraints(false);
+    syncOriginalAssignedNames();
+    renderSingerMembers();
+    renderProducerMembers();
+    renderOriginalRows();
   });
 
   originalRoleList.addEventListener("click", (e) => {
@@ -2073,15 +2195,7 @@
     if (!row) return;
 
     originalRows = originalRows.filter(item => item.id !== row.id);
-    keepAtLeastOneRow();
-
-    if (row.assignedSingerId) {
-      const stillUsed = originalRows.some(item => item.assignedSingerId === row.assignedSingerId);
-      if (!stillUsed) {
-        selectedSingerIds = selectedSingerIds.filter(id => id !== row.assignedSingerId);
-      }
-    }
-
+    syncRowsToQuota();
     syncOriginalAssignedNames();
     renderSingerMembers();
     renderProducerMembers();
@@ -2091,6 +2205,14 @@
 
   signupResetBtn.addEventListener("click", resetSignupForm);
   signupSubmitBtn.addEventListener("click", submitSignup);
+
+  document.querySelectorAll("#panelSwitch .switchBtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.page || "";
+      if (!target || btn.classList.contains("active")) return;
+      window.location.href = target;
+    });
+  });
 
   document.querySelectorAll(".navBtn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -2131,6 +2253,8 @@
 
   bg.addEventListener("load", syncOverlayToImage);
   window.addEventListener("resize", syncOverlayToImage);
+  window.addEventListener("orientationchange", syncOverlayToImage);
+  window.addEventListener("load", syncTopUiLayout);
 
   if ("ResizeObserver" in window) {
     const ro = new ResizeObserver(syncOverlayToImage);
@@ -2141,23 +2265,31 @@
     if ([STORAGE_KEYS.loggedIn, STORAGE_KEYS.user, STORAGE_KEYS.role, STORAGE_KEYS.memberId].includes(e.key)) {
       const ok = await ensureAuthState();
       if (!ok) return;
+      updateTopBarIdentity();
+      renderSiteNotifications();
       await loadMembersFromSupabase();
       await loadProjectsFromSupabase();
     }
   });
 
   async function init() {
+    updateTopBarIdentity();
+    renderSiteNotifications();
     updateRewardPreview();
+    syncOverlayToImage();
+
     const ok = await ensureAuthState();
     if (!ok) return;
 
     syncOverlayToImage();
+    renderSiteNotifications();
 
     try {
       await loadMembersFromSupabase();
       await loadProjectsFromSupabase();
       projectAutoCodeEl.textContent = getNextProjectCode();
       singerQuotaInput.value = String(getSingerQuota());
+      syncRowsToQuota();
       applyQuotaConstraints(false);
     } catch (error) {
       console.error(error);
