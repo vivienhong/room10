@@ -66,55 +66,40 @@
     z-index:1;
     overflow:hidden;
     pointer-events:none;
-    --nav-scale:1;
-    --top-ui-scale:1;
-    --topbar-left:28.2%;
-    --topbar-top:8.15%;
-    --topbar-width:65.4%;
-    --topbar-gap:1.2%;
-    --user-right:140px;
-    --user-top:7.5%;
-    --topbar-safe-gap:18px;
+    --overlay-ui-scale:1;
   }
   #overlay *{
     pointer-events:auto;
   }
 
   :root{
-    --bg-top:#e7dfd4;
-    --bg-mid:#e2d8cb;
-    --bg-bottom:#ddd4c8;
-    --bg-side-left:#e5ddd1;
-    --bg-side-right:#e1d7ca;
     --top-chip-bg: rgba(255,252,247,0.86);
     --top-chip-border: rgba(160,116,78,0.12);
     --top-chip-shadow:
       inset 0 1px 0 rgba(255,255,255,0.96),
       0 3px 10px rgba(110,84,58,0.08);
   }
-
-
   #topBar{
     position:absolute;
-    left:var(--topbar-left);
-    top:var(--topbar-top);
-    width:var(--topbar-width);
-    max-width:calc(100% - var(--topbar-left) - var(--topbar-safe-gap));
+    left:28.2%;
+    top:8.15%;
+    width:65.4%;
     display:flex;
     align-items:flex-start;
     justify-content:flex-start;
-    gap:var(--topbar-gap);
+    z-index:40;
+    overflow:visible;
   }
 
   #navOuter{
-    flex:1 1 auto;
+    flex:0 0 auto;
     min-width:0;
-    overflow:hidden;
+    overflow:visible;
   }
 
   #navScroll{
     width:100%;
-    overflow-x:auto;
+    overflow:hidden;
     overflow-y:hidden;
     white-space:nowrap;
     scrollbar-width:none;
@@ -128,21 +113,23 @@
   #roomNav{
     display:inline-flex;
     align-items:center;
-    gap:calc(10px * var(--nav-scale));
+    gap:var(--nav-gap, 10px);
     min-width:max-content;
-    max-width:100%;
+    max-width:none;
+    transform-origin:left top;
+    will-change:transform;
   }
 
   .navBtn{
     appearance:none;
     border:none;
     cursor:pointer;
-    height:calc(42px * var(--nav-scale));
-    padding:0 calc(18px * var(--nav-scale));
-    border-radius:calc(14px * var(--nav-scale));
+    height:var(--nav-btn-height, 42px);
+    padding:0 var(--nav-btn-px, 18px);
+    border-radius:var(--nav-btn-radius, 14px);
     background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
     color:#704724;
-    font-size:calc(15px * var(--nav-scale));
+    font-size:var(--nav-btn-font, 15px);
     font-weight:700;
     white-space:nowrap;
     box-shadow:
@@ -151,6 +138,7 @@
       0 2px 8px rgba(112,83,52,0.12);
     border:1px solid rgba(159,114,69,0.18);
     transition:transform .18s ease, filter .18s ease, box-shadow .18s ease;
+    flex:0 0 auto;
   }
 
   .navBtn:hover{
@@ -166,22 +154,27 @@
     appearance:none;
     border:none;
     cursor:pointer;
-    flex:0 0 auto;
-    min-width:clamp(52px, 3.8vw, 64px);
-    height:clamp(34px, 3vw, 38px);
-    padding:0 clamp(12px, 1.1vw, 16px);
-    border-radius:999px;
-    background:var(--top-chip-bg);
+    width:var(--identity-logout-w);
+    min-width:var(--identity-logout-w);
+    height:var(--identity-inner-h);
+    min-height:var(--identity-inner-h);
+    padding:0;
+    border-radius:9px;
+    background:rgba(255,252,247,0.96);
     color:#67401f;
-    font-size:clamp(12px, 0.82vw, 14px);
+    font-size:var(--identity-logout-font, 10px);
     font-weight:800;
-    box-shadow:var(--top-chip-shadow);
-    border:1px solid var(--top-chip-border);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 1px 4px rgba(112,83,52,0.05);
+    border:1px solid rgba(160,116,78,0.12);
     backdrop-filter:blur(8px);
     -webkit-backdrop-filter:blur(8px);
     transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
     order:3;
     align-self:center;
+    overflow:hidden;
+    line-height:1;
   }
 
   #logoutBtn:hover{
@@ -189,84 +182,115 @@
     background:rgba(255,255,255,0.94);
   }
 
-  #topBarUserArea{
+  #topBarUserAnchor{
     position:absolute;
-    right:var(--user-right);
-    top:var(--user-top);
-    transform:scale(var(--top-ui-scale));
-    transform-origin:right top;
-    display:flex;
+    left:0;
+    top:0;
+    width:0;
+    height:0;
+    z-index:65;
+    pointer-events:none;
+  }
+
+  #topBarUserArea{
+    --identity-control:28px;
+    --identity-logout-w:34px;
+    --identity-gap:4px;
+    --identity-font:11px;
+    --identity-icon-font:11px;
+    --identity-logout-font:10px;
+    --identity-inner-h:calc(100% - 8px);
+
+    position:absolute;
+    left:0;
+    top:0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) var(--identity-control) var(--identity-logout-w);
     align-items:center;
-    gap:6px;
-    width:max-content;
-    min-width:max-content;
-    max-width:none;
-    padding:6px;
-    border-radius:20px;
-    background:rgba(255,248,239,0.9);
+    gap:var(--identity-gap);
+    width:170px;
+    min-width:170px;
+    max-width:170px;
+    height:40px;
+    min-height:40px;
+    max-height:40px;
+    padding:4px;
+    border-radius:13px;
+    background:rgba(255,248,239,0.92);
     border:1px solid rgba(186,146,103,0.24);
     box-shadow:
       0 10px 24px rgba(116,86,54,0.12),
-      inset 0 1px 0 rgba(255,255,255,0.86);
+      inset 0 1px 0 rgba(255,255,255,0.9);
     backdrop-filter:blur(8px);
     -webkit-backdrop-filter:blur(8px);
     text-align:center;
-    z-index:65;
+    pointer-events:auto;
+    box-sizing:border-box;
+    overflow:hidden;
+  }
+
+  @media (min-width: 1400px){
+    #topBarUserArea{
+      --identity-control:30px;
+      --identity-logout-w:38px;
+      --identity-gap:5px;
+      --identity-font:12px;
+      --identity-icon-font:12px;
+      --identity-logout-font:11px;
+      --identity-inner-h:calc(100% - 8px);
+
+      width:188px;
+      min-width:188px;
+      max-width:188px;
+      height:44px;
+      min-height:44px;
+      max-height:44px;
+    }
   }
 
   #currentUserBadge{
     order:1;
-    flex:1 1 auto;
-    min-width:clamp(116px, 8.6vw, 142px);
-    min-height:clamp(34px, 3vw, 38px);
-    padding:0 clamp(12px, 1vw, 16px);
-    border-radius:999px;
-    background:var(--top-chip-bg);
+    min-width:0;
+    width:100%;
+    height:var(--identity-inner-h);
+    min-height:var(--identity-inner-h);
+    padding:0 8px;
+    border-radius:9px;
+    background:rgba(255,252,247,0.96);
     color:#6c4523;
-    font-size:clamp(13px, 0.95vw, 15px);
+    font-size:var(--identity-font);
     font-weight:800;
     display:flex;
     align-items:center;
-    justify-content:center;
-    gap:6px;
-    box-shadow:var(--top-chip-shadow);
-    border:1px solid var(--top-chip-border);
+    justify-content:flex-start;
+    gap:5px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 1px 4px rgba(112,83,52,0.05);
+    border:1px solid rgba(160,116,78,0.12);
     white-space:nowrap;
+    overflow:hidden;
+    box-sizing:border-box;
   }
 
   #currentUserBadge .roleDot{
-    width:8px;
-    height:8px;
+    width:7px;
+    height:7px;
     border-radius:999px;
     background:#d9a364;
-    box-shadow:0 0 0 3px rgba(217,163,100,0.16);
+    box-shadow:0 0 0 2px rgba(217,163,100,0.14);
     flex:0 0 auto;
   }
 
   #currentUserBadge .identityText{
-    flex:0 1 auto;
+    flex:1 1 auto;
+    min-width:0;
     overflow:hidden;
-    text-overflow:ellipsis;
-    text-align:center;
-  }
-
-  @media (max-width: 980px){
-    .filterTagsWrap{
-      gap:5px;
-    }
-
-    .filterTagBtn{
-      min-width:auto;
-      height:24px;
-      padding:0 7px;
-      font-size:10px;
-    }
-
-    .pickerBtn.mixerOptionBtn{
-      height:26px;
-      padding:0 8px;
-      font-size:10px;
-    }
+    text-overflow:clip;
+    text-align:left;
+    white-space:nowrap;
+    line-height:1;
+    font-size:inherit;
   }
 
   #taskPanel{
@@ -331,8 +355,1387 @@
     color:#744b25;
     font-size:14px;
     font-weight:700;
-    line-height:1.2;
+    line-height:1.1;
     text-align:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,233,0.95),
+      0 2px 6px rgba(116,86,54,0.08);
+    transition:transform .18s ease, filter .18s ease, background .18s ease;
+  }
+
+  .switchBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .switchBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  .panelView{
+    position:absolute;
+    inset:0;
+    padding:0;
+  }
+
+  #browsePanelInner{
+    position:relative;
+    z-index:1;
+    width:100%;
+    height:100%;
+    display:grid;
+    grid-template-columns:26.5% 73.5%;
+  }
+
+  #browseListPane{
+    padding:16px 10px 14px 14px;
+    border-right:1px solid rgba(255,255,255,0.20);
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    background:transparent;
+  }
+
+  #musicNotesLayer{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .musicNote{
+    position:absolute;
+    left:0;
+    top:0;
+    pointer-events:none;
+    user-select:none;
+    opacity:0;
+    color:rgba(165,115,66,0.34);
+    text-shadow:0 2px 10px rgba(255,255,255,0.22);
+    animation:musicFloat linear forwards;
+    will-change:transform, opacity;
+  }
+
+  @keyframes musicFloat{
+    0%{
+      transform:translate3d(0, 16px, 0) scale(.82) rotate(0deg);
+      opacity:0;
+    }
+    12%{
+      opacity:.85;
+    }
+    72%{
+      opacity:.42;
+    }
+    100%{
+      transform:translate3d(var(--float-x, 36px), calc(-1 * var(--float-y, 180px)), 0) scale(1.18) rotate(var(--float-rotate, 14deg));
+      opacity:0;
+    }
+  }
+
+  .filterTagsWrap{
+    flex:0 0 auto;
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:0 0 10px;
+    padding-right:4px;
+    overflow:visible;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+    align-items:center;
+  }
+  .filterTagsWrap::-webkit-scrollbar{
+    display:none;
+  }
+
+  .filterTagBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    flex:0 0 auto;
+    min-width:56px;
+    height:28px;
+    padding:0 10px;
+    border-radius:10px;
+    background:rgba(255,252,247,0.9);
+    color:#7c4d25;
+    font-size:11px;
+    font-weight:800;
+    white-space:nowrap;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 2px 6px rgba(112,83,52,0.06);
+    transition:transform .18s ease, filter .18s ease, background .18s ease, color .18s ease;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    line-height:1;
+    vertical-align:middle;
+  }
+
+  .filterTagBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .filterTagBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  .filterTagBtn.altToggle{
+    background:rgba(255,252,247,0.42);
+    border:1.5px dashed rgba(188,144,99,0.72);
+    box-shadow:none;
+    color:#8a5b30;
+  }
+
+  .filterTagBtn.altToggle:hover{
+    background:rgba(255,252,247,0.62);
+  }
+
+  .filterTagBtn.altToggle.active{
+    background:rgba(217,163,100,0.18);
+    color:#8a5b30;
+    border:1.5px dashed rgba(201,140,79,0.95);
+    box-shadow:0 0 0 2px rgba(217,163,100,0.12) inset;
+  }
+
+  .taskItem{
+    width:100%;
+    text-align:left;
+    padding:8px 10px;
+    margin:0 0 6px;
+    border-radius:13px;
+    background:rgba(255,252,247,0.34);
+    color:#6c4523;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.52),
+      0 3px 10px rgba(120,92,63,0.05);
+    transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+    position:relative;
+    border:1px solid transparent;
+    isolation:isolate;
+    overflow:hidden;
+  }
+
+.taskItem.active{
+  border-color:rgba(233,193,139,0.32);
+  background:linear-gradient(180deg, rgba(252,242,223,0.98) 0%, rgba(246,229,202,0.98) 100%);
+  color:#5c3819;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(231,190,132,0.18),
+    inset 0 2px 6px rgba(255,255,255,0.65),
+    0 6px 14px rgba(120,92,63,0.06);
+}
+
+.taskItem.active::after{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-40%;
+  width:30%;
+  height:100%;
+
+  background:linear-gradient(90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.25) 40%,
+    rgba(255,255,255,0.55) 50%,
+    rgba(255,255,255,0.25) 60%,
+    rgba(255,255,255,0) 100%
+  );
+
+  transform:skewX(-18deg);
+  filter:blur(0.8px);
+
+  pointer-events:none;
+  animation:flowSweep 4.5s ease-in-out infinite;
+
+  z-index:1;
+}
+
+.taskItem.active::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:13px;
+
+  box-shadow:
+    inset 0 0 12px rgba(255,210,150,0.35);
+
+  pointer-events:none;
+  z-index:0;
+}
+
+@keyframes flowSweep{
+  0%{
+    left:-40%;
+    opacity:0;
+  }
+  20%{
+    opacity:.6;
+  }
+  60%{
+    left:120%;
+    opacity:.15;
+  }
+  100%{
+    left:120%;
+    opacity:0;
+  }
+}
+
+  .taskItem.active .taskNameText{
+    text-shadow:none;
+  }
+
+  .taskItem.active .taskTypeMini{
+    box-shadow:none;
+  }
+
+  .bonusValue{
+    font-size:18px;
+    letter-spacing:0;
+  }
+
+  .bonusValue small{
+    font-size:.64em;
+  }
+
+  .searchWrap{
+    flex:0 0 auto;
+    margin:0 0 8px;
+    padding-right:4px;
+  }
+
+  .searchInput{
+    width:100%;
+    height:34px;
+    border:none;
+    outline:none;
+    border-radius:12px;
+    padding:0 12px;
+    background:rgba(255,252,247,0.62);
+    color:#5f3b1d;
+    font-size:12px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.75),
+      0 2px 8px rgba(120,92,63,0.05);
+  }
+
+  .searchInput::placeholder{
+    color:#9a7b5b;
+  }
+
+#browseList{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:4px;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(175,135,98,0.55) transparent;
+}
+
+  #browseList::-webkit-scrollbar{
+    width:8px;
+  }
+  #browseList::-webkit-scrollbar-track{
+    background:transparent;
+  }
+  #browseList::-webkit-scrollbar-thumb{
+    background:rgba(175,135,98,0.55);
+    border-radius:999px;
+  }
+
+  .taskItem:hover{
+    transform:translateY(-1px);
+    background:rgba(255,252,247,0.52);
+  }
+
+  .taskItem.active:hover{
+    transform:none;
+    background:linear-gradient(180deg, rgba(250,238,217,0.98) 0%, rgba(244,224,194,0.98) 100%);
+  }
+
+  .taskItemCardBtn{
+    all:unset;
+    display:block;
+    width:100%;
+    cursor:pointer;
+  }
+
+  .taskItemName{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:8px;
+    min-width:0;
+    font-size:13px;
+    font-weight:800;
+    line-height:1.3;
+    color:inherit;
+  }
+
+  .taskItemTitleMain{
+    min-width:0;
+    display:flex;
+    align-items:flex-start;
+    gap:5px;
+    flex-wrap:wrap;
+    flex:1 1 auto;
+  }
+
+  .taskItemHeadActions{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  .taskNameText{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:normal;
+    line-height:1.35;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    word-break:break-word;
+  }
+
+  .taskTypeMini{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    height:17px;
+    padding:0 5px;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:700;
+    line-height:1;
+    background:rgba(255,248,238,0.88);
+    color:#8a5b30;
+    border:1px solid rgba(194,151,108,0.22);
+    flex:0 0 auto;
+  }
+
+  .taskItemInfo{
+    display:block;
+    margin-top:3px;
+    font-size:11px;
+    font-weight:600;
+    line-height:1.35;
+    color:#8b6947;
+  }
+
+  .taskEmpty{
+    padding:16px 12px;
+    border-radius:15px;
+    background:rgba(255,252,247,0.28);
+    color:#8b6947;
+    font-size:12px;
+    line-height:1.6;
+    text-align:center;
+  }
+
+  #browseDetailPane{
+    padding:16px 16px 12px;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    background:transparent;
+  }
+
+  #browseDetailHeader{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:8px;
+  }
+
+  .detailTitleWrap{
+    min-width:0;
+  }
+
+  #browseDetailTitle{
+    color:#6f4726;
+    font-size:18px;
+    font-weight:800;
+    line-height:1.2;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:4px;
+    min-width:0;
+  }
+
+  .detailTitleMain{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    min-width:0;
+    word-break:break-word;
+  }
+
+  .detailTitleText{
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+
+  .detailTitleStatus{
+    color:#8a6644;
+    font-size:11px;
+    font-weight:700;
+    line-height:1.45;
+  }
+
+  .topRightStatus{
+    display:none;
+  }
+
+  .autoSaveBadge{
+    flex:0 0 auto;
+    min-height:30px;
+    padding:6px 12px;
+    border-radius:999px;
+    background:rgba(255,252,247,0.56);
+    color:#7a5231;
+    font-size:11px;
+    font-weight:700;
+    white-space:nowrap;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .autoSaveBadge.saving{
+    background:rgba(240,226,200,0.9);
+    color:#8a5a2d;
+  }
+
+  .autoSaveBadge.saved{
+    background:rgba(222,238,212,0.95);
+    color:#55763a;
+  }
+
+  .autoSaveBadge.error{
+    background:rgba(245,219,213,0.96);
+    color:#934d3f;
+  }
+
+  .headerRight{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+
+  .saveNowBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-height:30px;
+    padding:6px 12px;
+    border-radius:999px;
+    background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
+    color:#6a4120;
+    font-size:11px;
+    font-weight:800;
+    white-space:nowrap;
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,230,0.95),
+      0 4px 12px rgba(112,83,52,0.10);
+    transition:transform .18s ease, filter .18s ease;
+  }
+
+  .saveNowBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .saveNowBtn:disabled{
+    cursor:not-allowed;
+    opacity:.55;
+    transform:none;
+    filter:none;
+  }
+
+  .undoBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-height:30px;
+    padding:6px 12px;
+    border-radius:999px;
+    background:rgba(255,252,247,0.86);
+    color:#7a5231;
+    font-size:11px;
+    font-weight:800;
+    white-space:nowrap;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 2px 8px rgba(112,83,52,0.08);
+    transition:transform .18s ease, filter .18s ease;
+  }
+
+  .undoBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .undoBtn:disabled{
+    cursor:not-allowed;
+    opacity:.5;
+    transform:none;
+    filter:none;
+  }
+
+  #browseDetailBody{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    padding-right:4px;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(175,135,98,0.55) transparent;
+  }
+
+  #browseDetailBody::-webkit-scrollbar{
+    width:8px;
+  }
+  #browseDetailBody::-webkit-scrollbar-track{
+    background:transparent;
+  }
+  #browseDetailBody::-webkit-scrollbar-thumb{
+    background:rgba(175,135,98,0.55);
+    border-radius:999px;
+  }
+
+  .editBlock{
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:16px;
+    background:rgba(255,252,247,0.36);
+    border:1px solid rgba(255,255,255,0.34);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.5),
+      0 2px 8px rgba(120,92,63,0.04);
+  }
+
+  .editGrid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+  }
+
+  .editGrid.four{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+
+  .editField{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    min-width:0;
+  }
+
+  .editLabel{
+    color:#8a6644;
+    font-size:11px;
+    font-weight:700;
+  }
+
+  .sectionTitle{
+    color:#6f4726;
+    font-size:14px;
+    font-weight:800;
+    margin-bottom:10px;
+  }
+
+  .editInput,
+  .editSelect{
+    width:100%;
+    min-height:38px;
+    border:none;
+    outline:none;
+    border-radius:12px;
+    padding:0 12px;
+    background:rgba(255,252,247,0.82);
+    color:#5f3b1d;
+    font-size:13px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.75),
+      0 2px 8px rgba(120,92,63,0.05);
+  }
+
+  .editInput::placeholder{
+    color:#9a7b5b;
+  }
+
+  .rowList{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .lyricsAssignWrap{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 210px;
+    gap:12px;
+    align-items:start;
+  }
+
+  .lyricsAssignWrap.noCandidates{
+    grid-template-columns:1fr;
+  }
+
+  .rowCard{
+    display:grid;
+    grid-template-columns:minmax(0,1.25fr) minmax(0,1.2fr) 32px;
+    gap:8px;
+    align-items:center;
+    padding:8px;
+    border-radius:13px;
+    background:rgba(255,252,247,0.48);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.65),
+      0 2px 8px rgba(120,92,63,0.04);
+    transition:box-shadow .18s ease, background .18s ease, transform .18s ease;
+    position:relative;
+  }
+
+  .rowCard.openTarget{
+    cursor:pointer;
+  }
+
+  .rowCard.openTarget:hover{
+    transform:translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.75),
+      0 4px 12px rgba(120,92,63,0.08);
+  }
+
+  .rowCard.dropHover{
+    background:rgba(248,233,202,0.78);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.85),
+      0 0 0 2px rgba(201,140,79,0.35);
+  }
+
+  .candidatePane{
+    padding:10px;
+    border-radius:14px;
+    background:rgba(255,252,247,0.46);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.65),
+      0 2px 8px rgba(120,92,63,0.04);
+    min-height:100%;
+  }
+
+  .candidateTitle{
+    color:#7a5231;
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:8px;
+  }
+
+  .candidateList{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .miniBtn,
+  .pickerBtn,
+  .candidateBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-width:96px;
+    height:36px;
+    padding:0 14px;
+    border-radius:12px;
+    background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
+    color:#6a4120;
+    font-size:12px;
+    font-weight:800;
+    box-shadow:
+      inset 0 1px 0 rgba(255,247,230,0.95),
+      0 4px 12px rgba(112,83,52,0.10);
+    transition:transform .18s ease, filter .18s ease, background .18s ease, color .18s ease;
+  }
+
+  .miniBtn:hover,
+  .pickerBtn:hover,
+  .candidateBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .miniBtn.ghost{
+    background:rgba(255,252,247,0.9);
+    color:#7c4d25;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 2px 6px rgba(112,83,52,0.06);
+  }
+
+  .miniBtn.active,
+  .pickerBtn.active,
+  .candidateBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  .miniBtn.dangerWide{
+    background:linear-gradient(180deg, #d99072 0%, #c97556 100%);
+    color:#fff7f1;
+  }
+
+  .miniBtn:disabled,
+  .pickerBtn:disabled,
+  .candidateBtn:disabled{
+    cursor:not-allowed;
+    opacity:.55;
+    transform:none;
+    filter:none;
+  }
+
+  .toolbarLine{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+
+  .bonusSectionTitle{
+    color:#7d5731;
+    font-size:14px;
+    font-weight:800;
+    margin-bottom:10px;
+  }
+
+  .bonusWrap{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px;
+    padding:4px 2px 0;
+  }
+
+  .bonusCard{
+    min-width:0;
+  }
+
+  .bonusLabel{
+    color:#9a7146;
+    font-size:12px;
+    font-weight:700;
+    margin-bottom:2px;
+  }
+
+  .bonusValue{
+    color:#8a5b2f;
+    font-size:20px;
+    font-weight:900;
+    line-height:1.1;
+    letter-spacing:.2px;
+  }
+
+  .bonusValue small{
+    font-size:.7em;
+    font-weight:800;
+  }
+
+  .bonusHint{
+    margin-top:4px;
+    color:#8a6644;
+    font-size:12px;
+    font-weight:700;
+    line-height:1.5;
+  }
+
+  .lyricsToolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+
+  .lyricsToolBtns{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .addPartRowBtn,
+  .roleToolBtn{
+    min-width:auto;
+    height:30px;
+    padding:0 12px;
+    font-size:11px;
+    border-radius:10px;
+  }
+
+  .taskDangerBar{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:10px;
+  }
+
+  #deleteTaskBtn{
+    background:transparent;
+    box-shadow:none;
+    border:none;
+    padding:0 2px;
+    min-width:auto;
+    height:auto;
+    color:#a05547;
+  }
+
+  #deleteTaskBtn:hover{
+    background:transparent;
+    filter:none;
+    transform:none;
+    text-decoration:underline;
+  }
+
+  .disabledWrap{
+    opacity:.72;
+    pointer-events:none;
+  }
+
+  .loadingText{
+    color:#8b6947;
+    font-size:13px;
+    line-height:1.6;
+    text-align:center;
+    padding:20px 12px;
+  }
+
+  .pickerGroup{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .pickerGroup.singerPicker{
+    margin-top:10px;
+    gap:10px;
+  }
+
+  .joinTaskBtn{
+    width:28px;
+    height:28px;
+    min-width:28px;
+    padding:0;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.2px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.96);
+    color:#7c4d25;
+    border:1px solid rgba(194,151,108,0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.96),
+      0 2px 8px rgba(112,83,52,0.06);
+  }
+
+  .joinTaskBtn:hover{
+    background:rgba(255,255,255,1);
+  }
+
+  .joinTaskBtn.ghost{
+    background:rgba(255,255,255,0.86);
+    color:#9a7b5b;
+    border:1px solid rgba(194,151,108,0.14);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.94),
+      0 2px 6px rgba(112,83,52,0.04);
+  }
+
+  .joinTaskBtn.joined{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    border-color:rgba(194,151,108,0.12);
+  }
+
+  .taskModeToggleBtn{
+    width:32px;
+    height:32px;
+    min-width:32px;
+    padding:0;
+    border-radius:8px;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.2px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.96);
+    color:#7c4d25;
+    border:1px solid rgba(194,151,108,0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.96),
+      0 2px 8px rgba(112,83,52,0.06);
+  }
+
+  .taskModeToggleBtn:hover{
+    background:rgba(255,255,255,1);
+  }
+
+  .taskModeToggleBtn.special{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    border-color:rgba(194,151,108,0.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  .taskModeToggleBtn:disabled{
+    cursor:not-allowed;
+    opacity:.55;
+    transform:none;
+    filter:none;
+  }
+
+  .songNameFieldWrap{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+
+  .songNameFieldWrap .editInput{
+    flex:1 1 auto;
+    min-width:0;
+  }
+
+  .taskBasicGrid{
+    grid-template-columns:minmax(88px,0.82fr) minmax(240px,1.9fr) minmax(118px,1fr) !important;
+    align-items:end;
+  }
+
+  .taskMetaGrid{
+    grid-template-columns:minmax(96px,0.95fr) minmax(120px,1fr) minmax(158px,1.25fr) !important;
+  }
+
+  .publishMetaGrid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    align-items:end;
+  }
+
+  .pickerBtn.singerOptionBtn{
+    min-width:auto;
+    height:34px;
+    padding:0 14px;
+    border-radius:999px;
+    background:rgba(255,252,247,0.92);
+    color:#7a4d25;
+    border:1px solid rgba(194,151,108,0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.96),
+      0 2px 6px rgba(112,83,52,0.06);
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .pickerBtn.mixerOptionBtn{
+    min-width:auto;
+    height:28px;
+    padding:0 10px;
+    border-radius:10px;
+    font-size:11px;
+    font-weight:700;
+    background:rgba(255,252,247,0.92);
+    color:#7a4d25;
+    border:1px solid rgba(194,151,108,0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.96),
+      0 2px 6px rgba(112,83,52,0.06);
+  }
+
+  .pickerBtn.mixerOptionBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    border-color:rgba(194,151,108,0.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  .pickerBtn.singerOptionBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.02);
+  }
+
+  .pickerBtn.singerOptionBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+    border-color:rgba(194,151,108,0.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255,224,188,0.55),
+      0 4px 10px rgba(116,86,54,0.14);
+  }
+
+  .rowDeleteBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    width:32px;
+    height:32px;
+    border-radius:10px;
+    background:rgba(217,144,114,0.16);
+    color:#934d3f;
+    font-size:16px;
+    font-weight:800;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.75);
+    transition:transform .18s ease, filter .18s ease, background .18s ease;
+  }
+
+  .rowDeleteBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+    background:rgba(217,144,114,0.24);
+  }
+
+  .rowDeleteBtn:disabled{
+    cursor:not-allowed;
+    opacity:.55;
+    transform:none;
+    filter:none;
+  }
+
+  .partRow{
+    position:relative;
+    z-index:1;
+  }
+
+  .partRow.suggestOpen{
+    z-index:220;
+  }
+
+  .partMemberField{
+    position:relative;
+    min-width:0;
+    z-index:2;
+  }
+
+  .partRow.suggestOpen .partMemberField{
+    z-index:230;
+  }
+
+  .memberSuggestBox{
+    position:absolute;
+    left:0;
+    right:0;
+    top:calc(100% + 6px);
+    z-index:80;
+    display:none;
+    max-height:188px;
+    overflow-y:auto;
+    padding:6px;
+    border-radius:12px;
+    background:rgba(255,249,241,0.98);
+    border:1px solid rgba(203,167,123,0.34);
+    box-shadow:
+      0 10px 24px rgba(85,58,34,0.12),
+      inset 0 1px 0 rgba(255,255,255,0.92);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+  }
+
+  .memberSuggestBox.show{
+    display:block;
+  }
+
+  .memberSuggestEmpty{
+    padding:9px 10px;
+    color:#9a7b5b;
+    font-size:12px;
+    line-height:1.4;
+    text-align:center;
+  }
+
+  .memberSuggestItem{
+    width:100%;
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    min-height:34px;
+    padding:0 10px;
+    border-radius:9px;
+    background:transparent;
+    color:#6a4120;
+    font-size:12px;
+    font-weight:700;
+    text-align:left;
+  }
+
+  .memberSuggestItem:hover,
+  .memberSuggestItem.active{
+    background:rgba(217,163,100,0.18);
+  }
+
+  #siteNoticeWrap{
+    position:relative;
+    width:var(--identity-control);
+    height:var(--identity-inner-h);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    order:2;
+  }
+
+  #siteNoticeBtn{
+    position:relative;
+    width:100%;
+    min-width:0;
+    height:100%;
+    padding:0;
+    border:none;
+    cursor:pointer;
+    border-radius:9px;
+    background:rgba(255,252,247,0.96);
+    color:#6c4523;
+    font-size:var(--identity-icon-font, 11px);
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 1px 4px rgba(112,83,52,0.05);
+    border:1px solid rgba(160,116,78,0.12);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+    overflow:hidden;
+    box-sizing:border-box;
+  }
+
+  #siteNoticeBtn:hover{
+    transform:translateY(-1px);
+    background:rgba(255,255,255,0.94);
+  }
+
+  #siteNoticeBtn.hasNotice{
+    background:var(--top-chip-bg);
+    box-shadow:var(--top-chip-shadow);
+  }
+
+  #siteNoticeIcon{
+    display:block;
+    line-height:1;
+    filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
+  }
+
+  #siteNoticeText{
+    display:none;
+  }
+
+  #siteNoticeCount{
+    position:absolute;
+    right:-2px;
+    top:-2px;
+    min-width:18px;
+    height:18px;
+    padding:0 5px;
+    border-radius:999px;
+    background:#c98c4f;
+    color:#fff9f1;
+    font-size:10px;
+    font-weight:900;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 8px rgba(116,86,54,0.16);
+  }
+
+  #siteNoticeBtn.hasNotice #siteNoticeCount{
+    display:flex;
+  }
+
+  #siteNoticePanel{
+    position:absolute;
+    top:calc(100% + 10px);
+    right:0;
+    width:min(360px, 72vw);
+    max-height:320px;
+    overflow:auto;
+    padding:12px;
+    border-radius:16px;
+    background:rgba(255,249,241,0.98);
+    border:1px solid rgba(203,167,123,0.28);
+    box-shadow:0 16px 36px rgba(85,58,34,0.16);
+    display:none;
+    z-index:80;
+    text-align:left;
+  }
+
+  #siteNoticePanel.show{
+    display:block;
+  }
+
+  .siteNoticeTitle{
+    color:#6f4726;
+    font-size:13px;
+    font-weight:900;
+    margin-bottom:8px;
+  }
+
+  .siteNoticeEmpty{
+    color:#8a6644;
+    font-size:12px;
+    line-height:1.6;
+    padding:6px 2px 2px;
+  }
+
+  .siteNoticeList{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .siteNoticeItem{
+    padding:10px;
+    border-radius:12px;
+    background:rgba(255,252,247,0.82);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.92), 0 2px 8px rgba(120,92,63,0.05);
+  }
+
+  .siteNoticeItemTitle{
+    color:#6f4726;
+    font-size:12px;
+    font-weight:800;
+    line-height:1.5;
+    margin-bottom:4px;
+  }
+
+  .siteNoticeItemDesc{
+    color:#8a6644;
+    font-size:11px;
+    line-height:1.55;
+    margin-bottom:8px;
+  }
+
+  .siteNoticeAction{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-height:30px;
+    padding:0 12px;
+    border-radius:10px;
+    background:linear-gradient(180deg,#efd5ab 0%, #dfbd8a 100%);
+    color:#6a4120;
+    font-size:11px;
+    font-weight:800;
+    box-shadow:inset 0 1px 0 rgba(255,247,230,0.95), 0 4px 12px rgba(112,83,52,0.10);
+  }
+
+  #taskPanel{
+    position:absolute;
+    left:43%;
+    top:22.3%;
+    transform:translateX(-50%);
+    width:68%;
+    height:70.6%;
+    min-height:360px;
+    border-radius:30px;
+    background:rgba(255,255,255,0.34);
+    border:1px solid rgba(255,255,255,0.52);
+    box-shadow:
+      0 16px 42px rgba(122,96,68,0.10),
+      inset 0 1px 0 rgba(255,255,255,0.62),
+      inset 0 -1px 0 rgba(255,255,255,0.20);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    overflow:visible;
+  }
+
+  #taskPanel::before{
+    content:"";
+    position:absolute;
+    inset:10px;
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,0.22);
+    pointer-events:none;
+  }
+
+  #panelSwitch{
+    position:absolute;
+    right:-194px;
+    top:26%;
+    transform:translateY(-50%);
+    width:170px;
+    padding:18px 14px;
+    border-radius:20px;
+    background:rgba(255,248,239,0.9);
+    border:1px solid rgba(186,146,103,0.24);
+    box-shadow:
+      0 10px 24px rgba(116,86,54,0.12),
+      inset 0 1px 0 rgba(255,255,255,0.86);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    z-index:30;
+  }
+
+  .switchBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    width:100%;
+    min-height:40px;
+    padding:8px 12px;
+    border-radius:13px;
+    background:rgba(231,214,185,0.92);
+    color:#744b25;
+    font-size:14px;
+    font-weight:700;
+    line-height:1.1;
+    text-align:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     box-shadow:
       inset 0 1px 0 rgba(255,247,233,0.95),
       0 2px 6px rgba(116,86,54,0.08);
@@ -1494,157 +2897,6 @@
     background:rgba(217,163,100,0.18);
   }
 
-  #siteNoticeWrap{
-    position:relative;
-    flex:0 0 auto;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    order:2;
-  }
-
-  #siteNoticeBtn{
-    position:relative;
-    width:clamp(34px, 3vw, 38px);
-    min-width:clamp(34px, 3vw, 38px);
-    height:clamp(34px, 3vw, 38px);
-    padding:0;
-    border:none;
-    cursor:pointer;
-    border-radius:999px;
-    background:var(--top-chip-bg);
-    color:#6c4523;
-    font-size:clamp(14px, 1vw, 16px);
-    font-weight:800;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    box-shadow:var(--top-chip-shadow);
-    border:1px solid var(--top-chip-border);
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
-    transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
-  }
-
-  #siteNoticeBtn:hover{
-    transform:translateY(-1px);
-    background:rgba(255,255,255,0.94);
-  }
-
-  #siteNoticeBtn.hasNotice{
-    background:var(--top-chip-bg);
-    box-shadow:var(--top-chip-shadow);
-  }
-
-  #siteNoticeIcon{
-    display:block;
-    line-height:1;
-    filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
-  }
-
-  #siteNoticeText{
-    display:none;
-  }
-
-  #siteNoticeCount{
-    position:absolute;
-    right:-2px;
-    top:-2px;
-    min-width:18px;
-    height:18px;
-    padding:0 5px;
-    border-radius:999px;
-    background:#c98c4f;
-    color:#fff9f1;
-    font-size:10px;
-    font-weight:900;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    box-shadow:0 2px 8px rgba(116,86,54,0.16);
-  }
-
-  #siteNoticeBtn.hasNotice #siteNoticeCount{
-    display:flex;
-  }
-
-  #siteNoticePanel{
-    position:absolute;
-    top:calc(100% + 10px);
-    right:0;
-    width:min(360px, 72vw);
-    max-height:320px;
-    overflow:auto;
-    padding:12px;
-    border-radius:16px;
-    background:rgba(255,249,241,0.98);
-    border:1px solid rgba(203,167,123,0.28);
-    box-shadow:0 16px 36px rgba(85,58,34,0.16);
-    display:none;
-    z-index:80;
-    text-align:left;
-  }
-
-  #siteNoticePanel.show{
-    display:block;
-  }
-
-  .siteNoticeTitle{
-    color:#6f4726;
-    font-size:13px;
-    font-weight:900;
-    margin-bottom:8px;
-  }
-
-  .siteNoticeEmpty{
-    color:#8a6644;
-    font-size:12px;
-    line-height:1.6;
-    padding:6px 2px 2px;
-  }
-
-  .siteNoticeList{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-  }
-
-  .siteNoticeItem{
-    padding:10px;
-    border-radius:12px;
-    background:rgba(255,252,247,0.82);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,0.92), 0 2px 8px rgba(120,92,63,0.05);
-  }
-
-  .siteNoticeItemTitle{
-    color:#6f4726;
-    font-size:12px;
-    font-weight:800;
-    line-height:1.5;
-    margin-bottom:4px;
-  }
-
-  .siteNoticeItemDesc{
-    color:#8a6644;
-    font-size:11px;
-    line-height:1.55;
-    margin-bottom:8px;
-  }
-
-  .siteNoticeAction{
-    appearance:none;
-    border:none;
-    cursor:pointer;
-    min-height:30px;
-    padding:0 12px;
-    border-radius:10px;
-    background:linear-gradient(180deg,#efd5ab 0%, #dfbd8a 100%);
-    color:#6a4120;
-    font-size:11px;
-    font-weight:800;
-    box-shadow:inset 0 1px 0 rgba(255,247,230,0.95), 0 4px 12px rgba(112,83,52,0.10);
-  }
-
   #miniNotice{
     position:fixed;
     top:22px;
@@ -2011,60 +3263,6 @@
     grid-template-columns:1fr;
   }
 }
-
-/* ===== 👇 在这里加 👇 ===== */
-
-/* 大屏默认 */
-#overlay{
-  --user-right:190px;
-  --user-top:7.5%;
-  --top-ui-scale:1;
-}
-
-/* 中大屏 */
-@media (max-width: 1400px){
-  #overlay{
-    --user-right:150px;
-    --user-top:7.2%;
-    --top-ui-scale:0.95;
-  }
-}
-
-/* 中屏 */
-@media (max-width: 1200px){
-  #overlay{
-    --user-right:105px;
-    --user-top:7.5%;
-    --top-ui-scale:0.9;
-  }
-}
-
-/* 小屏 */
-@media (max-width: 1000px){
-  #overlay{
-    --user-right:85px;
-    --user-top:7%;
-    --top-ui-scale:0.84;
-  }
-}
-
-/* 平板 */
-@media (max-width: 820px){
-  #overlay{
-    --user-right:65px;
-    --user-top:7%;
-    --top-ui-scale:0.78;
-  }
-}
-
-/* 手机 */
-@media (max-width: 640px){
-  #overlay{
-    --user-right:42px;
-    --user-top:6%;
-    --top-ui-scale:0.72;
-  }
-}
 </style>
 </head>
 <body>
@@ -2090,10 +3288,10 @@
             </nav>
           </div>
         </div>
-
       </div>
 
-      <div id="topBarUserArea">
+      <div id="topBarUserAnchor">
+        <div id="topBarUserArea">
           <div id="currentUserBadge"><span class="roleDot"></span><span class="identityText">未登录</span></div>
           <div id="siteNoticeWrap">
             <button id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="站内通知">
@@ -2107,13 +3305,14 @@
             </div>
           </div>
           <button id="logoutBtn" type="button">登出</button>
+        </div>
       </div>
 
-      <section id="taskPanel" aria-label="工作间任务面板">
+      <section id="taskPanel"<section id="taskPanel" aria-label="工作间任务面板">
         <div id="panelSwitch">
-          <button class="switchBtn" type="button" data-page="studio-claim.html">待处理</button>
-          <button class="switchBtn" type="button" data-page="studio-task.html">任务详情</button>
-          <button class="switchBtn" type="button" data-page="studio-project.html">项目委托</button>
+          <button class="switchBtn" type="button" data-page="studio-todo.html">待处理</button>
+          <button class="switchBtn" type="button" data-page="studio-project.html">任务详情</button>
+          <button class="switchBtn" type="button" data-page="studio-Submit.html">项目委托</button>
         </div>
 
         <div id="claimView" class="panelView">
@@ -2202,6 +3401,7 @@
   const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
   const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const MEMBER_DIRECTORY_RPC = "get_room10_member_directory";
 
   const STORAGE_KEYS = {
     loggedIn: "room10LoggedIn",
@@ -2283,6 +3483,13 @@
   const siteNoticeCount = document.getElementById("siteNoticeCount");
   const siteNoticePanel = document.getElementById("siteNoticePanel");
   const siteNoticeBody = document.getElementById("siteNoticeBody");
+  const topBar = document.getElementById("topBar");
+  const navOuter = document.getElementById("navOuter");
+  const navScroll = document.getElementById("navScroll");
+  const roomNav = document.getElementById("roomNav");
+  const panelSwitch = document.getElementById("panelSwitch");
+  const topBarUserAnchor = document.getElementById("topBarUserAnchor");
+  const topBarUserArea = document.getElementById("topBarUserArea");
 
   const roleSetupMask = document.getElementById("roleSetupMask");
   const roleSetupTitle = document.getElementById("roleSetupTitle");
@@ -2355,9 +3562,13 @@
     return String(authState.nickname || localStorage.getItem(STORAGE_KEYS.user) || "").trim();
   }
 
+  function getCurrentMemberCode() {
+    return String(authState.memberCode || localStorage.getItem(STORAGE_KEYS.memberCode) || "").trim();
+  }
+
   function getCurrentRoleLabel(roleValue = authState.role) {
     const role = String(roleValue || "").toLowerCase();
-    if (role === "owner") return "创建者";
+    if (role === "owner") return "维修工";
     if (role === "admin") return "管理员";
     if (role === "member") return "成员";
     if (role === "applying") return "申请中";
@@ -2367,6 +3578,7 @@
   function updateTopBarIdentity() {
     if (!currentUserBadge) return;
     currentUserBadge.innerHTML = `<span class="roleDot"></span><span class="identityText">${escapeHtml(getCurrentMemberName() || "未登录")}｜${escapeHtml(getCurrentRoleLabel())}</span>`;
+    requestAnimationFrame(fitTopBarIdentityContent);
   }
 
   async function ensureAuthState() {
@@ -2381,28 +3593,30 @@
       return false;
     }
 
-    if (authState.memberId) {
-      authState.initialized = true;
-      updateTopBarIdentity();
-      return true;
-    }
-
     try {
-      const { data, error } = await supabaseClient
+      let query = supabaseClient
         .from("members")
-        .select("id, nickname, role, member_code")
-        .eq("nickname", authState.nickname)
-        .maybeSingle();
+        .select("id, nickname, role, member_code");
+
+      if (authState.memberId) {
+        query = query.eq("id", authState.memberId);
+      } else {
+        query = query.eq("nickname", authState.nickname);
+      }
+
+      const { data, error } = await query.maybeSingle();
 
       if (error || !data) {
         handleLogout();
         return false;
       }
 
-      authState.memberId = String(data.id);
+      authState.memberId = String(data.id || authState.memberId || "");
+      authState.nickname = String(data.nickname || authState.nickname || "").trim();
       authState.role = String(data.role || authState.role || "member").toLowerCase();
-      authState.memberCode = String(data.member_code || "");
+      authState.memberCode = String(data.member_code || authState.memberCode || "").trim();
 
+      localStorage.setItem(STORAGE_KEYS.user, authState.nickname);
       localStorage.setItem(STORAGE_KEYS.memberId, authState.memberId);
       localStorage.setItem(STORAGE_KEYS.role, authState.role);
       if (authState.memberCode) {
@@ -2687,25 +3901,7 @@
   }
 
   async function setLyricsLotteryEnabled(taskId, enabled) {
-    const payload = enabled
-      ? { lyrics_lottery_enabled: true, lyrics_lottery_opened_at: new Date().toISOString() }
-      : { lyrics_lottery_enabled: false, lyrics_lottery_opened_at: null, lyrics_lottery_opened_by: null };
-
-    const currentMemberId = getCurrentMemberId();
-    if (enabled && currentMemberId) payload.lyrics_lottery_opened_by = currentMemberId;
-
-    const { error } = await supabaseClient
-      .from("projects")
-      .update(payload)
-      .eq("id", taskId);
-
-    if (error) {
-      const detailText = String(error?.message || error?.details || error?.hint || "").toLowerCase();
-      if (detailText.includes("game_type")) {
-        error.message = '保存失败：数据库中的 projects 表缺少 game_type 列，请先执行补充列的 SQL。';
-      }
-      throw error;
-    }
+    throw new Error("当前安全模式下，抽签开关还没有接入专用安全函数。");
   }
 
   async function assignRandomRoleToCurrentMember(task) {
@@ -3024,37 +4220,66 @@ ${names}${suffix}`);
     return uniqueAssignedCount < singerQuota || !hasProducer;
   }
 
-  function getSupplementTags(task) {
-    const rows = task.parts || [];
-    const singerQuota = Math.max(1, Number(task.singer_quota) || 1);
-    const assignedSingerCount = getUniqueAssignedSingerCount(task);
-    const hasProducer = !!String(task.producer_member_id || "").trim();
-    const hasTone = !!String(task.project_tone || "").trim();
-    const hasReleaseDate = !!String(task.release_date || "").trim();
-
-    const needClaim = assignedSingerCount < singerQuota || !hasProducer;
-
-    const hasAnySinger = assignedSingerCount > 0;
+  function getLyricsAssignmentState(task) {
+    const rows = Array.isArray(task?.parts) ? task.parts : [];
+    const singerQuota = Math.max(1, Number(task?.singer_quota) || 1);
     const rowsShort = rows.length < singerQuota;
     const noRowsYet = rows.length === 0;
     const hasIncompleteRow = rows.some(row => {
-      const partText = String(row.original_name || "").trim();
-      const assignedId = String(row.assigned_member_id || "").trim();
+      const partText = String(row?.original_name || "").trim();
+      const assignedId = String(row?.assigned_member_id || "").trim();
       return !partText || !assignedId;
     });
-    const needLyricsAssign = hasAnySinger && (noRowsYet || rowsShort || hasIncompleteRow);
+    return {
+      noRowsYet,
+      rowsShort,
+      hasIncompleteRow,
+      complete: !(noRowsYet || rowsShort || hasIncompleteRow)
+    };
+  }
 
-    const allInfoComplete = isTaskInfoComplete(task);
+  function getTodoStage(task) {
+    const singerQuota = Math.max(1, Number(task?.singer_quota) || 1);
+    const assignedSingerCount = getUniqueAssignedSingerCount(task);
+    const hasProducer = !!String(task?.producer_member_id || "").trim();
+    const hasTone = !!String(task?.project_tone || "").trim();
+    const hasVideoLink = !!String(task?.display_link || "").trim();
+    const lyricState = getLyricsAssignmentState(task);
     const allSubmitted = isAllSingersSubmitted(task);
+    const producerCompleted = !!task?.producer_completed;
 
-    const tags = [];
+    if (hasVideoLink) return null;
 
-    if (needClaim) tags.push("待认领");
-    if (needLyricsAssign) tags.push("待分词");
-    if (!hasTone) tags.push("待定调");
-    if (allInfoComplete && allSubmitted && !hasReleaseDate) tags.push("待发布");
+    if (assignedSingerCount < singerQuota) {
+      return { tag: "待认领", statusText: "待认领" };
+    }
 
-    return tags;
+    if (!hasTone) {
+      return { tag: "待定调", statusText: "待定调" };
+    }
+
+    if (!lyricState.complete) {
+      return { tag: "待分词", statusText: "待分词" };
+    }
+
+    if (!allSubmitted) {
+      return null;
+    }
+
+    if (!hasProducer) {
+      return { tag: "待认领", statusText: "缺后期负责人" };
+    }
+
+    if (producerCompleted) {
+      return { tag: "待发布", statusText: "待发布" };
+    }
+
+    return null;
+  }
+
+  function getSupplementTags(task) {
+    const stage = getTodoStage(task);
+    return stage ? [stage.tag] : [];
   }
 
   function getSkillText(row) {
@@ -3132,7 +4357,8 @@ ${names}${suffix}`);
 
         task.supplementTags = getSupplementTags(task);
         task.readyForHonorShow = isReadyForHonorShow(task);
-        task.computedStatus = task.supplementTags.join("｜");
+        const todoStage = getTodoStage(task);
+        task.computedStatus = todoStage ? todoStage.statusText : "";
         return task;
       })
       .filter(task => task.supplementTags.length > 0)
@@ -3150,63 +4376,159 @@ ${names}${suffix}`);
     return match ? parseInt(match[0], 10) : Number.POSITIVE_INFINITY;
   }
 
-  function getMemberOrderNumber(member) {
-    const candidates = [
+  function getMemberPrimaryKeyCode(member) {
+    const keyCandidates = [
       member?.member_code,
+      member?.memberCode,
       member?.key_code,
+      member?.keyCode,
+      member?.invite_key,
+      member?.inviteKey,
       member?.invite_code,
+      member?.inviteCode,
+      member?.code
+    ];
+
+    for (const item of keyCandidates) {
+      const raw = String(item ?? "").trim();
+      if (raw) return raw;
+    }
+
+    return "";
+  }
+
+  function getMemberOrderNumber(member) {
+    const primaryCode = getMemberPrimaryKeyCode(member);
+    const primaryNum = extractNumberFromValue(primaryCode);
+    if (Number.isFinite(primaryNum)) return primaryNum;
+
+    const orderCandidates = [
+      member?.sort_order_num,
       member?.display_order,
       member?.member_order,
       member?.order_no,
       member?.member_no,
       member?.member_number,
       member?.no,
-      member?.code,
-      member?.nickname,
-      member?.name
+      member?.memberOrderNo
     ];
 
-    for (const item of candidates) {
+    for (const item of orderCandidates) {
       const num = extractNumberFromValue(item);
       if (Number.isFinite(num)) return num;
     }
+
     return Number.POSITIVE_INFINITY;
+  }
+
+  function parseMemberKeyForSort(member) {
+    const rawCode = getMemberPrimaryKeyCode(member).toUpperCase();
+    const match = rawCode.match(/^([A-Z]+)?\s*(\d+)(.*)$/);
+    if (match) {
+      return {
+        hasCode: true,
+        prefix: String(match[1] || ""),
+        number: parseInt(match[2], 10),
+        suffix: String(match[3] || "")
+      };
+    }
+
+    return {
+      hasCode: false,
+      prefix: "",
+      number: getMemberOrderNumber(member),
+      suffix: rawCode
+    };
+  }
+
+  function sortMembersByKey(list) {
+    return (list || []).slice().sort((a, b) => {
+      const keyA = parseMemberKeyForSort(a);
+      const keyB = parseMemberKeyForSort(b);
+
+      if (keyA.hasCode !== keyB.hasCode) {
+        return keyA.hasCode ? -1 : 1;
+      }
+
+      if (keyA.prefix !== keyB.prefix) {
+        return keyA.prefix.localeCompare(keyB.prefix, 'en', { sensitivity: 'base' });
+      }
+
+      if (keyA.number !== keyB.number) {
+        return keyA.number - keyB.number;
+      }
+
+      if (keyA.suffix !== keyB.suffix) {
+        return keyA.suffix.localeCompare(keyB.suffix, 'en', { numeric: true, sensitivity: 'base' });
+      }
+
+      const nameA = String(a?.display || a?.name || a?.nickname || '').trim();
+      const nameB = String(b?.display || b?.name || b?.nickname || '').trim();
+      return nameA.localeCompare(nameB, 'zh-Hans-CN', { numeric: true, sensitivity: 'base' });
+    });
   }
 
   async function loadMembersList() {
     try {
-      const { data, error } = await supabaseClient
-        .from("members")
-        .select("*");
+      const [{ data, error }, memberTableResult] = await Promise.all([
+        supabaseClient.rpc(MEMBER_DIRECTORY_RPC),
+        supabaseClient.from("members").select("id, nickname, role, skills, member_code")
+      ]);
 
       if (error) throw error;
 
-      membersCache = (data || [])
-        .filter(item => String(item.role || "").toLowerCase() !== "applying")
-        .map(item => ({
-          ...item,
-          id: String(item.id),
-          nickname: String(item.nickname || "").trim(),
-          name: String(item.name || "").trim(),
-          display: item.nickname || item.name || "未命名成员",
-          memberOrderNo: getMemberOrderNumber(item)
-        }))
-        .sort((a, b) => {
-          if (a.memberOrderNo !== b.memberOrderNo) return a.memberOrderNo - b.memberOrderNo;
-          return String(a.display || "").localeCompare(String(b.display || ""), "zh-CN");
-        });
+      const memberTableMap = new Map(
+        ((memberTableResult && memberTableResult.data) || []).map(row => [String(row.id || "").trim(), row])
+      );
 
-      mixerMembersCache = membersCache.filter(isMixerMember);
+      membersCache = sortMembersByKey(
+        (data || [])
+          .map((item, index) => {
+            const id = String(item.member_id || item.id || "").trim();
+            const extra = memberTableMap.get(id) || {};
+            const nickname = String(item.nickname || extra.nickname || "").trim();
+            const displayName = String(item.display_name || item.nickname || extra.nickname || "未命名成员").trim();
+            const role = String(item.role || extra.role || "").trim();
+            const skills = String(item.skills || extra.skills || "").trim();
+            const memberCode = getMemberPrimaryKeyCode({ ...extra, ...item });
+
+            return {
+              ...extra,
+              ...item,
+              id,
+              nickname,
+              name: displayName,
+              display: displayName,
+              role,
+              skills,
+              member_code: memberCode,
+              memberCode,
+              key_code: String(item.key_code || item.keyCode || extra.key_code || "").trim(),
+              invite_key: String(item.invite_key || item.inviteKey || extra.invite_key || "").trim(),
+              invite_code: String(item.invite_code || item.inviteCode || extra.invite_code || "").trim(),
+              memberOrderNo: (() => {
+                const orderNo = getMemberOrderNumber({ ...extra, ...item, member_code: memberCode, memberCode });
+                return Number.isFinite(orderNo) ? orderNo : index;
+              })()
+            };
+          })
+          .filter(item => item.id && item.display)
+      );
+
+      mixerMembersCache = sortMembersByKey(membersCache.filter(isMixerMember));
 
       document.getElementById("memberOptionsAll").innerHTML = membersCache
         .map(member => `<option value="${escapeHtml(member.display)}"></option>`)
         .join("");
+
+      console.log("membersCache count:", membersCache.length, membersCache);
+      console.log("mixerMembersCache count:", mixerMembersCache.length, mixerMembersCache);
     } catch (err) {
-      console.error("读取成员列表失败：", err);
+      console.error("读取成员目录失败：", err);
       membersCache = [];
       mixerMembersCache = [];
       document.getElementById("memberOptionsAll").innerHTML = "";
-      showToast("读取失败", "成员列表读取失败，请检查 members 表权限。");
+      showToast("读取失败", "成员目录读取失败，请先执行本页配套 SQL。\n演唱者和混音备选池需要依赖安全目录函数。");
     }
   }
 
@@ -3259,12 +4581,7 @@ ${names}${suffix}`);
       const memberIdList = [...memberIds];
       let memberMap = new Map();
       if (memberIdList.length) {
-        const { data: memberRows, error: membersError } = await supabaseClient
-          .from("members")
-          .select("id, nickname, name")
-          .in("id", memberIdList);
-
-        if (membersError) throw membersError;
+        const memberRows = membersCache.filter(row => memberIdList.includes(String(row.id || "")));
         memberMap = new Map((memberRows || []).map(row => [String(row.id), row]));
       }
 
@@ -3335,59 +4652,144 @@ ${names}${suffix}`);
 
     const BASE_SCREEN_W = 1600;
     const BASE_SCREEN_H = 900;
-    const BASE_TOPBAR_LEFT = 28.2;
-    const BASE_TOPBAR_TOP = 8.15;
-    const BASE_TOPBAR_WIDTH = 65.4;
-    const BASE_TOPBAR_GAP = 1.2;
-
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
     const fitW = drawW / BASE_SCREEN_W;
     const fitH = drawH / BASE_SCREEN_H;
     const fit = Math.min(fitW, fitH);
+    const uiScale = clamp(fit, 0.58, 1);
 
-    let navScale = clamp(fit, 0.46, 1);
-    let topUiScale = clamp(fit * 0.96, 0.72, 1);
+    overlay.style.setProperty("--overlay-ui-scale", uiScale.toFixed(4));
+    overlay.style.setProperty("--nav-btn-height", `${Math.round(42 * uiScale)}px`);
+    overlay.style.setProperty("--nav-btn-px", `${Math.round(18 * uiScale)}px`);
+    overlay.style.setProperty("--nav-btn-radius", `${Math.round(14 * uiScale)}px`);
+    overlay.style.setProperty("--nav-btn-font", `${Math.max(11, Math.round(15 * uiScale))}px`);
+    overlay.style.setProperty("--nav-gap", `${Math.max(4, Math.round(10 * uiScale))}px`);
 
-    const smallerDelta = Math.max(0, 1 - fit);
-    const topbarLeft = BASE_TOPBAR_LEFT - smallerDelta * 1.1;
-    const topbarTop = BASE_TOPBAR_TOP;
-    const topbarGap = clamp(BASE_TOPBAR_GAP * (0.92 + fit * 0.08), 0.82, 1.2);
-    const safeGapPx = clamp(12, drawW * 0.012, 24);
-    const overlayStyles = window.getComputedStyle(overlay);
-    const userRight = parseFloat(overlayStyles.getPropertyValue("--user-right")) || 180;
+    requestAnimationFrame(syncTopUiLayout);
+  }
 
-    overlay.style.setProperty("--top-ui-scale", topUiScale.toFixed(4));
-    overlay.style.setProperty("--topbar-left", `${topbarLeft.toFixed(3)}%`);
-    overlay.style.setProperty("--topbar-top", `${topbarTop.toFixed(3)}%`);
-    overlay.style.setProperty("--topbar-gap", `${topbarGap.toFixed(3)}%`);
-    overlay.style.setProperty("--topbar-safe-gap", `${safeGapPx.toFixed(2)}px`);
-    overlay.style.setProperty("--nav-scale", navScale.toFixed(4));
+  function fitTopBarIdentityContent() {
+    if (!topBarUserArea || !currentUserBadge) return;
+    const textEl = currentUserBadge.querySelector(".identityText");
+    if (!textEl) return;
 
-    const leftPx = drawW * (topbarLeft / 100);
-    const userBoxWidth = topBarUserArea ? topBarUserArea.offsetWidth * topUiScale : 0;
-    const availableWidthPx = Math.max(180, drawW - leftPx - userRight - userBoxWidth - safeGapPx);
-    const desiredTopbarWidthPx = drawW * (BASE_TOPBAR_WIDTH / 100);
-    const topbarWidthPx = Math.min(desiredTopbarWidthPx, availableWidthPx);
-    overlay.style.setProperty("--topbar-width", `${(topbarWidthPx / drawW * 100).toFixed(3)}%`);
+    const totalWidth = Math.round(topBarUserArea.getBoundingClientRect().width || parseFloat(topBarUserArea.style.width) || 170);
+    const totalHeight = Math.round(topBarUserArea.getBoundingClientRect().height || parseFloat(topBarUserArea.style.height) || 40);
 
-    requestAnimationFrame(() => {
-      if (!navOuter || !roomNav) return;
-      const navVisible = Math.max(160, navOuter.clientWidth - 2);
-      let navNeeded = roomNav.scrollWidth;
-      if (navNeeded > navVisible) {
-        let ratio = navVisible / navNeeded;
-        navScale = clamp(navScale * ratio * 0.985, 0.40, 1);
-        overlay.style.setProperty("--nav-scale", navScale.toFixed(4));
-        requestAnimationFrame(() => {
-          navNeeded = roomNav.scrollWidth;
-          if (navNeeded > navVisible) {
-            ratio = navVisible / navNeeded;
-            navScale = clamp(navScale * ratio * 0.992, 0.34, 1);
-            overlay.style.setProperty("--nav-scale", navScale.toFixed(4));
-          }
-        });
+    let gap = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-gap")) || Math.max(4, Math.round(totalWidth * 0.03));
+    let control = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-control")) || Math.max(22, Math.round(totalHeight - 10));
+    let logoutW = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-logout-w")) || Math.max(30, Math.round(totalWidth * 0.18));
+    let font = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-font")) || Math.max(10, Math.min(12, Math.round(totalHeight * 0.28)));
+    let logoutFont = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-logout-font")) || Math.max(8, font - 1);
+    let iconFont = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-icon-font")) || Math.max(10, font);
+    let innerH = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-inner-h")) || Math.max(24, totalHeight - 8);
+    let pad = 4;
+    let badgePad = 8;
+
+    const applyIdentityVars = () => {
+      const badgeW = Math.max(42, totalWidth - pad * 2 - gap * 2 - control - logoutW);
+      topBarUserArea.style.setProperty("--identity-gap", `${gap}px`);
+      topBarUserArea.style.setProperty("--identity-control", `${control}px`);
+      topBarUserArea.style.setProperty("--identity-logout-w", `${logoutW}px`);
+      topBarUserArea.style.setProperty("--identity-font", `${font}px`);
+      topBarUserArea.style.setProperty("--identity-logout-font", `${logoutFont}px`);
+      topBarUserArea.style.setProperty("--identity-icon-font", `${iconFont}px`);
+      topBarUserArea.style.setProperty("--identity-inner-h", `${innerH}px`);
+      topBarUserArea.style.padding = `${pad}px`;
+      topBarUserArea.style.gap = `${gap}px`;
+      topBarUserArea.style.gridTemplateColumns = `${badgeW}px ${control}px ${logoutW}px`;
+      currentUserBadge.style.padding = `0 ${badgePad}px`;
+    };
+
+    applyIdentityVars();
+
+    for (let i = 0; i < 24; i++) {
+      if (textEl.scrollWidth <= textEl.clientWidth + 1) break;
+
+      if (logoutW > 24) {
+        logoutW -= 1;
+      } else if (control > 22) {
+        control -= 1;
+      } else if (gap > 2) {
+        gap -= 0.5;
+      } else if (badgePad > 4) {
+        badgePad -= 1;
+      } else if (font > 8) {
+        font -= 0.5;
+        logoutFont = Math.max(8, font - 1);
+        iconFont = Math.max(9, font);
+      } else {
+        break;
       }
-    });
+
+      applyIdentityVars();
+    }
+  }
+
+  function syncTopUiLayout() {
+    if (!overlay || !topBar || !navOuter || !navScroll || !roomNav || !panelSwitch || !topBarUserAnchor || !topBarUserArea) return;
+
+    const overlayRect = overlay.getBoundingClientRect();
+    const topBarRect = topBar.getBoundingClientRect();
+    const panelSwitchRect = panelSwitch.getBoundingClientRect();
+    const switchBtn = panelSwitch.querySelector(".switchBtn");
+
+    const targetWidth = Math.round(panelSwitchRect.width || 170);
+    const targetHeight = Math.round((switchBtn?.getBoundingClientRect().height) || 40);
+    const targetLeft = panelSwitchRect.left - overlayRect.left;
+
+    topBarUserArea.style.width = `${targetWidth}px`;
+    topBarUserArea.style.minWidth = `${targetWidth}px`;
+    topBarUserArea.style.maxWidth = `${targetWidth}px`;
+    topBarUserArea.style.height = `${targetHeight}px`;
+    topBarUserArea.style.minHeight = `${targetHeight}px`;
+    topBarUserArea.style.maxHeight = `${targetHeight}px`;
+
+    const gap = Math.max(4, Math.round(targetWidth * 0.03));
+    const paddingX = Math.max(5, Math.round(targetWidth * 0.035));
+    const control = Math.max(22, Math.round(targetHeight - 10));
+    const logoutW = Math.max(30, Math.round(targetWidth * 0.18));
+    const badgeW = Math.max(44, targetWidth - paddingX * 2 - gap * 2 - control - logoutW);
+
+    topBarUserArea.style.setProperty("--identity-gap", `${gap}px`);
+    topBarUserArea.style.setProperty("--identity-control", `${control}px`);
+    topBarUserArea.style.setProperty("--identity-logout-w", `${logoutW}px`);
+    topBarUserArea.style.setProperty("--identity-font", `${Math.max(10, Math.min(12, Math.round(targetHeight * 0.28)))}px`);
+    topBarUserArea.style.setProperty("--identity-inner-h", `${Math.max(24, targetHeight - 8)}px`);
+    topBarUserArea.style.padding = `4px`;
+    topBarUserArea.style.gap = `${gap}px`;
+    topBarUserArea.style.gridTemplateColumns = `${badgeW}px ${control}px ${logoutW}px`;
+
+    const topBarLeft = topBarRect.left - overlayRect.left;
+    const safeGap = Math.max(10, Math.round(targetWidth * 0.08));
+    const availableWidth = Math.max(120, targetLeft - safeGap - topBarLeft);
+
+    topBar.style.width = `${availableWidth}px`;
+
+    roomNav.style.transform = "scale(1)";
+    navScroll.scrollLeft = 0;
+
+    const requiredWidth = roomNav.scrollWidth || 1;
+    const navScale = Math.max(0.55, Math.min(1, availableWidth / requiredWidth));
+    roomNav.style.transform = `scale(${navScale})`;
+    roomNav.style.transformOrigin = "left top";
+
+    const scaledNavRect = roomNav.getBoundingClientRect();
+    navOuter.style.height = `${Math.ceil(scaledNavRect.height)}px`;
+
+    const firstNavBtn = roomNav.querySelector('.navBtn');
+    let targetTop = topBarRect.top - overlayRect.top;
+    if (firstNavBtn) {
+      const navBtnRect = firstNavBtn.getBoundingClientRect();
+      targetTop = (navBtnRect.top + navBtnRect.height / 2) - overlayRect.top - targetHeight / 2;
+    } else if (scaledNavRect.height > 0) {
+      targetTop = (topBarRect.top + scaledNavRect.height / 2) - overlayRect.top - targetHeight / 2;
+    }
+
+    topBarUserAnchor.style.left = `${targetLeft}px`;
+    topBarUserAnchor.style.top = `${Math.round(targetTop)}px`;
+
+    requestAnimationFrame(fitTopBarIdentityContent);
   }
 
   function applyDefaultBackgroundBlend() {
@@ -3544,8 +4946,13 @@ ${names}${suffix}`);
       if (!shouldShowHasMeFilter()) return;
       activeSecondaryFilter = activeSecondaryFilter === "有我在" ? "" : "有我在";
     } else {
-      activeMainFilter = normalized;
-      activeSecondaryFilter = "";
+      if (activeMainFilter === normalized) {
+        activeMainFilter = "";
+        activeSecondaryFilter = "";
+      } else {
+        activeMainFilter = normalized;
+        activeSecondaryFilter = "";
+      }
     }
 
     syncFilterButtons();
@@ -3575,10 +4982,6 @@ ${names}${suffix}`);
       }
 
       if (!isActiveTask && activeSecondaryFilter === "有我在" && !isCurrentUserInTask(task)) {
-        return false;
-      }
-
-      if (!isActiveTask && ["待分词", "待定调", "待发布"].includes(currentFilter) && activeSecondaryFilter !== "有我在" && !isCurrentUserInTask(task)) {
         return false;
       }
 
@@ -3759,11 +5162,11 @@ function renderBrowseList() {
   function buildMixerPickerHtml(currentName, disabledAttr) {
     const current = String(currentName || "").trim();
     const isDisabled = disabledAttr.includes("disabled");
-    const mixerCandidates = mixerMembersCache.length ? mixerMembersCache : membersCache;
+    const mixerCandidates = mixerMembersCache;
 
     return `
       <div class="pickerGroup" id="producerPicker">
-        ${mixerCandidates.map(member => {
+        ${mixerCandidates.length ? mixerCandidates.map(member => {
           const display = String(member.display || "").trim();
           const active = display === current ? "active" : "";
           return `
@@ -3774,7 +5177,7 @@ function renderBrowseList() {
               ${isDisabled ? "disabled" : ""}
             >${escapeHtml(display)}</button>
           `;
-        }).join("")}
+        }).join("") : `<div class="taskEmpty" style="width:100%;margin:0;">未读取到混音成员</div>`}
       </div>
       <input id="editProducerName" class="autoSaveField" type="hidden" value="${escapeHtml(current)}" />
     `;
@@ -3788,7 +5191,7 @@ function renderBrowseList() {
       <div class="editField">
         <label class="editLabel">演唱者</label>
         <div class="pickerGroup singerPicker" id="singerPicker">
-          ${membersCache.map(member => {
+          ${membersCache.length ? membersCache.map(member => {
             const memberId = String(member.id || "").trim();
             const display = String(member.display || "").trim();
             const active = currentSingerIds.includes(memberId) ? "active" : "";
@@ -3801,7 +5204,7 @@ function renderBrowseList() {
                 ${isDisabled ? "disabled" : ""}
               >${escapeHtml(display)}</button>
             `;
-          }).join("")}
+          }).join("") : `<div class="taskEmpty" style="width:100%;margin:0;">未读取到成员列表</div>`}
         </div>
       </div>
     `;
@@ -3847,6 +5250,9 @@ function renderBrowseList() {
     const wrapClass = editable ? "" : "disabledWrap";
     const songName = String(task.task_name || "").trim();
     const singerQuota = Math.max(1, Number(task.singer_quota) || 1);
+    const shouldShowVideoLinkInput = getCurrentMainFilter() === "待发布"
+      || (Array.isArray(task.supplementTags) && task.supplementTags.includes("待发布"))
+      || !!String(task.display_link || "").trim();
 
     const singerBonus = getBonusValue(task, ["singer_bonus","vocal_bonus","singer_reward","vocal_reward"]);
     const mixerBonus = getBonusValue(task, ["producer_bonus","mix_bonus","mixing_bonus","producer_reward"]);
@@ -3897,6 +5303,13 @@ function renderBrowseList() {
               <label class="editLabel">预计发布</label>
               <input id="editReleaseDate" class="editInput autoSaveField" type="date" value="${escapeHtml(formatDateForInput(task.release_date))}" ${disabledAttr} />
             </div>
+
+            ${shouldShowVideoLinkInput ? `
+            <div class="editField">
+              <label class="editLabel">视频链接</label>
+              <input id="editVideoLink" class="editInput autoSaveField" type="url" value="${escapeHtml(String(task.display_link || ""))}" placeholder="填写视频链接，作品展览可直接读取" ${disabledAttr} />
+            </div>
+            ` : ``}
           </div>
         </div>
 
@@ -4464,6 +5877,7 @@ function renderBrowseList() {
       taskCode: String(document.getElementById("editTaskCode")?.value || ""),
       taskName: String(document.getElementById("editSongName")?.value || ""),
       releaseDate: String(document.getElementById("editReleaseDate")?.value || ""),
+      videoLink: String(document.getElementById("editVideoLink")?.value || ""),
       taskType: String(document.getElementById("editTaskType")?.value || ""),
       singerQuota: String(document.getElementById("editSingerQuota")?.value || ""),
       tone: String(document.getElementById("editTone")?.value || ""),
@@ -4511,6 +5925,7 @@ function renderBrowseList() {
       setValue("editTaskCode", snapshot.taskCode || "");
       setValue("editSongName", snapshot.taskName || "");
       setValue("editReleaseDate", snapshot.releaseDate || "");
+      setValue("editVideoLink", snapshot.videoLink || "");
       setValue("editTaskType", snapshot.taskType || "");
       setValue("editSingerQuota", snapshot.singerQuota || "");
       setValue("editTone", snapshot.tone || "");
@@ -4571,6 +5986,7 @@ function renderBrowseList() {
     const taskCode = String(document.getElementById("editTaskCode")?.value || "").trim();
     const songName = String(document.getElementById("editSongName")?.value || "").trim();
     const releaseDate = String(document.getElementById("editReleaseDate")?.value || "").trim();
+    const videoLink = String(document.getElementById("editVideoLink")?.value || "").trim();
     const taskType = String(document.getElementById("editTaskType")?.value || "").trim();
     const gameType = taskType === "游戏" ? String(document.getElementById("editGameType")?.value || "").trim() : "";
     const isCollectiveTask = String(document.getElementById("editIsCollective")?.value || "") === "1";
@@ -4588,6 +6004,7 @@ function renderBrowseList() {
       task_name: songName || null,
       displayName: makeDisplayTaskName(taskCode, songName),
       release_date: releaseDate || null,
+      display_link: videoLink || null,
       task_type: taskType || null,
       is_collective_task: isCollectiveTask,
       project_tone: toneResult.value,
@@ -4617,8 +6034,9 @@ function renderBrowseList() {
 
     nextTask.supplementTags = getSupplementTags(nextTask);
     nextTask.readyForHonorShow = isReadyForHonorShow(nextTask);
-    nextTask.computedStatus = nextTask.supplementTags.join("｜");
-    return { task: nextTask, partResult, singerPayload, toneResult, taskCode, songName, releaseDate, taskType, gameType, isCollectiveTask, producerName, singerQuota };
+    const nextTodoStage = getTodoStage(nextTask);
+    nextTask.computedStatus = nextTodoStage ? nextTodoStage.statusText : "";
+    return { task: nextTask, partResult, singerPayload, toneResult, taskCode, songName, releaseDate, videoLink, taskType, gameType, isCollectiveTask, producerName, singerQuota };
   }
 
   function patchTaskInMemory(nextTask) {
@@ -5307,6 +6725,125 @@ function closeRoleSetupModal() {
     });
   }
 
+  async function secureUpdateProjectViaRpc(task, snapshot, projectPayload) {
+    const memberName = getCurrentMemberName();
+    const memberCode = getCurrentMemberCode();
+    if (!memberName || !memberCode) {
+      throw new Error("当前登录信息不完整，请重新登录后再试。");
+    }
+
+    const args = {
+      p_nickname: memberName,
+      p_member_code: memberCode,
+      p_project_id: task.id,
+      p_project_name: snapshot.songName || task.task_name || "",
+      p_project_code: snapshot.taskCode || task.task_code || "",
+      p_project_type: task.project_type || snapshot.taskType || task.task_type || "",
+      p_task_type: snapshot.taskType || task.task_type || "",
+      p_status: task.status || "",
+      p_publish_status: task.publish_status || "",
+      p_original_singer: task.original_singer || "",
+      p_project_tone: projectPayload.project_tone || "",
+      p_participant_count: Array.isArray(snapshot.singerPayload) ? snapshot.singerPayload.length : (task.participant_count || 0),
+      p_singer_quota: projectPayload.singer_quota || 1,
+      p_release_date: projectPayload.release_date || null,
+      p_is_collective_project: !!(task.is_collective_project || projectPayload.is_collective_task),
+      p_is_collective_task: !!projectPayload.is_collective_task,
+      p_game_type: snapshot.gameType || task.game_type || ""
+    };
+
+    const { error } = await supabaseClient.rpc("secure_update_project", args);
+    if (error) throw error;
+  }
+
+  async function secureReplaceProjectSingersViaRpc(taskId, memberIds) {
+    const memberName = getCurrentMemberName();
+    const memberCode = getCurrentMemberCode();
+    if (!memberName || !memberCode) {
+      throw new Error("当前登录信息不完整，请重新登录后再试。");
+    }
+
+    const normalizedIds = [...new Set((memberIds || []).map(id => String(id || "").trim()).filter(Boolean))];
+    const { error } = await supabaseClient.rpc("secure_replace_project_singers", {
+      p_nickname: memberName,
+      p_member_code: memberCode,
+      p_project_id: taskId,
+      p_member_ids: normalizedIds
+    });
+    if (error) throw error;
+  }
+
+  async function saveProjectSingersDirectly(taskId, singerPayload, existingTask) {
+    const normalizedPayload = [...new Set((singerPayload || []).map(item => String(item.member_id || "").trim()).filter(Boolean))].map(memberId => {
+      const existing = (existingTask?.singers || []).find(row => String(row.member_id || "").trim() === memberId) || {};
+      return {
+        project_id: taskId,
+        member_id: memberId,
+        is_submitted: !!existing.is_submitted,
+        submitted_at: existing.submitted_at || null
+      };
+    });
+
+    const existingRows = (existingTask?.singers || []).map(row => ({
+      id: String(row.id || "").trim(),
+      member_id: String(row.member_id || "").trim(),
+      is_submitted: !!row.is_submitted,
+      submitted_at: row.submitted_at || null
+    })).filter(row => row.member_id);
+
+    const existingIdByMember = new Map(existingRows.map(row => [row.member_id, row]));
+    const nextIds = new Set(normalizedPayload.map(row => row.member_id));
+
+    const removedRowIds = existingRows
+      .filter(row => row.id && !nextIds.has(row.member_id))
+      .map(row => row.id);
+
+    if (removedRowIds.length) {
+      const { error: deleteError } = await supabaseClient
+        .from("project_singers")
+        .delete()
+        .in("id", removedRowIds);
+      if (deleteError) throw deleteError;
+    }
+
+    const rowsToInsert = normalizedPayload.filter(row => !existingIdByMember.has(row.member_id));
+    if (rowsToInsert.length) {
+      const { error: insertError } = await supabaseClient
+        .from("project_singers")
+        .insert(rowsToInsert);
+      if (insertError) throw insertError;
+    }
+
+    for (const row of normalizedPayload) {
+      const existing = existingIdByMember.get(row.member_id);
+      if (!existing?.id) continue;
+      const { error: updateError } = await supabaseClient
+        .from("project_singers")
+        .update({
+          is_submitted: row.is_submitted,
+          submitted_at: row.submitted_at
+        })
+        .eq("id", existing.id);
+      if (updateError) throw updateError;
+    }
+  }
+
+  async function saveProjectPartsDirectly(taskId, partResult) {
+    const { error: deletePartError } = await supabaseClient
+      .from("project_parts")
+      .delete()
+      .eq("project_id", taskId);
+    if (deletePartError) throw deletePartError;
+
+    if (partResult.payload.length) {
+      const insertRows = partResult.payload.map(({ assigned_member_name, id, ...rest }) => rest);
+      const { error: insertPartError } = await supabaseClient
+        .from("project_parts")
+        .insert(insertRows);
+      if (insertPartError) throw insertPartError;
+    }
+  }
+
   function shouldFallbackFromRpcError(err) {
     const detail = String(err?.message || err?.details || err?.hint || err?.code || "").toLowerCase();
     return detail.includes("save_project_bundle")
@@ -5362,36 +6899,17 @@ function closeRoleSetupModal() {
     if (error) throw error;
   }
 
-  async function saveTaskBundleWithRpc(task, projectPayload, partResult, singerPayload) {
-    const partRows = partResult.payload.map(({ assigned_member_name, ...rest }) => ({
-      original_name: rest.original_name || "",
-      assigned_member_id: rest.assigned_member_id || null,
-      part_order: Number(rest.part_order) || null
-    }));
-    const singerRows = singerPayload.map(item => ({
-      member_id: item.member_id || null,
-      is_submitted: !!item.is_submitted,
-      submitted_at: item.submitted_at || null
-    }));
-
-    const args = {
-      p_project_id: task.id,
-      p_task_code: projectPayload.task_code,
-      p_task_name: projectPayload.task_name,
-      p_release_date: projectPayload.release_date,
-      p_task_type: projectPayload.task_type,
-      p_is_collective_task: projectPayload.is_collective_task,
-      p_project_tone: projectPayload.project_tone,
-      p_producer_member_id: projectPayload.producer_member_id,
-      p_singer_quota: projectPayload.singer_quota,
-      p_singer_bonus: projectPayload.singer_bonus,
-      p_producer_bonus: projectPayload.producer_bonus,
-      p_parts: partRows,
-      p_singers: singerRows
-    };
-
-    const { error } = await supabaseClient.rpc('save_project_bundle', args);
-    if (error) throw error;
+  async function saveTaskBundleWithRpc(task, snapshot, projectPayload, partResult, singerPayload) {
+    try {
+      await secureUpdateProjectViaRpc(task, snapshot, projectPayload);
+      await secureReplaceProjectSingersViaRpc(task.id, singerPayload.map(item => item.member_id));
+      await saveProjectPartsDirectly(task.id, partResult);
+    } catch (err) {
+      if (!shouldFallbackFromRpcError(err)) throw err;
+      await saveProjectPayloadDirectly(task.id, projectPayload);
+      await saveProjectSingersDirectly(task.id, singerPayload, task);
+      await saveProjectPartsDirectly(task.id, partResult);
+    }
   }
 
   function scheduleAutoSave(mode = "auto") {
@@ -5421,7 +6939,7 @@ function closeRoleSetupModal() {
     }
 
     const snapshot = buildTaskFromDom(task);
-    const { task: nextTask, partResult, singerPayload, toneResult, taskCode, songName, releaseDate, taskType, isCollectiveTask, producerName, singerQuota } = snapshot;
+    const { task: nextTask, partResult, singerPayload, toneResult, taskCode, songName, releaseDate, videoLink, taskType, isCollectiveTask, producerName, singerQuota } = snapshot;
 
     if (!toneResult.ok) {
       setAutoSaveStatus("error", "调只能填 -2 / 原调 / +6 这种格式");
@@ -5458,6 +6976,7 @@ function closeRoleSetupModal() {
       task_code: taskCode || null,
       task_name: songName || null,
       release_date: releaseDate || null,
+      display_link: videoLink || null,
       task_type: taskType || null,
       is_collective_task: isCollectiveTask,
       project_tone: toneResult.value,
@@ -5471,40 +6990,7 @@ function closeRoleSetupModal() {
     try {
       setAutoSaveStatus("saving", mode === "manual" ? "保存中..." : "自动保存中...");
 
-      try {
-        await saveTaskBundleWithRpc(task, projectPayload, partResult, singerPayload);
-      } catch (rpcErr) {
-        if (!shouldFallbackFromRpcError(rpcErr)) throw rpcErr;
-
-        await saveProjectPayloadDirectly(task.id, projectPayload);
-
-        const { error: deleteSingerError } = await supabaseClient
-          .from("project_singers")
-          .delete()
-          .eq("project_id", task.id);
-        if (deleteSingerError) throw deleteSingerError;
-
-        if (singerPayload.length) {
-          const { error: insertSingerError } = await supabaseClient
-            .from("project_singers")
-            .insert(singerPayload);
-          if (insertSingerError) throw insertSingerError;
-        }
-
-        const { error: deletePartError } = await supabaseClient
-          .from("project_parts")
-          .delete()
-          .eq("project_id", task.id);
-        if (deletePartError) throw deletePartError;
-
-        if (partResult.payload.length) {
-          const insertRows = partResult.payload.map(({ assigned_member_name, id, ...rest }) => rest);
-          const { error: insertPartError } = await supabaseClient
-            .from("project_parts")
-            .insert(insertRows);
-          if (insertPartError) throw insertPartError;
-        }
-      }
+      await saveTaskBundleWithRpc(task, snapshot, projectPayload, partResult, singerPayload);
 
       await loadProjectsFromSupabase({ keepSelection: true });
       hasPendingLocalChanges = false;
@@ -5547,12 +7033,15 @@ function closeRoleSetupModal() {
     try {
       setAutoSaveStatus("saving", "退出中...");
 
-      const { error: deleteSingerError } = await supabaseClient
-        .from("project_singers")
-        .delete()
-        .eq("project_id", task.id)
-        .eq("member_id", currentMemberId);
-      if (deleteSingerError) throw deleteSingerError;
+      const remainingSingerIds = (task.singers || [])
+        .map(row => String(row.member_id || "").trim())
+        .filter(id => id && id !== currentMemberId);
+      try {
+        await secureReplaceProjectSingersViaRpc(task.id, remainingSingerIds);
+      } catch (err) {
+        if (!shouldFallbackFromRpcError(err)) throw err;
+        await saveProjectSingersDirectly(task.id, remainingSingerIds.map(member_id => ({ member_id })), task);
+      }
 
       const assignedRows = (task.parts || []).filter(row => String(row.assigned_member_id || "").trim() === currentMemberId);
       for (const row of assignedRows) {
@@ -5582,7 +7071,7 @@ function closeRoleSetupModal() {
       console.error("退出任务失败：", err);
       setAutoSaveStatus("error", "退出失败");
       const detail = String(err?.message || err?.details || err?.hint || "").trim();
-      showToast("退出失败", detail ? `退出失败：${detail}` : "退出失败，请检查 project_singers / project_parts 表是否允许当前页面执行删除或更新。");
+      showToast("退出失败", detail ? `退出失败：${detail}` : "退出失败，请检查安全保存函数与 project_parts 权限。");
     }
   }
 
@@ -5603,18 +7092,13 @@ function closeRoleSetupModal() {
     try {
       setAutoSaveStatus("saving", "加入中...");
 
-      const { error: singerUpsertError } = await supabaseClient
-        .from("project_singers")
-        .upsert({
-          project_id: task.id,
-          member_id: currentMemberId,
-          is_submitted: false,
-          submitted_at: null
-        }, {
-          onConflict: "project_id,member_id",
-          ignoreDuplicates: false
-        });
-      if (singerUpsertError) throw singerUpsertError;
+      const nextSingerIds = [...new Set([...(task.singers || []).map(row => String(row.member_id || "").trim()).filter(Boolean), currentMemberId])];
+      try {
+        await secureReplaceProjectSingersViaRpc(task.id, nextSingerIds);
+      } catch (err) {
+        if (!shouldFallbackFromRpcError(err)) throw err;
+        await saveProjectSingersDirectly(task.id, nextSingerIds.map(member_id => ({ member_id })), task);
+      }
 
       await loadProjectsFromSupabase({keepSelection:true});
 
@@ -5630,63 +7114,25 @@ function closeRoleSetupModal() {
       console.error("加入任务失败：", err);
       setAutoSaveStatus("error", "加入失败");
       const detail = String(err?.message || err?.details || err?.hint || "").trim();
-      showToast("加入失败", detail ? `加入失败：${detail}` : "加入失败，请检查 project_singers 表是否允许当前页面执行新增或更新。\n如果你开了 RLS，需要放行 anon 的 insert / update。");
+      showToast("加入失败", detail ? `加入失败：${detail}` : "加入失败，请检查安全保存函数是否已创建。");
     }
   }
 
   async function deleteCurrentTask() {
-    if (!canEditCurrentPage()) return;
-    const task = tasks.find(item => item.id === activeClaimTaskId);
-    if (!task) return;
-
-    const ok = await showConfirmToast("确认删除", `确认删除任务「${task.displayName || "未命名任务"}」吗？
-删除后不可恢复。`, "确认删除", "取消");
-    if (!ok) return;
-
-    try {
-      setAutoSaveStatus("saving", "删除中...");
-
-      const { error: deleteSingerError } = await supabaseClient
-        .from("project_singers")
-        .delete()
-        .eq("project_id", task.id);
-      if (deleteSingerError) throw deleteSingerError;
-
-      const { error: deletePartError } = await supabaseClient
-        .from("project_parts")
-        .delete()
-        .eq("project_id", task.id);
-      if (deletePartError) throw deletePartError;
-
-      const { error: deleteProjectError } = await supabaseClient
-        .from("projects")
-        .delete()
-        .eq("id", task.id);
-      if (deleteProjectError) throw deleteProjectError;
-
-      const remainingTasks = tasks.filter(item => item.id !== task.id);
-      activeClaimTaskId = remainingTasks.length ? remainingTasks[0].id : "";
-      setAutoSaveStatus("saved", "已删除");
-
-      await loadProjectsFromSupabase({keepSelection:false});
-    } catch (err) {
-      console.error("删除任务失败：", err);
-      setAutoSaveStatus("error", "删除失败");
-      showToast("删除失败", "任务删除失败，请检查数据库权限或表关联设置。");
-    }
+    showToast("暂不支持", "当前安全模式下，删除任务还没有接入专用安全函数，先不要在这个页面直接删除。");
   }
 
+  const CURRENT_STUDIO_PAGE = "studio-todo.html";
+
   function syncPanelSwitchActive() {
-    const current = window.location.pathname.split("/").pop() || "";
     document.querySelectorAll("#panelSwitch .switchBtn").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.page === current);
+      btn.classList.toggle("active", btn.dataset.page === CURRENT_STUDIO_PAGE);
     });
   }
 
   async function goStudioPage(page) {
     if (!page) return;
-    const current = window.location.pathname.split("/").pop() || "";
-    if (current === page) return;
+    if (page === CURRENT_STUDIO_PAGE) return;
     if (hasPendingLocalChanges) {
       await saveCurrentTaskEdits("manual");
     }
@@ -5818,6 +7264,7 @@ function closeRoleSetupModal() {
 
   window.addEventListener("resize", syncOverlayToImage);
   window.addEventListener("orientationchange", syncOverlayToImage);
+  window.addEventListener("load", syncTopUiLayout);
   window.addEventListener("pageshow", () => {
     resetTransientUiState();
   });
