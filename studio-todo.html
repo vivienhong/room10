@@ -226,7 +226,7 @@
     text-align:center;
     pointer-events:auto;
     box-sizing:border-box;
-    overflow:hidden;
+    overflow:visible;
   }
 
   @media (min-width: 1400px){
@@ -1193,6 +1193,45 @@
     flex-wrap:wrap;
   }
 
+  .sectionTitleRow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+
+  .sectionTitleRow .sectionTitle{
+    margin-bottom:0;
+  }
+
+  .sectionTitleActions{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+    flex-wrap:wrap;
+    min-height:30px;
+  }
+
+  .lotteryResultBadge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:30px;
+    padding:0 12px;
+    border-radius:10px;
+    background:rgba(255,252,247,0.9);
+    color:#7c4d25;
+    font-size:11px;
+    font-weight:800;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 2px 6px rgba(112,83,52,0.06);
+    white-space:nowrap;
+    max-width:100%;
+  }
+
   .addPartRowBtn,
   .roleToolBtn{
     min-width:auto;
@@ -1521,6 +1560,7 @@
     align-items:center;
     justify-content:center;
     order:2;
+    overflow:visible;
   }
 
   #siteNoticeBtn{
@@ -1546,7 +1586,7 @@
     backdrop-filter:blur(8px);
     -webkit-backdrop-filter:blur(8px);
     transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
-    overflow:hidden;
+    overflow:visible;
     box-sizing:border-box;
   }
 
@@ -1572,20 +1612,24 @@
 
   #siteNoticeCount{
     position:absolute;
-    right:-2px;
-    top:-2px;
-    min-width:18px;
-    height:18px;
-    padding:0 5px;
+    right:-6px;
+    top:-6px;
+    min-width:20px;
+    height:20px;
+    padding:0 6px;
     border-radius:999px;
     background:#c98c4f;
     color:#fff9f1;
     font-size:10px;
     font-weight:900;
+    line-height:1;
     display:none;
     align-items:center;
     justify-content:center;
+    border:2px solid rgba(255,248,239,0.98);
+    box-sizing:border-box;
     box-shadow:0 2px 8px rgba(116,86,54,0.16);
+    z-index:3;
   }
 
   #siteNoticeBtn.hasNotice #siteNoticeCount{
@@ -3463,6 +3507,8 @@
   let lastLotteryReminderKey = "";
   let hasPendingLocalChanges = false;
   let preserveActiveTaskInCurrentView = true;
+  let stickyTaskIdInCurrentView = "";
+  let stickyTaskReason = "";
   let personalLotteryInFlight = false;
 
   const room = document.getElementById("room");
@@ -3877,38 +3923,83 @@
     return liveTask.parts.filter(row => String(row.assigned_member_id || "").trim() === id);
   }
 
-  function canCurrentUserUseLottery(task) {
+  function getCurrentUserUnassignedLotteryState(task) {
     const currentId = getCurrentMemberId();
-    if (!task || !currentId) return false;
-    if (!isCurrentUserSingerInTask(task)) return false;
-    if (!getUnassignedRoleRows(task).length) return false;
-    return true;
+    const liveTask = getTaskForLiveUi(task);
+    const result = {
+      task: liveTask,
+      currentId,
+      isSinger: false,
+      assignedRows: [],
+      assignedRoleName: '',
+      unassignedRows: [],
+      unassignedSingerIds: [],
+      eligible: false,
+      needsLottery: false
+    };
+
+    if (!liveTask || !currentId) return result;
+
+    const singerIds = [...new Set((liveTask.singers || []).map(item => String(item.member_id || '').trim()).filter(Boolean))];
+    result.isSinger = singerIds.includes(currentId);
+    if (!result.isSinger) return result;
+
+    result.assignedRows = getAssignedRoleRowsForMember(liveTask, currentId);
+    result.assignedRoleName = String(result.assignedRows[0]?.original_name || '').trim();
+    if (result.assignedRows.length) return result;
+
+    result.unassignedRows = getUnassignedRoleRows(liveTask);
+    result.unassignedSingerIds = singerIds.filter(memberId => getAssignedRoleRowsForMember(liveTask, memberId).length === 0);
+    result.eligible = result.unassignedRows.length > 0 && result.unassignedSingerIds.includes(currentId);
+    result.needsLottery = result.eligible && result.unassignedRows.length >= 2 && result.unassignedSingerIds.length >= 2;
+    return result;
+  }
+
+  function canCurrentUserUseLottery(task) {
+    return getCurrentUserUnassignedLotteryState(task).needsLottery;
   }
 
   function shouldCurrentUserDrawNow(task) {
-    const currentId = getCurrentMemberId();
-    if (!currentId || !canCurrentUserUseLottery(task)) return false;
-    if (!task.lyrics_lottery_enabled) return false;
-    return getAssignedRoleRowsForMember(task, currentId).length === 0;
+    return getCurrentUserUnassignedLotteryState(task).needsLottery;
   }
 
   function getPersonalLotteryButtonText(task) {
-    if (!task) return "开始抽签";
-    if (!canCurrentUserUseLottery(task)) return "开始抽签";
-    if (!task.lyrics_lottery_enabled) return "开启抽签";
-    if (shouldCurrentUserDrawNow(task)) return "开始抽签";
-    return "已抽签";
+    return '开始抽签';
   }
 
-  async function setLyricsLotteryEnabled(taskId, enabled) {
-    throw new Error("当前安全模式下，抽签开关还没有接入专用安全函数。");
+  function shouldRemindCurrentUserForLottery(task) {
+    const state = getCurrentUserUnassignedLotteryState(task);
+    if (!state.needsLottery) return false;
+    return (state.task?.parts || []).some(row => {
+      const assignedId = String(row?.assigned_member_id || '').trim();
+      return assignedId && assignedId !== state.currentId;
+    });
+  }
+
+async function setLyricsLotteryEnabled(taskId, enabled) {
+    const memberName = getCurrentMemberName();
+    const memberCode = getCurrentMemberCode();
+    const currentMemberId = getCurrentMemberId();
+
+    if (!memberName || !memberCode || !currentMemberId) {
+      throw new Error("当前登录信息不完整，请重新登录后再试。");
+    }
+
+    const { error } = await supabaseClient.rpc("secure_set_lyrics_lottery_enabled", {
+      p_nickname: memberName,
+      p_member_code: memberCode,
+      p_project_id: taskId,
+      p_enabled: !!enabled
+    });
+    if (error) throw error;
   }
 
   async function assignRandomRoleToCurrentMember(task) {
     const currentMemberId = getCurrentMemberId();
     const currentMemberName = getCurrentMemberName();
+    const currentMemberCode = getCurrentMemberCode();
 
-    if (!currentMemberId || !currentMemberName) {
+    if (!currentMemberId || !currentMemberName || !currentMemberCode) {
       showToast("无法抽签", "当前登录信息不完整，请重新登录后再试。");
       return false;
     }
@@ -3928,41 +4019,41 @@
       return false;
     }
 
-    const { error: clearStaleAssignError } = await supabaseClient
-      .from("project_parts")
-      .update({ assigned_member_id: null })
-      .eq("project_id", task.id)
-      .eq("assigned_member_id", currentMemberId);
-    if (clearStaleAssignError) throw clearStaleAssignError;
-
-    await loadProjectsFromSupabase({ keepSelection: true });
     const latestTask = getCurrentTaskSafe(task.id) || task;
     const unassignedRows = getUnassignedRoleRows(latestTask).filter(row => String(row.id || "").trim());
-
     if (!unassignedRows.length) {
       showToast("无需抽签", "当前已经没有可抽取的角色了。");
       return false;
     }
 
-    const pickedRow = unassignedRows[Math.floor(Math.random() * unassignedRows.length)];
-    const pickedRoleName = String(pickedRow?.original_name || "").trim();
-
     pushUndoSnapshot();
-    setAutoSaveStatus("saving", "抽签中...");
+    setAutoSaveStatus("saving", "抽签中.");
 
-    const { error } = await supabaseClient
-      .from("project_parts")
-      .update({ assigned_member_id: currentMemberId })
-      .eq("id", pickedRow.id)
-      .eq("project_id", task.id)
-      .eq("original_name", pickedRoleName)
-      .is("assigned_member_id", null);
+    const { data, error } = await supabaseClient.rpc("secure_assign_random_role_for_current_member", {
+      p_nickname: currentMemberName,
+      p_member_code: currentMemberCode,
+      p_project_id: task.id
+    });
     if (error) throw error;
 
     await loadProjectsFromSupabase({ keepSelection: true });
 
-    setAutoSaveStatus("saved", "已抽签");
-    showToast("抽签成功", pickedRoleName ? `你抽到的是：${pickedRoleName}` : "你已经抽到角色了。");
+    let picked = Array.isArray(data) ? data[0] || null : data || null;
+    let pickedRoleName = String(
+      picked?.picked_role_name ||
+      picked?.role_name ||
+      picked?.original_name ||
+      ""
+    ).trim();
+
+    if (!pickedRoleName) {
+      const refreshedTask = getCurrentTaskSafe(task.id) || task;
+      const assignedRows = getAssignedRoleRowsForMember(refreshedTask, currentMemberId);
+      pickedRoleName = String(assignedRows[0]?.original_name || '').trim();
+    }
+
+    setAutoSaveStatus("saved", "已同步");
+    showToast("抽签成功", pickedRoleName ? `你抽到了：${pickedRoleName}` : "你已经完成分配。");
     return true;
   }
 
@@ -4001,28 +4092,31 @@
     }
 
     const liveTask = getTaskForLiveUi(task) || task;
-    if (!canCurrentUserUseLottery(liveTask)) {
-      if (!isCurrentUserSingerInTask(liveTask)) {
-        showToast("无法抽签", "只有参与这首歌演唱的成员才可以抽签。");
-      } else {
-        showToast("无需抽签", "当前没有可抽取的未分配角色。");
-      }
+    const lotteryState = getCurrentUserUnassignedLotteryState(liveTask);
+    if (!lotteryState.isSinger) {
+      showToast("无法抽签", "只有参与这首歌演唱的成员才可以抽签。");
+      return;
+    }
+    if (lotteryState.assignedRoleName) {
+      showToast("无需抽签", `你当前对应的是：${lotteryState.assignedRoleName}`);
+      return;
+    }
+    if (!lotteryState.needsLottery) {
+      showToast("无需抽签", "当前不是需要随机抽签的情况。");
       return;
     }
 
     personalLotteryInFlight = true;
     try {
       const persistedTask = await ensureLotteryRowsPersisted(task.id);
-      const workingTask = persistedTask || getCurrentTaskSafe(task.id) || task;
-
-      if (!workingTask.lyrics_lottery_enabled) {
-        setAutoSaveStatus("saving", "开启抽签中...");
-        await setLyricsLotteryEnabled(workingTask.id, true);
+      const latestTask = persistedTask || getCurrentTaskSafe(task.id) || task;
+      if (!latestTask.lyrics_lottery_enabled) {
+        setAutoSaveStatus("saving", "准备抽签中...");
+        await setLyricsLotteryEnabled(latestTask.id, true);
         await loadProjectsFromSupabase({ keepSelection: true });
       }
-
-      const latestTask = getCurrentTaskSafe(workingTask.id) || workingTask;
-      await assignRandomRoleToCurrentMember(latestTask);
+      const workingTask = getCurrentTaskSafe(task.id) || latestTask;
+      await assignRandomRoleToCurrentMember(workingTask);
     } catch (err) {
       console.error("个人抽签失败：", err);
       setAutoSaveStatus("error", "抽签失败");
@@ -4034,15 +4128,7 @@
   }
 
   function getPendingPersonalLotteryTasks() {
-    const currentMemberId = getCurrentMemberId();
-    if (!currentMemberId) return [];
-
-    return tasks.filter(task => {
-      if (!shouldCurrentUserDrawNow(task)) return false;
-      const openedBy = String(task.lyrics_lottery_opened_by || '').trim();
-      if (openedBy && openedBy === currentMemberId) return false;
-      return true;
-    });
+    return tasks.filter(task => shouldRemindCurrentUserForLottery(task));
   }
 
   function getSiteNotificationItems() {
@@ -4051,11 +4137,11 @@
       type: 'lottery',
       taskId: task.id,
       title: task.displayName || task.task_name || '未命名任务',
-      desc: '这首歌已经开启抽签，且当前还需要你本人完成抽签。'
+      desc: '这首歌的歌词分配已经开始，且你还没有完成分配，请尽快来抽签。'
     }));
   }
 
-  function renderSiteNotifications() {
+function renderSiteNotifications() {
     if (!siteNoticeBtn || !siteNoticeBody || !siteNoticeText || !siteNoticeCount || !siteNoticePanel) return;
 
     const items = getSiteNotificationItems();
@@ -4109,6 +4195,7 @@
     if (!nextId || nextId === String(activeClaimTaskId || '').trim()) return;
     const ok = await saveBeforeContextSwitch();
     if (!ok) return;
+    clearPinnedTaskInCurrentView();
     activeClaimTaskId = nextId;
     setAutoSaveStatus('saved', '已同步');
     renderBrowseList();
@@ -4119,6 +4206,7 @@
   async function applyFilterAndRefresh(nextFilter) {
     const ok = await saveBeforeContextSwitch();
     if (!ok) return;
+    clearPinnedTaskInCurrentView();
     updateFilterState(nextFilter);
     const filtered = getFilteredTasks(claimSearchKeyword);
     if (!filtered.some(task => task.id === activeClaimTaskId)) {
@@ -4958,12 +5046,27 @@ ${names}${suffix}`);
     syncFilterButtons();
   }
 
+  function pinActiveTaskInCurrentView(taskId, reason = "") {
+    const normalizedId = String(taskId || "").trim();
+    stickyTaskIdInCurrentView = normalizedId;
+    stickyTaskReason = normalizedId ? String(reason || "").trim() : "";
+  }
+
+  function clearPinnedTaskInCurrentView(taskId = "") {
+    const normalizedId = String(taskId || "").trim();
+    if (!normalizedId || normalizedId === String(stickyTaskIdInCurrentView || "").trim()) {
+      stickyTaskIdInCurrentView = "";
+      stickyTaskReason = "";
+    }
+  }
+
   function getFilteredTasks(keyword) {
     const tokens = normalizeSearchQuery(keyword);
     const currentFilter = getCurrentMainFilter();
 
     return tasks.filter(task => {
-      const isActiveTask = preserveActiveTaskInCurrentView && task.id === activeClaimTaskId;
+      const isPinnedTask = String(task.id || "") === String(stickyTaskIdInCurrentView || "");
+      const isActiveTask = (preserveActiveTaskInCurrentView && task.id === activeClaimTaskId) || isPinnedTask;
       const haystack = [
         task.displayName,
         task.task_name,
@@ -5318,13 +5421,11 @@ function renderBrowseList() {
         </div>
 
         <div class="editBlock">
-          <div class="sectionTitle">歌词分配</div>
+          <div class="sectionTitleRow">
+            <div class="sectionTitle">歌词分配</div>
+            ${editable ? `<div class="sectionTitleActions" id="lyricsToolBtns"></div>` : ``}
+          </div>
           ${buildPartRowsHtml(task, disabledAttr, singerQuota)}
-          ${editable ? `
-            <div class="lyricsToolbar" id="lyricsToolbar" style="display:none;">
-              <div class="lyricsToolBtns" id="lyricsToolBtns"></div>
-            </div>
-          ` : ``}
         </div>
 
         <div class="editBlock">
@@ -6279,28 +6380,26 @@ function closeRoleSetupModal() {
     bindPartMemberOptionEvents();
     updatePartMemberOptionsFromSelectedSingers();
 
-    const toolbar = document.getElementById("lyricsToolbar");
     const btnWrap = document.getElementById("lyricsToolBtns");
-    if (!toolbar || !btnWrap) return;
+    if (!btnWrap) return;
 
     const autoFillState = getAutoFillLastSingerState();
     const domIsCollective = document.getElementById("editIsCollectiveBtn")?.classList.contains("special")
       || String(document.getElementById("editIsCollective")?.value || "") === "1";
     const roleState = getRoleToolState();
     const liveTask = getTaskForLiveUi(getCurrentTaskSafe());
+    const lotteryState = getCurrentUserUnassignedLotteryState(liveTask);
     const personalLotteryButtonText = getPersonalLotteryButtonText(liveTask);
-    const canShowLottery = !autoFillState.shouldAutoFill && !!liveTask && isCurrentUserSingerInTask(liveTask) && roleState.pendingRows.length > 0;
+    const canShowLottery = !autoFillState.shouldAutoFill && lotteryState.needsLottery;
     const canOpenWheel = !!domIsCollective && !autoFillState.shouldAutoFill && roleState.pendingRows.length > 0 && roleState.selectedSingerNames.length > 0;
 
     if (!canShowLottery && !canOpenWheel) {
-      toolbar.style.display = "none";
       btnWrap.innerHTML = "";
       return;
     }
 
-    toolbar.style.display = "";
     btnWrap.innerHTML = `
-      ${canShowLottery ? `<button id="roleLotteryBtn" class="miniBtn roleToolBtn" type="button" ${personalLotteryButtonText === "已抽签" ? "disabled" : ""}>${personalLotteryButtonText}</button>` : ''}
+      ${canShowLottery ? `<button id="roleLotteryBtn" class="miniBtn roleToolBtn" type="button">${escapeHtml(personalLotteryButtonText)}</button>` : ''}
       ${canOpenWheel ? '<button id="openWheelBtn" class="miniBtn ghost roleToolBtn" type="button">转盘工具</button>' : ''}
     `;
 
@@ -6940,6 +7039,8 @@ function closeRoleSetupModal() {
 
     const snapshot = buildTaskFromDom(task);
     const { task: nextTask, partResult, singerPayload, toneResult, taskCode, songName, releaseDate, videoLink, taskType, isCollectiveTask, producerName, singerQuota } = snapshot;
+    const activeFilterBeforeSave = getCurrentMainFilter();
+    const lyricsStateBeforeSave = getLyricsAssignmentState(task);
 
     if (!toneResult.ok) {
       setAutoSaveStatus("error", "调只能填 -2 / 原调 / +6 这种格式");
@@ -6993,6 +7094,20 @@ function closeRoleSetupModal() {
       await saveTaskBundleWithRpc(task, snapshot, projectPayload, partResult, singerPayload);
 
       await loadProjectsFromSupabase({ keepSelection: true });
+
+      const refreshedTask = tasks.find(item => String(item.id || "") === String(task.id || ""));
+      const lyricsStateAfterSave = refreshedTask ? getLyricsAssignmentState(refreshedTask) : null;
+      const shouldPinCompletedLyricsTask =
+        activeFilterBeforeSave === "待分词"
+        && lyricsStateBeforeSave?.complete === false
+        && lyricsStateAfterSave?.complete === true;
+
+      if (shouldPinCompletedLyricsTask && refreshedTask) {
+        pinActiveTaskInCurrentView(refreshedTask.id, "lyrics-complete");
+      } else if (String(stickyTaskIdInCurrentView || "") === String(task.id || "")) {
+        clearPinnedTaskInCurrentView(task.id);
+      }
+
       hasPendingLocalChanges = false;
       setAutoSaveStatus("saved", mode === "manual" ? "已保存" : "已同步");
       renderBrowseList();
@@ -7133,6 +7248,7 @@ function closeRoleSetupModal() {
   async function goStudioPage(page) {
     if (!page) return;
     if (page === CURRENT_STUDIO_PAGE) return;
+    clearPinnedTaskInCurrentView();
     if (hasPendingLocalChanges) {
       await saveCurrentTaskEdits("manual");
     }
@@ -7221,6 +7337,7 @@ function closeRoleSetupModal() {
 
   window.addEventListener("pagehide", () => {
     preserveActiveTaskInCurrentView = false;
+    clearPinnedTaskInCurrentView();
     if (!hasPendingLocalChanges) return;
     try {
       saveCurrentTaskEdits("manual");
