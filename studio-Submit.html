@@ -1648,23 +1648,56 @@
       .join("");
   }
 
+  function getAssignableSingerMembers(rowId = "") {
+    const usedSingerIds = new Set(getUsedSingerIds(rowId));
+    return selectedSingerIds
+      .map(memberId => getMemberById(memberId))
+      .filter(member => member && (!usedSingerIds.has(member.id) || originalRows.some(row => row.id === rowId && row.assignedSingerId === member.id)));
+  }
+
+  function findSingerMemberByText(text, rowId = "") {
+    const normalized = String(text || "").trim();
+    if (!normalized) return null;
+    const exactSelected = getAssignableSingerMembers(rowId).find(member => member.name === normalized || member.nickname === normalized);
+    if (exactSelected) return exactSelected;
+    return null;
+  }
+
+  function buildSingerDatalistOptions(rowId, selectedId) {
+    return getAssignableSingerMembers(rowId)
+      .map(member => `<option value="${escapeHtml(member.name)}"></option>`)
+      .join("");
+  }
+
   function renderOriginalRows() {
     syncRowsToQuota();
     syncOriginalAssignedNames();
 
-    originalRoleList.innerHTML = originalRows.map(row => `
-      <div class="originalRoleRow" data-row-id="${escapeHtml(row.id)}">
+    originalRoleList.innerHTML = originalRows.map((row, index) => `
+      <div class="originalRoleRow" data-row-id="${escapeHtml(row.id)}" data-row-index="${index}">
         <input
           class="originalInput"
           type="text"
           data-field="original"
+          data-row-index="${index}"
           value="${escapeHtml(row.original)}"
           placeholder="填写原唱名或部分"
         />
-        <select class="originalInput" data-field="assignedSingerId">
-          ${buildSingerOptions(row.id, row.assignedSingerId)}
-        </select>
-        <button class="rowActionBtn" type="button" data-action="delete">删除</button>
+        <div>
+          <input
+            class="originalInput"
+            type="text"
+            list="assignSingerOptions_${escapeHtml(row.id)}"
+            data-field="assignedSingerName"
+            data-row-index="${index}"
+            value="${escapeHtml(row.assignedSingerName || '')}"
+            placeholder="可选择，也可直接填入"
+          />
+          <datalist id="assignSingerOptions_${escapeHtml(row.id)}">
+            ${buildSingerDatalistOptions(row.id, row.assignedSingerId)}
+          </datalist>
+        </div>
+        <button class="rowActionBtn" type="button" data-action="delete">清空成员</button>
       </div>
     `).join("");
   }
@@ -1819,18 +1852,24 @@
       String(row.original || "").trim() || String(row.assignedSingerId || "").trim()
     );
 
+    const lastFilledOriginalIndex = originalRows.reduce((lastIndex, row, index) => {
+      return String(row.original || "").trim() ? index : lastIndex;
+    }, -1);
+
+    if (lastFilledOriginalIndex >= 0) {
+      const hasOriginalGap = originalRows.slice(0, lastFilledOriginalIndex + 1).some(row =>
+        !String(row.original || "").trim()
+      );
+      if (hasOriginalGap) {
+        throw new Error("原唱空行未填写完全，请先补全原唱 / 部分。");
+      }
+    }
+
     const missingOriginalRow = nonEmptyRows.find(row =>
       String(row.assignedSingerId || "").trim() && !String(row.original || "").trim()
     );
     if (missingOriginalRow) {
-      throw new Error("歌词分配中存在已选择认领成员但未填写原唱 / 部分的行。");
-    }
-
-    const missingSingerRow = nonEmptyRows.find(row =>
-      String(row.original || "").trim() && !String(row.assignedSingerId || "").trim()
-    );
-    if (missingSingerRow) {
-      throw new Error("歌词分配中存在已填写原唱 / 部分但未选择认领成员的行。");
+      throw new Error("原唱空行未填写完全，请先补全原唱 / 部分。");
     }
 
     const invalidAssigned = nonEmptyRows.find(row =>
@@ -2136,11 +2175,56 @@ function fitTopBarIdentityContent() {
     if (!rowEl) return;
     const rowId = rowEl.dataset.rowId;
     const field = e.target.dataset.field;
-    if (field !== "original") return;
 
-    originalRows = originalRows.map(row => (
-      row.id === rowId ? { ...row, original: e.target.value } : row
-    ));
+    if (field === "original") {
+      originalRows = originalRows.map(row => (
+        row.id === rowId ? { ...row, original: e.target.value } : row
+      ));
+      return;
+    }
+
+    if (field === "assignedSingerName") {
+      originalRows = originalRows.map(row => {
+        if (row.id !== rowId) return row;
+        const matched = findSingerMemberByText(e.target.value, rowId);
+        return {
+          ...row,
+          assignedSingerId: matched ? matched.id : "",
+          assignedSingerName: e.target.value
+        };
+      });
+    }
+  });
+
+  originalRoleList.addEventListener("keydown", (e) => {
+    const input = e.target.closest(".originalInput");
+    if (!input) return;
+
+    if (e.key === "Enter" && input.dataset.field === "original") {
+      e.preventDefault();
+      const currentIndex = Number(input.dataset.rowIndex || "-1");
+      if (!Number.isFinite(currentIndex) || currentIndex < 0) return;
+      const nextInput = originalRoleList.querySelector(`.originalInput[data-field="original"][data-row-index="${currentIndex + 1}"]`);
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.select();
+      }
+      return;
+    }
+
+    if (e.key !== "Tab") return;
+
+    const inputs = [...originalRoleList.querySelectorAll('.originalInput')];
+    const currentIndex = inputs.indexOf(input);
+    if (currentIndex < 0) return;
+
+    e.preventDefault();
+    const nextIndex = e.shiftKey ? currentIndex - 1 : currentIndex + 1;
+    const target = inputs[nextIndex];
+    if (target) {
+      target.focus();
+      if (typeof target.select === 'function') target.select();
+    }
   });
 
   originalRoleList.addEventListener("change", (e) => {
@@ -2148,34 +2232,36 @@ function fitTopBarIdentityContent() {
     if (!rowEl) return;
     const rowId = rowEl.dataset.rowId;
     const field = e.target.dataset.field;
-    if (field !== "assignedSingerId") return;
+    if (field !== "assignedSingerName") return;
 
     const row = originalRows.find(item => item.id === rowId);
     if (!row) return;
 
     const previousSingerId = row.assignedSingerId;
-    const nextSingerId = String(e.target.value || "").trim();
+    const previousSingerName = row.assignedSingerName;
+    const inputText = String(e.target.value || "").trim();
+    const matched = findSingerMemberByText(inputText, rowId);
+    const nextSingerId = matched ? String(matched.id || "") : "";
     const usedSingerIds = new Set(getUsedSingerIds(rowId));
 
     if (nextSingerId && usedSingerIds.has(nextSingerId)) {
-      e.target.value = previousSingerId || "";
+      e.target.value = previousSingerName || "";
       showToast("重复选择", "同一个成员不能在歌词分配中被重复选择。");
       return;
     }
 
-    if (nextSingerId && !selectedSingerIds.includes(nextSingerId)) {
-      e.target.value = previousSingerId || "";
-      showToast("无效选择", "请先在左侧勾选演唱者，再在右侧分配。");
+    if (inputText && !matched) {
+      e.target.value = previousSingerName || "";
+      showToast("无效成员", "请先在左侧勾选演唱者，再在右侧分配；也可以直接输入已勾选成员的名字。");
       return;
     }
 
     originalRows = originalRows.map(item => {
       if (item.id !== rowId) return item;
-      const member = getMemberById(nextSingerId);
       return {
         ...item,
         assignedSingerId: nextSingerId,
-        assignedSingerName: member ? member.name : ""
+        assignedSingerName: matched ? matched.name : ""
       };
     });
 
@@ -2191,11 +2277,14 @@ function fitTopBarIdentityContent() {
     const rowEl = e.target.closest(".originalRoleRow");
     if (!rowEl) return;
 
-    const row = originalRows.find(item => item.id === rowEl.dataset.rowId);
-    if (!row) return;
+    const rowId = rowEl.dataset.rowId;
 
-    originalRows = originalRows.filter(item => item.id !== row.id);
-    syncRowsToQuota();
+    originalRows = originalRows.map(item => (
+      item.id === rowId
+        ? { ...item, assignedSingerId: "", assignedSingerName: "" }
+        : item
+    ));
+
     syncOriginalAssignedNames();
     renderSingerMembers();
     renderProducerMembers();
