@@ -4941,99 +4941,49 @@ body{
 }
 
 
-/* 541px-700px：只修复身份组件完整显示，不改其他断点与页面布局 */
-@media (min-width:541px) and (max-width:700px){
+/* 541px-760px：横屏网页版身份组件按外框宽度比例缩放，避免铃铛/登出占比过大 */
+@media (min-width:541px) and (max-width:760px){
   #topBarUserArea{
-    gap:2px !important;
-    padding:2px 3px !important;
-    align-items:center !important;
-    overflow:hidden !important;
+    --identity-font:clamp(6px, 1.10vw, 8.4px) !important;
+    --identity-icon-font:clamp(6.2px, 1.18vw, 9px) !important;
+    --identity-logout-font:clamp(4.8px, .86vw, 6.4px) !important;
+    --identity-circle:clamp(10px, 1.98vw, 15px) !important;
+    --identity-logout-w:clamp(11px, 2.16vw, 16.5px) !important;
+    --identity-gap:clamp(1.2px, .32vw, 2.4px) !important;
+    --identity-pad-x:clamp(1.1px, .25vw, 2px) !important;
+    --identity-pad-y:clamp(1px, .22vw, 2px) !important;
+    --identity-radius:clamp(7px, 1.35vw, 10.5px) !important;
+    grid-template-columns:minmax(0,1fr) var(--identity-circle) var(--identity-logout-w) !important;
   }
 
   #currentUserBadge{
-    flex:1 1 auto !important;
-    width:100% !important;
     min-width:0 !important;
-    max-width:100% !important;
-    padding:1px 2px !important;
-    gap:1px !important;
-    justify-content:center !important;
-    align-items:center !important;
-    overflow:hidden !important;
-    white-space:normal !important;
-  }
-
-  #currentUserBadge .roleDot{
-    width:3px !important;
-    height:3px !important;
-    box-shadow:0 0 0 1px rgba(217,163,100,0.12) !important;
+    width:100% !important;
+    white-space:nowrap !important;
   }
 
   #currentUserBadge .identityText{
-    flex:1 1 auto !important;
+    flex:0 1 auto !important;
     min-width:0 !important;
     max-width:100% !important;
-    display:flex !important;
-    flex-direction:column !important;
-    align-items:center !important;
-    justify-content:center !important;
+    flex-direction:row !important;
+    white-space:nowrap !important;
+    line-height:1 !important;
+    letter-spacing:-.02em !important;
     overflow:hidden !important;
     text-overflow:clip !important;
-    white-space:normal !important;
-    word-break:keep-all !important;
-    overflow-wrap:normal !important;
-    text-align:center !important;
-    line-height:1.03 !important;
-    font-size:clamp(5.8px, 1.12vw, 7px) !important;
-    letter-spacing:-0.15px !important;
   }
 
   #currentUserBadge .identityName,
+  #currentUserBadge .identitySep,
   #currentUserBadge .identityRole{
-    display:block !important;
-    max-width:100% !important;
-    overflow:hidden !important;
-    text-overflow:clip !important;
+    display:inline-block !important;
     white-space:nowrap !important;
-    line-height:1.03 !important;
+    line-height:1 !important;
   }
 
   #currentUserBadge .identitySep{
-    display:none !important;
-  }
-
-  #siteNoticeWrap{
-    width:18px !important;
-    min-width:18px !important;
-    max-width:18px !important;
-    flex:0 0 18px !important;
-  }
-
-  #siteNoticeBtn{
-    border-radius:7px !important;
-    font-size:7px !important;
-    line-height:1 !important;
-  }
-
-  #siteNoticeCount{
-    right:-4px !important;
-    top:-4px !important;
-    min-width:12px !important;
-    height:12px !important;
-    padding:0 3px !important;
-    border-width:1px !important;
-    font-size:7px !important;
-  }
-
-  #logoutBtn{
-    width:24px !important;
-    min-width:24px !important;
-    max-width:24px !important;
-    flex:0 0 24px !important;
-    border-radius:7px !important;
-    font-size:6.5px !important;
-    line-height:1 !important;
-    letter-spacing:-0.2px !important;
+    display:inline-block !important;
   }
 }
 </style>
@@ -6698,17 +6648,33 @@ ${names}${suffix}`);
     topBarUserArea.style.minHeight = `${Math.round(targetHeight)}px`;
     topBarUserArea.style.maxHeight = `${Math.round(targetHeight)}px`;
 
-    const identityGap = clampValue(5 * uiScale, 1.2, 8);
-    const identityPadX = clampValue(7 * uiScale, 1.5, 10);
-    const identityPadY = clampValue(4 * uiScale, 1, 6);
-    const identityInnerH = Math.max(10, targetHeight - identityPadY * 2);
-    const identityCircle = clampValue(identityInnerH, 8, targetHeight);
-    const logoutW = clampValue(34 * uiScale, Math.max(12, identityCircle * 1.08), 50);
-    const identityFont = clampValue(11.5 * uiScale, 3.8, 17);
-    const identityIconFont = clampValue(13 * uiScale, 4.2, 20);
-    const identityLogoutFont = clampValue(10.2 * uiScale, 3.8, 15);
-    const identityRadius = clampValue(11 * uiScale, 2.5, 15);
-    const identityLineGap = clampValue(2 * uiScale, 0, 3);
+    let identityGap = clampValue(5 * uiScale, 1.2, 8);
+    let identityPadX = clampValue(7 * uiScale, 1.5, 10);
+    let identityPadY = clampValue(4 * uiScale, 1, 6);
+    let identityInnerH = Math.max(10, targetHeight - identityPadY * 2);
+    let identityCircle = clampValue(identityInnerH, 8, targetHeight);
+    let logoutW = clampValue(34 * uiScale, Math.max(12, identityCircle * 1.08), 50);
+    let identityFont = clampValue(11.5 * uiScale, 3.8, 17);
+    let identityIconFont = clampValue(13 * uiScale, 4.2, 20);
+    let identityLogoutFont = clampValue(10.2 * uiScale, 3.8, 15);
+    let identityRadius = clampValue(11 * uiScale, 2.5, 15);
+    let identityLineGap = clampValue(2 * uiScale, 0, 3);
+
+    /* 541–760px 是横屏网页版窄宽度：按钮不能继续按高度取值，
+       否则铃铛/登出占比会比大屏更大。这里按身份外框宽度成比例缩放，
+       保持 2327px 时“身份信息 / 铃铛 / 登出”的相对占比。 */
+    if (overlayRect.width >= 541 && overlayRect.width <= 760) {
+      identityCircle = clampValue(sideWidth * 0.145, 10, 15);
+      logoutW = clampValue(sideWidth * 0.158, 11, 16.5);
+      identityGap = clampValue(sideWidth * 0.023, 1.2, 2.4);
+      identityPadX = clampValue(sideWidth * 0.017, 1.1, 2.0);
+      identityPadY = clampValue(targetHeight * 0.11, 1.0, 2.0);
+      identityFont = clampValue(sideWidth * 0.082, 6.0, 8.4);
+      identityIconFont = clampValue(sideWidth * 0.086, 6.2, 9.0);
+      identityLogoutFont = clampValue(sideWidth * 0.056, 4.8, 6.4);
+      identityRadius = clampValue(sideWidth * 0.105, 7, 10.5);
+      identityLineGap = 0;
+    }
 
     topBarUserArea.style.setProperty("--identity-gap", `${identityGap.toFixed(2)}px`);
     topBarUserArea.style.setProperty("--identity-circle", `${identityCircle.toFixed(2)}px`);
