@@ -7,8 +7,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>*{box-sizing:border-box;}
-
+<style>
+*{box-sizing:border-box;}
 html,body{
     margin:0;
     width:100%;
@@ -20,13 +20,11 @@ html,body{
       radial-gradient(circle at top right, color-mix(in srgb, var(--bg-side-right) 80%, white 20%) 0%, transparent 38%),
       linear-gradient(180deg,var(--bg-top) 0%, var(--bg-mid) 52%, var(--bg-bottom) 100%);
   }
-
 body{
     display:flex;
     justify-content:center;
     align-items:center;
   }
-
 #room{
     position:relative;
     width:100vw;
@@ -35,7 +33,6 @@ body{
     overflow:hidden;
     background:#e7dfd4;
   }
-
 #bgFrame{
     position:absolute;
     inset:0;
@@ -43,7 +40,6 @@ body{
     overflow:hidden;
     background:none;
   }
-
 #bg{
     position:absolute;
     inset:0;
@@ -58,7 +54,6 @@ body{
     opacity:1;
     transition:none;
   }
-
 #overlay{
     position:absolute;
     inset:0;
@@ -68,14 +63,12 @@ body{
     --ui-scale:1;
     --overlay-ui-scale:var(--ui-scale);
     --project-radius-md:calc(20px * var(--ui-scale));
-    --project-font-base:calc(13px * var(--ui-scale));
+    --project-font-base:calc(16px * var(--ui-scale));
     --project-btn-h:calc(40px * var(--ui-scale));
   }
-
 #overlay *{
     pointer-events:auto;
   }
-
 :root{
     --top-chip-bg: rgba(255,252,247,0.86);
     --top-chip-border: rgba(160,116,78,0.12);
@@ -83,7 +76,6 @@ body{
       inset 0 1px 0 rgba(255,255,255,0.96),
       0 3px 10px rgba(110,84,58,0.08);
   }
-
 #topBar{
     position:absolute;
     left:28.2%;
@@ -95,13 +87,11 @@ body{
     z-index:40;
     overflow:visible;
   }
-
 #navOuter{
     flex:0 0 auto;
     min-width:0;
     overflow:visible;
   }
-
 #navScroll{
     width:100%;
     overflow:visible;
@@ -112,11 +102,9 @@ body{
     padding:6px;
     margin:-6px;
   }
-
 #navScroll::-webkit-scrollbar{
     display:none;
   }
-
 #roomNav{
     display:inline-flex;
     align-items:center;
@@ -126,7 +114,6 @@ body{
     transform-origin:left top;
     will-change:auto;
   }
-
 @keyframes navInnerGlowSweep{
     0%{
       transform:translateX(-130%) skewX(-18deg);
@@ -143,7 +130,6 @@ body{
       opacity:0;
     }
   }
-
 .navBtn{
     appearance:none;
     border:none;
@@ -168,7 +154,6 @@ body{
     overflow:hidden;
     isolation:isolate;
   }
-
 .navBtn::before{
     content:"";
     position:absolute;
@@ -188,7 +173,6 @@ body{
     pointer-events:none;
     z-index:0;
   }
-
 .navBtn::after{
     content:"";
     position:absolute;
@@ -201,7 +185,6 @@ body{
     z-index:1;
     transition:opacity .18s ease, border-color .18s ease, box-shadow .18s ease;
   }
-
 .navBtn:hover,
 .navBtn:focus-visible{
     transform:none;
@@ -214,12 +197,10 @@ body{
       inset 0 0 15px rgba(255,238,199,0.34),
       0 3px 9px rgba(112,83,52,0.13);
   }
-
 .navBtn:hover::before,
 .navBtn:focus-visible::before{
     animation:navInnerGlowSweep 1.2s ease-out;
   }
-
 .navBtn:hover::after,
 .navBtn:focus-visible::after{
     opacity:.96;
@@ -228,7 +209,6 @@ body{
       inset 0 0 12px rgba(255,255,255,0.34),
       inset 0 0 0 1px rgba(255,232,190,0.30);
   }
-
 .navBtn.active{
     background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
     color:#fff9f1;
@@ -240,11 +220,9 @@ body{
       inset 0 0 16px rgba(255,235,194,0.40),
       0 4px 12px rgba(116,86,54,0.18);
   }
-
 .navBtn.active::before{
     animation:navInnerGlowSweep 3.2s ease-in-out infinite;
   }
-
 .navBtn.active::after{
     inset:3px;
     border-color:rgba(255,250,235,0.90);
@@ -253,7 +231,6 @@ body{
       inset 0 -5px 10px rgba(255,225,170,0.24);
     opacity:1;
   }
-
 #logoutBtn{
     appearance:none;
     border:none;
@@ -281,12 +258,10 @@ body{
     overflow:hidden;
     line-height:1;
   }
-
 #logoutBtn:hover{
     transform:translateY(-1px);
     background:rgba(255,255,255,0.94);
   }
-
 #topBarUserAnchor{
     position:absolute;
     right:7.35%;
@@ -297,12 +272,10 @@ body{
     z-index:65;
     pointer-events:none;
   }
-
 #topBarUserArea{
-    --identity-font:clamp(9px, 0.72vw, 11px);
-    --identity-icon-font:clamp(9px, 0.72vw, 11px);
-    --identity-logout-font:clamp(8px, 0.66vw, 10px);
-
+    --identity-font:calc(25px * var(--bg-ui-scale, 1));
+    --identity-icon-font:calc(22px * var(--bg-ui-scale, 1));
+    --identity-logout-font:calc(18px * var(--bg-ui-scale, 1));
     position:absolute;
     right:0;
     left:auto;
@@ -333,7 +306,6 @@ body{
     transform:none;
     white-space:nowrap;
   }
-
 #currentUserBadge{
     order:1;
     flex:0 0 auto;
@@ -349,7 +321,7 @@ body{
     font-weight:800;
     display:flex;
     align-items:center;
-    justify-content:flex-start;
+    justify-content:center;
     gap:5px;
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.95),
@@ -370,19 +342,11 @@ body{
     line-height:1;
     font-size:inherit;
   }
-
 #taskPanel{
-    /*
-      主任务面板暂时保留坐标工具，定位先按实测底图坐标修正：
-      左下角参考值：桌面大屏 left≈10.8%，1600px 以下 left≈9.2%；
-      底边贴墙地分界线，底图 y≈88%，所以 bottom≈12%；
-      顶部保持原来的 18%，右侧边界先保持原来的 22.4%。
-    */
     --task-panel-left:9.2%;
     --task-panel-top:18%;
     --task-panel-right:22.4%;
     --task-panel-bottom:12%;
-
     position:absolute;
     left:var(--task-panel-left);
     right:var(--task-panel-right);
@@ -405,13 +369,11 @@ body{
     -webkit-backdrop-filter:blur(12px);
     overflow:visible;
   }
-
 @media (min-width:1600px){
   #taskPanel{
     --task-panel-left:9.1%;
   }
 }
-
 #taskPanel::before{
     content:"";
     position:absolute;
@@ -420,7 +382,6 @@ body{
     border:1px solid rgba(255,255,255,0.22);
     pointer-events:none;
   }
-
 #panelSwitch{
     position:absolute;
     left:104.9%;
@@ -443,7 +404,6 @@ body{
     gap:calc(8px * var(--ui-scale));
     z-index:30;
   }
-
 .switchBtn{
     appearance:none;
     border:none;
@@ -466,12 +426,10 @@ body{
       0 2px 6px rgba(116,86,54,0.08);
     transition:transform .18s ease, filter .18s ease, background .18s ease;
   }
-
 .switchBtn:hover{
     transform:none;
     filter:brightness(1.03);
   }
-
 .switchBtn.active{
     background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
     color:#fff9f1;
@@ -479,13 +437,11 @@ body{
       inset 0 1px 0 rgba(255,224,188,0.55),
       0 4px 10px rgba(116,86,54,0.14);
   }
-
 .panelView{
     position:absolute;
     inset:0;
     padding:0;
   }
-
 #browsePanelInner{
     position:relative;
     z-index:1;
@@ -494,7 +450,6 @@ body{
     display:grid;
     grid-template-columns:26.5% 73.5%;
   }
-
 #browseListPane{
     padding:16px 10px 14px 14px;
     border-right:1px solid rgba(255,255,255,0.20);
@@ -503,7 +458,6 @@ body{
     min-height:0;
     background:transparent;
   }
-
 #musicNotesLayer{
     position:absolute;
     inset:0;
@@ -511,7 +465,6 @@ body{
     pointer-events:none;
     z-index:0;
   }
-
 .musicNote{
     position:absolute;
     left:0;
@@ -524,7 +477,6 @@ body{
     animation:musicFloat linear forwards;
     will-change:transform, opacity;
   }
-
 @keyframes musicFloat{
     0%{
       transform:translate3d(0, 16px, 0) scale(.82) rotate(0deg);
@@ -541,7 +493,6 @@ body{
       opacity:0;
     }
   }
-
 .filterTagsWrap{
     flex:0 0 auto;
     display:flex;
@@ -554,11 +505,9 @@ body{
     -ms-overflow-style:none;
     align-items:center;
   }
-
 .filterTagsWrap::-webkit-scrollbar{
     display:none;
   }
-
 .filterTagBtn{
     appearance:none;
     border:none;
@@ -583,12 +532,10 @@ body{
     line-height:1;
     vertical-align:middle;
   }
-
 .filterTagBtn:hover{
     transform:translateY(-1px);
     filter:brightness(1.03);
   }
-
 .filterTagBtn.active{
     background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
     color:#fff9f1;
@@ -596,25 +543,21 @@ body{
       inset 0 1px 0 rgba(255,224,188,0.55),
       0 4px 10px rgba(116,86,54,0.14);
   }
-
 .filterTagBtn.altToggle{
     background:rgba(255,252,247,0.42);
     border:1.5px dashed rgba(188,144,99,0.72);
     box-shadow:none;
     color:#8a5b30;
   }
-
 .filterTagBtn.altToggle:hover{
     background:rgba(255,252,247,0.62);
   }
-
 .filterTagBtn.altToggle.active{
     background:rgba(217,163,100,0.18);
     color:#8a5b30;
     border:1.5px dashed rgba(201,140,79,0.95);
     box-shadow:0 0 0 2px rgba(217,163,100,0.12) inset;
   }
-
 .taskItem{
     width:100%;
     text-align:left;
@@ -632,18 +575,15 @@ body{
     isolation:isolate;
     overflow:hidden;
   }
-
 .taskItem.active{
   border-color:rgba(233,193,139,0.32);
   background:linear-gradient(180deg, rgba(252,242,223,0.98) 0%, rgba(246,229,202,0.98) 100%);
   color:#5c3819;
-
   box-shadow:
     inset 0 0 0 1px rgba(231,190,132,0.18),
     inset 0 2px 6px rgba(255,255,255,0.65),
     0 6px 14px rgba(120,92,63,0.06);
 }
-
 .taskItem.active::after{
   content:"";
   position:absolute;
@@ -651,7 +591,6 @@ body{
   left:-40%;
   width:30%;
   height:100%;
-
   background:linear-gradient(90deg,
     rgba(255,255,255,0) 0%,
     rgba(255,255,255,0.25) 40%,
@@ -659,29 +598,22 @@ body{
     rgba(255,255,255,0.25) 60%,
     rgba(255,255,255,0) 100%
   );
-
   transform:skewX(-18deg);
   filter:blur(0.8px);
-
   pointer-events:none;
   animation:flowSweep 4.5s ease-in-out infinite;
-
   z-index:1;
 }
-
 .taskItem.active::before{
   content:"";
   position:absolute;
   inset:0;
   border-radius:13px;
-
   box-shadow:
     inset 0 0 12px rgba(255,210,150,0.35);
-
   pointer-events:none;
   z-index:0;
 }
-
 @keyframes flowSweep{
   0%{
     left:-40%;
@@ -699,30 +631,24 @@ body{
     opacity:0;
   }
 }
-
 .taskItem.active .taskNameText{
     text-shadow:none;
   }
-
 .taskItem.active .taskTypeMini{
     box-shadow:none;
   }
-
 .bonusValue{
     font-size:18px;
     letter-spacing:0;
   }
-
 .bonusValue small{
     font-size:.64em;
   }
-
 .searchWrap{
     flex:0 0 auto;
     margin:0 0 8px;
     padding-right:4px;
   }
-
 .searchInput{
     width:100%;
     height:34px;
@@ -737,11 +663,9 @@ body{
       inset 0 1px 0 rgba(255,255,255,0.75),
       0 2px 8px rgba(120,92,63,0.05);
   }
-
 .searchInput::placeholder{
     color:#9a7b5b;
   }
-
 #browseList{
   flex:1 1 auto;
   min-height:0;
@@ -751,34 +675,27 @@ body{
   scrollbar-width:thin;
   scrollbar-color:rgba(175,135,98,0.55) transparent;
 }
-
 #browseList::-webkit-scrollbar{
     width:8px;
   }
-
 #browseList::-webkit-scrollbar-track{
     background:transparent;
   }
-
 #browseList::-webkit-scrollbar-thumb{
     background:rgba(175,135,98,0.55);
     border-radius:999px;
   }
-
 .taskItem:hover{
     transform:translateY(-1px);
     background:rgba(255,252,247,0.52);
   }
-
 .taskItem.active:hover{
     transform:none;
     background:linear-gradient(180deg, rgba(250,238,217,0.98) 0%, rgba(244,224,194,0.98) 100%);
   }
-
 .taskItem.jumpFlash{
     animation:taskJumpFlash 1.8s ease;
   }
-
 @keyframes taskJumpFlash{
     0%{
       box-shadow:
@@ -798,14 +715,12 @@ body{
       transform:none;
     }
   }
-
 .taskItemCardBtn{
     all:unset;
     display:block;
     width:100%;
     cursor:pointer;
   }
-
 .taskItemName{
     display:flex;
     align-items:flex-start;
@@ -817,7 +732,6 @@ body{
     line-height:1.3;
     color:inherit;
   }
-
 .taskItemTitleMain{
     min-width:0;
     display:flex;
@@ -826,14 +740,12 @@ body{
     flex-wrap:wrap;
     flex:1 1 auto;
   }
-
 .taskItemHeadActions{
     flex:0 0 auto;
     display:flex;
     align-items:center;
     gap:6px;
   }
-
 .taskNameText{
     min-width:0;
     overflow:hidden;
@@ -845,7 +757,6 @@ body{
     -webkit-box-orient:vertical;
     word-break:break-word;
   }
-
 .taskTypeMini{
     display:inline-flex;
     align-items:center;
@@ -861,7 +772,6 @@ body{
     border:1px solid rgba(194,151,108,0.22);
     flex:0 0 auto;
   }
-
 .taskItemInfo{
     display:block;
     margin-top:3px;
@@ -870,7 +780,6 @@ body{
     line-height:1.35;
     color:#8b6947;
   }
-
 .taskEmpty{
     padding:16px 12px;
     border-radius:15px;
@@ -880,7 +789,6 @@ body{
     line-height:1.6;
     text-align:center;
   }
-
 #browseDetailPane{
     padding:16px 16px 12px;
     min-width:0;
@@ -889,7 +797,6 @@ body{
     min-height:0;
     background:transparent;
   }
-
 #browseDetailHeader{
     display:flex;
     align-items:flex-start;
@@ -897,11 +804,9 @@ body{
     gap:10px;
     margin-bottom:8px;
   }
-
 .detailTitleWrap{
     min-width:0;
   }
-
 #browseDetailTitle{
     color:#6f4726;
     font-size:18px;
@@ -913,7 +818,6 @@ body{
     gap:4px;
     min-width:0;
   }
-
 .detailTitleMain{
     display:flex;
     align-items:center;
@@ -922,7 +826,6 @@ body{
     min-width:0;
     word-break:break-word;
   }
-
 .detailTitleMetaRow{
     display:flex;
     align-items:center;
@@ -930,23 +833,19 @@ body{
     flex-wrap:wrap;
     min-width:0;
   }
-
 .detailTitleText{
     min-width:0;
     overflow-wrap:anywhere;
   }
-
 .detailTitleStatus{
     color:#8a6644;
     font-size:11px;
     font-weight:700;
     line-height:1.45;
   }
-
 .topRightStatus{
     display:none;
   }
-
 .autoSaveBadge{
     flex:0 0 auto;
     min-height:30px;
@@ -961,22 +860,18 @@ body{
     align-items:center;
     justify-content:center;
   }
-
 .autoSaveBadge.saving{
     background:rgba(240,226,200,0.9);
     color:#8a5a2d;
   }
-
 .autoSaveBadge.saved{
     background:rgba(222,238,212,0.95);
     color:#55763a;
   }
-
 .autoSaveBadge.error{
     background:rgba(245,219,213,0.96);
     color:#934d3f;
   }
-
 .headerRight{
     display:flex;
     align-items:center;
@@ -984,7 +879,6 @@ body{
     flex-wrap:wrap;
     justify-content:flex-end;
   }
-
 .saveNowBtn{
     appearance:none;
     border:none;
@@ -1002,19 +896,16 @@ body{
       0 4px 12px rgba(112,83,52,0.10);
     transition:transform .18s ease, filter .18s ease;
   }
-
 .saveNowBtn:hover{
     transform:translateY(-1px);
     filter:brightness(1.03);
   }
-
 .saveNowBtn:disabled{
     cursor:not-allowed;
     opacity:.55;
     transform:none;
     filter:none;
   }
-
 .undoBtn{
     appearance:none;
     border:none;
@@ -1032,19 +923,16 @@ body{
       0 2px 8px rgba(112,83,52,0.08);
     transition:transform .18s ease, filter .18s ease;
   }
-
 .undoBtn:hover{
     transform:translateY(-1px);
     filter:brightness(1.03);
   }
-
 .undoBtn:disabled{
     cursor:not-allowed;
     opacity:.5;
     transform:none;
     filter:none;
   }
-
 #browseDetailBody{
     flex:1 1 auto;
     min-height:0;
@@ -1053,20 +941,16 @@ body{
     scrollbar-width:thin;
     scrollbar-color:rgba(175,135,98,0.55) transparent;
   }
-
 #browseDetailBody::-webkit-scrollbar{
     width:8px;
   }
-
 #browseDetailBody::-webkit-scrollbar-track{
     background:transparent;
   }
-
 #browseDetailBody::-webkit-scrollbar-thumb{
     background:rgba(175,135,98,0.55);
     border-radius:999px;
   }
-
 .editBlock{
     padding:12px;
     margin-bottom:10px;
@@ -1077,34 +961,28 @@ body{
       inset 0 1px 0 rgba(255,255,255,0.5),
       0 2px 8px rgba(120,92,63,0.04);
   }
-
 .editGrid{
     display:grid;
     grid-template-columns:repeat(2,minmax(0,1fr));
     gap:10px;
   }
-
 .editGrid.four{
     grid-template-columns:repeat(4,minmax(0,1fr));
   }
-
 .editField{
     display:flex;
     flex-direction:column;
     gap:5px;
     min-width:0;
   }
-
 .editField.full{
     grid-column:1 / -1;
   }
-
 .editLabel{
     color:#8a6644;
     font-size:11px;
     font-weight:700;
   }
-
 .majorEditLabel{
     color:#6f4726;
     font-size:16px;
@@ -1117,7 +995,6 @@ body{
     font-weight:900;
     margin-bottom:10px;
   }
-
 .editInput,
   .editSelect{
     width:100%;
@@ -1133,28 +1010,23 @@ body{
       inset 0 1px 0 rgba(255,255,255,0.75),
       0 2px 8px rgba(120,92,63,0.05);
   }
-
 .editInput::placeholder{
     color:#9a7b5b;
   }
-
 .rowList{
     display:flex;
     flex-direction:column;
     gap:8px;
   }
-
 .lyricsAssignWrap{
     display:grid;
     grid-template-columns:minmax(0,1fr) 210px;
     gap:12px;
     align-items:start;
   }
-
 .lyricsAssignWrap.noCandidates{
     grid-template-columns:1fr;
   }
-
 .rowCard{
     display:grid;
     grid-template-columns:minmax(0,1.25fr) minmax(0,1.2fr) 32px;
@@ -1169,25 +1041,21 @@ body{
     transition:box-shadow .18s ease, background .18s ease, transform .18s ease;
     position:relative;
   }
-
 .rowCard.openTarget{
     cursor:pointer;
   }
-
 .rowCard.openTarget:hover{
     transform:translateY(-1px);
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.75),
       0 4px 12px rgba(120,92,63,0.08);
   }
-
 .rowCard.dropHover{
     background:rgba(248,233,202,0.78);
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.85),
       0 0 0 2px rgba(201,140,79,0.35);
   }
-
 .candidatePane{
     padding:10px;
     border-radius:14px;
@@ -1197,20 +1065,17 @@ body{
       0 2px 8px rgba(120,92,63,0.04);
     min-height:100%;
   }
-
 .candidateTitle{
     color:#7a5231;
     font-size:12px;
     font-weight:800;
     margin-bottom:8px;
   }
-
 .candidateList{
     display:flex;
     flex-wrap:wrap;
     gap:8px;
   }
-
 .miniBtn,
   .pickerBtn,
   .candidateBtn{
@@ -1230,14 +1095,12 @@ body{
       0 4px 12px rgba(112,83,52,0.10);
     transition:transform .18s ease, filter .18s ease, background .18s ease, color .18s ease;
   }
-
 .miniBtn:hover,
   .pickerBtn:hover,
   .candidateBtn:hover{
     transform:translateY(-1px);
     filter:brightness(1.03);
   }
-
 .miniBtn.ghost{
     background:rgba(255,252,247,0.9);
     color:#7c4d25;
@@ -1245,7 +1108,6 @@ body{
       inset 0 1px 0 rgba(255,255,255,0.95),
       0 2px 6px rgba(112,83,52,0.06);
   }
-
 .miniBtn.active,
   .pickerBtn.active,
   .candidateBtn.active{
@@ -1255,12 +1117,10 @@ body{
       inset 0 1px 0 rgba(255,224,188,0.55),
       0 4px 10px rgba(116,86,54,0.14);
   }
-
 .miniBtn.dangerWide{
     background:linear-gradient(180deg, #d99072 0%, #c97556 100%);
     color:#fff7f1;
   }
-
 .miniBtn:disabled,
   .pickerBtn:disabled,
   .candidateBtn:disabled{
@@ -1269,7 +1129,6 @@ body{
     transform:none;
     filter:none;
   }
-
 .toolbarLine{
     display:flex;
     align-items:center;
@@ -1278,32 +1137,27 @@ body{
     margin-top:10px;
     flex-wrap:wrap;
   }
-
 .bonusSectionTitle{
     color:#7d5731;
     font-size:16px;
     font-weight:900;
     margin-bottom:10px;
   }
-
 .bonusWrap{
     display:grid;
     grid-template-columns:repeat(2,minmax(0,1fr));
     gap:18px;
     padding:4px 2px 0;
   }
-
 .bonusCard{
     min-width:0;
   }
-
 .bonusLabel{
     color:#9a7146;
     font-size:12px;
     font-weight:700;
     margin-bottom:2px;
   }
-
 .bonusHint{
     margin-top:4px;
     color:#8a6644;
@@ -1311,7 +1165,6 @@ body{
     font-weight:700;
     line-height:1.5;
   }
-
 .lyricsToolbar{
     display:flex;
     justify-content:space-between;
@@ -1320,14 +1173,12 @@ body{
     margin-top:10px;
     flex-wrap:wrap;
   }
-
 .lyricsToolBtns{
     display:flex;
     align-items:center;
     gap:8px;
     flex-wrap:wrap;
   }
-
 .sectionTitleRow{
     display:flex;
     align-items:center;
@@ -1335,11 +1186,9 @@ body{
     gap:10px;
     margin-bottom:10px;
   }
-
 .sectionTitleRow .sectionTitle{
     margin-bottom:0;
   }
-
 .sectionTitleActions{
     display:flex;
     align-items:center;
@@ -1348,7 +1197,6 @@ body{
     flex-wrap:wrap;
     min-height:30px;
   }
-
 .lotteryResultBadge{
     display:inline-flex;
     align-items:center;
@@ -1366,7 +1214,6 @@ body{
     white-space:nowrap;
     max-width:100%;
   }
-
 .addPartRowBtn,
   .roleToolBtn{
     min-width:auto;
@@ -1375,13 +1222,11 @@ body{
     font-size:11px;
     border-radius:10px;
   }
-
 .taskDangerBar{
     display:flex;
     justify-content:flex-end;
     margin-top:10px;
   }
-
 #deleteTaskBtn{
     background:transparent;
     box-shadow:none;
@@ -1391,19 +1236,16 @@ body{
     height:auto;
     color:#a05547;
   }
-
 #deleteTaskBtn:hover{
     background:transparent;
     filter:none;
     transform:none;
     text-decoration:underline;
   }
-
 .disabledWrap{
     opacity:.72;
     pointer-events:none;
   }
-
 .loadingText{
     color:#8b6947;
     font-size:13px;
@@ -1411,18 +1253,15 @@ body{
     text-align:center;
     padding:20px 12px;
   }
-
 .pickerGroup{
     display:flex;
     flex-wrap:wrap;
     gap:8px;
   }
-
 .pickerGroup.singerPicker{
     margin-top:10px;
     gap:10px;
   }
-
 .joinTaskBtn{
     width:28px;
     height:28px;
@@ -1442,11 +1281,9 @@ body{
       inset 0 1px 0 rgba(255,255,255,0.96),
       0 2px 8px rgba(112,83,52,0.06);
   }
-
 .joinTaskBtn:hover{
     background:rgba(255,255,255,1);
   }
-
 .joinTaskBtn.ghost{
     background:rgba(255,255,255,0.86);
     color:#9a7b5b;
@@ -1455,13 +1292,11 @@ body{
       inset 0 1px 0 rgba(255,255,255,0.94),
       0 2px 6px rgba(112,83,52,0.04);
   }
-
 .joinTaskBtn.joined{
     background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
     color:#fff9f1;
     border-color:rgba(194,151,108,0.12);
   }
-
 .taskModeToggleBtn{
     width:38px;
     height:38px;
@@ -1481,11 +1316,9 @@ body{
       inset 0 1px 0 rgba(255,255,255,0.96),
       0 2px 8px rgba(112,83,52,0.06);
   }
-
 .taskModeToggleBtn:hover{
     background:rgba(255,255,255,1);
   }
-
 .taskModeToggleBtn.special{
     background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
     color:#fff9f1;
@@ -1494,40 +1327,33 @@ body{
       inset 0 1px 0 rgba(255,224,188,0.55),
       0 4px 10px rgba(116,86,54,0.14);
   }
-
 .taskModeToggleBtn:disabled{
     cursor:not-allowed;
     opacity:.55;
     transform:none;
     filter:none;
   }
-
 .songNameFieldWrap{
     display:flex;
     align-items:center;
     gap:8px;
     min-width:0;
   }
-
 .songNameFieldWrap .editInput{
     flex:1 1 auto;
     min-width:0;
   }
-
 .taskBasicGrid{
     grid-template-columns:minmax(88px,0.82fr) minmax(240px,1.9fr) minmax(118px,1fr) !important;
     align-items:end;
   }
-
 .taskMetaGrid{
     grid-template-columns:minmax(96px,0.95fr) minmax(120px,1fr) minmax(158px,1.25fr) !important;
   }
-
 .publishMetaGrid{
     grid-template-columns:repeat(2,minmax(0,1fr)) !important;
     align-items:end;
   }
-
 .pickerBtn.singerOptionBtn{
     min-width:auto;
     height:34px;
@@ -1542,7 +1368,6 @@ body{
     font-size:12px;
     font-weight:700;
   }
-
 .pickerBtn.mixerOptionBtn{
     min-width:auto;
     height:28px;
@@ -1557,7 +1382,6 @@ body{
       inset 0 1px 0 rgba(255,255,255,0.96),
       0 2px 6px rgba(112,83,52,0.06);
   }
-
 .pickerBtn.mixerOptionBtn.active{
     background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
     color:#fff9f1;
@@ -1566,12 +1390,10 @@ body{
       inset 0 1px 0 rgba(255,224,188,0.55),
       0 4px 10px rgba(116,86,54,0.14);
   }
-
 .pickerBtn.singerOptionBtn:hover{
     transform:translateY(-1px);
     filter:brightness(1.02);
   }
-
 .pickerBtn.singerOptionBtn.active{
     background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
     color:#fff9f1;
@@ -1580,7 +1402,6 @@ body{
       inset 0 1px 0 rgba(255,224,188,0.55),
       0 4px 10px rgba(116,86,54,0.14);
   }
-
 .rowDeleteBtn{
     appearance:none;
     border:none;
@@ -1599,20 +1420,17 @@ body{
     box-shadow:inset 0 1px 0 rgba(255,255,255,0.75);
     transition:transform .18s ease, filter .18s ease, background .18s ease;
   }
-
 .rowDeleteBtn:hover{
     transform:translateY(-1px);
     filter:brightness(1.03);
     background:rgba(217,144,114,0.24);
   }
-
 .rowDeleteBtn:disabled{
     cursor:not-allowed;
     opacity:.55;
     transform:none;
     filter:none;
   }
-
 .rowDeleteBtn.withdrawRowBtn,
   .pickerBtn.withdrawMixerBtn{
     background:linear-gradient(180deg, #d99072 0%, #c97556 100%);
@@ -1622,7 +1440,6 @@ body{
       inset 0 1px 0 rgba(255,229,222,0.42),
       0 4px 10px rgba(148,78,62,0.12);
   }
-
 .rowDeleteBtn.withdrawRowBtn{
     width:44px;
     min-width:44px;
@@ -1632,7 +1449,6 @@ body{
     line-height:1;
     writing-mode:horizontal-tb;
   }
-
 .pickerBtn.withdrawMixerBtn{
     min-width:auto;
     height:30px;
@@ -1642,14 +1458,12 @@ body{
     letter-spacing:0;
     white-space:nowrap;
   }
-
 .mixerWithdrawRow{
     display:flex;
     align-items:center;
     gap:10px;
     flex-wrap:wrap;
   }
-
 .mixerCurrentName{
     min-height:30px;
     padding:0 12px;
@@ -1667,26 +1481,21 @@ body{
     justify-content:center;
     white-space:nowrap;
   }
-
 .partRow{
     position:relative;
     z-index:1;
   }
-
 .partRow.suggestOpen{
     z-index:220;
   }
-
 .partMemberField{
     position:relative;
     min-width:0;
     z-index:2;
   }
-
 .partRow.suggestOpen .partMemberField{
     z-index:230;
   }
-
 .memberSuggestBox{
     position:absolute;
     left:0;
@@ -1706,11 +1515,9 @@ body{
     backdrop-filter:blur(8px);
     -webkit-backdrop-filter:blur(8px);
   }
-
 .memberSuggestBox.show{
     display:block;
   }
-
 .memberSuggestEmpty{
     padding:9px 10px;
     color:#9a7b5b;
@@ -1718,7 +1525,6 @@ body{
     line-height:1.4;
     text-align:center;
   }
-
 .memberSuggestItem{
     width:100%;
     appearance:none;
@@ -1736,12 +1542,10 @@ body{
     font-weight:700;
     text-align:left;
   }
-
 .memberSuggestItem:hover,
   .memberSuggestItem.active{
     background:rgba(217,163,100,0.18);
   }
-
 #siteNoticeWrap{
     position:relative;
     width:28px;
@@ -1755,7 +1559,6 @@ body{
     overflow:visible;
     flex:0 0 28px;
   }
-
 #siteNoticeBtn{
     position:relative;
     width:100%;
@@ -1782,27 +1585,22 @@ body{
     overflow:visible;
     box-sizing:border-box;
   }
-
 #siteNoticeBtn:hover{
     transform:translateY(-1px);
     background:rgba(255,255,255,0.94);
   }
-
 #siteNoticeBtn.hasNotice{
     background:var(--top-chip-bg);
     box-shadow:var(--top-chip-shadow);
   }
-
 #siteNoticeIcon{
     display:block;
     line-height:1;
     filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
   }
-
 #siteNoticeText{
     display:none;
   }
-
 #siteNoticeCount{
     position:absolute;
     right:-6px;
@@ -1824,11 +1622,9 @@ body{
     box-shadow:0 2px 8px rgba(116,86,54,0.16);
     z-index:3;
   }
-
 #siteNoticeBtn.hasNotice #siteNoticeCount{
     display:flex;
   }
-
 #siteNoticePanel{
     position:absolute;
     top:calc(100% + 10px);
@@ -1845,38 +1641,32 @@ body{
     z-index:80;
     text-align:left;
   }
-
 #siteNoticePanel.show{
     display:block;
   }
-
 .siteNoticeTitle{
     color:#6f4726;
     font-size:13px;
     font-weight:900;
     margin-bottom:8px;
   }
-
 .siteNoticeEmpty{
     color:#8a6644;
     font-size:12px;
     line-height:1.6;
     padding:6px 2px 2px;
   }
-
 .siteNoticeList{
     display:flex;
     flex-direction:column;
     gap:8px;
   }
-
 .siteNoticeItem{
     padding:10px;
     border-radius:12px;
     background:rgba(255,252,247,0.82);
     box-shadow:inset 0 1px 0 rgba(255,255,255,0.92), 0 2px 8px rgba(120,92,63,0.05);
   }
-
 .siteNoticeItemTitle{
     color:#6f4726;
     font-size:12px;
@@ -1884,14 +1674,12 @@ body{
     line-height:1.5;
     margin-bottom:4px;
   }
-
 .siteNoticeItemDesc{
     color:#8a6644;
     font-size:11px;
     line-height:1.55;
     margin-bottom:8px;
   }
-
 .siteNoticeAction{
     appearance:none;
     border:none;
@@ -1905,7 +1693,6 @@ body{
     font-weight:800;
     box-shadow:inset 0 1px 0 rgba(255,247,230,0.95), 0 4px 12px rgba(112,83,52,0.10);
   }
-
 #browseListTitle{
     flex:0 0 auto;
     color:#6f4726;
@@ -1914,8 +1701,6 @@ body{
     margin:2px 0 8px;
     padding-left:2px;
   }
-
-
 #miniNotice{
     position:fixed;
     top:22px;
@@ -1939,12 +1724,10 @@ body{
     z-index:10020;
     transition:opacity .22s ease, transform .22s ease;
   }
-
 #miniNotice.show{
     opacity:1;
     transform:translateX(-50%) translateY(0);
   }
-
 #toastMask{
     position:fixed;
     inset:0;
@@ -1957,11 +1740,9 @@ body{
     z-index:9999;
     padding:20px;
   }
-
 #toastMask.show{
     display:flex;
   }
-
 #toastBox{
     width:min(420px, 92vw);
     border-radius:22px;
@@ -1973,14 +1754,12 @@ body{
     padding:22px 20px 18px;
     text-align:center;
   }
-
 #toastTitle{
     color:#6f4726;
     font-size:19px;
     font-weight:800;
     margin-bottom:10px;
   }
-
 #toastMessage{
     color:#6a4525;
     font-size:14px;
@@ -1989,7 +1768,6 @@ body{
     word-break:break-word;
     margin-bottom:14px;
   }
-
 .toastActions{
     display:flex;
     align-items:center;
@@ -1997,7 +1775,6 @@ body{
     gap:10px;
     flex-wrap:wrap;
   }
-
 #toastCloseBtn,
   #toastConfirmBtn{
     appearance:none;
@@ -2015,53 +1792,41 @@ body{
       inset 0 1px 0 rgba(255,247,230,0.95),
       0 4px 12px rgba(112,83,52,0.10);
   }
-
 #toastConfirmBtn{
     background:linear-gradient(180deg, #d99072 0%, #c97556 100%);
     color:#fff7f1;
   }
-
-
 @media (min-width: 2400px){
     #topBar{
       width:41.79%;
     }
-
     #overlay{
       --ui-scale:1.18;
-      --project-font-base:calc(13px * var(--ui-scale));
+      --project-font-base:calc(16px * var(--ui-scale));
       --project-btn-h:50px;
       --project-radius-md:24px;
     }
-
-
     #browseListPane{
       padding:22px 16px 20px 20px;
     }
-
     #browseDetailPane{
       padding:22px 22px 18px;
     }
-
     #browseDetailHeader{
       margin-bottom:12px;
     }
-
     #browseDetailTitle{
       font-size:30px;
       line-height:1.2;
     }
-
     .detailTitleStatus{
       font-size:16px;
       line-height:1.5;
     }
-
     .filterTagsWrap{
       gap:8px;
       margin-bottom:12px;
     }
-
     .filterTagBtn{
       min-width:74px;
       height:38px;
@@ -2069,58 +1834,48 @@ body{
       border-radius:13px;
       font-size:15px;
     }
-
     .searchInput{
       height:44px;
       border-radius:15px;
       padding:0 16px;
       font-size:17px;
     }
-
     .taskItem{
       padding:12px 14px;
       margin-bottom:10px;
       border-radius:17px;
     }
-
     .taskItemName{
       font-size:18px;
       line-height:1.38;
     }
-
     .taskItemInfo{
       margin-top:6px;
       font-size:15px;
       line-height:1.48;
     }
-
     .taskTypeMini{
       height:23px;
       padding:0 8px;
       font-size:13px;
     }
-
     .joinTaskBtn{
       width:29px;
       height:29px;
       min-width:29px;
       font-size:11px;
     }
-
     .editBlock{
       padding:18px;
       margin-bottom:16px;
       border-radius:20px;
     }
-
     .editGrid{
       gap:14px;
     }
-
     .editLabel{
       font-size:16px;
     }
-
     .majorEditLabel,
     .sectionTitle,
     .bonusSectionTitle{
@@ -2129,7 +1884,6 @@ body{
       letter-spacing:.02em;
       margin-bottom:12px;
     }
-
     .editInput,
     .editSelect{
       min-height:50px;
@@ -2137,7 +1891,6 @@ body{
       padding:0 16px;
       font-size:18px;
     }
-
     .miniBtn,
     .pickerBtn,
     .candidateBtn{
@@ -2147,7 +1900,6 @@ body{
       font-size:18px;
       border-radius:16px;
     }
-
     .pickerBtn.singerOptionBtn{
       min-width:auto;
       height:52px;
@@ -2156,7 +1908,6 @@ body{
       border-radius:16px;
       font-weight:800;
     }
-
     .pickerBtn.mixerOptionBtn{
       min-width:auto;
       height:46px;
@@ -2165,7 +1916,6 @@ body{
       border-radius:14px;
       font-weight:800;
     }
-
     .mixerCurrentName{
       min-height:46px;
       padding:0 18px;
@@ -2173,14 +1923,12 @@ body{
       font-size:17px;
       font-weight:800;
     }
-
     .pickerBtn.withdrawMixerBtn{
       height:40px;
       padding:0 16px;
       font-size:15px;
       border-radius:13px;
     }
-
     .addPartRowBtn,
     .roleToolBtn{
       height:40px;
@@ -2188,7 +1936,6 @@ body{
       font-size:15px;
       border-radius:13px;
     }
-
     .saveNowBtn,
     .undoBtn,
     .autoSaveBadge{
@@ -2196,62 +1943,51 @@ body{
       padding:9px 17px;
       font-size:16px;
     }
-
     .rowCard{
       padding:14px;
       gap:14px;
       border-radius:16px;
     }
-
     .rowDeleteBtn{
       width:40px;
       height:40px;
       border-radius:12px;
       font-size:19px;
     }
-
     .rowDeleteBtn.withdrawRowBtn{
       width:54px;
       min-width:54px;
       font-size:15px;
     }
-
     .candidatePane{
       padding:15px;
       border-radius:17px;
     }
-
     .candidateTitle{
       font-size:17px;
       margin-bottom:10px;
     }
-
     .candidateList,
     .pickerGroup.singerPicker,
     .mixerWithdrawRow{
       gap:12px;
     }
-
     .memberSuggestItem,
     .memberSuggestEmpty{
       font-size:16px;
     }
-
     .bonusValue{
       font-size:28px;
     }
-
     .bonusLabel,
     .bonusHint{
       font-size:16px;
     }
-
     .lyricsToolbar,
     .toolbarLine,
     .sectionTitleRow{
       gap:14px;
     }
-
     .miniBtn.taskModeToggleBtn,
     .taskModeToggleBtn{
       width:46px;
@@ -2262,7 +1998,6 @@ body{
       font-size:19px;
       line-height:1;
     }
-
     .miniBtn.joinTaskBtn,
     .joinTaskBtn{
       width:29px;
@@ -2276,37 +2011,16 @@ body{
       flex:0 0 29px;
     }
   }
-
-
-
-
-
 @media (min-width: 1500px) and (max-width: 1700px){
-
-    #topBarUserArea{
-      --identity-logout-w:18%;
-      --identity-gap:1.8%;
-      --identity-font:clamp(10px, 0.68vw, 11px);
-      --identity-icon-font:clamp(10px, 0.68vw, 11px);
-      --identity-logout-font:clamp(9px, 0.62vw, 10px);
-      padding:4px 5px;
-    }
-
-    #currentUserBadge{
-      padding:0 6px;
-      gap:3px;
-    }
 #browseDetailTitle{
       font-size:17px;
     }
-
     .majorEditLabel,
     .sectionTitle,
     .bonusSectionTitle{
       font-size:15px;
       margin-bottom:8px;
     }
-
     .miniBtn.taskModeToggleBtn,
     .taskModeToggleBtn{
       width:30px;
@@ -2326,27 +2040,7 @@ body{
       flex:0 0 30px;
     }
   }
-
-
 @media (min-width: 1181px) and (max-width: 1499px){
-    #topBarUserAnchor{
-      top:8.7%;
-      height:4.8%;
-    }
-
-    #topBarUserArea{
-      --identity-logout-w:14%;
-      --identity-gap:1.5%;
-      --identity-font:clamp(9px, 0.72vw, 10px);
-      --identity-icon-font:clamp(9px, 0.72vw, 10px);
-      --identity-logout-font:clamp(8px, 0.66vw, 9px);
-      padding:4px 6px;
-    }
-
-    #currentUserBadge{
-      padding:0 6px;
-      gap:3px;
-    }
 .majorEditLabel,
     .sectionTitle,
     .bonusSectionTitle{
@@ -2354,32 +2048,16 @@ body{
       margin-bottom:8px;
     }
   }
-
 @media (max-width: 1180px){
-    #topBarUserArea{
-      --identity-logout-w:15%;
-      --identity-gap:1.2%;
-      --identity-font:clamp(8px, 0.72vw, 9px);
-      --identity-icon-font:clamp(8px, 0.72vw, 9px);
-      --identity-logout-font:clamp(7px, 0.66vw, 8px);
-      padding:3px 4px;
-    }
-
-    #currentUserBadge{
-      padding:0 4px;
-      gap:2px;
-    }
 #browseDetailTitle{
       font-size:16px;
     }
-
     .majorEditLabel,
     .sectionTitle,
     .bonusSectionTitle{
       font-size:13px;
       margin-bottom:7px;
     }
-
     .miniBtn.taskModeToggleBtn,
     .taskModeToggleBtn{
       width:28px;
@@ -2398,41 +2076,23 @@ body{
       text-align:center;
       flex:0 0 28px;
     }
-
     .taskBasicGrid{
       grid-template-columns:minmax(82px,0.85fr) minmax(185px,1.6fr) minmax(100px,0.95fr) !important;
     }
-
     .taskMetaGrid{
       grid-template-columns:minmax(84px,0.9fr) minmax(112px,0.95fr) minmax(136px,1.12fr) !important;
     }
   }
-
 @media (max-width: 980px){
-    #topBarUserArea{
-      --identity-logout-w:13.5%;
-      --identity-gap:1%;
-      --identity-font:clamp(7px, 0.68vw, 8px);
-      --identity-icon-font:clamp(7px, 0.68vw, 8px);
-      --identity-logout-font:clamp(6px, 0.62vw, 7px);
-      padding:2px 3px;
-    }
-
-    #currentUserBadge{
-      padding:0 3px;
-      gap:2px;
-    }
 #browseDetailTitle{
       font-size:14px;
     }
-
     .majorEditLabel,
     .sectionTitle,
     .bonusSectionTitle{
       font-size:12px;
       margin-bottom:6px;
     }
-
     .miniBtn.taskModeToggleBtn,
     .taskModeToggleBtn{
       width:24px;
@@ -2451,90 +2111,72 @@ body{
       text-align:center;
       flex:0 0 24px;
     }
-
     .editLabel{
       font-size:10px;
     }
-
     .rowCard{
       grid-template-columns:minmax(0,1.25fr) minmax(0,1.2fr) 32px;
     }
-
     .editGrid{
       grid-template-columns:repeat(2,minmax(0,1fr));
     }
-
     .editGrid.four{
       grid-template-columns:0.8fr 1.35fr 0.95fr 0.9fr;
     }
-
     .bonusWrap{
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:12px;
     }
-
     .filterTagsWrap{
       gap:5px;
     }
-
     .filterTagBtn{
       min-width:auto;
       height:24px;
       padding:0 7px;
       font-size:10px;
     }
-
     .pickerBtn.mixerOptionBtn{
       height:26px;
       padding:0 8px;
       font-size:10px;
     }
-
     .taskItem{
       padding:8px 9px;
     }
-
     .taskNameText{
       -webkit-line-clamp:3;
       font-size:12px;
     }
-
     .taskItemInfo{
       font-size:10px;
     }
-
     .taskBasicGrid{
       grid-template-columns:minmax(72px,0.92fr) minmax(170px,1.7fr) minmax(92px,0.95fr) !important;
     }
-
     .taskMetaGrid{
       grid-template-columns:minmax(78px,0.92fr) minmax(108px,1fr) minmax(124px,1.18fr) !important;
     }
-
     #browseDetailContentClaim .editGrid[style*="grid-template-columns:0.9fr 1fr 1fr"]{
       grid-template-columns:0.9fr 1fr 1fr !important;
     }
   }
-
 @media (max-width: 720px){
     .filterTagsWrap{
       gap:4px;
     }
-
     .filterTagBtn{
       height:22px;
       padding:0 6px;
       font-size:9px;
       border-radius:8px;
     }
-
     .joinTaskBtn{
       width:26px;
       height:26px;
       min-width:26px;
       font-size:10px;
     }
-
     .pickerBtn.mixerOptionBtn{
       height:24px;
       padding:0 7px;
@@ -2542,18 +2184,15 @@ body{
       border-radius:8px;
     }
   }
-
 @media (max-width: 760px){
     .taskBasicGrid,
     .taskMetaGrid{
       grid-template-columns:1fr !important;
     }
-
     #browseDetailContentClaim .editGrid[style*="grid-template-columns:0.9fr 1fr 1fr"]{
       grid-template-columns:1fr !important;
     }
   }
-
 #wheelModalMask{
     position:fixed;
     inset:0;
@@ -2566,11 +2205,9 @@ body{
     z-index:9997;
     padding:18px;
   }
-
 #wheelModalMask.show{
     display:flex;
   }
-
 #wheelModalBox{
     position:relative;
     width:min(1120px, 96vw);
@@ -2581,7 +2218,6 @@ body{
     border:1px solid rgba(203,167,123,0.28);
     box-shadow:0 20px 48px rgba(85,58,34,0.22);
   }
-
 #wheelModalCloseBtn{
     position:absolute;
     top:14px;
@@ -2591,14 +2227,12 @@ body{
     height:36px;
     border-radius:12px;
   }
-
 #wheelModalFrame{
     width:100%;
     height:100%;
     border:none;
     background:#fffaf4;
   }
-
 #roleSetupMask{
     position:fixed;
     inset:0;
@@ -2611,11 +2245,9 @@ body{
     z-index:9998;
     padding:20px;
   }
-
 #roleSetupMask.show{
     display:flex;
   }
-
 #roleSetupBox{
     width:min(720px, 94vw);
     max-height:min(88vh, 860px);
@@ -2628,14 +2260,12 @@ body{
       inset 0 1px 0 rgba(255,255,255,0.92);
     padding:22px 20px 18px;
   }
-
 .roleSetupTitle{
     color:#6f4726;
     font-size:19px;
     font-weight:800;
     margin-bottom:8px;
   }
-
 .roleSetupDesc{
     color:#6a4525;
     font-size:13px;
@@ -2643,14 +2273,12 @@ body{
     margin-bottom:14px;
     white-space:pre-line;
   }
-
 .roleSetupRows{
     display:flex;
     flex-direction:column;
     gap:8px;
     margin-bottom:14px;
   }
-
 .roleSetupRow{
     display:grid;
     grid-template-columns:92px minmax(0,1fr) 130px;
@@ -2660,20 +2288,17 @@ body{
     border-radius:13px;
     background:rgba(255,252,247,0.72);
   }
-
 .roleSetupRowLabel,
   .roleSetupMemberLabel{
     color:#8a6644;
     font-size:11px;
     font-weight:700;
   }
-
 .roleSetupMemberText{
     color:#6f4726;
     font-size:12px;
     font-weight:800;
   }
-
 .roleSetupActions{
     display:flex;
     align-items:center;
@@ -2681,39 +2306,23 @@ body{
     gap:10px;
     flex-wrap:wrap;
   }
-
 @media (max-width: 640px){
   .roleSetupRow{
     grid-template-columns:1fr;
   }
 }
-
-
-
-
-
-/* =========================================================
-   2026-04-28 统一规则版：房间按钮 / 身份组件 / 页面切换 / 小屏
-   保留业务逻辑，只统一视觉、锚点和缩放规则
-========================================================= */
-
-/* 主面板左线：保留已经锁定的正确规则 */
 @media (min-width:1600px){
   #taskPanel{ --task-panel-left:9.1%; }
 }
-
-/* 房间切换按钮：干净水彩按钮，取消内部白圈/扫光 */
 #topBar,
 #navOuter,
 #navScroll{
   overflow:visible !important;
 }
-
 #navScroll{
   padding:0 !important;
   margin:0 !important;
 }
-
 #roomNav{
   width:100%;
   max-width:100%;
@@ -2724,7 +2333,6 @@ body{
   gap:var(--nav-gap, 8px);
   transform-origin:left center;
 }
-
 .navBtn{
   appearance:none;
   border:none;
@@ -2758,8 +2366,6 @@ body{
     color .18s ease,
     filter .18s ease;
 }
-
-/* 取消旧版内部白框/白圈/扫光，改为选中音符 */
 .navBtn::before,
 .navBtn::after{
   position:absolute;
@@ -2771,7 +2377,6 @@ body{
   background:none;
   inset:auto;
 }
-
 .navBtn:hover,
 .navBtn:focus-visible{
   color:#5f3d22;
@@ -2783,7 +2388,6 @@ body{
     0 3px 7px rgba(91,68,45,.15);
   filter:brightness(1.015);
 }
-
 .navBtn:hover::before,
 .navBtn:focus-visible::before{
   content:"♪";
@@ -2794,7 +2398,6 @@ body{
   text-shadow:0 1px 2px rgba(255,250,232,.70);
   animation:navNotePopA 2.2s ease-in-out infinite;
 }
-
 .navBtn:hover::after,
 .navBtn:focus-visible::after{
   content:"♫";
@@ -2805,7 +2408,6 @@ body{
   text-shadow:0 1px 2px rgba(255,250,232,.70);
   animation:navNotePopB 2.5s ease-in-out infinite;
 }
-
 .navBtn.active{
   color:#fffaf2;
   background:
@@ -2815,7 +2417,6 @@ body{
     0 1px 0 rgba(255,232,200,.55) inset,
     0 3px 8px rgba(92,63,38,.18);
 }
-
 .navBtn.active::before{
   content:"♪";
   left:8%;
@@ -2825,7 +2426,6 @@ body{
   text-shadow:0 1px 2px rgba(255,250,232,.70);
   animation:navNotePopA 2.8s ease-in-out infinite;
 }
-
 .navBtn.active::after{
   content:"♫";
   right:8%;
@@ -2835,22 +2435,16 @@ body{
   text-shadow:0 1px 2px rgba(255,250,232,.70);
   animation:navNotePopB 3.2s ease-in-out infinite;
 }
-
 @keyframes navNotePopA{
   0%,100%{ transform:translateY(3px) rotate(-8deg) scale(.82); opacity:0; }
   22%,68%{ opacity:.88; }
   48%{ transform:translateY(-3px) rotate(5deg) scale(1); opacity:.72; }
 }
-
 @keyframes navNotePopB{
   0%,100%{ transform:translateY(4px) rotate(8deg) scale(.78); opacity:0; }
   26%,72%{ opacity:.78; }
   50%{ transform:translateY(-4px) rotate(-6deg) scale(1); opacity:.64; }
 }
-
-/* 身份组件最终样式统一放在文件末尾，避免多套身份组件规则互相覆盖。 */
-
-/* 页面切换组件：外框位置由 JS 对齐身份组件，内部三按钮平均分布 */
 #panelSwitch{
   display:flex;
   flex-direction:column;
@@ -2858,7 +2452,6 @@ body{
   align-items:stretch;
   overflow:hidden;
 }
-
 .switchBtn{
   flex:1 1 0;
   min-height:0;
@@ -2872,19 +2465,15 @@ body{
   white-space:nowrap;
   overflow:hidden;
 }
-
-/* 840px 起左栏优先显示歌名，让列表能显示更多 */
 @media (max-width:840px){
   #browseListPane{
     padding:8px 5px 8px 7px;
   }
-
   .taskItem{
     padding:5px 6px;
     margin-bottom:3px;
     border-radius:9px;
   }
-
   .taskNameText{
     white-space:nowrap;
     display:block;
@@ -2893,37 +2482,29 @@ body{
     line-height:1.15;
     -webkit-line-clamp:unset;
   }
-
   .taskTypeMini,
   .taskItemInfo{
     display:none;
   }
-
   .taskItemName{
     align-items:center;
     gap:4px;
   }
-
   .taskItemHeadActions{
     gap:3px;
   }
 }
-
-/* 760px 起右栏仍保持多列，不强制单列 */
 @media (max-width:760px){
   .taskBasicGrid{
     grid-template-columns:minmax(52px,.8fr) minmax(0,1.75fr) minmax(64px,.95fr) !important;
   }
-
   .taskMetaGrid{
     grid-template-columns:minmax(56px,.9fr) minmax(60px,.95fr) minmax(72px,1.15fr) !important;
   }
-
   #browseDetailContentClaim .editGrid[style*="grid-template-columns:0.9fr 1fr 1fr"]{
     grid-template-columns:.9fr 1fr 1fr !important;
   }
 }
-
 .navActiveNote{
   position:absolute;
   pointer-events:none;
@@ -2934,21 +2515,18 @@ body{
   line-height:1;
   text-shadow:0 1px 2px rgba(255,250,232,.72);
 }
-
 .navActiveNoteA{
   left:8%;
   top:-52%;
   color:rgba(167,104,54,.72);
   font-size:calc(var(--nav-btn-font, 14px) * .88);
 }
-
 .navActiveNoteB{
   right:8%;
   top:-60%;
   color:rgba(122,91,143,.58);
   font-size:calc(var(--nav-btn-font, 14px) * .80);
 }
-
 .navActiveNoteC{
   left:50%;
   top:-68%;
@@ -2956,14 +2534,12 @@ body{
   color:rgba(198,124,112,.78);
   font-size:calc(var(--nav-btn-font, 14px) * .96);
 }
-
 .navBtn:hover .navActiveNoteA,
 .navBtn:focus-visible .navActiveNoteA{ animation:navNotePopA 2.2s ease-in-out infinite; }
 .navBtn:hover .navActiveNoteB,
 .navBtn:focus-visible .navActiveNoteB{ animation:navNotePopB 2.5s ease-in-out infinite; }
 .navBtn:hover .navActiveNoteC,
 .navBtn:focus-visible .navActiveNoteC{ animation:navNotePopC 2.35s ease-in-out infinite; }
-
 .navBtn.active .navActiveNoteA{
   color:rgba(255,225,171,.86);
   font-size:calc(var(--nav-btn-font, 14px) * .96);
@@ -2979,249 +2555,11 @@ body{
   font-size:calc(var(--nav-btn-font, 14px) * 1.02);
   animation:navNotePopC 3.0s ease-in-out infinite;
 }
-
 @keyframes navNotePopC{
   0%,100%{ transform:translateX(-50%) translateY(5px) rotate(0deg) scale(.76); opacity:0; }
   24%,70%{ opacity:.86; }
   50%{ transform:translateX(-50%) translateY(-5px) rotate(2deg) scale(1); opacity:.76; }
 }
-
-
-
-/* =========================================================
-   最新确认修改：身份组件名牌型 / 单行锁定 / 金币层级 / 小屏密度
-   只覆盖已确认的视觉问题，不改业务逻辑与主布局锚点
-========================================================= */
-
-/* 身份组件：改为“房间里的小木牌/名牌”，不再是三个按钮拼接 */
-#topBarUserArea{
-  display:flex !important;
-  align-items:center !important;
-  justify-content:flex-start !important;
-  gap:var(--identity-gap, 5px) !important;
-  padding:var(--identity-pad-y, 4px) var(--identity-pad-x, 6px) !important;
-  border-radius:calc(var(--identity-radius, 11px) + 5px) !important;
-  background:
-    linear-gradient(180deg, #dfb982 0%, #d4a469 100%) !important;
-  border:1px solid rgba(128,80,42,.34) !important;
-  box-shadow:
-    0 2px 5px rgba(92,62,36,.14),
-    inset 0 1px 0 rgba(255,235,196,.55),
-    inset 0 -1px 0 rgba(111,72,35,.10) !important;
-  backdrop-filter:none !important;
-  -webkit-backdrop-filter:none !important;
-  overflow:visible !important;
-  white-space:nowrap !important;
-}
-
-/* 昵称是主体：浅奶油名牌，不做按钮感，不换行 */
-#currentUserBadge{
-  order:1 !important;
-  flex:1 1 auto !important;
-  min-width:0 !important;
-  height:100% !important;
-  padding:0 calc(var(--identity-pad-x, 6px) * 1.35) !important;
-  border-radius:calc(var(--identity-radius, 11px) + 1px) !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  background:
-    linear-gradient(180deg, #f8e8c9 0%, #f1d9ae 100%) !important;
-  border:1px solid rgba(142,94,51,.24) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,248,228,.72),
-    0 1px 2px rgba(95,65,38,.08) !important;
-  color:#5f3e21 !important;
-  text-shadow:none !important;
-  backdrop-filter:none !important;
-  -webkit-backdrop-filter:none !important;
-  overflow:hidden !important;
-  white-space:nowrap !important;
-}
-
-#currentUserBadge:hover{
-  background:
-    linear-gradient(180deg, #faecd2 0%, #f3ddb8 100%) !important;
-  border-color:rgba(142,94,51,.34) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,249,232,.78),
-    0 1px 3px rgba(95,65,38,.10) !important;
-  filter:none !important;
-  transform:none !important;
-}
-#currentUserBadge .identityText{
-  display:flex !important;
-  flex-direction:row !important;
-  align-items:center !important;
-  justify-content:center !important;
-  gap:0 !important;
-  width:100% !important;
-  min-width:0 !important;
-  max-width:100% !important;
-  color:inherit !important;
-  font-size:var(--identity-font, 11px) !important;
-  font-weight:900 !important;
-  line-height:1 !important;
-  letter-spacing:-.02em !important;
-  text-align:center !important;
-  white-space:nowrap !important;
-  overflow:hidden !important;
-  text-overflow:clip !important;
-}
-
-#currentUserBadge .identityName,
-#currentUserBadge .identitySep,
-#currentUserBadge .identityRole{
-  display:inline-block !important;
-  flex:0 0 auto !important;
-  min-width:0 !important;
-  white-space:nowrap !important;
-  line-height:1 !important;
-}
-
-/* 禁止旧逻辑把身份文字切成两行 */
-#currentUserBadge.identityStacked .identityText{
-  flex-direction:row !important;
-  gap:0 !important;
-  white-space:nowrap !important;
-}
-#currentUserBadge.identityStacked .identitySep{
-  display:inline-block !important;
-}
-#currentUserBadge.identityStacked .identityName,
-#currentUserBadge.identityStacked .identityRole{
-  display:inline-block !important;
-  width:auto !important;
-  white-space:nowrap !important;
-}
-
-/* 铃铛是点缀：柔和小徽章，不抢主视觉 */
-#siteNoticeWrap{
-  order:2 !important;
-  position:relative !important;
-  flex:0 0 var(--identity-circle, 28px) !important;
-  width:var(--identity-circle, 28px) !important;
-  height:100% !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  align-self:stretch !important;
-  overflow:visible !important;
-}
-
-#siteNoticeBtn{
-  position:relative !important;
-  width:calc(var(--identity-circle, 28px) * .92) !important;
-  height:calc(var(--identity-circle, 28px) * .92) !important;
-  min-width:0 !important;
-  min-height:0 !important;
-  max-width:100% !important;
-  max-height:100% !important;
-  margin:auto !important;
-  padding:0 !important;
-  border-radius:999px !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  background:
-    radial-gradient(circle at 35% 28%, #f5c0b7 0%, #e69a91 68%, #d48678 100%) !important;
-  border:1px solid rgba(139,79,66,.26) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,229,220,.55),
-    0 1px 2px rgba(92,62,36,.10) !important;
-  color:#fff7ee !important;
-  font-size:var(--identity-icon-font, 13px) !important;
-  line-height:1 !important;
-  text-shadow:none !important;
-  backdrop-filter:none !important;
-  -webkit-backdrop-filter:none !important;
-  cursor:pointer !important;
-  overflow:visible !important;
-}
-
-#siteNoticeBtn:hover{
-  background:
-    radial-gradient(circle at 35% 28%, #f8cbc3 0%, #eba99f 68%, #dc9183 100%) !important;
-  border-color:rgba(139,79,66,.34) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,235,229,.64),
-    0 2px 4px rgba(92,62,36,.12) !important;
-  filter:none !important;
-  transform:none !important;
-}
-
-#siteNoticeIcon{
-  display:block !important;
-  line-height:1 !important;
-  transform:translateY(-1px) !important;
-  filter:none !important;
-}
-
-#siteNoticeText{
-  display:none !important;
-}
-
-/* 退出是最弱的工具，不再和昵称同权重 */
-#logoutBtn{
-  order:3 !important;
-  flex:0 0 var(--identity-logout-w, 34px) !important;
-  width:var(--identity-logout-w, 34px) !important;
-  min-width:0 !important;
-  height:100% !important;
-  padding:0 !important;
-  border-radius:calc(var(--identity-radius, 11px) + 1px) !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  background:
-    linear-gradient(180deg, #cf9055 0%, #bb7840 100%) !important;
-  border:1px solid rgba(118,75,36,.24) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,218,173,.38),
-    0 1px 2px rgba(92,62,36,.10) !important;
-  color:#fff7ea !important;
-  font-size:var(--identity-logout-font, 10px) !important;
-  font-weight:900 !important;
-  line-height:1 !important;
-  text-shadow:none !important;
-  backdrop-filter:none !important;
-  -webkit-backdrop-filter:none !important;
-  cursor:pointer !important;
-  overflow:hidden !important;
-  white-space:nowrap !important;
-}
-
-#logoutBtn:hover{
-  background:
-    linear-gradient(180deg, #d99d62 0%, #c7864b 100%) !important;
-  border-color:rgba(118,75,36,.32) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,224,185,.42),
-    0 2px 4px rgba(92,62,36,.12) !important;
-  filter:none !important;
-  transform:none !important;
-}
-
-/* 通知数字跟随铃铛比例 */
-#siteNoticeCount{
-  right:calc(var(--identity-circle, 28px) * -0.15) !important;
-  top:calc(var(--identity-circle, 28px) * -0.15) !important;
-  min-width:calc(var(--identity-circle, 28px) * .54) !important;
-  height:calc(var(--identity-circle, 28px) * .54) !important;
-  padding:0 calc(var(--identity-circle, 28px) * .15) !important;
-  border-radius:999px !important;
-  background:#c9794d !important;
-  color:#fff8ef !important;
-  font-size:calc(var(--identity-icon-font, 13px) * .66) !important;
-  font-weight:900 !important;
-  line-height:1 !important;
-  border:calc(var(--identity-circle, 28px) * .06) solid #f3dfbf !important;
-  box-shadow:0 1px 4px rgba(92,62,36,.16) !important;
-  box-sizing:border-box !important;
-  z-index:5 !important;
-}
-
-/* 金币数值层级：数字为主，单位弱化 */
 .bonusValue{
   color:#5d3a1c !important;
   font-size:calc(18px * var(--ui-scale)) !important;
@@ -3229,12 +2567,10 @@ body{
   line-height:1.1 !important;
   letter-spacing:-.01em !important;
 }
-
 .bonusValue .bonusNumber{
   font-size:1.08em !important;
   font-weight:950 !important;
 }
-
 .bonusValue .bonusUnit{
   margin-left:.22em !important;
   font-size:.72em !important;
@@ -3242,13 +2578,10 @@ body{
   color:#7f5b36 !important;
   letter-spacing:0 !important;
 }
-
-/* 760px 以下：只压缩视觉密度，不改坐标和页面结构 */
 @media (max-width:760px){
   #overlay{
     --small-density:.84;
   }
-
   #browseDetailTitle,
   .detailTitleMain,
   .detailTitleStatus,
@@ -3271,26 +2604,18 @@ body{
   .bonusHint{
     font-size:calc(1em * var(--small-density)) !important;
   }
-
   .bonusValue{
     font-size:calc(17px * var(--ui-scale) * var(--small-density)) !important;
   }
 }
-
 @media (max-width:560px){
   #overlay{
     --small-density:.74;
   }
-
   .bonusValue{
     font-size:calc(16px * var(--ui-scale) * var(--small-density)) !important;
   }
 }
-
-
-
-
-
 @media (max-width:540px){
   html,
   body{
@@ -3298,12 +2623,10 @@ body{
     min-height:100% !important;
     overflow:auto !important;
   }
-
   body{
     display:block !important;
     background:linear-gradient(180deg,#efe4d5 0%,#e4d5c4 100%) !important;
   }
-
   #room{
     width:100% !important;
     min-height:100dvh !important;
@@ -3311,23 +2634,19 @@ body{
     overflow:visible !important;
     background:linear-gradient(180deg,#efe4d5 0%,#e4d5c4 100%) !important;
   }
-
   #bgFrame{
     position:fixed !important;
     inset:0 !important;
     opacity:.16 !important;
     pointer-events:none !important;
   }
-
   #bg{
     object-fit:cover !important;
     filter:saturate(.92) blur(.2px) !important;
   }
-
   #musicNotesLayer{
     display:none !important;
   }
-
   #overlay{
     position:relative !important;
     inset:auto !important;
@@ -3342,10 +2661,9 @@ body{
     --ui-scale:1 !important;
     --overlay-ui-scale:1 !important;
     --project-radius-md:16px !important;
-    --project-font-base:13px !important;
+    --project-font-base:16px !important;
     --project-btn-h:34px !important;
   }
-
   #topBarUserAnchor{
     position:relative !important;
     top:auto !important;
@@ -3356,7 +2674,6 @@ body{
     margin:0 0 8px !important;
     z-index:20 !important;
   }
-
   #topBarUserArea{
     position:relative !important;
     inset:auto !important;
@@ -3372,7 +2689,6 @@ body{
     white-space:nowrap !important;
     overflow:visible !important;
   }
-
   #currentUserBadge{
     flex:1 1 auto !important;
     min-width:0 !important;
@@ -3381,7 +2697,6 @@ body{
     border-radius:10px !important;
     overflow:hidden !important;
   }
-
   #currentUserBadge .identityText{
     min-width:0 !important;
     overflow:hidden !important;
@@ -3396,14 +2711,12 @@ body{
     flex:0 0 30px !important;
     align-self:center !important;
   }
-
   #siteNoticeBtn{
     width:30px !important;
     height:30px !important;
     border-radius:10px !important;
     font-size:13px !important;
   }
-
   #logoutBtn{
     width:42px !important;
     min-width:42px !important;
@@ -3413,7 +2726,6 @@ body{
     border-radius:10px !important;
     font-size:11px !important;
   }
-
   #siteNoticePanel{
     position:fixed !important;
     top:58px !important;
@@ -3422,7 +2734,6 @@ body{
     width:auto !important;
     max-height:60dvh !important;
   }
-
   #topBar{
     position:relative !important;
     left:auto !important;
@@ -3431,7 +2742,6 @@ body{
     margin:0 0 8px !important;
     z-index:15 !important;
   }
-
   #navOuter,
   #navScroll{
     width:100% !important;
@@ -3440,7 +2750,6 @@ body{
     padding:0 !important;
     margin:0 !important;
   }
-
   #roomNav{
     display:flex !important;
     width:max-content !important;
@@ -3448,14 +2757,12 @@ body{
     gap:6px !important;
     padding-bottom:2px !important;
   }
-
   .navBtn{
     height:30px !important;
     padding:0 10px !important;
     border-radius:11px !important;
     font-size:12px !important;
   }
-
   #taskPanel{
     position:relative !important;
     left:auto !important;
@@ -3468,11 +2775,9 @@ body{
     border-radius:18px !important;
     overflow:visible !important;
   }
-
   #taskPanel::before{
     display:none !important;
   }
-
   #panelSwitch{
     position:relative !important;
     left:auto !important;
@@ -3486,7 +2791,6 @@ body{
     border-radius:16px 16px 0 0 !important;
     margin:0 !important;
   }
-
   .switchBtn{
     flex:1 1 0 !important;
     min-height:32px !important;
@@ -3496,21 +2800,18 @@ body{
     font-size:12px !important;
     line-height:1 !important;
   }
-
   .panelView{
     position:relative !important;
     inset:auto !important;
     width:100% !important;
     height:auto !important;
   }
-
   #browsePanelInner{
     display:flex !important;
     flex-direction:column !important;
     width:100% !important;
     height:auto !important;
   }
-
   #browseListPane{
     width:100% !important;
     min-height:auto !important;
@@ -3519,7 +2820,6 @@ body{
     border-right:none !important;
     border-bottom:1px solid rgba(255,255,255,.28) !important;
   }
-
   .filterTagsWrap{
     display:flex !important;
     flex-wrap:wrap !important;
@@ -3527,7 +2827,6 @@ body{
     margin-bottom:8px !important;
     padding-right:0 !important;
   }
-
   .filterTagBtn{
     width:auto !important;
     min-width:58px !important;
@@ -3536,64 +2835,53 @@ body{
     border-radius:10px !important;
     font-size:11px !important;
   }
-
   .searchInput{
     height:34px !important;
     border-radius:12px !important;
     font-size:12px !important;
   }
-
   #browseList{
     max-height:36dvh !important;
     overflow:auto !important;
     padding-right:4px !important;
   }
-
   .taskItem{
     padding:8px 10px !important;
     margin-bottom:7px !important;
     border-radius:13px !important;
   }
-
   .taskItemName,
   .taskNameText{
     font-size:13px !important;
     line-height:1.28 !important;
   }
-
   .taskItemInfo,
   .taskTypeMini{
     display:inline-flex !important;
   }
-
   #browseDetailPane{
     width:100% !important;
     padding:12px 10px 14px !important;
     min-height:auto !important;
   }
-
   #browseDetailHeader{
     display:flex !important;
     flex-direction:column !important;
     gap:8px !important;
     margin-bottom:10px !important;
   }
-
   #browseDetailTitle{
     font-size:18px !important;
     line-height:1.22 !important;
   }
-
   .detailTitleStatus{
     font-size:12px !important;
     line-height:1.45 !important;
   }
-
   .headerRight{
     justify-content:flex-start !important;
     gap:8px !important;
   }
-
   .saveNowBtn,
   .undoBtn,
   .autoSaveBadge{
@@ -3602,19 +2890,16 @@ body{
     padding:0 12px !important;
     font-size:12px !important;
   }
-
   #browseDetailBody{
     overflow:visible !important;
     max-height:none !important;
     padding-right:0 !important;
   }
-
   .editBlock{
     padding:12px !important;
     margin-bottom:10px !important;
     border-radius:15px !important;
   }
-
   .editGrid,
   .editGrid.four,
   .taskBasicGrid,
@@ -3625,7 +2910,6 @@ body{
     grid-template-columns:1fr !important;
     gap:9px !important;
   }
-
   .majorEditLabel,
   .sectionTitle,
   .bonusSectionTitle{
@@ -3633,11 +2917,9 @@ body{
     line-height:1.2 !important;
     margin-bottom:8px !important;
   }
-
   .editLabel{
     font-size:12px !important;
   }
-
   .editInput,
   .editSelect{
     min-height:36px !important;
@@ -3646,7 +2928,6 @@ body{
     border-radius:11px !important;
     font-size:13px !important;
   }
-
   .pickerGroup,
   .pickerGroup.singerPicker,
   .candidateList,
@@ -3655,7 +2936,6 @@ body{
   .sectionTitleActions{
     gap:7px !important;
   }
-
   .miniBtn,
   .pickerBtn,
   .candidateBtn,
@@ -3670,14 +2950,12 @@ body{
     border-radius:10px !important;
     font-size:12px !important;
   }
-
   .rowCard{
     grid-template-columns:1fr !important;
     gap:7px !important;
     padding:10px !important;
     border-radius:13px !important;
   }
-
   .rowDeleteBtn,
   .rowDeleteBtn.withdrawRowBtn{
     width:34px !important;
@@ -3686,37 +2964,25 @@ body{
     border-radius:9px !important;
     font-size:13px !important;
   }
-
   .bonusWrap{
     grid-template-columns:1fr 1fr !important;
     gap:10px !important;
   }
-
   .bonusValue{
     font-size:22px !important;
     font-weight:950 !important;
   }
-
   .bonusLabel,
   .bonusHint{
     font-size:12px !important;
     line-height:1.45 !important;
   }
 }
-
-
-/* =========================================================
-   最终确认：手机版板块体系修正
-   只覆盖 540px 及以下手机版，不影响 541px 以上横屏网页版与业务逻辑
-========================================================= */
 @media (max-width:540px){
-  /* 页面最顶部必须有可感知留白；所有手机版组件以板块方式向下排列 */
   #overlay{
     padding:18px 4px 12px !important;
     gap:6px !important;
   }
-
-  /* 顶部三组：房间切换 / 身份组件 / 页面切换，宽度统一、间距统一 */
   #topBar,
   #topBarUserAnchor,
   #panelSwitch,
@@ -3724,7 +2990,6 @@ body{
     width:100% !important;
     max-width:100% !important;
   }
-
   #topBar{
     position:relative !important;
     left:auto !important;
@@ -3739,7 +3004,6 @@ body{
     border:1px solid rgba(168,123,81,.16) !important;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.56), 0 2px 7px rgba(116,86,54,.06) !important;
   }
-
   #navOuter,
   #navScroll{
     width:100% !important;
@@ -3747,11 +3011,9 @@ body{
     padding:0 !important;
     margin:0 !important;
   }
-
   #navScroll{
     display:block !important;
   }
-
   #roomNav{
     display:flex !important;
     width:100% !important;
@@ -3761,7 +3023,6 @@ body{
     gap:2px !important;
     padding:0 !important;
   }
-
   .navBtn{
     flex:1 1 0 !important;
     min-width:0 !important;
@@ -3773,13 +3034,10 @@ body{
     border:1px solid rgba(142,95,50,.34) !important;
     box-shadow:inset 0 1px 0 rgba(255,250,235,.90), inset 0 -1px 0 rgba(122,83,45,.10), 0 2px 6px rgba(112,83,52,.10) !important;
   }
-
   .navBtn::after{
     inset:2px !important;
     border-radius:9px !important;
   }
-
-  /* 身份组件：独立板块，宽度与房间切换一致；内部三个小部件各自有框并居中 */
   #topBarUserAnchor{
     position:relative !important;
     top:auto !important;
@@ -3792,7 +3050,6 @@ body{
     align-items:center !important;
     z-index:15 !important;
   }
-
   #topBarUserArea{
     position:relative !important;
     inset:auto !important;
@@ -3814,7 +3071,6 @@ body{
     backdrop-filter:none !important;
     -webkit-backdrop-filter:none !important;
   }
-
   #currentUserBadge,
   #siteNoticeWrap,
   #logoutBtn{
@@ -3828,7 +3084,6 @@ body{
     text-align:center !important;
     box-sizing:border-box !important;
   }
-
   #currentUserBadge{
     flex:initial !important;
     width:100% !important;
@@ -3841,7 +3096,6 @@ body{
     border:1px solid rgba(145,92,43,.14) !important;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.70) !important;
   }
-
   #currentUserBadge .identityText{
     min-width:0 !important;
     overflow:hidden !important;
@@ -3856,7 +3110,6 @@ body{
     flex:initial !important;
     overflow:visible !important;
   }
-
   #siteNoticeBtn{
     width:100% !important;
     height:100% !important;
@@ -3871,7 +3124,6 @@ body{
     backdrop-filter:none !important;
     -webkit-backdrop-filter:none !important;
   }
-
   #logoutBtn{
     width:46px !important;
     min-width:46px !important;
@@ -3885,7 +3137,6 @@ body{
     backdrop-filter:none !important;
     -webkit-backdrop-filter:none !important;
   }
-
   #siteNoticePanel{
     position:fixed !important;
     top:62px !important;
@@ -3894,8 +3145,6 @@ body{
     width:auto !important;
     max-height:60dvh !important;
   }
-
-  /* 主面板改成手机版流式容器；页面切换是独立板块 */
   #taskPanel{
     position:relative !important;
     left:auto !important;
@@ -3913,11 +3162,9 @@ body{
     -webkit-backdrop-filter:none !important;
     overflow:visible !important;
   }
-
   #taskPanel::before{
     display:none !important;
   }
-
   #panelSwitch{
     position:relative !important;
     left:auto !important;
@@ -3936,7 +3183,6 @@ body{
     backdrop-filter:none !important;
     -webkit-backdrop-filter:none !important;
   }
-
   .switchBtn{
     flex:1 1 0 !important;
     min-height:30px !important;
@@ -3946,7 +3192,6 @@ body{
     font-size:12px !important;
     line-height:1 !important;
   }
-
   .panelView,
   #browsePanelInner{
     position:relative !important;
@@ -3954,14 +3199,11 @@ body{
     width:100% !important;
     height:auto !important;
   }
-
   #browsePanelInner{
     display:flex !important;
     flex-direction:column !important;
     gap:8px !important;
   }
-
-  /* 列表板块：筛选标签、搜索框、歌名列表属于同一个板块 */
   #browseListPane{
     width:100% !important;
     min-height:auto !important;
@@ -3973,7 +3215,6 @@ body{
     background:rgba(255,252,247,.30) !important;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.50), 0 3px 10px rgba(120,92,63,.05) !important;
   }
-
   .filterTagsWrap{
     display:flex !important;
     flex-wrap:wrap !important;
@@ -3981,7 +3222,6 @@ body{
     margin-bottom:8px !important;
     padding-right:0 !important;
   }
-
   .filterTagBtn{
     width:auto !important;
     min-width:58px !important;
@@ -3990,46 +3230,38 @@ body{
     border-radius:10px !important;
     font-size:11px !important;
   }
-
   .searchInput{
     height:34px !important;
     border-radius:12px !important;
     font-size:12px !important;
   }
-
   #browseList{
     max-height:36dvh !important;
     overflow:auto !important;
     padding-right:4px !important;
   }
-
   .taskItem{
     padding:8px 10px !important;
     margin-bottom:7px !important;
     border-radius:13px !important;
   }
-
   .taskItemName,
   .taskNameText{
     font-size:13px !important;
     line-height:1.28 !important;
   }
-
   .taskItemInfo,
   .taskItem .taskTypeMini{
     display:none !important;
   }
-
   .taskItemName{
     align-items:center !important;
   }
-
   .taskItemTitleMain{
     flex-wrap:nowrap !important;
     align-items:center !important;
     width:100% !important;
   }
-
   .taskNameText{
     flex:1 1 auto !important;
     min-width:0 !important;
@@ -4039,8 +3271,6 @@ body{
     text-overflow:ellipsis !important;
     -webkit-line-clamp:unset !important;
   }
-
-  /* 内容板块：歌名是标题，演唱者/歌词分配/混音/视频链接等是同级小标题 */
   #browseDetailPane{
     width:100% !important;
     padding:12px 10px 14px !important;
@@ -4050,7 +3280,6 @@ body{
     background:rgba(255,252,247,.30) !important;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.50), 0 3px 10px rgba(120,92,63,.05) !important;
   }
-
   #browseDetailHeader{
     display:grid !important;
     grid-template-columns:auto minmax(0,1fr) !important;
@@ -4059,12 +3288,10 @@ body{
     row-gap:7px !important;
     margin-bottom:10px !important;
   }
-
   .detailTitleWrap,
   #browseDetailTitle{
     display:contents !important;
   }
-
   .detailTitleText{
     grid-column:1 / -1 !important;
     display:block !important;
@@ -4080,7 +3307,6 @@ body{
     font-weight:900 !important;
     line-height:1.2 !important;
   }
-
   .detailTitleMetaRow{
     grid-column:1 !important;
     display:flex !important;
@@ -4089,11 +3315,9 @@ body{
     gap:5px !important;
     min-width:0 !important;
   }
-
   .detailTitleStatus{
     display:none !important;
   }
-
   .headerRight{
     grid-column:2 !important;
     display:flex !important;
@@ -4105,7 +3329,6 @@ body{
     flex-wrap:nowrap !important;
     padding-top:0 !important;
   }
-
   .topRightStatus{
     order:4 !important;
     display:inline-flex !important;
@@ -4126,11 +3349,9 @@ body{
     overflow:hidden !important;
     text-overflow:clip !important;
   }
-
   .undoBtn{ order:1 !important; }
   .saveNowBtn{ order:2 !important; }
   .autoSaveBadge{ order:3 !important; }
-
   .saveNowBtn,
   .undoBtn,
   .autoSaveBadge{
@@ -4142,24 +3363,20 @@ body{
     line-height:1 !important;
     white-space:nowrap !important;
   }
-
   .undoBtn{
     max-width:58px !important;
     overflow:hidden !important;
     text-overflow:clip !important;
   }
-
   .autoSaveBadge{
     max-width:44px !important;
     overflow:hidden !important;
   }
-
   #browseDetailBody{
     overflow:visible !important;
     max-height:none !important;
     padding-right:0 !important;
   }
-
   .editBlock{
     padding:11px !important;
     margin-bottom:10px !important;
@@ -4168,7 +3385,6 @@ body{
     border:1px solid rgba(255,255,255,.30) !important;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.46) !important;
   }
-
   .editGrid,
   .editGrid.four,
   .publishMetaGrid,
@@ -4177,43 +3393,35 @@ body{
     grid-template-columns:1fr !important;
     gap:9px !important;
   }
-
   .taskBasicGrid{
     display:grid !important;
     grid-template-columns:1fr 1fr !important;
     gap:9px !important;
   }
-
   .taskBasicGrid .editField:nth-child(1){
     order:1 !important;
     grid-column:auto !important;
   }
-
   .taskBasicGrid .editField:nth-child(2){
     order:3 !important;
     grid-column:1 / -1 !important;
   }
-
   .taskBasicGrid .editField:nth-child(3){
     order:2 !important;
     grid-column:auto !important;
   }
-
   .taskMetaGrid{
     display:grid !important;
     grid-template-columns:1fr 1fr !important;
     gap:9px !important;
   }
-
   .taskMetaGrid .editField:nth-child(1),
   .taskMetaGrid .editField:nth-child(2){
     grid-column:auto !important;
   }
-
   .taskMetaGrid .editField:nth-child(n+3){
     grid-column:1 / -1 !important;
   }
-
   .majorEditLabel,
   .sectionTitle{
     font-size:13px !important;
@@ -4222,11 +3430,9 @@ body{
     color:#7a5231 !important;
     font-weight:900 !important;
   }
-
   .editLabel{
     font-size:12px !important;
   }
-
   .editInput,
   .editSelect{
     min-height:36px !important;
@@ -4235,7 +3441,6 @@ body{
     border-radius:11px !important;
     font-size:13px !important;
   }
-
   .pickerGroup,
   .pickerGroup.singerPicker,
   .candidateList,
@@ -4244,7 +3449,6 @@ body{
   .sectionTitleActions{
     gap:7px !important;
   }
-
   .miniBtn,
   .pickerBtn,
   .candidateBtn,
@@ -4259,7 +3463,6 @@ body{
     border-radius:10px !important;
     font-size:12px !important;
   }
-
   .rowCard{
     grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px !important;
     align-items:center !important;
@@ -4267,7 +3470,6 @@ body{
     padding:8px !important;
     border-radius:13px !important;
   }
-
   .rowDeleteBtn,
   .rowDeleteBtn.withdrawRowBtn{
     width:34px !important;
@@ -4278,8 +3480,6 @@ body{
     border-radius:9px !important;
     white-space:nowrap !important;
   }
-
-  /* 任务奖金独立成自己的板块，标题与内容区小标题区分 */
   .bonusSectionTitle{
     font-size:15px !important;
     line-height:1.25 !important;
@@ -4287,46 +3487,37 @@ body{
     color:#7d5731 !important;
     font-weight:950 !important;
   }
-
   .bonusWrap{
     grid-template-columns:1fr 1fr !important;
     gap:10px !important;
     padding:0 !important;
   }
-
   .bonusCard{
     padding:9px !important;
     border-radius:14px !important;
     background:rgba(255,252,247,.40) !important;
     border:1px solid rgba(255,255,255,.28) !important;
   }
-
   .bonusValue{
     font-size:22px !important;
     font-weight:950 !important;
   }
-
   .bonusLabel,
   .bonusHint{
     font-size:12px !important;
     line-height:1.45 !important;
   }
-
-
-  /* 手机版内容区压缩：缩小歌词分配/混音等子版块的空隙与高度 */
   #browseDetailPane .editBlock{
     padding:8px !important;
     margin-bottom:7px !important;
     border-radius:14px !important;
   }
-
   #browseDetailPane .majorEditLabel,
   #browseDetailPane .sectionTitle{
     font-size:12px !important;
     line-height:1.2 !important;
     margin-bottom:6px !important;
   }
-
   #browseDetailPane .editGrid,
   #browseDetailPane .editGrid.four,
   #browseDetailPane .publishMetaGrid,
@@ -4334,13 +3525,11 @@ body{
   #browseDetailPane .rowList{
     gap:6px !important;
   }
-
   #browseDetailPane .rowCard{
     gap:5px !important;
     padding:6px !important;
     border-radius:12px !important;
   }
-
   #browseDetailPane .editInput,
   #browseDetailPane .editSelect{
     min-height:32px !important;
@@ -4349,7 +3538,6 @@ body{
     border-radius:10px !important;
     font-size:12px !important;
   }
-
   #browseDetailPane .miniBtn,
   #browseDetailPane .pickerBtn,
   #browseDetailPane .candidateBtn,
@@ -4363,7 +3551,6 @@ body{
     border-radius:9px !important;
     font-size:11px !important;
   }
-
   #browseDetailPane .rowDeleteBtn,
   #browseDetailPane .rowDeleteBtn.withdrawRowBtn{
     width:30px !important;
@@ -4372,21 +3559,17 @@ body{
     border-radius:8px !important;
     font-size:11px !important;
   }
-  /* 手机版顶部微调：保留顶部留白，缩短房间切换与身份组件间距，并保证房间按钮完整显示 */
   #topBar{
     margin-bottom:2px !important;
   }
-
   #topBarUserAnchor{
     margin-top:0 !important;
     margin-bottom:4px !important;
   }
-
   #roomNav{
     justify-content:center !important;
     gap:2px !important;
   }
-
   .navBtn{
     height:25px !important;
     padding-left:2px !important;
@@ -4394,96 +3577,15 @@ body{
     font-size:8.5px !important;
     line-height:1 !important;
   }
-
   #panelSwitch{
     margin-bottom:6px !important;
   }
-
 }
-
-
-/* 540px及以下手机版：仅上移身份组件，不影响541px以上横屏网页版 */
 @media (max-width:540px){
   #topBarUserAnchor{
     transform:translateY(-4px) !important;
   }
 }
-
-
-
-/* =========================================================
-   本轮确认修改：只改指定项，不动结构、位置与业务逻辑
-   1) 网页版身份组件仅统一为手机版配色
-   2) 541px–760px 内容区字号连续缩小，避免 761→760 跳变
-   3) 手机版房间切换组件外框换成更清晰但不跳色的水彩边界
-========================================================= */
-
-/* 1) 身份组件：只改颜色，不改尺寸、位置、结构 */
-#topBarUserArea{
-  background:rgba(255,248,239,.32) !important;
-  border-color:rgba(168,123,81,.14) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.50), 0 2px 6px rgba(116,86,54,.05) !important;
-}
-
-#currentUserBadge{
-  background:rgba(255,252,247,.74) !important;
-  color:#68401e !important;
-  border-color:rgba(145,92,43,.14) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.70) !important;
-}
-
-#currentUserBadge:hover{
-  background:rgba(255,252,247,.82) !important;
-  border-color:rgba(145,92,43,.20) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.76), 0 1px 3px rgba(116,86,54,.05) !important;
-}
-#siteNoticeBtn{
-  background:rgba(255,252,247,.74) !important;
-  color:#6c4523 !important;
-  border-color:rgba(145,92,43,.14) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.70) !important;
-}
-
-#siteNoticeBtn:hover,
-#siteNoticeBtn.hasNotice{
-  background:rgba(255,252,247,.82) !important;
-  color:#6c4523 !important;
-  border-color:rgba(145,92,43,.20) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.76), 0 1px 3px rgba(116,86,54,.05) !important;
-}
-
-#logoutBtn{
-  background:rgba(255,252,247,.74) !important;
-  color:#6c4523 !important;
-  border-color:rgba(145,92,43,.14) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.70) !important;
-}
-
-#logoutBtn:hover{
-  background:rgba(255,252,247,.82) !important;
-  color:#6c4523 !important;
-  border-color:rgba(145,92,43,.20) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.76), 0 1px 3px rgba(116,86,54,.05) !important;
-}
-
-#siteNoticeCount{
-  background:#c98c4f !important;
-  color:#fff8ef !important;
-  border-color:#f3dfbf !important;
-  box-shadow:0 1px 4px rgba(92,62,36,.16) !important;
-}
-
-/* 3) 手机版房间切换外框：只换外框颜色，保留现有大小和位置 */
-@media (max-width:540px){
-  #topBar{
-    background:linear-gradient(180deg, rgba(255,246,232,.54) 0%, rgba(239,220,196,.46) 100%) !important;
-    border-color:rgba(181,126,82,.26) !important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.66), 0 2px 7px rgba(116,86,54,.07) !important;
-  }
-}
-
-
-/* 本轮修正：只覆盖指定错误，不改业务逻辑和未提到布局 */
 @media (min-width:541px){
   #browseDetailTitle{
     flex-direction:row !important;
@@ -4492,11 +3594,9 @@ body{
     column-gap:8px !important;
     row-gap:4px !important;
   }
-
   #browseDetailTitle .detailTitleText{
     flex:0 1 auto !important;
   }
-
   #browseDetailTitle .detailTitleMetaRow{
     display:inline-flex !important;
     align-items:center !important;
@@ -4504,93 +3604,69 @@ body{
     gap:7px !important;
   }
 }
-
 @media (min-width:2000px) and (max-width:2399px){
-  #overlay{
-    --project-font-base:15px;
-    --project-btn-h:44px;
-  }
-
-  .navBtn{
-    --nav-btn-font:16.5px;
-  }
-
   #browseDetailTitle{
     font-size:22px;
   }
-
   .detailTitleStatus{
     font-size:13px;
   }
-
   .filterTagBtn{
     min-width:64px;
     height:32px;
     font-size:13px;
   }
-
   .searchInput{
     height:38px;
     font-size:14px;
   }
-
   .taskItemName{
     font-size:15px;
   }
-
   .taskItemInfo{
     font-size:13px;
   }
-
   .majorEditLabel,
   .sectionTitle,
   .bonusSectionTitle{
     font-size:18px;
   }
-
   .editLabel,
   .bonusLabel,
   .bonusHint{
     font-size:13px;
   }
-
   .editInput,
   .editSelect{
     min-height:42px;
     font-size:15px;
   }
-
   .miniBtn,
   .pickerBtn,
   .candidateBtn{
     height:40px;
     font-size:13px;
   }
-
   .saveNowBtn,
   .undoBtn,
   .autoSaveBadge{
     min-height:34px;
     font-size:13px;
   }
-
   .bonusValue{
     font-size:21px;
   }
 }
-
 @media (min-width:541px) and (max-width:760px){
   #browseDetailPane #browseDetailTitle,
   #browseDetailPane .detailTitleText{
     font-size:13px !important;
     line-height:1.16 !important;
   }
-
   #browseDetailPane .detailTitleStatus{
     font-size:8.5px !important;
     line-height:1.18 !important;
   }
-
   #browseDetailPane .majorEditLabel,
   #browseDetailPane .sectionTitle,
   #browseDetailPane .bonusSectionTitle{
@@ -4598,7 +3674,6 @@ body{
     line-height:1.15 !important;
     margin-bottom:5px !important;
   }
-
   #browseDetailPane .editLabel,
   #browseDetailPane .bonusLabel,
   #browseDetailPane .bonusHint,
@@ -4606,7 +3681,6 @@ body{
     font-size:9px !important;
     line-height:1.25 !important;
   }
-
   #browseDetailPane .editInput,
   #browseDetailPane .editSelect,
   #browseListPane .searchInput{
@@ -4616,18 +3690,15 @@ body{
     padding-left:8px !important;
     padding-right:8px !important;
   }
-
   #browseListPane .taskItemName,
   #browseListPane .taskNameText{
     font-size:10px !important;
     line-height:1.24 !important;
   }
-
   #browseListPane .filterTagsWrap{
     gap:4px !important;
     margin-bottom:6px !important;
   }
-
   #browseListPane .filterTagBtn{
     min-width:42px !important;
     height:21px !important;
@@ -4636,7 +3707,6 @@ body{
     font-size:8.5px !important;
     line-height:1 !important;
   }
-
   #browseDetailPane .saveNowBtn,
   #browseDetailPane .undoBtn,
   #browseDetailPane .autoSaveBadge{
@@ -4647,7 +3717,6 @@ body{
     font-size:8.5px !important;
     line-height:1 !important;
   }
-
   #browseDetailPane .miniBtn,
   #browseDetailPane .pickerBtn,
   #browseDetailPane .candidateBtn,
@@ -4663,7 +3732,6 @@ body{
     font-size:9px !important;
     line-height:1 !important;
   }
-
   #browseDetailPane .taskModeToggleBtn,
   #browseDetailPane .miniBtn.taskModeToggleBtn{
     width:24px !important;
@@ -4674,64 +3742,10 @@ body{
     padding:0 !important;
     font-size:10px !important;
   }
-
   #browseDetailPane .bonusValue{
     font-size:13px !important;
   }
 }
-
-
-
-
-/* =========================================================
-   最小修正：身份组件完整居中 / 小屏左栏可读 / 筛选标签紧凑
-   只修当前反馈的细节，不重写原有定位与主布局
-========================================================= */
-#topBarUserArea{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) var(--identity-circle, 28px) var(--identity-logout-w, 34px);
-  align-items:center;
-  justify-content:initial;
-  gap:var(--identity-gap, 5px);
-  width:100%;
-  min-width:0;
-  max-width:100%;
-  padding:var(--identity-pad-y, 4px) var(--identity-pad-x, 5px);
-  overflow:hidden;
-}
-
-#currentUserBadge{
-  width:100%;
-  min-width:0;
-  max-width:100%;
-  justify-content:center;
-  text-align:center;
-  overflow:hidden;
-}
-
-#currentUserBadge .identityText{
-  flex:0 1 auto;
-  min-width:0;
-  max-width:100%;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  text-align:center;
-}
-
-#siteNoticeWrap{
-  width:var(--identity-circle, 28px);
-  min-width:0;
-  flex:0 0 var(--identity-circle, 28px);
-}
-
-#logoutBtn{
-  width:var(--identity-logout-w, 34px);
-  min-width:0;
-  flex:0 0 var(--identity-logout-w, 34px);
-  text-align:center;
-}
-
 @media (min-width:541px) and (max-width:760px){
   #browseListPane .filterTagsWrap{
     display:grid !important;
@@ -4741,7 +3755,6 @@ body{
     padding-right:0 !important;
     overflow:visible !important;
   }
-
   #browseListPane .filterTagBtn{
     width:100% !important;
     min-width:0 !important;
@@ -4753,12 +3766,10 @@ body{
     justify-content:center !important;
     text-align:center !important;
   }
-
   #browseListPane .taskItem{
     padding:6px 6px !important;
     margin-bottom:6px !important;
   }
-
   #browseListPane .taskItemName{
     display:flex !important;
     align-items:center !important;
@@ -4768,7 +3779,6 @@ body{
     font-size:10px !important;
     line-height:1.18 !important;
   }
-
   #browseListPane .taskItemTitleMain{
     flex:1 1 auto !important;
     min-width:0 !important;
@@ -4777,7 +3787,6 @@ body{
     flex-wrap:nowrap !important;
     gap:3px !important;
   }
-
   #browseListPane .taskNameText{
     flex:1 1 auto !important;
     min-width:0 !important;
@@ -4791,7 +3800,6 @@ body{
     font-size:clamp(8px, 1.55vw, 10px) !important;
     line-height:1.18 !important;
   }
-
   #browseListPane .taskItemHeadActions{
     flex:0 0 auto !important;
     display:flex !important;
@@ -4800,7 +3808,6 @@ body{
     gap:3px !important;
     margin-top:0 !important;
   }
-
   #browseListPane .joinTaskBtn{
     width:22px !important;
     height:22px !important;
@@ -4810,19 +3817,16 @@ body{
     line-height:1 !important;
   }
 }
-
 @media (max-width:540px){
   #topBarUserArea{
     grid-template-columns:minmax(0,1fr) 34px 46px !important;
     overflow:hidden !important;
   }
-
   #currentUserBadge{
     justify-content:center !important;
     text-align:center !important;
     overflow:hidden !important;
   }
-
   #currentUserBadge .identityText{
     max-width:100% !important;
     overflow:hidden !important;
@@ -4830,27 +3834,23 @@ body{
     white-space:nowrap !important;
     text-align:center !important;
   }
-
   .filterTagsWrap{
     display:grid !important;
     grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
     gap:6px !important;
   }
-
   .filterTagBtn{
     width:100% !important;
     min-width:0 !important;
     justify-content:center !important;
     text-align:center !important;
   }
-
   .taskItemName{
     display:flex !important;
     align-items:center !important;
     justify-content:space-between !important;
     gap:8px !important;
   }
-
   .taskItemTitleMain{
     flex:1 1 auto !important;
     min-width:0 !important;
@@ -4858,7 +3858,6 @@ body{
     align-items:center !important;
     flex-wrap:nowrap !important;
   }
-
   .taskNameText{
     flex:1 1 auto !important;
     min-width:0 !important;
@@ -4869,7 +3868,6 @@ body{
     -webkit-line-clamp:unset !important;
     line-height:1.2 !important;
   }
-
   .taskItemHeadActions{
     flex:0 0 auto !important;
     display:flex !important;
@@ -4878,51 +3876,434 @@ body{
     margin-top:0 !important;
   }
 }
-
-
-/* 541px-760px：横屏网页版身份组件按外框宽度比例缩放，避免铃铛/登出占比过大 */
-@media (min-width:541px) and (max-width:760px){
-  #topBarUserArea{
-    --identity-font:clamp(6px, 1.10vw, 8.4px) !important;
-    --identity-icon-font:clamp(6.2px, 1.18vw, 9px) !important;
-    --identity-logout-font:clamp(4.8px, .86vw, 6.4px) !important;
-    --identity-circle:clamp(10px, 1.98vw, 15px) !important;
-    --identity-logout-w:clamp(11px, 2.16vw, 16.5px) !important;
-    --identity-gap:clamp(1.2px, .32vw, 2.4px) !important;
-    --identity-pad-x:clamp(1.1px, .25vw, 2px) !important;
-    --identity-pad-y:clamp(1px, .22vw, 2px) !important;
-    --identity-radius:clamp(7px, 1.35vw, 10.5px) !important;
-    grid-template-columns:minmax(0,1fr) var(--identity-circle) var(--identity-logout-w) !important;
+@media (min-width:541px){
+  #overlay{
+    --bg-scale:var(--bg-ui-scale, 1);
+    --ui-scale:var(--bg-ui-scale, 1) !important;
+    --overlay-ui-scale:var(--bg-ui-scale, 1) !important;
+    --project-radius-md:calc(20px * var(--bg-scale)) !important;
+    --project-font-base:calc(16px * var(--bg-scale)) !important;
+    --project-btn-h:calc(40px * var(--bg-scale)) !important;
   }
-
-  #currentUserBadge{
-    min-width:0 !important;
-    width:100% !important;
+  #topBar{
+    position:absolute !important;
+    z-index:40 !important;
+    overflow:visible !important;
+    transform:translateY(-50%) !important;
+  }
+  #roomNav{
+    display:inline-flex !important;
+    align-items:center !important;
+    gap:var(--nav-gap) !important;
+    min-width:max-content !important;
+    max-width:none !important;
+    transform-origin:left center !important;
+    will-change:auto !important;
+  }
+  .navBtn{
+    height:var(--nav-btn-height) !important;
+    padding:0 var(--nav-btn-px) !important;
+    border-radius:var(--nav-btn-radius) !important;
+    font-size:var(--nav-btn-font) !important;
+    flex:0 0 auto !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
     white-space:nowrap !important;
   }
-
+  #topBarUserAnchor{
+    position:absolute !important;
+    left:var(--identity-left) !important;
+    right:auto !important;
+    top:var(--identity-top) !important;
+    width:var(--identity-w) !important;
+    height:var(--identity-h) !important;
+    z-index:65 !important;
+    pointer-events:none !important;
+  }
+  #topBarUserArea{
+    position:absolute !important;
+    inset:0 auto auto 0 !important;
+    width:100% !important;
+    min-width:100% !important;
+    max-width:100% !important;
+    height:100% !important;
+    min-height:100% !important;
+    max-height:100% !important;
+    display:inline-flex !important;
+    align-items:stretch !important;
+    justify-content:flex-end !important;
+    gap:var(--identity-gap) !important;
+    padding:var(--identity-pad-y) var(--identity-pad-x) !important;
+    border-radius:var(--identity-radius) !important;
+    background:rgba(255,248,239,0.92) !important;
+    border:1px solid rgba(186,146,103,0.24) !important;
+    box-shadow:0 10px 24px rgba(116,86,54,0.12), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+    backdrop-filter:blur(8px) !important;
+    -webkit-backdrop-filter:blur(8px) !important;
+    box-sizing:border-box !important;
+    overflow:visible !important;
+    white-space:nowrap !important;
+    pointer-events:auto !important;
+  }
+  #currentUserBadge{
+    order:1 !important;
+    flex:0 0 auto !important;
+    width:auto !important;
+    min-width:max-content !important;
+    height:auto !important;
+    min-height:0 !important;
+    align-self:stretch !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:var(--identity-text-gap) !important;
+    padding:0 var(--identity-badge-px) !important;
+    border-radius:var(--identity-chip-radius) !important;
+    background:rgba(255,252,247,0.96) !important;
+    color:#6c4523 !important;
+    font-size:var(--identity-font) !important;
+    font-weight:800 !important;
+    line-height:1 !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.95), 0 1px 4px rgba(112,83,52,0.05) !important;
+    border:1px solid rgba(160,116,78,0.12) !important;
+    box-sizing:border-box !important;
+    overflow:visible !important;
+    white-space:nowrap !important;
+  }
+  #currentUserBadge .identityText{
+    flex:0 0 auto !important;
+    min-width:0 !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    white-space:nowrap !important;
+    line-height:1 !important;
+    font-size:inherit !important;
+  }
+  #siteNoticeWrap{
+    position:relative !important;
+    order:2 !important;
+    flex:0 0 var(--identity-icon-w) !important;
+    width:var(--identity-icon-w) !important;
+    min-width:var(--identity-icon-w) !important;
+    height:auto !important;
+    min-height:0 !important;
+    align-self:stretch !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    overflow:visible !important;
+  }
+  #siteNoticeBtn{
+    width:100% !important;
+    height:100% !important;
+    min-width:0 !important;
+    min-height:0 !important;
+    padding:0 !important;
+    border-radius:var(--identity-chip-radius) !important;
+    background:rgba(255,252,247,0.96) !important;
+    color:#6c4523 !important;
+    font-size:var(--identity-icon-font) !important;
+    line-height:1 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.95), 0 1px 4px rgba(112,83,52,0.05) !important;
+    border:1px solid rgba(160,116,78,0.12) !important;
+    box-sizing:border-box !important;
+  }
+  #siteNoticeIcon{
+    display:block !important;
+    line-height:1 !important;
+    font-size:1em !important;
+    transform:translateY(var(--identity-icon-shift, 0px)) !important;
+  }
+  #logoutBtn{
+    order:3 !important;
+    flex:0 0 var(--identity-logout-w) !important;
+    width:var(--identity-logout-w) !important;
+    min-width:var(--identity-logout-w) !important;
+    height:auto !important;
+    min-height:0 !important;
+    align-self:stretch !important;
+    padding:0 !important;
+    border-radius:var(--identity-chip-radius) !important;
+    background:rgba(255,252,247,0.96) !important;
+    color:#67401f !important;
+    font-size:var(--identity-logout-font) !important;
+    font-weight:800 !important;
+    line-height:1 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.95), 0 1px 4px rgba(112,83,52,0.05) !important;
+    border:1px solid rgba(160,116,78,0.12) !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+  #panelSwitch{
+    left:var(--panel-switch-left) !important;
+    top:var(--panel-switch-top) !important;
+    width:var(--panel-switch-w) !important;
+    height:var(--panel-switch-h) !important;
+    padding:var(--panel-switch-pad-y) var(--panel-switch-pad-x) !important;
+    border-radius:var(--panel-switch-radius) !important;
+    gap:var(--panel-switch-gap) !important;
+  }
+  .switchBtn{
+    flex:0 0 var(--switch-btn-h) !important;
+    min-height:var(--switch-btn-h) !important;
+    height:var(--switch-btn-h) !important;
+    padding:var(--switch-btn-pad-y) var(--switch-btn-pad-x) !important;
+    border-radius:var(--switch-btn-radius) !important;
+    font-size:var(--switch-font) !important;
+    line-height:1.1 !important;
+  }
+  #taskPanel{
+    left:var(--task-panel-left-bound, 9.2%) !important;
+    right:var(--task-panel-right-bound, 22.4%) !important;
+    top:var(--task-panel-top-bound, 18%) !important;
+    bottom:var(--task-panel-bottom-bound, 12%) !important;
+  }
+}
+@media (min-width:541px){
+  #topBarUserAnchor{
+    position:absolute !important;
+    left:var(--identity-left) !important;
+    right:auto !important;
+    top:var(--identity-top) !important;
+    width:var(--identity-w) !important;
+    height:var(--identity-h) !important;
+    z-index:65 !important;
+    pointer-events:none !important;
+  }
+  #topBarUserArea{
+    position:absolute !important;
+    inset:0 auto auto 0 !important;
+    width:100% !important;
+    min-width:100% !important;
+    max-width:100% !important;
+    height:100% !important;
+    min-height:100% !important;
+    display:flex !important;
+    align-items:stretch !important;
+    justify-content:flex-start !important;
+    gap:var(--identity-gap) !important;
+    padding:var(--identity-pad-y) var(--identity-pad-x) !important;
+    border-radius:var(--identity-radius) !important;
+    background:rgba(255,248,239,0.92) !important;
+    border:1px solid rgba(186,146,103,0.24) !important;
+    box-shadow:0 10px 24px rgba(116,86,54,0.12), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+    backdrop-filter:blur(8px) !important;
+    -webkit-backdrop-filter:blur(8px) !important;
+    box-sizing:border-box !important;
+    overflow:visible !important;
+    white-space:nowrap !important;
+    pointer-events:auto !important;
+  }
+  #currentUserBadge{
+    order:1 !important;
+    flex:1 1 auto !important;
+    width:auto !important;
+    min-width:0 !important;
+    height:auto !important;
+    min-height:0 !important;
+    align-self:stretch !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:var(--identity-text-gap) !important;
+    padding:0 var(--identity-badge-px) !important;
+    border-radius:var(--identity-chip-radius) !important;
+    background:rgba(255,252,247,0.96) !important;
+    color:#6c4523 !important;
+    font-size:var(--identity-font) !important;
+    font-weight:800 !important;
+    line-height:1 !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.95), 0 1px 4px rgba(112,83,52,0.05) !important;
+    border:1px solid rgba(160,116,78,0.12) !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+    white-space:nowrap !important;
+  }
   #currentUserBadge .identityText{
     flex:0 1 auto !important;
     min-width:0 !important;
-    max-width:100% !important;
-    flex-direction:row !important;
-    white-space:nowrap !important;
-    line-height:1 !important;
-    letter-spacing:-.02em !important;
     overflow:hidden !important;
-    text-overflow:clip !important;
-  }
-
-  #currentUserBadge .identityName,
-  #currentUserBadge .identitySep,
-  #currentUserBadge .identityRole{
-    display:inline-block !important;
+    text-overflow:ellipsis !important;
     white-space:nowrap !important;
     line-height:1 !important;
+    font-size:inherit !important;
   }
-
+  #siteNoticeWrap{
+    position:relative !important;
+    order:2 !important;
+    flex:0 0 var(--identity-icon-w) !important;
+    width:var(--identity-icon-w) !important;
+    min-width:var(--identity-icon-w) !important;
+    height:auto !important;
+    min-height:0 !important;
+    align-self:stretch !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    overflow:visible !important;
+  }
+  #siteNoticeBtn{
+    width:100% !important;
+    height:100% !important;
+    min-width:0 !important;
+    min-height:0 !important;
+    padding:0 !important;
+    border-radius:var(--identity-chip-radius) !important;
+    background:rgba(255,252,247,0.96) !important;
+    color:#6c4523 !important;
+    font-size:var(--identity-icon-font) !important;
+    line-height:1 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.95), 0 1px 4px rgba(112,83,52,0.05) !important;
+    border:1px solid rgba(160,116,78,0.12) !important;
+    box-sizing:border-box !important;
+  }
+  #siteNoticeIcon{
+    display:block !important;
+    line-height:1 !important;
+    font-size:1em !important;
+    transform:translateY(var(--identity-icon-shift, 0px)) !important;
+  }
+  #logoutBtn{
+    order:3 !important;
+    flex:0 0 var(--identity-logout-w) !important;
+    width:var(--identity-logout-w) !important;
+    min-width:var(--identity-logout-w) !important;
+    height:auto !important;
+    min-height:0 !important;
+    align-self:stretch !important;
+    padding:0 !important;
+    border-radius:var(--identity-chip-radius) !important;
+    background:rgba(255,252,247,0.96) !important;
+    color:#67401f !important;
+    font-size:var(--identity-logout-font) !important;
+    font-weight:800 !important;
+    line-height:1 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.95), 0 1px 4px rgba(112,83,52,0.05) !important;
+    border:1px solid rgba(160,116,78,0.12) !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+  #panelSwitch{
+    left:var(--panel-switch-left) !important;
+    top:var(--panel-switch-top) !important;
+    width:var(--panel-switch-w) !important;
+    height:var(--panel-switch-h) !important;
+    padding:var(--panel-switch-pad-y) var(--panel-switch-pad-x) !important;
+    border-radius:var(--panel-switch-radius) !important;
+    gap:var(--panel-switch-gap) !important;
+    display:flex !important;
+    flex-direction:column !important;
+    justify-content:space-between !important;
+    align-items:stretch !important;
+    overflow:hidden !important;
+  }
+  .switchBtn{
+    flex:1 1 0 !important;
+    min-height:0 !important;
+    height:auto !important;
+    padding:0 var(--switch-btn-pad-x) !important;
+    border-radius:var(--switch-btn-radius) !important;
+    font-size:var(--switch-font) !important;
+    line-height:1.05 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    overflow:hidden !important;
+  }
+}
+@media (min-width:541px){
+  #currentUserBadge{
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    overflow:visible !important;
+  }
+  #currentUserBadge .identityText{
+    flex:0 0 auto !important;
+    width:auto !important;
+    max-width:none !important;
+    min-width:0 !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    white-space:nowrap !important;
+    text-align:center !important;
+  }
+  #siteNoticeWrap{
+    flex:0 0 var(--identity-icon-w) !important;
+    width:var(--identity-icon-w) !important;
+    min-width:var(--identity-icon-w) !important;
+  }
+  #logoutBtn{
+    flex:0 0 var(--identity-logout-w) !important;
+    width:var(--identity-logout-w) !important;
+    min-width:var(--identity-logout-w) !important;
+  }
+}
+@media (min-width:541px) and (max-width:853.98px){
+  #topBarUserArea{
+    align-items:stretch !important;
+    overflow:visible !important;
+    min-height:var(--identity-h) !important;
+  }
+  #currentUserBadge{
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    overflow:visible !important;
+    padding:0 var(--identity-badge-px) !important;
+  }
+  #currentUserBadge .identityText{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:1px !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    white-space:normal !important;
+    text-align:center !important;
+    line-height:1.02 !important;
+  }
   #currentUserBadge .identitySep{
-    display:inline-block !important;
+    display:none !important;
+  }
+  #currentUserBadge .identityName,
+  #currentUserBadge .identityRole{
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    white-space:nowrap !important;
+    text-align:center !important;
+    line-height:1.02 !important;
+  }
+  #siteNoticeWrap{
+    flex:0 0 var(--identity-icon-w) !important;
+    width:var(--identity-icon-w) !important;
+    min-width:var(--identity-icon-w) !important;
+    overflow:visible !important;
+  }
+  #logoutBtn{
+    flex:0 0 var(--identity-logout-w) !important;
+    width:var(--identity-logout-w) !important;
+    min-width:var(--identity-logout-w) !important;
+    overflow:hidden !important;
   }
 }
 </style>
@@ -4981,7 +4362,6 @@ body{
         <div id="claimView" class="panelView">
           <div id="browsePanelInner">
             <div id="browseListPane">
-              
 
               <div class="filterTagsWrap">
                 <button id="filterClaimBtn" class="filterTagBtn primaryFilterBtn" type="button" data-filter="待认领">待认领</button>
@@ -5049,7 +4429,6 @@ body{
       </div>
     </div>
   </div>
-
 
   <div id="wheelModalMask" aria-hidden="true">
     <div id="wheelModalBox">
@@ -5372,7 +4751,6 @@ body{
     }, duration);
   }
 
-
   function buildWheelToolUrl(taskId = activeClaimTaskId) {
     const params = new URLSearchParams();
     if (taskId) params.set('task_id', String(taskId));
@@ -5423,7 +4801,6 @@ body{
       if (e.target === wheelModalMask) closeWheelToolModal();
     });
   }
-
 
   function setAutoSaveStatus(type, text) {
     autoSaveStatus.className = "autoSaveBadge";
@@ -5491,7 +4868,6 @@ body{
     return (task.singers || []).some(item => String(item.member_id || "").trim() === currentId)
       || (task.parts || []).some(row => String(row.assigned_member_id || "").trim() === currentId);
   }
-
 
   function getCurrentTaskSafe(taskId = activeClaimTaskId) {
     const task = tasks.find(item => String(item.id) === String(taskId || ""));
@@ -5754,7 +5130,6 @@ async function setLyricsLotteryEnabled(taskId, enabled) {
       personalLotteryInFlight = false;
     }
   }
-
 
   function readStudioJumpIntent() {
     try {
@@ -6475,21 +5850,15 @@ ${names}${suffix}`);
     overlay.style.width = drawW + "px";
     overlay.style.height = drawH + "px";
 
-    const BASE_SCREEN_W = 1600;
-    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-    const baseScale = drawW / BASE_SCREEN_W;
-    const largeScreenBoost = drawW >= 2400 ? 1.065 : 1;
-    /* 320–480 保留窄屏网页模式时不再把 UI 缩到不可读；竖屏手机由 CSS 切换为表单流式布局 */
-    const minUiScale = drawW <= 319 ? 0.70 : (drawW <= 480 ? 0.52 : (drawW <= 560 ? 0.48 : 0.52));
-    const uiScale = clamp(baseScale * largeScreenBoost, minUiScale, 1.86);
+    /* 2440px 为网页版母版。541px 以上只允许按底图比例缩放；540px 以下交给手机版布局。 */
+    const DESIGN_W = 2440;
+    const rawScale = drawW / DESIGN_W;
+    const minWebScale = drawW >= 541 ? 0.42 : rawScale;
+    const bgScale = Math.min(Math.max(rawScale, minWebScale), 1.24);
 
-    overlay.style.setProperty("--ui-scale", uiScale.toFixed(4));
-    overlay.style.setProperty("--overlay-ui-scale", uiScale.toFixed(4));
-    overlay.style.setProperty("--nav-btn-height", `${Math.round(40 * uiScale)}px`);
-    overlay.style.setProperty("--nav-btn-px", `${Math.round(16 * uiScale)}px`);
-    overlay.style.setProperty("--nav-btn-radius", `${Math.round(14 * uiScale)}px`);
-    overlay.style.setProperty("--nav-btn-font", `${(14 * uiScale).toFixed(2)}px`);
-    overlay.style.setProperty("--nav-gap", `${(11 * uiScale).toFixed(2)}px`);
+    overlay.style.setProperty("--bg-ui-scale", bgScale.toFixed(5));
+    overlay.style.setProperty("--ui-scale", bgScale.toFixed(5));
+    overlay.style.setProperty("--overlay-ui-scale", bgScale.toFixed(5));
 
     requestAnimationFrame(syncTopUiLayout);
   }
@@ -6509,21 +5878,11 @@ ${names}${suffix}`);
     textEl.style.lineHeight = "1";
     textEl.style.whiteSpace = "nowrap";
 
-    const badgeRect = currentUserBadge.getBoundingClientRect();
-    const badgeW = Math.max(1, badgeRect.width);
-    const badgeH = Math.max(1, badgeRect.height);
-
-    const baseFont = parseFloat(getComputedStyle(topBarUserArea).getPropertyValue("--identity-font")) || 11;
-    const maxFont = Math.max(5, Math.min(baseFont, badgeH * 0.45));
-    const minFont = Math.max(4.2, Math.min(7.2, badgeH * 0.22));
-    let font = clampValue(maxFont, minFont, maxFont);
-
-    textEl.style.fontSize = `${font}px`;
-
-    for (let i = 0; i < 28 && textEl.scrollWidth > textEl.clientWidth + 1 && font > minFont; i++) {
-      font -= 0.25;
-      textEl.style.fontSize = `${font}px`;
-    }
+    /*
+      字号不再用 badge 高度二次压缩。
+      2440px 母版字号由 syncTopUiLayout() 写入 --identity-font，
+      其他分辨率只跟随底图等比例缩放。
+    */
   }
 
   function ensureRoomNavNotes() {
@@ -6559,95 +5918,79 @@ ${names}${suffix}`);
     ensureRoomNavNotes();
 
     const overlayRect = overlay.getBoundingClientRect();
+    const scale = parseFloat(getComputedStyle(overlay).getPropertyValue("--bg-ui-scale")) || 1;
     const taskPanel = document.getElementById("taskPanel");
-    const taskPanelRect = taskPanel ? taskPanel.getBoundingClientRect() : overlayRect;
-    const uiScale = parseFloat(getComputedStyle(overlay).getPropertyValue("--ui-scale")) || 1;
 
-    /* 页面切换组件 + 身份组件：统一左右线。左线按 2440px 新采样锁定为底图 82.60%，右线保持原规则。 */
-    const sideLeftPx = Math.round(overlayRect.width * 0.8260);
-    const sideRightPx = Math.round(overlayRect.width * 0.9602);
-    const sideWidth = Math.max(20, sideRightPx - sideLeftPx);
+    /* 2440px 母版坐标：所有网页版组件都绑定在底图坐标上。 */
+    const sideLeft = overlayRect.width * 0.8260;
+    const sideRight = overlayRect.width * 0.9602;
+    const sideWidth = Math.max(24 * scale, sideRight - sideLeft);
 
-    const panelLeftRelative = sideLeftPx - (taskPanelRect.left - overlayRect.left);
-    panelSwitch.style.left = `${Math.round(panelLeftRelative)}px`;
-    panelSwitch.style.width = `${Math.round(sideWidth)}px`;
-    panelSwitch.style.top = "";
-    panelSwitch.style.height = "";
+    let identityH = 60 * scale;
+    let identityInnerScale = scale;
 
-    topBarUserAnchor.style.left = `${Math.round(sideLeftPx)}px`;
-    topBarUserAnchor.style.width = `${Math.round(sideWidth)}px`;
-    topBarUserAnchor.style.height = `${Math.round(clampValue(40 * uiScale, 14, 58))}px`;
+    let identityGap = 5.2 * identityInnerScale;
+    let identityPadX = 5.8 * identityInnerScale;
+    let identityPadY = 6.2 * identityInnerScale;
+    let identityRadius = 18 * scale;
+    let identityChipRadius = 12.5 * identityInnerScale;
+    let identityBadgePx = 7.2 * identityInnerScale;
+    let identityTextGap = 4.2 * identityInnerScale;
+    let identityIconW = 34 * identityInnerScale;
+    let identityLogoutW = 38 * identityInnerScale;
+    let identityFont = 27 * identityInnerScale;
+    let identityIconFont = 22 * identityInnerScale;
+    let identityLogoutFont = 18 * identityInnerScale;
 
-    const targetHeight = parseFloat(topBarUserAnchor.style.height) || 34;
-    topBarUserArea.style.width = `${Math.round(sideWidth)}px`;
-    topBarUserArea.style.minWidth = `${Math.round(sideWidth)}px`;
-    topBarUserArea.style.maxWidth = `${Math.round(sideWidth)}px`;
-    topBarUserArea.style.height = `${Math.round(targetHeight)}px`;
-    topBarUserArea.style.minHeight = `${Math.round(targetHeight)}px`;
-    topBarUserArea.style.maxHeight = `${Math.round(targetHeight)}px`;
+    if (overlayRect.width < 854) {
+      /*
+        854px 以下：外层宽度和位置不变；身份信息允许上下两行显示，
+        因此不再硬压铃铛/登出按钮。右侧按钮保留可读宽度，名字和身份换行承接空间不足。
+      */
+      const smallRatio = clampValue(overlayRect.width / 854, 0.62, 1);
+      const sideUnit = sideWidth / 100;
 
-    let identityGap = clampValue(5 * uiScale, 1.2, 8);
-    let identityPadX = clampValue(7 * uiScale, 1.5, 10);
-    let identityPadY = clampValue(4 * uiScale, 1, 6);
-    let identityInnerH = Math.max(10, targetHeight - identityPadY * 2);
-    let identityCircle = clampValue(identityInnerH, 8, targetHeight);
-    let logoutW = clampValue(34 * uiScale, Math.max(12, identityCircle * 1.08), 50);
-    let identityFont = clampValue(11.5 * uiScale, 3.8, 17);
-    let identityIconFont = clampValue(13 * uiScale, 4.2, 20);
-    let identityLogoutFont = clampValue(10.2 * uiScale, 3.8, 15);
-    let identityRadius = clampValue(11 * uiScale, 2.5, 15);
-    let identityLineGap = clampValue(2 * uiScale, 0, 3);
+      /*
+        两行身份信息需要比单行状态更高的外框。
+        只在 854px 以下加高身份组件，不改变外层宽度和左右位置。
+      */
+      identityH = clampValue(sideWidth * 0.34, 30, 38);
 
-    /* 541–760px 是横屏网页版窄宽度：按钮不能继续按高度取值，
-       否则铃铛/登出占比会比大屏更大。这里按身份外框宽度成比例缩放，
-       保持 2327px 时“身份信息 / 铃铛 / 登出”的相对占比。 */
-    if (overlayRect.width >= 541 && overlayRect.width <= 760) {
-      identityCircle = clampValue(sideWidth * 0.145, 10, 15);
-      logoutW = clampValue(sideWidth * 0.158, 11, 16.5);
-      identityGap = clampValue(sideWidth * 0.023, 1.2, 2.4);
-      identityPadX = clampValue(sideWidth * 0.017, 1.1, 2.0);
-      identityPadY = clampValue(targetHeight * 0.11, 1.0, 2.0);
-      identityFont = clampValue(sideWidth * 0.082, 6.0, 8.4);
-      identityIconFont = clampValue(sideWidth * 0.086, 6.2, 9.0);
-      identityLogoutFont = clampValue(sideWidth * 0.056, 4.8, 6.4);
-      identityRadius = clampValue(sideWidth * 0.105, 7, 10.5);
-      identityLineGap = 0;
+      identityGap = clampValue(3.0 * smallRatio, 1.4, 3.0);
+      identityPadX = clampValue(3.2 * smallRatio, 1.6, 3.2);
+      identityPadY = clampValue(3.2 * smallRatio, 1.6, 3.2);
+      identityRadius = Math.max(10 * smallRatio, 8);
+      identityChipRadius = Math.max(8.5 * smallRatio, 6.5);
+      identityBadgePx = clampValue(4.4 * smallRatio, 2.2, 4.4);
+      identityTextGap = 0;
+
+      identityIconW = clampValue(sideUnit * 20.5, 16, 24);
+      identityLogoutW = clampValue(sideUnit * 25.5, 19, 30);
+      identityFont = clampValue(sideUnit * 7.1, 5.8, 8.8);
+      identityIconFont = clampValue(sideUnit * 8.8, 7.8, 11.2);
+      identityLogoutFont = clampValue(sideUnit * 6.6, 5.8, 8.8);
     }
+    /* 房间切换：位置和尺寸只按底图缩放，不再按断点重写。 */
+    const taskLeftPct = overlayRect.width >= 1600 ? 9.1 : 9.2;
+    const taskRightPct = 22.4;
+    const taskWidthPct = 100 - taskLeftPct - taskRightPct;
+    const navLeftPct = taskLeftPct + taskWidthPct * 0.265;
+    const navRightPct = 69.99;
+    const navLeft = overlayRect.width * (navLeftPct / 100);
+    const navRight = overlayRect.width * (navRightPct / 100);
+    const navWidth = Math.max(24 * scale, navRight - navLeft);
 
-    topBarUserArea.style.setProperty("--identity-gap", `${identityGap.toFixed(2)}px`);
-    topBarUserArea.style.setProperty("--identity-circle", `${identityCircle.toFixed(2)}px`);
-    topBarUserArea.style.setProperty("--identity-logout-w", `${logoutW.toFixed(2)}px`);
-    topBarUserArea.style.setProperty("--identity-font", `${identityFont.toFixed(2)}px`);
-    topBarUserArea.style.setProperty("--identity-icon-font", `${identityIconFont.toFixed(2)}px`);
-    topBarUserArea.style.setProperty("--identity-logout-font", `${identityLogoutFont.toFixed(2)}px`);
-    topBarUserArea.style.setProperty("--identity-pad-x", `${identityPadX.toFixed(2)}px`);
-    topBarUserArea.style.setProperty("--identity-pad-y", `${identityPadY.toFixed(2)}px`);
-    topBarUserArea.style.setProperty("--identity-radius", `${identityRadius.toFixed(2)}px`);
-    topBarUserArea.style.setProperty("--identity-line-gap", `${identityLineGap.toFixed(2)}px`);
-
-    /* 房间按钮：左线保持现有规则；右线使用已实测节点动态收拢。 */
-    const isWideTaskLayout = overlayRect.width >= 1600;
-    const taskLeft = isWideTaskLayout ? 9.1 : 9.2;
-    const taskRight = 22.4;
-    const taskWidth = 100 - taskLeft - taskRight;
-    const navLeftPercent = taskLeft + taskWidth * 0.265;
-    const navLeftPx = overlayRect.width * (navLeftPercent / 100);
-
-    /* 房间按钮：左线保持现有规则，右线统一锁定到底图 x=69.99%。 */
-    const getResponsiveNavRightPercent = () => 69.99;
-
-    let navRightPx = overlayRect.width * (getResponsiveNavRightPercent(overlayRect.width) / 100);
-    if (!Number.isFinite(navRightPx) || navRightPx <= navLeftPx + 40) {
-      navRightPx = overlayRect.width * 0.64;
-    }
-
-    const navWidthPx = Math.max(32, navRightPx - navLeftPx);
-
-    topBar.style.left = `${Math.round(navLeftPx)}px`;
-    topBar.style.width = `${Math.round(navWidthPx)}px`;
-    topBar.style.top = "10.3%";
+    topBar.style.left = `${navLeft.toFixed(2)}px`;
+    topBar.style.top = `${(overlayRect.height * 0.103).toFixed(2)}px`;
+    topBar.style.width = `${navWidth.toFixed(2)}px`;
     topBar.style.transform = "translateY(-50%)";
     topBar.style.overflow = "visible";
+
+    overlay.style.setProperty("--nav-btn-height", `${(60 * scale).toFixed(2)}px`);
+    overlay.style.setProperty("--nav-btn-px", `${(26 * scale).toFixed(2)}px`);
+    overlay.style.setProperty("--nav-btn-radius", `${(17 * scale).toFixed(2)}px`);
+    overlay.style.setProperty("--nav-btn-font", `${(23 * scale).toFixed(2)}px`);
+    overlay.style.setProperty("--nav-gap", `${(12 * scale).toFixed(2)}px`);
 
     navScroll.scrollLeft = 0;
     navScroll.style.overflow = "visible";
@@ -6655,49 +5998,66 @@ ${names}${suffix}`);
     roomNav.style.transform = "scale(1)";
     roomNav.style.transformOrigin = "left center";
 
-    const availableWidth = Math.max(24, topBar.getBoundingClientRect().width);
+    requestAnimationFrame(() => {
+      const availableWidth = Math.max(1, topBar.getBoundingClientRect().width);
+      const requiredWidth = Math.max(1, roomNav.scrollWidth || 1);
+      const fit = Math.min(1, availableWidth / requiredWidth);
+      roomNav.style.transform = fit < 1 ? `scale(${fit.toFixed(5)})` : "scale(1)";
+      const scaledNavRect = roomNav.getBoundingClientRect();
+      navOuter.style.height = `${Math.ceil(scaledNavRect.height)}px`;
 
-    const applyRoomNavSize = (fit = 1) => {
-      const safeFit = clampValue(fit, 0.22, 1);
-      const navHeight = clampValue(40 * uiScale * safeFit, 6, 56);
-      const navPadding = clampValue(16 * uiScale * safeFit, 0.5, 24);
-      const navRadius = clampValue(13 * uiScale * safeFit, 2.5, 18);
-      const navFont = clampValue(14 * uiScale * safeFit, 3.8, 18);
-      const navGap = clampValue(11 * uiScale * safeFit, 0.5, 16);
+      const firstNavBtn = roomNav.querySelector(".navBtn");
+      let identityTop = overlayRect.height * 0.08;
+      if (firstNavBtn) {
+        const navBtnRect = firstNavBtn.getBoundingClientRect();
+        identityTop = (navBtnRect.top + navBtnRect.height / 2) - overlayRect.top - identityH / 2;
+      }
 
-      overlay.style.setProperty("--nav-btn-height", `${navHeight.toFixed(2)}px`);
-      overlay.style.setProperty("--nav-btn-px", `${navPadding.toFixed(2)}px`);
-      overlay.style.setProperty("--nav-btn-radius", `${navRadius.toFixed(2)}px`);
-      overlay.style.setProperty("--nav-btn-font", `${navFont.toFixed(2)}px`);
-      overlay.style.setProperty("--nav-gap", `${navGap.toFixed(2)}px`);
-    };
+      overlay.style.setProperty("--identity-left", `${sideLeft.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-top", `${identityTop.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-w", `${sideWidth.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-h", `${identityH.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-gap", `${identityGap.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-pad-x", `${identityPadX.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-pad-y", `${identityPadY.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-radius", `${identityRadius.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-chip-radius", `${identityChipRadius.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-badge-px", `${identityBadgePx.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-text-gap", `${identityTextGap.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-icon-w", `${identityIconW.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-logout-w", `${identityLogoutW.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-font", `${identityFont.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-icon-font", `${identityIconFont.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-logout-font", `${identityLogoutFont.toFixed(2)}px`);
+      overlay.style.setProperty("--identity-icon-shift", `${(0.5 * scale).toFixed(2)}px`);
 
-    applyRoomNavSize(1);
+      /* 页面切换和身份组件共用右侧竖线，仍绑定在主面板右侧。 */
+      if (taskPanel) {
+        const taskPanelRect = taskPanel.getBoundingClientRect();
+        const panelLeft = sideLeft - (taskPanelRect.left - overlayRect.left);
+        panelSwitch.style.left = `${panelLeft.toFixed(2)}px`;
+      }
+      overlay.style.setProperty("--panel-switch-left", panelSwitch.style.left || `${(overlayRect.width * 0.70).toFixed(2)}px`);
+      overlay.style.setProperty("--panel-switch-top", `${(overlayRect.height * 0.109).toFixed(2)}px`);
+      overlay.style.setProperty("--panel-switch-w", `${sideWidth.toFixed(2)}px`);
+      overlay.style.setProperty("--panel-switch-h", `${(overlayRect.height * 0.19).toFixed(2)}px`);
+      overlay.style.setProperty("--panel-switch-pad-y", `${(10 * scale).toFixed(2)}px`);
+      overlay.style.setProperty("--panel-switch-pad-x", `${(14 * scale).toFixed(2)}px`);
+      overlay.style.setProperty("--panel-switch-radius", `${(22 * scale).toFixed(2)}px`);
+      overlay.style.setProperty("--panel-switch-gap", `${(8 * scale).toFixed(2)}px`);
+      overlay.style.setProperty("--switch-btn-h", `${(44 * scale).toFixed(2)}px`);
+      overlay.style.setProperty("--switch-btn-pad-y", `${(0 * scale).toFixed(2)}px`);
+      overlay.style.setProperty("--switch-btn-pad-x", `${(14 * scale).toFixed(2)}px`);
+      overlay.style.setProperty("--switch-btn-radius", `${(15 * scale).toFixed(2)}px`);
+      overlay.style.setProperty("--switch-font", `${(25 * scale).toFixed(2)}px`);
 
-    let requiredWidth = roomNav.scrollWidth || 1;
-    if (requiredWidth > availableWidth) {
-      applyRoomNavSize((availableWidth - 1) / requiredWidth);
-      requiredWidth = roomNav.scrollWidth || 1;
-    }
+      overlay.style.setProperty("--task-panel-left-bound", overlayRect.width >= 1600 ? "9.1%" : "9.2%");
+      overlay.style.setProperty("--task-panel-right-bound", "22.4%");
+      overlay.style.setProperty("--task-panel-top-bound", "18%");
+      overlay.style.setProperty("--task-panel-bottom-bound", "12%");
 
-    if (requiredWidth > availableWidth) {
-      const finalScale = clampValue((availableWidth - 1) / requiredWidth, 0.22, 1);
-      roomNav.style.transform = `scale(${finalScale})`;
-    }
-
-    const scaledNavRect = roomNav.getBoundingClientRect();
-    navOuter.style.height = `${Math.ceil(scaledNavRect.height)}px`;
-
-    const firstNavBtn = roomNav.querySelector(".navBtn");
-    let identityTop = panelSwitch.getBoundingClientRect().top - overlayRect.top;
-    if (firstNavBtn) {
-      const navBtnRect = firstNavBtn.getBoundingClientRect();
-      identityTop = (navBtnRect.top + navBtnRect.height / 2) - overlayRect.top - targetHeight / 2;
-    }
-
-    topBarUserAnchor.style.top = `${Math.round(identityTop)}px`;
-
-    requestAnimationFrame(fitTopBarIdentityContent);
+      requestAnimationFrame(fitTopBarIdentityContent);
+    });
   }
 
   function applyDefaultBackgroundBlend() {
@@ -6807,7 +6167,6 @@ ${names}${suffix}`);
       .filter(Boolean);
   }
 
-  
   function getCurrentMainFilter() {
     return String(activeMainFilter || "").trim();
   }
@@ -7933,7 +7292,6 @@ function renderBrowseList() {
     applyDetailSnapshot(snapshot);
   }
 
-
   function buildTaskFromDom(existingTask) {
     const taskCode = String(document.getElementById("editTaskCode")?.value || "").trim();
     const songName = String(document.getElementById("editSongName")?.value || "").trim();
@@ -8521,7 +7879,6 @@ function closeRoleSetupModal() {
       taskTypeInput.addEventListener("input", typeHandler);
     }
 
-
     const deleteBtn = document.getElementById("deleteTaskBtn");
     if (deleteBtn && deleteBtn.dataset.bound !== "1") {
       deleteBtn.dataset.bound = "1";
@@ -8529,7 +7886,6 @@ function closeRoleSetupModal() {
     }
 
   }
-
 
   function getRoleToolState() {
     const rows = [...document.querySelectorAll(".partRow")];
@@ -9285,7 +8641,6 @@ function closeRoleSetupModal() {
     renderSiteNotifications();
   });
 
-  
   document.querySelectorAll(".primaryFilterBtn").forEach(btn => {
     btn.addEventListener("click", async () => {
       const filterKey = String(btn.dataset.filter || "").trim();
@@ -9473,178 +8828,6 @@ function closeRoleSetupModal() {
     setAutoSaveStatus("saved", "已同步");
   })();
 
-
-
-  /* ===== 临时坐标读取工具：用于确认底图参考线，确认后可删除 ===== */
-  (function initRoom10CoordinateTool(){
-    function createCoordTool(){
-      let tool = document.getElementById("room10CoordTool");
-      if (tool) return tool;
-
-      tool = document.createElement("div");
-      tool.id = "room10CoordTool";
-      tool.innerHTML = `
-        <div class="coordTitle">坐标读取</div>
-        <div class="coordLine" id="coordViewportText">页面：x --%, y --%</div>
-        <div class="coordLine" id="coordBgText">底图：x --%, y --%</div>
-        <div class="coordHint">请把鼠标放到参考线位置后截图/记录数值</div>
-      `;
-      document.body.appendChild(tool);
-
-      const style = document.createElement("style");
-      style.id = "room10CoordToolStyle";
-      style.textContent = `
-        #room10CoordTool{
-          position:fixed;
-          left:16px;
-          bottom:16px;
-          z-index:2147483647;
-          width:286px;
-          padding:10px 12px;
-          border-radius:14px;
-          background:rgba(48,34,22,.86);
-          color:#fffaf3;
-          font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif;
-          font-size:13px;
-          line-height:1.55;
-          box-shadow:0 10px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.18);
-          border:1px solid rgba(255,255,255,.18);
-          pointer-events:none;
-          white-space:nowrap;
-        }
-        #room10CoordTool .coordTitle{
-          font-weight:900;
-          margin-bottom:4px;
-          color:#ffe3b6;
-        }
-        #room10CoordTool .coordLine{
-          font-weight:800;
-          letter-spacing:.01em;
-        }
-        #room10CoordTool .coordHint{
-          margin-top:4px;
-          font-size:11px;
-          opacity:.78;
-          white-space:normal;
-        }
-        #room10CoordCrossX,
-        #room10CoordCrossY{
-          position:fixed;
-          z-index:2147483646;
-          pointer-events:none;
-          background:rgba(214,137,62,.72);
-          box-shadow:0 0 0 1px rgba(255,255,255,.52);
-        }
-        #room10CoordCrossX{
-          left:0;
-          width:100vw;
-          height:1px;
-          top:0;
-        }
-        #room10CoordCrossY{
-          top:0;
-          height:100vh;
-          width:1px;
-          left:0;
-        }
-      `;
-      document.head.appendChild(style);
-
-      const crossX = document.createElement("div");
-      crossX.id = "room10CoordCrossX";
-      document.body.appendChild(crossX);
-
-      const crossY = document.createElement("div");
-      crossY.id = "room10CoordCrossY";
-      document.body.appendChild(crossY);
-
-      return tool;
-    }
-
-    function clampCoord(value, min, max){
-      return Math.max(min, Math.min(max, value));
-    }
-
-    function getContainedImageRect(img){
-      const rect = img.getBoundingClientRect();
-      const naturalW = img.naturalWidth || 16;
-      const naturalH = img.naturalHeight || 9;
-      const imgRatio = naturalW / naturalH;
-      const boxRatio = rect.width / rect.height;
-
-      let drawW, drawH, drawLeft, drawTop;
-      if (boxRatio > imgRatio) {
-        drawH = rect.height;
-        drawW = drawH * imgRatio;
-        drawLeft = rect.left + (rect.width - drawW) / 2;
-        drawTop = rect.top;
-      } else {
-        drawW = rect.width;
-        drawH = drawW / imgRatio;
-        drawLeft = rect.left;
-        drawTop = rect.top + (rect.height - drawH) / 2;
-      }
-      return { left:drawLeft, top:drawTop, width:drawW, height:drawH };
-    }
-
-    function updateCoordGuide(clientX, clientY){
-      createCoordTool();
-
-      const viewportText = document.getElementById("coordViewportText");
-      const bgText = document.getElementById("coordBgText");
-      const crossX = document.getElementById("room10CoordCrossX");
-      const crossY = document.getElementById("room10CoordCrossY");
-
-      if (crossX) crossX.style.transform = `translateY(${Math.round(clientY)}px)`;
-      if (crossY) crossY.style.transform = `translateX(${Math.round(clientX)}px)`;
-
-      const vw = window.innerWidth || document.documentElement.clientWidth || 1;
-      const vh = window.innerHeight || document.documentElement.clientHeight || 1;
-      const pageX = clampCoord(clientX / vw * 100, 0, 100);
-      const pageY = clampCoord(clientY / vh * 100, 0, 100);
-
-      if (viewportText) {
-        viewportText.textContent = `页面：x ${pageX.toFixed(2)}%, y ${pageY.toFixed(2)}%`;
-      }
-
-      const bg = document.getElementById("bg");
-      if (!bg || !bg.getBoundingClientRect) {
-        if (bgText) bgText.textContent = "底图：未找到 #bg";
-        return;
-      }
-
-      const imgRect = getContainedImageRect(bg);
-      const imgX = clampCoord((clientX - imgRect.left) / imgRect.width * 100, 0, 100);
-      const imgY = clampCoord((clientY - imgRect.top) / imgRect.height * 100, 0, 100);
-
-      if (bgText) {
-        bgText.textContent = `底图：x ${imgX.toFixed(2)}%, y ${imgY.toFixed(2)}%`;
-      }
-    }
-
-    window.addEventListener("mousemove", function(event){
-      updateCoordGuide(event.clientX, event.clientY);
-    }, { passive:true });
-
-    window.addEventListener("resize", function(){
-      updateCoordGuide(window.innerWidth / 2, window.innerHeight / 2);
-    });
-
-    window.addEventListener("load", function(){
-      createCoordTool();
-      updateCoordGuide(window.innerWidth / 2, window.innerHeight / 2);
-    });
-
-    if (document.readyState !== "loading") {
-      createCoordTool();
-      updateCoordGuide(window.innerWidth / 2, window.innerHeight / 2);
-    } else {
-      document.addEventListener("DOMContentLoaded", function(){
-        createCoordTool();
-        updateCoordGuide(window.innerWidth / 2, window.innerHeight / 2);
-      });
-    }
-  })();
 
 </script>
 </body>
