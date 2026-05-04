@@ -63,7 +63,7 @@ body{
     --ui-scale:1;
     --overlay-ui-scale:var(--ui-scale);
     --project-radius-md:calc(20px * var(--ui-scale));
-    --project-font-base:calc(16px * var(--ui-scale));
+    --project-font-base:calc(13px * var(--ui-scale));
     --project-btn-h:calc(40px * var(--ui-scale));
   }
 #overlay *{
@@ -273,7 +273,7 @@ body{
     pointer-events:none;
   }
 #topBarUserArea{
-    --identity-font:calc(25px * var(--bg-ui-scale, 1));
+    --identity-font:calc(23px * var(--bg-ui-scale, 1));
     --identity-icon-font:calc(22px * var(--bg-ui-scale, 1));
     --identity-logout-font:calc(18px * var(--bg-ui-scale, 1));
     position:absolute;
@@ -1802,7 +1802,7 @@ body{
     }
     #overlay{
       --ui-scale:1.18;
-      --project-font-base:calc(16px * var(--ui-scale));
+      --project-font-base:calc(13px * var(--ui-scale));
       --project-btn-h:50px;
       --project-radius-md:24px;
     }
@@ -2388,26 +2388,6 @@ body{
     0 3px 7px rgba(91,68,45,.15);
   filter:brightness(1.015);
 }
-.navBtn:hover::before,
-.navBtn:focus-visible::before{
-  content:"♪";
-  left:8%;
-  top:-52%;
-  color:rgba(167,104,54,.70);
-  font-size:calc(var(--nav-btn-font, 14px) * .88);
-  text-shadow:0 1px 2px rgba(255,250,232,.70);
-  animation:navNotePopA 2.2s ease-in-out infinite;
-}
-.navBtn:hover::after,
-.navBtn:focus-visible::after{
-  content:"♫";
-  right:8%;
-  top:-60%;
-  color:rgba(122,91,143,.54);
-  font-size:calc(var(--nav-btn-font, 14px) * .80);
-  text-shadow:0 1px 2px rgba(255,250,232,.70);
-  animation:navNotePopB 2.5s ease-in-out infinite;
-}
 .navBtn.active{
   color:#fffaf2;
   background:
@@ -2416,24 +2396,6 @@ body{
   box-shadow:
     0 1px 0 rgba(255,232,200,.55) inset,
     0 3px 8px rgba(92,63,38,.18);
-}
-.navBtn.active::before{
-  content:"♪";
-  left:8%;
-  top:-52%;
-  color:rgba(167,104,54,.78);
-  font-size:calc(var(--nav-btn-font, 14px) * .96);
-  text-shadow:0 1px 2px rgba(255,250,232,.70);
-  animation:navNotePopA 2.8s ease-in-out infinite;
-}
-.navBtn.active::after{
-  content:"♫";
-  right:8%;
-  top:-60%;
-  color:rgba(122,91,143,.62);
-  font-size:calc(var(--nav-btn-font, 14px) * .88);
-  text-shadow:0 1px 2px rgba(255,250,232,.70);
-  animation:navNotePopB 3.2s ease-in-out infinite;
 }
 @keyframes navNotePopA{
   0%,100%{ transform:translateY(3px) rotate(-8deg) scale(.82); opacity:0; }
@@ -4306,6 +4268,14 @@ body{
     overflow:hidden !important;
   }
 }
+
+/* 2440px 母版：只下调身份信息文字字号，铃铛和登出保持原比例 */
+@media (min-width:2400px){
+  #topBarUserArea{
+    --identity-font:calc(23px * var(--bg-ui-scale, 1)) !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -5938,7 +5908,7 @@ ${names}${suffix}`);
     let identityTextGap = 4.2 * identityInnerScale;
     let identityIconW = 34 * identityInnerScale;
     let identityLogoutW = 38 * identityInnerScale;
-    let identityFont = 27 * identityInnerScale;
+    let identityFont = 23 * identityInnerScale;
     let identityIconFont = 22 * identityInnerScale;
     let identityLogoutFont = 18 * identityInnerScale;
 
