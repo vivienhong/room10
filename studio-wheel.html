@@ -2,174 +2,607 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>十号房｜抢麦转盘</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜角色转盘</title>
 <style>
 *{box-sizing:border-box;}
-
 html,body{
   margin:0;
   width:100%;
   height:100%;
   overflow:hidden;
   font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  color:#6f4726;
 }
-
 body{
   background:
-    linear-gradient(rgba(255,248,240,0.12), rgba(255,248,240,0.12)),
-    url("room-game.png") center / cover no-repeat;
+    radial-gradient(circle at top left,rgba(255,246,232,.94) 0%,rgba(255,246,232,.5) 36%,transparent 62%),
+    radial-gradient(circle at bottom right,rgba(231,210,184,.7) 0%,rgba(231,210,184,.3) 38%,transparent 66%),
+    linear-gradient(180deg,#f7eddf 0%,#e9d7c1 100%);
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
 }
-
+button,input,select,textarea{font-family:inherit;}
 .page{
   width:100%;
   height:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
   padding:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-
 .panel{
-  width:min(92vw, 780px);
-  padding:28px;
-  border-radius:28px;
-  background:rgba(255,255,255,0.28);
-  border:1.5px solid rgba(255,255,255,0.6);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  text-align:center;
+  width:min(96vw,1220px);
+  height:min(94vh,840px);
+  border-radius:30px;
+  padding:26px;
+  background:rgba(255,249,241,.9);
+  border:1px solid rgba(203,167,123,.36);
+  box-shadow:0 18px 45px rgba(85,58,34,.17), inset 0 1px 0 rgba(255,255,255,.88);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
 }
-
-.title{
-  font-size:32px;
-  font-weight:800;
-  color:#7a5030;
-  margin-bottom:20px;
-}
-
-.wheel-wrap{
-  position:relative;
-  width:min(70vw, 380px);
-  height:min(70vw, 380px);
-  margin:0 auto 20px;
-}
-
-#wheel{
+body.embedded .panel{
   width:100%;
   height:100%;
-  border-radius:50%;
-  background:conic-gradient(
-    #ffe5c2 0deg 60deg,
-    #ffd6a5 60deg 120deg,
-    #ffcad4 120deg 180deg,
-    #cdb4db 180deg 240deg,
-    #bde0fe 240deg 300deg,
-    #caffbf 300deg 360deg
-  );
-  transition:transform 4s cubic-bezier(.2,.8,.2,1);
-  box-shadow:0 10px 25px rgba(0,0,0,0.15);
-  position:relative;
+  border-radius:24px;
+  padding:28px 34px 24px 28px;
 }
-
-/* 指针 */
+.topBar{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:18px;
+}
+.titleBlock{min-width:0;}
+.title{
+  font-size:32px;
+  font-weight:950;
+  line-height:1.18;
+  color:#6f4726;
+  letter-spacing:.02em;
+}
+.subtitle{
+  margin-top:6px;
+  font-size:15px;
+  font-weight:750;
+  line-height:1.5;
+  color:#8a6644;
+}
+.closeBtn,.backBtn,.softBtn,.primaryBtn,.tabBtn,.smallBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  font-weight:900;
+  color:#7a5231;
+  background:rgba(255,252,247,.88);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.92),0 2px 8px rgba(112,83,52,.08);
+}
+.closeBtn{
+  min-width:82px;
+  height:38px;
+  padding:0 18px;
+  border-radius:14px;
+  font-size:14px;
+}
+body.embedded .closeBtn{display:none;}
+.view{display:none; min-height:0; flex:1 1 auto;}
+.view.active{display:flex;}
+.card{
+  border-radius:20px;
+  background:rgba(255,252,247,.62);
+  border:1px solid rgba(214,186,149,.3);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72),0 4px 12px rgba(118,86,54,.045);
+}
+.cardTitle{
+  font-size:18px;
+  font-weight:950;
+  color:#7a5231;
+  margin-bottom:10px;
+}
+.hint{
+  color:#9a7b5b;
+  font-size:13px;
+  font-weight:750;
+  line-height:1.7;
+}
+/* 模式切换 */
+.modeSwitch{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.modeSwitchBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  height:38px;
+  min-width:92px;
+  padding:0 16px;
+  border-radius:13px;
+  font-size:14px;
+  font-weight:900;
+  color:#7a5231;
+  background:rgba(255,252,247,.88);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.92),0 2px 8px rgba(112,83,52,.08);
+}
+.modeSwitchBtn.active{
+  background:linear-gradient(180deg,#efd5ab,#dfbd8a);
+  color:#6a4120;
+}
+.modeSwitchBtn:hover{filter:brightness(1.03);}
+/* 设置页 */
+.setupView{gap:16px; min-height:0;}
+.setupLeft{width:310px; flex:0 0 310px; display:flex; flex-direction:column; gap:14px; min-height:0;}
+.setupMain{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:14px; min-height:0;}
+.setupRight{width:310px; flex:0 0 310px; display:flex; flex-direction:column; gap:14px; min-height:0;}
+.setupScroll{overflow:auto; padding-right:4px; min-height:0;}
+.navCard{padding:16px;}
+.segmentBtns{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.tabBtn{height:42px; border-radius:14px; font-size:14px;}
+.tabBtn.active{background:linear-gradient(180deg,#efd5ab,#dfbd8a); color:#6a4120;}
+.listCard{padding:16px; min-height:0;}
+.sectionCard{padding:18px;}
+.formGrid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.formGrid.three{grid-template-columns:1fr 1fr 1fr;}
+.field{display:flex; flex-direction:column; gap:6px; color:#8a6644; font-size:13px; font-weight:850; min-width:0;}
+.input,.select,.textarea{
+  width:100%;
+  border:none;
+  outline:none;
+  border-radius:12px;
+  background:rgba(255,252,247,.93);
+  color:#5f3b1d;
+  font-size:14px;
+  font-weight:760;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 8px rgba(120,92,63,.05);
+}
+.input,.select{height:40px; padding:0 12px;}
+.textarea{min-height:138px; resize:vertical; padding:12px; line-height:1.65;}
+.layerList{display:flex; flex-direction:column; gap:10px;}
+.layerItem{padding:14px; border-radius:16px; background:rgba(255,249,241,.56); border:1px solid rgba(194,151,108,.18);}
+.layerHead{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
+.layerName{font-size:15px; font-weight:950; color:#6f4726;}
+.smallBtn{height:30px; padding:0 10px; border-radius:10px; font-size:12px;}
+.softBtn,.primaryBtn{height:42px; padding:0 18px; border-radius:14px; font-size:14px;}
+.primaryBtn{background:linear-gradient(180deg,#efd5ab,#dfbd8a); color:#6a4120;}
+.primaryBtn:disabled,.softBtn:disabled{opacity:.55; cursor:not-allowed;}
+.previewList{display:flex; flex-direction:column; gap:8px;}
+.previewItem{padding:10px 12px; border-radius:13px; background:rgba(255,249,241,.64); border:1px solid rgba(194,151,108,.16); font-size:14px; font-weight:850; color:#7a5231;}
+.noticeBox{padding:14px; border-radius:16px; background:rgba(247,232,209,.45); border:1px solid rgba(194,151,108,.16); color:#8a6644; font-size:13px; font-weight:760; line-height:1.65;}
+/* 运行页 */
+.runView{gap:18px; min-height:0;}
+.runLeft{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:12px; align-items:center; justify-content:center;}
+.runRight{width:410px; flex:0 0 410px; min-height:0; display:flex; flex-direction:column; gap:14px;}
+.runHeader{display:flex; gap:10px; justify-content:flex-start; width:100%;}
+.backBtn{height:38px; padding:0 16px; border-radius:13px; font-size:14px;}
+.switchBtn{min-width:92px;}
+.runLayerBlock{padding:10px 12px; border-radius:13px; background:rgba(255,249,241,.64); border:1px solid rgba(194,151,108,.16);}
+.runLayerTitle{font-size:14px; font-weight:950; color:#7a5231; margin-bottom:8px;}
+.runLayerItems{display:flex; flex-wrap:wrap; gap:6px; max-height:74px; overflow:auto; padding-right:2px;}
+.runLayerChip{min-height:24px; padding:0 9px; border-radius:999px; background:rgba(255,252,247,.9); border:1px solid rgba(194,151,108,.18); color:#7a5231; font-size:12px; font-weight:850; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.wheelWrap{
+  position:relative;
+  width:min(68vh,640px);
+  height:min(68vh,640px);
+  max-width:100%;
+  max-height:100%;
+}
 .pointer{
   position:absolute;
-  top:-14px;
   left:50%;
+  top:-16px;
   transform:translateX(-50%);
-  width:0;
-  height:0;
-  border-left:12px solid transparent;
-  border-right:12px solid transparent;
-  border-bottom:20px solid #ff7a5c;
+  width:0;height:0;
+  border-left:18px solid transparent;
+  border-right:18px solid transparent;
+  border-bottom:34px solid #c97556;
+  filter:drop-shadow(0 3px 4px rgba(85,58,34,.18));
+  z-index:6;
 }
-
-/* 中心按钮 */
-.spin-btn{
+#wheelSvg{width:100%; height:100%; display:block; filter:drop-shadow(0 16px 24px rgba(95,67,41,.12));}
+.wheelLayerGroup{transform-origin:320px 320px; transition:transform 2.8s cubic-bezier(.18,.82,.22,1);}
+.slicePath{stroke:rgba(255,255,255,.72); stroke-width:1.2;}
+.ringBoundary{fill:none; stroke:rgba(255,255,255,.94); stroke-width:2.2; filter:drop-shadow(0 0 1px rgba(133,93,54,.18));}
+.outerBoundary{fill:none; stroke:rgba(151,105,61,.24); stroke-width:2.6;}
+.wheelText{fill:#674426; font-weight:900; font-size:14px; text-anchor:middle; dominant-baseline:middle; paint-order:stroke; stroke:rgba(255,255,255,.65); stroke-width:3px; stroke-linejoin:round;}
+.centerBtn{
   position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  border:none;
-  background:#fff6ea;
-  font-weight:700;
-  cursor:pointer;
-  box-shadow:0 6px 15px rgba(0,0,0,0.15);
+  left:50%; top:50%; transform:translate(-50%,-50%);
+  width:74px; height:74px;
+  border:none; border-radius:50%; cursor:pointer;
+  background:linear-gradient(180deg,#fffaf3,#f2d8b0);
+  color:#6f4726; font-size:16px; line-height:1.18; font-weight:950;
+  box-shadow:0 8px 18px rgba(85,58,34,.18), inset 0 1px 0 rgba(255,255,255,.95);
+  z-index:7;
 }
-
-/* 结果 */
-.result{
-  margin-top:10px;
-  font-size:20px;
-  color:#7a5030;
-  font-weight:700;
+.centerBtn:disabled{opacity:.58; cursor:not-allowed;}
+.resultCard{padding:16px; min-height:0; display:flex; flex-direction:column; flex:1 1 auto;}
+.resultList{min-height:0; flex:1 1 auto; overflow:auto; display:flex; flex-direction:column; gap:8px; padding-right:2px;}
+.resultEmpty{min-height:120px; display:flex; align-items:center; justify-content:center; color:#8a6644; font-size:15px; font-weight:850; text-align:center; border-radius:14px; background:rgba(255,249,241,.64); padding:12px;}
+.resultItem{padding:11px 12px; border-radius:14px; background:rgba(255,249,241,.78); border:1px solid rgba(194,151,108,.18); color:#6f4726; font-size:14px; font-weight:850; line-height:1.55;}
+.resultArrow{color:#b98145; padding:0 4px;}
+.actionRow{display:grid; grid-template-columns:1fr 1fr; gap:10px; flex:0 0 auto;}
+@media (min-width:2200px){
+  .panel{width:min(96vw,1580px); height:min(94vh,1060px); padding:34px 38px 32px;}
+  .title{font-size:44px}.subtitle{font-size:18px}.closeBtn{height:46px; min-width:100px; font-size:18px;}
+  .modeName{font-size:30px}.modeDesc{font-size:18px}.modeTag{height:40px; font-size:16px;}
+  .setupLeft{width:360px; flex-basis:360px}.setupRight{width:360px; flex-basis:360px}.runRight{width:500px; flex-basis:500px;}
+  .mainArea{gap:32px}.wheelWrap{width:min(69vh,780px); height:min(69vh,780px)}.centerBtn{width:88px;height:88px;font-size:19px;}
+  .cardTitle{font-size:22px}.boxTitle{font-size:21px}.chip,.resultItem,.previewItem{font-size:17px}.hint,.noticeBox{font-size:16px}.input,.select,.textarea{font-size:16px;}
+  .primaryBtn,.softBtn,.backBtn{height:48px; font-size:17px;}
 }
-
-/* 返回按钮 */
-.back{
-  margin-top:18px;
-  display:inline-block;
-  text-decoration:none;
-  color:#8a6241;
-  font-size:14px;
+@media (max-width:860px){
+  .page{padding:12px}.panel{width:100%;height:100%;padding:18px 14px 14px;border-radius:22px;}
+  .title{font-size:24px}.subtitle{font-size:12px}.modeSwitch{gap:8px}.setupView,.runView{flex-direction:column; overflow:auto;}.setupLeft,.setupRight,.runRight{width:100%; flex:auto}.wheelWrap{width:min(82vw,360px); height:min(82vw,360px)}
 }
 </style>
 </head>
-
 <body>
 <div class="page">
   <div class="panel">
-    <div class="title">抢麦转盘</div>
-
-    <div class="wheel-wrap">
-      <div class="pointer"></div>
-      <div id="wheel"></div>
-      <button class="spin-btn" onclick="spin()">开始</button>
+    <div class="topBar">
+      <div class="titleBlock">
+        <div class="title" id="pageTitle">角色转盘</div>
+        <div class="subtitle" id="pageSubtitle">用于当前任务的角色分配</div>
+      </div>
+      <button class="closeBtn" type="button" onclick="closeWheel()">关闭</button>
     </div>
 
-    <div class="result" id="result">点击开始</div>
+    <section class="view setupView" id="addonSetupView">
+      <aside class="setupLeft">
+        <div class="card navCard"><div class="modeSwitch"><button class="modeSwitchBtn" onclick="startDefaultMode()">默认转盘</button><button class="modeSwitchBtn active" onclick="openAddonSetup()">附加转盘</button><button class="modeSwitchBtn" onclick="openSpecialSetup()">特殊转盘</button></div></div>
+        <div class="card listCard setupScroll">
+          <div class="cardTitle">基础层</div>
+          <div class="hint">第1层：演唱者<br>第2层：原唱 / 顺序号<br>原唱层不重复。</div>
+          <div style="height:12px"></div>
+          <div class="cardTitle">演唱者</div><div class="chips" id="addonSingerList"></div>
+          <div style="height:12px"></div>
+          <div class="cardTitle">原唱</div><div class="chips" id="addonRoleList"></div>
+        </div>
+      </aside>
+      <main class="setupMain">
+        <div class="card sectionCard">
+          <div class="cardTitle">添加附加层</div>
+          <div class="formGrid three">
+            <label class="field">层名称<select class="select" id="addonKind" onchange="renderAddonFields()"></select></label>
+            <label class="field">每项数量<input class="input" id="addonQty" type="number" min="1" step="1" value="1"></label>
+            <div class="field" style="justify-content:end"><button class="primaryBtn" onclick="addAddonLayer()">添加附加层</button></div>
+          </div>
+          <div id="addonFields" style="margin-top:12px"></div>
+          <div class="hint" style="margin-top:10px">调、速度、歌名、自定义会按“选项 × 每项数量”生成随机池；数量不足会自动提高每项数量。时长按原唱/顺序号绑定。</div>
+        </div>
+        <div class="card sectionCard setupScroll">
+          <div class="cardTitle">已添加附加层</div>
+          <div class="layerList" id="addonLayerList"></div>
+        </div>
+      </main>
+      <aside class="setupRight">
+        <div class="card sectionCard">
+          <div class="cardTitle">转盘层预览</div>
+          <div class="previewList" id="addonPreviewList"></div>
+        </div>
+        <div class="noticeBox" id="addonNotice">当前只使用默认两层。添加条件后再生成转盘。</div>
+        <button class="primaryBtn" onclick="generateAddonWheel()">生成转盘</button>
+      </aside>
+    </section>
 
-    <a class="back" href="game.html">← 返回游戏房</a>
+    <section class="view setupView" id="specialSetupView">
+      <aside class="setupLeft">
+        <div class="card navCard"><div class="modeSwitch"><button class="modeSwitchBtn" onclick="startDefaultMode()">默认转盘</button><button class="modeSwitchBtn" onclick="openAddonSetup()">附加转盘</button><button class="modeSwitchBtn active" onclick="openSpecialSetup()">特殊转盘</button></div></div>
+        <div class="card listCard setupScroll">
+          <div class="cardTitle">演唱者</div>
+          <div class="hint">特殊转盘只需要当前演唱者。原唱 / 段落在右侧粘贴。</div>
+          <div style="height:12px"></div>
+          <div class="chips" id="specialSingerList"></div>
+        </div>
+      </aside>
+      <main class="setupMain">
+        <div class="card sectionCard" style="flex:1 1 auto; display:flex; flex-direction:column; min-height:0;">
+          <div class="cardTitle">粘贴原唱 / 段落</div>
+          <div class="hint">每行一个，或用顿号、逗号分隔。每个名字都会成为转盘上的一个格子。</div>
+          <textarea class="textarea" id="specialText" style="flex:1 1 auto; min-height:300px; margin-top:12px;" placeholder="王一哲\n高卿尘\n阿如那\n梁龙\n庆怜"></textarea>
+        </div>
+      </main>
+      <aside class="setupRight">
+        <div class="card sectionCard">
+          <div class="cardTitle">特殊转盘规则</div>
+          <div class="hint">转盘停止后，从指针所在格开始顺时针读取全部名字，再按演唱者顺序平均分组。多出的段落继续补给前面的演唱者。</div>
+        </div>
+        <div class="card sectionCard">
+          <div class="cardTitle">预览</div>
+          <div class="previewList" id="specialPreviewList"></div>
+        </div>
+        <button class="primaryBtn" onclick="generateSpecialWheel()">生成特殊转盘</button>
+      </aside>
+    </section>
+
+    <section class="view runView" id="runView">
+      <div class="runLeft">
+        <div class="runHeader modeSwitch"><button class="modeSwitchBtn" id="switchDefaultBtn" onclick="startDefaultMode()">默认转盘</button><button class="modeSwitchBtn" id="switchAddonBtn" onclick="openAddonSetup()">附加转盘</button><button class="modeSwitchBtn" id="switchSpecialBtn" onclick="openSpecialSetup()">特殊转盘</button></div>
+        <div class="wheelWrap">
+          <div class="pointer"></div>
+          <svg id="wheelSvg" viewBox="0 0 640 640" aria-label="角色转盘"></svg>
+          <button class="centerBtn" id="spinBtn" onclick="spinWheel()">开始<br>配对</button>
+        </div>
+      </div>
+      <aside class="runRight">
+        <div class="card sectionCard">
+          <div class="cardTitle">转盘层 <span class="countText" id="runLayerCount">0层</span></div>
+          <div class="previewList" id="runLayerList"></div>
+        </div>
+        <div class="card resultCard">
+          <div class="cardTitle">配对结果</div>
+          <div class="resultList" id="resultList"><div class="resultEmpty" id="resultEmpty">点击开始配对</div></div>
+        </div>
+        <div class="actionRow">
+          <button class="softBtn" onclick="resetRun()">重转</button>
+          <button class="primaryBtn" id="confirmBtn" onclick="confirmResult()" disabled>确认写入</button>
+        </div>
+      </aside>
+    </section>
   </div>
 </div>
-
 <script>
-const items = ["1号位","2号位","3号位","4号位","5号位","6号位"];
+const COLORS=["#ffe5c2","#ffd6a5","#ffcad4","#cdb4db","#bde0fe","#caffbf","#f8edc6","#d8f3dc","#fde2e4","#e2ece9","#fbc4ab","#d0f4de"];
+const DEFAULT_SINGERS=[{id:"demo-a",member_id:"demo-a",name:"扬",label:"扬"},{id:"demo-b",member_id:"demo-b",name:"夏",label:"夏"},{id:"demo-c",member_id:"demo-c",name:"桃",label:"桃"},{id:"demo-d",member_id:"demo-d",name:"罐",label:"罐"},{id:"demo-e",member_id:"demo-e",name:"Lumi",label:"Lumi"}];
+const DEFAULT_ROLES=["1","2","3","4","5"].map((v,i)=>({id:`demo-r-${i}`,part_id:`demo-r-${i}`,original_name:v,label:v}));
+let singers=[];let roles=[];let addonLayers=[];let runMode="default";let runLayers=[];let currentResults=[];let layerRotations=[];let layerReadStarts=[];let spinning=false;let wheelContext={};
+const $=id=>document.getElementById(id);
+function safe(v){return String(v??"").trim();}
+function hasParent(){return window.parent&&window.parent!==window;}
+function post(payload){if(hasParent())window.parent.postMessage(payload,"*");}
+function showView(id){["addonSetupView","specialSetupView","runView"].forEach(v=>$(v).classList.toggle("active",v===id));}
+function parseJsonParam(v){if(!v)return null;for(const c of [v,decodeURIComponent(v)]){try{return JSON.parse(c)}catch(e){}}return null;}
+function normalizeSinger(item,index){if(typeof item==="string"){const label=safe(item);return label?{id:label,member_id:label,name:label,label}:null;}if(item&&typeof item==="object"){const id=safe(item.member_id||item.memberId||item.id||item.nickname||item.name||`singer-${index}`);const label=safe(item.label||item.nickname||item.name||item.member_name||item.memberName||id);return label?{...item,id,member_id:id,name:label,label}:null;}return null;}
+function normalizeRole(item,index){if(typeof item==="string"){const label=safe(item);return label?{id:label,part_id:label,original_name:label,label}:null;}if(item&&typeof item==="object"){const id=safe(item.part_id||item.project_part_id||item.partId||item.id||item.original_name||`role-${index}`);const label=safe(item.label||item.original_name||item.originalName||item.name||item.title||id);return label?{...item,id,part_id:id,original_name:label,label}:null;}return null;}
+function normalizeList(arr,fn){if(!Array.isArray(arr))return[];const seen=new Set();const out=[];arr.forEach((x,i)=>{const n=fn(x,i);if(!n)return;const key=n.id||n.label;if(seen.has(key))return;seen.add(key);out.push(n);});return out;}
+function setWheelData(data={}){wheelContext={project_id:data.project_id||data.projectId||data.task_id||data.taskId||"",project_name:data.project_name||data.projectName||data.task_name||data.taskName||""};singers=normalizeList(data.singers||data.members||data.inner||data.innerItems||[],normalizeSinger);roles=normalizeList(data.roles||data.parts||data.outer||data.outerItems||data.items||[],normalizeRole);if(!singers.length)singers=[...DEFAULT_SINGERS];if(!roles.length)roles=[...DEFAULT_ROLES];startDefaultMode(true);}
+function chipList(id,items){const el=$(id);el.innerHTML="";items.forEach(i=>{const s=document.createElement("span");s.className="chip";s.textContent=i.label||i.name||i.original_name;s.title=s.textContent;el.appendChild(s);});}
+function validateBase(){if(!singers.length){alert("暂无演唱者");return false;}return true;}
+function makeRegularRunLayers(){
+  const memberSlots=shuffle(singers).map(x=>({...x,label:x.label}));
+  const roleSlots=shuffle(roles).map(x=>({...x,label:x.label}));
+  const layers=[
+    {key:"singers",name:"演唱者",items:memberSlots},
+    {key:"roles",name:"原唱",items:roleSlots}
+  ];
 
-let currentRotation = 0;
-let spinning = false;
+  if(runMode==='addon'){
+    addonLayers.forEach(layer=>{
+      let items=[];
+      if(layer.assignMode==='byRole'){
+        items=roleSlots.map(role=>{
+          const idx=roles.findIndex(r=>String(r.id)===String(role.id));
+          return {id:`${layer.id}-${role.id}`,label:layer.values[idx]||''};
+        });
+      }else{
+        items=buildPoolLayerValues(layer,singers.length).map((v,i)=>({id:`${layer.id}-${i}`,label:v}));
+      }
+      layers.push({key:layer.id,name:layer.name,items,source:layer});
+    });
+  }
 
-function spin(){
-  if(spinning) return;
+  return layers;
+}
 
-  spinning = true;
+function startDefaultMode(silent=false){
+  if(!validateBase())return;
+  if(singers.length!==roles.length){
+    if(!silent)alert("默认转盘需要演唱者和原唱数量一致");
+    else openSpecialSetup();
+    return;
+  }
+  runMode="default";
+  runLayers=makeRegularRunLayers();
+  openRun("默认转盘");
+}
+function openAddonSetup(){if(!validateBase())return;if(singers.length!==roles.length){alert("附加转盘需要演唱者和原唱数量一致");return;}addonLayers=[];$("pageTitle").textContent="附加转盘设置";$("pageSubtitle").textContent="先添加调、速度、时长、歌名等条件，再生成转盘";chipList("addonSingerList",singers);chipList("addonRoleList",roles);renderAddonKindOptions();renderAddonFields();renderAddonLayers();showView("addonSetupView");}
+function openSpecialSetup(){if(!validateBase())return;$("pageTitle").textContent="特殊转盘设置";$("pageSubtitle").textContent="粘贴大量原唱或段落名，每个名字占一格";chipList("specialSingerList",singers);renderSpecialPreview();showView("specialSetupView");}
+function renderAddonKindOptions(){const used=new Set(addonLayers.map(l=>l.kind));const kinds=[['tone','调'],['speed','速度'],['duration','时长'],['song','歌名'],['custom','自定义']];$("addonKind").innerHTML=kinds.filter(k=>k[0]==='custom'||!used.has(k[0])).map(k=>`<option value="${k[0]}">${k[1]}</option>`).join("")||'<option value="custom">自定义</option>';}
+function renderAddonFields(){const kind=$("addonKind").value;let html="";if(kind==='tone')html='<div class="formGrid three"><label class="field">最小值<input class="input" data-addon="min" type="number" value="-2"></label><label class="field">最大值<input class="input" data-addon="max" type="number" value="6"></label><label class="field">间隔<input class="input" data-addon="step" type="number" value="1"></label></div>';else if(kind==='speed')html='<div class="formGrid three"><label class="field">最小值<input class="input" data-addon="min" type="number" step="0.1" value="0.8"></label><label class="field">最大值<input class="input" data-addon="max" type="number" step="0.1" value="2"></label><label class="field">间隔<input class="input" data-addon="step" type="number" step="0.1" value="0.1"></label></div>';else if(kind==='duration')html='<div class="formGrid"><label class="field">开始时间<input class="input" data-addon="start" value="0:00"></label><label class="field">每段秒数<input class="input" data-addon="seconds" type="number" value="40"></label></div>';else if(kind==='song')html='<label class="field">歌名池<textarea class="textarea" data-addon="values" placeholder="一行一首歌名"></textarea></label>';else html='<div class="formGrid"><label class="field">自定义层名称<input class="input" data-addon="name" placeholder="例如：挑战"></label><label class="field">内容<textarea class="textarea" data-addon="values" placeholder="一行一个内容"></textarea></label></div>';$("addonFields").innerHTML=html;}
+function getAddonField(name){return document.querySelector(`[data-addon="${name}"]`)?.value??"";}
+function decimalPlaces(v){const t=String(v);return t.includes('.')?t.split('.')[1].length:0;}
+function formatRangeValue(value,{step=1,zeroLabel='',oneLabel='',suffix='',showSign=false}={}){const d=decimalPlaces(step);let n=Number(value.toFixed(Math.max(0,d)));if(Object.is(n,-0))n=0;if(n===0&&zeroLabel)return zeroLabel;if(n===1&&oneLabel)return oneLabel;let text=d>0?n.toFixed(d):String(Math.round(n));if(showSign&&n>0)text=`+${text}`;return `${text}${suffix}`;}
+function rangeValues(min,max,step,opts){min=Number(min);max=Number(max);step=Math.abs(Number(step));if(!Number.isFinite(min)||!Number.isFinite(max)||!Number.isFinite(step)||step<=0)return[];const a=Math.min(min,max),b=Math.max(min,max),out=[];let count=0;for(let v=a;v<=b+step/1000&&count<1000;v+=step){out.push(formatRangeValue(v,{step,...opts}));count++;}return out;}
+function splitValues(text){return String(text||'').split(/\n|,|，|、/).map(safe).filter(Boolean);}
+function parseTimeToSeconds(v){const parts=safe(v).split(':').map(Number);if(parts.some(x=>!Number.isFinite(x)))return 0;if(parts.length===1)return parts[0];if(parts.length===2)return parts[0]*60+parts[1];return parts[0]*3600+parts[1]*60+parts[2];}
+function formatSeconds(sec){sec=Math.max(0,Math.round(sec));const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;if(h>0)return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;return `${m}:${String(s).padStart(2,'0')}`;}
+function roleOrder(role,index){const m=safe(role.original_name||role.label).match(/\d+/);return m?Number(m[0]):index+1;}
+function durationValues(start,dur){const st=parseTimeToSeconds(start);dur=Number(dur)||40;return roles.map((r,i)=>{const idx=Math.max(0,roleOrder(r,i)-1);const a=st+idx*dur;return `${formatSeconds(a)}-${formatSeconds(a+dur)}`;});}
+function addAddonLayer(){const kind=$("addonKind").value;let name='',values=[],qty=Math.max(1,Number($("addonQty").value)||1),assignMode='pool';if(kind==='tone'){name='调';values=rangeValues(getAddonField('min'),getAddonField('max'),getAddonField('step'),{zeroLabel:'原调',showSign:true});}else if(kind==='speed'){name='速度';values=rangeValues(getAddonField('min'),getAddonField('max'),getAddonField('step'),{oneLabel:'原速',suffix:'x'});}else if(kind==='duration'){name='时长';values=durationValues(getAddonField('start'),getAddonField('seconds'));assignMode='byRole';qty=1;}else if(kind==='song'){name='歌名';values=splitValues(getAddonField('values'));}else{name=safe(getAddonField('name'))||`自定义${addonLayers.length+1}`;values=splitValues(getAddonField('values'));}
+values=values.filter(Boolean);if(!values.length){alert('请完整填写附加层内容');return;}let notice='';if(assignMode==='pool'){const need=singers.length;let minQty=qty;if(values.length*minQty<need){minQty=Math.ceil(need/values.length);notice=`当前人数为${need}人，原设置每项${qty}个不足，已自动调整为每项${minQty}个。`;qty=minQty;}}
+addonLayers.push({id:`layer-${Date.now()}-${Math.random().toString(16).slice(2)}`,kind,name,values,qty,assignMode,notice});renderAddonKindOptions();renderAddonFields();renderAddonLayers();if(notice)$("addonNotice").textContent=notice;}
+function removeAddonLayer(i){addonLayers.splice(i,1);renderAddonKindOptions();renderAddonFields();renderAddonLayers();}
+function renderAddonLayers(){const list=$("addonLayerList");list.innerHTML='';if(!addonLayers.length)list.innerHTML='<div class="hint">暂无附加层。</div>';addonLayers.forEach((l,i)=>{const div=document.createElement('div');div.className='layerItem';div.innerHTML=`<div class="layerHead"><div class="layerName">${escapeHtml(l.name)}</div><button class="smallBtn" onclick="removeAddonLayer(${i})">删除</button></div><div class="hint">${l.assignMode==='byRole'?'按原唱顺序绑定':'每项数量：'+l.qty}<br>${escapeHtml(l.values.join('、'))}</div>`;list.appendChild(div);});const preview=['演唱者','原唱',...addonLayers.map(l=>l.name)];$("addonPreviewList").innerHTML=preview.map((p,i)=>`<div class="previewItem">第${i+1}层：${escapeHtml(p)}</div>`).join('');if(!addonLayers.length)$("addonNotice").textContent='当前只使用默认两层。添加条件后再生成转盘。';}
+function buildPoolLayerValues(layer,n){if(layer.assignMode==='byRole')return null;const pool=[];layer.values.forEach(v=>{for(let i=0;i<layer.qty;i++)pool.push(v);});while(pool.length<n)layer.values.forEach(v=>pool.push(v));return shuffle(pool).slice(0,n);}
+function generateAddonWheel(){runMode='addon';runLayers=makeRegularRunLayers();openRun('附加转盘');}
+function renderSpecialPreview(){const items=splitValues($("specialText")?.value||'');if($("specialPreviewList"))$("specialPreviewList").innerHTML=`<div class="previewItem">演唱者：${singers.length}人</div><div class="previewItem">段落：${items.length}项</div>`;}
+function generateSpecialWheel(){const segments=splitValues($("specialText").value);if(!segments.length){alert('请先粘贴原唱或段落名');return;}runMode='special';
+  window.specialSegments=segments;
+  runLayers=[
+    {key:'singers',name:'演唱者',items:shuffle(singers).map(x=>({...x,label:x.label}))},
+    {key:'segments',name:'原唱/段落',items:shuffle(segments).map((v,i)=>({id:`seg-${i}`,label:v}))}
+  ];
+  openRun('特殊转盘');}
 
-  const randomIndex = Math.floor(Math.random() * items.length);
-  const sliceDeg = 360 / items.length;
+function setActiveModeButton(mode){
+  const map={default:'switchDefaultBtn',addon:'switchAddonBtn',special:'switchSpecialBtn'};
+  Object.entries(map).forEach(([key,id])=>{
+    const btn=$(id);
+    if(btn) btn.classList.toggle('active', key===mode);
+  });
+}
+function openRun(title){currentResults=[];layerRotations=[];layerReadStarts=[];spinning=false;$("pageTitle").textContent=title;$("pageSubtitle").textContent=runMode==='special'?'内层显示演唱者，外层显示原唱/段落，转完后按指针顺序分配':'每一层都会独立随机排列，指针位置作为读取起点';showView('runView');setActiveModeButton(runMode);renderRunLayers();renderWheel();renderResults();$("confirmBtn").disabled=true;$("spinBtn").disabled=false;}
+function backFromRun(){if(runMode==='addon')openAddonSetup();else if(runMode==='special')openSpecialSetup();else startDefaultMode(true);}
+function renderRunLayers(){
+  $("runLayerCount").textContent=`${runLayers.length}层`;
+  $("runLayerList").innerHTML=runLayers.map((l,i)=>{
+    const chips=(l.items||[]).map(item=>`<span class="runLayerChip" title="${escapeHtml(item.label)}">${escapeHtml(shortLabel(item.label,10))}</span>`).join('');
+    return `<div class="runLayerBlock"><div class="runLayerTitle">第${i+1}层：${escapeHtml(l.name)}（${l.items.length}项）</div><div class="runLayerItems">${chips}</div></div>`;
+  }).join('');
+}
+function polar(cx,cy,r,deg){const rad=(deg-90)*Math.PI/180;return {x:cx+r*Math.cos(rad),y:cy+r*Math.sin(rad)};}
+function annularPath(cx,cy,r1,r2,a0,a1){const p1=polar(cx,cy,r2,a0),p2=polar(cx,cy,r2,a1),p3=polar(cx,cy,r1,a1),p4=polar(cx,cy,r1,a0);const large=a1-a0>180?1:0;return `M ${p1.x} ${p1.y} A ${r2} ${r2} 0 ${large} 1 ${p2.x} ${p2.y} L ${p3.x} ${p3.y} A ${r1} ${r1} 0 ${large} 0 ${p4.x} ${p4.y} Z`;}
+function renderWheel(){
+  const svg=$("wheelSvg");
+  svg.innerHTML='';
+  const cx=320,cy=320,minR=54,maxR=300;
+  const count=runLayers.length||1;
+  const w=(maxR-minR)/count;
 
-  const extraTurns = 5 * 360;
-  const targetDeg = 360 - (randomIndex * sliceDeg) - sliceDeg/2;
+  runLayers.forEach((layer,li)=>{
+    const r1=minR+w*li,r2=minR+w*(li+1);
+    const items=layer.items||[];
+    const slice=360/Math.max(1,items.length);
+    const group=document.createElementNS('http://www.w3.org/2000/svg','g');
+    group.classList.add('wheelLayerGroup');
+    group.setAttribute('id',`wheelLayerGroup-${li}`);
+    group.dataset.layerIndex=String(li);
+    group.style.transform=`rotate(${layerRotations[li]||0}deg)`;
 
-  const finalDeg = extraTurns + targetDeg;
+    items.forEach((item,i)=>{
+      const a0=i*slice,a1=(i+1)*slice;
+      const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d',annularPath(cx,cy,r1,r2,a0,a1));
+      path.setAttribute('fill',COLORS[(i+li*2)%COLORS.length]);
+      path.setAttribute('class','slicePath');
+      group.appendChild(path);
 
-  currentRotation += finalDeg;
+      const mid=(a0+a1)/2;
+      const rr=(r1+r2)/2;
+      const pos=polar(cx,cy,rr,mid);
+      const text=document.createElementNS('http://www.w3.org/2000/svg','text');
+      text.setAttribute('x',pos.x);
+      text.setAttribute('y',pos.y);
+      text.setAttribute('class','wheelText');
+      const fs=Math.max(9,Math.min(18,w*.34*(items.length>=10?.88:1)));
+      text.setAttribute('font-size',String(fs));
+      text.textContent=shortLabel(item.label,li===runLayers.length-1?8:7);
+      group.appendChild(text);
+    });
 
-  const wheel = document.getElementById("wheel");
-  wheel.style.transform = `rotate(${currentRotation}deg)`;
+    svg.appendChild(group);
+  });
+
+  for(let i=0;i<=count;i++){
+    const r=minR+w*i;
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',cx);
+    c.setAttribute('cy',cy);
+    c.setAttribute('r',r);
+    c.setAttribute('class',i===count?'outerBoundary':'ringBoundary');
+    svg.appendChild(c);
+  }
+}
+function shortLabel(v,n){v=safe(v);return v.length>n?v.slice(0,n)+'…':v;}
+function prepareLayersForSpin(){
+  if(runMode==='default' || runMode==='addon'){
+    runLayers=makeRegularRunLayers();
+  }else if(runMode==='special'){
+    const source=(window.specialSegments&&window.specialSegments.length)
+      ? window.specialSegments
+      : (runLayers.find(layer=>layer.key==='segments')?.items || []).map(x=>x.label);
+    runLayers=[
+      {key:'singers',name:'演唱者',items:shuffle(singers).map(x=>({...x,label:x.label}))},
+      {key:'segments',name:'原唱/段落',items:shuffle(source).map((v,i)=>({id:`seg-${i}`,label:v}))}
+    ];
+  }
+}
+
+function spinWheel(){
+  if(spinning)return;
+  if(!runLayers.length)return;
+  spinning=true;
+  currentResults=[];
+  renderResults();
+  $("confirmBtn").disabled=true;
+  $("spinBtn").disabled=true;
+
+  prepareLayersForSpin();
+  layerRotations=runLayers.map(()=>0);
+  layerReadStarts=runLayers.map(()=>0);
+  renderRunLayers();
+  renderWheel();
+
+  runLayers.forEach((layer,li)=>{
+    const len=layer.items.length||1;
+    const slice=360/len;
+    const startIndex=Math.floor(Math.random()*len);
+    const fineTune=Math.random()*slice*.38;
+    const direction=li%2===0?1:-1;
+    layerReadStarts[li]=startIndex;
+    layerRotations[li]=direction*((4+li)*360) - startIndex*slice + fineTune;
+  });
+
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      runLayers.forEach((layer,li)=>{
+        const g=$(`wheelLayerGroup-${li}`);
+        if(g) g.style.transform=`rotate(${layerRotations[li]}deg)`;
+      });
+    });
+  });
 
   setTimeout(()=>{
-    document.getElementById("result").innerText = "结果：" + items[randomIndex];
-    spinning = false;
-  }, 4000);
+    currentResults=buildResults(layerReadStarts);
+    spinning=false;
+    $("spinBtn").disabled=false;
+    $("confirmBtn").disabled=!currentResults.length;
+    renderResults();
+    post({type:'ROOM10_WHEEL_SPUN',mode:runMode,pairs:currentResults,layers:runLayers,context:{...wheelContext}});
+  },2850);
 }
+function buildResults(starts){
+  const readStarts=Array.isArray(starts)?starts:[starts||0];
+  if(runMode==='special'){
+    const singerLayer = runLayers.find(layer=>layer.key === 'singers') || { items:singers };
+    const segmentLayer = runLayers.find(layer=>layer.key === 'segments') || runLayers[0] || { items:[] };
+    const singerLayerIndex = runLayers.findIndex(layer=>layer.key === 'singers');
+    const segmentLayerIndex = runLayers.findIndex(layer=>layer.key === 'segments');
+    const orderedSingers = ordered(singerLayer.items || [], readStarts[singerLayerIndex >= 0 ? singerLayerIndex : 0] || 0);
+    const segs = ordered(segmentLayer.items || [], readStarts[segmentLayerIndex >= 0 ? segmentLayerIndex : 0] || 0).map(x=>x.label);
+    const groups = orderedSingers.map(()=>[]);
+    segs.forEach((seg,i)=>groups[i % orderedSingers.length].push(seg));
+    return orderedSingers.map((s,i)=>({
+      member_id:s.member_id||s.id,
+      member_name:s.name||s.label,
+      part_id:'',
+      original_name:groups[i].join('、'),
+      final_original_name:groups[i].join('、'),
+      segments:groups[i],
+      singer:s,
+      index:i
+    })).filter(x=>x.segments.length);
+  }
+  const n=singers.length;
+  const orderedLayers=runLayers.map((l,idx)=>({...l,items:ordered(l.items,readStarts[idx]||0)}));
+  const res=[];
+  for(let i=0;i<n;i++){
+    const singer=orderedLayers[0].items[i];
+    const role=orderedLayers[1].items[i];
+    const addons=orderedLayers.slice(2).map(l=>safe(l.items[i]?.label)).filter(Boolean);
+    const finalName=buildFinalOriginalName(role.label,addons);
+    res.push({member_id:singer.member_id||singer.id,member_name:singer.name||singer.label,part_id:role.part_id||role.id,original_name:role.original_name||role.label,final_original_name:finalName,addons,singer,role,index:i});
+  }
+  return res;
+}
+function ordered(arr,start){if(!arr.length)return[];const s=((start%arr.length)+arr.length)%arr.length;return [...arr.slice(s),...arr.slice(0,s)];}
+function buildFinalOriginalName(base,addons){base=safe(base);addons=(addons||[]).map(safe).filter(Boolean);if(!addons.length)return base;const m=base.match(/^(.*?)(?:（([^）]*)）)?$/);const main=safe(m?.[1])||base;const existing=safe(m?.[2]);const all=[...(existing?existing.split('｜').map(safe).filter(Boolean):[]),...addons];return `${main}（${all.join('｜')}）`;}
+function renderResults(){const list=$("resultList");list.innerHTML='';if(!currentResults.length){const e=document.createElement('div');e.className='resultEmpty';e.textContent='点击开始配对';list.appendChild(e);return;}currentResults.forEach(p=>{const d=document.createElement('div');d.className='resultItem';d.innerHTML=`<span>${escapeHtml(p.member_name)}</span><span class="resultArrow">→</span><span>${escapeHtml(p.final_original_name||p.original_name)}</span>`;list.appendChild(d);});}
+function resetRun(){layerRotations=[];layerReadStarts=[];currentResults=[];renderWheel();renderRunLayers();renderResults();$("confirmBtn").disabled=true;$("spinBtn").disabled=false;}
+function confirmResult(){if(!currentResults.length)return;post({type:'ROOM10_WHEEL_CONFIRM',mode:runMode,pairs:currentResults,layers:runLayers,context:{...wheelContext}});}
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+function escapeHtml(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+function closeWheel(){post({type:'ROOM10_WHEEL_CLOSE',context:{...wheelContext}});if(!hasParent()&&history.length>1)history.back();}
+window.addEventListener('message',e=>{const d=e.data||{};if(d.type==='ROOM10_WHEEL_INIT')setWheelData(d);});
+window.addEventListener('load',()=>{if(hasParent()||new URLSearchParams(location.search).get('embed')==='1')document.body.classList.add('embedded');const data=parseJsonParam(new URLSearchParams(location.search).get('data'));setWheelData(data||{});$('specialText').addEventListener('input',renderSpecialPreview);post({type:'ROOM10_WHEEL_READY'});});
 </script>
 </body>
 </html>
