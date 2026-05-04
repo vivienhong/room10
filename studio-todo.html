@@ -2210,8 +2210,8 @@ body{
   }
 #wheelModalBox{
     position:relative;
-    width:min(1120px, 96vw);
-    height:min(86vh, 820px);
+    width:min(1240px, 96vw);
+    height:min(90vh, 860px);
     border-radius:24px;
     overflow:hidden;
     background:rgba(255,249,241,0.98);
@@ -2220,18 +2220,41 @@ body{
   }
 #wheelModalCloseBtn{
     position:absolute;
-    top:14px;
-    right:14px;
-    z-index:2;
+    top:26px;
+    right:28px;
+    z-index:20;
     min-width:86px;
     height:36px;
     border-radius:12px;
+    margin:0;
+    transform:none;
+  }
+#wheelModalCloseBtn:hover{
+    transform:none;
   }
 #wheelModalFrame{
     width:100%;
     height:100%;
     border:none;
     background:#fffaf4;
+  }
+@media (min-width:2200px){
+    #wheelModalMask{
+      padding:24px;
+    }
+    #wheelModalBox{
+      width:min(1560px, 96vw);
+      height:min(92vh, 1080px);
+      border-radius:30px;
+    }
+    #wheelModalCloseBtn{
+      top:34px;
+      right:36px;
+      min-width:108px;
+      height:46px;
+      border-radius:15px;
+      font-size:17px;
+    }
   }
 #roleSetupMask{
     position:fixed;
@@ -4726,7 +4749,77 @@ body{
     if (taskId) params.set('task_id', String(taskId));
     if (getCurrentMemberId()) params.set('member_id', getCurrentMemberId());
     params.set('embed', '1');
+    params.set('v', '20260504-wheel-layers');
     return `studio-wheel.html${params.toString() ? `?${params.toString()}` : ''}`;
+  }
+
+  function buildWheelToolPayload(taskId = activeClaimTaskId) {
+    const task = getCurrentTaskSafe(taskId);
+    const state = getRoleToolState();
+
+    const roles = state.pendingRows.map((item, orderIndex) => {
+      const partId = String(item.row?.dataset?.partId || '').trim();
+      const rowIndex = Number.isFinite(Number(item.index)) ? Number(item.index) : orderIndex;
+      const label = item.roleName || `第 ${rowIndex + 1} 行`;
+      return {
+        id: partId || `row-${rowIndex}`,
+        part_id: partId,
+        row_index: rowIndex,
+        original_name: label,
+        label
+      };
+    });
+
+    const singers = state.availableSingerNames.map((name, index) => {
+      const member = findMemberByName(name);
+      const memberId = String(member?.id || '').trim();
+      return {
+        id: memberId || `singer-${index}`,
+        member_id: memberId,
+        name,
+        label: name,
+        index
+      };
+    });
+
+    return {
+      type: 'ROOM10_WHEEL_INIT',
+      mode: 'multi_layer_assignment',
+      title: '角色转盘',
+      subtitle: task?.task_name ? `当前任务：${task.task_name}` : '用于当前任务的角色分配',
+      layers: [
+        {
+          key: 'singers',
+          name: '演唱者',
+          role: 'singer',
+          items: singers
+        },
+        {
+          key: 'originals',
+          name: '原唱',
+          role: 'original',
+          items: roles
+        }
+      ],
+      singers,
+      roles,
+      items: roles,
+      context: {
+        project_id: String(task?.id || taskId || ''),
+        task_id: String(task?.id || taskId || ''),
+        task_name: String(task?.task_name || ''),
+        task_code: String(task?.task_code || ''),
+        selected_singers: state.selectedSingerNames,
+        available_singers: state.availableSingerNames,
+        fixed_count: state.fixedRows.length,
+        pending_count: state.pendingRows.length
+      }
+    };
+  }
+
+  function postWheelInitToFrame(payload) {
+    if (!wheelModalFrame || !wheelModalFrame.contentWindow) return;
+    wheelModalFrame.contentWindow.postMessage(payload, '*');
   }
 
   function openWheelToolModal(taskId = activeClaimTaskId) {
@@ -4735,26 +4828,220 @@ body{
       || String(document.getElementById("editIsCollective")?.value || "") === "1";
     if (!task || !isCollective) return;
 
-    const wheelUrl = buildWheelToolUrl(task.id);
+    const payload = buildWheelToolPayload(task.id);
+    const roleCount = payload.roles?.length || 0;
+    const singerCount = payload.singers?.length || 0;
 
-    if (IS_FILE_PROTOCOL) {
-      window.location.href = wheelUrl;
+    if (!roleCount) {
+      showToast('无法打开转盘', '当前没有可分配的未分配原唱。');
       return;
     }
 
+    if (!singerCount) {
+      showToast('无法打开转盘', '当前没有可参与转盘的未分配演唱者。');
+      return;
+    }
+
+    if (roleCount !== singerCount) {
+      showToast('无法打开转盘', `未分配原唱和未分配演唱者数量不一致。\n当前未分配原唱：${roleCount} 个\n当前未分配演唱者：${singerCount} 个`);
+      return;
+    }
+
+    const wheelUrl = buildWheelToolUrl(task.id);
+
     if (!wheelModalMask || !wheelModalFrame) return;
+    wheelModalFrame.dataset.pendingPayload = JSON.stringify(payload);
     wheelModalFrame.src = wheelUrl;
     wheelModalMask.classList.add('show');
     wheelModalMask.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+
+    wheelModalFrame.onload = () => {
+      const rawPayload = wheelModalFrame.dataset.pendingPayload || '';
+      if (!rawPayload) return;
+      try {
+        postWheelInitToFrame(JSON.parse(rawPayload));
+      } catch (err) {
+        console.warn('转盘数据发送失败：', err);
+      }
+    };
+
+    setTimeout(() => {
+      try { postWheelInitToFrame(payload); } catch (err) {}
+    }, 350);
   }
 
   function closeWheelToolModal() {
     if (!wheelModalMask || !wheelModalFrame) return;
     wheelModalMask.classList.remove('show');
     wheelModalMask.setAttribute('aria-hidden', 'true');
+    wheelModalFrame.onload = null;
+    wheelModalFrame.dataset.pendingPayload = '';
     wheelModalFrame.src = 'about:blank';
     document.body.style.overflow = '';
+  }
+
+  function findPartRowForWheelItem(item) {
+    if (!item || typeof item !== 'object') return null;
+    const partId = String(item.part_id || item.id || '').trim();
+    if (partId && !partId.startsWith('row-')) {
+      const byPartId = document.querySelector(`.partRow[data-part-id="${CSS.escape(partId)}"]`);
+      if (byPartId) return byPartId;
+    }
+
+    const rowIndexRaw = item.row_index ?? item.index;
+    const rowIndex = Number(rowIndexRaw);
+    const rows = [...document.querySelectorAll('.partRow')];
+    if (Number.isInteger(rowIndex) && rows[rowIndex]) return rows[rowIndex];
+
+    const label = String(item.original_name || item.label || item.value || '').trim();
+    if (label) {
+      return rows.find(row => String(row.querySelector('.partNameInput')?.value || '').trim() === label) || null;
+    }
+    return null;
+  }
+
+  function normalizeWheelOriginalName(baseName, extras = []) {
+    const base = String(baseName || '').trim();
+    const cleanExtras = (Array.isArray(extras) ? extras : [])
+      .map(item => String(item || '').trim())
+      .filter(Boolean);
+    if (!base || !cleanExtras.length) return base;
+
+    const match = base.match(/^(.*?)(?:（([^）]*)）)?$/);
+    const root = String(match?.[1] || base).trim();
+    const existingExtras = String(match?.[2] || '')
+      .split('｜')
+      .map(item => item.trim())
+      .filter(Boolean);
+    const mergedExtras = [...existingExtras];
+    cleanExtras.forEach(item => {
+      if (!mergedExtras.includes(item)) mergedExtras.push(item);
+    });
+    return mergedExtras.length ? `${root}（${mergedExtras.join('｜')}）` : root;
+  }
+
+  function extractWheelPairings(data) {
+    if (Array.isArray(data?.pairs)) return data.pairs;
+    if (Array.isArray(data?.pairings)) return data.pairings;
+    if (Array.isArray(data?.assignments)) return data.assignments;
+    if (Array.isArray(data?.results)) return data.results;
+    if (data?.item && typeof data.item === 'object') {
+      return [{
+        role: data.item,
+        original: data.item,
+        singer: {
+          name: data?.member_name || data?.context?.member_name || getCurrentMemberName(),
+          member_id: data?.member_id || data?.context?.member_id || getCurrentMemberId()
+        },
+        extras: data?.extras || []
+      }];
+    }
+    return [];
+  }
+
+  function getWheelPairRole(pairing) {
+    return pairing?.role || pairing?.original || pairing?.part || pairing?.item || pairing;
+  }
+
+  function getWheelPairSingerName(pairing) {
+    return String(
+      pairing?.singer?.name ||
+      pairing?.singer?.label ||
+      pairing?.member_name ||
+      pairing?.memberName ||
+      pairing?.name ||
+      ''
+    ).trim();
+  }
+
+  function getWheelPairExtras(pairing) {
+    if (Array.isArray(pairing?.extras)) return pairing.extras;
+    if (Array.isArray(pairing?.extra_layers)) return pairing.extra_layers;
+    if (Array.isArray(pairing?.append_layers)) return pairing.append_layers;
+    return [];
+  }
+
+  function getWheelPairUpdatedOriginalName(pairing, roleName) {
+    const direct = String(pairing?.updated_original_name || pairing?.final_original_name || pairing?.original_name_final || '').trim();
+    if (direct) return direct;
+    return normalizeWheelOriginalName(roleName, getWheelPairExtras(pairing));
+  }
+
+  function applyWheelConfirmedResult(data) {
+    const pairings = extractWheelPairings(data);
+
+    if (!pairings.length) {
+      showToast('转盘结果未写入', '没有收到有效的转盘配对结果。');
+      return;
+    }
+
+    const operations = [];
+    const usedRows = new Set();
+
+    for (const pairing of pairings) {
+      const role = getWheelPairRole(pairing);
+      const row = findPartRowForWheelItem(role);
+      const singerName = getWheelPairSingerName(pairing);
+
+      if (!row) {
+        showToast('转盘结果未写入', '有配对结果没有找到对应的歌词分配行，请刷新后重试。');
+        return;
+      }
+
+      if (usedRows.has(row)) {
+        showToast('转盘结果未写入', '转盘结果中存在重复的原唱行，请重新转盘。');
+        return;
+      }
+      usedRows.add(row);
+
+      const partInput = row.querySelector('.partNameInput');
+      const memberInput = row.querySelector('.partMemberInput');
+      const roleName = String(partInput?.value || role?.original_name || role?.label || '').trim();
+      const existingMemberName = String(memberInput?.value || '').trim();
+
+      if (!partInput || !memberInput) {
+        showToast('转盘结果未写入', '当前歌词分配行无法填写完整结果。');
+        return;
+      }
+
+      if (existingMemberName) {
+        showToast('转盘结果未写入', `${roleName || '该角色'} 已经分配给 ${existingMemberName}，不会重复覆盖。`);
+        return;
+      }
+
+      if (!singerName) {
+        showToast('转盘结果未写入', `${roleName || '该角色'} 没有匹配到演唱者，请重新转盘。`);
+        return;
+      }
+
+      operations.push({
+        row,
+        partInput,
+        memberInput,
+        roleName,
+        singerName,
+        finalOriginalName: getWheelPairUpdatedOriginalName(pairing, roleName)
+      });
+    }
+
+    pushUndoSnapshot();
+
+    operations.forEach(item => {
+      item.partInput.value = item.finalOriginalName || item.roleName;
+      item.memberInput.value = item.singerName;
+      item.memberInput.dataset.prevMemberName = item.singerName;
+      toggleSingerButtonByName(item.singerName, true);
+      updatePartMemberOptionsForRow(item.row);
+    });
+
+    syncSingerPickerFromRows();
+    refreshCandidateRowState();
+    scheduleAutoSave('manual');
+    closeWheelToolModal();
+
+    const summary = operations.map(item => `${item.singerName} → ${item.finalOriginalName || item.roleName}`).join('\n');
+    showToast('角色转盘', `已写入 ${operations.length} 组配对：\n${summary}`);
   }
 
   toastCloseBtn.addEventListener("click", () => closeToast(false));
@@ -4771,6 +5058,20 @@ body{
       if (e.target === wheelModalMask) closeWheelToolModal();
     });
   }
+
+  window.addEventListener('message', (event) => {
+    const data = event.data || {};
+    if (!data || typeof data !== 'object') return;
+
+    if (data.type === 'ROOM10_WHEEL_CLOSE') {
+      closeWheelToolModal();
+      return;
+    }
+
+    if (data.type === 'ROOM10_WHEEL_CONFIRM') {
+      applyWheelConfirmedResult(data);
+    }
+  });
 
   function setAutoSaveStatus(type, text) {
     autoSaveStatus.className = "autoSaveBadge";
