@@ -980,36 +980,6 @@
     border-radius:999px;
   }
 
-  .detailTopGrid{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:var(--project-gap-sm);
-    margin-bottom:calc(10px * var(--project-panel-scale));
-  }
-
-  .detailMetaCard{
-    padding:calc(9px * var(--project-panel-scale)) calc(10px * var(--project-panel-scale));
-    border-radius:calc(16px * var(--project-panel-scale));
-    background:rgba(255,248,240,0.72);
-    border:1px solid rgba(214,186,149,0.28);
-    box-shadow:0 4px 12px rgba(118,86,54,0.04);
-    min-width:0;
-  }
-
-  .detailMetaLabel{
-    color:#8a6644;
-    font-size:var(--project-font-sm);
-    font-weight:500;
-    margin-bottom:6px;
-  }
-
-  .detailMetaValue{
-    color:#5f3b1d;
-    font-size:var(--project-font-lg);
-    font-weight:700;
-    word-break:break-word;
-    line-height:1.3;
-  }
 
   .sectionCard{
     padding:calc(10px * var(--project-panel-scale)) calc(11px * var(--project-panel-scale)) calc(10px * var(--project-panel-scale));
@@ -1143,14 +1113,6 @@
     width:100%;
   }
 
-  .assignmentSubLine{
-    color:#8b6947;
-    font-size:var(--project-font-xs);
-    font-weight:500;
-    line-height:1.2;
-    text-align:center;
-    word-break:break-word;
-  }
 
   .tinyActionBtn{
     appearance:none;
@@ -1234,9 +1196,6 @@
     gap:4px;
   }
 
-  .producerLabel{
-    display:none;
-  }
 
   .producerNameInline{
     color:#5a3921;
@@ -1543,9 +1502,6 @@
     z-index:40;
   }
 
-  .taskEditFieldWide{
-    grid-column:1 / -1;
-  }
   .taskEditGridProject{
     grid-template-columns:1fr;
     gap:12px;
@@ -1601,8 +1557,7 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,0.85);
   }
 
-  .taskEditSelect,
-  .editSelect{
+  .taskEditSelect{
     appearance:none;
     -webkit-appearance:none;
     -moz-appearance:none;
@@ -1616,8 +1571,7 @@
     z-index:5;
   }
 
-  .taskEditSelect option,
-  .editSelect option{
+  .taskEditSelect option{
     color:#5f3b1d;
     background:#fffdf9;
   }
@@ -1677,12 +1631,6 @@
       0 4px 10px rgba(116,86,54,0.14);
   }
 
-  .taskEditHint{
-    margin-top:8px;
-    color:#8b6947;
-    font-size:var(--project-font-sm);
-    line-height:1.6;
-  }
 
   .taskEditRows{
     display:flex;
@@ -1701,26 +1649,6 @@
     border:1px solid rgba(214,186,149,0.24);
   }
 
-  .taskEditInlineBtns{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-  }
-
-  .taskEditTinyBtn{
-    appearance:none;
-    border:none;
-    cursor:pointer;
-    min-width:74px;
-    height:32px;
-    padding:0 10px;
-    border-radius:10px;
-    background:rgba(255,252,247,0.88);
-    color:#6a4120;
-    font-size:var(--project-font-sm);
-    font-weight:800;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,0.82),0 2px 8px rgba(112,83,52,0.06);
-  }
 
 .taskEditRemoveBtn{
   appearance:none;
@@ -2022,18 +1950,12 @@
     filter:none;
   }
 
-  .detailActionBtn[disabled],
-  .taskEditTinyBtn[disabled]{
+  .detailActionBtn[disabled]{
     opacity:.6;
     cursor:not-allowed;
     transform:none;
     filter:none;
   }
-
-  /* 真正手机版 */
-  
-
-
 
   @media (max-aspect-ratio: 16/10){
     #taskPanel{
@@ -2092,7 +2014,6 @@
     65%{opacity:.46;}
     100%{transform:translate3d(var(--note-drift-x,14px),var(--note-drift-y,-72px),0) rotate(var(--note-rot-end,10deg)) scale(calc(var(--note-scale,1) * 1.04));opacity:0;}
   }
-
 
 
 /* =========================================================
@@ -2376,7 +2297,6 @@
   }
   .detailHero,
   .sectionCard,
-  .detailMetaCard,
   .goldCard,
   .assignmentCompactRow,
   .producerCard{
@@ -2423,7 +2343,6 @@
   .memberCheckItem{height:calc(52px * var(--bg-scale)) !important;padding:0 calc(22px * var(--bg-scale)) !important;font-size:calc(18px * var(--bg-scale)) !important;border-radius:calc(16px * var(--bg-scale)) !important;}
   .taskEditInput,.taskEditSelect{min-height:calc(50px * var(--bg-scale)) !important;font-size:calc(18px * var(--bg-scale)) !important;border-radius:calc(15px * var(--bg-scale)) !important;}
 }
-
 
 
 /* =========================================================
@@ -2560,7 +2479,6 @@
     line-height:1.34 !important;
   }
 
-  .assignmentSubLine,
   .goldSub{
     font-size:var(--project-font-xs) !important;
     line-height:1.28 !important;
@@ -4058,20 +3976,6 @@ const authState = {
 
   let bgNoteTimer = null;
 
-  function rectRelativeToOverlay(el) {
-    if (!el || !overlay) return null;
-    const r = el.getBoundingClientRect();
-    const o = overlay.getBoundingClientRect();
-    return {
-      left: r.left - o.left,
-      top: r.top - o.top,
-      right: r.right - o.left,
-      bottom: r.bottom - o.top,
-      width: r.width,
-      height: r.height
-    };
-  }
-
   function intersectsForbidden(x, y, size, forbidden) {
     const padding = 18;
     const left = x - padding;
@@ -4410,18 +4314,6 @@ const authState = {
     return Array.from(editSingerMemberList.querySelectorAll('.memberCheckItem.active[data-member-id]')).map(btn => String(btn.dataset.memberId || ""));
   }
 
-  function buildMemberSelectOptions(selectedId = "", singerIdPool = null, includeEmpty = true) {
-    const selected = String(selectedId || "");
-    const allowed = singerIdPool ? new Set(singerIdPool.map(String)) : null;
-
-    const optionHtml = members
-      .filter(member => !allowed || allowed.has(String(member.id)))
-      .map(member => `<option value="${escapeHtml(member.id)}" ${String(member.id) === selected ? "selected" : ""}>${escapeHtml(member.nickname || member.name)}</option>`)
-      .join("");
-
-    return `${includeEmpty ? `<option value="">未分配</option>` : ""}${optionHtml}`;
-  }
-
   function renderEditSingerMemberList(selectedIds = []) {
     const selectedSet = new Set((selectedIds || []).map(String));
     editSingerMemberList.innerHTML = members.map(member => {
@@ -4543,15 +4435,6 @@ const authState = {
 
   function refreshAllPartSuggestions() {
     Array.from(editPartRows.querySelectorAll('.taskEditRow')).forEach(renderPartSuggestForRow);
-  }
-
-function syncEditPartDraftFromDomAndRender() {
-    const currentRows = getCurrentPartDraftFromDom();
-    if (currentRows.length) {
-      editPartDraftRows = currentRows;
-    }
-    renderEditPartRows();
-    bindEditPartRowButtons();
   }
 
   function bindEditPartRowButtons() {
@@ -4803,28 +4686,6 @@ function populateTaskTypeSelect(currentValue) {
     if (!taskEditOriginalSnapshot) return;
     const snapshotClone = JSON.parse(JSON.stringify(taskEditOriginalSnapshot));
     applyTaskEditSnapshot(snapshotClone);
-  }
-
-  function syncTaskStoreFromEditSnapshot(snapshot) {
-    if (!snapshot) return;
-    const task = getTaskById(snapshot.taskId);
-    if (!task) return;
-
-    task.project_code = String(snapshot.project_code || "");
-    task.project_name = String(snapshot.project_name || "");
-    task.project_type = String(snapshot.project_type || "其他");
-    task.is_collective_task = !!snapshot.is_collective_task;
-    task.participant_count = Math.max(1, Number(snapshot.participant_count) || 1);
-    task.project_tone = String(snapshot.project_tone || "") || null;
-    task.release_date = snapshot.release_date || null;
-    task.producer_member_id = String(snapshot.producer_member_id || "") || null;
-    task.singers = (snapshot.singer_ids || []).map(memberId => ({ member_id: String(memberId || "") })).filter(item => item.member_id);
-    task.parts = (snapshot.parts || []).map((part, index) => ({
-      original_name: String(part.original_name || ""),
-      assigned_member_id: String(part.assigned_member_id || "") || null,
-      assigned_member_name: String(part.assigned_member_name || ""),
-      part_order: index + 1
-    }));
   }
 
 function openTaskEditModal(taskId = activeDetailTaskId) {
