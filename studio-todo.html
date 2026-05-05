@@ -8871,7 +8871,70 @@ function closeRoleSetupModal() {
   }
 
   async function deleteCurrentTask() {
-    showToast("暂不支持", "当前安全模式下，删除任务还没有接入专用安全函数，先不要在这个页面直接删除。");
+    const task = getCurrentTaskSafe(activeClaimTaskId) || tasks.find(item => String(item.id || "") === String(activeClaimTaskId || ""));
+    if (!task || !task.id) {
+      showToast("无法删除", "当前没有选中的任务。");
+      return;
+    }
+
+    const currentRole = getCurrentRole();
+    if (!["owner", "admin"].includes(currentRole)) {
+      showToast("无法删除", "只有管理员可以删除整个任务。\n如果只是想退出演唱，请使用任务列表里的退出按钮。\n如果只是想清空成员，请在演唱者或歌词分配里单独调整。");
+      return;
+    }
+
+    const memberName = getCurrentMemberName();
+    const memberCode = getCurrentMemberCode();
+    if (!memberName || !memberCode) {
+      showToast("无法删除", "当前登录信息不完整，请重新登录后再试。");
+      return;
+    }
+
+    const taskName = String(task.project_name || task.displayName || task.project_code || "这个任务").trim();
+    const ok = await showConfirmToast(
+      "确认删除整个任务",
+      `确定要删除「${taskName}」吗？
+
+这个操作会删除整条任务记录，并联动删除该任务的演唱者、歌词分配和混音负责人记录。
+这不是清空成员，也不是退出任务。`,
+      "确认删除",
+      "取消"
+    );
+    if (!ok) return;
+
+    const deleteBtn = document.getElementById("deleteTaskBtn");
+    if (deleteBtn) deleteBtn.disabled = true;
+
+    try {
+      setAutoSaveStatus("saving", "删除中...");
+
+      const { error } = await supabaseClient.rpc("secure_delete_project", {
+        p_nickname: memberName,
+        p_member_code: memberCode,
+        p_project_id: task.id
+      });
+      if (error) throw error;
+
+      clearPinnedTaskInCurrentView(task.id);
+      clearUndoSnapshots();
+      hasPendingLocalChanges = false;
+      preserveActiveTaskInCurrentView = false;
+      activeClaimTaskId = "";
+
+      await loadProjectsFromSupabase({ keepSelection: false });
+
+      preserveActiveTaskInCurrentView = true;
+      setAutoSaveStatus("saved", "已删除");
+      showToast("已删除", `「${taskName}」已删除。`);
+    } catch (err) {
+      console.error("删除整个任务失败：", err);
+      preserveActiveTaskInCurrentView = true;
+      const detail = String(err?.message || err?.details || err?.hint || "").trim();
+      setAutoSaveStatus("error", "删除失败");
+      showToast("删除失败", detail ? `删除失败：${detail}` : "删除失败，请检查 secure_delete_project 函数、管理员权限和 project_mixers 数据。" );
+    } finally {
+      if (deleteBtn) deleteBtn.disabled = false;
+    }
   }
 
   const CURRENT_STUDIO_PAGE = "studio-todo.html";
