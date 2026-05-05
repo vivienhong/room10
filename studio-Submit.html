@@ -144,56 +144,6 @@
     will-change:auto;
   }
 
-.navBtn{
-    appearance:none;
-    border:none;
-    cursor:pointer;
-    height:var(--nav-btn-height, 42px);
-    padding:0 var(--nav-btn-px, 18px);
-    border-radius:var(--nav-btn-radius, 14px);
-    background:linear-gradient(180deg, #efd6ad 0%, #dfbd8a 100%);
-    color:#704724;
-    font-size:var(--nav-btn-font, 15px);
-    font-weight:800;
-    white-space:nowrap;
-    border:1px solid rgba(142,95,50,0.30);
-    box-shadow:
-      inset 0 1px 0 rgba(255,250,235,0.95),
-      inset 0 -2px 0 rgba(122,83,45,0.12),
-      inset 0 0 0 1px rgba(255,255,255,0.18),
-      0 2px 7px rgba(112,83,52,0.12);
-    transition:filter .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
-    flex:0 0 auto;
-    position:relative;
-    overflow:hidden;
-    isolation:isolate;
-  }
-
-.navBtn:hover,
-.navBtn:focus-visible{
-    transform:none;
-    filter:brightness(1.055);
-    border-color:rgba(172,111,52,0.58);
-    box-shadow:
-      inset 0 1px 0 rgba(255,250,235,0.98),
-      inset 0 -2px 0 rgba(122,83,45,0.13),
-      inset 0 0 0 2px rgba(255,242,213,0.50),
-      inset 0 0 15px rgba(255,238,199,0.34),
-      0 3px 9px rgba(112,83,52,0.13);
-  }
-
-.navBtn.active{
-    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
-    color:#fff9f1;
-    border-color:rgba(255,239,210,0.76);
-    box-shadow:
-      inset 0 1px 0 rgba(255,224,188,0.64),
-      inset 0 -2px 0 rgba(112,73,35,0.16),
-      inset 0 0 0 2px rgba(255,247,226,0.34),
-      inset 0 0 16px rgba(255,235,194,0.40),
-      0 4px 12px rgba(116,86,54,0.18);
-  }
-
 /* =========================================================
    身份组件：恢复 todo 奶油半透明标准样式
 ========================================================= */
@@ -554,6 +504,67 @@
     margin:0 0 calc(7px * var(--ui-scale));
   }
 
+  .sectionTitleRow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin:0 0 calc(7px * var(--ui-scale));
+  }
+
+  .sectionTitleRow .signupSectionTitle{
+    margin:0;
+  }
+
+  .sectionTitleActions{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .roleToolBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-width:88px;
+    height:30px;
+    padding:0 12px;
+    border-radius:10px;
+    background:rgba(255,252,247,0.72);
+    color:#744b25;
+    font-size:var(--project-font-sm);
+    font-weight:800;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.78),
+      0 2px 6px rgba(116,86,54,0.06);
+    transition:transform .18s ease, filter .18s ease, background .18s ease, color .18s ease;
+    white-space:nowrap;
+  }
+
+  .roleToolBtn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.03);
+  }
+
+  .roleToolBtn.active{
+    background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
+    color:#fff9f1;
+  }
+
+  .roleToolBtn[hidden],
+  .lotteryHintText[hidden]{
+    display:none !important;
+  }
+
+  .lotteryHintText{
+    color:#8a6644;
+    font-size:var(--project-font-sm);
+    font-weight:700;
+    line-height:1.35;
+  }
+
   .rowGridFour{
     display:grid;
     grid-template-columns:0.85fr 1.7fr 0.9fr 0.9fr;
@@ -894,143 +905,6 @@
       inset 0 1px 0 rgba(255,247,230,0.95),
       0 4px 12px rgba(112,83,52,0.10);
   }
-
-
-/* 旧版大屏/中屏断点已删除：统一改由文件末尾 541px 以上网页版最终规则控制。 */
-
-#wheelModalMask{
-    position:fixed;
-    inset:0;
-    background:rgba(60,42,23,0.26);
-    backdrop-filter:blur(4px);
-    -webkit-backdrop-filter:blur(4px);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:9997;
-    padding:18px;
-  }
-
-#wheelModalMask.show{
-    display:flex;
-  }
-
-#wheelModalBox{
-    position:relative;
-    width:min(1120px, 96vw);
-    height:min(86vh, 820px);
-    border-radius:24px;
-    overflow:hidden;
-    background:rgba(255,249,241,0.98);
-    border:1px solid rgba(203,167,123,0.28);
-    box-shadow:0 20px 48px rgba(85,58,34,0.22);
-  }
-
-#wheelModalCloseBtn{
-    position:absolute;
-    top:14px;
-    right:14px;
-    z-index:2;
-    min-width:86px;
-    height:36px;
-    border-radius:12px;
-  }
-
-#wheelModalFrame{
-    width:100%;
-    height:100%;
-    border:none;
-    background:#fffaf4;
-  }
-
-#roleSetupMask{
-    position:fixed;
-    inset:0;
-    background:rgba(60,42,23,0.18);
-    backdrop-filter:blur(3px);
-    -webkit-backdrop-filter:blur(3px);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:9998;
-    padding:20px;
-  }
-
-#roleSetupMask.show{
-    display:flex;
-  }
-
-#roleSetupBox{
-    width:min(720px, 94vw);
-    max-height:min(88vh, 860px);
-    overflow:auto;
-    border-radius:22px;
-    background:rgba(255,249,241,0.97);
-    border:1px solid rgba(203,167,123,0.28);
-    box-shadow:
-      0 18px 45px rgba(85,58,34,0.18),
-      inset 0 1px 0 rgba(255,255,255,0.92);
-    padding:22px 20px 18px;
-  }
-
-.roleSetupTitle{
-    color:#6f4726;
-    font-size:19px;
-    font-weight:800;
-    margin-bottom:8px;
-  }
-
-.roleSetupDesc{
-    color:#6a4525;
-    font-size:13px;
-    line-height:1.7;
-    margin-bottom:14px;
-    white-space:pre-line;
-  }
-
-.roleSetupRows{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    margin-bottom:14px;
-  }
-
-.roleSetupRow{
-    display:grid;
-    grid-template-columns:92px minmax(0,1fr) 130px;
-    gap:8px;
-    align-items:center;
-    padding:8px;
-    border-radius:13px;
-    background:rgba(255,252,247,0.72);
-  }
-
-.roleSetupRowLabel,
-  .roleSetupMemberLabel{
-    color:#8a6644;
-    font-size:11px;
-    font-weight:700;
-  }
-
-.roleSetupMemberText{
-    color:#6f4726;
-    font-size:12px;
-    font-weight:800;
-  }
-
-.roleSetupActions{
-    display:flex;
-    align-items:center;
-    justify-content:flex-end;
-    gap:10px;
-    flex-wrap:wrap;
-  }
-
-@media (max-width: 640px){
-  .roleSetupRow{
-    grid-template-columns:1fr;
-  }
-}
 
 
 /* =========================================================
@@ -1600,6 +1474,7 @@
 
   .typeBtn,
   .memberBtn,
+  .roleToolBtn,
   .rowActionBtn{
     min-width:auto !important;
     height:32px !important;
@@ -2641,7 +2516,13 @@
                 </div>
 
                 <div class="signupSection">
-                  <div class="signupSectionTitle">歌词分配</div>
+                  <div class="sectionTitleRow">
+                    <div class="signupSectionTitle">歌词分配</div>
+                    <div class="sectionTitleActions">
+                      <span id="lyricsLotteryHint" class="lotteryHintText" hidden>提交后，成员可在待处理页自行抽签。</span>
+                      <button id="enableLyricsLotteryBtn" class="roleToolBtn" type="button" hidden>开启抽签</button>
+                    </div>
+                  </div>
                   <div class="originalRoleBoard">
                     <div class="originalRoleHeader">
                       <div class="headerCell">原唱 / 部分</div>
@@ -2763,6 +2644,7 @@
   let selectedSingerIds = [];
   let selectedProducerId = "";
   let originalRows = [createRow()];
+  let lyricsLotteryEnabled = false;
 
   const room = document.getElementById("room");
   const bg = document.getElementById("bg");
@@ -2791,6 +2673,8 @@
   const singerMemberGrid = document.getElementById("singerMemberGrid");
   const producerMemberGrid = document.getElementById("producerMemberGrid");
   const originalRoleList = document.getElementById("originalRoleList");
+  const enableLyricsLotteryBtn = document.getElementById("enableLyricsLotteryBtn");
+  const lyricsLotteryHint = document.getElementById("lyricsLotteryHint");
   const signupStatus = document.getElementById("signupStatus");
   const signupSubmitBtn = document.getElementById("signupSubmitBtn");
   const signupResetBtn = document.getElementById("signupResetBtn");
@@ -3236,19 +3120,6 @@
     `).join("");
   }
 
-  function buildSingerOptions(rowId, selectedId) {
-    const usedSingerIds = new Set(getUsedSingerIds(rowId));
-
-    return ['<option value="">未选择</option>']
-      .concat(selectedSingerIds.map(memberId => {
-        const member = getMemberById(memberId);
-        if (!member) return "";
-        if (memberId !== selectedId && usedSingerIds.has(memberId)) return "";
-        return `<option value="${escapeHtml(member.id)}" ${selectedId === member.id ? "selected" : ""}>${escapeHtml(member.name)}</option>`;
-      }))
-      .join("");
-  }
-
   function getAssignableSingerMembers(rowId = "") {
     const usedSingerIds = new Set(getUsedSingerIds(rowId));
     return selectedSingerIds
@@ -3268,6 +3139,130 @@
     return getAssignableSingerMembers(rowId)
       .map(member => `<option value="${escapeHtml(member.name)}"></option>`)
       .join("");
+  }
+
+  function getLyricsLotteryReadyState() {
+    const quota = getSingerQuota();
+    const rows = originalRows.slice(0, quota);
+    const selectedSingerCount = selectedSingerIds.length;
+    const allOriginalFilled = rows.length === quota && rows.every(row => String(row.original || "").trim());
+    const singersFull = selectedSingerCount === quota;
+
+    return {
+      quota,
+      selectedSingerCount,
+      rowsCount: rows.length,
+      singersFull,
+      allOriginalFilled,
+      ready: singersFull && allOriginalFilled
+    };
+  }
+
+  function getCurrentSingerMember() {
+    const currentMemberId = String(authState.memberId || "").trim();
+    if (!currentMemberId) return null;
+    if (!selectedSingerIds.includes(currentMemberId)) return null;
+    return getMemberById(currentMemberId);
+  }
+
+  function getCurrentUserLotteryRow() {
+    const currentMemberId = String(authState.memberId || "").trim();
+    if (!currentMemberId) return null;
+    return originalRows.find(row => String(row.assignedSingerId || "") === currentMemberId) || null;
+  }
+
+  function getPendingLotteryRows() {
+    const quota = getSingerQuota();
+    return originalRows
+      .slice(0, quota)
+      .filter(row => String(row.original || "").trim() && !String(row.assignedSingerId || "").trim());
+  }
+
+  function getLotteryEnabledHintText() {
+    const drawnRow = getCurrentUserLotteryRow();
+    if (drawnRow && String(drawnRow.original || "").trim()) {
+      return `你抽到：${String(drawnRow.original || "").trim()}。提交后，请提醒其他演唱者去待处理页抽签。`;
+    }
+    return "提交后，请提醒其他演唱者去待处理页抽签。";
+  }
+
+  function syncLyricsLotteryButton() {
+    if (!enableLyricsLotteryBtn) return;
+
+    const state = getLyricsLotteryReadyState();
+
+    if (!state.ready) {
+      lyricsLotteryEnabled = false;
+      enableLyricsLotteryBtn.hidden = true;
+      enableLyricsLotteryBtn.classList.remove("active");
+      enableLyricsLotteryBtn.textContent = "开启抽签";
+      if (lyricsLotteryHint) {
+        lyricsLotteryHint.hidden = true;
+        lyricsLotteryHint.textContent = "";
+      }
+      return;
+    }
+
+    enableLyricsLotteryBtn.hidden = false;
+    enableLyricsLotteryBtn.classList.toggle("active", lyricsLotteryEnabled);
+    enableLyricsLotteryBtn.textContent = lyricsLotteryEnabled ? "已抽取" : "开启抽签";
+
+    if (lyricsLotteryHint) {
+      lyricsLotteryHint.hidden = !lyricsLotteryEnabled;
+      lyricsLotteryHint.textContent = lyricsLotteryEnabled ? getLotteryEnabledHintText() : "";
+    }
+  }
+
+  function handleEnableLyricsLotteryClick() {
+    const state = getLyricsLotteryReadyState();
+
+    if (!state.ready) {
+      showToast("暂不能开启", "需要先选满演唱者，并补全所有原唱 / 部分名称。");
+      syncLyricsLotteryButton();
+      return;
+    }
+
+    const currentSinger = getCurrentSingerMember();
+    if (!currentSinger) {
+      showToast("暂不能开启", "开启抽签会先抽取填写人本人的部分。请先把当前登录成员加入演唱者，再开启抽签。");
+      syncLyricsLotteryButton();
+      return;
+    }
+
+    let drawnRow = getCurrentUserLotteryRow();
+
+    if (!drawnRow) {
+      const pendingRows = getPendingLotteryRows();
+      if (!pendingRows.length) {
+        showToast("暂不能开启", "当前没有可抽取的空原唱行，请先清空一个分配给本人抽取。");
+        syncLyricsLotteryButton();
+        return;
+      }
+
+      const pickedRow = pendingRows.length === 1
+        ? pendingRows[0]
+        : pendingRows[Math.floor(Math.random() * pendingRows.length)];
+
+      originalRows = originalRows.map(row => (
+        row.id === pickedRow.id
+          ? { ...row, assignedSingerId: currentSinger.id, assignedSingerName: currentSinger.name }
+          : row
+      ));
+
+      drawnRow = originalRows.find(row => row.id === pickedRow.id) || pickedRow;
+      syncOriginalAssignedNames();
+      renderOriginalRows();
+    }
+
+    lyricsLotteryEnabled = true;
+    syncLyricsLotteryButton();
+
+    const partName = String(drawnRow.original || "").trim();
+    showToast(
+      "已开启抽签",
+      `你抽到：${partName || "未命名部分"}。
+提交任务后，请提醒其他演唱者去待处理页自行抽签。`
+    );
   }
 
   function renderOriginalRows() {
@@ -3301,6 +3296,8 @@
         <button class="rowActionBtn" type="button" data-action="delete">X</button>
       </div>
     `).join("");
+
+    syncLyricsLotteryButton();
   }
 
   function getUsedSingerIds(excludeRowId = "") {
@@ -3420,6 +3417,7 @@
     selectedSingerIds = [];
     selectedProducerId = "";
     originalRows = [createRow()];
+    lyricsLotteryEnabled = false;
     signupStatus.textContent = "填写中";
 
     document.querySelectorAll(".typeBtn").forEach(btn => {
@@ -3487,6 +3485,10 @@
     if (new Set(usedSingerIds).size !== usedSingerIds.length) {
       throw new Error("同一个成员不能在歌词分配中被重复选择。");
     }
+
+    if (lyricsLotteryEnabled && !getLyricsLotteryReadyState().ready) {
+      throw new Error("开启抽签需要先选满演唱者，并补全所有原唱 / 部分名称。");
+    }
   }
 
   async function submitSignup() {
@@ -3512,6 +3514,7 @@
         producer_member_id: selectedProducerId || null,
         release_date: releaseDateInput.value || null,
         project_tone: String(projectToneInput.value || "").trim() || null,
+        lyrics_lottery_enabled: lyricsLotteryEnabled && getLyricsLotteryReadyState().ready,
         created_by: authState.memberId || null,
         status: "待认领"
       };
@@ -3558,7 +3561,11 @@
       }
 
       signupStatus.textContent = "已发布";
-      showToast("发布成功", `任务 ${insertedProject.project_code}.${insertedProject.project_name} 已写入数据库。`);
+      const successMessage = lyricsLotteryEnabled
+        ? `任务 ${insertedProject.project_code}.${insertedProject.project_name} 已写入数据库。
+你已抽取本人的部分，请提醒其他演唱者去待处理页自行抽签。`
+        : `任务 ${insertedProject.project_code}.${insertedProject.project_name} 已写入数据库。`;
+      showToast("发布成功", successMessage);
       await loadProjectsFromSupabase();
       resetSignupForm();
     } catch (error) {
@@ -3831,6 +3838,7 @@
       originalRows = originalRows.map(row => (
         row.id === rowId ? { ...row, original: e.target.value } : row
       ));
+      syncLyricsLotteryButton();
       return;
     }
 
@@ -3844,6 +3852,7 @@
           assignedSingerName: e.target.value
         };
       });
+      syncLyricsLotteryButton();
     }
   });
 
@@ -3943,6 +3952,7 @@
     updateRewardPreview();
   });
 
+  enableLyricsLotteryBtn?.addEventListener("click", handleEnableLyricsLotteryClick);
   signupResetBtn.addEventListener("click", resetSignupForm);
   signupSubmitBtn.addEventListener("click", submitSignup);
 
