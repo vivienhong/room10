@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>十号房｜脸萌挑战</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{box-sizing:border-box;}
@@ -165,7 +166,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:8px;
+  gap:10px;
 }
 
 #gameTitle{
@@ -176,24 +177,27 @@ body{
   margin:0;
 }
 
-#backBtnInline{
+#leaderboardOpenBtn{
   flex:0 0 auto;
-  min-width:38px;
-  height:38px;
+  height:30px;
+  padding:0 12px;
   border:none;
   border-radius:999px;
-  background:rgba(255,244,225,.96);
+  background:rgba(255,246,232,.96);
   color:#6a4b2f;
-  font-size:20px;
-  font-weight:bold;
+  font-size:12px;
+  font-weight:900;
   cursor:pointer;
   box-shadow:
-    0 6px 18px rgba(92,63,37,.18),
-    inset 0 1px 0 rgba(255,255,255,.82);
+    0 6px 16px rgba(92,63,37,.14),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  transition:transform .18s ease, background .18s ease;
+  font-family:inherit;
 }
 
-#backBtnInline:hover{
-  background:rgba(255,249,240,.99);
+#leaderboardOpenBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,250,242,.99);
 }
 
 #gameSub{
@@ -436,6 +440,277 @@ body{
   animation:shakeZone .36s ease;
 }
 
+
+.hidden{display:none !important;}
+
+/* 挑战结束后排行榜弹窗 */
+#finishMask{
+  position:fixed;
+  inset:0;
+  z-index:30;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(70,45,24,.22);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+#finishCard{
+  position:relative;
+  width:min(92vw, 470px);
+  max-height:min(86vh, 690px);
+  overflow:auto;
+  padding:18px 18px 16px;
+  border-radius:24px;
+  background:rgba(255,249,240,.98);
+  border:1px solid rgba(255,255,255,.86);
+  box-shadow:
+    0 18px 46px rgba(92,63,37,.20),
+    inset 0 1px 0 rgba(255,255,255,.92);
+  color:var(--text);
+}
+
+
+#finishCard.leaderboard-only .finishSummary,
+#finishCard.leaderboard-only #finishMessage{
+  display:none;
+}
+
+#finishCard.leaderboard-only .leaderboardTitle{
+  margin-top:0;
+}
+
+#finishCard.leaderboard-only .finishBtn:first-child{
+  display:none;
+}
+
+
+#finishCloseBtn{
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:32px;
+  height:32px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,246,232,.96);
+  color:#6a4b2f;
+  font-size:18px;
+  font-weight:900;
+  line-height:1;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:
+    0 5px 14px rgba(92,63,37,.14),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  transition:transform .18s ease, background .18s ease;
+}
+
+#finishCloseBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,250,242,.99);
+}
+
+.finishTitle{
+  margin:0 38px 8px;
+  font-size:22px;
+  font-weight:900;
+  line-height:1.2;
+  color:var(--text);
+  text-align:center;
+}
+
+.finishSummary{
+  margin:0 0 12px;
+  padding:10px 12px;
+  border-radius:16px;
+  background:rgba(255,250,242,.80);
+  border:1px solid rgba(255,255,255,.86);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.88);
+}
+
+.finishSummaryRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-size:13px;
+  line-height:1.65;
+  color:var(--text2);
+}
+
+.finishSummaryRow b{
+  color:var(--text);
+}
+
+#finishMessage{
+  margin:0 0 12px;
+  padding:9px 11px;
+  border-radius:14px;
+  background:rgba(255,246,232,.78);
+  border:1px solid rgba(255,255,255,.82);
+  color:#7d5c3c;
+  font-size:12px;
+  line-height:1.5;
+  text-align:center;
+}
+
+.leaderboardTitle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:12px 0 8px;
+  font-size:15px;
+  font-weight:900;
+  color:var(--text);
+}
+
+#leaderboardHint{
+  font-size:11px;
+  font-weight:700;
+  color:#8a6847;
+}
+
+#leaderboardList{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.rankItem{
+  display:grid;
+  grid-template-columns:32px 1fr auto;
+  align-items:center;
+  gap:8px;
+  min-height:34px;
+  padding:7px 9px;
+  border-radius:14px;
+  background:rgba(255,246,232,.82);
+  border:1px solid rgba(255,255,255,.82);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+}
+
+.rankItem.currentUser{
+  background:rgba(233,248,231,.94);
+  border-color:rgba(121,179,107,.46);
+}
+
+.rankNo{
+  font-size:12px;
+  font-weight:900;
+  color:#9b7049;
+}
+
+.rankName{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:900;
+  color:#5b3e28;
+}
+
+.rankScore{
+  text-align:right;
+  font-size:11px;
+  line-height:1.25;
+  color:#7d5c3c;
+  white-space:nowrap;
+}
+
+.rankScore b{
+  display:block;
+  font-size:13px;
+  color:#4c7d45;
+}
+
+.leaderboardEmpty{
+  padding:14px 10px;
+  border-radius:14px;
+  background:rgba(255,250,242,.72);
+  color:#7d5c3c;
+  font-size:12px;
+  line-height:1.5;
+  text-align:center;
+}
+
+.finishActions{
+  display:flex;
+  gap:8px;
+  margin-top:14px;
+}
+
+.finishBtn{
+  flex:1;
+  height:38px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,246,232,.96);
+  color:#6a4b2f;
+  font-size:13px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:
+    0 6px 18px rgba(92,63,37,.14),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  transition:transform .18s ease, background .18s ease;
+}
+
+.finishBtn.primary{
+  background:#c98e56;
+  color:#fffaf2;
+}
+
+.finishBtn:hover{
+  transform:translateY(-1px);
+}
+
+@media (max-width:560px){
+  #finishCard{
+    width:94vw;
+    padding:15px 14px 14px;
+    border-radius:20px;
+  }
+
+  .finishTitle{
+    font-size:18px;
+  }
+
+  .finishSummaryRow{
+    font-size:12px;
+  }
+
+  .rankItem{
+    grid-template-columns:28px 1fr auto;
+    gap:6px;
+    padding:6px 7px;
+  }
+
+  .rankName{
+    font-size:12px;
+  }
+
+  .rankScore,
+  #leaderboardHint{
+    font-size:10px;
+  }
+
+  .finishActions{
+    gap:7px;
+  }
+
+  .finishBtn{
+    height:34px;
+    font-size:12px;
+  }
+}
+
 /* 常规中屏左右 */
 @media (max-width:1100px){
   #leftPanel{
@@ -483,6 +758,12 @@ body{
     font-size:18px;
   }
 
+  #leaderboardOpenBtn{
+    height:28px;
+    padding:0 10px;
+    font-size:11px;
+  }
+
   #gameSub{
     font-size:10px;
     line-height:1.42;
@@ -520,11 +801,6 @@ body{
     height:34px;
   }
 
-  #backBtnInline{
-    min-width:34px;
-    height:34px;
-    font-size:18px;
-  }
 }
 
 /* 上下结构 */
@@ -632,11 +908,12 @@ body.stack-layout #gameTitle{
   font-size:17px;
 }
 
-body.stack-layout #backBtnInline{
-  min-width:32px;
-  height:32px;
-  font-size:17px;
+body.stack-layout #leaderboardOpenBtn{
+  height:28px;
+  padding:0 10px;
+  font-size:10px;
 }
+
 
 body.stack-layout #gameSub{
   font-size:9px;
@@ -720,6 +997,12 @@ body.stack-layout .ctrlBtn{
     font-size:16px;
   }
 
+  body.stack-layout #leaderboardOpenBtn{
+    height:26px;
+    padding:0 9px;
+    font-size:9px;
+  }
+
   body.stack-layout #gameSub,
   body.stack-layout #layoutHint{
     font-size:8.5px;
@@ -776,7 +1059,7 @@ body.stack-layout .ctrlBtn{
     <div id="leftPanel">
       <div id="titleRow">
         <h1 id="gameTitle">脸萌挑战</h1>
-        <button id="backBtnInline" onclick="window.location.href='game.html'" title="返回上一层">‹</button>
+        <button id="leaderboardOpenBtn" type="button" onclick="openLeaderboardBoard()">风云榜</button>
       </div>
 
       <p id="gameSub">支持两种方式：拖拽匹配，或先点名字再点框，也可以先点框再点名字。</p>
@@ -799,6 +1082,36 @@ body.stack-layout .ctrlBtn{
           <button class="ctrlBtn" onclick="resetGame()">重新开始</button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="finishMask" class="hidden" aria-hidden="true">
+  <div id="finishCard" role="dialog" aria-modal="true" aria-labelledby="finishTitle">
+    <button id="finishCloseBtn" type="button" onclick="closeFinishBoard()" aria-label="关闭排行榜">×</button>
+    <h2 id="finishTitle" class="finishTitle">挑战完成！</h2>
+
+    <div class="finishSummary">
+      <div class="finishSummaryRow"><span>原始用时</span><b id="finishRawTime">00:00</b></div>
+      <div class="finishSummaryRow"><span>错误次数</span><b id="finishWrongCount">0</b></div>
+      <div class="finishSummaryRow"><span>罚时</span><b id="finishPenaltyTime">0 秒</b></div>
+      <div class="finishSummaryRow"><span>总用时</span><b id="finishTotalTime">00:00</b></div>
+    </div>
+
+    <div id="finishMessage">正在处理成绩…</div>
+
+    <div class="leaderboardTitle">
+      <span>排行榜</span>
+      <span id="leaderboardHint">读取中…</span>
+    </div>
+    <div id="leaderboardList">
+      <div class="leaderboardEmpty">正在读取排行榜…</div>
+    </div>
+
+    <div class="finishActions">
+      <button class="finishBtn" type="button" onclick="closeFinishBoard()">继续查看</button>
+      <button class="finishBtn primary" type="button" onclick="restartFromFinish()">再玩一次</button>
     </div>
   </div>
 </div>
@@ -907,6 +1220,22 @@ const penaltyTextEl = document.getElementById("penaltyText");
 const timerTextEl = document.getElementById("timerText");
 const totalTimeTextEl = document.getElementById("totalTimeText");
 const resultTextEl = document.getElementById("resultText");
+const finishMask = document.getElementById("finishMask");
+const finishCard = document.getElementById("finishCard");
+const finishRawTimeEl = document.getElementById("finishRawTime");
+const finishWrongCountEl = document.getElementById("finishWrongCount");
+const finishPenaltyTimeEl = document.getElementById("finishPenaltyTime");
+const finishTotalTimeEl = document.getElementById("finishTotalTime");
+const finishMessageEl = document.getElementById("finishMessage");
+const leaderboardHintEl = document.getElementById("leaderboardHint");
+const leaderboardListEl = document.getElementById("leaderboardList");
+
+const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const GAME_KEY = "face_match";
+const leaderboardClient = window.supabase
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : null;
 
 function shouldUseStackLayout(){
   const w = window.innerWidth;
@@ -955,6 +1284,180 @@ function setResult(text, color){
   resultTextEl.style.color = color || "#5b3e28";
 }
 
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function getCurrentPlayer(){
+  const loggedIn = localStorage.getItem("room10LoggedIn") === "true";
+  const memberId = localStorage.getItem("room10MemberId") || "";
+  const memberCode = localStorage.getItem("room10MemberCode") || "";
+  return {
+    isLoggedIn:Boolean(loggedIn && memberId && memberCode),
+    memberId,
+    memberCode
+  };
+}
+
+function normalizeRankRows(rows){
+  return (Array.isArray(rows) ? rows : [])
+    .filter(row => Number.isFinite(Number(row.total_seconds)))
+    .map(row => ({
+      rank:Number(row.rank || 0),
+      member_id:row.member_id || "",
+      nickname:row.nickname || "匿名房客",
+      raw_seconds:Number(row.raw_seconds || 0),
+      wrong_count:Number(row.wrong_count || 0),
+      penalty_seconds:Number(row.penalty_seconds || 0),
+      total_seconds:Number(row.total_seconds || 0),
+      completed_at:row.completed_at || ""
+    }))
+    .sort((a,b) =>
+      a.total_seconds - b.total_seconds ||
+      a.wrong_count - b.wrong_count ||
+      new Date(a.completed_at || 0) - new Date(b.completed_at || 0)
+    )
+    .slice(0, 10);
+}
+
+function renderLeaderboard(rows, currentMemberId){
+  if(!leaderboardListEl) return;
+
+  const list = normalizeRankRows(rows);
+  if(!list.length){
+    leaderboardListEl.innerHTML = `<div class="leaderboardEmpty">暂无排行榜记录。</div>`;
+    return;
+  }
+
+  leaderboardListEl.innerHTML = list.map((row, index) => {
+    const rank = row.rank || index + 1;
+    const isCurrent = currentMemberId && row.member_id === currentMemberId;
+
+    return `
+      <div class="rankItem${isCurrent ? " currentUser" : ""}">
+        <div class="rankNo">${rank}</div>
+        <div class="rankName">${escapeHtml(row.nickname)}${isCurrent ? "（你）" : ""}</div>
+        <div class="rankScore">
+          <b>${formatTime(row.total_seconds)}</b>
+          错 ${row.wrong_count}｜罚 ${row.penalty_seconds}s
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function submitScoreToSupabase(score){
+  const player = getCurrentPlayer();
+  if(!leaderboardClient || !player.isLoggedIn){
+    return { saved:false, message:"未登录成员，本次成绩不会记录到排行榜。" };
+  }
+
+  const { data, error } = await leaderboardClient.rpc("submit_game_score", {
+    p_member_id:player.memberId,
+    p_member_code:player.memberCode,
+    p_game_key:GAME_KEY,
+    p_raw_seconds:score.raw_seconds,
+    p_wrong_count:score.wrong_count,
+    p_penalty_seconds:score.penalty_seconds,
+    p_total_seconds:score.total_seconds
+  });
+
+  if(error) throw error;
+
+  const result = Array.isArray(data) ? data[0] : data;
+  return result || { saved:false, message:"成绩已处理。" };
+}
+
+async function loadLeaderboardFromSupabase(){
+  if(!leaderboardClient) return [];
+
+  const { data, error } = await leaderboardClient.rpc("get_game_leaderboard", {
+    p_game_key:GAME_KEY,
+    p_limit:10
+  });
+
+  if(error) throw error;
+  return data || [];
+}
+
+async function showFinishBoard(score){
+  const player = getCurrentPlayer();
+
+  if(finishCard) finishCard.classList.remove("leaderboard-only");
+  const finishTitleEl = document.getElementById("finishTitle");
+  if(finishTitleEl) finishTitleEl.textContent = "挑战完成！";
+
+  finishRawTimeEl.textContent = formatTime(score.raw_seconds);
+  finishWrongCountEl.textContent = String(score.wrong_count);
+  finishPenaltyTimeEl.textContent = `${score.penalty_seconds} 秒`;
+  finishTotalTimeEl.textContent = formatTime(score.total_seconds);
+
+  finishMask.classList.remove("hidden");
+  finishMask.setAttribute("aria-hidden", "false");
+  finishMessageEl.textContent = player.isLoggedIn
+    ? "正在同步你的成绩…"
+    : "未登录成员，本次成绩不会记录到排行榜。";
+  leaderboardHintEl.textContent = "读取中…";
+  leaderboardListEl.innerHTML = `<div class="leaderboardEmpty">正在读取排行榜…</div>`;
+
+  try{
+    if(player.isLoggedIn){
+      const submitResult = await submitScoreToSupabase(score);
+      finishMessageEl.textContent = submitResult.message || "成绩已处理。";
+    }
+
+    const rows = await loadLeaderboardFromSupabase();
+    renderLeaderboard(rows, player.memberId);
+    leaderboardHintEl.textContent = rows.length ? "前 10 名" : "暂无记录";
+  }catch(err){
+    console.error("排行榜处理失败：", err);
+    finishMessageEl.textContent = player.isLoggedIn
+      ? "成绩提交或排行榜读取失败，请稍后再试。"
+      : "排行榜读取失败，请稍后再试。";
+    leaderboardHintEl.textContent = "读取失败";
+    leaderboardListEl.innerHTML = `<div class="leaderboardEmpty">暂时无法读取排行榜。</div>`;
+  }
+}
+
+
+async function openLeaderboardBoard(){
+  const player = getCurrentPlayer();
+  const finishTitleEl = document.getElementById("finishTitle");
+
+  if(finishCard) finishCard.classList.add("leaderboard-only");
+  if(finishTitleEl) finishTitleEl.textContent = "风云榜";
+
+  finishMask.classList.remove("hidden");
+  finishMask.setAttribute("aria-hidden", "false");
+  leaderboardHintEl.textContent = "读取中…";
+  leaderboardListEl.innerHTML = `<div class="leaderboardEmpty">正在读取排行榜…</div>`;
+
+  try{
+    const rows = await loadLeaderboardFromSupabase();
+    renderLeaderboard(rows, player.memberId);
+    leaderboardHintEl.textContent = rows.length ? "前 10 名" : "暂无记录";
+  }catch(err){
+    console.error("风云榜读取失败：", err);
+    leaderboardHintEl.textContent = "读取失败";
+    leaderboardListEl.innerHTML = `<div class="leaderboardEmpty">暂时无法读取风云榜。</div>`;
+  }
+}
+
+function closeFinishBoard(){
+  finishMask.classList.add("hidden");
+  finishMask.setAttribute("aria-hidden", "true");
+}
+
+function restartFromFinish(){
+  closeFinishBoard();
+  resetGame();
+}
+
 function startTimerIfNeeded(){
   if(timerStarted) return;
   timerStarted = true;
@@ -976,8 +1479,17 @@ function finishGame(){
   stopTimer();
   clearCurrentSelection();
   updateStatus();
+
   const total = finalRawSeconds + penaltySeconds;
+  const score = {
+    raw_seconds:finalRawSeconds,
+    wrong_count:wrongCount,
+    penalty_seconds:penaltySeconds,
+    total_seconds:total
+  };
+
   setResult(`完成！原始用时 ${formatTime(finalRawSeconds)}，罚时 ${penaltySeconds} 秒，总用时 ${formatTime(total)}`, "#4c7d45");
+  showFinishBoard(score);
 }
 
 function triggerWrong(zoneRect, cardEl){
@@ -1287,6 +1799,7 @@ function clearPlacedNames(){
 }
 
 function resetGame(){
+  if(finishMask) closeFinishBoard();
   placedCorrect.clear();
   wrongCount = 0;
   penaltySeconds = 0;
@@ -1310,6 +1823,16 @@ function handleResize(){
     fitAllLabels();
   }, 50);
 }
+
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape" && finishMask && !finishMask.classList.contains("hidden")){
+    closeFinishBoard();
+  }
+});
+
+finishMask.addEventListener("click", (e) => {
+  if(e.target === finishMask) closeFinishBoard();
+});
 
 window.addEventListener("resize", handleResize);
 bg.addEventListener("load", () => {
