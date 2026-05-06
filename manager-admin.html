@@ -801,23 +801,6 @@ body{
     border-radius:8px;
   }
 
-  #sidebar{
-    left:3.2%;
-    top:21.2%;
-    width:16.2%;
-    padding:9px;
-  }
-
-  .nav-group{
-    gap:6px;
-  }
-
-  .nav-btn{
-    min-height:31px;
-    padding:5px 4px;
-    font-size:11px;
-    border-radius:9px;
-  }
 
   #pageNotice{
     left:22.8%;
@@ -916,6 +899,49 @@ body{
     padding:0 10px;
     font-size:10px;
     border-radius:9px;
+  }
+}
+
+
+/* ===== 541px - 730px：房间切换按钮随底图压缩，避免超出舞台 ===== */
+@media (min-width: 541px) and (max-width: 730px){
+  #sidebar{
+    left:3.1%;
+    top:20.4%;
+    width:15.6%;
+    padding:6px;
+  }
+
+  .nav-group{
+    gap:4px;
+  }
+
+  .nav-btn{
+    min-height:25px;
+    padding:3px 3px;
+    font-size:9px;
+    line-height:1.05;
+    border-radius:8px;
+  }
+}
+
+@media (min-width: 541px) and (max-width: 620px){
+  #sidebar{
+    left:2.9%;
+    top:20.1%;
+    width:16%;
+    padding:5px;
+  }
+
+  .nav-group{
+    gap:3px;
+  }
+
+  .nav-btn{
+    min-height:23px;
+    padding:2px 2px;
+    font-size:8px;
+    border-radius:7px;
   }
 }
 
@@ -1157,8 +1183,10 @@ body{
           <button class="nav-btn" onclick="goNeedLogin('studio-todo.html')">工作间</button>
           <button class="nav-btn" onclick="goNeedLogin('living.html')">客厅</button>
           <button class="nav-btn" onclick="goNeedLogin('dorm.html')">宿舍</button>
+          <button class="nav-btn" onclick="goNeedLogin('flower.html')">花房区</button>
+          <button class="nav-btn" onclick="goNeedLogin('pets.html')">宠物区</button>
         </div>
-</aside>
+      </aside>
 
       <aside id="adminSwitchPanel" class="panel">
         <h3 class="switch-title">管理切换</h3>
@@ -1247,7 +1275,6 @@ const adminArchiveCard = document.getElementById("adminArchiveCard");
 const adminKeysCard = document.getElementById("adminKeysCard");
 const adminLogsCard = document.getElementById("adminLogsCard");
 
-const img = document.getElementById("managerBg");
 const contentArea = document.getElementById("contentArea");
 
 const keyStorageLoading = document.getElementById("keyStorageLoading");
@@ -1266,12 +1293,8 @@ let logsLoaded = false;
 let activeAdminTab = "archive";
 let actionBusyMap = {};
 
-function isTinyFlowScreen(){
-  return window.innerWidth <= 540;
-}
-
 function isMediumScrollScreen(){
-  return !isTinyFlowScreen() && (window.innerWidth <= 900 || window.innerHeight <= 760);
+  return window.innerWidth > 540 && (window.innerWidth <= 900 || window.innerHeight <= 760);
 }
 
 function isLoggedIn(){
@@ -1331,7 +1354,6 @@ function parseKeySortValue(raw){
 
   return { num: Number.MAX_SAFE_INTEGER, text: s };
 }
-
 
 function getRoleLabel(roleValue = getRole()){
   const role = String(roleValue || "").toLowerCase();
@@ -2342,45 +2364,6 @@ async function ensureAdminPage(){
   setAdminTab(activeAdminTab);
 }
 
-function applyManagerBackgroundColor(){
-  if(isMediumScrollScreen() || isTinyFlowScreen()) return;
-
-  try{
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    ctx.drawImage(img, 0, 0);
-
-    const sampleWidth = Math.min(50, canvas.width);
-    const data = ctx.getImageData(0, 0, sampleWidth, canvas.height).data;
-
-    let r = 0, g = 0, b = 0, count = 0;
-
-    for(let i = 0; i < data.length; i += 4){
-      r += data[i];
-      g += data[i + 1];
-      b += data[i + 2];
-      count++;
-    }
-
-    r = Math.round(r / count);
-    g = Math.round(g / count);
-    b = Math.round(b / count);
-
-    document.body.style.background = `rgb(${r},${g},${b})`;
-  }catch(err){
-    console.warn("背景采样失败：", err);
-  }
-}
-
-img.onload = applyManagerBackgroundColor;
-
-if(img.complete && img.naturalWidth){
-  applyManagerBackgroundColor();
-}
-
 ensureAdminPage();
 
 window.addEventListener("storage", async (e) => {
@@ -2398,13 +2381,6 @@ window.addEventListener("storage", async (e) => {
   }
 });
 
-window.addEventListener("resize", () => {
-  if(!isMediumScrollScreen() && !isTinyFlowScreen()){
-    applyManagerBackgroundColor();
-  }else{
-    document.body.style.background = "#f3ecdf";
-  }
-});
 </script>
 
 </body>
