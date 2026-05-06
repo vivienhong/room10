@@ -717,7 +717,7 @@ body{
       <div id="topUserWrap">
         <div id="topUserBar">
           <div id="currentUserBadge">
-            <span class="identityText">未登录 · 游客</span>
+            <span class="identityText">未登录 | 参观者</span>
           </div>
           <button id="bellBtn" type="button" aria-label="消息通知" title="消息通知">🔔</button>
           <button id="logoutBtn" type="button" onclick="handleLogout()">登出</button>
@@ -976,12 +976,12 @@ function getCurrentUser(){
 function getRoleLabel(role){
   const map = {
     owner: "维修工",
-    admin: "管理员",
-    member: "成员",
+    admin: "宿管",
+    member: "房客",
     applying: "申请中",
-    visitor: "游客"
+    visitor: "参观者"
   };
-  return map[String(role || "visitor").toLowerCase()] || "游客";
+  return map[String(role || "visitor").toLowerCase()] || "参观者";
 }
 
 function updateIdentityDisplay(){
@@ -989,9 +989,9 @@ function updateIdentityDisplay(){
   if(!textEl) return;
   if(isLoggedIn()){
     const user = getCurrentUser();
-    textEl.textContent = `${user.nickname || "未登录"} · ${getRoleLabel(user.role)}`;
+    textEl.textContent = `${user.nickname || "未登录"} | ${getRoleLabel(user.role)}`;
   }else{
-    textEl.textContent = "未登录 · 游客";
+    textEl.textContent = "未登录 | 参观者";
   }
 }
 
@@ -1397,9 +1397,9 @@ async function login(){
     if(user.role === "owner"){
       roleMessage = "维修工已上线";
     }else if(user.role === "admin"){
-      roleMessage = "管理员已上线";
+      roleMessage = "宿管已上线";
     }else if(user.role === "member"){
-      roleMessage = "成员已登录";
+      roleMessage = "房客已登录";
     }else if(user.role === "applying"){
       roleMessage = "当前身份为申请中";
     }
