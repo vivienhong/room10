@@ -848,23 +848,6 @@ body{
     border-radius:8px;
   }
 
-  #sidebar{
-    left:3.2%;
-    top:21.2%;
-    width:16.2%;
-    padding:9px;
-  }
-
-  .nav-group{
-    gap:6px;
-  }
-
-  .nav-btn{
-    min-height:31px;
-    padding:5px 4px;
-    font-size:11px;
-    border-radius:9px;
-  }
 
   #contentArea{
     left:22.8%;
@@ -1064,6 +1047,49 @@ body{
     padding:9px 10px;
     border-radius:9px;
     font-size:11px;
+  }
+}
+
+
+/* ===== 541px - 730px：房间切换按钮随底图压缩，避免超出舞台 ===== */
+@media (min-width: 541px) and (max-width: 730px){
+  #sidebar{
+    left:3.1%;
+    top:20.4%;
+    width:15.6%;
+    padding:6px;
+  }
+
+  .nav-group{
+    gap:4px;
+  }
+
+  .nav-btn{
+    min-height:25px;
+    padding:3px 3px;
+    font-size:9px;
+    line-height:1.05;
+    border-radius:8px;
+  }
+}
+
+@media (min-width: 541px) and (max-width: 620px){
+  #sidebar{
+    left:2.9%;
+    top:20.1%;
+    width:16%;
+    padding:5px;
+  }
+
+  .nav-group{
+    gap:3px;
+  }
+
+  .nav-btn{
+    min-height:23px;
+    padding:2px 2px;
+    font-size:8px;
+    border-radius:7px;
   }
 }
 
@@ -1400,6 +1426,8 @@ body{
           <button class="nav-btn" onclick="goNeedLogin('studio-todo.html')">工作间</button>
           <button class="nav-btn" onclick="goNeedLogin('living.html')">客厅</button>
           <button class="nav-btn" onclick="goNeedLogin('dorm.html')">宿舍</button>
+          <button class="nav-btn" onclick="goNeedLogin('flower.html')">花房区</button>
+          <button class="nav-btn" onclick="goNeedLogin('pets.html')">宠物区</button>
         </div>
       </aside>
 
@@ -1571,12 +1599,8 @@ const APPLICANT_SESSION_KEY = "room10ApplicantSession";
 let currentApplicationRecord = null;
 let reapplyBusy = false;
 
-function isTinyFlowScreen(){
-  return window.innerWidth <= 540;
-}
-
 function isMediumScrollScreen(){
-  return !isTinyFlowScreen() && (window.innerWidth <= 900 || window.innerHeight <= 760);
+  return window.innerWidth > 540 && (window.innerWidth <= 900 || window.innerHeight <= 760);
 }
 
 function isLoggedIn(){
