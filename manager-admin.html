@@ -10,6 +10,11 @@
 *{box-sizing:border-box;}
 
 :root{
+  --bg-left:#fff3e7;
+  --bg-right:#f4dfc8;
+  --bg-top:#fff7ef;
+  --bg-bottom:#edd8c1;
+  --bg-ui-scale:1;
   --text:#5b4632;
   --title:#6a5038;
   --line:#d8c2a3;
@@ -38,6 +43,7 @@ html,body{
 }
 
 body{
+  position:relative;
   font-family:Arial, Helvetica, sans-serif;
   min-height:100vh;
   min-height:100dvh;
@@ -45,41 +51,83 @@ body{
   justify-content:center;
   align-items:center;
   overflow:hidden;
-  background:#f3ecdf;
+  background:
+    radial-gradient(circle at center, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 62%),
+    linear-gradient(90deg, var(--bg-left) 0%, var(--bg-right) 100%);
   color:var(--text);
 }
 
-/* ===== 舞台 ===== */
+/* ===== 游戏房同款底图舞台 ===== */
+#bgColorFill{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  background:
+    linear-gradient(180deg, var(--bg-top) 0%, rgba(255,255,255,0) 18%, rgba(255,255,255,0) 82%, var(--bg-bottom) 100%),
+    linear-gradient(90deg, var(--bg-left) 0%, var(--bg-right) 100%);
+}
+
+#bgBleed{
+  position:fixed;
+  inset:-8vh -8vw;
+  z-index:1;
+  background:url("room-manager.png") center center / cover no-repeat;
+  filter:blur(30px) saturate(1.05);
+  transform:scale(1.08);
+  opacity:.72;
+  pointer-events:none;
+}
+
+#bgLight{
+  position:fixed;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0) 58%),
+    linear-gradient(180deg, rgba(255,248,240,0.08), rgba(255,248,240,0.08));
+}
+
 #managerPage{
+  position:relative;
+  z-index:3;
   width:100vw;
   height:100vh;
   height:100dvh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
   overflow:hidden;
+  background:transparent;
 }
 
 #managerStage{
-  position:relative;
-  width:min(100vw, calc(100dvh * 1.6));
-  aspect-ratio:1440 / 900;
-  max-width:100vw;
-  max-height:100dvh;
+  position:absolute;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
 }
 
 #managerBg{
+  position:absolute;
+  inset:0;
   display:block;
   width:100%;
   height:100%;
   object-fit:contain;
+  object-position:center center;
   user-select:none;
   -webkit-user-drag:none;
+  pointer-events:none;
 }
 
 #managerUI{
   position:absolute;
-  inset:0;
+  z-index:1;
+  overflow:visible;
+  pointer-events:none;
+  --ui-scale:var(--bg-ui-scale, 1);
+}
+
+#managerUI *{
+  pointer-events:auto;
 }
 
 /* ===== 面板通用 ===== */
@@ -145,11 +193,13 @@ body{
 /* ===== 右上角身份组件 ===== */
 #topActions{
   position:absolute;
-  right:8%;
-  top:15%;
-  width:13.8%;
-  height:40px;
-  z-index:5;
+  right:7.35%;
+  top:6.46%;
+  width:calc(232px * var(--ui-scale));
+  height:calc(38px * var(--ui-scale));
+  min-width:0;
+  min-height:0;
+  z-index:10;
   pointer-events:none;
 }
 
@@ -159,9 +209,9 @@ body{
   display:flex;
   align-items:stretch;
   justify-content:flex-start;
-  gap:5px;
-  padding:4px 5px;
-  border-radius:13px;
+  gap:calc(5px * var(--ui-scale));
+  padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
+  border-radius:calc(13px * var(--ui-scale));
   background:rgba(255,248,239,0.92);
   border:1px solid rgba(186,146,103,0.24);
   box-shadow:
@@ -176,7 +226,7 @@ body{
 
 #topIdentityBadge,
 #logoutBtn{
-  border-radius:9px;
+  border-radius:calc(9px * var(--ui-scale));
   background:rgba(255,252,247,0.96);
   color:#6c4523;
   box-shadow:
@@ -188,8 +238,8 @@ body{
 #topIdentityBadge{
   flex:1 1 auto;
   min-width:0;
-  padding:0 8px;
-  font-size:12px;
+  padding:0 calc(8px * var(--ui-scale));
+  font-size:calc(13px * var(--ui-scale));
   font-weight:800;
   display:flex;
   align-items:center;
@@ -209,12 +259,12 @@ body{
 #logoutBtn{
   appearance:none;
   cursor:pointer;
-  width:42px;
-  min-width:42px;
-  flex:0 0 42px;
+  width:calc(42px * var(--ui-scale));
+  min-width:calc(42px * var(--ui-scale));
+  flex:0 0 calc(42px * var(--ui-scale));
   padding:0;
   color:#67401f;
-  font-size:12px;
+  font-size:calc(12px * var(--ui-scale));
   font-weight:800;
   line-height:1;
   display:flex;
@@ -229,37 +279,190 @@ body{
   background:rgba(255,255,255,0.94);
 }
 
-/* ===== 左侧栏 ===== */
-#sidebar{
+/* ===== 房间切换：同游戏房顶部按钮 ===== */
+#topBar{
   position:absolute;
-  left:4.3%;
-  top:21.8%;
-  width:14.2%;
-  padding:12px;
-  z-index:2;
+  left:27.2%;
+  top:6.35%;
+  width:45.5%;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  z-index:9;
+  overflow:visible;
+  --nav-btn-height:calc(40px * var(--ui-scale));
+  --nav-btn-px:calc(16px * var(--ui-scale));
+  --nav-btn-radius:calc(13px * var(--ui-scale));
+  --nav-btn-font:calc(14px * var(--ui-scale));
+  --nav-gap:calc(8px * var(--ui-scale));
 }
 
-.nav-group{
+#topBar,
+#navOuter,
+#navScroll{
+  overflow:visible !important;
+}
+
+#navOuter{
+  flex:0 0 auto;
+  min-width:0;
+  width:100%;
+}
+
+#navScroll{
+  width:100%;
+  white-space:nowrap;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+  padding:0 !important;
+  margin:0 !important;
+}
+
+#navScroll::-webkit-scrollbar{display:none;}
+
+#roomNav{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--nav-gap, 8px);
+  transform-origin:left center;
+}
+
+.navBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  position:relative;
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:var(--nav-btn-height, 40px);
+  padding:0 var(--nav-btn-px, 16px);
+  border-radius:var(--nav-btn-radius, 13px);
+  color:#6e4827;
+  font-size:var(--nav-btn-font, 14px);
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+  overflow:visible;
+  isolation:isolate;
+  background:linear-gradient(180deg, rgba(249,232,203,.90) 0%, rgba(226,195,152,.86) 100%);
+  border:1px solid rgba(145,98,56,.34);
+  box-shadow:0 1px 1px rgba(255,255,255,.48) inset, 0 2px 5px rgba(91,68,45,.13);
+  text-shadow:0 1px 0 rgba(255,255,255,.42);
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+.navBtn:hover,
+.navBtn:focus-visible{
+  color:#5f3d22;
+  background:linear-gradient(180deg, rgba(252,238,215,.95) 0%, rgba(232,205,166,.90) 100%);
+  border-color:rgba(153,102,55,.48);
+  box-shadow:0 1px 1px rgba(255,255,255,.55) inset, 0 3px 7px rgba(91,68,45,.15);
+  filter:brightness(1.015);
+}
+
+.navLabel{position:relative; z-index:5;}
+
+.navActiveNote{
+  position:absolute;
+  pointer-events:none;
+  opacity:0;
+  z-index:4;
+  display:block !important;
+  font-weight:900;
+  line-height:1;
+  text-shadow:0 1px 2px rgba(255,250,232,.72);
+}
+
+.navActiveNoteA{left:8%; top:-52%; color:rgba(167,104,54,.72); font-size:calc(var(--nav-btn-font, 14px) * .88);}
+.navActiveNoteB{right:8%; top:-60%; color:rgba(122,91,143,.58); font-size:calc(var(--nav-btn-font, 14px) * .80);}
+.navActiveNoteC{left:50%; top:-68%; transform:translateX(-50%); color:rgba(198,124,112,.78); font-size:calc(var(--nav-btn-font, 14px) * .96);}
+
+@keyframes navNotePopA{0%,100%{transform:translateY(3px) rotate(-8deg) scale(.82);opacity:0;}22%,68%{opacity:.88;}48%{transform:translateY(-3px) rotate(5deg) scale(1);opacity:.72;}}
+@keyframes navNotePopB{0%,100%{transform:translateY(4px) rotate(8deg) scale(.78);opacity:0;}26%,72%{opacity:.78;}50%{transform:translateY(-4px) rotate(-6deg) scale(1);opacity:.64;}}
+@keyframes navNotePopC{0%,100%{transform:translateX(-50%) translateY(5px) rotate(0deg) scale(.76);opacity:0;}24%,70%{opacity:.86;}50%{transform:translateX(-50%) translateY(-5px) rotate(2deg) scale(1);opacity:.76;}}
+
+.navBtn:hover .navActiveNoteA,.navBtn:focus-visible .navActiveNoteA{animation:navNotePopA 2.2s ease-in-out infinite;}
+.navBtn:hover .navActiveNoteB,.navBtn:focus-visible .navActiveNoteB{animation:navNotePopB 2.5s ease-in-out infinite;}
+.navBtn:hover .navActiveNoteC,.navBtn:focus-visible .navActiveNoteC{animation:navNotePopC 2.35s ease-in-out infinite;}
+
+
+/* ===== 左侧宿管说明卡 ===== */
+#managerBriefCard{
+  position:absolute;
+  left:5.65%;
+  top:22.4%;
+  width:calc(232px * var(--ui-scale));
+  padding:calc(13px * var(--ui-scale)) calc(14px * var(--ui-scale));
+  z-index:4;
+  color:#6a4b32;
+  background:rgba(255,249,240,.86);
+  border:1px solid rgba(216,194,163,.78);
+  border-radius:calc(16px * var(--ui-scale));
+  box-shadow:
+    0 10px 24px rgba(116,86,54,.10),
+    inset 0 1px 0 rgba(255,255,255,.78);
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+
+.brief-title{
+  margin:0 0 calc(7px * var(--ui-scale));
+  font-size:calc(14px * var(--ui-scale));
+  line-height:1.25;
+  font-weight:900;
+  color:#6b4524;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+.brief-text{
+  margin:0;
+  font-size:calc(12px * var(--ui-scale));
+  line-height:1.55;
+  color:#765a40;
+}
+
+.brief-list{
+  margin:calc(8px * var(--ui-scale)) 0 0;
+  padding:0;
+  list-style:none;
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:calc(5px * var(--ui-scale));
 }
 
-.nav-btn{
-  border:none;
-  border-radius:12px;
-  padding:10px 8px;
-  font-size:clamp(13px, .95vw, 18px);
-  background:#ead9bc;
-  cursor:pointer;
-  text-align:center;
-  color:var(--text);
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-  font-weight:600;
-  line-height:1.2;
+.brief-list li{
+  position:relative;
+  padding-left:calc(14px * var(--ui-scale));
+  font-size:calc(11px * var(--ui-scale));
+  line-height:1.45;
+  color:#84664a;
 }
 
-.nav-btn:hover{ background:#e2ccaa; }
+.brief-list li::before{
+  content:"•";
+  position:absolute;
+  left:0;
+  top:0;
+  color:#c98e56;
+  font-weight:900;
+}
+
+.brief-sign{
+  margin-top:calc(9px * var(--ui-scale));
+  padding-top:calc(7px * var(--ui-scale));
+  border-top:1px dashed rgba(180,139,94,.32);
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.35;
+  color:#9a795b;
+  text-align:right;
+}
 
 /* ===== 中栏内容区 ===== */
 #contentArea{
@@ -624,246 +827,264 @@ body{
   white-space:nowrap;
 }
 
-/* ===== 中等尺寸 ===== */
-@media (max-width: 1180px){
-  #topActions{
-    right:9%;
-    width:14.8%;
+/* ===== 宿管室轻动态：柔光 / 钥匙浮光 / 空气粒子 / 纸张切换 ===== */
+#bgLight{
+  animation:managerLightBreath 7.5s ease-in-out infinite;
+}
+
+#bgBleed{
+  animation:managerBgDrift 18s ease-in-out infinite alternate;
+}
+
+@keyframes managerLightBreath{
+  0%,100%{ opacity:.62; }
+  50%{ opacity:.9; }
+}
+
+@keyframes managerBgDrift{
+  0%{ transform:scale(1.08) translate3d(0,0,0); }
+  100%{ transform:scale(1.095) translate3d(-.4%,.35%,0); }
+}
+
+@media (min-width:541px){
+  #managerUI::before{
+    content:"";
+    position:absolute;
+    right:9.6%;
+    bottom:18.4%;
+    width:19%;
+    height:22%;
+    border-radius:24px;
+    background:
+      linear-gradient(112deg,
+        transparent 0%,
+        transparent 35%,
+        rgba(255,244,204,.06) 44%,
+        rgba(255,238,178,.34) 50%,
+        rgba(255,244,204,.08) 57%,
+        transparent 68%,
+        transparent 100%);
+    mix-blend-mode:screen;
+    opacity:.56;
+    pointer-events:none;
+    animation:managerKeyShine 6.8s ease-in-out infinite;
   }
 
-  #sidebar{
-    left:3.6%;
-    top:20.8%;
-    width:15.8%;
-    padding:10px;
+  #managerUI::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:.38;
+    background-image:
+      radial-gradient(circle, rgba(194,139,82,.20) 0 1px, transparent 1.5px),
+      radial-gradient(circle, rgba(255,238,190,.18) 0 1px, transparent 1.6px),
+      radial-gradient(circle, rgba(170,119,77,.12) 0 .8px, transparent 1.4px);
+    background-size:210px 180px, 260px 220px, 320px 260px;
+    background-position:18% 22%, 64% 18%, 42% 68%;
+    animation:managerDustFloat 15s linear infinite;
   }
 
-  #contentArea{
-    left:23.8%;
-    top:9.3%;
-    width:47%;
-    height:81%;
+  #contentArea,
+  #adminSwitchPanel,
+  #managerBriefCard,
+  #topActions,
+  #topBar{
+    animation:managerPanelIn .55s ease both;
   }
 
-  #adminSwitchPanel{
-    right:9%;
-    top:24%;
-    width:14.8%;
-    padding:9px;
+  .admin-view-card.tab-enter{
+    animation:managerPaperIn .36s ease both;
   }
 
-  #pageNotice{
-    left:23.8%;
-    width:47%;
-    top:4.2%;
+  .switch-btn.active{
+    position:relative;
+    overflow:hidden;
   }
 
-  .switch-title{
-    font-size:12px;
-    margin-bottom:7px;
-  }
-
-  .switch-btn{
-    padding:8px 5px;
-    font-size:11px;
-    border-radius:10px;
-  }
-
-  .card{
-    padding:12px 14px;
-    margin-bottom:8px;
+  .switch-btn.active::after{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-65%;
+    width:48%;
+    height:100%;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.40), transparent);
+    pointer-events:none;
+    animation:managerBtnShine 4.2s ease-in-out infinite;
   }
 }
 
-/* ===== 中小屏 / 矮屏 ===== */
-@media (max-width: 900px), (max-height: 760px){
-  #topActions{
-    right:7.2%;
-    top:15%;
-    width:14.8%;
-    height:34px;
-  }
+@keyframes managerKeyShine{
+  0%,58%{ opacity:0; transform:translateX(-18%) skewX(-8deg); }
+  68%{ opacity:.72; }
+  88%,100%{ opacity:0; transform:translateX(28%) skewX(-8deg); }
+}
 
-  #topIdentityBar{
-    gap:4px;
-    padding:4px;
-    border-radius:12px;
-  }
+@keyframes managerDustFloat{
+  0%{ transform:translate3d(0,0,0); background-position:18% 22%, 64% 18%, 42% 68%; }
+  100%{ transform:translate3d(0,-10px,0); background-position:20% 18%, 61% 14%, 44% 64%; }
+}
 
-  #topIdentityBadge{
-    padding:0 6px;
-    font-size:10px;
-    border-radius:8px;
-  }
+@keyframes managerPanelIn{
+  from{ opacity:0; transform:translateY(8px); }
+  to{ opacity:1; transform:translateY(0); }
+}
 
-  #logoutBtn{
-    width:32px;
-    min-width:32px;
-    flex-basis:32px;
-    font-size:9px;
-    border-radius:8px;
-  }
+@keyframes managerPaperIn{
+  from{ opacity:.15; transform:translateY(7px) scale(.992); filter:blur(1.2px); }
+  to{ opacity:1; transform:translateY(0) scale(1); filter:blur(0); }
+}
 
-  #sidebar{
-    left:3.8%;
-    top:21.3%;
-    width:15.2%;
-    padding:10px;
-  }
+@keyframes managerBtnShine{
+  0%,62%{ left:-65%; }
+  100%{ left:125%; }
+}
 
-  .nav-group{ gap:6px; }
-
-  .nav-btn{
-    min-height:34px;
-    padding:6px 4px;
-    font-size:12px;
-    border-radius:10px;
-  }
-
-  #pageNotice{
-    left:24.2%;
-    width:49%;
-    top:3.8%;
-    min-height:38px;
-    padding:8px 10px;
-    font-size:11px;
-  }
-
-  #contentArea{
-    left:24.2%;
-    top:8.7%;
-    width:49%;
-    max-height:80%;
-    overflow-y:auto;
-    overflow-x:hidden;
-    padding-right:6px;
-  }
-
-  #adminSwitchPanel{
-    right:7.2%;
-    top:23.7%;
-    width:14.8%;
-    padding:8px;
-  }
-
-  .switch-title{
-    font-size:11px;
-    margin-bottom:6px;
-  }
-
-  .switch-group{ gap:6px; }
-
-  .switch-btn{
-    min-height:30px;
-    padding:6px 4px;
-    font-size:10px;
-    border-radius:9px;
-  }
-
-  .card{
-    padding:10px 12px;
-    margin-bottom:8px;
-    border-radius:14px;
-  }
-
-  .section-title{
-    font-size:14px !important;
-    margin-bottom:6px;
+@media (prefers-reduced-motion: reduce){
+  #bgLight,
+  #bgBleed,
+  #managerUI::before,
+  #managerUI::after,
+  #contentArea,
+  #adminSwitchPanel,
+  #managerBriefCard,
+  #topActions,
+  #topBar,
+  .admin-view-card.tab-enter,
+  .switch-btn.active::after{
+    animation:none !important;
   }
 }
 
-/* ===== 过渡屏：保留背景图舞台感，不切小屏 ===== */
-@media (min-width: 541px) and (max-width: 680px){
+/* ===== 桌面定位校准：随底图等比例缩放 ===== */
+@media (min-width: 541px){
   #topActions{
-    right:4.2%;
-    top:12%;
-    width:18.2%;
-    height:32px;
+    right:7.35%;
+    top:6.46%;
+    width:calc(232px * var(--ui-scale));
+    height:calc(38px * var(--ui-scale));
   }
 
   #topIdentityBar{
-    gap:3px;
-    padding:3px;
-    border-radius:11px;
+    gap:calc(5px * var(--ui-scale));
+    padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
+    border-radius:calc(13px * var(--ui-scale));
   }
 
   #topIdentityBadge{
-    padding:0 4px;
-    font-size:8px;
-    border-radius:8px;
+    padding:0 calc(8px * var(--ui-scale));
+    font-size:calc(13px * var(--ui-scale));
+    border-radius:calc(9px * var(--ui-scale));
   }
 
   #logoutBtn{
-    width:27px;
-    min-width:27px;
-    flex-basis:27px;
-    font-size:7px;
-    border-radius:8px;
+    width:calc(42px * var(--ui-scale));
+    min-width:calc(42px * var(--ui-scale));
+    flex-basis:calc(42px * var(--ui-scale));
+    font-size:calc(12px * var(--ui-scale));
+    border-radius:calc(9px * var(--ui-scale));
+  }
+
+  #topBar{
+    left:27.2%;
+    top:6.35%;
+    width:45.5%;
+    --nav-gap:calc(8px * var(--ui-scale));
+    --nav-btn-height:calc(40px * var(--ui-scale));
+    --nav-btn-px:calc(16px * var(--ui-scale));
+    --nav-btn-radius:calc(13px * var(--ui-scale));
+    --nav-btn-font:calc(14px * var(--ui-scale));
   }
 
 
-  #pageNotice{
-    left:22.8%;
-    top:3.8%;
-    width:50.6%;
-    min-height:36px;
-    padding:8px 10px;
-    font-size:10px;
+  #managerBriefCard{
+    left:5.65%;
+    top:22.4%;
+    width:calc(232px * var(--ui-scale));
+    padding:calc(13px * var(--ui-scale)) calc(14px * var(--ui-scale));
+    border-radius:calc(16px * var(--ui-scale));
+  }
+
+  .brief-title{
+    margin-bottom:calc(7px * var(--ui-scale));
+    font-size:calc(14px * var(--ui-scale));
+  }
+
+  .brief-text{
+    font-size:calc(12px * var(--ui-scale));
+  }
+
+  .brief-list li{
+    font-size:calc(11px * var(--ui-scale));
+  }
+
+  .brief-sign{
+    font-size:calc(10px * var(--ui-scale));
   }
 
   #contentArea{
-    left:22.8%;
-    top:8.7%;
-    width:50.8%;
-    height:80.2%;
-    max-height:80.2%;
-    overflow-y:auto;
-    overflow-x:hidden;
-    padding-right:6px;
+    left:25.8%;
+    top:16.2%;
+    width:48.8%;
+    height:58.5%;
+    padding-right:calc(8px * var(--ui-scale));
   }
 
   #adminSwitchPanel{
-    right:4.2%;
-    top:23.6%;
-    width:18.2%;
-    padding:8px;
+    right:7.35%;
+    top:18.8%;
+    width:calc(232px * var(--ui-scale));
+    padding:calc(10px * var(--ui-scale));
+    border-radius:calc(16px * var(--ui-scale));
   }
 
   .switch-title{
-    font-size:10px;
-    margin-bottom:6px;
+    margin:0 0 calc(8px * var(--ui-scale)) 0;
+    font-size:calc(13px * var(--ui-scale));
   }
 
   .switch-group{
-    gap:6px;
+    gap:calc(7px * var(--ui-scale));
   }
 
   .switch-btn{
-    min-height:29px;
-    padding:5px 4px;
-    font-size:9px;
-    border-radius:8px;
+    min-height:calc(30px * var(--ui-scale));
+    padding:0 calc(8px * var(--ui-scale));
+    border-radius:calc(11px * var(--ui-scale));
+    font-size:calc(12px * var(--ui-scale));
   }
 
   .card{
-    padding:10px 11px;
-    margin-bottom:8px;
-    border-radius:13px;
+    padding:calc(12px * var(--ui-scale)) calc(14px * var(--ui-scale));
+    margin-bottom:calc(10px * var(--ui-scale));
+    border-radius:calc(16px * var(--ui-scale));
   }
 
   .section-title{
-    font-size:13px !important;
-    margin-bottom:6px;
+    margin-bottom:calc(8px * var(--ui-scale));
+    font-size:calc(18px * var(--ui-scale));
+  }
+
+  .admin-view-card{
+    min-height:100%;
+  }
+
+  .admin-view-card > .admin-block{
+    flex:1 1 0;
+    min-height:0;
+    overflow:hidden;
   }
 
   .admin-block{
-    padding:12px;
-    margin-top:9px;
-    border-radius:11px;
+    padding:calc(12px * var(--ui-scale));
+    margin-top:calc(9px * var(--ui-scale));
+    border-radius:calc(12px * var(--ui-scale));
   }
 
   .admin-block h3{
-    font-size:12px;
+    margin-bottom:calc(6px * var(--ui-scale));
+    font-size:calc(14px * var(--ui-scale));
   }
 
   .module-note,
@@ -877,71 +1098,7 @@ body{
   .key-empty,
   .key-loading,
   .key-error{
-    font-size:10px;
-  }
-
-  .apply-head strong{
-    font-size:11px;
-  }
-
-  .apply-time{
-    font-size:10px;
-  }
-
-  .apply-actions-row{
-    gap:6px;
-  }
-
-  .apply-actions-row .inline-btn,
-  .apply-actions-row .sub-btn{
-    height:30px;
-    min-width:68px;
-    padding:0 10px;
-    font-size:10px;
-    border-radius:9px;
-  }
-}
-
-
-/* ===== 541px - 730px：房间切换按钮随底图压缩，避免超出舞台 ===== */
-@media (min-width: 541px) and (max-width: 730px){
-  #sidebar{
-    left:3.1%;
-    top:20.4%;
-    width:15.6%;
-    padding:6px;
-  }
-
-  .nav-group{
-    gap:4px;
-  }
-
-  .nav-btn{
-    min-height:25px;
-    padding:3px 3px;
-    font-size:9px;
-    line-height:1.05;
-    border-radius:8px;
-  }
-}
-
-@media (min-width: 541px) and (max-width: 620px){
-  #sidebar{
-    left:2.9%;
-    top:20.1%;
-    width:16%;
-    padding:5px;
-  }
-
-  .nav-group{
-    gap:3px;
-  }
-
-  .nav-btn{
-    min-height:23px;
-    padding:2px 2px;
-    font-size:8px;
-    border-radius:7px;
+    font-size:calc(12px * var(--ui-scale));
   }
 }
 
@@ -958,6 +1115,12 @@ body{
     overflow-y:auto;
     display:block;
     background:#f3ecdf;
+  }
+
+  #bgColorFill,
+  #bgBleed,
+  #bgLight{
+    display:none;
   }
 
   #managerPage{
@@ -1057,7 +1220,8 @@ body{
     transform:none;
   }
 
-  #sidebar,
+  #topBar,
+  #managerBriefCard,
   #adminSwitchPanel,
   #contentArea{
     position:relative;
@@ -1074,23 +1238,63 @@ body{
     transform:none;
   }
 
-  #sidebar{ padding:10px; }
+  #topBar{
+    order:2;
+    padding:10px;
+    display:block;
+  }
+
+  #managerBriefCard{
+    order:3;
+    padding:12px 14px;
+    text-align:left;
+  }
+
+  .brief-title{
+    font-size:14px;
+    margin-bottom:7px;
+  }
+
+  .brief-text{
+    font-size:12px;
+  }
+
+  .brief-list{
+    gap:5px;
+  }
+
+  .brief-list li{
+    font-size:11px;
+    padding-left:14px;
+  }
+
+  .brief-sign{
+    font-size:10px;
+  }
 
   #adminSwitchPanel{
-    order:3;
+    order:4;
     padding:10px;
     text-align:center;
     align-self:stretch;
   }
 
-  .nav-group{
+  #navOuter,
+  #navScroll{
+    width:100%;
+  }
+
+  #roomNav{
     display:grid;
     grid-template-columns:repeat(2, minmax(0, 1fr));
     gap:7px;
+    transform:none !important;
   }
 
-  .nav-btn{
+  .navBtn{
+    width:100%;
     min-height:34px;
+    height:auto;
     padding:6px 4px;
     font-size:12px;
     border-radius:10px;
@@ -1118,7 +1322,7 @@ body{
     display:flex;
     flex-direction:column;
     gap:10px;
-    order:4;
+    order:5;
   }
 
   .card{
@@ -1157,6 +1361,10 @@ body{
 </head>
 
 <body>
+<div id="bgColorFill"></div>
+<div id="bgBleed"></div>
+<div id="bgLight"></div>
+
 <div id="managerPage">
   <div id="managerStage">
     <img id="managerBg" src="room-manager.png" alt="宿管室背景">
@@ -1175,17 +1383,32 @@ body{
         <button class="notice-close" type="button" onclick="hideNotice()">×</button>
       </div>
 
-      <aside id="sidebar" class="panel">
-        <div class="nav-group">
-          <button class="nav-btn" onclick="location.href='index.html'">大堂</button>
-          <button class="nav-btn" onclick="location.href='honor.html'">荣誉墙</button>
-          <button class="nav-btn" onclick="location.href='game.html'">游戏房</button>
-          <button class="nav-btn" onclick="goNeedLogin('studio-todo.html')">工作间</button>
-          <button class="nav-btn" onclick="goNeedLogin('living.html')">客厅</button>
-          <button class="nav-btn" onclick="goNeedLogin('dorm.html')">宿舍</button>
-          <button class="nav-btn" onclick="goNeedLogin('flower.html')">花房区</button>
-          <button class="nav-btn" onclick="goNeedLogin('pets.html')">宠物区</button>
+      <div id="topBar" aria-label="房间切换">
+        <div id="navOuter">
+          <div id="navScroll">
+            <nav id="roomNav">
+              <button class="navBtn" type="button" onclick="location.href='index.html'"><span class="navLabel">大堂</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
+              <button class="navBtn" type="button" onclick="location.href='honor.html'"><span class="navLabel">荣誉墙</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
+              <button class="navBtn" type="button" onclick="location.href='game.html'"><span class="navLabel">游戏房</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
+              <button class="navBtn" type="button" onclick="goNeedLogin('studio-todo.html')"><span class="navLabel">工作间</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
+              <button class="navBtn" type="button" onclick="goNeedLogin('living.html')"><span class="navLabel">客厅</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
+              <button class="navBtn" type="button" onclick="goNeedLogin('dorm.html')"><span class="navLabel">宿舍</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
+              <button class="navBtn" type="button" onclick="goNeedLogin('pets.html')"><span class="navLabel">宠物区</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
+              <button class="navBtn" type="button" onclick="goNeedLogin('flower.html')"><span class="navLabel">花房区</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
+            </nav>
+          </div>
         </div>
+      </div>
+
+      <aside id="managerBriefCard" class="panel" aria-label="宿管室说明">
+        <h3 class="brief-title">宿管室说明</h3>
+        <p class="brief-text">这里是宿管专用的管理页，用来处理入住申请、宿管申请、钥匙保管和近期维修记录。</p>
+        <ul class="brief-list">
+          <li>入住申请可在档案夹内投票处理。</li>
+          <li>钥匙状态请以钥匙保管处为准。</li>
+          <li>维修日志用于回看近期处理记录。</li>
+        </ul>
+        <div class="brief-sign">宿管查看｜请谨慎操作</div>
       </aside>
 
       <aside id="adminSwitchPanel" class="panel">
@@ -1264,6 +1487,13 @@ const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+const managerImg = document.getElementById("managerBg");
+const managerStage = document.getElementById("managerStage");
+const managerUI = document.getElementById("managerUI");
+const root = document.documentElement;
+const roomNav = document.getElementById("roomNav");
+const topBar = document.getElementById("topBar");
+
 const topIdentityBadge = document.getElementById("topIdentityBadge");
 const logoutBtn = document.getElementById("logoutBtn");
 
@@ -1292,6 +1522,57 @@ let archiveLoaded = false;
 let logsLoaded = false;
 let activeAdminTab = "archive";
 let actionBusyMap = {};
+
+function isTinyScreen(){
+  return window.innerWidth <= 540;
+}
+
+function syncManagerUIToImage(){
+  if(isTinyScreen()) return;
+  if(!managerImg?.naturalWidth || !managerImg?.naturalHeight || !managerStage || !managerUI) return;
+
+  const frame = managerStage.getBoundingClientRect();
+  const frameRatio = frame.width / frame.height;
+  const imageRatio = managerImg.naturalWidth / managerImg.naturalHeight;
+
+  let displayWidth;
+  let displayHeight;
+  let displayLeft;
+  let displayTop;
+
+  if(frameRatio > imageRatio){
+    displayHeight = frame.height;
+    displayWidth = displayHeight * imageRatio;
+    displayLeft = (frame.width - displayWidth) / 2;
+    displayTop = 0;
+  }else{
+    displayWidth = frame.width;
+    displayHeight = displayWidth / imageRatio;
+    displayLeft = 0;
+    displayTop = (frame.height - displayHeight) / 2;
+  }
+
+  managerUI.style.left = `${displayLeft}px`;
+  managerUI.style.top = `${displayTop}px`;
+  managerUI.style.width = `${displayWidth}px`;
+  managerUI.style.height = `${displayHeight}px`;
+
+  const scale = Math.max(0.34, Math.min(1.42, displayWidth / 1440));
+  root.style.setProperty("--bg-ui-scale", String(scale));
+
+  requestAnimationFrame(fitRoomNavToBar);
+}
+
+function fitRoomNavToBar(){
+  if(!roomNav || !topBar || isTinyScreen()) return;
+
+  roomNav.style.transform = "scale(1)";
+  const available = topBar.clientWidth;
+  const needed = roomNav.scrollWidth;
+  const scale = Math.min(1, available / Math.max(needed, 1));
+
+  roomNav.style.transform = `scale(${scale})`;
+}
 
 function isMediumScrollScreen(){
   return window.innerWidth > 540 && (window.innerWidth <= 900 || window.innerHeight <= 760);
@@ -1478,18 +1759,29 @@ function setAdminTab(tab){
   adminKeysCard.classList.add("hidden");
   adminLogsCard.classList.add("hidden");
 
+  let activeCard = null;
+
   if(tab === "archive"){
     switchArchiveBtn.classList.add("active");
     adminArchiveCard.classList.remove("hidden");
+    activeCard = adminArchiveCard;
     loadAllApplications();
   }else if(tab === "keys"){
     switchKeysBtn.classList.add("active");
     adminKeysCard.classList.remove("hidden");
+    activeCard = adminKeysCard;
     loadKeyStorage();
   }else if(tab === "logs"){
     switchLogsBtn.classList.add("active");
     adminLogsCard.classList.remove("hidden");
+    activeCard = adminLogsCard;
     loadRecentLogs();
+  }
+
+  if(activeCard){
+    activeCard.classList.remove("tab-enter");
+    void activeCard.offsetWidth;
+    activeCard.classList.add("tab-enter");
   }
 
   if(isMediumScrollScreen()){
@@ -2362,6 +2654,14 @@ async function ensureAdminPage(){
 
   updateStatusUserUI();
   setAdminTab(activeAdminTab);
+}
+
+window.addEventListener("resize", syncManagerUIToImage);
+
+if(managerImg?.complete && managerImg?.naturalWidth){
+  syncManagerUIToImage();
+}else if(managerImg){
+  managerImg.addEventListener("load", syncManagerUIToImage, { once:true });
 }
 
 ensureAdminPage();
