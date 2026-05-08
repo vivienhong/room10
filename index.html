@@ -83,8 +83,22 @@ body{
   justify-content:flex-end;
   pointer-events:none;
   --topbar-scale:1;
+  --bar-height:38px;
+  --bar-gap:5px;
+  --bar-padding:4px 5px;
+  --bar-radius:13px;
+  --badge-min:116px;
+  --badge-max:168px;
+  --badge-padding:0 8px;
+  --badge-radius:9px;
+  --badge-font:12px;
+  --bell-size:28px;
+  --bell-font:14px;
+  --logout-size:34px;
+  --logout-font:12px;
+  --notice-dot-size:7px;
+  --notice-dot-offset:6px;
 }
-
 #topActions.show{
   display:flex;
 }
@@ -94,16 +108,50 @@ body{
   pointer-events:auto;
   transform:scale(var(--topbar-scale));
   transform-origin:top right;
+  transition:transform .18s ease;
+}
+
+#topActions.is-compact{
+  --bar-height:34px;
+  --bar-gap:4px;
+  --bar-padding:3px 4px;
+  --bar-radius:12px;
+  --badge-min:98px;
+  --badge-max:130px;
+  --badge-padding:0 6px;
+  --badge-radius:8px;
+  --badge-font:11px;
+  --bell-size:26px;
+  --bell-font:13px;
+  --logout-size:30px;
+  --logout-font:11px;
+}
+
+#topActions.is-mini{
+  --bar-height:31px;
+  --bar-gap:3px;
+  --bar-padding:3px;
+  --bar-radius:11px;
+  --badge-min:88px;
+  --badge-max:108px;
+  --badge-padding:0 5px;
+  --badge-font:10px;
+  --bell-size:24px;
+  --bell-font:12px;
+  --logout-size:24px;
+  --logout-font:10px;
+  --notice-dot-size:6px;
+  --notice-dot-offset:5px;
 }
 
 #topUserBar{
   display:flex;
   align-items:stretch;
   justify-content:flex-end;
-  gap:5px;
-  height:38px;
-  padding:4px 5px;
-  border-radius:13px;
+  gap:var(--bar-gap);
+  height:var(--bar-height);
+  padding:var(--bar-padding);
+  border-radius:var(--bar-radius);
   background:rgba(255,248,239,.92);
   border:1px solid rgba(186,146,103,.24);
   box-shadow:
@@ -114,13 +162,13 @@ body{
 }
 
 #currentUserBadge{
-  min-width:116px;
-  max-width:168px;
-  padding:0 8px;
-  border-radius:9px;
+  min-width:var(--badge-min);
+  max-width:var(--badge-max);
+  padding:var(--badge-padding);
+  border-radius:var(--badge-radius);
   background:rgba(255,252,247,.96);
   color:#6c4523;
-  font-size:12px;
+  font-size:var(--badge-font);
   font-weight:800;
   display:flex;
   align-items:center;
@@ -145,7 +193,8 @@ body{
   appearance:none;
   border:none;
   cursor:pointer;
-  border-radius:9px;
+  padding:0;
+  border-radius:var(--badge-radius);
   background:rgba(255,252,247,.96);
   color:#67401f;
   font-weight:800;
@@ -159,14 +208,19 @@ body{
 
 #bellBtn{
   position:relative;
-  min-width:28px;
-  width:28px;
-  padding:0;
-  font-size:14px;
+  min-width:var(--bell-size);
+  width:var(--bell-size);
+  font-size:var(--bell-font);
   display:flex;
   align-items:center;
   justify-content:center;
   line-height:1;
+}
+
+#logoutBtn{
+  min-width:var(--logout-size);
+  width:var(--logout-size);
+  font-size:var(--logout-font);
 }
 
 #bellBtn:hover,
@@ -179,20 +233,13 @@ body{
 #bellBtn.has-notice::after{
   content:"";
   position:absolute;
-  top:6px;
-  right:6px;
-  width:7px;
-  height:7px;
+  top:var(--notice-dot-offset);
+  right:var(--notice-dot-offset);
+  width:var(--notice-dot-size);
+  height:var(--notice-dot-size);
   border-radius:50%;
   background:#e47957;
   box-shadow:0 0 0 2px rgba(255,252,247,.96);
-}
-
-#logoutBtn{
-  min-width:34px;
-  width:34px;
-  padding:0;
-  font-size:12px;
 }
 
 /* ===== 铃铛通知弹窗 ===== */
@@ -486,37 +533,7 @@ body{
   font-size:18px;
 }
 
-@media (min-width:2200px){
-  #topActions{
-    --topbar-scale:1.32;
-  }
-}
-
 /* ===== 响应式 ===== */
-@media (max-width: 1400px){
-  #topActions{
-    right:3.1%;
-    top:7.9%;
-    --topbar-scale:.92;
-  }
-}
-
-@media (max-width: 1200px){
-  #topActions{
-    right:2.8%;
-    top:7.4%;
-    --topbar-scale:.84;
-  }
-}
-
-@media (max-width: 1000px){
-  #topActions{
-    right:2.2%;
-    top:6.8%;
-    --topbar-scale:.74;
-  }
-}
-
 @media (max-width: 920px){
   #loginMessage{
     top:35.6%;
@@ -554,12 +571,6 @@ body{
     font-size:16px;
     padding:0 8px;
   }
-
-  #topActions{
-    right:1.6%;
-    top:5.8%;
-    --topbar-scale:.62;
-  }
 }
 
 @media (max-width: 520px){
@@ -579,12 +590,6 @@ body{
     width:46%;
     font-size:9px;
     line-height:1.18;
-  }
-
-  #topActions{
-    right:1.2%;
-    top:4.8%;
-    --topbar-scale:.54;
   }
 }
 
@@ -641,12 +646,6 @@ body{
     top:2px;
     right:2px;
   }
-
-  #topActions{
-    right:.8%;
-    top:4.2%;
-    --topbar-scale:.48;
-  }
 }
 
 @media (max-width: 340px){
@@ -696,12 +695,6 @@ body{
 
   #loginBtn{
     top:67.8%;
-  }
-
-  #topActions{
-    right:.4%;
-    top:3.8%;
-    --topbar-scale:.44;
   }
 }
 </style>
@@ -800,9 +793,11 @@ const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 const homeImg = document.getElementById("homeImage");
+const homeStage = document.getElementById("homeStage");
 const topActions = document.getElementById("topActions");
 const currentUserBadge = document.getElementById("currentUserBadge");
 const bellBtn = document.getElementById("bellBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 const noticePanel = document.getElementById("noticePanel");
 const noticeList = document.getElementById("noticeList");
 const noticeClearBtn = document.getElementById("noticeClearBtn");
@@ -957,8 +952,38 @@ function bindHomeImageLoadOnce(){
 
   homeImg.addEventListener("load", () => {
     applyCurrentHomeBackground();
+    syncHomeTopbarScale();
     initSeasonEffect();
   });
+}
+
+function syncHomeTopbarScale(){
+  const rect = homeStage?.getBoundingClientRect() || homeImg?.getBoundingClientRect();
+  const stageWidth = Number(rect?.width || 0);
+  if(!topActions || !stageWidth) return;
+
+  const ranges = [
+    { min:2100, base:2100, minScale:1.02, maxScale:1.18, top:7.45, right:7.1 },
+    { min:1600, base:1900, minScale:.86, maxScale:1.02, top:7.55, right:7.0 },
+    { min:1200, base:1700, minScale:.72, maxScale:.86, top:7.2, right:4.2 },
+    { min:900,  base:1600, minScale:.62, maxScale:.74, top:6.2, right:2.6 },
+    { min:620,  base:1450, minScale:.52, maxScale:.62, top:4.0, right:1.8, compact:true },
+    { min:430,  base:1250, minScale:.44, maxScale:.52, top:2.0, right:1.2, compact:true },
+    { min:0,    base:900,  minScale:.40, maxScale:.48, top:1.0, right:.8, compact:true, mini:true }
+  ];
+
+  const setting = ranges.find(item => stageWidth >= item.min) || ranges.at(-1);
+  const finalScale = clamp(stageWidth / setting.base, setting.minScale, setting.maxScale);
+
+  topActions.style.setProperty("--topbar-scale", finalScale.toFixed(4));
+  topActions.style.top = `${setting.top}%`;
+  topActions.style.right = `${setting.right}%`;
+  topActions.classList.toggle("is-compact", !!setting.compact);
+  topActions.classList.toggle("is-mini", !!setting.mini);
+
+  if(logoutBtn){
+    logoutBtn.textContent = stageWidth < 430 ? "退" : "登出";
+  }
 }
 
 function isLoggedIn(){
@@ -1048,18 +1073,18 @@ function sortProjectsByUrgency(projects){
       return aTime - bTime;
     }
 
-    const aCode = parseInt(String(a.task_code || a.project_code || "").match(/\d+/)?.[0] || "0", 10);
-    const bCode = parseInt(String(b.task_code || b.project_code || "").match(/\d+/)?.[0] || "0", 10);
+    const aCode = parseInt(String(a.project_code || "").match(/\d+/)?.[0] || "0", 10);
+    const bCode = parseInt(String(b.project_code || "").match(/\d+/)?.[0] || "0", 10);
     if(aCode !== bCode){
       return aCode - bCode;
     }
 
-    return String(a.task_name || a.project_name || "").localeCompare(String(b.task_name || b.project_name || ""));
+    return String(a.project_name || "").localeCompare(String(b.project_name || ""));
   });
 }
 
 function getDisplayTaskName(project){
-  return String(project?.task_name || project?.project_name || project?.task_code || project?.project_code || "未命名项目").trim();
+  return String(project?.project_name || project?.project_code || "未命名项目").trim();
 }
 
 function buildTitlePreview(names){
@@ -1096,7 +1121,7 @@ async function buildTaskNoticeItems(){
   ] = await Promise.all([
     client
       .from("projects")
-      .select("id, task_code, task_name, project_code, project_name, release_date, lyrics_lottery_enabled"),
+      .select("id, project_code, project_name, release_date, lyrics_lottery_enabled"),
     client
       .from("project_parts")
       .select("id, project_id, part_order, original_name, assigned_member_id"),
@@ -1265,15 +1290,21 @@ async function safeSyncHomeUI(){
   try{
     updateHomeImageByTime();
     applyCurrentHomeBackground();
+    syncHomeTopbarScale();
     await updateLogoutDisplay();
   }catch(err){
     console.warn("safeSyncHomeUI 失败：", err);
+    syncHomeTopbarScale();
     await updateLogoutDisplay();
   }
 }
 
 window.addEventListener("pageshow", () => {
   safeSyncHomeUI();
+});
+
+window.addEventListener("resize", () => {
+  syncHomeTopbarScale();
 });
 
 window.addEventListener("focus", () => {
@@ -1642,7 +1673,7 @@ function drawWinterParticle(ctx, p){
 
 function initSeasonEffect(){
   const canvas = document.getElementById("seasonLayer");
-  const stage = document.getElementById("homeStage");
+  const stage = homeStage;
   if(!canvas || !stage) return;
 
   if(seasonEffectState.rafId){
@@ -1780,6 +1811,7 @@ updateHomeImageByTime();
 
 if(homeImg.complete && homeImg.naturalWidth){
   applyCurrentHomeBackground();
+  syncHomeTopbarScale();
   initSeasonEffect();
 }
 
