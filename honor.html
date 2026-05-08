@@ -1,35 +1,87 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>荣誉墙</title>
+<title>十号房｜荣誉墙</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+*{box-sizing:border-box;}
+
+html,
 body{
   margin:0;
-  background:linear-gradient(to right, #fff3e0, #f8e3c8);
-  height:100vh;
-  height:100dvh;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  color:#5b4632;
+  background:
+    radial-gradient(circle at top left, #f7ead8 0%, transparent 36%),
+    radial-gradient(circle at top right, #efe0c9 0%, transparent 38%),
+    linear-gradient(180deg,#f7efe6 0%, #eadcc9 52%, #d9c4aa 100%);
+}
+
+body{
   display:flex;
   justify-content:center;
   align-items:center;
-  overflow:hidden;
-  font-family:Arial, Helvetica,sans-serif;
 }
+
+button{font-family:inherit;}
 
 #room{
   position:relative;
   width:100vw;
   height:100vh;
   height:100dvh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
   overflow:hidden;
+  background:#e7dfd4;
 }
 
-/* ===== 新增：边缘压暗层，不影响底图 ===== */
+#stageFrame{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(100vw, calc(100vh * 2048 / 1143));
+  height:min(100vh, calc(100vw * 1143 / 2048));
+  overflow:hidden;
+  z-index:0;
+  --ui-scale:1;
+  --nav-gap:10px;
+  --nav-btn-height:44px;
+  --nav-btn-px:14px;
+  --nav-btn-radius:14px;
+  --nav-btn-font:16px;
+  --switch-font-size:13.2px;
+}
+
+#bg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:fill;
+  object-position:center center;
+  display:block;
+  user-select:none;
+  pointer-events:none;
+  -webkit-user-drag:none;
+  z-index:0;
+}
+
+#overlay{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+#overlay *{pointer-events:auto;}
+
 #bgShade{
   position:absolute;
   inset:0;
@@ -45,221 +97,294 @@ body{
     );
 }
 
-#stage{
-  position:relative;
-  width:fit-content;
-  height:fit-content;
-  max-width:100vw;
-  max-height:100vh;
-  z-index:2;
+/* ===== 房间切换：学习 studio-todo 统一样式 ===== */
+#topBar{
+  position:absolute;
+  left:40.8%;
+  top:0.40%;
+  width:42.6%;
+  transform:none;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  z-index:72;
+  overflow:visible;
 }
 
-#bgWrap{
-  position:relative;
-  display:block;
-  line-height:0;
+#navOuter{
+  flex:0 0 auto;
+  min-width:0;
+  overflow:visible;
 }
 
-#bg{
-  display:block;
-  max-width:100vw;
-  max-height:100vh;
-  width:auto;
-  height:auto;
+#navScroll{
+  width:100%;
+  overflow:visible;
+  white-space:nowrap;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+  padding:0;
+  margin:0;
+}
+
+#navScroll::-webkit-scrollbar{display:none;}
+
+#roomNav{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--nav-gap, 10px);
+  min-width:max-content;
+  max-width:none;
+  transform-origin:left top;
+  will-change:auto;
+}
+
+@keyframes navInnerGlowSweep{
+  0%{transform:translateX(-130%) skewX(-18deg);opacity:0;}
+  20%{opacity:.78;}
+  62%{opacity:.36;}
+  100%{transform:translateX(245%) skewX(-18deg);opacity:0;}
+}
+
+.navBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  height:var(--nav-btn-height, 42px);
+  padding:0 var(--nav-btn-px, 18px);
+  border-radius:var(--nav-btn-radius, 14px);
+  background:linear-gradient(180deg, #efd6ad 0%, #dfbd8a 100%);
+  color:#704724;
+  font-size:var(--nav-btn-font, 15px);
+  font-weight:800;
+  line-height:1;
+  white-space:nowrap;
+  border:1px solid rgba(142,95,50,0.30);
+  box-shadow:
+    inset 0 1px 0 rgba(255,250,235,0.78),
+    inset 0 0 0 1px rgba(255,255,255,0.12);
+  transition:filter .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+  flex:0 0 auto;
   position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+
+.navBtn::before{
+  content:"";
+  position:absolute;
+  top:-28%;
+  bottom:-28%;
+  left:-52%;
+  width:42%;
+  border-radius:999px;
+  background:linear-gradient(90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.28) 35%,
+    rgba(255,247,219,0.72) 50%,
+    rgba(255,255,255,0.26) 65%,
+    rgba(255,255,255,0) 100%
+  );
+  opacity:0;
+  pointer-events:none;
   z-index:0;
 }
 
-/* ===== 翻页按钮：自适应尺寸 ===== */
-.pageBtn{
+.navBtn::after{display:none;}
+
+.navBtn:hover,
+.navBtn:focus-visible{
+  transform:none;
+  filter:brightness(1.055);
+  border-color:rgba(172,111,52,0.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255,250,235,0.82),
+    inset 0 0 0 1px rgba(255,242,213,0.34),
+    inset 0 0 10px rgba(255,238,199,0.20);
+}
+
+.navBtn:hover::before,
+.navBtn:focus-visible::before{
+  animation:navInnerGlowSweep 1.2s ease-out;
+}
+
+/* ===== 身份组件：首页同款，删除铃铛和通知功能 ===== */
+#topActions{
   position:absolute;
-  width:clamp(34px, 4.4vw, 64px);
-  height:clamp(34px, 4.4vw, 64px);
+  right:2.4%;
+  top:0.62%;
+  z-index:58;
+  display:flex;
+  justify-content:flex-end;
+  pointer-events:none;
+  --topbar-scale:1;
+}
+
+#topUserWrap{
+  position:relative;
+  pointer-events:auto;
+  transform:scale(var(--topbar-scale));
+  transform-origin:top right;
+}
+
+#topUserBar{
+  display:flex;
+  align-items:stretch;
+  justify-content:flex-end;
+  gap:5px;
+  height:38px;
+  padding:4px 5px;
+  border-radius:13px;
+  background:rgba(255,248,239,.92);
+  border:1px solid rgba(186,146,103,.24);
+  box-shadow:
+    0 10px 24px rgba(116,86,54,.12),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+#currentUserBadge{
+  min-width:122px;
+  max-width:180px;
+  padding:0 9px;
+  border-radius:10px;
+  background:rgba(255,252,247,.96);
+  color:#6c4523;
+  font-size:15px;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(160,116,78,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    0 1px 4px rgba(112,83,52,.05);
+  white-space:nowrap;
+  overflow:hidden;
+}
+
+#currentUserBadge .identityText{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  min-width:0;
+}
+
+#logoutBtn{
+  appearance:none;
   border:none;
-  border-radius:50%;
-  background:rgba(255,244,225,.96);
-  color:#6a4b2f;
-  font-size:clamp(18px, 2.2vw, 32px);
-  font-weight:bold;
   cursor:pointer;
-  z-index:8;
+  border-radius:9px;
+  background:rgba(255,252,247,.96);
+  color:#67401f;
+  font-weight:800;
+  border:1px solid rgba(160,116,78,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    0 1px 4px rgba(112,83,52,.05);
+  white-space:nowrap;
+  transition:background .18s ease, transform .18s ease, box-shadow .18s ease;
+  min-width:38px;
+  width:38px;
+  padding:0;
+  font-size:14px;
+}
+
+#logoutBtn:hover{
+  background:#f2e0c4;
+  transform:translateY(-1px);
+}
+
+/* ===== 荣誉墙内部页面切换 ===== */
+#panelSwitch{
+  position:absolute;
+  inset:0;
+  z-index:34;
+  pointer-events:none;
+}
+
+.switchBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  position:absolute;
+  width:max(calc(76px * var(--ui-scale)), 24px);
+  height:max(calc(76px * var(--ui-scale)), 24px);
+  min-width:max(calc(76px * var(--ui-scale)), 24px);
+  min-height:max(calc(76px * var(--ui-scale)), 24px);
+  padding:0;
+  border-radius:max(calc(17px * var(--ui-scale)), 7px);
+  background:rgba(255,248,239,0.92);
+  border:1px solid rgba(186,146,103,0.26);
+  color:#744b25;
+  font-weight:850;
+  line-height:1.08;
+  letter-spacing:.02em;
+  text-align:center;
   display:flex;
   align-items:center;
   justify-content:center;
   box-shadow:
-    0 6px 18px rgba(92,63,37,.18),
-    inset 0 1px 0 rgba(255,255,255,.82);
-  transform:translate(-50%, -50%);
-  transition:
-    transform .22s ease,
-    background .22s ease,
-    box-shadow .22s ease;
+    0 10px 22px rgba(116,86,54,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.88),
+    inset 0 -2px 0 rgba(130,91,54,0.08);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  transition:transform .18s ease, filter .18s ease, background .18s ease;
+  pointer-events:auto;
+  white-space:normal;
 }
 
-.pageBtn:hover{
-  transform:translate(-50%, -50%) scale(1.08);
-  background:rgba(255,249,240,.99);
-  box-shadow:
-    0 8px 22px rgba(92,63,37,.24),
-    inset 0 1px 0 rgba(255,255,255,.88);
+.switchBtn:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.03);
+  background:rgba(255,252,247,0.94);
 }
 
-#btnPrevPage{
-  left:7.5%;
-  top:6%;
-}
+#switchTitles{left:4.2%;top:4.55%;}
+#switchGallery{left:34.55%;top:4.55%;}
 
-#btnNextPage{
-  left:35%;
-  top:6%;
-}
 
-/* ===== 顶部导航 ===== */
-.roomNav{
-  position:absolute;
-  left:70%;
-  top:4.6%;
-  transform:translateX(-50%);
-  display:flex;
-  gap:20px;
-  z-index:8;
-}
-
-.roomNav button{
-  padding:7px 14px;
-  border:2px solid #b89266;
-  border-radius:12px;
-  background:#ead3b1;
-  color:#5b3e28;
-  font-size:13px;
-  font-weight:600;
-  cursor:pointer;
-  white-space:nowrap;
-  text-shadow:0 1px 1px rgba(255,255,255,.28);
-  box-shadow:
-    0 3px 8px rgba(0,0,0,.12),
-    inset 0 1px 0 rgba(255,255,255,.4),
-    inset 0 -2px 3px rgba(0,0,0,.10);
-  transition:.2s;
-}
-
-.roomNav button:hover{
-  background:#f5e2c8;
-  transform:translateY(-2px);
-  border-color:#a67c52;
-}
-
-/* ===== 右侧磨砂排行榜面板 ===== */
+/* ===== 排行榜面板基础结构 ===== */
 #rankPanel{
   position:absolute;
-  left:45%;
-  top:13%;
-  width:50%;
-  height:72%;
+  left:42.0%;
+  top:16.8%;
+  width:46.5%;
+  height:73.5%;
   z-index:7;
   display:none;
   opacity:0;
   transform:translateX(-42px) translateY(8px) scale(.985);
-  transition:
-    opacity .34s ease,
-    transform .38s cubic-bezier(.22,.8,.2,1);
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,.30) 0%,
-      rgba(255,255,255,.20) 35%,
-      rgba(255,255,255,.13) 100%
-    );
+  transition:opacity .34s ease, transform .38s cubic-bezier(.22,.8,.2,1);
+  border-radius:calc(26px * var(--ui-scale));
+  overflow:hidden;
   backdrop-filter:blur(18px) saturate(125%);
   -webkit-backdrop-filter:blur(18px) saturate(125%);
-  border-radius:24px;
-  border:1px solid rgba(255,255,255,.78);
-
-  box-shadow:
-    0 14px 40px rgba(0,0,0,.18),
-    0 0 24px rgba(255,255,255,.22),
-    inset 0 1px 0 rgba(255,255,255,.92),
-    inset 0 -2px 8px rgba(255,255,255,.10),
-    inset 0 0 22px rgba(255,255,255,.14);
-
-  overflow:hidden;
 }
 
-#rankPanel.show{
-  display:block;
-  opacity:1;
-  transform:translateX(0) translateY(0) scale(1);
-}
-
-#rankPanel.closing{
-  opacity:0;
-  transform:translateX(-30px) translateY(6px) scale(.985);
-}
-
-#rankPanel::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:24px;
-  background:
-    radial-gradient(circle at 18% 12%, rgba(255,255,255,.36) 0%, rgba(255,255,255,0) 34%),
-    radial-gradient(circle at 80% 20%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 30%);
-  pointer-events:none;
-}
-
-#rankPanel::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:24px;
-  background:linear-gradient(
-    120deg,
-    rgba(255,255,255,.62) 0%,
-    rgba(255,255,255,.16) 26%,
-    rgba(255,255,255,.05) 58%,
-    rgba(255,255,255,.42) 100%
-  );
-  opacity:0.42;
-  pointer-events:none;
-  animation:glassGlow 4s ease-in-out infinite;
-}
-
-@keyframes glassGlow{
-  0%{opacity:0.34;}
-  50%{opacity:0.48;}
-  100%{opacity:0.34;}
-}
+#rankPanel.show{display:block;opacity:1;transform:translateX(0) translateY(0) scale(1);}
+#rankPanel.closing{opacity:0;transform:translateX(-30px) translateY(6px) scale(.985);}
 
 #rankPanelInner{
   position:relative;
+  z-index:1;
   width:100%;
   height:100%;
-  padding:22px 20px 18px;
-  box-sizing:border-box;
-  overflow:auto;
-}
-
-#rankPanelInner::-webkit-scrollbar{
-  width:8px;
-}
-
-#rankPanelInner::-webkit-scrollbar-thumb{
-  background:rgba(145,106,70,.22);
-  border-radius:99px;
 }
 
 #rankClose{
   position:absolute;
-  top:12px;
-  right:14px;
-  width:28px;
-  height:28px;
+  top:calc(12px * var(--ui-scale));
+  right:calc(14px * var(--ui-scale));
+  width:calc(28px * var(--ui-scale));
+  height:calc(28px * var(--ui-scale));
   border:none;
   border-radius:50%;
   background:rgba(255,255,255,.62);
   color:#7b5635;
-  font-size:16px;
+  font-size:calc(16px * var(--ui-scale));
   font-weight:bold;
   cursor:pointer;
   display:flex;
@@ -268,80 +393,8 @@ body{
   z-index:2;
 }
 
-#rankClose:hover{
-  background:rgba(255,255,255,.82);
-}
+#rankClose:hover{background:rgba(255,255,255,.82);}
 
-#rankTitle{
-  font-size:24px;
-  font-weight:700;
-  color:#4a3422;
-  line-height:1.25;
-  margin:0 34px 8px 0;
-}
-
-#rankDesc{
-  font-size:13px;
-  line-height:1.65;
-  color:#6d5036;
-  margin-bottom:14px;
-}
-
-#rankSince{
-  font-size:12px;
-  color:#8a6849;
-  margin-bottom:14px;
-}
-
-#rankList{
-  display:flex;
-  flex-direction:column;
-  gap:9px;
-}
-
-.rankItem{
-  display:grid;
-  grid-template-columns:58px 1fr auto;
-  align-items:center;
-  gap:10px;
-  padding:10px 12px;
-  border-radius:16px;
-  background:rgba(255,255,255,.34);
-  border:1px solid rgba(255,255,255,.45);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.58),
-    0 4px 10px rgba(0,0,0,.05);
-}
-
-.rankNo{
-  font-size:13px;
-  font-weight:700;
-  color:#9b6f44;
-}
-
-.rankName{
-  font-size:15px;
-  font-weight:700;
-  color:#5b3e28;
-}
-
-.rankScore{
-  font-size:14px;
-  font-weight:700;
-  color:#7a5432;
-}
-
-#rankEmpty{
-  padding:16px 12px;
-  border:1px dashed rgba(176,140,103,.35);
-  border-radius:14px;
-  color:#7a5c41;
-  background:rgba(255,255,255,.22);
-  font-size:13px;
-  line-height:1.7;
-}
-
-/* ===== 奖杯铭牌获奖者 ===== */
 #trophyLabels{
   position:absolute;
   inset:0;
@@ -353,26 +406,21 @@ body{
   position:absolute;
   transform:translate(-50%, -50%);
   min-width:44px;
-  max-width:74px;
-  font-size:11px;
-  font-weight:600;
+  max-width:calc(150px * var(--ui-scale));
+  font-size:calc(25px * var(--ui-scale));
+  font-weight:800;
   color:#7a5432;
   white-space:nowrap;
   text-align:center;
-  line-height:1;
+  line-height:1.05;
   letter-spacing:.2px;
-  text-shadow:
-    0 1px 0 rgba(255,255,255,.45),
-    0 -1px 1px rgba(0,0,0,.12);
+  text-shadow:0 1px 0 rgba(255,255,255,.45), 0 -1px 1px rgba(0,0,0,.12);
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
-.label.multi{
-  font-size:10px;
-}
+.label.multi{font-size:calc(19px * var(--ui-scale));}
 
-/* ===== 奖杯热区 ===== */
 #map{
   position:absolute;
   inset:0;
@@ -382,17 +430,17 @@ body{
 }
 
 .trophyRect{
-  fill:rgba(255,0,0,.14);
-  stroke:rgba(180,0,0,.75);
+  fill:rgba(255,255,255,0);
+  stroke:rgba(255,255,255,0);
   stroke-width:.45;
   cursor:pointer;
-  transition:.2s;
+  transition:fill .18s ease, stroke .18s ease, filter .18s ease;
   pointer-events:all;
 }
 
 .trophyRect:hover{
-  fill:rgba(255,160,80,.22);
-  stroke:#cc5a00;
+  fill:rgba(255,186,92,.14);
+  stroke:rgba(255,178,76,.78);
   stroke-width:.75;
 }
 
@@ -403,237 +451,1360 @@ body{
   filter:drop-shadow(0 0 5px rgba(255,196,108,.85));
 }
 
-/* ===== 退出登录 ===== */
-#logoutImg{
-  position:absolute;
-  top:-30px;
-  right:-15px;
-  z-index:5;
-  pointer-events:none;
-  display:none;
-}
-
-#logoutSvg{
-  position:absolute;
+/* ===== 登录弹窗：首页同款登录框 ===== */
+#loginUI{
+  position:fixed;
   inset:0;
-  width:100%;
-  height:100%;
-  z-index:6;
-  pointer-events:none;
+  background:rgba(0,0,0,.5);
   display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
 }
 
-#logoutSvg rect{
-  fill:rgba(0,0,255,.25);
-  stroke:blue;
-  stroke-width:.4;
-  pointer-events:all;
+#loginUI.show{
+  display:flex;
+}
+
+.login-panel{
+  position:relative;
+  width:min(720px, 94vw);
+}
+
+.login-panel img{
+  width:100%;
+  display:block;
+  pointer-events:none;
+}
+
+#username{
+  position:absolute;
+  top:40%;
+  left:36.2%;
+  width:27.5%;
+  height:8.1%;
+  border:none;
+  outline:none;
+  padding:0 10px;
+  font-size:18px;
+  color:#5b3e28;
+  background:transparent;
+  line-height:1.1;
+}
+
+#password{
+  position:absolute;
+  top:56%;
+  left:36.2%;
+  width:20%;
+  height:8.1%;
+  border:none;
+  outline:none;
+  padding:0 10px;
+  font-size:18px;
+  color:#5b3e28;
+  background:transparent;
+  line-height:1.1;
+}
+
+#togglePassword{
+  position:absolute;
+  top:56%;
+  left:56%;
+  width:8%;
+  height:8.1%;
+  border:none;
+  cursor:pointer;
+  background:rgba(255,215,120,.15);
+  border-radius:6px;
+}
+
+#togglePassword:hover{
+  background:rgba(255,215,120,.35);
+  box-shadow:0 0 8px rgba(255,220,120,.6);
+}
+
+#loginSubmitBtn{
+  position:absolute;
+  top:68%;
+  left:40%;
+  width:20%;
+  height:9%;
+  border:none;
+  background:transparent;
   cursor:pointer;
 }
 
-/* ===== 小屏微调 ===== */
-@media (max-width:980px){
-  .roomNav{
-    left:69%;
-    top:4.2%;
-    gap:10px;
+#registerLink{
+  position:absolute;
+  top:50%;
+  left:52%;
+  transform:translateX(-50%);
+  color:#7a4f2b;
+  font-size:14px;
+  font-weight:600;
+  text-decoration:underline;
+  cursor:pointer;
+  background:none;
+  border:none;
+  padding:0;
+  white-space:nowrap;
+}
+
+#registerLink:hover{
+  color:#9b6334;
+}
+
+#loginMessage{
+  position:absolute;
+  top:34.8%;
+  left:53.5%;
+  transform:translateX(-50%);
+  text-align:center;
+  color:#7a4f2b;
+  font-size:14px;
+  font-weight:600;
+  width:42%;
+  max-width:320px;
+  white-space:normal;
+  line-height:1.25;
+}
+
+.closeBtn{
+  position:absolute;
+  top:4px;
+  right:6px;
+  border:none;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:white;
+  cursor:pointer;
+  font-size:18px;
+}
+
+@media (max-width:920px){
+  #loginMessage{
+    top:35.6%;
+    width:44%;
+    max-width:none;
+    font-size:13px;
+    line-height:1.22;
   }
 
-  .roomNav button{
-    padding:6px 10px;
-    font-size:12px;
+  #registerLink{
+    font-size:13px;
   }
 
-  #rankPanel{
-    left:58.5%;
-    top:14%;
-    width:38%;
-    height:70%;
-  }
-
-  #rankTitle{
-    font-size:20px;
-  }
-
-  .rankItem{
-    grid-template-columns:50px 1fr auto;
-    gap:8px;
-    padding:9px 10px;
-  }
-
-  #btnPrevPage{
-    left:7.8%;
-    top:6.2%;
-  }
-
-  #btnNextPage{
-    left:35.2%;
-    top:6.2%;
+  #username,
+  #password{
+    font-size:17px;
   }
 }
 
-@media (max-width:780px){
-  .roomNav{
-    left:68%;
-    top:3.9%;
-    gap:8px;
-    flex-wrap:wrap;
-    width:42%;
+@media (max-width:760px){
+  #loginMessage{
+    top:35.2%;
+    width:48%;
+    font-size:11px;
+    line-height:1.2;
+  }
+
+  #registerLink{
+    top:49.5%;
+    font-size:11px;
+  }
+
+  #username,
+  #password{
+    font-size:16px;
+    padding:0 8px;
+  }
+}
+
+@media (max-width:520px){
+  #registerLink{
+    top:49.2%;
+    font-size:10px;
+  }
+
+  #username,
+  #password{
+    font-size:15px;
+    padding:0 7px;
+  }
+
+  #loginMessage{
+    top:34.1%;
+    width:46%;
+    font-size:9px;
+    line-height:1.18;
+  }
+}
+
+@media (max-width:380px){
+  .login-panel{
+    width:95vw;
+  }
+
+  #registerLink{
+    top:48.8%;
+    font-size:8px;
+  }
+
+  #username,
+  #password{
+    font-size:12px;
+    padding:0 5px;
+  }
+
+  #username{
+    top:40.1%;
+    left:36.25%;
+    width:27.1%;
+    height:7.9%;
+  }
+
+  #password{
+    top:56.05%;
+    left:36.25%;
+    width:19.7%;
+    height:7.9%;
+  }
+
+  #togglePassword{
+    top:56.05%;
+    left:55.9%;
+    width:8.2%;
+    height:7.9%;
+  }
+
+  #loginMessage{
+    top:34.8%;
+    left:53.4%;
+    width:44%;
+    font-size:7.8px;
+    line-height:1.16;
+    letter-spacing:0;
+  }
+
+  .closeBtn{
+    width:28px;
+    height:28px;
+    font-size:16px;
+    top:2px;
+    right:2px;
+  }
+}
+
+@media (max-width:340px){
+  .login-panel{
+    width:96vw;
+  }
+
+  #registerLink{
+    top:48.5%;
+    font-size:7px;
+  }
+
+  #username,
+  #password{
+    font-size:11px;
+    padding:0 4px;
+  }
+
+  #username{
+    top:40.15%;
+    left:36.35%;
+    width:26.9%;
+    height:7.8%;
+  }
+
+  #password{
+    top:56.1%;
+    left:36.35%;
+    width:19.5%;
+    height:7.8%;
+  }
+
+  #togglePassword{
+    top:56.1%;
+    left:55.85%;
+    width:8.25%;
+    height:7.8%;
+  }
+
+  #loginMessage{
+    top:35.5%;
+    left:53.35%;
+    width:43%;
+    font-size:7px;
+    line-height:1.12;
+  }
+
+  #loginSubmitBtn{
+    top:67.8%;
+  }
+}
+
+
+
+/* ===== 统一跟随底图缩放：尺寸随底图变化 ===== */
+.switchBtn{
+  font-size:var(--switch-font-size);
+  word-break:keep-all;
+  overflow-wrap:normal;
+}
+
+/* ===== 540px 以下：手机版界面，不沿用大屏奖杯柜布局 ===== */
+#mobileTrophyList{
+  display:none;
+}
+
+@media (max-width:540px){
+  html,
+  body{
+    overflow:hidden;
+  }
+
+  #stageFrame{
+    width:100vw;
+    height:100dvh;
+    --ui-scale:1;
+  }
+
+  #bg{
+    object-fit:cover;
+    object-position:center center;
+  }
+
+  #overlay{
+    overflow:hidden;
+  }
+
+  #bgShade{
+    background:
+      linear-gradient(180deg, rgba(255,248,238,.50) 0%, rgba(255,248,238,.22) 38%, rgba(120,82,46,.18) 100%),
+      radial-gradient(circle at center, rgba(0,0,0,0) 48%, rgba(130,95,60,.22) 100%);
+  }
+
+
+  #topUserWrap{
+    width:100%;
+    transform:scale(var(--topbar-scale));
+    transform-origin:top center;
+  }
+
+  #topUserBar{
+    width:100%;
+    height:34px;
+    padding:4px;
+    border-radius:12px;
     justify-content:center;
   }
 
-  .roomNav button{
-    font-size:11px;
-    padding:5px 8px;
+  #currentUserBadge{
+    flex:1 1 auto;
+    min-width:0;
+    max-width:none;
+    font-size:12px;
+  }
+
+  #logoutBtn{
+    flex:0 0 48px;
+    width:48px;
+    min-width:48px;
+    font-size:12px;
+  }
+
+
+  #switchTitles,
+  #switchGallery{
+    position:static;
+    flex:1 1 0;
+    width:auto;
+    height:40px;
+    min-width:0;
+    min-height:40px;
+    border-radius:14px;
+    line-height:1.08;
+    text-align:center;
+  }
+
+  #trophyLabels,
+  #map{
+    display:none;
+  }
+
+  #mobileTrophyList{
+    position:absolute;
+    left:50%;
+    right:auto;
+    top:174px;
+    bottom:14px;
+    width:min(92vw, 460px);
+    transform:translateX(-50%);
+    z-index:20;
+    display:grid;
+    grid-template-columns:1fr;
+    align-content:start;
+    justify-items:center;
+    gap:8px;
+    padding:12px;
+    overflow:auto;
+    pointer-events:auto;
+    border-radius:20px;
+    background:rgba(255,248,239,.72);
+    border:1px solid rgba(186,146,103,.24);
+    box-shadow:
+      0 14px 34px rgba(116,86,54,.14),
+      inset 0 1px 0 rgba(255,255,255,.80);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+  }
+
+  .mobileTrophyBtn{
+    appearance:none;
+    border:none;
+    width:100%;
+    min-height:42px;
+    padding:10px 12px;
+    border-radius:14px;
+    cursor:pointer;
+    background:rgba(255,252,247,.88);
+    border:1px solid rgba(160,116,78,.16);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.92),
+      0 4px 10px rgba(112,83,52,.07);
+    color:#6c4523;
+    font-size:14px;
+    font-weight:850;
+    text-align:center;
+  }
+
+  .mobileTrophyBtn:active{
+    transform:translateY(1px);
   }
 
   #rankPanel{
-    left:57%;
-    top:15.5%;
-    width:39%;
-    height:68%;
+    left:50%;
+    right:auto;
+    top:174px;
+    width:min(92vw, 460px);
+    height:calc(100dvh - 190px);
+    z-index:90;
+    border-radius:20px;
+    transform:translateX(-50%) translateY(18px) scale(.985);
+  }
+
+  #rankPanel.show{
+    transform:translateX(-50%) translateY(0) scale(1);
+  }
+
+  #rankPanel.closing{
+    transform:translateX(-50%) translateY(14px) scale(.985);
   }
 
   #rankPanelInner{
-    padding:14px 14px 12px;
+    padding:16px 14px 14px;
   }
 
-  #rankTitle{
-    font-size:17px;
+  #rankClose{
+    top:10px;
+    right:10px;
+    width:28px;
+    height:28px;
+    font-size:16px;
   }
 
-  #rankDesc{
-    font-size:12px;
-  }
-
-  .rankName,
-  .rankScore,
-  .rankNo{
-    font-size:12px;
-  }
-
-  .label{
-    font-size:10px;
-    max-width:62px;
-  }
-
+  .label,
   .label.multi{
+    font-size:0;
+    max-width:none;
+  }
+
+  /* 手机房间按钮最终覆盖：完整显示，自适应换行 */
+  #topBar{
+    left:50%;
+    right:auto;
+    top:10px;
+    width:min(92vw, 460px);
+    height:auto;
+    transform:translateX(-50%);
+    z-index:80;
+  }
+
+  #navOuter,
+  #navScroll{
+    width:100%;
+    overflow:visible;
+  }
+
+  #roomNav{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    width:100%;
+    min-width:0;
+    gap:5px;
+    transform:none !important;
+  }
+
+  .navBtn{
+    width:100%;
+    min-width:0;
+    height:28px;
+    padding:0 3px;
+    border-radius:9px;
+    font-size:clamp(9px, 2.5vw, 11px);
+    letter-spacing:-.02em;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  #topActions{
+    left:50%;
+    right:auto;
+    top:76px;
+    width:min(92vw, 460px);
+    transform:translateX(-50%);
+    justify-content:center;
+    z-index:82;
+  }
+
+  #panelSwitch{
+    left:50%;
+    right:auto;
+    top:120px;
+    width:min(92vw, 460px);
+    height:42px;
+    display:flex;
+    gap:8px;
+    transform:translateX(-50%);
+    justify-content:center;
+    z-index:76;
+    pointer-events:auto;
+  }
+
+}
+
+/* ===== 541px 以上网页版微调：不影响手机版 ===== */
+@media (min-width:541px){
+  #switchTitles{
+    left:4.2%;
+    top:3.95%;
+  }
+
+  #switchGallery{
+    left:34.55%;
+    top:3.95%;
+  }
+
+  #topUserBar{
+    background:rgba(255,252,244,.96);
+    border-color:rgba(190,150,106,.26);
+    box-shadow:
+      0 12px 26px rgba(116,86,54,.13),
+      inset 0 1px 0 rgba(255,255,255,.95);
+  }
+
+  #currentUserBadge{
+    background:rgba(255,250,240,.98);
+    color:#664220;
+    border-color:rgba(160,116,78,.14);
+  }
+
+  #logoutBtn{
+    background:rgba(255,250,240,.98);
+    color:#62401f;
+    border-color:rgba(160,116,78,.14);
+  }
+
+  #logoutBtn:hover{
+    background:#f4e5cf;
+  }
+
+}
+
+
+@media (max-width:360px){
+  #roomNav{
+    gap:4px;
+  }
+
+  .navBtn{
+    height:26px;
+    padding:0 2px;
+    border-radius:8px;
     font-size:9px;
   }
 
-  #btnPrevPage{
-    left:8.2%;
-    top:6.5%;
+  #topActions{
+    top:72px;
   }
 
-  #btnNextPage{
-    left:35.5%;
-    top:6.5%;
+  #panelSwitch{
+    top:116px;
+  }
+
+  #mobileTrophyList{
+    top:168px;
+  }
+
+  #rankPanel{
+    top:168px;
+    height:calc(100dvh - 184px);
   }
 }
+
+/* ===== 排行榜：榜首横幅 + 去重双栏榜单（清减统一版） ===== */
+#rankPanel{
+  background:
+    radial-gradient(circle at 16% 10%, rgba(255,232,190,.30) 0%, rgba(255,232,190,0) 34%),
+    radial-gradient(circle at 88% 18%, rgba(235,198,158,.22) 0%, rgba(235,198,158,0) 32%),
+    linear-gradient(145deg, rgba(250,242,231,.92) 0%, rgba(244,232,215,.84) 52%, rgba(235,217,195,.78) 100%);
+  border:1px solid rgba(224,199,168,.78);
+  box-shadow:
+    0 16px 42px rgba(82,60,38,.16),
+    inset 0 1px 0 rgba(255,250,241,.70),
+    inset 0 -10px 24px rgba(181,137,92,.055);
+}
+
+#rankPanel::before{
+  content:"";
+  position:absolute;
+  inset:calc(8px * var(--ui-scale));
+  border-radius:calc(21px * var(--ui-scale));
+  border:1px solid rgba(255,248,238,.45);
+  background:
+    linear-gradient(135deg, rgba(255,250,240,.18), rgba(255,250,240,0) 44%),
+    radial-gradient(circle at 8% 92%, rgba(232,187,132,.12), rgba(232,187,132,0) 30%);
+  pointer-events:none;
+}
+
+#rankPanel::after{
+  content:"✦";
+  position:absolute;
+  right:calc(21px * var(--ui-scale));
+  bottom:calc(14px * var(--ui-scale));
+  color:rgba(176,119,70,.16);
+  font-size:calc(34px * var(--ui-scale));
+  line-height:1;
+  transform:rotate(8deg);
+  pointer-events:none;
+}
+
+#rankPanelInner{
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  padding:
+    calc(16px * var(--ui-scale))
+    calc(18px * var(--ui-scale))
+    calc(15px * var(--ui-scale));
+}
+
+#rankTitle{
+  font-size:calc(31px * var(--ui-scale));
+  font-weight:900;
+  color:#4f3624;
+  line-height:1.12;
+  margin:0 calc(34px * var(--ui-scale)) calc(4px * var(--ui-scale)) 0;
+  letter-spacing:.01em;
+}
+
+#rankDesc{
+  font-size:calc(15.8px * var(--ui-scale));
+  line-height:1.34;
+  color:#73553c;
+  margin:0 0 calc(4px * var(--ui-scale));
+}
+
+#rankSince{
+  font-size:calc(12.8px * var(--ui-scale));
+  color:#9a7b5e;
+  margin:0 0 calc(8px * var(--ui-scale));
+}
+
+#rankList{
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  gap:calc(9px * var(--ui-scale));
+  overflow:hidden;
+  padding-right:0;
+}
+
+.rankChampion{
+  position:relative;
+  overflow:hidden;
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto auto;
+  align-items:center;
+  gap:calc(16px * var(--ui-scale));
+  padding:calc(13px * var(--ui-scale)) calc(16px * var(--ui-scale));
+  border-radius:calc(20px * var(--ui-scale));
+  background:
+    radial-gradient(circle at 92% 18%, rgba(255,220,145,.34) 0%, rgba(255,220,145,0) 34%),
+    linear-gradient(135deg, rgba(255,246,229,.90) 0%, rgba(246,224,191,.68) 100%);
+  border:1px solid rgba(220,184,132,.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255,252,242,.78),
+    0 8px 20px rgba(111,78,42,.08);
+}
+
+.rankChampion::before{
+  content:"🏆";
+  position:absolute;
+  right:calc(14px * var(--ui-scale));
+  top:calc(-8px * var(--ui-scale));
+  opacity:.17;
+  font-size:calc(58px * var(--ui-scale));
+  line-height:1;
+  pointer-events:none;
+  transform:rotate(8deg);
+}
+
+.rankChampionMain{
+  min-width:0;
+  position:relative;
+  z-index:1;
+}
+
+.rankChampionKicker{
+  display:inline-flex;
+  align-items:center;
+  gap:calc(5px * var(--ui-scale));
+  min-height:calc(24px * var(--ui-scale));
+  padding:0 calc(11px * var(--ui-scale));
+  border-radius:999px;
+  color:#7a4f2b;
+  font-size:calc(14.2px * var(--ui-scale));
+  font-weight:950;
+  background:linear-gradient(180deg, rgba(250,225,176,.94) 0%, rgba(235,196,133,.74) 100%);
+  border:1px solid rgba(168,116,62,.20);
+  box-shadow:inset 0 1px 0 rgba(255,252,242,.68);
+}
+
+.rankChampionTitle{
+  margin-top:calc(7px * var(--ui-scale));
+  color:#4f3624;
+  font-size:calc(22px * var(--ui-scale));
+  font-weight:1000;
+  line-height:1.18;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.rankChampionMeta{
+  margin-top:calc(5px * var(--ui-scale));
+  color:#826247;
+  font-size:calc(14.4px * var(--ui-scale));
+  font-weight:700;
+  line-height:1.25;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.rankChampionScore{
+  position:relative;
+  z-index:1;
+  color:#704b2b;
+  font-size:calc(28px * var(--ui-scale));
+  font-weight:1000;
+  line-height:1;
+  padding:calc(10px * var(--ui-scale)) calc(16px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(244,226,199,.88);
+  border:1px solid rgba(204,174,138,.60);
+  box-shadow:inset 0 1px 0 rgba(255,252,244,.64);
+  white-space:nowrap;
+}
+
+.rankChampionAvatars{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  justify-self:center;
+  min-width:calc(96px * var(--ui-scale));
+  min-height:calc(42px * var(--ui-scale));
+}
+
+.rankAvatar{
+  width:calc(42px * var(--ui-scale));
+  height:calc(42px * var(--ui-scale));
+  border-radius:999px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  margin-right:calc(-9px * var(--ui-scale));
+  color:#7a4f2b;
+  font-size:calc(16px * var(--ui-scale));
+  font-weight:950;
+  background:linear-gradient(180deg, rgba(255,238,203,.96), rgba(239,202,153,.92));
+  border:2px solid rgba(255,249,237,.94);
+  box-shadow:0 4px 10px rgba(98,68,36,.13);
+}
+
+.rankAvatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.rankBoard{
+  flex:1 1 auto;
+  min-height:0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:calc(10px * var(--ui-scale));
+  overflow:auto;
+  padding-right:calc(4px * var(--ui-scale));
+  scrollbar-width:thin;
+}
+
+.rankBoard::-webkit-scrollbar{width:7px;}
+.rankBoard::-webkit-scrollbar-thumb{background:rgba(145,106,70,.24);border-radius:99px;}
+
+.rankColumn{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:calc(9px * var(--ui-scale));
+}
+
+.rankItem.rankGroup{
+  position:relative;
+  display:block;
+  overflow:hidden;
+  padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border-radius:calc(17px * var(--ui-scale));
+  background:
+    radial-gradient(circle at 96% 16%, rgba(241,205,153,.16) 0%, rgba(241,205,153,0) 26%),
+    linear-gradient(180deg, rgba(255,249,240,.64) 0%, rgba(248,237,222,.46) 100%);
+  border:1px solid rgba(226,203,174,.54);
+  box-shadow:
+    inset 0 1px 0 rgba(255,252,244,.60),
+    0 4px 11px rgba(102,74,44,.045);
+}
+
+.rankItem.rankGroup::before{
+  content:"✿";
+  position:absolute;
+  right:calc(12px * var(--ui-scale));
+  top:calc(8px * var(--ui-scale));
+  color:rgba(176,118,68,.13);
+  font-size:calc(16px * var(--ui-scale));
+  line-height:1;
+  pointer-events:none;
+}
+
+.rankGroupHead{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:calc(8px * var(--ui-scale));
+  margin-bottom:calc(6px * var(--ui-scale));
+}
+
+.rankBadge,
+.rankGroupScore{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:calc(24px * var(--ui-scale));
+  border-radius:999px;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.rankBadge{
+  padding:0 calc(11px * var(--ui-scale));
+  color:#7a4f2b;
+  font-size:calc(14.2px * var(--ui-scale));
+  font-weight:950;
+  letter-spacing:.02em;
+  background:linear-gradient(180deg, rgba(249,225,178,.88) 0%, rgba(235,196,133,.66) 100%);
+  border:1px solid rgba(168,116,62,.16);
+  box-shadow:inset 0 1px 0 rgba(255,252,242,.62);
+}
+
+.rankBadge::before{
+  content:"✿";
+  margin-right:calc(4px * var(--ui-scale));
+  font-size:calc(12px * var(--ui-scale));
+  color:rgba(166,96,49,.70);
+}
+
+.rankGroupScore{
+  padding:0 calc(10px * var(--ui-scale));
+  color:#755331;
+  font-size:calc(14.5px * var(--ui-scale));
+  font-weight:1000;
+  background:rgba(244,226,199,.78);
+  border:1px solid rgba(204,174,138,.46);
+  box-shadow:inset 0 1px 0 rgba(255,252,244,.54);
+}
+
+.rankRows{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  gap:calc(3px * var(--ui-scale));
+}
+
+.rankPersonRow{
+  display:grid;
+  grid-template-columns:minmax(calc(46px * var(--ui-scale)), calc(66px * var(--ui-scale))) minmax(0, 1fr);
+  align-items:center;
+  column-gap:calc(10px * var(--ui-scale));
+  min-height:calc(26px * var(--ui-scale));
+  padding:calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale));
+  border-radius:calc(10px * var(--ui-scale));
+  background:transparent;
+}
+
+.rankPersonRow + .rankPersonRow{
+  border-top:1px dashed rgba(173,132,88,.13);
+}
+
+.rankPersonName{
+  min-width:0;
+  color:#5f4736;
+  font-size:calc(17px * var(--ui-scale));
+  font-weight:950;
+  line-height:1.15;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.rankPersonDetail{
+  min-width:0;
+  color:#80644d;
+  font-size:calc(13.8px * var(--ui-scale));
+  font-weight:700;
+  line-height:1.16;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.rankPersonDetailEmpty,
+.rankPersonScore{display:none;}
+
+#rankEmpty{
+  padding:calc(16px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border:1px dashed rgba(176,140,103,.35);
+  border-radius:calc(14px * var(--ui-scale));
+  color:#7a5c41;
+  background:rgba(255,255,255,.22);
+  font-size:calc(13px * var(--ui-scale));
+  line-height:1.7;
+}
+
+/* 强制奖杯热区透明，避免 SVG 默认黑色填充 */
+.trophyRect,
+#map rect{
+  fill:rgba(255,255,255,0) !important;
+  stroke:rgba(255,255,255,0) !important;
+  pointer-events:all;
+}
+
+.trophyRect:hover{
+  fill:rgba(255,186,92,.14) !important;
+  stroke:rgba(255,178,76,.78) !important;
+}
+
+.trophyRect.active{
+  fill:rgba(255,218,130,.26) !important;
+  stroke:#ffb24c !important;
+  filter:drop-shadow(0 0 5px rgba(255,196,108,.85));
+}
+
+@media (max-width:540px){
+  #rankPanelInner{overflow:hidden;}
+  #rankTitle{font-size:24px;line-height:1.18;margin-bottom:7px;}
+  #rankDesc{font-size:14px;line-height:1.48;margin-bottom:6px;}
+  #rankSince{font-size:13px;line-height:1.35;margin-bottom:9px;}
+  #rankList{overflow:hidden;padding-right:0;}
+
+  .rankChampion{
+    grid-template-columns:minmax(0, 1fr) auto;
+    gap:8px 10px;
+    padding:12px;
+    border-radius:16px;
+  }
+
+  .rankChampionMain{grid-column:1 / 2;grid-row:1 / 2;}
+
+  .rankChampionAvatars{
+    grid-column:1 / 2;
+    grid-row:2 / 3;
+    justify-self:start;
+    justify-content:flex-start;
+    min-width:0;
+    min-height:32px;
+  }
+
+  .rankChampionScore{
+    grid-column:2 / 3;
+    grid-row:1 / 3;
+    align-self:center;
+    justify-self:end;
+    font-size:20px;
+    padding:8px 12px;
+  }
+
+  .rankChampionKicker{
+    min-height:23px;
+    padding:0 10px;
+    font-size:12.5px;
+  }
+
+  .rankChampionTitle{font-size:17px;}
+  .rankChampionMeta{font-size:12.5px;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .rankAvatar{width:32px;height:32px;font-size:12px;}
+
+  .rankBoard{
+    grid-template-columns:1fr;
+    gap:8px;
+    overflow:auto;
+    padding-right:2px;
+  }
+
+  .rankColumn{gap:8px;}
+
+  .rankItem.rankGroup{
+    padding:10px 11px;
+    border-radius:15px;
+  }
+
+  .rankGroupHead{margin-bottom:6px;}
+
+  .rankBadge,
+  .rankGroupScore{
+    min-height:23px;
+    padding:0 10px;
+    font-size:12.5px;
+  }
+
+  .rankBadge::before{
+    margin-right:4px;
+    font-size:11px;
+  }
+
+  .rankRows{gap:3px;}
+
+  .rankPersonRow{
+    grid-template-columns:minmax(42px, 58px) minmax(0, 1fr);
+    min-height:28px;
+    padding:4px 7px;
+    column-gap:7px;
+    border-radius:10px;
+  }
+
+  .rankPersonName{font-size:14px;}
+  .rankPersonDetail{font-size:12px;}
+}
+
 </style>
 </head>
 
 <body>
-
 <div id="room">
-  <div id="bgShade"></div>
+  <div id="stageFrame">
+    <img id="bg" src="room-honor.png" alt="荣誉墙">
 
-  <div id="stage">
+    <div id="overlay">
+      <div id="bgShade"></div>
 
-    <div id="bgWrap">
-      <img id="bg" src="room-honor.png" alt="荣誉墙">
-    </div>
-
-    <!-- 退出登录 -->
-    <img id="logoutImg" src="logout-on.png" alt="">
-    <svg id="logoutSvg" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <a href="#" onclick="handleLogoutHotspot();return false;">
-        <rect x="85.2" y="6" width="10.5" height="6"></rect>
-      </a>
-    </svg>
-
-    <!-- 顶部导航 -->
-    <div class="roomNav">
-      <button onclick="goHome()">大堂</button>
-      <button onclick="goRoom('dorm.html')">宿舍</button>
-      <button onclick="goRoom('living.html')">客厅</button>
-      <button onclick="goRoom('studio.html')">工作间</button>
-      <button onclick="goRoom('game.html')">游戏房</button>
-      <button onclick="goRoom('manager.html')">宿管室</button>
-    </div>
-
-    <!-- 翻页按钮 -->
-    <button id="btnPrevPage" class="pageBtn" onclick="goPrevPage()" title="上一页">‹</button>
-    <button id="btnNextPage" class="pageBtn" onclick="goNextPage()" title="下一页">›</button>
-
-    <!-- 右侧磨砂排行榜 -->
-    <div id="rankPanel">
-      <div id="rankPanelInner">
-        <button id="rankClose" onclick="closeRank()" title="关闭">×</button>
-        <div id="rankTitle">点击左侧奖杯查看排行榜</div>
-        <div id="rankDesc">这里会展示对应奖杯的排行榜、说明和统计起始时间。</div>
-        <div id="rankSince">统计时间：待设置</div>
-        <div id="rankList">
-          <div id="rankEmpty">请先点击左侧奖杯柜中的任意奖杯。</div>
+      <div id="topBar">
+        <div id="navOuter">
+          <div id="navScroll">
+            <nav id="roomNav" aria-label="房间切换">
+              <button class="navBtn" type="button" onclick="goRoom('index.html')">大堂</button>
+              <button class="navBtn" type="button" onclick="goRoom('game.html')">游戏房</button>
+              <button class="navBtn" type="button" onclick="goRoom('studio-Submit.html')">工作间</button>
+              <button class="navBtn" type="button" onclick="goRoom('living.html')">客厅</button>
+              <button class="navBtn" type="button" onclick="goRoom('dorm.html')">宿舍</button>
+              <button class="navBtn" type="button" onclick="goManagerRoom()">宿管室</button>
+              <button class="navBtn" type="button" onclick="goRoom('flower.html')">花房区</button>
+              <button class="navBtn" type="button" onclick="goRoom('pets.html')">宠物区</button>
+            </nav>
+          </div>
         </div>
       </div>
+
+      <div id="topActions">
+        <div id="topUserWrap">
+          <div id="topUserBar">
+            <div id="currentUserBadge">
+              <span class="identityText" id="currentUserText">未登录 | 参观者</span>
+            </div>
+            <button id="logoutBtn" type="button" onclick="handleIdentityAction()">登录</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="panelSwitch" aria-label="荣誉墙页面切换">
+        <button id="switchTitles" class="switchBtn" type="button" onclick="goRoom('honor-titles.html')">荣誉<br>图鉴</button>
+        <button id="switchGallery" class="switchBtn" type="button" onclick="goRoom('honor-gallery.html')">作品<br>展览</button>
+      </div>
+
+      <div id="rankPanel">
+        <div id="rankPanelInner">
+          <button id="rankClose" onclick="closeRank()" title="关闭">×</button>
+          <div id="rankTitle">点击左侧奖杯查看排行榜</div>
+          <div id="rankDesc">这里会展示对应奖杯的排行榜、说明和统计起始时间。</div>
+          <div id="rankSince">统计时间：待设置</div>
+          <div id="rankList">
+            <div id="rankEmpty">请先点击左侧奖杯柜中的任意奖杯。</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="trophyLabels">
+        <div class="label" id="label1" style="left:9.22%; top:40.25%;">-</div>
+        <div class="label" id="label2" style="left:21.42%; top:40.25%;">-</div>
+        <div class="label" id="label3" style="left:33.52%; top:40.25%;">-</div>
+
+        <div class="label" id="label4" style="left:9.22%; top:65.05%;">-</div>
+        <div class="label" id="label5" style="left:21.42%; top:65.05%;">-</div>
+        <div class="label" id="label6" style="left:33.52%; top:65.05%;">-</div>
+
+        <div class="label" id="label7" style="left:9.22%; top:91.00%;">-</div>
+        <div class="label" id="label8" style="left:21.42%; top:91.00%;">-</div>
+        <div class="label" id="label9" style="left:33.52%; top:91.00%;">-</div>
+      </div>
+
+      <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="奖杯热区">
+        <rect id="trophy1" class="trophyRect" x="3.70" y="18.20" width="10.7" height="19.1" onclick="showTrophy(1)"></rect>
+        <rect id="trophy2" class="trophyRect" x="15.90" y="18.20" width="10.7" height="19.1" onclick="showTrophy(2)"></rect>
+        <rect id="trophy3" class="trophyRect" x="28.10" y="18.20" width="10.7" height="19.1" onclick="showTrophy(3)"></rect>
+
+        <rect id="trophy4" class="trophyRect" x="3.70" y="42.80" width="10.7" height="19.3" onclick="showTrophy(4)"></rect>
+        <rect id="trophy5" class="trophyRect" x="15.90" y="42.80" width="10.7" height="19.3" onclick="showTrophy(5)"></rect>
+        <rect id="trophy6" class="trophyRect" x="28.10" y="42.80" width="10.7" height="19.3" onclick="showTrophy(6)"></rect>
+
+        <rect id="trophy7" class="trophyRect" x="3.70" y="67.30" width="10.7" height="20.3" onclick="showTrophy(7)"></rect>
+        <rect id="trophy8" class="trophyRect" x="15.90" y="67.30" width="10.7" height="20.3" onclick="showTrophy(8)"></rect>
+        <rect id="trophy9" class="trophyRect" x="28.10" y="67.30" width="10.7" height="20.3" onclick="showTrophy(9)"></rect>
+      </svg>
+
+      <div id="mobileTrophyList" aria-label="手机版奖杯排行榜入口">
+        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(1)">最佳尖叫鸡</button>
+        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(2)">觉醒狮子王</button>
+        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(3)">最刺激过山车</button>
+        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(4)">好多人啊</button>
+        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(5)">最佳双子星</button>
+        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(6)">闲工夫不负有心人</button>
+        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(7)">还要再战五百年</button>
+        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(8)">送你一朵小红花</button>
+        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(9)">音之炼金术师</button>
+      </div>
     </div>
+  </div>
+</div>
 
-    <!-- 奖杯铭牌获奖者 -->
-    <div id="trophyLabels">
-      <div class="label" id="label1" style="left:9.2%; top:40.4%;">-</div>
-      <div class="label" id="label2" style="left:21.5%; top:40.4%;">-</div>
-      <div class="label" id="label3" style="left:33.5%; top:40.4%;">-</div>
 
-      <div class="label" id="label4" style="left:9.2%; top:65%;">-</div>
-      <div class="label" id="label5" style="left:21.5%; top:65%;">-</div>
-      <div class="label" id="label6" style="left:33.5%; top:65%;">-</div>
+<div id="loginUI">
+  <div class="login-panel">
+    <img src="login.png" alt="登录框">
 
-      <div class="label" id="label7" style="left:9.2%; top:91.1%;">-</div>
-      <div class="label" id="label8" style="left:21.5%; top:91.1%;">-</div>
-      <div class="label" id="label9" style="left:33.5%; top:91.1%;">-</div>
-    </div>
+    <input id="username" type="text" autocomplete="username">
+    <input id="password" type="password" autocomplete="current-password">
 
-    <!-- 奖杯点击区域（热区不改） -->
-    <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <rect id="trophy1" class="trophyRect" x="3.2" y="18" width="12" height="20" onclick="showTrophy(1)"></rect>
-      <rect id="trophy2" class="trophyRect" x="15.5" y="18" width="12" height="20" onclick="showTrophy(2)"></rect>
-      <rect id="trophy3" class="trophyRect" x="27.5" y="18" width="12" height="20" onclick="showTrophy(3)"></rect>
+    <button id="togglePassword" type="button" onclick="togglePassword()"></button>
+    <button id="loginSubmitBtn" type="button" onclick="login()"></button>
 
-      <rect id="trophy4" class="trophyRect" x="3.2" y="43" width="12" height="20" onclick="showTrophy(4)"></rect>
-      <rect id="trophy5" class="trophyRect" x="15.2" y="43" width="12" height="20" onclick="showTrophy(5)"></rect>
-      <rect id="trophy6" class="trophyRect" x="27.5" y="43" width="12" height="20" onclick="showTrophy(6)"></rect>
+    <button id="registerLink" type="button" onclick="goRegisterFromHonor()">新成员先登记哦</button>
+    <button class="closeBtn" type="button" onclick="closeLogin()">×</button>
 
-      <rect id="trophy7" class="trophyRect" x="3.2" y="67.3" width="12" height="21" onclick="showTrophy(7)"></rect>
-      <rect id="trophy8" class="trophyRect" x="15.2" y="67.3" width="12" height="21" onclick="showTrophy(8)"></rect>
-      <rect id="trophy9" class="trophyRect" x="27.5" y="67.3" width="12" height="21" onclick="showTrophy(9)"></rect>
-    </svg>
-
+    <div id="loginMessage"></div>
   </div>
 </div>
 
 <script>
-function goHome(){
-  window.location.href = "index.html";
+
+const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+const ROOM_NAV_BOTTOM_POINTS = [
+  { width:2440, y:5.50 },
+  { width:970, y:5.48 },
+  { width:541, y:5.45 }
+];
+
+function getRoomNavBottomY(stageWidth){
+  const points = ROOM_NAV_BOTTOM_POINTS;
+
+  if(stageWidth >= points[0].width) return points[0].y;
+  if(stageWidth <= points[2].width) return points[2].y;
+
+  for(let i = 0; i < points.length - 1; i++){
+    const left = points[i];
+    const right = points[i + 1];
+
+    if(stageWidth <= left.width && stageWidth >= right.width){
+      const progress = (stageWidth - right.width) / (left.width - right.width);
+      return right.y + (left.y - right.y) * progress;
+    }
+  }
+
+  return points[1].y;
+}
+
+function normalizeLoginInput(value){
+  return String(value || "")
+    .replace(/\u3000/g, " ")
+    .trim();
+}
+
+function openLogin(){
+  const loginUI = document.getElementById("loginUI");
+  const msg = document.getElementById("loginMessage");
+
+  if(msg){
+    msg.innerText = "";
+    msg.style.color = "#8b4a2d";
+  }
+
+  loginUI.classList.add("show");
+
+  setTimeout(() => {
+    const username = document.getElementById("username");
+    if(username) username.focus();
+  }, 30);
+}
+
+function closeLogin(){
+  const loginUI = document.getElementById("loginUI");
+  const msg = document.getElementById("loginMessage");
+
+  if(loginUI) loginUI.classList.remove("show");
+  if(msg) msg.innerText = "";
+}
+
+function goRegisterFromHonor(){
+  sessionStorage.setItem("room10RegisterReturn", "honor.html");
+  window.location.href = "register.html?from=honor.html";
+}
+
+function togglePassword(){
+  const p = document.getElementById("password");
+  if(!p) return;
+  p.type = (p.type === "password") ? "text" : "password";
+}
+
+async function login(){
+  const nicknameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+  const msg = document.getElementById("loginMessage");
+
+  const nickname = normalizeLoginInput(nicknameInput.value);
+  const key = normalizeLoginInput(passwordInput.value);
+
+  msg.innerText = "";
+  msg.style.color = "#8b4a2d";
+
+  if(!nickname || !key){
+    msg.innerText = "还没填写完整呢";
+    return;
+  }
+
+  try{
+    const { data, error } = await client.rpc("verify_member_login", {
+      input_nickname: nickname,
+      input_code: key
+    });
+
+    if(error){
+      console.error("KEY 登录失败：", error);
+      msg.innerText = `登录检查失败：${error.message || "请稍后再试"}`;
+      return;
+    }
+
+    if(!Array.isArray(data) || data.length === 0){
+      msg.innerText = "没有找到你的记录哎";
+      return;
+    }
+
+    const user = data[0] || {};
+
+    localStorage.setItem("room10LoggedIn", "true");
+    localStorage.setItem("room10User", user.nickname || nickname);
+    localStorage.setItem("room10Role", user.role || "member");
+    localStorage.setItem("room10MemberId", user.member_id || user.id || "");
+
+    let roleMessage = "登录成功";
+    if(user.role === "owner"){
+      roleMessage = "维修工已上线";
+    }else if(user.role === "admin"){
+      roleMessage = "宿管已上线";
+    }else if(user.role === "member"){
+      roleMessage = "房客已登录";
+    }else if(user.role === "applying"){
+      roleMessage = "当前身份为申请中";
+    }
+
+    msg.style.color = "#5f7d3a";
+    msg.innerText = roleMessage;
+
+    updateIdentity();
+
+    setTimeout(() => {
+      nicknameInput.value = "";
+      passwordInput.value = "";
+      closeLogin();
+    }, 650);
+  }catch(e){
+    console.error("login() 查询异常：", e);
+    msg.style.color = "#8b4a2d";
+    msg.innerText = `登录失败：${e?.message || "请稍后再试"}`;
+  }
 }
 
 function goRoom(url){
   window.location.href = url;
 }
 
-const honorPages = [
-  "titles.html",
-  "honor.html",
-  "achievements.html",
-  "gallery.html"
-];
+function goManagerRoom(){
+  const user = readStoredUser();
+  const role = String(user.role || "").trim().toLowerCase();
 
-const trophyData = {
+  if(!user.loggedIn){
+    window.location.href = "manager-visitor.html";
+    return;
+  }
+
+  if(role === "owner" || role === "creator"){
+    window.location.href = "manager-owner.html";
+    return;
+  }
+
+  if(role === "admin"){
+    window.location.href = "manager-admin.html";
+    return;
+  }
+
+  window.location.href = "manager-member.html";
+}
+
+const fallbackTrophyData = {
   1:{
     title:"最佳尖叫鸡",
     desc:"统计成员在作品中达成的最高音表现，用于展示当前高音表现最突出的成员排行。",
-    since:"统计时间：自荣誉墙启用起累计",
+    since:"统计时间：按当前数据库实时统计",
     list:[
       {name:"夏", score:"#C6"},
       {name:"扬", score:"#C6"},
@@ -645,7 +1816,7 @@ const trophyData = {
   2:{
     title:"觉醒狮子王",
     desc:"统计成员在作品中达成的最低音表现，用于展示低音表现最突出的成员排行。",
-    since:"统计时间：自荣誉墙启用起累计",
+    since:"统计时间：按当前数据库实时统计",
     list:[
       {name:"扬", score:"E2"},
       {name:"夏", score:"F2"},
@@ -657,19 +1828,19 @@ const trophyData = {
   3:{
     title:"最刺激过山车",
     desc:"统计单曲中的最大音域跨度，用于展示在单首作品里跨度最夸张的成员排行。",
-    since:"统计时间：按作品音域记录累计",
+    since:"统计时间：按当前数据库实时统计",
     list:[
-      {name:"夏", score:"19度"},
-      {name:"桃", score:"17度"},
-      {name:"扬", score:"16度"},
-      {name:"罐", score:"15度"},
-      {name:"糖", score:"13度"}
+      {name:"夏", score:"19半音"},
+      {name:"桃", score:"17半音"},
+      {name:"扬", score:"16半音"},
+      {name:"罐", score:"15半音"},
+      {name:"糖", score:"13半音"}
     ]
   },
   4:{
     title:"好多人啊",
-    desc:"统计成员演唱过的不同角色数量，用于展示角色覆盖最广的成员排行。",
-    since:"统计时间：按角色记录累计",
+    desc:"统计成员已交音状态下唱过的不同原唱 / 角色数量，用于展示角色覆盖最广的成员排行。",
+    since:"统计时间：按当前数据库实时统计",
     list:[
       {name:"桃", score:"12角"},
       {name:"夏", score:"10角"},
@@ -680,8 +1851,8 @@ const trophyData = {
   },
   5:{
     title:"最佳双子星",
-    desc:"统计固定双人合作组合的合作次数，用于展示最常见和最默契的双人搭档。",
-    since:"统计时间：按双人合作项目累计",
+    desc:"统计同一个项目中两人都已交音的合作次数，用于展示最常见和最默契的双人搭档。",
+    since:"统计时间：按当前数据库实时统计",
     list:[
       {name:"夏 × 扬", score:"9次"},
       {name:"桃 × 罐", score:"7次"},
@@ -693,7 +1864,7 @@ const trophyData = {
   6:{
     title:"闲工夫不负有心人",
     desc:"统计报歌参与次数，展示在项目中最积极报名和参与的成员排行。",
-    since:"统计时间：按已记录报名数据累计",
+    since:"统计时间：按当前数据库实时统计",
     list:[
       {name:"桃", score:"32次"},
       {name:"夏", score:"28次"},
@@ -704,8 +1875,8 @@ const trophyData = {
   },
   7:{
     title:"还要再战五百年",
-    desc:"统计当前未交音或积压任务数量，用于展示当前欠债最多的成员排行。",
-    since:"统计时间：按当前任务状态实时计算",
+    desc:"统计制作中项目里演唱成员当前未交音数量，用于展示当前还需要再战的成员排行。",
+    since:"统计时间：按当前数据库实时统计",
     list:[
       {name:"夏", score:"7项"},
       {name:"桃", score:"5项"},
@@ -716,8 +1887,8 @@ const trophyData = {
   },
   8:{
     title:"送你一朵小红花",
-    desc:"统计成功补交、还债、完成积压任务的次数，用于展示还债最多成员排行。",
-    since:"统计时间：按补交记录累计",
+    desc:"统计当前演唱交音完成数，不统计后期交付，不要求项目已发布。",
+    since:"统计时间：按当前数据库实时统计",
     list:[
       {name:"扬", score:"14次"},
       {name:"夏", score:"12次"},
@@ -728,8 +1899,8 @@ const trophyData = {
   },
   9:{
     title:"音之炼金术师",
-    desc:"统计后期完成数量，用于展示完成后期作品最多的成员排行。",
-    since:"统计时间：按已完成后期记录累计",
+    desc:"统计当前混音 / 后期交付完成数，不统计演唱交音，不要求项目已发布。",
+    since:"统计时间：按当前数据库实时统计",
     list:[
       {name:"扬", score:"26首"},
       {name:"夏", score:"22首"},
@@ -740,6 +1911,239 @@ const trophyData = {
   }
 };
 
+
+const rankConfigs = {
+  1:{
+    key:"highest_note",
+    title:"最佳尖叫鸡",
+    desc:"统计成员在作品中达成的最高音表现，用于展示当前高音表现最突出的成员排行。",
+    since:"统计时间：按当前数据库实时统计"
+  },
+  2:{
+    key:"lowest_note",
+    title:"觉醒狮子王",
+    desc:"统计成员在作品中达成的最低音表现，用于展示低音表现最突出的成员排行。",
+    since:"统计时间：按当前数据库实时统计"
+  },
+  3:{
+    key:"widest_range",
+    title:"最刺激过山车",
+    desc:"统计单曲中的最大音域跨度，用于展示在单首作品里跨度最夸张的成员排行。",
+    since:"统计时间：按当前数据库实时统计"
+  },
+  4:{
+    key:"role_count",
+    title:"好多人啊",
+    desc:"统计成员已交音状态下唱过的不同原唱 / 角色数量，用于展示角色覆盖最广的成员排行。",
+    since:"统计时间：按当前数据库实时统计"
+  },
+  5:{
+    key:"best_duo",
+    title:"最佳双子星",
+    desc:"统计同一个项目中两人都已交音的合作次数，用于展示最常见和最默契的双人搭档。",
+    since:"统计时间：按当前数据库实时统计"
+  },
+  6:{
+    key:"join_count",
+    title:"闲工夫不负有心人",
+    desc:"统计报歌参与次数，展示在项目中最积极报名和参与的成员排行。",
+    since:"统计时间：按当前数据库实时统计"
+  },
+  7:{
+    key:"pending_count",
+    title:"还要再战五百年",
+    desc:"统计制作中项目里演唱成员当前未交音数量，用于展示当前还需要再战的成员排行。",
+    since:"统计时间：按当前数据库实时统计"
+  },
+  8:{
+    key:"catchup_count",
+    title:"送你一朵小红花",
+    desc:"统计当前演唱交音完成数，不统计后期交付，不要求项目已发布。",
+    since:"统计时间：按当前数据库实时统计"
+  },
+  9:{
+    key:"mix_count",
+    title:"音之炼金术师",
+    desc:"统计当前混音 / 后期交付完成数，不统计演唱交音，不要求项目已发布。",
+    since:"统计时间：按当前数据库实时统计"
+  }
+};
+
+let trophyData = {};
+let trophyDataReady = false;
+
+const memberAvatarMap = new Map();
+const memberNicknameMap = new Map();
+
+function normalizeRankRows(rows){
+  const mapped = (rows || [])
+    .map(row => {
+      const name = String(row.member_name || row.nickname || row.name || "").trim();
+      const score = String(row.score_text || row.score || row.value || "").trim();
+      const extraText = String(row.extra_text || "").trim();
+      const projectName = String(row.project_name || row.source_title || "").trim();
+      const memberId = String(row.member_id || "").trim();
+      const sortOrder = Number(row.sort_order || 0);
+      const scoreValue = Number(row.score_value || 0);
+      const avatarUrl = getAvatarUrlForName(name, memberId);
+
+      return {
+        name,
+        score,
+        sortOrder: Number.isFinite(sortOrder) && sortOrder > 0 ? sortOrder : null,
+        scoreValue: Number.isFinite(scoreValue) ? scoreValue : 0,
+        memberId,
+        avatarUrl,
+        extraText,
+        projectName
+      };
+    })
+    .filter(item => item.name && item.score);
+
+  const hasRealRank = mapped.some(item => item.sortOrder);
+  if(hasRealRank){
+    return mapped.filter(item => (item.sortOrder || 9999) <= 10);
+  }
+
+  return mapped.slice(0, 10);
+}
+
+function getMemberNameParts(name){
+  return String(name || "")
+    .split(/[×xX/、,，]/)
+    .map(part => part.trim())
+    .filter(Boolean);
+}
+
+function getAvatarUrlForName(name, memberId){
+  if(memberId && memberAvatarMap.has(memberId)){
+    return memberAvatarMap.get(memberId) || "";
+  }
+
+  const nameParts = getMemberNameParts(name);
+  if(nameParts.length === 1 && memberNicknameMap.has(nameParts[0])){
+    return memberNicknameMap.get(nameParts[0])?.avatar_url || "";
+  }
+
+  return "";
+}
+
+function getAvatarSourcesForItem(item){
+  const sources = [];
+
+  if(item?.avatarUrl){
+    sources.push({ name:item.name, avatarUrl:item.avatarUrl });
+    return sources;
+  }
+
+  getMemberNameParts(item?.name).forEach(name => {
+    const member = memberNicknameMap.get(name);
+    sources.push({
+      name,
+      avatarUrl:member?.avatar_url || ""
+    });
+  });
+
+  if(!sources.length && item?.name){
+    sources.push({ name:item.name, avatarUrl:"" });
+  }
+
+  return sources;
+}
+
+function renderAvatarStack(items){
+  const sources = [];
+
+  (items || []).forEach(item => {
+    getAvatarSourcesForItem(item).forEach(source => {
+      if(!sources.some(existing => existing.name === source.name && existing.avatarUrl === source.avatarUrl)){
+        sources.push(source);
+      }
+    });
+  });
+
+  return sources.slice(0, 5).map(source => {
+    const initial = String(source.name || "?").trim().slice(0, 1) || "?";
+    if(source.avatarUrl){
+      return `
+        <span class="rankAvatar" title="${escapeHtml(source.name)}">
+          <img src="${escapeHtml(source.avatarUrl)}" alt="${escapeHtml(source.name)}">
+        </span>
+      `;
+    }
+
+    return `<span class="rankAvatar" title="${escapeHtml(source.name)}">${escapeHtml(initial)}</span>`;
+  }).join("");
+}
+
+function applyFallbackRanks(){
+  trophyData = JSON.parse(JSON.stringify(fallbackTrophyData));
+  trophyDataReady = true;
+}
+
+async function loadTrophyDataFromDatabase(){
+  applyFallbackRanks();
+
+  try{
+    const [rankResult, memberResult] = await Promise.all([
+      client
+        .from("honor_live_rank_entries")
+        .select("rank_key, sort_order, member_id, member_name, score_text, extra_text, project_name, score_value, note")
+        .order("sort_order", { ascending:true })
+        .order("member_name", { ascending:true }),
+      client
+        .from("members")
+        .select("id, nickname, avatar_url")
+    ]);
+
+    if(memberResult.error){
+      console.warn("成员头像读取失败，将使用姓名章：", memberResult.error);
+    }else if(Array.isArray(memberResult.data)){
+      memberAvatarMap.clear();
+      memberNicknameMap.clear();
+
+      memberResult.data.forEach(member => {
+        const id = String(member.id || "").trim();
+        const nickname = String(member.nickname || "").trim();
+        const avatarUrl = String(member.avatar_url || "").trim();
+        const cleanMember = { id, nickname, avatar_url:avatarUrl };
+
+        if(id) memberAvatarMap.set(id, avatarUrl);
+        if(nickname) memberNicknameMap.set(nickname, cleanMember);
+      });
+    }
+
+    const { data, error } = rankResult;
+
+    if(error){
+      console.warn("荣誉墙实时榜单读取失败，已使用备用数据：", error);
+      return;
+    }
+
+    if(!Array.isArray(data) || !data.length){
+      return;
+    }
+
+    Object.entries(rankConfigs).forEach(([id, config]) => {
+      const rows = data.filter(row => String(row.rank_key || "").trim() === config.key);
+      const list = normalizeRankRows(rows);
+
+      trophyData[id] = {
+        title:config.title,
+        desc:config.desc,
+        since:config.since,
+        list:list.length ? list : (fallbackTrophyData[id]?.list || [])
+      };
+    });
+
+    trophyDataReady = true;
+    renderPlaqueWinners();
+  }catch(e){
+    console.warn("荣誉墙实时榜单读取异常，已使用备用数据：", e);
+  }
+}
+
+
 const rankPanel = document.getElementById("rankPanel");
 const rankTitle = document.getElementById("rankTitle");
 const rankDesc = document.getElementById("rankDesc");
@@ -748,25 +2152,13 @@ const rankList = document.getElementById("rankList");
 const trophyRects = document.querySelectorAll(".trophyRect");
 let rankPanelHideTimer = null;
 
-function getCurrentPageName(){
-  const current = window.location.pathname.split("/").pop();
-  return current || "honor.html";
-}
-
-function goPrevPage(){
-  const current = getCurrentPageName();
-  const currentIndex = honorPages.indexOf(current);
-  const safeIndex = currentIndex === -1 ? 1 : currentIndex;
-  const prevIndex = (safeIndex - 1 + honorPages.length) % honorPages.length;
-  window.location.href = honorPages[prevIndex];
-}
-
-function goNextPage(){
-  const current = getCurrentPageName();
-  const currentIndex = honorPages.indexOf(current);
-  const safeIndex = currentIndex === -1 ? 1 : currentIndex;
-  const nextIndex = (safeIndex + 1) % honorPages.length;
-  window.location.href = honorPages[nextIndex];
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
 
 function clearActiveTrophies(){
@@ -776,29 +2168,138 @@ function clearActiveTrophies(){
 function setActiveTrophy(id){
   clearActiveTrophies();
   const target = document.getElementById("trophy" + id);
-  if(target){
-    target.classList.add("active");
-  }
+  if(target) target.classList.add("active");
+}
+
+function buildGroupedRanks(list){
+  const groups = [];
+  const groupMap = new Map();
+
+  (list || []).forEach((item, index) => {
+    const rankNo = item.sortOrder || (index + 1);
+    const key = String(rankNo);
+
+    if(!groupMap.has(key)){
+      const group = {
+        rankNo,
+        items:[]
+      };
+      groupMap.set(key, group);
+      groups.push(group);
+    }
+
+    groupMap.get(key).items.push(item);
+  });
+
+  return groups;
+}
+
+function buildItemDetail(item){
+  const parts = [];
+  if(item?.extraText) parts.push(item.extraText);
+  if(item?.projectName) parts.push(`《${item.projectName}》`);
+  return parts.join("　");
+}
+
+function splitGroupsIntoColumns(groups){
+  const left = [];
+  const right = [];
+  let leftWeight = 0;
+  let rightWeight = 0;
+
+  (groups || []).forEach(group => {
+    const weight = 1 + Math.max(1, group.items.length) * 0.72;
+
+    if(leftWeight <= rightWeight){
+      left.push(group);
+      leftWeight += weight;
+    }else{
+      right.push(group);
+      rightWeight += weight;
+    }
+  });
+
+  return [left, right];
+}
+
+function renderRankGroup(group){
+  const groupScore = String(group.items[0]?.score || "").trim();
+
+  const rowsHtml = group.items.map(item => {
+    const detail = buildItemDetail(item);
+    const detailHtml = detail
+      ? `<div class="rankPersonDetail">${escapeHtml(detail)}</div>`
+      : "";
+
+    return `
+      <div class="rankPersonRow">
+        <div class="rankPersonName">${escapeHtml(item.name)}</div>
+        ${detailHtml}
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <div class="rankItem rankGroup ${group.items.length > 1 ? "hasTie" : "singleGroup"}">
+      <div class="rankGroupHead">
+        <span class="rankBadge">第 ${group.rankNo} 名</span>
+        <span class="rankGroupScore">${escapeHtml(groupScore)}</span>
+      </div>
+      <div class="rankRows">${rowsHtml}</div>
+    </div>
+  `;
+}
+
+function renderChampion(groups){
+  const topGroup = groups?.[0];
+  if(!topGroup || !topGroup.items?.length) return "";
+
+  const topNames = topGroup.items.map(item => item.name).join(" / ");
+  const topScore = String(topGroup.items[0]?.score || "").trim();
+  const topDetails = topGroup.items
+    .map(item => buildItemDetail(item))
+    .filter(Boolean)
+    .join("　/　");
+
+  return `
+    <div class="rankChampion">
+      <div class="rankChampionMain">
+        <div class="rankChampionKicker">榜首 · 第 ${topGroup.rankNo} 名</div>
+        <div class="rankChampionTitle">${escapeHtml(topNames)}</div>
+        ${topDetails ? `<div class="rankChampionMeta">${escapeHtml(topDetails)}</div>` : ""}
+      </div>
+      <div class="rankChampionAvatars">${renderAvatarStack(topGroup.items)}</div>
+      <div class="rankChampionScore">${escapeHtml(topScore)}</div>
+    </div>
+  `;
 }
 
 function renderRankList(list){
   rankList.innerHTML = "";
+
   if(!list || !list.length){
     rankList.innerHTML = '<div id="rankEmpty">当前还没有可展示的数据。</div>';
     return;
   }
 
-  list.forEach((item, index) => {
-    const row = document.createElement("div");
-    row.className = "rankItem";
-    row.innerHTML = `
-      <div class="rankNo">第 ${index + 1} 名</div>
-      <div class="rankName">${item.name}</div>
-      <div class="rankScore">${item.score}</div>
-    `;
-    rankList.appendChild(row);
-  });
+  const groups = buildGroupedRanks(list);
+  const boardGroups = groups.slice(1);
+  const [leftGroups, rightGroups] = splitGroupsIntoColumns(boardGroups);
+  const boardHtml = boardGroups.length
+    ? `
+      <div class="rankBoard">
+        <div class="rankColumn">${leftGroups.map(renderRankGroup).join("")}</div>
+        <div class="rankColumn">${rightGroups.map(renderRankGroup).join("")}</div>
+      </div>
+    `
+    : '<div id="rankEmpty">榜首之后暂无其他名次。</div>';
+
+  rankList.innerHTML = `
+    ${renderChampion(groups)}
+    ${boardHtml}
+  `;
 }
+
 
 function openRankPanel(){
   clearTimeout(rankPanelHideTimer);
@@ -811,7 +2312,8 @@ function openRankPanel(){
 }
 
 function showTrophy(id){
-  const data = trophyData[id];
+  if(!trophyDataReady) applyFallbackRanks();
+  const data = trophyData[id] || fallbackTrophyData[id];
   if(!data) return;
 
   setActiveTrophy(id);
@@ -819,7 +2321,6 @@ function showTrophy(id){
   rankDesc.textContent = data.desc;
   rankSince.textContent = data.since;
   renderRankList(data.list);
-
   openRankPanel();
 }
 
@@ -835,24 +2336,28 @@ function closeRank(){
 }
 
 function getPlaqueText(id){
-  const list = trophyData[id]?.list || [];
+  if(!trophyDataReady) applyFallbackRanks();
+  const list = (trophyData[id] || fallbackTrophyData[id])?.list || [];
   if(!list.length) return "-";
 
   const first = list[0];
   if(!first || first.score === undefined || first.score === null) return "-";
 
+  const topRank = first.sortOrder || 1;
   const topScore = String(first.score).trim();
   if(!topScore) return "-";
 
   const tiedNames = list
-    .filter(item => String(item.score).trim() === topScore)
+    .filter(item => {
+      if(item.sortOrder) return item.sortOrder === topRank;
+      return String(item.score).trim() === topScore;
+    })
     .map(item => String(item.name || "").trim())
     .filter(Boolean);
 
-  if(!tiedNames.length) return "-";
-
-  return tiedNames.join(" / ");
+  return tiedNames.length ? tiedNames.join(" / ") : "-";
 }
+
 
 function renderPlaqueWinners(){
   for(let i = 1; i <= 9; i++){
@@ -862,11 +2367,7 @@ function renderPlaqueWinners(){
     const text = getPlaqueText(i);
     el.textContent = text;
 
-    if(
-      text.includes("/") ||
-      text.includes("×") ||
-      text.length >= 6
-    ){
+    if(text.includes("/") || text.includes("×") || text.length >= 6){
       el.classList.add("multi");
     }else{
       el.classList.remove("multi");
@@ -874,50 +2375,189 @@ function renderPlaqueWinners(){
   }
 }
 
-renderPlaqueWinners();
-
-const logoutImg = document.getElementById("logoutImg");
-const logoutSvg = document.getElementById("logoutSvg");
-
-function isLoggedIn(){
-  return localStorage.getItem("room10LoggedIn") === "true";
+function readStoredUser(){
+  return {
+    nickname: localStorage.getItem("room10User") || "",
+    role: localStorage.getItem("room10Role") || "",
+    memberId: localStorage.getItem("room10MemberId") || "",
+    loggedIn: localStorage.getItem("room10LoggedIn") === "true"
+  };
 }
 
-function updateLogoutDisplay(){
-  if(isLoggedIn()){
-    logoutImg.style.display = "block";
-    logoutSvg.style.display = "block";
-    logoutImg.src = "logout-on.png";
+function getRoleLabel(role){
+  const map = {
+    owner: "维修工",
+    admin: "宿管",
+    member: "房客",
+    applying: "申请中",
+    visitor: "参观者"
+  };
+  return map[String(role || "visitor").toLowerCase()] || "参观者";
+}
+
+function updateIdentity(){
+  const currentUserText = document.getElementById("currentUserText");
+  const actionBtn = document.getElementById("logoutBtn");
+  const user = readStoredUser();
+
+  if(user.loggedIn){
+    currentUserText.textContent = `${user.nickname || "未登录"} | ${getRoleLabel(user.role)}`;
+    actionBtn.textContent = "登出";
+    actionBtn.title = "登出";
   }else{
-    logoutImg.style.display = "none";
-    logoutSvg.style.display = "none";
+    currentUserText.textContent = "未登录 | 参观者";
+    actionBtn.textContent = "登录";
+    actionBtn.title = "登录";
   }
 }
 
-function handleLogoutHotspot(){
-  if(isLoggedIn()){
-    localStorage.removeItem("room10LoggedIn");
-    localStorage.removeItem("room10User");
-    localStorage.removeItem("room10Role");
-    updateLogoutDisplay();
-    alert("已退出登录");
-    window.location.href = "index.html";
+function handleIdentityAction(){
+  const user = readStoredUser();
+  if(user.loggedIn){
+    logoutRoom10();
+    return;
+  }
+  openLogin();
+}
+
+function logoutRoom10(){
+  [
+    "room10LoggedIn",
+    "room10User",
+    "room10CurrentUser",
+    "room10Member",
+    "room10Role",
+    "room10Nickname",
+    "room10MemberId",
+    "room10ApplicantSession",
+    "room10ApplicationDraft"
+  ].forEach(key => localStorage.removeItem(key));
+
+  updateIdentity();
+  window.location.href = "index.html";
+}
+
+function updateStageScale(){
+  const stage = document.getElementById("stageFrame");
+  const topBar = document.getElementById("topBar");
+  const navOuter = document.getElementById("navOuter");
+  const navScroll = document.getElementById("navScroll");
+  const roomNav = document.getElementById("roomNav");
+  if(!stage) return;
+
+  const rect = stage.getBoundingClientRect();
+  const rawScale = rect.width / 2048;
+  const uiScale = Math.max(0.30, Math.min(1.60, rawScale));
+  stage.style.setProperty("--ui-scale", uiScale.toFixed(3));
+
+  const switchFontSize = Math.max(9.8, Math.min(18.2, rawScale * 14.8));
+  stage.style.setProperty("--switch-font-size", `${switchFontSize.toFixed(2)}px`);
+
+  const topActions = document.getElementById("topActions");
+  const topUserWrap = document.getElementById("topUserWrap");
+  if(topActions){
+    let identityScale = Math.max(0.34, Math.min(1.78, rawScale * 1.06));
+    if(rect.width <= 540){
+      identityScale = 1;
+    }
+    topActions.style.setProperty("--topbar-scale", identityScale.toFixed(3));
+  }
+
+  if(topBar && navOuter && navScroll && roomNav){
+    const navScale = Math.max(0.30, Math.min(1.60, rawScale));
+
+    if(rect.width <= 540){
+      stage.style.setProperty("--nav-btn-height", "30px");
+      stage.style.setProperty("--nav-btn-px", "10px");
+      stage.style.setProperty("--nav-btn-radius", "10px");
+      stage.style.setProperty("--nav-btn-font", "11px");
+      stage.style.setProperty("--nav-gap", "6px");
+    }else{
+      stage.style.setProperty("--nav-btn-height", `${(60 * navScale).toFixed(2)}px`);
+      stage.style.setProperty("--nav-btn-px", `${(26 * navScale).toFixed(2)}px`);
+      stage.style.setProperty("--nav-btn-radius", `${(17 * navScale).toFixed(2)}px`);
+      stage.style.setProperty("--nav-btn-font", `${(23 * navScale).toFixed(2)}px`);
+      stage.style.setProperty("--nav-gap", `${(12 * navScale).toFixed(2)}px`);
+    }
+
+    navScroll.scrollLeft = 0;
+    roomNav.style.transformOrigin = "left top";
+    roomNav.style.flexWrap = "nowrap";
+
+    if(rect.width <= 540){
+      topBar.style.top = "";
+      if(topActions) topActions.style.top = "";
+      navScroll.style.overflow = "visible";
+      navOuter.style.overflow = "visible";
+      navOuter.style.width = "100%";
+      navOuter.style.height = "auto";
+      roomNav.style.transform = "none";
+      return;
+    }
+
+    navScroll.style.overflow = "visible";
+    navOuter.style.overflow = "visible";
+    roomNav.style.transform = "scale(1)";
+
+    requestAnimationFrame(() => {
+      const availableWidth = Math.max(1, topBar.getBoundingClientRect().width);
+      const requiredWidth = Math.max(1, roomNav.scrollWidth || 1);
+      const fit = Math.min(1, availableWidth / requiredWidth);
+      roomNav.style.transform = fit < 1 ? `scale(${fit.toFixed(5)})` : "scale(1)";
+
+      const scaledNavRect = roomNav.getBoundingClientRect();
+      navOuter.style.width = `${Math.ceil(scaledNavRect.width)}px`;
+      navOuter.style.height = `${Math.ceil(scaledNavRect.height)}px`;
+
+      if(rect.width > 540){
+        const targetBottomY = getRoomNavBottomY(rect.width);
+
+        /*
+          用真实渲染后的按钮底边来校准，而不是只用高度推算。
+          这样可以避开 transform、border、字体渲染、外层容器高度取整等导致的偏差。
+          目标：房间按钮视觉下线 / 底边 = targetBottomY。
+        */
+        const currentNavRect = roomNav.getBoundingClientRect();
+        const currentTopPercent = ((topBar.getBoundingClientRect().top - rect.top) / rect.height) * 100;
+        const currentBottomPercent = ((currentNavRect.bottom - rect.top) / rect.height) * 100;
+        const targetTopPercent = currentTopPercent + (targetBottomY - currentBottomPercent);
+
+        topBar.style.top = `${targetTopPercent.toFixed(3)}%`;
+
+        if(topActions && topUserWrap){
+          const navHeightPercent = (currentNavRect.height / rect.height) * 100;
+          const navCenterPercent = targetBottomY - navHeightPercent / 2;
+          const userRect = topUserWrap.getBoundingClientRect();
+          const userHeightPercent = (userRect.height / rect.height) * 100;
+          const userTopPercent = navCenterPercent - userHeightPercent / 2;
+          topActions.style.top = `${userTopPercent.toFixed(3)}%`;
+        }
+      }
+    });
   }
 }
 
-logoutSvg.addEventListener("mouseenter", () => {
-  if(isLoggedIn()){
-    logoutImg.src = "logout-out.png";
-  }
+window.addEventListener("resize", updateStageScale);
+
+window.addEventListener("pageshow", () => {
+  updateIdentity();
+  updateStageScale();
 });
 
-logoutSvg.addEventListener("mouseleave", () => {
-  if(isLoggedIn()){
-    logoutImg.src = "logout-on.png";
-  }
+
+document.getElementById("username").addEventListener("keydown", (e) => {
+  if(e.key === "Enter") login();
 });
 
-updateLogoutDisplay();
+document.getElementById("password").addEventListener("keydown", (e) => {
+  if(e.key === "Enter") login();
+});
+
+applyFallbackRanks();
+renderPlaqueWinners();
+loadTrophyDataFromDatabase();
+updateIdentity();
+updateStageScale();
 </script>
 
 </body>
