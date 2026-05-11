@@ -229,7 +229,7 @@ body.embedded .closeBtn{display:none;}
   .title{font-size:44px}.subtitle{font-size:18px}.closeBtn{height:46px; min-width:100px; font-size:18px;}
   .setupLeft{width:360px; flex-basis:360px}.setupRight{width:360px; flex-basis:360px}.runRight{width:500px; flex-basis:500px;}
   .wheelWrap{width:min(69vh,780px); height:min(69vh,780px)}.centerBtn{width:88px;height:88px;font-size:19px;}
-  .cardTitle{font-size:22px}.chip,.resultItem,.previewItem{font-size:17px}.hint,.noticeBox{font-size:16px}.input,.select,.textarea{font-size:16px;}
+  .cardTitle{font-size:22px}.resultItem,.previewItem{font-size:17px}.hint,.noticeBox{font-size:16px}.input,.select,.textarea{font-size:16px;}
   .primaryBtn,.softBtn{height:48px; font-size:17px;}
 }
 @media (max-width:860px){
@@ -300,7 +300,7 @@ body.embedded .closeBtn{display:none;}
       <main class="setupMain">
         <div class="card sectionCard" style="flex:1 1 auto; display:flex; flex-direction:column; min-height:0;">
           <div class="cardTitle">粘贴原唱 / 段落</div>
-          <div class="hint">每行一个，或用顿号、逗号分隔。每个名字都会成为转盘上的一个格子。</div>
+          <div class="hint">可用中文/英文逗号或换行分隔；顿号会保留在同一格；也支持“原唱–演唱者”，转盘只读取原唱部分。</div>
           <textarea class="textarea" id="specialText" style="flex:1 1 auto; min-height:300px; margin-top:12px;" placeholder="王一哲\n高卿尘\n阿如那\n梁龙\n庆怜"></textarea>
         </div>
       </main>
@@ -347,7 +347,7 @@ body.embedded .closeBtn{display:none;}
 const COLORS=["#ffe5c2","#ffd6a5","#ffcad4","#cdb4db","#bde0fe","#caffbf","#f8edc6","#d8f3dc","#fde2e4","#e2ece9","#fbc4ab","#d0f4de"];
 const DEFAULT_SINGERS=[{id:"demo-a",member_id:"demo-a",name:"扬",label:"扬"},{id:"demo-b",member_id:"demo-b",name:"夏",label:"夏"},{id:"demo-c",member_id:"demo-c",name:"桃",label:"桃"},{id:"demo-d",member_id:"demo-d",name:"罐",label:"罐"},{id:"demo-e",member_id:"demo-e",name:"Lumi",label:"Lumi"}];
 const DEFAULT_ROLES=["1","2","3","4","5"].map((v,i)=>({id:`demo-r-${i}`,part_id:`demo-r-${i}`,original_name:v,label:v}));
-let singers=[];let roles=[];let addonLayers=[];let runMode="default";let runLayers=[];let currentResults=[];let layerRotations=[];let layerReadStarts=[];let spinning=false;let wheelContext={};
+let singers=[];let roles=[];let addonLayers=[];let runMode="default";let runLayers=[];let currentResults=[];let layerRotations=[];let layerReadStarts=[];let specialSegments=[];let spinning=false;let wheelContext={};
 const $=id=>document.getElementById(id);
 function safe(v){return String(v??"").trim();}
 function hasParent(){return window.parent&&window.parent!==window;}
@@ -357,7 +357,7 @@ function parseJsonParam(v){if(!v)return null;for(const c of [v,decodeURIComponen
 function normalizeSinger(item,index){if(typeof item==="string"){const label=safe(item);return label?{id:label,member_id:label,name:label,label}:null;}if(item&&typeof item==="object"){const id=safe(item.member_id||item.memberId||item.id||item.nickname||item.name||`singer-${index}`);const label=safe(item.label||item.nickname||item.name||item.member_name||item.memberName||id);return label?{...item,id,member_id:id,name:label,label}:null;}return null;}
 function normalizeRole(item,index){if(typeof item==="string"){const label=safe(item);return label?{id:label,part_id:label,original_name:label,label}:null;}if(item&&typeof item==="object"){const id=safe(item.part_id||item.project_part_id||item.partId||item.id||item.original_name||`role-${index}`);const label=safe(item.label||item.original_name||item.originalName||item.name||item.title||id);return label?{...item,id,part_id:id,original_name:label,label}:null;}return null;}
 function normalizeList(arr,fn){if(!Array.isArray(arr))return[];const seen=new Set();const out=[];arr.forEach((x,i)=>{const n=fn(x,i);if(!n)return;const key=n.id||n.label;if(seen.has(key))return;seen.add(key);out.push(n);});return out;}
-function setWheelData(data={}){wheelContext={project_id:data.project_id||data.projectId||data.task_id||data.taskId||"",project_name:data.project_name||data.projectName||data.task_name||data.taskName||""};singers=normalizeList(data.singers||data.members||data.inner||data.innerItems||[],normalizeSinger);roles=normalizeList(data.roles||data.parts||data.outer||data.outerItems||data.items||[],normalizeRole);if(!singers.length)singers=[...DEFAULT_SINGERS];if(!roles.length)roles=[...DEFAULT_ROLES];startDefaultMode(true);}
+function setWheelData(data={}){specialSegments=[];wheelContext={project_id:data.project_id||data.projectId||data.task_id||data.taskId||"",project_name:data.project_name||data.projectName||data.task_name||data.taskName||""};singers=normalizeList(data.singers||data.members||data.inner||data.innerItems||[],normalizeSinger);roles=normalizeList(data.roles||data.parts||data.outer||data.outerItems||data.items||[],normalizeRole);if(!singers.length)singers=[...DEFAULT_SINGERS];if(!roles.length)roles=[...DEFAULT_ROLES];startDefaultMode(true);}
 function chipList(id,items){const el=$(id);el.innerHTML="";items.forEach(i=>{const s=document.createElement("span");s.className="chip";s.textContent=i.label||i.name||i.original_name;s.title=s.textContent;el.appendChild(s);});}
 function validateBase(){if(!singers.length){alert("暂无演唱者");return false;}return true;}
 function makeRegularRunLayers(){
@@ -405,7 +405,18 @@ function getAddonField(name){return document.querySelector(`[data-addon="${name}
 function decimalPlaces(v){const t=String(v);return t.includes('.')?t.split('.')[1].length:0;}
 function formatRangeValue(value,{step=1,zeroLabel='',oneLabel='',suffix='',showSign=false}={}){const d=decimalPlaces(step);let n=Number(value.toFixed(Math.max(0,d)));if(Object.is(n,-0))n=0;if(n===0&&zeroLabel)return zeroLabel;if(n===1&&oneLabel)return oneLabel;let text=d>0?n.toFixed(d):String(Math.round(n));if(showSign&&n>0)text=`+${text}`;return `${text}${suffix}`;}
 function rangeValues(min,max,step,opts){min=Number(min);max=Number(max);step=Math.abs(Number(step));if(!Number.isFinite(min)||!Number.isFinite(max)||!Number.isFinite(step)||step<=0)return[];const a=Math.min(min,max),b=Math.max(min,max),out=[];let count=0;for(let v=a;v<=b+step/1000&&count<1000;v+=step){out.push(formatRangeValue(v,{step,...opts}));count++;}return out;}
-function splitValues(text){return String(text||'').split(/\n|,|，|、/).map(safe).filter(Boolean);}
+function splitValues(text){return String(text||'').split(/[\n,，、]+/).map(safe).filter(Boolean);}
+function parseSpecialOriginalSegments(text){
+  return String(text||'')
+    .split(/[\n,，]+/)
+    .map(item=>item.trim())
+    .filter(Boolean)
+    .map(item=>{
+      const parts=item.split(/\s*[–—-]\s*/);
+      return safe(parts[0]||'');
+    })
+    .filter(Boolean);
+}
 function parseTimeToSeconds(v){const parts=safe(v).split(':').map(Number);if(parts.some(x=>!Number.isFinite(x)))return 0;if(parts.length===1)return parts[0];if(parts.length===2)return parts[0]*60+parts[1];return parts[0]*3600+parts[1]*60+parts[2];}
 function formatSeconds(sec){sec=Math.max(0,Math.round(sec));const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;if(h>0)return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;return `${m}:${String(s).padStart(2,'0')}`;}
 function roleOrder(role,index){const m=safe(role.original_name||role.label).match(/\d+/);return m?Number(m[0]):index+1;}
@@ -417,9 +428,9 @@ function removeAddonLayer(i){addonLayers.splice(i,1);renderAddonKindOptions();re
 function renderAddonLayers(){const list=$("addonLayerList");list.innerHTML='';if(!addonLayers.length)list.innerHTML='<div class="hint">暂无附加层。</div>';addonLayers.forEach((l,i)=>{const div=document.createElement('div');div.className='layerItem';div.innerHTML=`<div class="layerHead"><div class="layerName">${escapeHtml(l.name)}</div><button class="smallBtn" onclick="removeAddonLayer(${i})">删除</button></div><div class="hint">${l.assignMode==='byRole'?'按原唱顺序绑定':'每项数量：'+l.qty}<br>${escapeHtml(l.values.join('、'))}</div>`;list.appendChild(div);});const preview=['演唱者','原唱',...addonLayers.map(l=>l.name)];$("addonPreviewList").innerHTML=preview.map((p,i)=>`<div class="previewItem">第${i+1}层：${escapeHtml(p)}</div>`).join('');if(!addonLayers.length)$("addonNotice").textContent='当前只使用默认两层。添加条件后再生成转盘。';}
 function buildPoolLayerValues(layer,n){if(layer.assignMode==='byRole')return null;const pool=[];layer.values.forEach(v=>{for(let i=0;i<layer.qty;i++)pool.push(v);});while(pool.length<n)layer.values.forEach(v=>pool.push(v));return shuffle(pool).slice(0,n);}
 function generateAddonWheel(){runMode='addon';runLayers=makeRegularRunLayers();openRun('附加转盘');}
-function renderSpecialPreview(){const items=splitValues($("specialText")?.value||'');if($("specialPreviewList"))$("specialPreviewList").innerHTML=`<div class="previewItem">演唱者：${singers.length}人</div><div class="previewItem">段落：${items.length}项</div>`;}
-function generateSpecialWheel(){const segments=splitValues($("specialText").value);if(!segments.length){alert('请先粘贴原唱或段落名');return;}runMode='special';
-  window.specialSegments=segments;
+function renderSpecialPreview(){const items=parseSpecialOriginalSegments($("specialText")?.value||'');if($("specialPreviewList"))$("specialPreviewList").innerHTML=`<div class="previewItem">演唱者：${singers.length}人</div><div class="previewItem">段落：${items.length}项</div>`;}
+function generateSpecialWheel(){const segments=parseSpecialOriginalSegments($("specialText").value);if(!segments.length){alert('请先粘贴原唱或段落名');return;}runMode='special';
+  specialSegments=segments;
   runLayers=[
     {key:'singers',name:'演唱者',items:shuffle(singers).map(x=>({...x,label:x.label}))},
     {key:'segments',name:'原唱/段落',items:shuffle(segments).map((v,i)=>({id:`seg-${i}`,label:v}))}
@@ -499,8 +510,8 @@ function prepareLayersForSpin(){
   if(runMode==='default' || runMode==='addon'){
     runLayers=makeRegularRunLayers();
   }else if(runMode==='special'){
-    const source=(window.specialSegments&&window.specialSegments.length)
-      ? window.specialSegments
+    const source=specialSegments.length
+      ? specialSegments
       : (runLayers.find(layer=>layer.key==='segments')?.items || []).map(x=>x.label);
     runLayers=[
       {key:'singers',name:'演唱者',items:shuffle(singers).map(x=>({...x,label:x.label}))},
@@ -595,7 +606,7 @@ function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.fl
 function escapeHtml(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 function closeWheel(){post({type:'ROOM10_WHEEL_CLOSE',context:{...wheelContext}});if(!hasParent()&&history.length>1)history.back();}
 window.addEventListener('message',e=>{const d=e.data||{};if(d.type==='ROOM10_WHEEL_INIT')setWheelData(d);});
-window.addEventListener('load',()=>{if(hasParent()||new URLSearchParams(location.search).get('embed')==='1')document.body.classList.add('embedded');const data=parseJsonParam(new URLSearchParams(location.search).get('data'));setWheelData(data||{});$('specialText').addEventListener('input',renderSpecialPreview);post({type:'ROOM10_WHEEL_READY'});});
+window.addEventListener('load',()=>{const params=new URLSearchParams(location.search);if(hasParent()||params.get('embed')==='1')document.body.classList.add('embedded');const data=parseJsonParam(params.get('data'));setWheelData(data||{});$('specialText').addEventListener('input',renderSpecialPreview);post({type:'ROOM10_WHEEL_READY'});});
 </script>
 </body>
 </html>
