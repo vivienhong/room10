@@ -160,9 +160,6 @@
     0 4px 10px rgba(112,83,52,0.16);
 }
 
-/* =========================================================
-   身份组件：恢复 todo 奶油半透明标准样式
-========================================================= */
 #logoutBtn{
     appearance:none;
     border:none;
@@ -331,10 +328,6 @@
     display:block;
     line-height:1;
     filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
-  }
-
-#siteNoticeText{
-    display:none;
   }
 
 #siteNoticeCount{
@@ -980,7 +973,6 @@
     border-radius:999px;
   }
 
-
   .sectionCard{
     padding:calc(10px * var(--project-panel-scale)) calc(11px * var(--project-panel-scale)) calc(10px * var(--project-panel-scale));
     border-radius:calc(18px * var(--project-panel-scale));
@@ -1113,7 +1105,6 @@
     width:100%;
   }
 
-
   .tinyActionBtn{
     appearance:none;
     border:none;
@@ -1159,8 +1150,6 @@
     transform:none;
   }
 
-  
-
   .bottomGrid{
     display:grid;
     grid-template-columns:1.05fr 1fr;
@@ -1195,7 +1184,6 @@
     align-items:flex-start;
     gap:4px;
   }
-
 
   .producerNameInline{
     color:#5a3921;
@@ -1246,8 +1234,8 @@
     font-size:var(--project-font-lg);
     font-weight:700;
     line-height:1.1;
-  white-space:nowrap;
-}
+    white-space:nowrap;
+  }
 
   .goldSub{
     margin-top:calc(3px * var(--project-panel-scale));
@@ -1631,7 +1619,6 @@
       0 4px 10px rgba(116,86,54,0.14);
   }
 
-
   .taskEditRows{
     display:flex;
     flex-direction:column;
@@ -1648,7 +1635,6 @@
     background:rgba(255,255,255,0.72);
     border:1px solid rgba(214,186,149,0.24);
   }
-
 
 .taskEditRemoveBtn{
   appearance:none;
@@ -1826,7 +1812,6 @@
     transform:none !important;
     filter:none !important;
   }
-
 
   .taskEditPickerGroup{
     display:flex;
@@ -2015,11 +2000,6 @@
     100%{transform:translate3d(var(--note-drift-x,14px),var(--note-drift-y,-72px),0) rotate(var(--note-rot-end,10deg)) scale(calc(var(--note-scale,1) * 1.04));opacity:0;}
   }
 
-
-/* =========================================================
-   最新统一基准：身份组件 / 房间切换 / 页面切换 / 主面板 / 字号系统
-   旧版定位、旧身份小圆点、max 固定字号、旧页面切换偏移全部在这里失效。
-========================================================= */
 @media (min-width:541px){
   #overlay{
     --bg-scale:var(--bg-ui-scale, 1);
@@ -2229,6 +2209,19 @@
     line-height:1 !important;
   }
   #siteNoticeIcon{font-size:1em !important;transform:translateY(var(--identity-icon-shift, 0px)) !important;}
+  #siteNoticeCount{
+    left:50% !important;
+    right:auto !important;
+    top:calc(var(--notice-count-size, 14px) * -0.62) !important;
+    transform:translateX(-50%) !important;
+    min-width:var(--notice-count-size, 14px) !important;
+    height:var(--notice-count-size, 14px) !important;
+    padding:0 var(--notice-count-pad-x, 4px) !important;
+    border-width:var(--notice-count-border, 1.2px) !important;
+    font-size:var(--notice-count-font, 8px) !important;
+    line-height:1 !important;
+    pointer-events:none !important;
+  }
   #logoutBtn{
     order:3 !important;
     flex:0 0 var(--identity-logout-w) !important;
@@ -2244,9 +2237,26 @@
     overflow:hidden !important;
   }
   @media (max-width:853.98px){
-    #currentUserBadge .identityText{width:100% !important;max-width:100% !important;display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;gap:1px !important;white-space:normal !important;text-align:center !important;line-height:1.02 !important;}
-    #currentUserBadge .identitySep{display:none !important;}
-    #currentUserBadge .identityName,#currentUserBadge .identityRole{display:block !important;width:100% !important;white-space:nowrap !important;text-align:center !important;line-height:1.02 !important;}
+    #currentUserBadge{overflow:visible !important;}
+    #currentUserBadge .identityText{
+      width:100% !important;
+      max-width:100% !important;
+      display:block !important;
+      white-space:nowrap !important;
+      overflow:visible !important;
+      text-overflow:clip !important;
+      text-align:center !important;
+      line-height:1 !important;
+    }
+    #currentUserBadge .identitySep{display:inline !important;}
+    #currentUserBadge .identityName,
+    #currentUserBadge .identityRole{
+      display:inline !important;
+      width:auto !important;
+      white-space:nowrap !important;
+      text-align:center !important;
+      line-height:1 !important;
+    }
   }
 
   #panelSwitch{
@@ -2284,7 +2294,6 @@
   .switchBtn:hover{transform:none !important;}
 }
 
-/* 主面板文字可读性：跟随底图缩放，中屏 980px 附近单独补强 */
 @media (min-width:541px) and (max-width:1180px){
   #overlay{
     --project-font-xs:calc(13px * var(--bg-scale)) !important;
@@ -2344,11 +2353,6 @@
   .taskEditInput,.taskEditSelect{min-height:calc(50px * var(--bg-scale)) !important;font-size:calc(18px * var(--bg-scale)) !important;border-radius:calc(15px * var(--bg-scale)) !important;}
 }
 
-
-/* =========================================================
-   任务详情主面板字号优化：跟随底图比例连续缩放
-   说明：不再使用固定下限 clamp，屏幕越小字号会继续缩小；大屏只做上限保护。
-========================================================= */
 @media (min-width:541px){
   #overlay{
     --project-detail-scale:var(--bg-scale, 1);
@@ -2514,7 +2518,6 @@
   }
 }
 
-
 @media (max-width:540px){
   html,body{height:auto !important;min-height:100% !important;overflow:auto !important;}
   body{display:block !important;background:linear-gradient(180deg,#efe4d5 0%,#e4d5c4 100%) !important;}
@@ -2523,15 +2526,29 @@
   #overlay{position:relative !important;inset:auto !important;left:auto !important;top:auto !important;width:100% !important;height:auto !important;min-height:100dvh !important;overflow:visible !important;padding:18px 4px 12px !important;pointer-events:auto !important;--bg-ui-scale:1 !important;--project-panel-scale:1 !important;}
   #topBarUserAnchor,#topBar,#taskPanel,#panelSwitch{position:relative !important;left:auto !important;right:auto !important;top:auto !important;bottom:auto !important;width:100% !important;max-width:100% !important;height:auto !important;transform:none !important;}
   #topBar{margin:10px 0 2px !important;padding:4px !important;border-radius:16px !important;background:rgba(255,248,239,.38) !important;border:1px solid rgba(168,123,81,.16) !important;}
-  #roomNav{display:flex !important;width:100% !important;min-width:0 !important;justify-content:center !important;gap:2px !important;transform:none !important;}
-  .navBtn{flex:1 1 0 !important;min-width:0 !important;height:25px !important;padding:0 2px !important;border-radius:10px !important;font-size:8.5px !important;}
+  #navOuter,#navScroll{width:100% !important;overflow:visible !important;}
+  #roomNav{display:flex !important;width:100% !important;min-width:0 !important;justify-content:center !important;align-items:center !important;flex-wrap:wrap !important;gap:3px !important;transform:none !important;}
+  .navBtn{flex:1 1 calc(12.5% - 3px) !important;min-width:38px !important;height:25px !important;padding:0 2px !important;border-radius:10px !important;font-size:clamp(7px,2.15vw,8.8px) !important;line-height:1 !important;overflow:hidden !important;}
   #topBarUserAnchor{height:30px !important;margin:0 0 4px !important;}
-  #topBarUserArea{position:relative !important;width:100% !important;height:30px !important;display:grid !important;grid-template-columns:minmax(0,1fr) 34px 46px !important;gap:6px !important;padding:4px 6px !important;border-radius:15px !important;}
+  #topBarUserArea{position:relative !important;width:100% !important;height:30px !important;display:grid !important;grid-template-columns:minmax(0,1fr) 30px 32px !important;gap:5px !important;padding:4px 6px !important;border-radius:15px !important;}
   #currentUserBadge,#siteNoticeWrap,#logoutBtn{height:22px !important;min-height:22px !important;align-self:center !important;border-radius:10px !important;}
-  #currentUserBadge .identityText{font-size:10px !important;text-align:center !important;}
-  #siteNoticeWrap{width:34px !important;min-width:34px !important;}
+  #currentUserBadge{overflow:visible !important;padding:0 4px !important;}
+  #currentUserBadge .identityText{
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    white-space:nowrap !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    font-size:clamp(8.8px,2.35vw,10px) !important;
+    line-height:1 !important;
+    text-align:center !important;
+  }
+  #currentUserBadge .identitySep{display:inline !important;}
+  #currentUserBadge .identityName,#currentUserBadge .identityRole{display:inline !important;width:auto !important;white-space:nowrap !important;line-height:1 !important;}
+  #siteNoticeWrap{width:30px !important;min-width:30px !important;}
   #siteNoticeBtn{font-size:11px !important;border-radius:10px !important;}
-  #logoutBtn{width:46px !important;min-width:46px !important;font-size:9px !important;}
+  #logoutBtn{width:32px !important;min-width:32px !important;font-size:10px !important;}
   #taskPanel{margin:0 !important;border-radius:0 !important;background:transparent !important;border:none !important;box-shadow:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;}
   #taskPanel::before,#bgNoteLayer{display:none !important;}
   #panelSwitch{display:flex !important;flex-direction:row !important;gap:6px !important;padding:4px !important;margin:0 0 6px !important;border-radius:16px !important;background:rgba(255,248,239,.38) !important;}
@@ -2552,6 +2569,44 @@
   .assignmentList{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
   .bottomGrid{grid-template-columns:1fr !important;}
   #browseDetailFooter{padding-right:0 !important;margin-top:10px !important;}
+
+  #taskEditMask{align-items:flex-start !important;justify-content:center !important;padding:10px 6px !important;overflow:auto !important;}
+  #taskEditDialog{width:100% !important;max-width:100% !important;max-height:calc(100dvh - 20px) !important;border-radius:20px !important;overflow:hidden !important;}
+  .taskEditHeader{padding:14px 14px 10px !important;gap:8px !important;}
+  #taskEditTitle{font-size:18px !important;line-height:1.25 !important;word-break:break-word !important;}
+  #taskEditSubtitle{font-size:11px !important;line-height:1.4 !important;}
+  #taskEditBody{padding:12px !important;overflow:auto !important;overflow-x:hidden !important;}
+  .taskEditSection{padding:12px !important;margin-bottom:12px !important;border-radius:16px !important;overflow:visible !important;}
+  .taskEditSectionTitle{font-size:15px !important;margin-bottom:9px !important;}
+  .taskEditGrid,.taskEditGridProject,.taskEditRowGroup,.taskEditRowTop,.taskEditRowMeta,.taskEditRowBottom{display:grid !important;grid-template-columns:1fr !important;gap:10px !important;width:100% !important;min-width:0 !important;}
+  .taskEditField,.taskEditFieldCode,.taskEditFieldMode,.taskEditFieldName{width:100% !important;max-width:none !important;min-width:0 !important;}
+  .taskEditInput,.taskEditSelect{width:100% !important;min-width:0 !important;min-height:38px !important;font-size:13px !important;border-radius:12px !important;}
+  .taskEditModeRow,.taskEditModeButtons,.taskEditModeButtonsCompact{width:100% !important;min-width:0 !important;}
+  .taskEditModeButtonsCompact{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:8px !important;}
+  .taskEditModeBtn.compact{width:100% !important;min-width:0 !important;height:34px !important;font-size:13px !important;}
+  .taskEditPickerGroup{display:flex !important;flex-wrap:wrap !important;gap:8px !important;width:100% !important;min-width:0 !important;}
+  .taskEditPickerBtn{max-width:100% !important;min-height:30px !important;height:auto !important;white-space:normal !important;line-height:1.25 !important;padding:6px 10px !important;}
+  .memberCheckGrid{gap:8px !important;}
+  .memberCheckItem{height:auto !important;min-height:32px !important;padding:6px 10px !important;white-space:normal !important;line-height:1.2 !important;}
+  .taskEditRow.partRow{grid-template-columns:1fr !important;gap:7px !important;align-items:stretch !important;}
+  .taskEditRemoveBtn{width:100% !important;min-width:0 !important;height:30px !important;}
+  .memberSuggestBox{position:relative !important;top:auto !important;left:auto !important;right:auto !important;margin-top:6px !important;max-height:150px !important;}
+  .taskEditFooter{padding:10px 12px 12px !important;gap:8px !important;justify-content:flex-end !important;}
+}
+
+@media (min-width:541px) and (max-width:853.98px){
+  #topBarUserArea{overflow:visible !important;}
+  #currentUserBadge{min-width:0 !important;}
+  #currentUserBadge .identityText{font-size:var(--identity-font) !important;}
+  #siteNoticeWrap,#logoutBtn{flex-shrink:0 !important;}
+  .taskEditRowTop{grid-template-columns:minmax(92px,.6fr) minmax(0,1.25fr) minmax(92px,.75fr) !important;gap:8px !important;}
+  .taskEditRowMeta{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:8px !important;}
+  .taskEditRowBottom{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr) !important;gap:8px !important;}
+  .taskEditFieldCode,.taskEditFieldMode{max-width:none !important;min-width:0 !important;}
+  .taskEditModeButtonsCompact{gap:6px !important;}
+  .taskEditModeBtn.compact{font-size:12px !important;}
+  .taskEditPickerGroup{gap:6px !important;}
+  .taskEditPickerBtn{height:auto !important;min-height:28px !important;white-space:normal !important;line-height:1.2 !important;padding:5px 9px !important;}
 }
 
 </style>
@@ -2581,17 +2636,16 @@
       <div id="topBarUserAnchor">
         <div id="topBarUserArea">
           <div id="currentUserBadge"><span class="identityText">未登录</span></div>
-        <div id="siteNoticeWrap">
-          <button id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="站内通知">
-            <span id="siteNoticeIcon" aria-hidden="true">🔔</span>
-            <span id="siteNoticeText">站内通知</span>
-            <span id="siteNoticeCount">0</span>
-          </button>
-          <div id="siteNoticePanel" aria-hidden="true">
-            <div class="siteNoticeTitle">待处理提醒</div>
-            <div id="siteNoticeBody" class="siteNoticeEmpty">暂无提醒</div>
+          <div id="siteNoticeWrap">
+            <button id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="站内通知">
+              <span id="siteNoticeIcon" aria-hidden="true">🔔</span>
+              <span id="siteNoticeCount">0</span>
+            </button>
+            <div id="siteNoticePanel" aria-hidden="true">
+              <div class="siteNoticeTitle">待处理提醒</div>
+              <div id="siteNoticeBody" class="siteNoticeEmpty">暂无提醒</div>
+            </div>
           </div>
-        </div>
           <button id="logoutBtn" type="button">登出</button>
         </div>
       </div>
@@ -2684,7 +2738,7 @@
             <div class="taskEditRowGroup taskEditRowMeta">
               <label class="taskEditField">
                 <span class="taskEditLabel">类型</span>
-                <select id="editTaskType" class="taskEditSelect taskEditRoundedSelect"></select>
+                <select id="editTaskType" class="taskEditSelect"></select>
               </label>
 
               <label class="taskEditField">
@@ -2715,7 +2769,6 @@
         <div class="taskEditSection">
           <div class="taskEditSectionTitle">演唱者</div>
           <div id="editSingerMemberList" class="memberCheckGrid"></div>
-          
         </div>
 
         <div class="taskEditSection">
@@ -2723,7 +2776,6 @@
             <div class="taskEditSectionTitle">歌词分配</div>
           </div>
           <div id="editPartRows" class="taskEditRows"></div>
-          
         </div>
       </div>
 
@@ -2733,7 +2785,6 @@
       </div>
     </div>
   </div>
-
 
   <div id="toastMask" aria-hidden="true">
     <div id="toastBox">
@@ -2839,7 +2890,6 @@ const authState = {
   const bgNoteLayer = document.getElementById("bgNoteLayer");
   const currentUserBadge = document.getElementById("currentUserBadge");
   const siteNoticeBtn = document.getElementById("siteNoticeBtn");
-  const siteNoticeText = document.getElementById("siteNoticeText");
   const siteNoticePanel = document.getElementById("siteNoticePanel");
   const siteNoticeBody = document.getElementById("siteNoticeBody");
   const siteNoticeCount = document.getElementById("siteNoticeCount");
@@ -2868,7 +2918,6 @@ const authState = {
   const editProducerPicker = document.getElementById("editProducerPicker");
   const editSingerMemberList = document.getElementById("editSingerMemberList");
   const editPartRows = document.getElementById("editPartRows");
-  const editAddPartRowBtn = document.getElementById("editAddPartRowBtn");
 
   let currentEditingTaskId = "";
   let currentEditingProducerMemberId = "";
@@ -3045,7 +3094,6 @@ const authState = {
     if (!currentUserBadge) return;
     const nickname = String(authState.nickname || localStorage.getItem(STORAGE_KEYS.user) || "未登录").trim() || "未登录";
     const roleLabel = getRoleLabel(authState.role || getCurrentRole());
-    currentUserBadge.classList.remove("identityStacked");
     currentUserBadge.innerHTML = `
       <span class="identityText">
         <span class="identityName">${escapeHtml(nickname)}</span><span class="identitySep">｜</span><span class="identityRole">${escapeHtml(roleLabel)}</span>
@@ -3081,7 +3129,7 @@ const authState = {
     if (!siteNoticeBody || !siteNoticeBtn || !siteNoticeCount) return;
     const items = getTaskAlerts();
     siteNoticeBtn.classList.toggle('hasNotice', items.length > 0);
-    siteNoticeCount.textContent = String(items.length);
+    siteNoticeCount.textContent = items.length > 99 ? "99+" : String(items.length);
 
     if (!items.length) {
       siteNoticeBody.className = 'siteNoticeEmpty';
@@ -3118,7 +3166,6 @@ const authState = {
     siteNoticePanel.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
     siteNoticeBtn.setAttribute('aria-expanded', shouldShow ? 'true' : 'false');
   }
-
 
   function readStudioJumpIntent() {
     try {
@@ -3531,36 +3578,16 @@ const authState = {
       hasEffectiveProducer &&
       producerCompleted &&
       hasReleaseDate;
-
-    // 只有链接 + 资料完整时，才视为真正已发布并从详情页移出
     if (readyForPublishedHide) return "已发布";
-
-    // 前期条件未完成的一律归到 todo，不再出现在详情
     if (singerCount < singerQuota) return "待认领";
     if (!hasTone) return "未定调";
     if (!hasPartText || !hasEnoughPartRows || hasPlaceholderPart || hasIncompletePartRow || assignedIds.length < singerCount) return "未分词";
-
-    // 前期完成后，录音阶段仍属正常推进，留在详情
     if (!allSubmitted) return "制作中";
-
-    // 全部交音后，如果既没人负责后期、也没有后期交付，流程卡住，归到 todo
     if (!hasEffectiveProducer) return "缺后期";
-
-    // 已有后期负责人或已视为后期处理，但后期未交付，仍属正常推进，留在详情
     if (!producerCompleted) return "制作中";
-
-    // 后期已交付但发布信息未补齐，归到 todo
     if (!hasReleaseDate || !hasDisplayLink) return "待发布";
 
     return "制作中";
-  }
-
-  function buildShortInfo(task) {
-    const parts = [];
-    parts.push(task.project_type || "未分类");
-    if (task.release_date) parts.push(`预计 ${formatDate(task.release_date)}`);
-    else parts.push("预计未定");
-    return parts.join("｜");
   }
 
   function transformProjectsToTasks(projectRows, partsRows, singersRows) {
@@ -3626,7 +3653,6 @@ const authState = {
       };
     }).map(task => {
       task.computedStatus = getComputedTaskStatus(task);
-      task.shortInfo = buildShortInfo(task);
       return task;
     }).filter(task => task.computedStatus === "制作中")
       .sort((a, b) => {
@@ -3756,19 +3782,82 @@ const authState = {
   }
 
   function fitTopBarIdentityContent() {
-    if (!topBarUserArea || !currentUserBadge) return;
+    if (isMobileLayout() || !topBarUserArea || !currentUserBadge) return;
     const textEl = currentUserBadge.querySelector(".identityText");
     if (!textEl) return;
 
-    currentUserBadge.classList.remove("identityStacked");
     textEl.style.fontSize = "";
     textEl.style.lineHeight = "1";
     textEl.style.whiteSpace = "nowrap";
+    textEl.style.textOverflow = "clip";
+
+    const badgeRect = currentUserBadge.getBoundingClientRect();
+    const viewportW = window.innerWidth || document.documentElement.clientWidth || 0;
+    const available = Math.max(1, badgeRect.width - 4);
+    const baseFont = parseFloat(getComputedStyle(currentUserBadge).fontSize) || 10;
+    const maxMiddleFont = viewportW >= 541 && viewportW <= 680 ? 5.6 : baseFont;
+    const startFont = Math.min(baseFont, maxMiddleFont);
+    textEl.style.fontSize = `${startFont.toFixed(2)}px`;
+
+    let needed = Math.max(textEl.scrollWidth, textEl.getBoundingClientRect().width);
+    if (needed > available) {
+      const minFont = viewportW >= 541 && viewportW <= 680 ? 2.8 : 3.2;
+      const compactFont = Math.max(minFont, startFont * (available / needed) * 0.94);
+      textEl.style.fontSize = `${compactFont.toFixed(2)}px`;
+      needed = Math.max(textEl.scrollWidth, textEl.getBoundingClientRect().width);
+      if (needed > available) {
+        const secondPassFont = Math.max(minFont, compactFont * (available / needed) * 0.94);
+        textEl.style.fontSize = `${secondPassFont.toFixed(2)}px`;
+      }
+    }
   }
 
-  
+  function fitPanelSwitchText() {
+    if (isMobileLayout() || !panelSwitch) return;
+    const buttons = Array.from(panelSwitch.querySelectorAll(".switchBtn"));
+    buttons.forEach(btn => {
+      btn.style.fontSize = "";
+      btn.style.lineHeight = "1.05";
+      btn.style.whiteSpace = "nowrap";
+    });
+
+    buttons.forEach(btn => {
+      const baseFont = parseFloat(getComputedStyle(btn).fontSize) || 10;
+      const available = Math.max(1, btn.clientWidth - 2);
+      const needed = Math.max(btn.scrollWidth, btn.getBoundingClientRect().width);
+      if (needed > available) {
+        const compactFont = Math.max(4.2, baseFont * (available / needed) * 0.96);
+        btn.style.fontSize = `${compactFont.toFixed(2)}px`;
+      }
+    });
+  }
+
+  function updateLogoutButtonLabel() {
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (!logoutBtn) return;
+    const compact = window.matchMedia("(max-width: 853.98px)").matches;
+    logoutBtn.textContent = compact ? "退" : "登出";
+    logoutBtn.setAttribute("title", "登出");
+    logoutBtn.setAttribute("aria-label", "登出");
+  }
+
+  function isMobileLayout() {
+    return window.matchMedia("(max-width: 540px)").matches;
+  }
+
+  function removeRoomNavNotes() {
+    if (!roomNav) return;
+    roomNav.querySelectorAll(".navActiveNote").forEach(note => note.remove());
+  }
+
   function ensureRoomNavNotes() {
     if (!roomNav) return;
+
+    if (isMobileLayout()) {
+      removeRoomNavNotes();
+      return;
+    }
+
     roomNav.querySelectorAll(".navBtn").forEach(btn => {
       if (!btn.querySelector(".navActiveNoteA")) {
         const a = document.createElement("span");
@@ -3797,7 +3886,15 @@ const authState = {
   function syncTopUiLayout() {
     if (!overlay || !topBar || !navOuter || !navScroll || !roomNav || !panelSwitch || !topBarUserAnchor || !topBarUserArea) return;
 
+    updateLogoutButtonLabel();
     ensureRoomNavNotes();
+
+    if (isMobileLayout()) {
+      roomNav.style.transform = "none";
+      roomNav.style.transformOrigin = "center center";
+      navOuter.style.height = "auto";
+      return;
+    }
 
     const overlayRect = overlay.getBoundingClientRect();
     const scale = parseFloat(getComputedStyle(overlay).getPropertyValue("--bg-ui-scale")) || 1;
@@ -3823,21 +3920,22 @@ const authState = {
     let identityLogoutFont = 18 * identityInnerScale;
 
     if (overlayRect.width < 854) {
-      const smallRatio = clamp(overlayRect.width / 854, 0.62, 1);
       const sideUnit = sideWidth / 100;
-      identityH = clamp(sideWidth * 0.34, 30, 38);
-      identityGap = clamp(3.0 * smallRatio, 1.4, 3.0);
-      identityPadX = clamp(3.2 * smallRatio, 1.6, 3.2);
-      identityPadY = clamp(3.2 * smallRatio, 1.6, 3.2);
-      identityRadius = Math.max(10 * smallRatio, 8);
-      identityChipRadius = Math.max(8.5 * smallRatio, 6.5);
-      identityBadgePx = clamp(4.4 * smallRatio, 2.2, 4.4);
+      identityH = clamp(sideWidth * 0.28, 22, 34);
+      identityGap = clamp(sideUnit * 1.35, 1, 2.4);
+      identityPadX = clamp(sideUnit * 1.35, 1, 2.6);
+      identityPadY = clamp(sideUnit * 1.25, 1, 2.4);
+      identityRadius = clamp(identityH * 0.34, 7, 11);
+      identityChipRadius = clamp(identityH * 0.26, 5.5, 8.5);
+      identityBadgePx = clamp(sideUnit * 1.45, 1, 3.0);
       identityTextGap = 0;
-      identityIconW = clamp(sideUnit * 20.5, 16, 24);
-      identityLogoutW = clamp(sideUnit * 25.5, 19, 30);
-      identityFont = clamp(sideUnit * 7.1, 5.8, 8.8);
-      identityIconFont = clamp(sideUnit * 8.8, 7.8, 11.2);
-      identityLogoutFont = clamp(sideUnit * 6.6, 5.8, 8.8);
+      identityIconW = clamp(sideWidth * 0.135, 11.5, 18);
+      identityLogoutW = clamp(sideWidth * 0.145, 12.5, 19.5);
+      identityFont = overlayRect.width <= 680
+        ? clamp(sideWidth * 0.036, 3.2, 5.6)
+        : clamp(sideWidth * 0.043, 3.8, 6.8);
+      identityIconFont = clamp(sideWidth * 0.064, 5.8, 9.2);
+      identityLogoutFont = clamp(sideWidth * 0.054, 4.9, 7.8);
     }
 
     const taskLeftPct = overlayRect.width >= 1600 ? 9.1 : 9.2;
@@ -3900,6 +3998,14 @@ const authState = {
       overlay.style.setProperty("--identity-logout-font", `${identityLogoutFont.toFixed(2)}px`);
       overlay.style.setProperty("--identity-icon-shift", `${(0.5 * scale).toFixed(2)}px`);
 
+      const noticeCountSize = overlayRect.width < 854
+        ? clamp(identityIconW * 0.78, 9.5, 13.5)
+        : clamp(identityIconW * 0.66, 12, 20);
+      overlay.style.setProperty("--notice-count-size", `${noticeCountSize.toFixed(2)}px`);
+      overlay.style.setProperty("--notice-count-pad-x", `${Math.max(3, noticeCountSize * 0.32).toFixed(2)}px`);
+      overlay.style.setProperty("--notice-count-border", `${Math.max(1.2, noticeCountSize * 0.10).toFixed(2)}px`);
+      overlay.style.setProperty("--notice-count-font", `${Math.max(6.6, noticeCountSize * 0.58).toFixed(2)}px`);
+
       if (taskPanelEl) {
         const taskPanelRect = taskPanelEl.getBoundingClientRect();
         const panelLeft = sideLeft - (taskPanelRect.left - overlayRect.left);
@@ -3912,15 +4018,21 @@ const authState = {
       overlay.style.setProperty("--panel-switch-pad-y", `${(10 * scale).toFixed(2)}px`);
       overlay.style.setProperty("--panel-switch-pad-x", `${(14 * scale).toFixed(2)}px`);
       overlay.style.setProperty("--panel-switch-radius", `${(22 * scale).toFixed(2)}px`);
+      const switchFont = overlayRect.width < 854
+        ? clamp(sideWidth * 0.105, 5.2, 9.6)
+        : 25 * scale;
       overlay.style.setProperty("--panel-switch-gap", `${(8 * scale).toFixed(2)}px`);
       overlay.style.setProperty("--switch-btn-pad-x", `${(14 * scale).toFixed(2)}px`);
       overlay.style.setProperty("--switch-btn-radius", `${(15 * scale).toFixed(2)}px`);
-      overlay.style.setProperty("--switch-font", `${(25 * scale).toFixed(2)}px`);
+      overlay.style.setProperty("--switch-font", `${switchFont.toFixed(2)}px`);
       overlay.style.setProperty("--task-panel-left-bound", overlayRect.width >= 1600 ? "9.1%" : "9.2%");
       overlay.style.setProperty("--task-panel-right-bound", "22.4%");
       overlay.style.setProperty("--task-panel-top-bound", "18%");
       overlay.style.setProperty("--task-panel-bottom-bound", "12%");
-      requestAnimationFrame(fitTopBarIdentityContent);
+      requestAnimationFrame(() => {
+        fitTopBarIdentityContent();
+        fitPanelSwitchText();
+      });
     });
   }
 
@@ -3972,7 +4084,6 @@ const authState = {
 
     requestAnimationFrame(syncTopUiLayout);
   }
-
 
   let bgNoteTimer = null;
 
@@ -4273,7 +4384,6 @@ const authState = {
     `;
   }
 
-
   function canEditTaskFromDetail(task) {
     const role = getCurrentRole();
     if (isManagerRole(role)) return true;
@@ -4404,7 +4514,6 @@ const authState = {
     refreshAllPartSuggestions();
   }
 
-  
   function getAllowedSingerMembersForRow(rowIndex) {
     const singerIds = getEditableSingerIds();
     const allowedSingerIds = getAllowedSingerIdsForRow(singerIds, rowIndex);
@@ -4530,7 +4639,7 @@ const authState = {
     });
   }
 
-function populateTaskTypeSelect(currentValue) {
+  function populateTaskTypeSelect(currentValue) {
     const options = getTaskTypeOptions(currentValue);
     editTaskType.innerHTML = options.map(item => `<option value="${escapeHtml(item)}" ${item === currentValue ? "selected" : ""}>${escapeHtml(item)}</option>`).join("");
   }
@@ -4688,7 +4797,7 @@ function populateTaskTypeSelect(currentValue) {
     applyTaskEditSnapshot(snapshotClone);
   }
 
-function openTaskEditModal(taskId = activeDetailTaskId) {
+  function openTaskEditModal(taskId = activeDetailTaskId) {
     const task = getTaskById(taskId);
     if (!task) {
       showToast("无法编辑", "当前未找到可编辑的项目。");
@@ -4897,7 +5006,6 @@ function openTaskEditModal(taskId = activeDetailTaskId) {
     }
   }
 
-
   function buildTaskDetailHtml(task) {
     const singerSplit = splitGold(task.singer_bonus || 0);
     const producerSplit = splitGold(task.producer_bonus || 0);
@@ -5070,7 +5178,6 @@ function openTaskEditModal(taskId = activeDetailTaskId) {
     }
   }
 
-
   if (browseEditBtnTask) {
     browseEditBtnTask.addEventListener("click", () => {
       openTaskEditModal(activeDetailTaskId);
@@ -5086,7 +5193,10 @@ function openTaskEditModal(taskId = activeDetailTaskId) {
 
   taskEditCancelBtn.addEventListener("click", () => closeTaskEditModal(true));
   taskEditMask.addEventListener("click", (event) => {
-    if (event.target === taskEditMask) closeTaskEditModal(true);
+    if (event.target === taskEditMask) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
   });
   taskEditSaveBtn.addEventListener("click", saveTaskEditModal);
 
@@ -5111,10 +5221,6 @@ function openTaskEditModal(taskId = activeDetailTaskId) {
     editTaskType.addEventListener("change", () => {
       syncProducerByEachSingRule();
     });
-  }
-
-  if (editAddPartRowBtn) {
-    editAddPartRowBtn.remove();
   }
 
   editSingerQuota.addEventListener("change", () => {
@@ -5162,7 +5268,6 @@ function openTaskEditModal(taskId = activeDetailTaskId) {
     renderEditPartRows();
     bindEditPartRowButtons();
   });
-
 
   document.getElementById("browsePrimaryBtnTask").addEventListener("click", async () => {
     await loadProjectsFromSupabase();
@@ -5271,7 +5376,6 @@ document.getElementById("goTaskBtn").addEventListener("click", () => {
 
   window.addEventListener("resize", syncOverlayToImage);
   window.addEventListener("orientationchange", syncOverlayToImage);
-  window.addEventListener("load", syncTopUiLayout);
 
   if ("ResizeObserver" in window) {
     const ro = new ResizeObserver(syncOverlayToImage);
