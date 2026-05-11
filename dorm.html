@@ -1,12 +1,1977 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>宿舍</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜宿舍</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;}
+
+:root{
+  --bg-ui-scale:1;
+
+  /* 当前页面坐标：宿舍页只改这里 */
+  --identity-right:7.35%;
+  --identity-top:6.46%;
+  --identity-width:calc(232px * var(--bg-ui-scale));
+  --identity-height:calc(38px * var(--bg-ui-scale));
+
+  --room-nav-left:27.2%;
+  --room-nav-top:6.35%;
+  --room-nav-width:45.5%;
+
+  /* 页面可改颜色，不改结构尺寸 */
+  --identity-bg:rgba(255,248,239,0.92);
+  --identity-inner-bg:rgba(255,252,247,0.96);
+  --identity-border:rgba(186,146,103,0.24);
+  --identity-text:#6c4523;
+  --identity-shadow:rgba(116,86,54,0.12);
+
+  --nav-text:#6e4827;
+  --nav-border:rgba(145,98,56,.34);
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left,#f5ecdb 0%,transparent 44%),
+    linear-gradient(180deg,#efe2cc 0%,#e9d8bd 100%);
+  color:#6f4726;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+button{
+  font-family:inherit;
+}
+
+.hidden{
+  display:none !important;
+}
+
+#room{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  overflow:hidden;
+}
+
+#bgFrame{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+}
+
+#bg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center center;
+  display:block;
+  user-select:none;
+  pointer-events:none;
+  -webkit-user-drag:none;
+}
+
+#overlay{
+  position:absolute;
+  z-index:1;
+  overflow:visible;
+  pointer-events:none;
+  --ui-scale:var(--bg-ui-scale, 1);
+}
+
+#overlay *{
+  pointer-events:auto;
+}
+
+/* =========================================================
+   身份组件：全站统一结构
+========================================================= */
+#topActions{
+  position:absolute;
+  right:var(--identity-right);
+  top:var(--identity-top);
+  width:var(--identity-width);
+  height:var(--identity-height);
+  min-width:0;
+  min-height:0;
+  z-index:65;
+  pointer-events:none;
+}
+
+#topIdentityBar{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:stretch;
+  justify-content:flex-start;
+  gap:calc(5px * var(--ui-scale));
+  padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
+  border-radius:calc(13px * var(--ui-scale));
+  background:var(--identity-bg);
+  border:1px solid var(--identity-border);
+  box-shadow:
+    0 calc(10px * var(--ui-scale)) calc(24px * var(--ui-scale)) var(--identity-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  pointer-events:auto;
+  overflow:visible;
+  white-space:nowrap;
+}
+
+#topIdentityBadge,
+#loginOpenBtn,
+#logoutBtn,
+#siteNoticeBtn{
+  border-radius:calc(9px * var(--ui-scale));
+  background:var(--identity-inner-bg);
+  color:var(--identity-text);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 1px 4px rgba(112,83,52,0.05);
+  border:1px solid rgba(160,116,78,0.12);
+}
+
+#topIdentityBadge{
+  flex:1 1 auto;
+  min-width:0;
+  padding:0 calc(8px * var(--ui-scale));
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  white-space:nowrap;
+}
+
+#topIdentityBadge .identityText{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  line-height:1;
+}
+
+#loginOpenBtn,
+#logoutBtn{
+  appearance:none;
+  cursor:pointer;
+  width:calc(42px * var(--ui-scale));
+  min-width:calc(42px * var(--ui-scale));
+  flex:0 0 calc(42px * var(--ui-scale));
+  padding:0;
+  color:#67401f;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:800;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+  overflow:hidden;
+  white-space:nowrap;
+}
+
+#loginOpenBtn:hover,
+#logoutBtn:hover,
+#siteNoticeBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,0.94);
+}
+
+#siteNoticeWrap{
+  position:relative;
+  width:calc(30px * var(--ui-scale));
+  min-width:calc(30px * var(--ui-scale));
+  flex:0 0 calc(30px * var(--ui-scale));
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  overflow:visible;
+}
+
+#siteNoticeBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  position:relative;
+  width:100%;
+  height:100%;
+  padding:0;
+  font-size:calc(14px * var(--ui-scale));
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+#siteNoticeIcon{
+  display:block;
+  line-height:1;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
+}
+
+#siteNoticeCount{
+  position:absolute;
+  right:calc(-6px * var(--ui-scale));
+  top:calc(-6px * var(--ui-scale));
+  min-width:calc(18px * var(--ui-scale));
+  height:calc(18px * var(--ui-scale));
+  padding:0 calc(5px * var(--ui-scale));
+  border-radius:999px;
+  background:#c98c4f;
+  color:#fff9f1;
+  font-size:calc(9px * var(--ui-scale));
+  font-weight:900;
+  line-height:1;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:calc(2px * var(--ui-scale)) solid rgba(255,248,239,0.98);
+  box-shadow:0 2px 8px rgba(116,86,54,0.16);
+  z-index:3;
+}
+
+#siteNoticeBtn.hasNotice #siteNoticeCount{
+  display:flex;
+}
+
+#siteNoticePanel{
+  position:absolute;
+  top:calc(100% + 10px);
+  right:0;
+  width:min(calc(360px * var(--ui-scale)), 72vw);
+  max-height:min(calc(540px * var(--ui-scale)), 70vh);
+  overflow:auto;
+  padding:calc(12px * var(--ui-scale));
+  border-radius:calc(16px * var(--ui-scale));
+  background:rgba(255,249,241,0.98);
+  border:1px solid rgba(203,167,123,0.28);
+  box-shadow:0 16px 36px rgba(85,58,34,0.16);
+  display:none;
+  z-index:80;
+  text-align:left;
+}
+
+#siteNoticePanel.show{
+  display:block;
+}
+
+.siteNoticeTitle{
+  color:#6f4726;
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:900;
+  margin-bottom:calc(10px * var(--ui-scale));
+}
+
+.siteNoticeEmpty{
+  color:#8a6644;
+  font-size:calc(12px * var(--ui-scale));
+  line-height:1.6;
+  padding:6px 2px 2px;
+}
+
+.siteNoticeList{
+  display:flex;
+  flex-direction:column;
+  gap:calc(8px * var(--ui-scale));
+}
+
+.siteNoticeItem{
+  padding:calc(10px * var(--ui-scale));
+  border-radius:calc(12px * var(--ui-scale));
+  background:rgba(255,252,247,0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.92),
+    0 2px 8px rgba(120,92,63,0.05);
+}
+
+.siteNoticeItemTitle{
+  color:#6f4726;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:800;
+  line-height:1.5;
+  margin-bottom:4px;
+}
+
+.siteNoticeItemDesc{
+  color:#8a6644;
+  font-size:calc(11px * var(--ui-scale));
+  line-height:1.55;
+}
+
+/* =========================================================
+   房间切换按钮：宿舍页不显示“宿舍”按钮
+========================================================= */
+#topBar{
+  position:absolute;
+  left:var(--room-nav-left);
+  top:var(--room-nav-top);
+  width:var(--room-nav-width);
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  z-index:55;
+  overflow:visible;
+  pointer-events:none;
+
+  --nav-btn-height:calc(40px * var(--ui-scale));
+  --nav-btn-px:calc(16px * var(--ui-scale));
+  --nav-btn-radius:calc(13px * var(--ui-scale));
+  --nav-btn-font:calc(14px * var(--ui-scale));
+  --nav-gap:calc(8px * var(--ui-scale));
+}
+
+#navOuter,
+#navScroll{
+  overflow:visible !important;
+}
+
+#navOuter{
+  flex:0 0 auto;
+  min-width:0;
+  width:100%;
+  pointer-events:auto;
+}
+
+#navScroll{
+  width:100%;
+  white-space:nowrap;
+  padding:0 !important;
+  margin:0 !important;
+}
+
+#roomNav{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--nav-gap);
+  transform-origin:left center;
+}
+
+.navBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  position:relative;
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:var(--nav-btn-height);
+  padding:0 var(--nav-btn-px);
+  border-radius:var(--nav-btn-radius);
+  color:var(--nav-text);
+  font-size:var(--nav-btn-font);
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+  overflow:visible;
+  isolation:isolate;
+  background:
+    linear-gradient(180deg, rgba(249,232,203,.90) 0%, rgba(226,195,152,.86) 100%);
+  border:1px solid var(--nav-border);
+  box-shadow:
+    0 1px 1px rgba(255,255,255,.48) inset,
+    0 2px 5px rgba(91,68,45,.13);
+  text-shadow:0 1px 0 rgba(255,255,255,.42);
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    color .18s ease,
+    filter .18s ease;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+.navBtn:hover,
+.navBtn:focus-visible{
+  color:#5f3d22;
+  background:
+    linear-gradient(180deg, rgba(252,238,215,.95) 0%, rgba(232,205,166,.90) 100%);
+  border-color:rgba(153,102,55,.48);
+  box-shadow:
+    0 1px 1px rgba(255,255,255,.55) inset,
+    0 3px 7px rgba(91,68,45,.15);
+  filter:brightness(1.015);
+}
+
+.navLabel{
+  position:relative;
+  z-index:5;
+  display:block;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.navEffect{
+  position:absolute;
+  pointer-events:none;
+  opacity:0;
+  z-index:4;
+  display:block;
+  font-weight:900;
+  line-height:1;
+  text-shadow:
+    0 1px 2px rgba(255,250,232,.82),
+    0 0 8px rgba(255,246,210,.52);
+  filter:saturate(.95);
+}
+
+.navEffectA{
+  left:8%;
+  top:-54%;
+  font-size:calc(var(--nav-btn-font) * .92);
+}
+
+.navEffectB{
+  right:8%;
+  top:-62%;
+  font-size:calc(var(--nav-btn-font) * .86);
+}
+
+.navEffectC{
+  left:50%;
+  top:-72%;
+  transform:translateX(-50%);
+  font-size:calc(var(--nav-btn-font) * 1.02);
+}
+
+@keyframes navFloatA{
+  0%,100%{ transform:translateY(4px) rotate(-8deg) scale(.82); opacity:0; }
+  20%,72%{ opacity:.86; }
+  50%{ transform:translateY(-5px) rotate(6deg) scale(1); opacity:.76; }
+}
+
+@keyframes navFloatB{
+  0%,100%{ transform:translateY(5px) rotate(9deg) scale(.78); opacity:0; }
+  24%,70%{ opacity:.78; }
+  52%{ transform:translateY(-6px) rotate(-7deg) scale(1); opacity:.68; }
+}
+
+@keyframes navFloatC{
+  0%,100%{ transform:translateX(-50%) translateY(6px) rotate(0deg) scale(.76); opacity:0; }
+  24%,70%{ opacity:.88; }
+  50%{ transform:translateX(-50%) translateY(-6px) rotate(2deg) scale(1); opacity:.78; }
+}
+
+.navBtn:hover .navEffectA,
+.navBtn:focus-visible .navEffectA{
+  animation:navFloatA 2.2s ease-in-out infinite;
+}
+
+.navBtn:hover .navEffectB,
+.navBtn:focus-visible .navEffectB{
+  animation:navFloatB 2.5s ease-in-out infinite;
+}
+
+.navBtn:hover .navEffectC,
+.navBtn:focus-visible .navEffectC{
+  animation:navFloatC 2.35s ease-in-out infinite;
+}
+
+/* 各房间特效颜色 */
+.navBtn[data-room="hall"] .navEffect{
+  color:rgba(255,205,96,.86);
+  text-shadow:
+    0 1px 2px rgba(255,250,232,.95),
+    0 0 10px rgba(255,215,105,.62);
+}
+
+.navBtn[data-room="manager"] .navEffect{
+  color:rgba(128,91,58,.82);
+}
+
+.navBtn[data-room="honor"] .navEffect{
+  color:rgba(205,143,45,.86);
+  text-shadow:
+    0 1px 2px rgba(255,250,232,.92),
+    0 0 8px rgba(255,220,130,.52);
+}
+
+.navBtn[data-room="game"] .navEffect{
+  color:rgba(117,91,150,.82);
+}
+
+.navBtn[data-room="studio"] .navEffect{
+  color:rgba(96,112,145,.84);
+}
+
+.navBtn[data-room="living"] .navEffect{
+  color:rgba(202,132,70,.82);
+}
+
+.navBtn[data-room="pets"] .navEffect{
+  color:rgba(131,111,78,.82);
+}
+
+.navBtn[data-room="flower"] .navEffect{
+  color:rgba(198,119,145,.82);
+}
+
+/* =========================================================
+   宿舍主体内容
+========================================================= */
+#dormShell{
+  position:absolute;
+  left:50%;
+  top:52.5%;
+  transform:translate(-50%,-50%);
+  width:min(1180px,78vw);
+  height:min(650px,68vh);
+  display:grid;
+  grid-template-columns:230px minmax(420px,1fr) 245px;
+  gap:22px;
+  z-index:20;
+}
+
+.glassPanel{
+  border-radius:28px;
+  background:rgba(255,250,240,.76);
+  border:1px solid rgba(198,145,79,.22);
+  box-shadow:
+    0 18px 40px rgba(116,86,54,.13),
+    inset 0 1px 0 rgba(255,255,255,.75);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+#sidePanel{
+  padding:20px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-height:0;
+}
+
+.sideBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  width:100%;
+  min-height:50px;
+  padding:0 15px;
+  border-radius:17px;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  color:#7a4f27;
+  font-size:15px;
+  font-weight:900;
+  text-align:left;
+}
+
+.sideBtn:hover{background:rgba(255,246,231,.58);}
+
+.sideBtn.active{
+  background:rgba(255,246,231,.96);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.8),
+    0 4px 12px rgba(120,80,35,.08);
+}
+
+.sideIcon{
+  width:24px;
+  text-align:center;
+  font-size:18px;
+}
+
+#mascotBox{
+  margin-top:auto;
+  min-height:176px;
+  border-radius:20px;
+  background:
+    linear-gradient(180deg,rgba(255,249,232,.76),rgba(255,238,206,.58));
+  border:1px dashed rgba(170,117,62,.28);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 12px 14px;
+  overflow:hidden;
+  position:relative;
+}
+
+#mascotBox img{
+  max-width:158px;
+  max-height:128px;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 8px 12px rgba(120,80,35,.13));
+  animation:mascotFloat 3.2s ease-in-out infinite;
+}
+
+#mascotBubble{
+  position:absolute;
+  right:10px;
+  top:14px;
+  max-width:150px;
+  min-height:30px;
+  padding:6px 13px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  text-align:center;
+  white-space:nowrap;
+  border:1px solid rgba(206,151,82,.22);
+  box-shadow:
+    0 6px 14px rgba(120,80,35,.10),
+    inset 0 1px 0 rgba(255,255,255,.85);
+}
+
+#mascotBubble::after{
+  content:"";
+  position:absolute;
+  right:18px;
+  bottom:-6px;
+  width:10px;
+  height:10px;
+  background:inherit;
+  border-right:1px solid rgba(206,151,82,.22);
+  border-bottom:1px solid rgba(206,151,82,.22);
+  transform:rotate(45deg);
+}
+
+@keyframes mascotFloat{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-6px);}
+}
+
+.bubble-work{background:#fff6e5;color:#c77b2a;animation:workShake 1.6s ease-in-out infinite;}
+.bubble-ok{background:#e8fff1;color:#2e9b5f;}
+.bubble-calm{background:#eef6ff;color:#4c7ecf;animation:calmFloat 2.6s ease-in-out infinite;}
+.bubble-energy{background:#ffe9e9;color:#d94a4a;animation:energyJump .62s ease-in-out infinite alternate;}
+.bubble-wait{background:#fffbe8;color:#b59b2a;}
+.bubble-plan{background:#f3ecff;color:#7a57d1;}
+.bubble-busy{background:#fff0f6;color:#c84a7a;animation:busyWiggle 1.5s ease-in-out infinite;}
+.bubble-cheer{background:#fff4e6;color:#d9812c;animation:energyJump .78s ease-in-out infinite alternate;}
+.bubble-thinking{background:#eef0ff;color:#5b63d6;animation:thinkingBlink 1.2s ease-in-out infinite;}
+.bubble-soft{background:#f6fff3;color:#6fa35a;animation:calmFloat 3s ease-in-out infinite;}
+
+@keyframes workShake{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-3px);}
+}
+
+@keyframes calmFloat{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-5px);}
+}
+
+@keyframes energyJump{
+  from{transform:translateY(0) scale(1);}
+  to{transform:translateY(-7px) scale(1.03);}
+}
+
+@keyframes busyWiggle{
+  0%,100%{transform:rotate(0deg);}
+  33%{transform:rotate(2deg);}
+  66%{transform:rotate(-2deg);}
+}
+
+@keyframes thinkingBlink{
+  0%,100%{opacity:1;}
+  50%{opacity:.56;}
+}
+
+#mainPanel{
+  padding:26px;
+  min-height:0;
+  overflow:hidden;
+}
+
+.view{
+  display:none;
+  height:100%;
+  min-height:0;
+}
+
+.view.active{
+  display:flex;
+  flex-direction:column;
+}
+
+.walletHeader{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:18px;
+}
+
+.walletIcon{
+  width:56px;
+  height:56px;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 40% 22%,rgba(255,255,255,.72),transparent 30%),
+    linear-gradient(180deg,#ffe7b8,#d89c58);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.8),
+    0 8px 18px rgba(130,82,28,.14);
+  position:relative;
+  overflow:hidden;
+}
+
+.walletIcon::before,
+.walletIcon::after{
+  content:"";
+  position:absolute;
+  border-radius:999px;
+  background:linear-gradient(180deg,#fff4c7,#d99a36);
+  border:2px solid rgba(127,83,32,.26);
+}
+
+.walletIcon::before{
+  width:31px;
+  height:31px;
+  left:12px;
+  top:16px;
+}
+
+.walletIcon::after{
+  width:24px;
+  height:24px;
+  right:10px;
+  top:20px;
+  opacity:.88;
+}
+
+.walletTitle{
+  margin:0;
+  font-size:30px;
+  font-weight:900;
+  color:#6f4726;
+}
+
+.walletSub{
+  margin:5px 0 0;
+  font-size:13px;
+  color:#9b7656;
+  font-weight:800;
+}
+
+.balanceCard{
+  position:relative;
+  min-height:145px;
+  border-radius:26px;
+  padding:24px 28px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 18% 8%,rgba(255,239,183,.95),transparent 48%),
+    linear-gradient(135deg,rgba(255,247,218,.96),rgba(255,255,250,.82));
+  border:1px solid rgba(214,166,86,.25);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.9),
+    0 12px 26px rgba(151,105,35,.12);
+}
+
+.balanceCard::after{
+  content:"🪙";
+  position:absolute;
+  right:38px;
+  top:22px;
+  font-size:70px;
+  opacity:.34;
+}
+
+.goldLabel{
+  color:#8a6843;
+  font-size:15px;
+  font-weight:900;
+  margin-bottom:12px;
+}
+
+.goldNumber{
+  color:#d88118;
+  font-size:58px;
+  line-height:1;
+  font-weight:900;
+}
+
+.goldUnit{
+  color:#9b6422;
+  font-size:19px;
+  font-weight:900;
+  margin-left:8px;
+}
+
+.goldStats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  margin-top:16px;
+}
+
+.statCard{
+  padding:17px;
+  border-radius:18px;
+  background:rgba(255,252,247,.68);
+  border:1px solid rgba(255,255,255,.62);
+}
+
+.statLabel{
+  color:#92745a;
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+
+.statValue{
+  color:#6f4726;
+  font-size:24px;
+  font-weight:900;
+}
+
+.todayValue.income{color:#3f984d;}
+.todayValue.none{color:#8a6a4e;}
+
+.sectionTitle{
+  margin:0 0 14px;
+  color:#6f4726;
+  font-size:26px;
+  font-weight:900;
+}
+
+.sectionDesc{
+  margin:0 0 18px;
+  color:#9b7656;
+  font-size:13px;
+  font-weight:800;
+}
+
+.ledgerList{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  flex:1;
+  min-height:0;
+  overflow:auto;
+  padding-right:4px;
+}
+
+.ledgerItem{
+  display:grid;
+  grid-template-columns:28px 1fr auto;
+  gap:12px;
+  align-items:center;
+  padding:11px 13px;
+  border-radius:15px;
+  background:rgba(255,255,255,.58);
+  color:#72533c;
+  font-size:13px;
+}
+
+.ledgerArrow{
+  width:24px;
+  height:24px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  font-weight:900;
+}
+
+.ledgerArrow.in{
+  background:rgba(100,180,90,.18);
+  color:#4b9b48;
+}
+
+.ledgerArrow.out{
+  background:rgba(226,91,64,.14);
+  color:#d45138;
+}
+
+.ledgerItem strong{
+  display:block;
+  color:#6f4726;
+  font-size:13px;
+  margin-bottom:3px;
+}
+
+.ledgerMeta{
+  color:#9a7b62;
+  font-size:11px;
+}
+
+.ledgerAmount{
+  font-weight:900;
+  font-size:16px;
+}
+
+.ledgerAmount.in{color:#7aa02d;}
+.ledgerAmount.out{color:#d84f35;}
+
+.placeholderGrid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+
+.placeholderCard{
+  min-height:120px;
+  padding:18px;
+  border-radius:20px;
+  background:rgba(255,252,247,.62);
+  border:1px solid rgba(255,255,255,.58);
+}
+
+.placeholderCard h3{
+  margin:0 0 8px;
+  font-size:18px;
+  color:#744b25;
+}
+
+.placeholderCard p{
+  margin:0;
+  color:#92745a;
+  font-size:13px;
+  line-height:1.7;
+  font-weight:700;
+}
+
+#tipPanel{
+  padding:22px;
+  align-self:start;
+  margin-top:28px;
+}
+
+.tipTitle{
+  color:#7a4f27;
+  font-size:19px;
+  font-weight:900;
+  margin-bottom:14px;
+}
+
+.goldWayList{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+
+.goldWayItem{
+  padding:10px 12px;
+  border-radius:14px;
+  background:rgba(255,252,247,.58);
+  border:1px solid rgba(255,255,255,.52);
+}
+
+.goldWayName{
+  color:#744b25;
+  font-size:13px;
+  font-weight:900;
+}
+
+.goldWayDesc{
+  color:#8a6644;
+  font-size:12px;
+  line-height:1.5;
+  font-weight:700;
+}
+
+.emptyText,.errorText{
+  font-size:13px;
+  line-height:1.7;
+  padding:12px;
+}
+
+.emptyText{color:#947256;}
+.errorText{color:#9b4a35;}
+
+@media(max-width:1280px){
+  #dormShell{
+    width:min(1060px,80vw);
+    height:min(610px,68vh);
+    grid-template-columns:205px minmax(390px,1fr) 220px;
+    gap:18px;
+  }
+
+  .sideBtn{
+    font-size:14px;
+    min-height:46px;
+  }
+
+  #mascotBox{min-height:164px;}
+
+  #mascotBox img{
+    max-width:138px;
+    max-height:112px;
+  }
+
+  .walletTitle{font-size:27px;}
+  .goldNumber{font-size:52px;}
+}
+
+@media(max-width:980px){
+  #dormShell{
+    width:82vw;
+    grid-template-columns:180px minmax(340px,1fr);
+  }
+
+  #tipPanel{display:none;}
+
+  .goldStats{grid-template-columns:1fr;}
+}
+
+@media(max-width:760px) and (min-width:541px){
+  #dormShell{
+    width:88vw;
+    height:70vh;
+    grid-template-columns:150px 1fr;
+    gap:12px;
+  }
+
+  #mainPanel{padding:20px;}
+
+  .sideBtn{
+    padding:0 10px;
+    font-size:13px;
+  }
+
+  .sideIcon{display:none;}
+
+  #mascotBox{min-height:150px;}
+
+  #mascotBox img{
+    max-width:106px;
+    max-height:90px;
+  }
+
+  #mascotBubble{
+    max-width:122px;
+    font-size:11px;
+    padding:5px 10px;
+    right:4px;
+    top:8px;
+  }
+
+  .walletTitle{font-size:24px;}
+  .goldNumber{font-size:44px;}
+}
+
+/* =========================================================
+   540px 及以下手机版
+========================================================= */
+@media(max-width:540px){
+  html,body{
+    overflow-x:hidden;
+    overflow-y:auto;
+    height:auto;
+    min-height:100%;
+  }
+
+  body{
+    display:block;
+    background:
+      linear-gradient(rgba(243,236,223,.72), rgba(243,236,223,.92)),
+      url("room-dorm.png") center center / cover no-repeat fixed;
+  }
+
+  #room{
+    width:100%;
+    min-height:100vh;
+    min-height:100dvh;
+    height:auto;
+    display:block;
+    overflow:visible;
+    padding:10px 12px 14px;
+  }
+
+  #bgFrame{
+    display:none;
+  }
+
+  #overlay{
+    position:relative !important;
+    left:auto !important;
+    top:auto !important;
+    width:100% !important;
+    height:auto !important;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    overflow:visible;
+    --ui-scale:1;
+    pointer-events:auto;
+  }
+
+  #topActions{
+    position:sticky;
+    top:10px;
+    right:auto;
+    left:auto;
+    width:100%;
+    height:40px;
+    z-index:30;
+    order:0;
+  }
+
+  #topIdentityBar{
+    gap:6px;
+    padding:5px 7px;
+    border-radius:14px;
+  }
+
+  #topIdentityBadge{
+    padding:0 9px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  #loginOpenBtn,
+  #logoutBtn{
+    width:42px;
+    min-width:42px;
+    flex-basis:42px;
+    font-size:11px;
+    border-radius:10px;
+  }
+
+  #siteNoticeWrap{
+    width:34px;
+    min-width:34px;
+    flex-basis:34px;
+  }
+
+  #siteNoticeBtn{
+    font-size:14px;
+    border-radius:10px;
+  }
+
+  #siteNoticePanel{
+    position:fixed;
+    top:58px;
+    right:10px;
+    left:10px;
+    width:auto;
+    max-height:60dvh;
+    z-index:999;
+  }
+
+  #topBar{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    order:1;
+    z-index:20;
+
+    --nav-btn-height:34px;
+    --nav-btn-px:8px;
+    --nav-btn-radius:10px;
+    --nav-btn-font:12px;
+    --nav-gap:7px;
+  }
+
+  #roomNav{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:7px;
+    transform:none !important;
+  }
+
+  .navBtn{
+    width:100%;
+    min-width:0;
+    height:34px;
+    padding:0 8px;
+    font-size:12px;
+    border-radius:10px;
+    overflow:hidden;
+  }
+
+  .navEffect{
+    display:none;
+  }
+
+  #dormShell{
+    position:relative;
+    left:auto;
+    top:auto;
+    transform:none;
+    order:2;
+    width:100%;
+    height:auto;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  #sidePanel{
+    flex-direction:row;
+    overflow-x:auto;
+    padding:10px;
+    border-radius:22px;
+  }
+
+  .sideBtn{
+    flex:0 0 auto;
+    width:auto;
+    min-height:38px;
+    padding:0 13px;
+    font-size:12px;
+  }
+
+  .sideIcon{
+    display:block;
+    width:auto;
+  }
+
+  #mascotBox{display:none;}
+
+  #mainPanel{
+    padding:20px;
+    min-height:520px;
+  }
+
+  .walletTitle{font-size:24px;}
+
+  .balanceCard{padding:20px;}
+
+  .balanceCard::after{
+    right:22px;
+    top:22px;
+    font-size:52px;
+  }
+
+  .goldNumber{font-size:44px;}
+
+  .goldStats{grid-template-columns:1fr;}
+
+  .placeholderGrid{grid-template-columns:1fr;}
+
+  #tipPanel{display:none;}
+}
+</style>
 </head>
+
 <body>
-  <h1>宿舍</h1>
-  <a href="index.html">返回首页</a>
+<div id="room">
+  <div id="bgFrame">
+    <img id="bg" src="room-dorm.png" alt="十号房宿舍背景">
+  </div>
+
+  <div id="overlay">
+    <!-- 身份组件 -->
+    <div id="topActions">
+      <div id="topIdentityBar">
+        <div id="topIdentityBadge">
+          <span class="identityText" id="currentUserText">读取中</span>
+        </div>
+
+        <div id="siteNoticeWrap">
+          <button id="siteNoticeBtn" type="button" aria-label="查看提醒">
+            <span id="siteNoticeIcon">🔔</span>
+            <span id="siteNoticeCount">0</span>
+          </button>
+
+          <div id="siteNoticePanel" aria-live="polite">
+            <div class="siteNoticeTitle">宿舍提醒</div>
+            <div id="siteNoticeContent">
+              <div class="siteNoticeEmpty">暂无提醒。</div>
+            </div>
+          </div>
+        </div>
+
+        <button id="loginOpenBtn" class="hidden" type="button">登录</button>
+        <button id="logoutBtn" type="button">登出</button>
+      </div>
+    </div>
+
+    <!-- 房间切换按钮：宿舍页不显示“宿舍”按钮 -->
+    <div id="topBar" aria-label="房间切换">
+      <div id="navOuter">
+        <div id="navScroll">
+          <nav id="roomNav">
+            <button class="navBtn" data-room="hall" type="button" onclick="enterRoom('index.html', false)">
+              <span class="navLabel">大堂</span>
+              <span class="navEffect navEffectA">✦</span>
+              <span class="navEffect navEffectB">✧</span>
+              <span class="navEffect navEffectC">★</span>
+            </button>
+
+            <button class="navBtn" data-room="manager" type="button" onclick="enterManagerRoom()">
+              <span class="navLabel">宿管室</span>
+              <span class="navEffect navEffectA">✎</span>
+              <span class="navEffect navEffectB">▱</span>
+              <span class="navEffect navEffectC">✐</span>
+            </button>
+
+            <button class="navBtn" data-room="honor" type="button" onclick="enterRoom('honor.html', false)">
+              <span class="navLabel">荣誉墙</span>
+              <span class="navEffect navEffectA">🏆</span>
+              <span class="navEffect navEffectB">🏅</span>
+              <span class="navEffect navEffectC">✦</span>
+            </button>
+
+            <button class="navBtn" data-room="game" type="button" onclick="enterRoom('game.html', false)">
+              <span class="navLabel">游戏房</span>
+              <span class="navEffect navEffectA">🎮</span>
+              <span class="navEffect navEffectB">◆</span>
+              <span class="navEffect navEffectC">🕹</span>
+            </button>
+
+            <button class="navBtn" data-room="studio" type="button" onclick="enterRoom('studio-todo.html', true)">
+              <span class="navLabel">工作间</span>
+              <span class="navEffect navEffectA">🎙</span>
+              <span class="navEffect navEffectB">🎧</span>
+              <span class="navEffect navEffectC">◇</span>
+            </button>
+
+            <button class="navBtn" data-room="living" type="button" onclick="enterRoom('living.html', false)">
+              <span class="navLabel">客厅</span>
+              <span class="navEffect navEffectA">☕</span>
+              <span class="navEffect navEffectB">✦</span>
+              <span class="navEffect navEffectC">💬</span>
+            </button>
+
+            <button class="navBtn" data-room="pets" type="button" onclick="enterRoom('pets.html', false)">
+              <span class="navLabel">宠物区</span>
+              <span class="navEffect navEffectA">🐾</span>
+              <span class="navEffect navEffectB">♡</span>
+              <span class="navEffect navEffectC">🐱</span>
+            </button>
+
+            <button class="navBtn" data-room="flower" type="button" onclick="enterRoom('flower.html', false)">
+              <span class="navLabel">花房区</span>
+              <span class="navEffect navEffectA">✿</span>
+              <span class="navEffect navEffectB">❀</span>
+              <span class="navEffect navEffectC">🌸</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <main id="dormShell">
+      <aside id="sidePanel" class="glassPanel">
+        <button class="sideBtn active" data-view="wallet"><span class="sideIcon">🏠</span>我的钱包</button>
+        <button class="sideBtn" data-view="ledger"><span class="sideIcon">📋</span>金币记录</button>
+        <button class="sideBtn" data-view="tasks"><span class="sideIcon">⭐</span>任务中心</button>
+        <button class="sideBtn" data-view="badges"><span class="sideIcon">🏆</span>成就徽章</button>
+        <button class="sideBtn" data-view="notice"><span class="sideIcon">💌</span>系统通知</button>
+
+        <div id="mascotBox">
+          <img src="mascot-niuma.png" alt="十号房牛马吉祥物">
+          <div id="mascotBubble" class="bubble-calm">收到啦</div>
+        </div>
+      </aside>
+
+      <section id="mainPanel" class="glassPanel">
+        <div class="view active" id="view-wallet">
+          <div class="walletHeader">
+            <div class="walletIcon" aria-hidden="true"></div>
+            <div>
+              <h1 class="walletTitle" id="walletTitle">我的钱包</h1>
+              <p class="walletSub" id="goldSub">正在读取金币信息……</p>
+            </div>
+          </div>
+
+          <div class="balanceCard">
+            <div class="goldLabel">当前余额</div>
+            <span class="goldNumber" id="goldBalance">0</span>
+            <span class="goldUnit">金币</span>
+          </div>
+
+          <div class="goldStats">
+            <div class="statCard">
+              <div class="statLabel">累计获得</div>
+              <div class="statValue" id="goldEarned">0</div>
+            </div>
+            <div class="statCard">
+              <div class="statLabel">累计花费</div>
+              <div class="statValue" id="goldSpent">0</div>
+            </div>
+            <div class="statCard">
+              <div class="statLabel">今日获得</div>
+              <div class="statValue todayValue none" id="todayGold">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="view" id="view-ledger">
+          <h2 class="sectionTitle">金币记录</h2>
+          <p class="sectionDesc">最近 30 条金币收入与支出。</p>
+          <div class="ledgerList" id="ledgerList">
+            <div class="emptyText">正在读取金币记录……</div>
+          </div>
+        </div>
+
+        <div class="view" id="view-tasks">
+          <h2 class="sectionTitle">任务中心</h2>
+          <p class="sectionDesc">这里之后可以显示你的待录音、待混音、待抽签项目。</p>
+          <div class="placeholderGrid">
+            <div class="placeholderCard"><h3>待录音</h3><p>统计你还没有交音的项目。</p></div>
+            <div class="placeholderCard"><h3>待混音</h3><p>统计你负责后期但还未交付的项目。</p></div>
+            <div class="placeholderCard"><h3>待抽签</h3><p>统计你已参与但还未完成歌词抽签的项目。</p></div>
+            <div class="placeholderCard"><h3>最近任务</h3><p>之后可接入项目表自动展示。</p></div>
+          </div>
+        </div>
+
+        <div class="view" id="view-badges">
+          <h2 class="sectionTitle">成就徽章</h2>
+          <p class="sectionDesc">这里之后可以接入称号和成就系统。</p>
+          <div class="placeholderGrid">
+            <div class="placeholderCard"><h3>演唱成就</h3><p>完成交音、发布后累计获得。</p></div>
+            <div class="placeholderCard"><h3>后期成就</h3><p>完成混音交付后累计获得。</p></div>
+          </div>
+        </div>
+
+        <div class="view" id="view-notice">
+          <h2 class="sectionTitle">系统通知</h2>
+          <p class="sectionDesc">这里之后可以接入右上角铃铛提醒。</p>
+          <div class="placeholderCard">
+            <h3>暂无通知</h3>
+            <p>当前页面先保留通知入口，后续统一接入全站提醒。</p>
+          </div>
+        </div>
+      </section>
+
+      <aside id="tipPanel" class="glassPanel">
+        <div class="tipTitle">🪙 获取金币</div>
+        <div class="goldWayList">
+          <div class="goldWayItem">
+            <div class="goldWayName">交音</div>
+            <div class="goldWayDesc">提交录音后获得。</div>
+          </div>
+          <div class="goldWayItem">
+            <div class="goldWayName">发布</div>
+            <div class="goldWayDesc">作品发布后获得。</div>
+          </div>
+          <div class="goldWayItem">
+            <div class="goldWayName">后期</div>
+            <div class="goldWayDesc">完成混音后获得。</div>
+          </div>
+          <div class="goldWayItem">
+            <div class="goldWayName">用途</div>
+            <div class="goldWayDesc">之后可用于宠物、花房和装饰。</div>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const STORAGE_KEYS = {
+  loggedIn:"room10LoggedIn",
+  user:"room10User",
+  role:"room10Role",
+  memberId:"room10MemberId",
+  memberCode:"room10MemberCode"
+};
+
+const img = document.getElementById("bg");
+const bgFrame = document.getElementById("bgFrame");
+const overlay = document.getElementById("overlay");
+const root = document.documentElement;
+const roomNav = document.getElementById("roomNav");
+const topBar = document.getElementById("topBar");
+
+const currentUserText = document.getElementById("currentUserText");
+const loginOpenBtn = document.getElementById("loginOpenBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const siteNoticeBtn = document.getElementById("siteNoticeBtn");
+const siteNoticePanel = document.getElementById("siteNoticePanel");
+const siteNoticeCount = document.getElementById("siteNoticeCount");
+const siteNoticeContent = document.getElementById("siteNoticeContent");
+
+const authState = {
+  loggedIn:false,
+  nickname:"",
+  role:"visitor",
+  memberId:null
+};
+
+const mascotLines = [
+  { text:"在做了在做了", style:"work" },
+  { text:"收到啦", style:"ok" },
+  { text:"没事哒", style:"calm" },
+  { text:"冲鸭！", style:"energy" },
+  { text:"马上就好", style:"wait" },
+  { text:"安排上了", style:"plan" },
+  { text:"努力营业中", style:"busy" },
+  { text:"今天也要加油", style:"cheer" },
+  { text:"灵感加载中", style:"thinking" },
+  { text:"休息一下也可以", style:"soft" },
+  { text:"慢慢来不着急", style:"calm" },
+  { text:"一起加油呀", style:"cheer" }
+];
+
+function isTinyScreen(){
+  return window.innerWidth <= 540;
+}
+
+/* =========================================================
+   底图贴合坐标系统
+========================================================= */
+function syncOverlayToImage(){
+  if(isTinyScreen()) return;
+  if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
+
+  const frame = bgFrame.getBoundingClientRect();
+  const frameRatio = frame.width / frame.height;
+  const imageRatio = img.naturalWidth / img.naturalHeight;
+
+  let displayWidth;
+  let displayHeight;
+  let displayLeft;
+  let displayTop;
+
+  if(frameRatio > imageRatio){
+    displayHeight = frame.height;
+    displayWidth = displayHeight * imageRatio;
+    displayLeft = frame.left + (frame.width - displayWidth) / 2;
+    displayTop = frame.top;
+  }else{
+    displayWidth = frame.width;
+    displayHeight = displayWidth / imageRatio;
+    displayLeft = frame.left;
+    displayTop = frame.top + (frame.height - displayHeight) / 2;
+  }
+
+  overlay.style.left = `${displayLeft}px`;
+  overlay.style.top = `${displayTop}px`;
+  overlay.style.width = `${displayWidth}px`;
+  overlay.style.height = `${displayHeight}px`;
+
+  const scale = Math.max(0.34, Math.min(1.42, displayWidth / 1440));
+  root.style.setProperty("--bg-ui-scale", String(scale));
+
+  requestAnimationFrame(fitRoomNavToBar);
+}
+
+/* =========================================================
+   房间按钮自动缩放
+========================================================= */
+function fitRoomNavToBar(){
+  if(!roomNav || !topBar || isTinyScreen()) return;
+
+  roomNav.style.transform = "scale(1)";
+
+  const availableWidth = topBar.clientWidth;
+  const neededWidth = roomNav.scrollWidth;
+
+  if(!availableWidth || !neededWidth) return;
+
+  const fitScale = Math.min(1, availableWidth / neededWidth);
+  roomNav.style.transform = `scale(${fitScale})`;
+}
+
+/* =========================================================
+   通用工具
+========================================================= */
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function roleLabel(role){
+  const r = String(role || "").toLowerCase();
+  if(r === "owner") return "维修工";
+  if(r === "admin") return "宿管";
+  if(r === "member") return "房客";
+  if(r === "applying") return "申请中";
+  return "参观者";
+}
+
+function ledgerLabel(item){
+  const sub = String(item.subcategory || "");
+  if(sub === "submit") return "演唱交音奖励";
+  if(sub === "publish") return "演唱发布奖励";
+  if(sub === "mix_submit") return "后期交付奖励";
+  if(sub === "mix_publish") return "后期发布奖励";
+  if(sub === "pet_adopt") return "宠物领养";
+  if(sub === "flower_buy") return "花房买入";
+  if(sub === "flower_sell") return "花房卖出";
+  return item.note || item.subcategory || item.category || "金币变动";
+}
+
+function formatDate(value){
+  if(!value) return "";
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return "";
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+
+function isToday(value){
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return false;
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear()
+    && d.getMonth() === now.getMonth()
+    && d.getDate() === now.getDate();
+}
+
+function setText(id,value){
+  const el = document.getElementById(id);
+  if(el) el.textContent = value;
+}
+
+function setLedgerMessage(message,isError=false){
+  const list = document.getElementById("ledgerList");
+  if(!list) return;
+  list.innerHTML = `<div class="${isError ? "errorText" : "emptyText"}">${escapeHtml(message)}</div>`;
+}
+
+/* =========================================================
+   身份与登录状态
+========================================================= */
+function readLocalAuth(){
+  authState.loggedIn = localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
+  authState.nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
+  authState.role = String(localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
+  authState.memberId = localStorage.getItem(STORAGE_KEYS.memberId) || null;
+
+  if(!authState.loggedIn || !authState.nickname || !authState.memberId){
+    window.location.href = "index.html";
+    return false;
+  }
+
+  return true;
+}
+
+function updateIdentity(member){
+  const name = member?.nickname || authState.nickname || "";
+  const role = roleLabel(member?.role || authState.role);
+
+  if(!currentUserText || !loginOpenBtn || !logoutBtn) return;
+
+  if(!name){
+    currentUserText.textContent = "参观者";
+    loginOpenBtn.classList.remove("hidden");
+    logoutBtn.classList.add("hidden");
+    return;
+  }
+
+  currentUserText.textContent = `${name} | ${role}`;
+  loginOpenBtn.classList.add("hidden");
+  logoutBtn.classList.remove("hidden");
+}
+
+function handleLogout(){
+  localStorage.removeItem(STORAGE_KEYS.loggedIn);
+  localStorage.removeItem(STORAGE_KEYS.user);
+  localStorage.removeItem(STORAGE_KEYS.role);
+  localStorage.removeItem(STORAGE_KEYS.memberId);
+  localStorage.removeItem(STORAGE_KEYS.memberCode);
+
+  localStorage.removeItem("room10_user");
+  localStorage.removeItem("room10_current_user");
+  localStorage.removeItem("currentUser");
+
+  window.location.href = "index.html";
+}
+
+/* =========================================================
+   房间跳转
+========================================================= */
+function getManagerPageByRole(){
+  const role = String(authState.role || localStorage.getItem(STORAGE_KEYS.role) || "").toLowerCase();
+
+  if(role === "owner") return "manager-owner.html";
+  if(role === "admin") return "manager-admin.html";
+  if(role === "member") return "manager-member.html";
+
+  return "manager-visitor.html";
+}
+
+function enterManagerRoom(){
+  window.location.href = getManagerPageByRole();
+}
+
+function enterRoom(page, needLogin){
+  const targetPage = String(page || "").trim();
+  if(!targetPage) return;
+
+  if(needLogin && !readLocalAuth()){
+    return;
+  }
+
+  if((targetPage === "flower.html" || targetPage === "pets.html") && !authState.loggedIn){
+    window.location.href = `${targetPage}?mode=guest`;
+    return;
+  }
+
+  window.location.href = targetPage;
+}
+
+/* =========================================================
+   铃铛提醒
+========================================================= */
+function setNoticeCount(count){
+  const n = Number(count) || 0;
+  siteNoticeCount.textContent = n > 99 ? "99+" : String(n);
+  siteNoticeBtn.classList.toggle("hasNotice", n > 0);
+}
+
+function renderNoticeList(items){
+  const list = Array.isArray(items) ? items : [];
+
+  if(!list.length){
+    siteNoticeContent.innerHTML = '<div class="siteNoticeEmpty">暂无提醒。</div>';
+    setNoticeCount(0);
+    return;
+  }
+
+  siteNoticeContent.innerHTML = `
+    <div class="siteNoticeList">
+      ${list.map(item => `
+        <div class="siteNoticeItem">
+          <div class="siteNoticeItemTitle">${escapeHtml(item.title || "提醒")}</div>
+          <div class="siteNoticeItemDesc">${escapeHtml(item.desc || "")}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+
+  setNoticeCount(list.length);
+}
+
+function toggleNoticePanel(){
+  siteNoticePanel.classList.toggle("show");
+}
+
+function closeNoticePanel(){
+  siteNoticePanel.classList.remove("show");
+}
+
+/* =========================================================
+   金币数据
+========================================================= */
+async function fetchCurrentMember(){
+  const { data,error } = await supabaseClient
+    .from("members")
+    .select("id,nickname,role,gold_balance,gold_total_earned,gold_total_spent")
+    .eq("id",authState.memberId)
+    .maybeSingle();
+
+  if(error) throw error;
+  return data;
+}
+
+async function loadGoldInfo(){
+  if(!readLocalAuth()) return;
+
+  updateIdentity({
+    nickname:authState.nickname,
+    role:authState.role
+  });
+
+  let member = null;
+
+  try{
+    member = await fetchCurrentMember();
+  }catch(error){
+    console.error(error);
+    setText("walletTitle",`${authState.nickname || "成员"}的钱包`);
+    setText("goldSub","金币信息读取失败，请检查 members 表读取权限。");
+    setLedgerMessage("金币记录读取失败，请检查 gold_ledger 表读取权限。",true);
+    return;
+  }
+
+  if(!member){
+    setText("walletTitle","无法读取钱包");
+    setText("goldSub","当前登录缓存对应的成员不存在，请重新登录。");
+    setLedgerMessage("没有找到当前成员的金币记录。",true);
+    return;
+  }
+
+  authState.nickname = member.nickname || authState.nickname;
+  authState.role = member.role || authState.role;
+
+  updateIdentity(member);
+
+  setText("walletTitle",`${member.nickname || "成员"}的钱包`);
+  setText("goldSub","金币是你在十号房的努力与收获");
+  setText("goldBalance",member.gold_balance ?? 0);
+  setText("goldEarned",member.gold_total_earned ?? 0);
+  setText("goldSpent",member.gold_total_spent ?? 0);
+
+  await loadGoldLedger(member.id);
+}
+
+async function loadGoldLedger(memberId){
+  const { data,error } = await supabaseClient
+    .from("gold_ledger")
+    .select("direction,amount,category,subcategory,note,created_at")
+    .eq("member_id",memberId)
+    .order("created_at",{ ascending:false })
+    .limit(30);
+
+  if(error){
+    console.error(error);
+    setLedgerMessage("金币记录读取失败，请检查 gold_ledger 权限。",true);
+    return;
+  }
+
+  if(!data || !data.length){
+    setLedgerMessage("当前账号暂无金币流水。");
+    setText("todayGold","0");
+    return;
+  }
+
+  const todayIncome = data
+    .filter(item => item.direction === "in" && isToday(item.created_at))
+    .reduce((sum,item) => sum + Number(item.amount || 0),0);
+
+  const todayEl = document.getElementById("todayGold");
+  if(todayEl){
+    todayEl.textContent = todayIncome > 0 ? `+${todayIncome}` : "0";
+    todayEl.className = todayIncome > 0 ? "statValue todayValue income" : "statValue todayValue none";
+  }
+
+  const list = document.getElementById("ledgerList");
+  list.innerHTML = data.map(item => {
+    const isIn = item.direction === "in";
+    const sign = isIn ? "+" : "-";
+    const title = ledgerLabel(item);
+    const note = item.note && item.note !== title ? item.note : "";
+
+    return `
+      <div class="ledgerItem">
+        <div class="ledgerArrow ${isIn ? "in" : "out"}">${isIn ? "↑" : "↓"}</div>
+        <div>
+          <strong>${escapeHtml(title)}</strong>
+          <div class="ledgerMeta">
+            ${escapeHtml(formatDate(item.created_at))}
+            ${note ? `｜${escapeHtml(note)}` : ""}
+          </div>
+        </div>
+        <div class="ledgerAmount ${isIn ? "in" : "out"}">
+          ${sign}${Number(item.amount || 0)}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* =========================================================
+   页面交互
+========================================================= */
+function bindSideTabs(){
+  const buttons = document.querySelectorAll(".sideBtn");
+  const views = document.querySelectorAll(".view");
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click",() => {
+      const target = btn.dataset.view;
+
+      buttons.forEach(item => item.classList.toggle("active",item === btn));
+      views.forEach(view => view.classList.toggle("active",view.id === `view-${target}`));
+    });
+  });
+}
+
+function setMascotBubbleOnce(){
+  const bubble = document.getElementById("mascotBubble");
+  if(!bubble) return;
+
+  const item = mascotLines[Math.floor(Math.random()*mascotLines.length)];
+  bubble.textContent = item.text;
+  bubble.className = `bubble-${item.style}`;
+}
+
+/* =========================================================
+   初始化
+========================================================= */
+document.addEventListener("DOMContentLoaded", () => {
+  if(!readLocalAuth()) return;
+
+  updateIdentity({
+    nickname:authState.nickname,
+    role:authState.role
+  });
+
+  bindSideTabs();
+  loadGoldInfo();
+  renderNoticeList([]);
+  setMascotBubbleOnce();
+
+  if(siteNoticeBtn){
+    siteNoticeBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      toggleNoticePanel();
+    });
+  }
+
+  if(logoutBtn){
+    logoutBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      handleLogout();
+    });
+  }
+
+  document.addEventListener("click", event => {
+    if(siteNoticePanel && siteNoticeBtn){
+      if(siteNoticePanel.contains(event.target) || siteNoticeBtn.contains(event.target)) return;
+      closeNoticePanel();
+    }
+  });
+
+  syncOverlayToImage();
+});
+
+window.addEventListener("resize", syncOverlayToImage);
+
+window.addEventListener("storage", event => {
+  if(
+    event.key === STORAGE_KEYS.loggedIn ||
+    event.key === STORAGE_KEYS.user ||
+    event.key === STORAGE_KEYS.role ||
+    event.key === STORAGE_KEYS.memberId
+  ){
+    updateIdentity({
+      nickname:localStorage.getItem(STORAGE_KEYS.user) || "",
+      role:localStorage.getItem(STORAGE_KEYS.role) || ""
+    });
+  }
+});
+
+if(img && img.complete && img.naturalWidth){
+  syncOverlayToImage();
+}else if(img){
+  img.addEventListener("load", syncOverlayToImage, { once:true });
+}
+
+setTimeout(syncOverlayToImage, 120);
+</script>
 </body>
 </html>
