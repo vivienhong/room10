@@ -2,1425 +2,1286 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>小游戏｜游戏房</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>十号房｜脸萌挑战</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{box-sizing:border-box;}
+
+:root{
+  --bg1:#fff3e0;
+  --bg2:#f8e3c8;
+  --text:#5b3e28;
+  --text2:#7d5c3c;
+  --line:rgba(255,255,255,.78);
+
+  /* 绿色正确框：更细、更实心 */
+  --ok:#79b36b;
+  --okBg:rgba(196,234,186,.78);
+
+  --bad:#d86a6a;
+  --badBg:rgba(255,193,193,.42);
+  --zoneHover:rgba(255,145,40,.42);
+  --zoneHoverStroke:#d96a00;
+  --select:#f1b94f;
+  --selectBg:rgba(255,218,120,.34);
+
+  /* 小屏裁切参数：裁掉左侧空白，只保留右侧主体 */
+  --cropScale:1.724137931;
+  --cropShift:-72.4137931%;
+}
 
 html,body{
   margin:0;
   width:100%;
   height:100%;
   overflow:hidden;
-  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
-}
-
-:root{
-  --bg-left:#fff3e7;
-  --bg-right:#f4dfc8;
-  --bg-top:#fff7ef;
-  --bg-bottom:#edd8c1;
-  --panel-bg:rgba(255,255,255,0.34);
-  --panel-border:rgba(255,255,255,0.62);
-  --panel-shadow:rgba(112,78,45,0.16);
-  --text-main:#7a5030;
-  --btn-bg:rgba(255,252,248,0.82);
-  --btn-border:rgba(255,255,255,0.92);
-  --btn-shadow:rgba(129,90,54,0.16);
-
-  --bg-ui-scale:1;
-
-  /* 当前页面坐标：游戏房页只改这里 */
-  --identity-right:7.35%;
-  --identity-top:6.46%;
-  --identity-width:calc(232px * var(--bg-ui-scale));
-  --identity-height:calc(38px * var(--bg-ui-scale));
-
-  --room-nav-left:27.2%;
-  --room-nav-top:6.35%;
-  --room-nav-width:45.5%;
-
-  /* 页面可改颜色，不改结构尺寸 */
-  --identity-bg:rgba(255,248,239,0.92);
-  --identity-inner-bg:rgba(255,252,247,0.96);
-  --identity-border:rgba(186,146,103,0.24);
-  --identity-text:#6c4523;
-  --identity-shadow:rgba(116,86,54,0.12);
-
-  --nav-text:#6e4827;
-  --nav-border:rgba(145,98,56,.34);
+  font-family:Arial, Helvetica, sans-serif;
 }
 
 body{
-  position:relative;
-  min-height:100vh;
-  min-height:100dvh;
-  background:
-    radial-gradient(circle at center, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 62%),
-    linear-gradient(90deg, var(--bg-left) 0%, var(--bg-right) 100%);
+  background:linear-gradient(to right, var(--bg1), var(--bg2));
   display:flex;
   justify-content:center;
   align-items:center;
-  color:var(--text-main);
-}
-
-button{
-  font-family:inherit;
-}
-
-.hidden{
-  display:none !important;
-}
-
-#bgColorFill{
-  position:fixed;
-  inset:0;
-  z-index:0;
-  background:
-    linear-gradient(180deg, var(--bg-top) 0%, rgba(255,255,255,0) 18%, rgba(255,255,255,0) 82%, var(--bg-bottom) 100%),
-    linear-gradient(90deg, var(--bg-left) 0%, var(--bg-right) 100%);
-}
-
-#bgBleed{
-  position:fixed;
-  inset:-8vh -8vw;
-  z-index:1;
-  background:url("room-game.png") center center / cover no-repeat;
-  filter:blur(30px) saturate(1.05);
-  transform:scale(1.08);
-  opacity:.72;
-  pointer-events:none;
-}
-
-#bgLight{
-  position:fixed;
-  inset:0;
-  z-index:2;
-  pointer-events:none;
-  background:
-    radial-gradient(circle at 50% 35%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0) 58%),
-    linear-gradient(180deg, rgba(255,248,240,0.08), rgba(255,248,240,0.08));
+  color:var(--text);
 }
 
 #room{
   position:relative;
-  z-index:3;
   width:100vw;
   height:100vh;
   height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
   overflow:hidden;
-  background:transparent;
 }
 
-#bgFrame{
+#bgShade{
   position:absolute;
   inset:0;
-  z-index:0;
-  overflow:hidden;
+  z-index:1;
+  pointer-events:none;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(0,0,0,0) 56%,
+      rgba(210,186,160,0.10) 72%,
+      rgba(190,160,130,0.16) 86%,
+      rgba(170,138,108,0.22) 100%
+    );
+}
+
+#stage{
+  position:relative;
+  width:fit-content;
+  height:fit-content;
+  max-width:100vw;
+  max-height:100vh;
+  z-index:2;
+}
+
+#playArea{
+  position:relative;
+  width:fit-content;
+  height:fit-content;
+  line-height:0;
+}
+
+#viewport{
+  position:relative;
+  display:block;
+  line-height:0;
+}
+
+#fullLayer{
+  position:relative;
+  display:block;
+  line-height:0;
 }
 
 #bg{
+  display:block;
+  width:auto;
+  height:auto;
+  max-width:100vw;
+  max-height:100vh;
+  position:relative;
+  z-index:0;
+  -webkit-user-drag:none;
+  user-select:none;
+}
+
+#map{
   position:absolute;
   inset:0;
   width:100%;
   height:100%;
-  object-fit:contain;
-  object-position:center center;
-  display:block;
-  user-select:none;
-  -webkit-user-drag:none;
-  pointer-events:none;
-}
-
-#overlay{
-  position:absolute;
-  z-index:1;
+  z-index:4;
   overflow:visible;
-  pointer-events:none;
-  --ui-scale:var(--bg-ui-scale, 1);
 }
 
-#overlay *{
-  pointer-events:auto;
-}
-
-.panel{
+#labelLayer{
   position:absolute;
-  left:48.8%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  width:57%;
-  max-width:820px;
-  padding:calc(38px * var(--ui-scale));
-  border-radius:calc(30px * var(--ui-scale));
-  background:var(--panel-bg);
-  border:1.5px solid var(--panel-border);
+  inset:0;
+  z-index:5;
+  pointer-events:none;
+}
+
+/* 左侧主面板 */
+#leftPanel{
+  position:absolute;
+  left:2.2%;
+  top:3%;
+  width:30%;
+  min-width:330px;
+  max-width:430px;
+  height:94%;
+  z-index:6;
+  pointer-events:auto;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.42) 0%,
+      rgba(255,255,255,.30) 45%,
+      rgba(255,255,255,.18) 100%
+    );
+  backdrop-filter:blur(16px) saturate(120%);
+  -webkit-backdrop-filter:blur(16px) saturate(120%);
+  border:1px solid var(--line);
+  border-radius:24px;
   box-shadow:
-    0 12px 36px var(--panel-shadow),
-    inset 0 1px 0 rgba(255,255,255,0.72),
-    inset 0 0 28px rgba(255,255,255,0.10);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  text-align:center;
-}
-
-.title{
-  margin:0 0 calc(30px * var(--ui-scale));
-  color:var(--text-main);
-  font-size:clamp(28px, calc(44px * var(--ui-scale)), 50px);
-  font-weight:800;
-  letter-spacing:1px;
-  text-shadow:0 1px 0 rgba(255,255,255,0.35);
-}
-
-.menu{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:calc(18px * var(--ui-scale));
-}
-
-.game-btn{
-  appearance:none;
-  border:none;
-  cursor:pointer;
-  width:100%;
-  min-height:calc(150px * var(--ui-scale));
-  border-radius:calc(24px * var(--ui-scale));
-  padding:calc(18px * var(--ui-scale));
-  text-decoration:none;
+    0 12px 34px rgba(92,63,37,.15),
+    inset 0 1px 0 rgba(255,255,255,.92),
+    inset 0 -2px 8px rgba(255,255,255,.12);
   display:flex;
   flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  background:var(--btn-bg);
-  border:1.5px solid var(--btn-border);
-  box-shadow:
-    0 8px 22px var(--btn-shadow),
-    inset 0 1px 0 rgba(255,255,255,0.92);
-  transition:
-    transform .18s ease,
-    box-shadow .18s ease,
-    background .18s ease,
-    border-color .18s ease;
-  font-family:inherit;
+  padding:14px 12px 12px;
+  gap:10px;
 }
 
-.game-btn:hover{
-  transform:translateY(-3px);
-  background:rgba(255,252,248,0.92);
-  box-shadow:
-    0 12px 28px rgba(129,90,54,0.22),
-    inset 0 1px 0 rgba(255,255,255,0.96);
-  border-color:rgba(255,255,255,1);
-}
-
-.game-btn:active{
-  transform:translateY(0);
-}
-
-.game-name{
-  color:#744a2a;
-  font-size:clamp(22px, calc(28px * var(--ui-scale)), 34px);
-  font-weight:800;
-  line-height:1.2;
-  margin-bottom:10px;
-}
-
-.game-desc{
-  color:#8a6547;
-  font-size:clamp(13px, calc(16px * var(--ui-scale)), 18px);
-  line-height:1.55;
-  max-width:22em;
-}
-
-/* =========================================================
-   身份组件：全站统一结构
-========================================================= */
-#topActions{
-  position:absolute;
-  right:var(--identity-right);
-  top:var(--identity-top);
-  width:var(--identity-width);
-  height:var(--identity-height);
-  min-width:0;
-  min-height:0;
-  z-index:65;
-  pointer-events:none;
-}
-
-#topIdentityBar{
-  width:100%;
-  height:100%;
-  display:flex;
-  align-items:stretch;
-  justify-content:flex-start;
-  gap:calc(5px * var(--ui-scale));
-  padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
-  border-radius:calc(13px * var(--ui-scale));
-  background:var(--identity-bg);
-  border:1px solid var(--identity-border);
-  box-shadow:
-    0 calc(10px * var(--ui-scale)) calc(24px * var(--ui-scale)) var(--identity-shadow),
-    inset 0 1px 0 rgba(255,255,255,0.9);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  pointer-events:auto;
-  overflow:visible;
-  white-space:nowrap;
-}
-
-#topIdentityBadge,
-#loginOpenBtn,
-#logoutBtn,
-#siteNoticeBtn{
-  border-radius:calc(9px * var(--ui-scale));
-  background:var(--identity-inner-bg);
-  color:var(--identity-text);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    0 1px 4px rgba(112,83,52,0.05);
-  border:1px solid rgba(160,116,78,0.12);
-}
-
-#topIdentityBadge{
-  flex:1 1 auto;
-  min-width:0;
-  padding:0 calc(8px * var(--ui-scale));
-  font-size:calc(13px * var(--ui-scale));
-  font-weight:800;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  white-space:nowrap;
-}
-
-#topIdentityBadge .identityText{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  line-height:1;
-}
-
-#loginOpenBtn,
-#logoutBtn{
-  appearance:none;
-  cursor:pointer;
-  width:calc(42px * var(--ui-scale));
-  min-width:calc(42px * var(--ui-scale));
-  flex:0 0 calc(42px * var(--ui-scale));
-  padding:0;
-  color:#67401f;
-  font-size:calc(12px * var(--ui-scale));
-  font-weight:800;
-  line-height:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
-  overflow:hidden;
-  white-space:nowrap;
-}
-
-#loginOpenBtn:hover,
-#logoutBtn:hover,
-#siteNoticeBtn:hover{
-  transform:translateY(-1px);
-  background:rgba(255,255,255,0.94);
-}
-
-#siteNoticeWrap{
-  position:relative;
-  width:calc(30px * var(--ui-scale));
-  min-width:calc(30px * var(--ui-scale));
-  flex:0 0 calc(30px * var(--ui-scale));
-  display:flex;
-  align-items:stretch;
-  justify-content:center;
-  overflow:visible;
-}
-
-#siteNoticeBtn{
-  appearance:none;
-  border:none;
-  cursor:pointer;
-  position:relative;
-  width:100%;
-  height:100%;
-  padding:0;
-  font-size:calc(14px * var(--ui-scale));
-  font-weight:800;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
-}
-
-#siteNoticeIcon{
-  display:block;
-  line-height:1;
-  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
-}
-
-#siteNoticeCount{
-  position:absolute;
-  right:calc(-6px * var(--ui-scale));
-  top:calc(-6px * var(--ui-scale));
-  min-width:calc(18px * var(--ui-scale));
-  height:calc(18px * var(--ui-scale));
-  padding:0 calc(5px * var(--ui-scale));
-  border-radius:999px;
-  background:#c98c4f;
-  color:#fff9f1;
-  font-size:calc(9px * var(--ui-scale));
-  font-weight:900;
-  line-height:1;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  border:calc(2px * var(--ui-scale)) solid rgba(255,248,239,0.98);
-  box-shadow:0 2px 8px rgba(116,86,54,0.16);
-  z-index:3;
-}
-
-#siteNoticeBtn.hasNotice #siteNoticeCount{
-  display:flex;
-}
-
-#siteNoticePanel{
-  position:absolute;
-  top:calc(100% + 10px);
-  right:0;
-  width:min(calc(360px * var(--ui-scale)), 72vw);
-  max-height:min(calc(540px * var(--ui-scale)), 70vh);
-  overflow:auto;
-  padding:calc(12px * var(--ui-scale));
-  border-radius:calc(16px * var(--ui-scale));
-  background:rgba(255,249,241,0.98);
-  border:1px solid rgba(203,167,123,0.28);
-  box-shadow:0 16px 36px rgba(85,58,34,0.16);
-  display:none;
-  z-index:80;
-  text-align:left;
-}
-
-#siteNoticePanel.show{
-  display:block;
-}
-
-.siteNoticeTitle{
-  color:#6f4726;
-  font-size:calc(13px * var(--ui-scale));
-  font-weight:900;
-  margin-bottom:calc(10px * var(--ui-scale));
-}
-
-.siteNoticeEmpty{
-  color:#8a6644;
-  font-size:calc(12px * var(--ui-scale));
-  line-height:1.6;
-  padding:6px 2px 2px;
-}
-
-.siteNoticeList{
-  display:flex;
-  flex-direction:column;
-  gap:calc(8px * var(--ui-scale));
-}
-
-.siteNoticeItem{
-  padding:calc(10px * var(--ui-scale));
-  border-radius:calc(12px * var(--ui-scale));
-  background:rgba(255,252,247,0.82);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.92),
-    0 2px 8px rgba(120,92,63,0.05);
-}
-
-.siteNoticeItemTitle{
-  color:#6f4726;
-  font-size:calc(12px * var(--ui-scale));
-  font-weight:800;
-  line-height:1.5;
-  margin-bottom:4px;
-}
-
-.siteNoticeItemDesc{
-  color:#8a6644;
-  font-size:calc(11px * var(--ui-scale));
-  line-height:1.55;
-}
-
-/* =========================================================
-   房间切换按钮：游戏房页不显示“游戏房”按钮
-========================================================= */
-#topBar{
-  position:absolute;
-  left:var(--room-nav-left);
-  top:var(--room-nav-top);
-  width:var(--room-nav-width);
-  display:flex;
-  align-items:flex-start;
-  justify-content:flex-start;
-  z-index:55;
-  overflow:visible;
-  pointer-events:none;
-
-  --nav-btn-height:calc(40px * var(--ui-scale));
-  --nav-btn-px:calc(16px * var(--ui-scale));
-  --nav-btn-radius:calc(13px * var(--ui-scale));
-  --nav-btn-font:calc(14px * var(--ui-scale));
-  --nav-gap:calc(8px * var(--ui-scale));
-}
-
-#navOuter,
-#navScroll{
-  overflow:visible !important;
-}
-
-#navOuter{
-  flex:0 0 auto;
-  min-width:0;
-  width:100%;
-  pointer-events:auto;
-}
-
-#navScroll{
-  width:100%;
-  white-space:nowrap;
-  padding:0 !important;
-  margin:0 !important;
-}
-
-#roomNav{
-  width:100%;
-  max-width:100%;
-  min-width:0;
+#titleRow{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:var(--nav-gap);
-  transform-origin:left center;
+  gap:10px;
 }
 
-.navBtn{
-  appearance:none;
-  border:none;
-  cursor:pointer;
-  position:relative;
-  flex:0 0 auto;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height:var(--nav-btn-height);
-  padding:0 var(--nav-btn-px);
-  border-radius:var(--nav-btn-radius);
-  color:var(--nav-text);
-  font-size:var(--nav-btn-font);
+#gameTitle{
+  font-size:24px;
   font-weight:900;
-  line-height:1;
+  color:var(--text);
+  line-height:1.1;
+  margin:0;
+}
+
+#leaderboardOpenBtn{
+  flex:0 0 auto;
+  height:30px;
+  padding:0 12px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,246,232,.96);
+  color:#6a4b2f;
+  font-size:12px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:
+    0 6px 16px rgba(92,63,37,.14),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  transition:transform .18s ease, background .18s ease;
+  font-family:inherit;
+}
+
+#leaderboardOpenBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,250,242,.99);
+}
+
+#gameSub{
+  font-size:11px;
+  line-height:1.5;
+  color:var(--text2);
+  margin:0;
+}
+
+#layoutHint{
+  display:none;
+}
+
+/* 名字区 */
+#nameListWrap{
+  flex:1;
+  min-height:0;
+  overflow:auto;
+  padding-right:2px;
+}
+
+#nameListWrap::-webkit-scrollbar{
+  width:7px;
+}
+#nameListWrap::-webkit-scrollbar-thumb{
+  background:rgba(131,96,63,.28);
+  border-radius:999px;
+}
+
+#nameList{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:6px;
+}
+
+.nameCard{
+  user-select:none;
+  -webkit-user-select:none;
+  cursor:grab;
+  padding:6px 4px;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:800;
+  color:#6a4b2f;
+  text-align:center;
+  line-height:1.15;
   white-space:nowrap;
-  overflow:visible;
-  isolation:isolate;
-  background:
-    linear-gradient(180deg, rgba(249,232,203,.90) 0%, rgba(226,195,152,.86) 100%);
-  border:1px solid var(--nav-border);
-  box-shadow:
-    0 1px 1px rgba(255,255,255,.48) inset,
-    0 2px 5px rgba(91,68,45,.13);
-  text-shadow:0 1px 0 rgba(255,255,255,.42);
-  transition:
-    background .18s ease,
-    border-color .18s ease,
-    box-shadow .18s ease,
-    color .18s ease,
-    filter .18s ease;
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-}
-
-.navBtn:hover,
-.navBtn:focus-visible{
-  color:#5f3d22;
-  background:
-    linear-gradient(180deg, rgba(252,238,215,.95) 0%, rgba(232,205,166,.90) 100%);
-  border-color:rgba(153,102,55,.48);
-  box-shadow:
-    0 1px 1px rgba(255,255,255,.55) inset,
-    0 3px 7px rgba(91,68,45,.15);
-  filter:brightness(1.015);
-}
-
-.navLabel{
-  position:relative;
-  z-index:5;
-  display:block;
-  max-width:100%;
   overflow:hidden;
   text-overflow:ellipsis;
-  white-space:nowrap;
+  background:rgba(255,249,240,.94);
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:
+    0 4px 12px rgba(92,63,37,.12),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  transition:
+    transform .15s ease,
+    box-shadow .15s ease,
+    opacity .15s ease,
+    background .15s ease,
+    border-color .15s ease;
+  touch-action:none;
 }
 
-.navEffect{
+.nameCard:hover{
+  transform:translateY(-1px);
+  box-shadow:
+    0 6px 16px rgba(92,63,37,.16),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.nameCard:active{
+  cursor:grabbing;
+}
+
+.nameCard.correct{
+  background:rgba(233,248,231,.96);
+  color:#4c7d45;
+  opacity:.82;
+  cursor:default;
+}
+
+.nameCard.dragging{
+  opacity:.55;
+}
+
+.nameCard.selected{
+  background:rgba(255,249,232,.98);
+  border-color:rgba(241,185,79,.95);
+  box-shadow:
+    0 0 0 2px rgba(241,185,79,.45),
+    0 6px 16px rgba(92,63,37,.16),
+    inset 0 1px 0 rgba(255,255,255,.92);
+  transform:translateY(-1px);
+}
+
+@keyframes flashBad{
+  0%{box-shadow:0 0 0 rgba(216,106,106,0);}
+  50%{box-shadow:0 0 0 3px rgba(216,106,106,.35);}
+  100%{box-shadow:0 0 0 rgba(216,106,106,0);}
+}
+.nameCard.bad{
+  animation:flashBad .45s ease;
+}
+
+/* 底部信息框 */
+#infoBox{
+  flex:0 0 auto;
+  padding:10px 10px 10px;
+  background:rgba(255,250,242,.76);
+  border:1px solid rgba(255,255,255,.86);
+  border-radius:16px;
+  color:var(--text);
+  box-shadow:
+    0 6px 16px rgba(92,63,37,.10),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.statusRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  line-height:1.5;
+}
+
+.statusRow b{
+  color:var(--text);
+}
+
+#resultText{
+  margin-top:7px;
+  font-size:13px;
+  font-weight:800;
+  color:var(--text);
+  min-height:19px;
+}
+
+#bottomBtns{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.ctrlBtn{
+  flex:1;
+  height:38px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,246,232,.96);
+  color:#6a4b2f;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:
+    0 6px 18px rgba(92,63,37,.16),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  transition:transform .18s ease, background .18s ease;
+}
+
+.ctrlBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,250,242,.99);
+}
+
+/* 热区 */
+.dropZone{
+  fill:rgba(255,176,72,.18);
+  stroke:rgba(235,120,20,.55);
+  stroke-width:.55;
+  stroke-dasharray:1.4 1.1;
+  rx:1.2;
+  ry:1.2;
+  transition:.18s;
+  cursor:pointer;
+  vector-effect:non-scaling-stroke;
+}
+
+.dropZone.hover{
+  fill:var(--zoneHover);
+  stroke:var(--zoneHoverStroke);
+  stroke-width:.8;
+}
+
+.dropZone.correct{
+  fill:var(--okBg);
+  stroke:var(--ok);
+  stroke-width:.52;
+  stroke-dasharray:none;
+}
+
+.dropZone.wrong{
+  fill:var(--badBg);
+  stroke:var(--bad);
+  stroke-width:.84;
+}
+
+.dropZone.selected{
+  fill:var(--selectBg);
+  stroke:var(--select);
+  stroke-width:1.05;
+  stroke-dasharray:none;
+}
+
+/* 白底：更高一点 */
+.nameLabel{
   position:absolute;
-  pointer-events:none;
-  opacity:0;
-  z-index:4;
-  display:block;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:clip;
+  background:rgba(255,248,238,.97);
+  border:1px solid rgba(255,255,255,.95);
+  border-radius:999px;
+  box-shadow:
+    0 2px 6px rgba(92,63,37,.08),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  color:#4f3a29;
   font-weight:900;
   line-height:1;
-  text-shadow:
-    0 1px 2px rgba(255,250,232,.82),
-    0 0 8px rgba(255,246,210,.52);
-  filter:saturate(.95);
+  padding:0 0.12em;
+  word-break:normal;
+  letter-spacing:0;
+  transform:translateZ(0);
+  font-stretch:normal;
 }
 
-.navEffectA{
-  left:8%;
-  top:-54%;
-  font-size:calc(var(--nav-btn-font) * .92);
+@keyframes shakeZone{
+  0%{transform:translateX(0);}
+  20%{transform:translateX(-1.1px);}
+  40%{transform:translateX(1.1px);}
+  60%{transform:translateX(-1px);}
+  80%{transform:translateX(.9px);}
+  100%{transform:translateX(0);}
+}
+.shake{
+  animation:shakeZone .36s ease;
 }
 
-.navEffectB{
-  right:8%;
-  top:-62%;
-  font-size:calc(var(--nav-btn-font) * .86);
-}
 
-.navEffectC{
-  left:50%;
-  top:-72%;
-  transform:translateX(-50%);
-  font-size:calc(var(--nav-btn-font) * 1.02);
-}
+.hidden{display:none !important;}
 
-@keyframes navFloatA{
-  0%,100%{ transform:translateY(4px) rotate(-8deg) scale(.82); opacity:0; }
-  20%,72%{ opacity:.86; }
-  50%{ transform:translateY(-5px) rotate(6deg) scale(1); opacity:.76; }
-}
-
-@keyframes navFloatB{
-  0%,100%{ transform:translateY(5px) rotate(9deg) scale(.78); opacity:0; }
-  24%,70%{ opacity:.78; }
-  52%{ transform:translateY(-6px) rotate(-7deg) scale(1); opacity:.68; }
-}
-
-@keyframes navFloatC{
-  0%,100%{ transform:translateX(-50%) translateY(6px) rotate(0deg) scale(.76); opacity:0; }
-  24%,70%{ opacity:.88; }
-  50%{ transform:translateX(-50%) translateY(-6px) rotate(2deg) scale(1); opacity:.78; }
-}
-
-.navBtn:hover .navEffectA,
-.navBtn:focus-visible .navEffectA{
-  animation:navFloatA 2.2s ease-in-out infinite;
-}
-
-.navBtn:hover .navEffectB,
-.navBtn:focus-visible .navEffectB{
-  animation:navFloatB 2.5s ease-in-out infinite;
-}
-
-.navBtn:hover .navEffectC,
-.navBtn:focus-visible .navEffectC{
-  animation:navFloatC 2.35s ease-in-out infinite;
-}
-
-/* 各房间特效颜色 */
-.navBtn[data-room="hall"] .navEffect{
-  color:rgba(255,205,96,.86);
-  text-shadow:
-    0 1px 2px rgba(255,250,232,.95),
-    0 0 10px rgba(255,215,105,.62);
-}
-
-.navBtn[data-room="manager"] .navEffect{
-  color:rgba(128,91,58,.82);
-}
-
-.navBtn[data-room="honor"] .navEffect{
-  color:rgba(205,143,45,.86);
-  text-shadow:
-    0 1px 2px rgba(255,250,232,.92),
-    0 0 8px rgba(255,220,130,.52);
-}
-
-.navBtn[data-room="studio"] .navEffect{
-  color:rgba(96,112,145,.84);
-}
-
-.navBtn[data-room="living"] .navEffect{
-  color:rgba(202,132,70,.82);
-}
-
-.navBtn[data-room="dorm"] .navEffect{
-  color:rgba(143,111,168,.76);
-}
-
-.navBtn[data-room="pets"] .navEffect{
-  color:rgba(131,111,78,.82);
-}
-
-.navBtn[data-room="flower"] .navEffect{
-  color:rgba(198,119,145,.82);
-}
-
-/* =========================================================
-   登录弹窗：引用首页登录框
-========================================================= */
-.login-mask,
-.game-modal-mask{
+/* 挑战结束后排行榜弹窗 */
+#finishMask{
   position:fixed;
   inset:0;
-  z-index:90;
+  z-index:30;
   display:flex;
   align-items:center;
   justify-content:center;
   padding:18px;
-  background:rgba(76,48,27,.24);
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
+  background:rgba(70,45,24,.22);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
 }
 
-.login-panel{
+#finishCard{
   position:relative;
-  width:min(720px, 94vw);
+  width:min(92vw, 470px);
+  max-height:min(86vh, 690px);
+  overflow:auto;
+  padding:18px 18px 16px;
+  border-radius:24px;
+  background:rgba(255,249,240,.98);
+  border:1px solid rgba(255,255,255,.86);
+  box-shadow:
+    0 18px 46px rgba(92,63,37,.20),
+    inset 0 1px 0 rgba(255,255,255,.92);
+  color:var(--text);
 }
 
-.login-panel img{
-  width:100%;
-  display:block;
-  pointer-events:none;
-  user-select:none;
-  -webkit-user-drag:none;
+
+#finishCard.leaderboard-only .finishSummary,
+#finishCard.leaderboard-only #finishMessage{
+  display:none;
 }
 
-#loginNickname{
+#finishCard.leaderboard-only .leaderboardTitle{
+  margin-top:0;
+}
+
+#finishCard.leaderboard-only .finishBtn:first-child{
+  display:none;
+}
+
+
+#finishCloseBtn{
   position:absolute;
-  top:40%;
-  left:36.2%;
-  width:27.5%;
-  height:8.1%;
+  top:12px;
+  right:12px;
+  width:32px;
+  height:32px;
   border:none;
-  outline:none;
-  padding:0 10px;
+  border-radius:999px;
+  background:rgba(255,246,232,.96);
+  color:#6a4b2f;
   font-size:18px;
+  font-weight:900;
+  line-height:1;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:
+    0 5px 14px rgba(92,63,37,.14),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  transition:transform .18s ease, background .18s ease;
+}
+
+#finishCloseBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,250,242,.99);
+}
+
+.finishTitle{
+  margin:0 38px 8px;
+  font-size:22px;
+  font-weight:900;
+  line-height:1.2;
+  color:var(--text);
+  text-align:center;
+}
+
+.finishSummary{
+  margin:0 0 12px;
+  padding:10px 12px;
+  border-radius:16px;
+  background:rgba(255,250,242,.80);
+  border:1px solid rgba(255,255,255,.86);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.88);
+}
+
+.finishSummaryRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-size:13px;
+  line-height:1.65;
+  color:var(--text2);
+}
+
+.finishSummaryRow b{
+  color:var(--text);
+}
+
+#finishMessage{
+  margin:0 0 12px;
+  padding:9px 11px;
+  border-radius:14px;
+  background:rgba(255,246,232,.78);
+  border:1px solid rgba(255,255,255,.82);
+  color:#7d5c3c;
+  font-size:12px;
+  line-height:1.5;
+  text-align:center;
+}
+
+.leaderboardTitle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:12px 0 8px;
+  font-size:15px;
+  font-weight:900;
+  color:var(--text);
+}
+
+#leaderboardHint{
+  font-size:11px;
+  font-weight:700;
+  color:#8a6847;
+}
+
+#leaderboardList{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.rankItem{
+  display:grid;
+  grid-template-columns:32px 1fr auto;
+  align-items:center;
+  gap:8px;
+  min-height:34px;
+  padding:7px 9px;
+  border-radius:14px;
+  background:rgba(255,246,232,.82);
+  border:1px solid rgba(255,255,255,.82);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+}
+
+.rankItem.currentUser{
+  background:rgba(233,248,231,.94);
+  border-color:rgba(121,179,107,.46);
+}
+
+.rankNo{
+  font-size:12px;
+  font-weight:900;
+  color:#9b7049;
+}
+
+.rankName{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:900;
   color:#5b3e28;
-  background:transparent;
-  line-height:1.1;
 }
 
-#loginCode{
-  position:absolute;
-  top:56%;
-  left:36.2%;
-  width:20%;
-  height:8.1%;
-  border:none;
-  outline:none;
-  padding:0 10px;
-  font-size:18px;
-  color:#5b3e28;
-  background:transparent;
-  line-height:1.1;
-}
-
-#toggleLoginCode{
-  position:absolute;
-  top:56%;
-  left:56%;
-  width:8%;
-  height:8.1%;
-  border:none;
-  cursor:pointer;
-  background:rgba(255,215,120,.15);
-  border-radius:6px;
-}
-
-#toggleLoginCode:hover{
-  background:rgba(255,215,120,.35);
-  box-shadow:0 0 8px rgba(255,220,120,.6);
-}
-
-#loginSubmitBtn{
-  position:absolute;
-  top:68%;
-  left:40%;
-  width:20%;
-  height:9%;
-  border:none;
-  background:transparent;
-  cursor:pointer;
-}
-
-#registerLink{
-  position:absolute;
-  top:50%;
-  left:52%;
-  transform:translateX(-50%);
-  color:#7a4f2b;
-  font-size:14px;
-  font-weight:600;
-  text-decoration:underline;
-  cursor:pointer;
-  background:none;
-  border:none;
-  padding:0;
+.rankScore{
+  text-align:right;
+  font-size:11px;
+  line-height:1.25;
+  color:#7d5c3c;
   white-space:nowrap;
 }
 
-#registerLink:hover{
-  color:#9b6334;
-}
-
-#loginHint{
-  position:absolute;
-  top:34.8%;
-  left:53.5%;
-  transform:translateX(-50%);
-  text-align:center;
-  color:#7a4f2b;
-  font-size:14px;
-  font-weight:600;
-  width:42%;
-  max-width:320px;
-  white-space:normal;
-  line-height:1.25;
-}
-
-#loginCancelBtn{
-  position:absolute;
-  top:4px;
-  right:6px;
-  border:none;
-  width:32px;
-  height:32px;
-  border-radius:50%;
-  background:white;
-  cursor:pointer;
-  font-size:18px;
-  color:#5b4632;
-}
-
-.game-modal-mask{
-  z-index:95;
-  background:rgba(60,42,23,0.28);
-}
-
-.game-modal-box{
-  position:relative;
-  width:min(1180px, 96vw);
-  height:min(860px, 92vh);
-  border-radius:24px;
-  overflow:hidden;
-  background:rgba(255,249,241,0.98);
-  border:1px solid rgba(203,167,123,0.28);
-  box-shadow:0 20px 48px rgba(85,58,34,0.22);
-}
-
-.game-modal-close{
-  position:absolute;
-  top:16px;
-  right:18px;
-  z-index:2;
-  min-width:74px;
-  height:34px;
-  border:none;
-  border-radius:12px;
-  background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
-  color:#6a4120;
+.rankScore b{
+  display:block;
   font-size:13px;
-  font-weight:800;
-  cursor:pointer;
-  box-shadow:inset 0 1px 0 rgba(255,247,230,0.95), 0 4px 12px rgba(112,83,52,0.10);
+  color:#4c7d45;
 }
 
-#gameModalFrame{
-  width:100%;
-  height:100%;
-  border:none;
-  background:#fffaf4;
-}
-
-.fallback-tip{
-  position:absolute;
-  left:50%;
-  bottom:14px;
-  transform:translateX(-50%);
-  z-index:20;
+.leaderboardEmpty{
+  padding:14px 10px;
+  border-radius:14px;
+  background:rgba(255,250,242,.72);
+  color:#7d5c3c;
   font-size:12px;
-  color:rgba(122,80,48,.78);
-  background:rgba(255,255,255,.34);
-  border:1px solid rgba(255,255,255,.56);
+  line-height:1.5;
+  text-align:center;
+}
+
+.finishActions{
+  display:flex;
+  gap:8px;
+  margin-top:14px;
+}
+
+.finishBtn{
+  flex:1;
+  height:38px;
+  border:none;
   border-radius:999px;
-  padding:6px 12px;
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .25s ease;
+  background:rgba(255,246,232,.96);
+  color:#6a4b2f;
+  font-size:13px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:
+    0 6px 18px rgba(92,63,37,.14),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  transition:transform .18s ease, background .18s ease;
 }
 
-.fallback-tip.show{
-  opacity:1;
+.finishBtn.primary{
+  background:#c98e56;
+  color:#fffaf2;
 }
 
-@media (max-width:920px){
-  #loginHint{
-    top:35.6%;
-    width:44%;
-    max-width:none;
-    font-size:13px;
-    line-height:1.22;
-  }
-
-  #registerLink{font-size:13px;}
-
-  #loginNickname,
-  #loginCode{font-size:17px;}
+.finishBtn:hover{
+  transform:translateY(-1px);
 }
 
-@media (max-width:760px) and (min-width:541px){
-  .panel{
-    width:50.8%;
-    padding:18px;
+@media (max-width:560px){
+  #finishCard{
+    width:94vw;
+    padding:15px 14px 14px;
+    border-radius:20px;
   }
 
-  .title{
-    font-size:24px;
+  .finishTitle{
+    font-size:18px;
   }
 
-  #loginHint{
-    top:35.2%;
-    width:48%;
-    font-size:11px;
-    line-height:1.2;
+  .finishSummaryRow{
+    font-size:12px;
   }
 
-  #registerLink{
-    top:49.5%;
-    font-size:11px;
-  }
-
-  #loginNickname,
-  #loginCode{
-    font-size:16px;
-    padding:0 8px;
-  }
-}
-
-@media (max-width:540px){
-  html,body{
-    overflow-x:hidden;
-    overflow-y:auto;
-    height:auto;
-    min-height:100%;
-  }
-
-  body{
-    display:block;
-    background:
-      linear-gradient(rgba(243,236,223,.72), rgba(243,236,223,.92)),
-      url("room-game.png") center center / cover no-repeat fixed;
-  }
-
-  #bgColorFill,
-  #bgBleed,
-  #bgLight,
-  #bgFrame{
-    display:none;
-  }
-
-  #room{
-    width:100%;
-    height:auto;
-    min-height:100vh;
-    min-height:100dvh;
-    display:block;
-    overflow:visible;
-    padding:10px 12px 14px;
-  }
-
-  #overlay{
-    position:relative !important;
-    left:auto !important;
-    top:auto !important;
-    width:100% !important;
-    height:auto !important;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    overflow:visible;
-    --ui-scale:1;
-  }
-
-  #topActions{
-    position:sticky;
-    top:10px;
-    right:auto;
-    left:auto;
-    width:100%;
-    height:40px;
-    z-index:30;
-    order:0;
-  }
-
-  #topIdentityBar{
+  .rankItem{
+    grid-template-columns:28px 1fr auto;
     gap:6px;
-    padding:5px 7px;
-    border-radius:14px;
+    padding:6px 7px;
   }
 
-  #topIdentityBadge{
-    padding:0 9px;
+  .rankName{
     font-size:12px;
-    border-radius:10px;
   }
 
-  #loginOpenBtn,
-  #logoutBtn{
-    width:42px;
-    min-width:42px;
-    flex-basis:42px;
-    font-size:11px;
-    border-radius:10px;
-  }
-
-  #siteNoticeWrap{
-    width:34px;
-    min-width:34px;
-    flex-basis:34px;
-  }
-
-  #siteNoticeBtn{
-    font-size:14px;
-    border-radius:10px;
-  }
-
-  #siteNoticePanel{
-    position:fixed;
-    top:58px;
-    right:10px;
-    left:10px;
-    width:auto;
-    max-height:60dvh;
-    z-index:999;
-  }
-
-  #topBar{
-    position:relative;
-    left:auto;
-    top:auto;
-    width:100%;
-    order:1;
-    z-index:20;
-
-    --nav-btn-height:34px;
-    --nav-btn-px:8px;
-    --nav-btn-radius:10px;
-    --nav-btn-font:12px;
-    --nav-gap:7px;
-  }
-
-  #roomNav{
-    width:100%;
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-    gap:7px;
-    transform:none !important;
-  }
-
-  .navBtn{
-    width:100%;
-    min-width:0;
-    height:34px;
-    padding:0 8px;
-    font-size:12px;
-    border-radius:10px;
-    overflow:hidden;
-  }
-
-  .navEffect{
-    display:none;
-  }
-
-  .panel{
-    position:relative;
-    left:auto;
-    top:auto;
-    transform:none;
-    width:100%;
-    border-radius:22px;
-    padding:20px 18px;
-    order:2;
-  }
-
-  .title{
-    font-size:clamp(24px, 7vw, 34px);
-  }
-
-  .game-modal-box{
-    width:96vw;
-    height:86vh;
-    border-radius:18px;
-  }
-
-  .login-panel{width:95vw;}
-
-  #registerLink{
-    top:49.2%;
+  .rankScore,
+  #leaderboardHint{
     font-size:10px;
   }
 
-  #loginNickname,
-  #loginCode{
-    font-size:15px;
-    padding:0 7px;
+  .finishActions{
+    gap:7px;
   }
 
-  #loginHint{
-    top:34.1%;
-    width:46%;
-    font-size:9px;
-    line-height:1.18;
-  }
-}
-
-@media (max-width:380px){
-  #registerLink{
-    top:48.8%;
-    font-size:8px;
-  }
-
-  #loginNickname,
-  #loginCode{
+  .finishBtn{
+    height:34px;
     font-size:12px;
-    padding:0 5px;
-  }
-
-  #loginNickname{
-    top:40.1%;
-    left:36.25%;
-    width:27.1%;
-    height:7.9%;
-  }
-
-  #loginCode{
-    top:56.05%;
-    left:36.25%;
-    width:19.7%;
-    height:7.9%;
-  }
-
-  #toggleLoginCode{
-    top:56.05%;
-    left:55.9%;
-    width:8.2%;
-    height:7.9%;
-  }
-
-  #loginHint{
-    top:34.8%;
-    left:53.4%;
-    width:44%;
-    font-size:7.8px;
-    line-height:1.16;
-    letter-spacing:0;
-  }
-
-  #loginCancelBtn{
-    width:28px;
-    height:28px;
-    font-size:16px;
-    top:2px;
-    right:2px;
   }
 }
 
-@media (max-width:340px){
-  .login-panel{width:96vw;}
+/* 常规中屏左右 */
+@media (max-width:1100px){
+  #leftPanel{
+    width:32%;
+    min-width:280px;
+  }
+}
 
-  #registerLink{
-    top:48.5%;
-    font-size:7px;
+@media (max-width:900px){
+  body{
+    overflow:auto;
   }
 
-  #loginNickname,
-  #loginCode{
+  #room{
+    min-height:100vh;
+    min-height:100dvh;
+    align-items:flex-start;
+    padding:10px 0;
+  }
+
+  #stage{
+    max-width:100vw;
+    max-height:none;
+  }
+
+  #bg{
+    width:100vw;
+    height:auto;
+    max-width:none;
+    max-height:none;
+  }
+
+  #leftPanel{
+    left:2%;
+    top:2%;
+    width:34%;
+    min-width:220px;
+    max-width:none;
+    height:94%;
+    padding:10px 8px 8px;
+    gap:8px;
+  }
+
+  #gameTitle{
+    font-size:18px;
+  }
+
+  #leaderboardOpenBtn{
+    height:28px;
+    padding:0 10px;
     font-size:11px;
-    padding:0 4px;
   }
 
-  #loginNickname{
-    top:40.15%;
-    left:36.35%;
-    width:26.9%;
-    height:7.8%;
+  #gameSub{
+    font-size:10px;
+    line-height:1.42;
   }
 
-  #loginCode{
-    top:56.1%;
-    left:36.35%;
-    width:19.5%;
-    height:7.8%;
+  #nameList{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:5px;
   }
 
-  #toggleLoginCode{
-    top:56.1%;
-    left:55.85%;
-    width:8.25%;
-    height:7.8%;
+  .nameCard{
+    font-size:10px;
+    padding:5px 4px;
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    word-break:break-all;
+    min-height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
   }
 
-  #loginHint{
-    top:35.5%;
-    left:53.35%;
-    width:43%;
-    font-size:7px;
-    line-height:1.12;
+  .statusRow{
+    font-size:11px;
   }
 
-  #loginSubmitBtn{top:67.8%;}
+  #resultText{
+    font-size:12px;
+    min-height:18px;
+  }
+
+  .ctrlBtn{
+    font-size:12px;
+    height:34px;
+  }
+
+}
+
+/* 上下结构 */
+body.stack-layout{
+  overflow:hidden;
+  align-items:stretch;
+}
+
+body.stack-layout #room{
+  align-items:stretch;
+  justify-content:flex-start;
+  overflow:hidden;
+  padding:0;
+}
+
+body.stack-layout #stage{
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  max-width:none;
+  max-height:none;
+  display:flex;
+  flex-direction:column;
+}
+
+body.stack-layout #playArea{
+  width:100%;
+  height:auto;
+  flex:0 0 40%;
+  min-height:235px;
+  max-height:42vh;
+  padding:8px 8px 0;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+
+body.stack-layout #viewport{
+  position:relative;
+  width:min(100%, calc(100% - 16px), calc(42vh * 965 / 936));
+  height:100%;
+  aspect-ratio:965 / 936;
+  overflow:hidden;
+  border-radius:18px;
+  box-shadow:
+    0 8px 24px rgba(92,63,37,.10),
+    inset 0 1px 0 rgba(255,255,255,.65);
+  background:rgba(255,248,238,.35);
+}
+
+body.stack-layout #fullLayer{
+  position:absolute;
+  left:var(--cropShift);
+  top:0;
+  width:calc(var(--cropScale) * 100%);
+  height:100%;
+}
+
+body.stack-layout #bg{
+  width:100%;
+  height:100%;
+  max-width:none;
+  max-height:none;
+  object-fit:fill;
+  display:block;
+}
+
+body.stack-layout #map,
+body.stack-layout #labelLayer{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
+
+body.stack-layout #leftPanel{
+  position:relative;
+  left:auto;
+  top:auto;
+  width:100%;
+  min-width:0;
+  max-width:none;
+  height:auto;
+  flex:1 1 auto;
+  min-height:0;
+  border-radius:22px 22px 0 0;
+  padding:9px 8px 10px;
+  gap:7px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.52) 0%,
+      rgba(255,255,255,.40) 45%,
+      rgba(255,255,255,.26) 100%
+    );
+  border-left:none;
+  border-right:none;
+  border-bottom:none;
+  box-shadow:
+    0 -8px 28px rgba(92,63,37,.10),
+    inset 0 1px 0 rgba(255,255,255,.92);
+}
+
+body.stack-layout #gameTitle{
+  font-size:17px;
+}
+
+body.stack-layout #leaderboardOpenBtn{
+  height:28px;
+  padding:0 10px;
+  font-size:10px;
+}
+
+
+body.stack-layout #gameSub{
+  font-size:9px;
+  line-height:1.38;
+}
+
+body.stack-layout #layoutHint{
+  display:block;
+  font-size:9px;
+  color:#8a6847;
+  margin-top:-2px;
+  margin-bottom:2px;
+  line-height:1.35;
+}
+
+body.stack-layout #nameList{
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:5px;
+}
+
+body.stack-layout .nameCard{
+  font-size:9.5px;
+  min-height:30px;
+  padding:5px 3px;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  word-break:break-all;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1.15;
+}
+
+body.stack-layout #infoBox{
+  padding:8px 8px;
+  border-radius:14px;
+}
+
+body.stack-layout .statusRow{
+  font-size:9px;
+  line-height:1.35;
+}
+
+body.stack-layout #resultText{
+  font-size:10px;
+  min-height:15px;
+}
+
+body.stack-layout #bottomBtns{
+  margin-top:7px;
+  gap:6px;
+}
+
+body.stack-layout .ctrlBtn{
+  height:30px;
+  font-size:10px;
+}
+
+@media (max-width:560px){
+  body.stack-layout #playArea{
+    flex-basis:38%;
+    min-height:210px;
+    max-height:40vh;
+  }
+
+  body.stack-layout #viewport{
+    width:min(100%, calc(40vh * 965 / 936));
+  }
+
+  body.stack-layout #nameList{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+
+  body.stack-layout .nameCard{
+    font-size:9px;
+    min-height:28px;
+  }
+
+  body.stack-layout #gameTitle{
+    font-size:16px;
+  }
+
+  body.stack-layout #leaderboardOpenBtn{
+    height:26px;
+    padding:0 9px;
+    font-size:9px;
+  }
+
+  body.stack-layout #gameSub,
+  body.stack-layout #layoutHint{
+    font-size:8.5px;
+  }
+
+  body.stack-layout .statusRow{
+    font-size:8.5px;
+  }
+
+  body.stack-layout #resultText{
+    font-size:9px;
+  }
+
+  body.stack-layout .ctrlBtn{
+    font-size:9px;
+    height:28px;
+  }
+}
+
+@media (max-width:360px){
+  .nameLabel{
+    padding:0 0.06em;
+    line-height:1;
+  }
+
+  body.stack-layout #playArea{
+    flex-basis:36%;
+    min-height:185px;
+    max-height:36vh;
+  }
+
+  body.stack-layout #viewport{
+    width:min(100%, calc(36vh * 965 / 936));
+  }
 }
 </style>
 </head>
 
 <body>
-<div id="bgColorFill"></div>
-<div id="bgBleed"></div>
-<div id="bgLight"></div>
-
 <div id="room">
-  <div id="bgFrame">
-    <img id="bg" src="room-game.png" alt="十号房游戏房背景" />
-  </div>
+  <div id="bgShade"></div>
 
-  <div id="overlay">
-    <!-- 身份组件 -->
-    <div id="topActions">
-      <div id="topIdentityBar">
-        <div id="topIdentityBadge">
-          <span class="identityText" id="currentUserText">参观者</span>
-        </div>
-
-        <div id="siteNoticeWrap">
-          <button id="siteNoticeBtn" type="button" aria-label="游戏记录提醒">
-            <span id="siteNoticeIcon">🔔</span>
-            <span id="siteNoticeCount">0</span>
-          </button>
-
-          <div id="siteNoticePanel" aria-live="polite">
-            <div class="siteNoticeTitle">游戏记录提醒</div>
-            <div id="siteNoticeContent">
-              <div class="siteNoticeEmpty">如果有人超过你的游戏记录，会在这里通知你。</div>
-            </div>
-          </div>
-        </div>
-
-        <button id="loginOpenBtn" type="button">登录</button>
-        <button id="logoutBtn" class="hidden" type="button">登出</button>
-      </div>
-    </div>
-
-    <!-- 房间切换按钮：游戏房页不显示“游戏房”按钮 -->
-    <div id="topBar" aria-label="房间切换">
-      <div id="navOuter">
-        <div id="navScroll">
-          <nav id="roomNav">
-            <button class="navBtn" data-room="hall" type="button" onclick="enterRoom('index.html', false)">
-              <span class="navLabel">大堂</span>
-              <span class="navEffect navEffectA">✦</span>
-              <span class="navEffect navEffectB">✧</span>
-              <span class="navEffect navEffectC">★</span>
-            </button>
-
-            <button class="navBtn" data-room="manager" type="button" onclick="enterManagerRoom()">
-              <span class="navLabel">宿管室</span>
-              <span class="navEffect navEffectA">✎</span>
-              <span class="navEffect navEffectB">▱</span>
-              <span class="navEffect navEffectC">✐</span>
-            </button>
-
-            <button class="navBtn" data-room="honor" type="button" onclick="enterRoom('honor.html', false)">
-              <span class="navLabel">荣誉墙</span>
-              <span class="navEffect navEffectA">🏆</span>
-              <span class="navEffect navEffectB">🏅</span>
-              <span class="navEffect navEffectC">✦</span>
-            </button>
-
-            <button class="navBtn" data-room="studio" type="button" onclick="enterRoom('studio-todo.html', true)">
-              <span class="navLabel">工作间</span>
-              <span class="navEffect navEffectA">🎙</span>
-              <span class="navEffect navEffectB">🎧</span>
-              <span class="navEffect navEffectC">◇</span>
-            </button>
-
-            <button class="navBtn" data-room="living" type="button" onclick="enterRoom('living.html', false)">
-              <span class="navLabel">客厅</span>
-              <span class="navEffect navEffectA">☕</span>
-              <span class="navEffect navEffectB">✦</span>
-              <span class="navEffect navEffectC">💬</span>
-            </button>
-
-            <button class="navBtn" data-room="dorm" type="button" onclick="enterRoom('dorm.html', true)">
-              <span class="navLabel">宿舍</span>
-              <span class="navEffect navEffectA">☁</span>
-              <span class="navEffect navEffectB">☾</span>
-              <span class="navEffect navEffectC">🛏</span>
-            </button>
-
-            <button class="navBtn" data-room="pets" type="button" onclick="enterRoom('pets.html', false)">
-              <span class="navLabel">宠物区</span>
-              <span class="navEffect navEffectA">🐾</span>
-              <span class="navEffect navEffectB">♡</span>
-              <span class="navEffect navEffectC">🐱</span>
-            </button>
-
-            <button class="navBtn" data-room="flower" type="button" onclick="enterRoom('flower.html', false)">
-              <span class="navLabel">花房区</span>
-              <span class="navEffect navEffectA">✿</span>
-              <span class="navEffect navEffectB">❀</span>
-              <span class="navEffect navEffectC">🌸</span>
-            </button>
-          </nav>
+  <div id="stage">
+    <div id="playArea">
+      <div id="viewport">
+        <div id="fullLayer">
+          <img id="bg" src="game-name.png" alt="脸萌挑战题图">
+          <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+          <div id="labelLayer"></div>
         </div>
       </div>
     </div>
 
-    <div class="panel">
-      <h1 class="title">小游戏</h1>
+    <div id="leftPanel">
+      <div id="titleRow">
+        <h1 id="gameTitle">脸萌挑战</h1>
+        <button id="leaderboardOpenBtn" type="button" onclick="openLeaderboardBoard()">风云榜</button>
+      </div>
 
-      <div class="menu">
-        <button class="game-btn" type="button" onclick="openGameModal('game-name.html')">
-          <div class="game-name">脸萌挑战</div>
-          <div class="game-desc">一个简单的小挑战</div>
-        </button>
+      <p id="gameSub">支持两种方式：拖拽匹配，或先点名字再点框，也可以先点框再点名字。</p>
+      <div id="layoutHint">小屏会切成上下结构，并裁掉左侧空白，只显示右侧大合照区域，热区会跟着一起裁切，不会漂移。</div>
+
+      <div id="nameListWrap">
+        <div id="nameList"></div>
+      </div>
+
+      <div id="infoBox">
+        <div class="statusRow"><span>已完成</span><b id="doneCount">0 / 34</b></div>
+        <div class="statusRow"><span>错误次数</span><b id="wrongCount">0</b></div>
+        <div class="statusRow"><span>罚时</span><b id="penaltyText">0 秒</b></div>
+        <div class="statusRow"><span>计时</span><b id="timerText">00:00</b></div>
+        <div class="statusRow"><span>总用时</span><b id="totalTimeText">00:00</b></div>
+        <div id="resultText">请开始匹配</div>
+
+        <div id="bottomBtns">
+          <button class="ctrlBtn" onclick="clearPlacedNames()">清空</button>
+          <button class="ctrlBtn" onclick="resetGame()">重新开始</button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<div id="loginMask" class="login-mask hidden" aria-hidden="true">
-  <div class="login-panel" role="dialog" aria-modal="true" aria-label="钥匙验证">
-    <img src="login.png" alt="登录框">
 
-    <input id="loginNickname" type="text" autocomplete="username">
-    <input id="loginCode" type="password" autocomplete="current-password">
+<div id="finishMask" class="hidden" aria-hidden="true">
+  <div id="finishCard" role="dialog" aria-modal="true" aria-labelledby="finishTitle">
+    <button id="finishCloseBtn" type="button" onclick="closeFinishBoard()" aria-label="关闭排行榜">×</button>
+    <h2 id="finishTitle" class="finishTitle">挑战完成！</h2>
 
-    <button id="toggleLoginCode" type="button" onclick="toggleLoginCode()"></button>
-    <button id="loginSubmitBtn" type="button" onclick="submitLogin()"></button>
-    <button id="registerLink" type="button" onclick="goRegisterFromGame()">新成员先登记哦</button>
-    <button id="loginCancelBtn" type="button" onclick="closeLogin(false)">×</button>
+    <div class="finishSummary">
+      <div class="finishSummaryRow"><span>原始用时</span><b id="finishRawTime">00:00</b></div>
+      <div class="finishSummaryRow"><span>错误次数</span><b id="finishWrongCount">0</b></div>
+      <div class="finishSummaryRow"><span>罚时</span><b id="finishPenaltyTime">0 秒</b></div>
+      <div class="finishSummaryRow"><span>总用时</span><b id="finishTotalTime">00:00</b></div>
+    </div>
 
-    <div id="loginHint"></div>
+    <div id="finishMessage">正在处理成绩…</div>
+
+    <div class="leaderboardTitle">
+      <span>排行榜</span>
+      <span id="leaderboardHint">读取中…</span>
+    </div>
+    <div id="leaderboardList">
+      <div class="leaderboardEmpty">正在读取排行榜…</div>
+    </div>
+
+    <div class="finishActions">
+      <button class="finishBtn" type="button" onclick="closeFinishBoard()">继续查看</button>
+      <button class="finishBtn primary" type="button" onclick="restartFromFinish()">再玩一次</button>
+    </div>
   </div>
 </div>
-
-<div id="gameModalMask" class="game-modal-mask hidden" aria-hidden="true">
-  <div class="game-modal-box" role="dialog" aria-modal="true" aria-label="脸萌挑战">
-    <button class="game-modal-close" type="button" onclick="closeGameModal()">关闭</button>
-    <iframe id="gameModalFrame" title="脸萌挑战"></iframe>
-  </div>
-</div>
-
-<div id="fallbackTip" class="fallback-tip">未能读取图片边缘颜色，已使用默认柔和背景。</div>
 
 <script>
-const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
-const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
-const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+const peopleData = [
+  { code:"N-01", animal:"德牧",   name:"李克勤"   },
+  { code:"N-02", animal:"棕熊",   name:"林依轮"   },
+  { code:"N-03", animal:"孔雀",   name:"梁龙"     },
+  { code:"N-04", animal:"小熊猫", name:"王铮亮"   },
+  { code:"N-05", animal:"白狮",   name:"严屹宽"   },
+  { code:"N-06", animal:"黑豹",   name:"黑泽良平" },
+  { code:"N-07", animal:"猞猁",   name:"雅"       },
+  { code:"N-08", animal:"浣熊",   name:"袁成杰"   },
+  { code:"N-09", animal:"北极狐", name:"徐海乔"   },
+  { code:"N-10", animal:"袋鼠",   name:"沈震轩"   },
+  { code:"N-11", animal:"梅花鹿", name:"李泽锋"   },
+  { code:"N-12", animal:"鬣狗",   name:"向佐"     },
+  { code:"N-13", animal:"树懒",   name:"秦昊"     },
+  { code:"N-14", animal:"柴犬",   name:"蔡旻佑"   },
+  { code:"N-15", animal:"大灰狼", name:"付辛博"   },
+  { code:"N-16", animal:"蓝色小鸟", name:"韦礼安" },
+  { code:"N-17", animal:"海象",   name:"杜海涛"   },
+  { code:"N-18", animal:"雪豹",   name:"凤小岳"   },
+  { code:"N-19", animal:"花豹",   name:"符龙飞"   },
+  { code:"N-20", animal:"猫鼬",   name:"黄潇"     },
+  { code:"N-21", animal:"红狐狸", name:"胡夏"     },
+  { code:"N-22", animal:"黑熊",   name:"熊梓淇"   },
+  { code:"N-23", animal:"水獭",   name:"李佳琦"   },
+  { code:"N-24", animal:"rap橘猫", name:"早安"    },
+  { code:"N-25", animal:"考拉",   name:"宁桓宇"   },
+  { code:"N-26", animal:"牦牛",   name:"阿如那"   },
+  { code:"N-27", animal:"缅因猫", name:"朱星杰"   },
+  { code:"N-28", animal:"白鹭",   name:"王一哲"   },
+  { code:"N-29", animal:"白兔",   name:"尤长靖"   },
+  { code:"N-30", animal:"松鼠",   name:"焦迈奇"   },
+  { code:"N-31", animal:"企鹅",   name:"井胧"     },
+  { code:"N-32", animal:"小猪",   name:"高卿尘"   },
+  { code:"N-33", animal:"萨摩耶", name:"石凯"     },
+  { code:"N-34", animal:"小猴子", name:"庆怜"     }
+];
 
-const img = document.getElementById("bg");
-const bgFrame = document.getElementById("bgFrame");
-const overlay = document.getElementById("overlay");
-const root = document.documentElement;
-const fallbackTip = document.getElementById("fallbackTip");
-const currentUserText = document.getElementById("currentUserText");
-const logoutBtn = document.getElementById("logoutBtn");
-const loginOpenBtn = document.getElementById("loginOpenBtn");
-const siteNoticeBtn = document.getElementById("siteNoticeBtn");
-const siteNoticePanel = document.getElementById("siteNoticePanel");
-const siteNoticeCount = document.getElementById("siteNoticeCount");
-const siteNoticeContent = document.getElementById("siteNoticeContent");
-const roomNav = document.getElementById("roomNav");
-const topBar = document.getElementById("topBar");
-const loginMask = document.getElementById("loginMask");
-const loginNicknameInput = document.getElementById("loginNickname");
-const loginCodeInput = document.getElementById("loginCode");
-const loginHint = document.getElementById("loginHint");
-const gameModalMask = document.getElementById("gameModalMask");
-const gameModalFrame = document.getElementById("gameModalFrame");
+const zoneLayout = [
+  { code:"N-02", x:48.0, y:22.0, w:5, h:4 },
+  { code:"N-05", x:56.0, y:22.0, w:5, h:4 },
+  { code:"N-12", x:62.0, y:22.0, w:5, h:4 },
+  { code:"N-10", x:68.0, y:22.0, w:5, h:4 },
+  { code:"N-26", x:76.0, y:21.0, w:5, h:4 },
+  { code:"N-28", x:82.5, y:21.0, w:5, h:4 },
+  { code:"N-11", x:88.5, y:22.0, w:5, h:4 },
 
-const PENDING_REDIRECT_KEY = "room10_pending_redirect";
+  { code:"N-08", x:45.0, y:37.0, w:5, h:4 },
+  { code:"N-17", x:53.4, y:36.0, w:5, h:4 },
+  { code:"N-25", x:59.0, y:40.0, w:5, h:4 },
+  { code:"N-09", x:65.5, y:37.0, w:5, h:4 },
+  { code:"N-16", x:69.0, y:36.0, w:5, h:4 },
+  { code:"N-14", x:73.5, y:37.0, w:5, h:4 },
+  { code:"N-22", x:79.4, y:36.0, w:5, h:4 },
+  { code:"N-19", x:85.8, y:36.0, w:5, h:4 },
+  { code:"N-06", x:92.0, y:36.0, w:5, h:4 },
 
-function isTinyScreen(){
-  return window.innerWidth <= 540;
+  { code:"N-18", x:44.0, y:54.0, w:5, h:4 },
+  { code:"N-03", x:52.0, y:55.0, w:5, h:4 },
+  { code:"N-27", x:57.5, y:54.0, w:5, h:4 },
+  { code:"N-13", x:63.0, y:54.0, w:5, h:4 },
+  { code:"N-01", x:69.0, y:54.0, w:5, h:4 },
+  { code:"N-04", x:75.0, y:56.0, w:5, h:4 },
+  { code:"N-21", x:81.0, y:55.0, w:5, h:4 },
+  { code:"N-15", x:85.4, y:54.0, w:5, h:4 },
+  { code:"N-24", x:91.0, y:54.0, w:5, h:4 },
+
+  { code:"N-30", x:45.0, y:78.0, w:5, h:4 },
+  { code:"N-31", x:51.5, y:77.0, w:5, h:4 },
+  { code:"N-32", x:57.6, y:75.0, w:5, h:4 },
+  { code:"N-33", x:64.5, y:75.0, w:5, h:4 },
+  { code:"N-23", x:71.0, y:74.0, w:5, h:4 },
+  { code:"N-20", x:77.0, y:74.0, w:5, h:4 },
+  { code:"N-29", x:83.0, y:80.0, w:5, h:4 },
+  { code:"N-07", x:88.0, y:73.0, w:5, h:4 },
+  { code:"N-34", x:93.0, y:78.0, w:5, h:4 }
+];
+
+const codeToItem = Object.fromEntries(peopleData.map(item => [item.code, item]));
+const placedCorrect = new Set();
+
+let wrongCount = 0;
+let penaltySeconds = 0;
+let timerStarted = false;
+let finished = false;
+let timerHandle = null;
+let startTimestamp = 0;
+let finalRawSeconds = 0;
+
+let selectedCardCode = null;
+let selectedZoneCode = null;
+let resizeTimer = null;
+
+const bodyEl = document.body;
+const bg = document.getElementById("bg");
+const map = document.getElementById("map");
+const labelLayer = document.getElementById("labelLayer");
+const nameList = document.getElementById("nameList");
+const doneCountEl = document.getElementById("doneCount");
+const wrongCountEl = document.getElementById("wrongCount");
+const penaltyTextEl = document.getElementById("penaltyText");
+const timerTextEl = document.getElementById("timerText");
+const totalTimeTextEl = document.getElementById("totalTimeText");
+const resultTextEl = document.getElementById("resultText");
+const finishMask = document.getElementById("finishMask");
+const finishCard = document.getElementById("finishCard");
+const finishRawTimeEl = document.getElementById("finishRawTime");
+const finishWrongCountEl = document.getElementById("finishWrongCount");
+const finishPenaltyTimeEl = document.getElementById("finishPenaltyTime");
+const finishTotalTimeEl = document.getElementById("finishTotalTime");
+const finishMessageEl = document.getElementById("finishMessage");
+const leaderboardHintEl = document.getElementById("leaderboardHint");
+const leaderboardListEl = document.getElementById("leaderboardList");
+
+const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const GAME_KEY = "face_match";
+const leaderboardClient = window.supabase
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : null;
+
+function shouldUseStackLayout(){
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const ratio = w / h;
+
+  return (
+    w < 760 ||
+    h < 620 ||
+    ratio < 1.18
+  );
 }
 
-function syncOverlayToImage(){
-  if(isTinyScreen()) return;
-  if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
-
-  const frame = bgFrame.getBoundingClientRect();
-  const frameRatio = frame.width / frame.height;
-  const imageRatio = img.naturalWidth / img.naturalHeight;
-
-  let displayWidth;
-  let displayHeight;
-  let displayLeft;
-  let displayTop;
-
-  if(frameRatio > imageRatio){
-    displayHeight = frame.height;
-    displayWidth = displayHeight * imageRatio;
-    displayLeft = frame.left + (frame.width - displayWidth) / 2;
-    displayTop = frame.top;
-  }else{
-    displayWidth = frame.width;
-    displayHeight = displayWidth / imageRatio;
-    displayLeft = frame.left;
-    displayTop = frame.top + (frame.height - displayHeight) / 2;
-  }
-
-  overlay.style.left = `${displayLeft}px`;
-  overlay.style.top = `${displayTop}px`;
-  overlay.style.width = `${displayWidth}px`;
-  overlay.style.height = `${displayHeight}px`;
-
-  const scale = Math.max(0.34, Math.min(1.42, displayWidth / 1440));
-  root.style.setProperty("--bg-ui-scale", String(scale));
-
-  requestAnimationFrame(fitRoomNavToBar);
+function applyLayoutMode(){
+  bodyEl.classList.toggle("stack-layout", shouldUseStackLayout());
+  clearCurrentSelection();
+  requestAnimationFrame(() => {
+    fitAllLabels();
+  });
 }
 
-function fitRoomNavToBar(){
-  if(!roomNav || !topBar || isTinyScreen()) return;
-
-  roomNav.style.transform = "scale(1)";
-
-  const availableWidth = topBar.clientWidth;
-  const neededWidth = roomNav.scrollWidth;
-
-  if(!availableWidth || !neededWidth) return;
-
-  const fitScale = Math.min(1, availableWidth / neededWidth);
-  roomNav.style.transform = `scale(${fitScale})`;
+function formatTime(sec){
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
 }
 
-function isLoggedIn(){
-  return localStorage.getItem("room10LoggedIn") === "true";
+function getElapsedSeconds(){
+  if(!timerStarted) return 0;
+  if(finished) return finalRawSeconds;
+  return Math.floor((Date.now() - startTimestamp) / 1000);
 }
 
-function getRole(){
-  return localStorage.getItem("room10Role") || "";
+function updateStatus(){
+  const raw = getElapsedSeconds();
+  const total = raw + penaltySeconds;
+  doneCountEl.textContent = `${placedCorrect.size} / ${peopleData.length}`;
+  wrongCountEl.textContent = String(wrongCount);
+  penaltyTextEl.textContent = `${penaltySeconds} 秒`;
+  timerTextEl.textContent = formatTime(raw);
+  totalTimeTextEl.textContent = formatTime(total);
 }
 
-function getCurrentUser(){
-  return localStorage.getItem("room10User") || "";
+function setResult(text, color){
+  resultTextEl.textContent = text;
+  resultTextEl.style.color = color || "#5b3e28";
 }
 
 function escapeHtml(value){
@@ -1432,451 +1293,558 @@ function escapeHtml(value){
     .replace(/'/g, "&#39;");
 }
 
-function getRoleLabel(roleValue = getRole()){
-  const role = String(roleValue || "").toLowerCase();
-  if(role === "owner") return "维修工";
-  if(role === "admin") return "宿管";
-  if(role === "member") return "房客";
-  if(role === "applying") return "申请中";
-  if(isLoggedIn()) return "房客";
-  return "参观者";
+function getCurrentPlayer(){
+  const loggedIn = localStorage.getItem("room10LoggedIn") === "true";
+  const memberId = localStorage.getItem("room10MemberId") || "";
+  const memberCode = localStorage.getItem("room10MemberCode") || "";
+  return {
+    isLoggedIn:Boolean(loggedIn && memberId && memberCode),
+    memberId,
+    memberCode
+  };
 }
 
-function updateIdentityUI(){
-  if(!currentUserText || !logoutBtn || !loginOpenBtn) return;
+function normalizeRankRows(rows){
+  return (Array.isArray(rows) ? rows : [])
+    .filter(row => Number.isFinite(Number(row.total_seconds)))
+    .map(row => ({
+      rank:Number(row.rank || 0),
+      member_id:row.member_id || "",
+      nickname:row.nickname || "匿名房客",
+      raw_seconds:Number(row.raw_seconds || 0),
+      wrong_count:Number(row.wrong_count || 0),
+      penalty_seconds:Number(row.penalty_seconds || 0),
+      total_seconds:Number(row.total_seconds || 0),
+      completed_at:row.completed_at || ""
+    }))
+    .sort((a,b) =>
+      a.total_seconds - b.total_seconds ||
+      a.wrong_count - b.wrong_count ||
+      new Date(a.completed_at || 0) - new Date(b.completed_at || 0)
+    )
+    .slice(0, 10);
+}
 
-  if(isLoggedIn()){
-    const user = getCurrentUser() || "已登录";
-    const roleLabel = getRoleLabel();
-    currentUserText.textContent = `${user} | ${roleLabel}`;
-    loginOpenBtn.classList.add("hidden");
-    logoutBtn.classList.remove("hidden");
+function renderLeaderboard(rows, currentMemberId){
+  if(!leaderboardListEl) return;
+
+  const list = normalizeRankRows(rows);
+  if(!list.length){
+    leaderboardListEl.innerHTML = `<div class="leaderboardEmpty">暂无排行榜记录。</div>`;
     return;
   }
 
-  currentUserText.textContent = "参观者";
-  loginOpenBtn.classList.remove("hidden");
-  logoutBtn.classList.add("hidden");
+  leaderboardListEl.innerHTML = list.map((row, index) => {
+    const rank = row.rank || index + 1;
+    const isCurrent = currentMemberId && row.member_id === currentMemberId;
+
+    return `
+      <div class="rankItem${isCurrent ? " currentUser" : ""}">
+        <div class="rankNo">${rank}</div>
+        <div class="rankName">${escapeHtml(row.nickname)}${isCurrent ? "（你）" : ""}</div>
+        <div class="rankScore">
+          <b>${formatTime(row.total_seconds)}</b>
+          错 ${row.wrong_count}｜罚 ${row.penalty_seconds}s
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
-function logout(){
-  localStorage.removeItem("room10LoggedIn");
-  localStorage.removeItem("room10User");
-  localStorage.removeItem("room10Role");
-  localStorage.removeItem("room10MemberId");
-  localStorage.removeItem("room10MemberCode");
-  localStorage.removeItem("room10ApplicantSession");
-  localStorage.removeItem("room10ApplicationDraft");
-
-  localStorage.removeItem("room10_user");
-  localStorage.removeItem("room10_current_user");
-  localStorage.removeItem("currentUser");
-
-  clearPendingRedirect();
-  closeLogin(false);
-  updateIdentityUI();
-}
-
-function normalizeLoginInput(value){
-  return String(value || "")
-    .replace(/\u3000/g, " ")
-    .trim();
-}
-
-function getPendingRedirect(){
-  return sessionStorage.getItem(PENDING_REDIRECT_KEY) || "";
-}
-
-function setPendingRedirect(page){
-  const safePage = String(page || "").trim();
-  if(!safePage) return;
-  sessionStorage.setItem(PENDING_REDIRECT_KEY, safePage);
-}
-
-function clearPendingRedirect(){
-  sessionStorage.removeItem(PENDING_REDIRECT_KEY);
-}
-
-function goRegisterFromGame(){
-  sessionStorage.setItem("room10RegisterReturn", "game.html");
-  window.location.href = "register.html?from=game.html";
-}
-
-function toggleLoginCode(){
-  loginCodeInput.type = loginCodeInput.type === "password" ? "text" : "password";
-}
-
-function getManagerPageByRole(roleValue = getRole()){
-  const role = String(roleValue || "").toLowerCase();
-  if(role === "owner") return "manager-owner.html";
-  if(role === "admin") return "manager-admin.html";
-  if(role === "member") return "manager-member.html";
-  return "manager-visitor.html";
-}
-
-function enterManagerRoom(){
-  clearPendingRedirect();
-  window.location.href = getManagerPageByRole();
-}
-
-function enterRoom(page, needLogin){
-  const targetPage = String(page || "").trim();
-  if(!targetPage) return;
-
-  if(needLogin && !isLoggedIn()){
-    openLogin(targetPage);
-    return;
+async function submitScoreToSupabase(score){
+  const player = getCurrentPlayer();
+  if(!leaderboardClient || !player.isLoggedIn){
+    return { saved:false, message:"未登录成员，本次成绩不会记录到排行榜。" };
   }
 
-  if((targetPage === "flower.html" || targetPage === "pets.html") && !isLoggedIn()){
-    clearPendingRedirect();
-    window.location.href = targetPage + "?mode=guest";
-    return;
-  }
+  const { data, error } = await leaderboardClient.rpc("submit_game_score", {
+    p_member_id:player.memberId,
+    p_member_code:player.memberCode,
+    p_game_key:GAME_KEY,
+    p_raw_seconds:score.raw_seconds,
+    p_wrong_count:score.wrong_count,
+    p_penalty_seconds:score.penalty_seconds,
+    p_total_seconds:score.total_seconds
+  });
 
-  clearPendingRedirect();
-  window.location.href = targetPage;
+  if(error) throw error;
+
+  const result = Array.isArray(data) ? data[0] : data;
+  return result || { saved:false, message:"成绩已处理。" };
 }
 
-function openLogin(targetPage = ""){
-  if(isLoggedIn()){
-    if(targetPage){
-      window.location.href = targetPage;
-    }
-    return;
-  }
+async function loadLeaderboardFromSupabase(){
+  if(!leaderboardClient) return [];
 
-  if(targetPage){
-    setPendingRedirect(targetPage);
-  }
+  const { data, error } = await leaderboardClient.rpc("get_game_leaderboard", {
+    p_game_key:GAME_KEY,
+    p_limit:10
+  });
 
-  loginMask.classList.remove("hidden");
-  loginMask.setAttribute("aria-hidden", "false");
-  loginHint.textContent = "";
-  loginHint.style.color = "#8b4a2d";
-  setTimeout(() => loginNicknameInput.focus(), 0);
+  if(error) throw error;
+  return data || [];
 }
 
-function closeLogin(keepRedirect = true){
-  loginMask.classList.add("hidden");
-  loginMask.setAttribute("aria-hidden", "true");
-  loginHint.textContent = "";
-  loginNicknameInput.value = "";
-  loginCodeInput.value = "";
+async function showFinishBoard(score){
+  const player = getCurrentPlayer();
 
-  if(!keepRedirect){
-    clearPendingRedirect();
-  }
-}
+  if(finishCard) finishCard.classList.remove("leaderboard-only");
+  const finishTitleEl = document.getElementById("finishTitle");
+  if(finishTitleEl) finishTitleEl.textContent = "挑战完成！";
 
-async function submitLogin(){
-  const nickname = normalizeLoginInput(loginNicknameInput.value);
-  const code = normalizeLoginInput(loginCodeInput.value);
+  finishRawTimeEl.textContent = formatTime(score.raw_seconds);
+  finishWrongCountEl.textContent = String(score.wrong_count);
+  finishPenaltyTimeEl.textContent = `${score.penalty_seconds} 秒`;
+  finishTotalTimeEl.textContent = formatTime(score.total_seconds);
 
-  loginHint.textContent = "";
-  loginHint.style.color = "#8b4a2d";
-
-  if(!nickname || !code){
-    loginHint.textContent = "还没填写完整呢";
-    return;
-  }
+  finishMask.classList.remove("hidden");
+  finishMask.setAttribute("aria-hidden", "false");
+  finishMessageEl.textContent = player.isLoggedIn
+    ? "正在同步你的成绩…"
+    : "未登录成员，本次成绩不会记录到排行榜。";
+  leaderboardHintEl.textContent = "读取中…";
+  leaderboardListEl.innerHTML = `<div class="leaderboardEmpty">正在读取排行榜…</div>`;
 
   try{
-    const { data, error } = await client.rpc("verify_member_login", {
-      input_nickname: nickname,
-      input_code: code
+    if(player.isLoggedIn){
+      const submitResult = await submitScoreToSupabase(score);
+      finishMessageEl.textContent = submitResult.message || "成绩已处理。";
+    }
+
+    const rows = await loadLeaderboardFromSupabase();
+    renderLeaderboard(rows, player.memberId);
+    leaderboardHintEl.textContent = rows.length ? "前 10 名" : "暂无记录";
+  }catch(err){
+    console.error("排行榜处理失败：", err);
+    finishMessageEl.textContent = player.isLoggedIn
+      ? "成绩提交或排行榜读取失败，请稍后再试。"
+      : "排行榜读取失败，请稍后再试。";
+    leaderboardHintEl.textContent = "读取失败";
+    leaderboardListEl.innerHTML = `<div class="leaderboardEmpty">暂时无法读取排行榜。</div>`;
+  }
+}
+
+
+async function openLeaderboardBoard(){
+  const player = getCurrentPlayer();
+  const finishTitleEl = document.getElementById("finishTitle");
+
+  if(finishCard) finishCard.classList.add("leaderboard-only");
+  if(finishTitleEl) finishTitleEl.textContent = "风云榜";
+
+  finishMask.classList.remove("hidden");
+  finishMask.setAttribute("aria-hidden", "false");
+  leaderboardHintEl.textContent = "读取中…";
+  leaderboardListEl.innerHTML = `<div class="leaderboardEmpty">正在读取排行榜…</div>`;
+
+  try{
+    const rows = await loadLeaderboardFromSupabase();
+    renderLeaderboard(rows, player.memberId);
+    leaderboardHintEl.textContent = rows.length ? "前 10 名" : "暂无记录";
+  }catch(err){
+    console.error("风云榜读取失败：", err);
+    leaderboardHintEl.textContent = "读取失败";
+    leaderboardListEl.innerHTML = `<div class="leaderboardEmpty">暂时无法读取风云榜。</div>`;
+  }
+}
+
+function closeFinishBoard(){
+  finishMask.classList.add("hidden");
+  finishMask.setAttribute("aria-hidden", "true");
+}
+
+function restartFromFinish(){
+  closeFinishBoard();
+  resetGame();
+}
+
+function startTimerIfNeeded(){
+  if(timerStarted) return;
+  timerStarted = true;
+  startTimestamp = Date.now();
+  timerHandle = setInterval(updateStatus, 200);
+}
+
+function stopTimer(){
+  if(timerHandle){
+    clearInterval(timerHandle);
+    timerHandle = null;
+  }
+}
+
+function finishGame(){
+  if(finished) return;
+  finished = true;
+  finalRawSeconds = Math.floor((Date.now() - startTimestamp) / 1000);
+  stopTimer();
+  clearCurrentSelection();
+  updateStatus();
+
+  const total = finalRawSeconds + penaltySeconds;
+  const score = {
+    raw_seconds:finalRawSeconds,
+    wrong_count:wrongCount,
+    penalty_seconds:penaltySeconds,
+    total_seconds:total
+  };
+
+  setResult(`完成！原始用时 ${formatTime(finalRawSeconds)}，罚时 ${penaltySeconds} 秒，总用时 ${formatTime(total)}`, "#4c7d45");
+  showFinishBoard(score);
+}
+
+function triggerWrong(zoneRect, cardEl){
+  wrongCount += 1;
+  penaltySeconds += 3;
+  updateStatus();
+  setResult("错误，已加 3 秒罚时", "#b85a5a");
+
+  zoneRect.classList.remove("correct");
+  zoneRect.classList.add("wrong", "shake");
+  cardEl.classList.add("bad");
+
+  setTimeout(() => zoneRect.classList.remove("wrong"), 520);
+  setTimeout(() => zoneRect.classList.remove("shake"), 420);
+  setTimeout(() => cardEl.classList.remove("bad"), 420);
+}
+
+function fitLabelText(el){
+  if(!el || !el.textContent.trim()) return;
+
+  const width = el.clientWidth;
+  const height = el.clientHeight;
+  const text = el.textContent.trim();
+  const len = text.length;
+
+  let widthFactor, heightFactor, maxSize, minSize;
+
+  if (window.innerWidth <= 360) {
+    widthFactor = 0.15;
+    heightFactor = 0.52;
+    maxSize = 11.5;
+    minSize = 6.5;
+  } else if (document.body.classList.contains("stack-layout")) {
+    widthFactor = 0.18;
+    heightFactor = 0.60;
+    maxSize = 14;
+    minSize = 7.5;
+  } else if (window.innerWidth <= 1100) {
+    widthFactor = 0.22;
+    heightFactor = 0.68;
+    maxSize = 18;
+    minSize = 8;
+  } else {
+    widthFactor = 0.27;
+    heightFactor = 0.82;
+    maxSize = 26;
+    minSize = 9;
+  }
+
+  let fontSize = Math.min(
+    maxSize,
+    Math.max(
+      minSize,
+      width * widthFactor,
+      height * heightFactor
+    )
+  );
+
+  if (len >= 4) fontSize *= 0.90;
+  if (len >= 5) fontSize *= 0.84;
+  if (len >= 6) fontSize *= 0.78;
+
+  el.style.fontSize = fontSize + "px";
+  el.style.whiteSpace = "nowrap";
+  el.style.lineHeight = "1";
+  el.style.wordBreak = "normal";
+  el.style.transform = "translateZ(0)";
+  el.style.fontStretch = "normal";
+
+  while (
+    (el.scrollWidth > el.clientWidth - 4 || el.scrollHeight > el.clientHeight - 3) &&
+    fontSize > minSize
+  ) {
+    fontSize -= 0.25;
+    el.style.fontSize = fontSize + "px";
+  }
+}
+
+function fitAllLabels(){
+  document.querySelectorAll(".nameLabel").forEach(el => {
+    if(el.textContent.trim()){
+      fitLabelText(el);
+    }
+  });
+}
+
+function clearCurrentSelection(){
+  selectedCardCode = null;
+  selectedZoneCode = null;
+
+  document.querySelectorAll(".nameCard.selected").forEach(el => {
+    el.classList.remove("selected");
+  });
+
+  document.querySelectorAll(".dropZone.selected").forEach(el => {
+    el.classList.remove("selected");
+  });
+}
+
+function updateCardSelectionUI(){
+  document.querySelectorAll(".nameCard").forEach(el => {
+    el.classList.toggle("selected", el.dataset.code === selectedCardCode);
+  });
+}
+
+function updateZoneSelectionUI(){
+  document.querySelectorAll(".dropZone").forEach(el => {
+    el.classList.toggle("selected", el.dataset.code === selectedZoneCode);
+  });
+}
+
+function selectCard(code){
+  if(finished || placedCorrect.has(code)) return;
+  selectedCardCode = (selectedCardCode === code) ? null : code;
+  updateCardSelectionUI();
+  tryResolveSelection();
+}
+
+function selectZone(code){
+  if(finished || placedCorrect.has(code)) return;
+  selectedZoneCode = (selectedZoneCode === code) ? null : code;
+  updateZoneSelectionUI();
+  tryResolveSelection();
+}
+
+function tryResolveSelection(){
+  if(!selectedCardCode || !selectedZoneCode) return;
+
+  startTimerIfNeeded();
+
+  const draggedCode = selectedCardCode;
+  const zoneCode = selectedZoneCode;
+
+  const draggedItem = codeToItem[draggedCode];
+  const cardEl = document.getElementById(`card-${draggedCode}`);
+  const zoneRect = document.getElementById(`zone-${zoneCode}`);
+  const placedTextEl = document.getElementById(`placed-${zoneCode}`);
+
+  if(!draggedItem || !cardEl || !zoneRect || !placedTextEl){
+    clearCurrentSelection();
+    return;
+  }
+
+  if(draggedCode === zoneCode){
+    triggerCorrect(zoneRect, placedTextEl, cardEl, draggedItem);
+  }else{
+    triggerWrong(zoneRect, cardEl);
+  }
+
+  clearCurrentSelection();
+}
+
+function triggerCorrect(zoneRect, placedTextEl, cardEl, item){
+  zoneRect.classList.remove("wrong", "selected");
+  zoneRect.classList.add("correct");
+
+  placedTextEl.textContent = item.name;
+  fitLabelText(placedTextEl);
+
+  cardEl.classList.remove("selected");
+  cardEl.classList.add("correct");
+  cardEl.draggable = false;
+
+  placedCorrect.add(item.code);
+
+  updateStatus();
+  setResult(`正确：${item.name}（${item.animal}）`, "#4c7d45");
+
+  if(placedCorrect.size === peopleData.length){
+    finishGame();
+  }
+}
+
+function renderNameCards(){
+  nameList.innerHTML = "";
+
+  peopleData.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "nameCard";
+    div.id = `card-${item.code}`;
+    div.draggable = true;
+    div.textContent = item.name;
+    div.dataset.code = item.code;
+
+    div.addEventListener("dragstart", e => {
+      if(finished || placedCorrect.has(item.code)){
+        e.preventDefault();
+        return;
+      }
+      startTimerIfNeeded();
+      div.classList.add("dragging");
+      e.dataTransfer.setData("text/plain", item.code);
+      e.dataTransfer.effectAllowed = "move";
+      clearCurrentSelection();
     });
 
-    if(error){
-      console.error("KEY 登录失败：", error);
-      loginHint.textContent = `登录检查失败：${error.message || "请稍后再试"}`;
-      return;
-    }
+    div.addEventListener("dragend", () => {
+      div.classList.remove("dragging");
+    });
 
-    if(!Array.isArray(data) || data.length === 0){
-      loginHint.textContent = "没有找到你的记录哎";
-      return;
-    }
+    div.addEventListener("click", () => {
+      if(finished || placedCorrect.has(item.code)) return;
+      selectCard(item.code);
+    });
 
-    const user = data[0] || {};
+    nameList.appendChild(div);
+  });
+}
 
-    localStorage.setItem("room10LoggedIn", "true");
-    localStorage.setItem("room10User", user.nickname || nickname);
-    localStorage.setItem("room10Role", user.role || "member");
-    localStorage.setItem("room10MemberId", user.member_id || user.id || "");
+function createZoneElements(){
+  map.innerHTML = "";
+  labelLayer.innerHTML = "";
 
-    let roleMessage = "登录成功";
-    if(user.role === "owner"){
-      roleMessage = "维修工已上线";
-    }else if(user.role === "admin"){
-      roleMessage = "宿管已上线";
-    }else if(user.role === "member"){
-      roleMessage = "房客已登录";
-    }else if(user.role === "applying"){
-      roleMessage = "当前身份为申请中";
-    }
+  zoneLayout.forEach(zone => {
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("class", "dropZone");
+    rect.setAttribute("id", `zone-${zone.code}`);
+    rect.setAttribute("data-code", zone.code);
+    rect.setAttribute("x", zone.x);
+    rect.setAttribute("y", zone.y);
+    rect.setAttribute("width", zone.w);
+    rect.setAttribute("height", zone.h);
 
-    loginHint.style.color = "#5f7d3a";
-    loginHint.textContent = roleMessage;
-    updateIdentityUI();
-    refreshGameNotice();
+    const label = document.createElement("div");
+    label.className = "nameLabel";
+    label.id = `placed-${zone.code}`;
 
-    setTimeout(() => {
-      const targetPage = getPendingRedirect();
-      closeLogin(true);
+    /* 白底更高一点 */
+    const left = zone.x + zone.w * 0.04;
+    const top = zone.y + zone.h * 0.16;
+    const width = zone.w * 0.92;
+    const height = zone.h * 0.64;
 
-      if(targetPage){
-        clearPendingRedirect();
-        window.location.href = targetPage;
+    label.style.left = `${left}%`;
+    label.style.top = `${top}%`;
+    label.style.width = `${width}%`;
+    label.style.height = `${height}%`;
+
+    rect.addEventListener("dragover", e => {
+      if(finished) return;
+      e.preventDefault();
+      rect.classList.add("hover");
+    });
+
+    rect.addEventListener("dragleave", () => {
+      rect.classList.remove("hover");
+    });
+
+    rect.addEventListener("drop", e => {
+      if(finished) return;
+      e.preventDefault();
+      rect.classList.remove("hover");
+      startTimerIfNeeded();
+
+      const draggedCode = e.dataTransfer.getData("text/plain");
+      if(!draggedCode || placedCorrect.has(draggedCode)) return;
+
+      const draggedItem = codeToItem[draggedCode];
+      const cardEl = document.getElementById(`card-${draggedCode}`);
+      const placedTextEl = document.getElementById(`placed-${zone.code}`);
+
+      if(!draggedItem || !cardEl || !placedTextEl) return;
+
+      if(draggedCode === zone.code){
+        triggerCorrect(rect, placedTextEl, cardEl, draggedItem);
+      }else{
+        triggerWrong(rect, cardEl);
       }
-    }, 700);
-  }catch(err){
-    console.error("submitLogin() 查询异常：", err);
-    loginHint.style.color = "#8b4a2d";
-    loginHint.textContent = `登录失败：${err?.message || "请稍后再试"}`;
-  }
+
+      clearCurrentSelection();
+    });
+
+    rect.addEventListener("click", () => {
+      if(finished || placedCorrect.has(zone.code)) return;
+      selectZone(zone.code);
+    });
+
+    map.appendChild(rect);
+    labelLayer.appendChild(label);
+  });
+
+  requestAnimationFrame(fitAllLabels);
 }
 
-function openGameModal(url){
-  if(!url) return;
+function clearPlacedNames(){
+  if(finished) return;
 
-  const currentUrl = gameModalFrame.getAttribute("data-current-src") || "";
-  const modalAlreadyOpen = !gameModalMask.classList.contains("hidden");
+  placedCorrect.clear();
+  clearCurrentSelection();
 
-  if(modalAlreadyOpen && currentUrl === url){
-    return;
-  }
+  document.querySelectorAll(".nameLabel").forEach(el => {
+    el.textContent = "";
+    el.style.fontSize = "";
+  });
 
-  gameModalFrame.setAttribute("data-current-src", url);
-  gameModalFrame.src = url;
-  gameModalMask.classList.remove("hidden");
-  gameModalMask.setAttribute("aria-hidden", "false");
+  document.querySelectorAll(".dropZone").forEach(el => {
+    el.classList.remove("correct", "wrong", "hover", "shake", "selected");
+  });
+
+  document.querySelectorAll(".nameCard").forEach(el => {
+    el.classList.remove("correct", "bad", "dragging", "selected");
+    el.draggable = true;
+  });
+
+  updateStatus();
+  setResult("已清空当前填写", "#5b3e28");
 }
 
-function closeGameModal(){
-  gameModalMask.classList.add("hidden");
-  gameModalMask.setAttribute("aria-hidden", "true");
-  gameModalFrame.removeAttribute("data-current-src");
-  gameModalFrame.src = "";
+function resetGame(){
+  if(finishMask) closeFinishBoard();
+  placedCorrect.clear();
+  wrongCount = 0;
+  penaltySeconds = 0;
+  timerStarted = false;
+  finished = false;
+  finalRawSeconds = 0;
+  startTimestamp = 0;
+  stopTimer();
+  clearCurrentSelection();
+
+  renderNameCards();
+  createZoneElements();
+  updateStatus();
+  setResult("请开始匹配", "#5b3e28");
 }
 
-function getGameNoticeItems(){
-  try{
-    const raw = localStorage.getItem("room10GameRecordNotices");
-    if(!raw) return [];
-    const data = JSON.parse(raw);
-    if(!Array.isArray(data)) return [];
-    return data
-      .map(item => typeof item === "string" ? { title:"游戏记录提醒", desc:item } : {
-        title:item?.title || "游戏记录提醒",
-        desc:item?.message || item?.desc || ""
-      })
-      .filter(item => item.desc);
-  }catch{
-    return [];
-  }
+function handleResize(){
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    applyLayoutMode();
+    fitAllLabels();
+  }, 50);
 }
 
-function setNoticeCount(count){
-  const n = Number(count) || 0;
-  siteNoticeCount.textContent = n > 99 ? "99+" : String(n);
-  siteNoticeBtn.classList.toggle("hasNotice", n > 0);
-}
-
-function renderNoticeList(items){
-  const list = Array.isArray(items) ? items : [];
-
-  if(!list.length){
-    siteNoticeContent.innerHTML = '<div class="siteNoticeEmpty">如果有人超过你的游戏记录，会在这里通知你。</div>';
-    setNoticeCount(0);
-    return;
-  }
-
-  siteNoticeContent.innerHTML = `
-    <div class="siteNoticeList">
-      ${list.map(item => `
-        <div class="siteNoticeItem">
-          <div class="siteNoticeItemTitle">${escapeHtml(item.title || "提醒")}</div>
-          <div class="siteNoticeItemDesc">${escapeHtml(item.desc || "")}</div>
-        </div>
-      `).join("")}
-    </div>
-  `;
-
-  setNoticeCount(list.length);
-}
-
-function refreshGameNotice(){
-  renderNoticeList(getGameNoticeItems());
-}
-
-function toggleSiteNoticePanel(){
-  if(!siteNoticePanel) return;
-  refreshGameNotice();
-  siteNoticePanel.classList.toggle("show");
-}
-
-function closeSiteNoticePanel(){
-  if(siteNoticePanel) siteNoticePanel.classList.remove("show");
-}
-
-function showTip(message){
-  fallbackTip.textContent = message || "操作提示";
-  fallbackTip.classList.add("show");
-  clearTimeout(showTip._timer);
-  showTip._timer = setTimeout(() => fallbackTip.classList.remove("show"), 2600);
-}
-
-function clamp(v,min,max){
-  return Math.max(min, Math.min(max, v));
-}
-
-function avgColor(data){
-  let r = 0, g = 0, b = 0, count = 0;
-  for(let i=0;i<data.length;i+=4){
-    const alpha = data[i+3];
-    if(alpha === 0) continue;
-    r += data[i];
-    g += data[i+1];
-    b += data[i+2];
-    count++;
-  }
-  if(!count) return [245, 233, 220];
-  return [
-    Math.round(r / count),
-    Math.round(g / count),
-    Math.round(b / count)
-  ];
-}
-
-function mix(color, target, ratio){
-  return [
-    Math.round(color[0] * (1 - ratio) + target[0] * ratio),
-    Math.round(color[1] * (1 - ratio) + target[1] * ratio),
-    Math.round(color[2] * (1 - ratio) + target[2] * ratio)
-  ];
-}
-
-function rgbToCss(arr){
-  return `rgb(${arr[0]}, ${arr[1]}, ${arr[2]})`;
-}
-
-function applyEdgeColors(){
-  try{
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d", { willReadFrequently:true });
-    const w = img.naturalWidth;
-    const h = img.naturalHeight;
-
-    if(!w || !h || !ctx) throw new Error("图片尺寸或画布无效");
-
-    canvas.width = w;
-    canvas.height = h;
-    ctx.drawImage(img, 0, 0, w, h);
-
-    const bandX = Math.max(8, Math.floor(w * 0.03));
-    const bandY = Math.max(8, Math.floor(h * 0.03));
-
-    const leftData = ctx.getImageData(0, 0, bandX, h).data;
-    const rightData = ctx.getImageData(w - bandX, 0, bandX, h).data;
-    const topData = ctx.getImageData(0, 0, w, bandY).data;
-    const bottomData = ctx.getImageData(0, h - bandY, w, bandY).data;
-
-    let left = avgColor(leftData);
-    let right = avgColor(rightData);
-    let top = avgColor(topData);
-    let bottom = avgColor(bottomData);
-
-    left = mix(left, [255,255,255], 0.14);
-    right = mix(right, [255,255,255], 0.12);
-    top = mix(top, [255,255,255], 0.16);
-    bottom = mix(bottom, [255,255,255], 0.10);
-
-    left = left.map(v => clamp(v, 120, 255));
-    right = right.map(v => clamp(v, 120, 255));
-    top = top.map(v => clamp(v, 130, 255));
-    bottom = bottom.map(v => clamp(v, 110, 255));
-
-    root.style.setProperty("--bg-left", rgbToCss(left));
-    root.style.setProperty("--bg-right", rgbToCss(right));
-    root.style.setProperty("--bg-top", rgbToCss(top));
-    root.style.setProperty("--bg-bottom", rgbToCss(bottom));
-  }catch(err){
-    showTip("未能读取图片边缘颜色，已使用默认柔和背景。");
-    console.warn("读取底图边缘颜色失败：", err);
-  }
-}
-
-loginNicknameInput.addEventListener("keydown", (e) => {
-  if(e.key === "Enter") submitLogin();
-});
-
-loginCodeInput.addEventListener("keydown", (e) => {
-  if(e.key === "Enter") submitLogin();
-});
-
-loginMask.addEventListener("click", (e) => {
-  if(e.target === loginMask) closeLogin(false);
-});
-
-gameModalMask.addEventListener("click", (e) => {
-  if(e.target === gameModalMask) closeGameModal();
-});
-
-siteNoticeBtn.addEventListener("click", event => {
-  event.stopPropagation();
-  toggleSiteNoticePanel();
-});
-
-loginOpenBtn.addEventListener("click", event => {
-  event.stopPropagation();
-  openLogin();
-});
-
-logoutBtn.addEventListener("click", event => {
-  event.stopPropagation();
-  logout();
-});
-
-document.addEventListener("click", (e) => {
-  if(!siteNoticePanel || !siteNoticeBtn) return;
-  if(siteNoticePanel.contains(e.target) || siteNoticeBtn.contains(e.target)) return;
-  closeSiteNoticePanel();
-});
-
-window.addEventListener("storage", (e) => {
-  if(
-    e.key === "room10LoggedIn" ||
-    e.key === "room10User" ||
-    e.key === "room10Role" ||
-    e.key === "room10MemberId"
-  ){
-    updateIdentityUI();
-  }
-
-  if(e.key === "room10GameRecordNotices"){
-    refreshGameNotice();
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape" && finishMask && !finishMask.classList.contains("hidden")){
+    closeFinishBoard();
   }
 });
 
-window.addEventListener("resize", syncOverlayToImage);
+finishMask.addEventListener("click", (e) => {
+  if(e.target === finishMask) closeFinishBoard();
+});
 
-if(img && img.complete && img.naturalWidth){
-  syncOverlayToImage();
-  applyEdgeColors();
-}else if(img){
-  img.addEventListener("load", () => {
-    syncOverlayToImage();
-    applyEdgeColors();
-  }, { once:true });
-  img.addEventListener("error", () => {
-    showTip("未能读取图片边缘颜色，已使用默认柔和背景。");
-  }, { once:true });
-}
+window.addEventListener("resize", handleResize);
+bg.addEventListener("load", () => {
+  applyLayoutMode();
+  fitAllLabels();
+});
 
-setTimeout(syncOverlayToImage, 120);
-updateIdentityUI();
-refreshGameNotice();
+renderNameCards();
+createZoneElements();
+updateStatus();
+applyLayoutMode();
+setResult("请开始匹配");
 </script>
 </body>
 </html>
