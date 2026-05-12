@@ -145,6 +145,8 @@ body{
   position:absolute;
   z-index:10;
   pointer-events:none;
+  min-width:0;
+  min-height:0;
 }
 
 #topIdentityBar{
@@ -153,6 +155,9 @@ body{
   display:flex;
   align-items:stretch;
   justify-content:flex-start;
+  gap:calc(5px * var(--ui-scale));
+  padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
+  border-radius:calc(13px * var(--ui-scale));
   background:rgba(255,248,239,0.92);
   border:1px solid rgba(186,146,103,0.24);
   box-shadow:
@@ -166,7 +171,10 @@ body{
 }
 
 #topIdentityBadge,
-#logoutBtn{
+#loginOpenBtn,
+#logoutBtn,
+#siteNoticeBtn{
+  border-radius:calc(9px * var(--ui-scale));
   background:rgba(255,252,247,0.96);
   color:#6c4523;
   box-shadow:
@@ -178,6 +186,8 @@ body{
 #topIdentityBadge{
   flex:1 1 auto;
   min-width:0;
+  padding:0 calc(8px * var(--ui-scale));
+  font-size:calc(13px * var(--ui-scale));
   font-weight:800;
   display:flex;
   align-items:center;
@@ -194,11 +204,16 @@ body{
   line-height:1;
 }
 
+#loginOpenBtn,
 #logoutBtn{
   appearance:none;
   cursor:pointer;
+  width:calc(42px * var(--ui-scale));
+  min-width:calc(42px * var(--ui-scale));
+  flex:0 0 calc(42px * var(--ui-scale));
   padding:0;
   color:#67401f;
+  font-size:calc(12px * var(--ui-scale));
   font-weight:800;
   line-height:1;
   display:flex;
@@ -208,9 +223,129 @@ body{
   overflow:hidden;
 }
 
-#logoutBtn:hover{
+#loginOpenBtn:hover,
+#logoutBtn:hover,
+#siteNoticeBtn:hover{
   transform:translateY(-1px);
   background:rgba(255,255,255,0.94);
+}
+
+#siteNoticeWrap{
+  position:relative;
+  width:calc(30px * var(--ui-scale));
+  min-width:calc(30px * var(--ui-scale));
+  flex:0 0 calc(30px * var(--ui-scale));
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  overflow:visible;
+}
+
+#siteNoticeBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  position:relative;
+  width:100%;
+  height:100%;
+  padding:0;
+  font-size:calc(14px * var(--ui-scale));
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+#siteNoticeIcon{
+  display:block;
+  line-height:1;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
+}
+
+#siteNoticeCount{
+  position:absolute;
+  right:calc(-6px * var(--ui-scale));
+  top:calc(-6px * var(--ui-scale));
+  min-width:calc(18px * var(--ui-scale));
+  height:calc(18px * var(--ui-scale));
+  padding:0 calc(5px * var(--ui-scale));
+  border-radius:999px;
+  background:#c98c4f;
+  color:#fff9f1;
+  font-size:calc(9px * var(--ui-scale));
+  font-weight:900;
+  line-height:1;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:calc(2px * var(--ui-scale)) solid rgba(255,248,239,0.98);
+  box-shadow:0 2px 8px rgba(116,86,54,0.16);
+  z-index:3;
+}
+
+#siteNoticeBtn.hasNotice #siteNoticeCount{
+  display:flex;
+}
+
+#siteNoticePanel{
+  position:absolute;
+  top:calc(100% + 10px);
+  right:0;
+  width:min(calc(360px * var(--ui-scale)), 72vw);
+  max-height:min(calc(540px * var(--ui-scale)), 70vh);
+  overflow:auto;
+  padding:calc(12px * var(--ui-scale));
+  border-radius:calc(16px * var(--ui-scale));
+  background:rgba(255,249,241,0.98);
+  border:1px solid rgba(203,167,123,0.28);
+  box-shadow:0 16px 36px rgba(85,58,34,0.16);
+  display:none;
+  z-index:80;
+  text-align:left;
+}
+
+#siteNoticePanel.show{display:block;}
+
+.siteNoticeTitle{
+  color:#6f4726;
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:900;
+  margin-bottom:calc(10px * var(--ui-scale));
+}
+
+.siteNoticeEmpty{
+  color:#8a6644;
+  font-size:calc(12px * var(--ui-scale));
+  line-height:1.6;
+  padding:6px 2px 2px;
+}
+
+.siteNoticeList{
+  display:flex;
+  flex-direction:column;
+  gap:calc(8px * var(--ui-scale));
+}
+
+.siteNoticeItem{
+  padding:calc(10px * var(--ui-scale));
+  border-radius:calc(12px * var(--ui-scale));
+  background:rgba(255,252,247,0.82);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.92), 0 2px 8px rgba(120,92,63,0.05);
+}
+
+.siteNoticeItemTitle{
+  color:#6f4726;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:800;
+  line-height:1.5;
+  margin-bottom:4px;
+}
+
+.siteNoticeItemDesc{
+  color:#8a6644;
+  font-size:calc(11px * var(--ui-scale));
+  line-height:1.55;
 }
 
 #topBar{
@@ -224,7 +359,7 @@ body{
 
 #topBar,
 #navOuter,
-#navScroll{overflow:visible !important;}
+#navScroll{overflow:visible;}
 
 #navOuter{
   flex:0 0 auto;
@@ -237,8 +372,8 @@ body{
   white-space:nowrap;
   scrollbar-width:none;
   -ms-overflow-style:none;
-  padding:0 !important;
-  margin:0 !important;
+  padding:0;
+  margin:0;
 }
 
 #navScroll::-webkit-scrollbar{display:none;}
@@ -297,7 +432,7 @@ body{
   pointer-events:none;
   opacity:0;
   z-index:4;
-  display:block !important;
+  display:block;
   font-weight:900;
   line-height:1;
   text-shadow:0 1px 2px rgba(255,250,232,.72);
@@ -310,6 +445,21 @@ body{
 .navBtn:hover .navActiveNoteA,.navBtn:focus-visible .navActiveNoteA{animation:navNotePopA 2.2s ease-in-out infinite;}
 .navBtn:hover .navActiveNoteB,.navBtn:focus-visible .navActiveNoteB{animation:navNotePopB 2.5s ease-in-out infinite;}
 .navBtn:hover .navActiveNoteC,.navBtn:focus-visible .navActiveNoteC{animation:navNotePopC 2.35s ease-in-out infinite;}
+
+.navBtn[data-room="hall"] .navActiveNote{
+  color:rgba(255,205,96,.86);
+  text-shadow:0 1px 2px rgba(255,250,232,.95), 0 0 10px rgba(255,215,105,.62);
+}
+.navBtn[data-room="honor"] .navActiveNote{
+  color:rgba(205,143,45,.86);
+  text-shadow:0 1px 2px rgba(255,250,232,.92), 0 0 8px rgba(255,220,130,.52);
+}
+.navBtn[data-room="game"] .navActiveNote{color:rgba(117,91,150,.82);}
+.navBtn[data-room="studio"] .navActiveNote{color:rgba(96,112,145,.84);}
+.navBtn[data-room="living"] .navActiveNote{color:rgba(150,111,72,.82);}
+.navBtn[data-room="dorm"] .navActiveNote{color:rgba(143,111,168,.76);}
+.navBtn[data-room="pets"] .navActiveNote{color:rgba(131,111,78,.82);}
+.navBtn[data-room="flower"] .navActiveNote{color:rgba(198,119,145,.82);}
 
 #managerBriefCard{
   position:absolute;
@@ -654,11 +804,23 @@ body{
     border-radius:calc(9px * var(--ui-scale));
   }
 
+  #loginOpenBtn,
   #logoutBtn{
     width:calc(42px * var(--ui-scale));
     min-width:calc(42px * var(--ui-scale));
     flex-basis:calc(42px * var(--ui-scale));
     font-size:calc(12px * var(--ui-scale));
+    border-radius:calc(9px * var(--ui-scale));
+  }
+
+  #siteNoticeWrap{
+    width:calc(30px * var(--ui-scale));
+    min-width:calc(30px * var(--ui-scale));
+    flex:0 0 calc(30px * var(--ui-scale));
+  }
+
+  #siteNoticeBtn{
+    font-size:calc(14px * var(--ui-scale));
     border-radius:calc(9px * var(--ui-scale));
   }
 
@@ -868,7 +1030,11 @@ body{
 
   #topIdentityBar{gap:6px; padding:5px 7px; border-radius:14px;}
   #topIdentityBadge{padding:0 9px; font-size:12px; border-radius:10px;}
+  #loginOpenBtn,
   #logoutBtn{width:42px; min-width:42px; flex-basis:42px; font-size:11px; border-radius:10px;}
+  #siteNoticeWrap{width:34px; min-width:34px; flex-basis:34px;}
+  #siteNoticeBtn{font-size:14px; border-radius:10px;}
+  #siteNoticePanel{position:fixed; top:58px; right:10px; left:10px; width:auto; max-height:60dvh; z-index:999;}
 
   #topBar,
   #managerBriefCard,
@@ -894,7 +1060,7 @@ body{
     display:grid;
     grid-template-columns:repeat(2, minmax(0, 1fr));
     gap:7px;
-    transform:none !important;
+    transform:none;
   }
 
   .navBtn{
@@ -922,8 +1088,8 @@ body{
 
   .card{padding:10px 12px; margin-bottom:0; border-radius:12px;}
   .title-line{flex-direction:column; align-items:flex-start; gap:4px; margin-bottom:6px;}
-  .section-title{font-size:14px !important;}
-  .title-note{font-size:11px !important; text-align:left; white-space:normal;}
+  .section-title{font-size:14px;}
+  .title-note{font-size:11px; text-align:left; white-space:normal;}
 
   .quick-login-row,
   .apply-query-row{
@@ -980,7 +1146,7 @@ body{
   .notice-box,.result-box{padding:10px 12px; border-radius:12px;}
   .notice-list{padding-left:18px;}
   .notice-list li,.result-box p{font-size:12px; line-height:1.35;}
-  .notice-note-line,.fold-hint{font-size:11px !important;}
+  .notice-note-line,.fold-hint{font-size:11px;}
   .dual-fold-row{grid-template-columns:1fr; gap:8px; margin-top:12px;}
   .dual-fold-row .sub-btn{height:32px; font-size:12px; padding:0 10px; border-radius:9px;}
   .fold-panel{padding:10px 12px; border-radius:12px; margin-top:10px;}
@@ -1011,7 +1177,23 @@ body{
     <div id="managerUI">
       <div id="topActions">
         <div id="topIdentityBar">
-          <div id="topIdentityBadge"><span class="identityText">未登录 | 参观者</span></div>
+          <div id="topIdentityBadge"><span class="identityText" id="currentUserText">参观者</span></div>
+
+          <div id="siteNoticeWrap">
+            <button id="siteNoticeBtn" type="button" aria-label="查看提醒">
+              <span id="siteNoticeIcon">🔔</span>
+              <span id="siteNoticeCount">0</span>
+            </button>
+
+            <div id="siteNoticePanel" aria-live="polite">
+              <div class="siteNoticeTitle">宿管室提醒</div>
+              <div id="siteNoticeContent">
+                <div class="siteNoticeEmpty">暂无提醒。</div>
+              </div>
+            </div>
+          </div>
+
+          <button id="loginOpenBtn" type="button">登录</button>
           <button id="logoutBtn" class="hidden" type="button" onclick="logout()">登出</button>
         </div>
       </div>
@@ -1020,14 +1202,14 @@ body{
         <div id="navOuter">
           <div id="navScroll">
             <nav id="roomNav">
-              <button class="navBtn" type="button" onclick="location.href='index.html'"><span class="navLabel">大堂</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
-              <button class="navBtn" type="button" onclick="location.href='honor.html'"><span class="navLabel">荣誉墙</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
-              <button class="navBtn" type="button" onclick="location.href='game.html'"><span class="navLabel">游戏房</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
-              <button class="navBtn" type="button" onclick="goNeedLogin('studio-todo.html')"><span class="navLabel">工作间</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
-              <button class="navBtn" type="button" onclick="goNeedLogin('living.html')"><span class="navLabel">客厅</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
-              <button class="navBtn" type="button" onclick="goNeedLogin('dorm.html')"><span class="navLabel">宿舍</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
-              <button class="navBtn" type="button" onclick="goNeedLogin('pets.html')"><span class="navLabel">宠物区</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
-              <button class="navBtn" type="button" onclick="goNeedLogin('flower.html')"><span class="navLabel">花房区</span><span class="navActiveNote navActiveNoteA">♪</span><span class="navActiveNote navActiveNoteB">♬</span><span class="navActiveNote navActiveNoteC">♫</span></button>
+              <button class="navBtn" data-room="hall" type="button" onclick="location.href='index.html'"><span class="navLabel">大堂</span><span class="navActiveNote navActiveNoteA">✦</span><span class="navActiveNote navActiveNoteB">✧</span><span class="navActiveNote navActiveNoteC">★</span></button>
+              <button class="navBtn" data-room="honor" type="button" onclick="location.href='honor.html'"><span class="navLabel">荣誉墙</span><span class="navActiveNote navActiveNoteA">🏆</span><span class="navActiveNote navActiveNoteB">🏅</span><span class="navActiveNote navActiveNoteC">✦</span></button>
+              <button class="navBtn" data-room="game" type="button" onclick="location.href='game.html'"><span class="navLabel">游戏房</span><span class="navActiveNote navActiveNoteA">🎮</span><span class="navActiveNote navActiveNoteB">🎲</span><span class="navActiveNote navActiveNoteC">👾</span></button>
+              <button class="navBtn" data-room="studio" type="button" onclick="goNeedLogin('studio-todo.html')"><span class="navLabel">工作间</span><span class="navActiveNote navActiveNoteA">🎙</span><span class="navActiveNote navActiveNoteB">🎧</span><span class="navActiveNote navActiveNoteC">◇</span></button>
+              <button class="navBtn" data-room="living" type="button" onclick="goNeedLogin('living.html')"><span class="navLabel">客厅</span><span class="navActiveNote navActiveNoteA">☕</span><span class="navActiveNote navActiveNoteB">💬</span><span class="navActiveNote navActiveNoteC">♡</span></button>
+              <button class="navBtn" data-room="dorm" type="button" onclick="goNeedLogin('dorm.html')"><span class="navLabel">宿舍</span><span class="navActiveNote navActiveNoteA">☁</span><span class="navActiveNote navActiveNoteB">☾</span><span class="navActiveNote navActiveNoteC">🛏</span></button>
+              <button class="navBtn" data-room="pets" type="button" onclick="goNeedLogin('pets.html')"><span class="navLabel">宠物区</span><span class="navActiveNote navActiveNoteA">🐾</span><span class="navActiveNote navActiveNoteB">♡</span><span class="navActiveNote navActiveNoteC">🐱</span></button>
+              <button class="navBtn" data-room="flower" type="button" onclick="goNeedLogin('flower.html')"><span class="navLabel">花房区</span><span class="navActiveNote navActiveNoteA">✿</span><span class="navActiveNote navActiveNoteB">❀</span><span class="navActiveNote navActiveNoteC">🌸</span></button>
             </nav>
           </div>
         </div>
@@ -1182,7 +1364,13 @@ const roomNav = document.getElementById("roomNav");
 const topBar = document.getElementById("topBar");
 
 const topIdentityBadge = document.getElementById("topIdentityBadge");
+const currentUserText = document.getElementById("currentUserText");
+const loginOpenBtn = document.getElementById("loginOpenBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+const siteNoticeBtn = document.getElementById("siteNoticeBtn");
+const siteNoticePanel = document.getElementById("siteNoticePanel");
+const siteNoticeCount = document.getElementById("siteNoticeCount");
+const siteNoticeContent = document.getElementById("siteNoticeContent");
 const contentArea = document.getElementById("contentArea");
 
 const loginHint = document.getElementById("loginHint");
@@ -1224,8 +1412,23 @@ function isTinyScreen(){
   return window.innerWidth <= 540;
 }
 
+function clearDesktopOverlayStyles(){
+  if(managerUI){
+    managerUI.style.left = "";
+    managerUI.style.top = "";
+    managerUI.style.width = "";
+    managerUI.style.height = "";
+  }
+  if(roomNav){
+    roomNav.style.transform = "";
+  }
+}
+
 function syncManagerUIToImage(){
-  if(isTinyScreen()) return;
+  if(isTinyScreen()){
+    clearDesktopOverlayStyles();
+    return;
+  }
   if(!managerImg?.naturalWidth || !managerImg?.naturalHeight || !managerStage || !managerUI) return;
 
   const frame = managerStage.getBoundingClientRect();
@@ -1275,16 +1478,53 @@ function isMediumScrollScreen(){
   return window.innerWidth > 540 && (window.innerWidth <= 900 || window.innerHeight <= 760);
 }
 
+function getStoredUser(){
+  const oldLoggedIn = localStorage.getItem("room10LoggedIn") === "true";
+  const oldUser = localStorage.getItem("room10User") || "";
+  const oldRole = localStorage.getItem("room10Role") || "";
+  const oldMemberId = localStorage.getItem("room10MemberId") || "";
+
+  if(oldLoggedIn && oldUser){
+    return {
+      nickname:oldUser,
+      role:oldRole || "member",
+      member_id:oldMemberId
+    };
+  }
+
+  try{
+    const raw =
+      localStorage.getItem("room10_user") ||
+      localStorage.getItem("room10_current_user") ||
+      localStorage.getItem("currentUser");
+
+    if(!raw) return null;
+    const data = JSON.parse(raw);
+    if(!data) return null;
+
+    return {
+      nickname:data.nickname || data.name || "",
+      role:data.role || "",
+      member_id:data.member_id || data.id || ""
+    };
+  }catch(err){
+    return null;
+  }
+}
+
 function isLoggedIn(){
-  return localStorage.getItem("room10LoggedIn") === "true";
+  const user = getStoredUser();
+  return !!(user && user.nickname);
 }
 
 function getRole(){
-  return localStorage.getItem("room10Role") || "";
+  const user = getStoredUser();
+  return user?.role || localStorage.getItem("room10Role") || "";
 }
 
 function getCurrentUser(){
-  return localStorage.getItem("room10User") || "";
+  const user = getStoredUser();
+  return user?.nickname || localStorage.getItem("room10User") || "";
 }
 
 function getApplicantSession(){
@@ -1315,12 +1555,13 @@ function getRoleLabel(roleValue = getRole()){
 }
 
 function updateStatusUserUI(labelOverride){
-  if(!topIdentityBadge || !logoutBtn) return;
+  if(!currentUserText || !loginOpenBtn || !logoutBtn) return;
 
   if(isLoggedIn()){
     const user = getCurrentUser() || "已登录";
     const roleLabel = labelOverride || getRoleLabel();
-    topIdentityBadge.innerHTML = `<span class="identityText">${escapeHtml(user)} | ${escapeHtml(roleLabel)}</span>`;
+    currentUserText.textContent = `${user} | ${roleLabel}`;
+    loginOpenBtn.classList.add("hidden");
     logoutBtn.classList.remove("hidden");
     return;
   }
@@ -1328,13 +1569,62 @@ function updateStatusUserUI(labelOverride){
   const applicant = getApplicantSession();
   if(applicant && applicant.name){
     const roleLabel = labelOverride || "申请中";
-    topIdentityBadge.innerHTML = `<span class="identityText">${escapeHtml(applicant.name)} | ${escapeHtml(roleLabel)}</span>`;
+    currentUserText.textContent = `${applicant.name} | ${roleLabel}`;
+    loginOpenBtn.classList.add("hidden");
     logoutBtn.classList.remove("hidden");
     return;
   }
 
-  topIdentityBadge.innerHTML = `<span class="identityText">未登录 | 参观者</span>`;
+  currentUserText.textContent = "参观者";
+  loginOpenBtn.classList.remove("hidden");
   logoutBtn.classList.add("hidden");
+}
+
+function setSiteNoticeCount(count){
+  const n = Number(count) || 0;
+  if(!siteNoticeCount || !siteNoticeBtn) return;
+  siteNoticeCount.textContent = n > 99 ? "99+" : String(n);
+  siteNoticeBtn.classList.toggle("hasNotice", n > 0);
+}
+
+function renderSiteNoticeList(items){
+  if(!siteNoticeContent) return;
+  const list = Array.isArray(items) ? items : [];
+
+  if(!list.length){
+    siteNoticeContent.innerHTML = '<div class="siteNoticeEmpty">暂无提醒。</div>';
+    setSiteNoticeCount(0);
+    return;
+  }
+
+  siteNoticeContent.innerHTML = `
+    <div class="siteNoticeList">
+      ${list.map(item => `
+        <div class="siteNoticeItem">
+          <div class="siteNoticeItemTitle">${escapeHtml(item.title || "提醒")}</div>
+          <div class="siteNoticeItemDesc">${escapeHtml(item.desc || "")}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+  setSiteNoticeCount(list.length);
+}
+
+function toggleSiteNoticePanel(){
+  siteNoticePanel?.classList.toggle("show");
+}
+
+function closeSiteNoticePanel(){
+  siteNoticePanel?.classList.remove("show");
+}
+
+function openLogin(){
+  if(isMediumScrollScreen()){
+    contentArea.scrollTo({ top:0, behavior:"smooth" });
+  }
+  quickNicknameInput?.focus();
+  loginHint.style.color = "#8b5b34";
+  loginHint.textContent = "请在这里输入昵称和钥匙。";
 }
 
 function showStatusNotice(message, type = "info"){
@@ -1821,6 +2111,9 @@ async function logout(){
   localStorage.removeItem("room10Role");
   localStorage.removeItem("room10MemberId");
   localStorage.removeItem("room10MemberCode");
+  localStorage.removeItem("room10_user");
+  localStorage.removeItem("room10_current_user");
+  localStorage.removeItem("currentUser");
   clearApplicantSession();
   currentApplicationRecord = null;
   applicationResultWrap.classList.add("hidden");
@@ -1953,6 +2246,29 @@ quickPasswordInput.addEventListener("keydown", (e) => {
 applyNicknameInput.addEventListener("input", saveApplicationDraft);
 applyQQInput.addEventListener("input", saveApplicationDraft);
 
+if(siteNoticeBtn){
+  siteNoticeBtn.addEventListener("click", event => {
+    event.stopPropagation();
+    toggleSiteNoticePanel();
+  });
+}
+
+if(loginOpenBtn){
+  loginOpenBtn.addEventListener("click", event => {
+    event.stopPropagation();
+    openLogin();
+  });
+}
+
+document.addEventListener("click", event => {
+  if(siteNoticePanel && siteNoticeBtn){
+    if(siteNoticePanel.contains(event.target) || siteNoticeBtn.contains(event.target)) return;
+    closeSiteNoticePanel();
+  }
+});
+
+renderSiteNoticeList([]);
+
 document.addEventListener("DOMContentLoaded", async () => {
   loadApplicationDraft();
   await updateIdentityUI();
@@ -1980,6 +2296,21 @@ if(document.fonts?.ready){
     fitRoomNavToBar();
   });
 }
+
+window.addEventListener("storage", async (event) => {
+  if(
+    event.key === "room10LoggedIn" ||
+    event.key === "room10User" ||
+    event.key === "room10Role" ||
+    event.key === "room10MemberId" ||
+    event.key === "room10MemberCode" ||
+    event.key === "room10_user" ||
+    event.key === "room10_current_user" ||
+    event.key === "currentUser"
+  ){
+    await updateIdentityUI();
+  }
+});
 
 </script>
 </body>
