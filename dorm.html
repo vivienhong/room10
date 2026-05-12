@@ -210,7 +210,6 @@ button{
 
 #siteNoticeBtn{
   appearance:none;
-  border:none;
   cursor:pointer;
   position:relative;
   width:100%;
@@ -343,7 +342,7 @@ button{
 
 #navOuter,
 #navScroll{
-  overflow:visible !important;
+  overflow:visible;
 }
 
 #navOuter{
@@ -356,8 +355,8 @@ button{
 #navScroll{
   width:100%;
   white-space:nowrap;
-  padding:0 !important;
-  margin:0 !important;
+  padding:0;
+  margin:0;
 }
 
 #roomNav{
@@ -1109,11 +1108,11 @@ button{
   }
 
   #overlay{
-    position:relative !important;
-    left:auto !important;
-    top:auto !important;
-    width:100% !important;
-    height:auto !important;
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    height:auto;
     display:flex;
     flex-direction:column;
     gap:10px;
@@ -1195,7 +1194,7 @@ button{
     display:grid;
     grid-template-columns:repeat(2, minmax(0, 1fr));
     gap:7px;
-    transform:none !important;
+    transform:none;
   }
 
   .navBtn{
@@ -1335,8 +1334,8 @@ button{
             <button class="navBtn" data-room="game" type="button" onclick="enterRoom('game.html', false)">
               <span class="navLabel">游戏房</span>
               <span class="navEffect navEffectA">🎮</span>
-              <span class="navEffect navEffectB">◆</span>
-              <span class="navEffect navEffectC">🕹</span>
+              <span class="navEffect navEffectB">🎲</span>
+              <span class="navEffect navEffectC">👾</span>
             </button>
 
             <button class="navBtn" data-room="studio" type="button" onclick="enterRoom('studio-todo.html', true)">
@@ -1538,8 +1537,26 @@ function isTinyScreen(){
 /* =========================================================
    底图贴合坐标系统
 ========================================================= */
+function clearDesktopOverlayStyles(){
+  if(!overlay) return;
+
+  overlay.style.left = "";
+  overlay.style.top = "";
+  overlay.style.width = "";
+  overlay.style.height = "";
+  root.style.setProperty("--bg-ui-scale","1");
+
+  if(roomNav){
+    roomNav.style.transform = "";
+  }
+}
+
 function syncOverlayToImage(){
-  if(isTinyScreen()) return;
+  if(isTinyScreen()){
+    clearDesktopOverlayStyles();
+    return;
+  }
+
   if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
 
   const frame = bgFrame.getBoundingClientRect();
@@ -1929,6 +1946,13 @@ document.addEventListener("DOMContentLoaded", () => {
     siteNoticeBtn.addEventListener("click", event => {
       event.stopPropagation();
       toggleNoticePanel();
+    });
+  }
+
+  if(loginOpenBtn){
+    loginOpenBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      window.location.href = "index.html";
     });
   }
 
