@@ -865,6 +865,30 @@ button{
   font-weight:800;
 }
 
+.walletLedgerBlock{
+  margin-top:18px;
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding-top:16px;
+  border-top:1px dashed rgba(170,117,62,.24);
+}
+
+.walletLedgerHead{
+  flex:0 0 auto;
+}
+
+.walletLedgerHead .sectionTitle{
+  margin-bottom:6px;
+  font-size:22px;
+}
+
+.walletLedgerHead .sectionDesc{
+  margin-bottom:0;
+}
+
 .ledgerList{
   display:flex;
   flex-direction:column;
@@ -873,6 +897,83 @@ button{
   min-height:0;
   overflow:auto;
   padding-right:4px;
+}
+
+.noticeCenter{
+  flex:1;
+  min-height:0;
+  overflow:auto;
+  padding-right:4px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.noticeRoomGroup{
+  border-radius:18px;
+  background:rgba(255,252,247,.62);
+  border:1px solid rgba(255,255,255,.58);
+  overflow:hidden;
+}
+
+.noticeRoomHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 14px;
+  color:#744b25;
+  font-size:14px;
+  font-weight:900;
+  background:rgba(255,246,231,.68);
+  border-bottom:1px dashed rgba(170,117,62,.18);
+}
+
+.noticeRoomCount{
+  flex:0 0 auto;
+  min-width:24px;
+  height:22px;
+  padding:0 8px;
+  border-radius:999px;
+  background:rgba(201,140,79,.16);
+  color:#9b6422;
+  font-size:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.noticeRoomBody{
+  padding:11px 14px 13px;
+}
+
+.noticeRoomEmpty{
+  color:#92745a;
+  font-size:12px;
+  line-height:1.6;
+}
+
+.noticeRoomItem{
+  padding:9px 0;
+  border-bottom:1px dashed rgba(170,117,62,.16);
+}
+
+.noticeRoomItem:last-child{
+  border-bottom:none;
+}
+
+.noticeRoomItemTitle{
+  color:#6f4726;
+  font-size:13px;
+  font-weight:900;
+  line-height:1.45;
+}
+
+.noticeRoomItemDesc{
+  margin-top:3px;
+  color:#8a6644;
+  font-size:12px;
+  line-height:1.55;
 }
 
 .ledgerItem{
@@ -1129,7 +1230,7 @@ button{
     width:100%;
     height:40px;
     z-index:30;
-    order:0;
+    order:1;
   }
 
   #topIdentityBar{
@@ -1165,11 +1266,11 @@ button{
   }
 
   #siteNoticePanel{
-    position:fixed;
-    top:58px;
-    right:10px;
-    left:10px;
-    width:auto;
+    position:absolute;
+    top:calc(100% + 8px);
+    right:0;
+    left:auto;
+    width:min(320px, calc(100vw - 24px));
     max-height:60dvh;
     z-index:999;
   }
@@ -1179,7 +1280,7 @@ button{
     left:auto;
     top:auto;
     width:100%;
-    order:1;
+    order:0;
     z-index:20;
 
     --nav-btn-height:34px;
@@ -1225,23 +1326,30 @@ button{
   }
 
   #sidePanel{
-    flex-direction:row;
-    overflow-x:auto;
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:8px;
+    overflow:visible;
     padding:10px;
     border-radius:22px;
   }
 
   .sideBtn{
-    flex:0 0 auto;
-    width:auto;
+    flex:none;
+    width:100%;
+    min-width:0;
     min-height:38px;
-    padding:0 13px;
+    padding:0 10px;
     font-size:12px;
+    justify-content:center;
+    text-align:center;
   }
+
 
   .sideIcon{
     display:block;
     width:auto;
+    flex:0 0 auto;
   }
 
   #mascotBox{display:none;}
@@ -1266,6 +1374,38 @@ button{
   .goldStats{grid-template-columns:1fr;}
 
   .placeholderGrid{grid-template-columns:1fr;}
+
+  #mainPanel{
+    overflow:visible;
+  }
+
+  .view{
+    height:auto;
+  }
+
+  .walletLedgerBlock{
+    margin-top:16px;
+    padding-top:14px;
+  }
+
+  .ledgerList,
+  .noticeCenter{
+    overflow:visible;
+    padding-right:0;
+  }
+
+  .walletLedgerHead .sectionTitle{
+    font-size:20px;
+  }
+
+  .noticeRoomHeader{
+    padding:10px 12px;
+    font-size:13px;
+  }
+
+  .noticeRoomBody{
+    padding:10px 12px 12px;
+  }
 
   #tipPanel{display:none;}
 }
@@ -1372,8 +1512,7 @@ button{
 
     <main id="dormShell">
       <aside id="sidePanel" class="glassPanel">
-        <button class="sideBtn active" data-view="wallet"><span class="sideIcon">🏠</span>我的钱包</button>
-        <button class="sideBtn" data-view="ledger"><span class="sideIcon">📋</span>金币记录</button>
+        <button class="sideBtn active" data-view="wallet"><span class="sideIcon">🏠</span>钱包记录</button>
         <button class="sideBtn" data-view="tasks"><span class="sideIcon">⭐</span>任务中心</button>
         <button class="sideBtn" data-view="badges"><span class="sideIcon">🏆</span>成就徽章</button>
         <button class="sideBtn" data-view="notice"><span class="sideIcon">💌</span>系统通知</button>
@@ -1389,8 +1528,8 @@ button{
           <div class="walletHeader">
             <div class="walletIcon" aria-hidden="true"></div>
             <div>
-              <h1 class="walletTitle" id="walletTitle">我的钱包</h1>
-              <p class="walletSub" id="goldSub">正在读取金币信息……</p>
+              <h1 class="walletTitle" id="walletTitle">钱包记录</h1>
+              <p class="walletSub" id="goldSub">正在读取金币与收支记录……</p>
             </div>
           </div>
 
@@ -1414,13 +1553,15 @@ button{
               <div class="statValue todayValue none" id="todayGold">0</div>
             </div>
           </div>
-        </div>
 
-        <div class="view" id="view-ledger">
-          <h2 class="sectionTitle">金币记录</h2>
-          <p class="sectionDesc">最近 30 条金币收入与支出。</p>
-          <div class="ledgerList" id="ledgerList">
-            <div class="emptyText">正在读取金币记录……</div>
+          <div class="walletLedgerBlock">
+            <div class="walletLedgerHead">
+              <h2 class="sectionTitle">金币记录</h2>
+              <p class="sectionDesc">最近 30 条金币收入与支出。</p>
+            </div>
+            <div class="ledgerList" id="ledgerList">
+              <div class="emptyText">正在读取金币记录……</div>
+            </div>
           </div>
         </div>
 
@@ -1446,10 +1587,9 @@ button{
 
         <div class="view" id="view-notice">
           <h2 class="sectionTitle">系统通知</h2>
-          <p class="sectionDesc">这里之后可以接入右上角铃铛提醒。</p>
-          <div class="placeholderCard">
-            <h3>暂无通知</h3>
-            <p>当前页面先保留通知入口，后续统一接入全站提醒。</p>
+          <p class="sectionDesc">这里集中显示全站通知，并按照房间分类查看。</p>
+          <div class="noticeCenter" id="dormNoticeCenter">
+            <div class="emptyText">正在整理全站通知……</div>
           </div>
         </div>
       </section>
@@ -1528,6 +1668,17 @@ const mascotLines = [
   { text:"休息一下也可以", style:"soft" },
   { text:"慢慢来不着急", style:"calm" },
   { text:"一起加油呀", style:"cheer" }
+];
+
+const roomNoticeGroups = [
+  { key:"studio", label:"工作间", icon:"🎙" },
+  { key:"manager", label:"宿管室", icon:"✎" },
+  { key:"honor", label:"荣誉墙", icon:"🏆" },
+  { key:"game", label:"游戏房", icon:"🎮" },
+  { key:"living", label:"客厅", icon:"☕" },
+  { key:"dorm", label:"宿舍", icon:"🏠" },
+  { key:"pets", label:"宠物区", icon:"🐾" },
+  { key:"flower", label:"花房区", icon:"✿" }
 ];
 
 function isTinyScreen(){
@@ -1782,6 +1933,44 @@ function renderNoticeList(items){
   setNoticeCount(list.length);
 }
 
+function renderDormNoticeCenter(items){
+  const wrap = document.getElementById("dormNoticeCenter");
+  if(!wrap) return;
+
+  const list = Array.isArray(items) ? items : [];
+  const byRoom = new Map();
+
+  roomNoticeGroups.forEach(room => byRoom.set(room.key, []));
+
+  list.forEach(item => {
+    const key = String(item.room || item.roomKey || item.category || "dorm").toLowerCase();
+    const targetKey = byRoom.has(key) ? key : "dorm";
+    byRoom.get(targetKey).push(item);
+  });
+
+  wrap.innerHTML = roomNoticeGroups.map(room => {
+    const roomItems = byRoom.get(room.key) || [];
+    const body = roomItems.length
+      ? roomItems.map(item => `
+        <div class="noticeRoomItem">
+          <div class="noticeRoomItemTitle">${escapeHtml(item.title || "通知")}</div>
+          <div class="noticeRoomItemDesc">${escapeHtml(item.desc || item.description || "")}</div>
+        </div>
+      `).join("")
+      : '<div class="noticeRoomEmpty">暂无通知。</div>';
+
+    return `
+      <section class="noticeRoomGroup" data-room="${escapeHtml(room.key)}">
+        <div class="noticeRoomHeader">
+          <span>${escapeHtml(room.icon)} ${escapeHtml(room.label)}</span>
+          <span class="noticeRoomCount">${roomItems.length}</span>
+        </div>
+        <div class="noticeRoomBody">${body}</div>
+      </section>
+    `;
+  }).join("");
+}
+
 function toggleNoticePanel(){
   siteNoticePanel.classList.toggle("show");
 }
@@ -1818,7 +2007,7 @@ async function loadGoldInfo(){
     member = await fetchCurrentMember();
   }catch(error){
     console.error(error);
-    setText("walletTitle",`${authState.nickname || "成员"}的钱包`);
+    setText("walletTitle",`${authState.nickname || "成员"}的钱包记录`);
     setText("goldSub","金币信息读取失败，请检查 members 表读取权限。");
     setLedgerMessage("金币记录读取失败，请检查 gold_ledger 表读取权限。",true);
     return;
@@ -1836,8 +2025,8 @@ async function loadGoldInfo(){
 
   updateIdentity(member);
 
-  setText("walletTitle",`${member.nickname || "成员"}的钱包`);
-  setText("goldSub","金币是你在十号房的努力与收获");
+  setText("walletTitle",`${member.nickname || "成员"}的钱包记录`);
+  setText("goldSub","金币余额与最近收支记录集中显示");
   setText("goldBalance",member.gold_balance ?? 0);
   setText("goldEarned",member.gold_total_earned ?? 0);
   setText("goldSpent",member.gold_total_spent ?? 0);
@@ -1940,6 +2129,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindSideTabs();
   loadGoldInfo();
   renderNoticeList([]);
+  renderDormNoticeCenter([]);
   setMascotBubbleOnce();
 
   if(siteNoticeBtn){
