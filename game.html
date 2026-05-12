@@ -236,6 +236,9 @@ button{
   max-width:22em;
 }
 
+/* =========================================================
+   身份组件：全站统一结构
+========================================================= */
 #topActions{
   position:absolute;
   right:var(--identity-right);
@@ -452,6 +455,9 @@ button{
   line-height:1.55;
 }
 
+/* =========================================================
+   房间切换按钮：游戏房页不显示“游戏房”按钮
+========================================================= */
 #topBar{
   position:absolute;
   left:var(--room-nav-left);
@@ -473,7 +479,7 @@ button{
 
 #navOuter,
 #navScroll{
-  overflow:visible;
+  overflow:visible !important;
 }
 
 #navOuter{
@@ -486,8 +492,8 @@ button{
 #navScroll{
   width:100%;
   white-space:nowrap;
-  padding:0;
-  margin:0;
+  padding:0 !important;
+  margin:0 !important;
 }
 
 #roomNav{
@@ -624,6 +630,7 @@ button{
   animation:navFloatC 2.35s ease-in-out infinite;
 }
 
+/* 各房间特效颜色 */
 .navBtn[data-room="hall"] .navEffect{
   color:rgba(255,205,96,.86);
   text-shadow:
@@ -662,6 +669,9 @@ button{
   color:rgba(198,119,145,.82);
 }
 
+/* =========================================================
+   登录弹窗：引用首页登录框
+========================================================= */
 .login-mask,
 .game-modal-mask{
   position:fixed;
@@ -814,23 +824,19 @@ button{
 
 .game-modal-close{
   position:absolute;
-  top:16px;
-  right:18px;
+  top:clamp(8px, 1.35vw, 16px);
+  right:clamp(9px, 1.5vw, 18px);
   z-index:2;
-  min-width:74px;
-  height:34px;
+  min-width:clamp(46px, 6.3vw, 74px);
+  height:clamp(24px, 3.2vw, 34px);
   border:none;
-  border-radius:12px;
+  border-radius:clamp(8px, 1.05vw, 12px);
   background:linear-gradient(180deg, #efd5ab 0%, #dfbd8a 100%);
   color:#6a4120;
-  font-size:13px;
+  font-size:clamp(10px, 1.15vw, 13px);
   font-weight:800;
   cursor:pointer;
   box-shadow:inset 0 1px 0 rgba(255,247,230,0.95), 0 4px 12px rgba(112,83,52,0.10);
-}
-
-.game-modal-close:hover{
-  filter:brightness(1.02);
 }
 
 #gameModalFrame{
@@ -838,24 +844,6 @@ button{
   height:100%;
   border:none;
   background:#fffaf4;
-}
-
-.game-modal-box.loading::after{
-  content:"游戏加载中……";
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  z-index:1;
-  padding:10px 16px;
-  border-radius:999px;
-  color:#7a5030;
-  font-size:13px;
-  font-weight:800;
-  background:rgba(255,250,243,0.88);
-  border:1px solid rgba(203,167,123,0.28);
-  box-shadow:0 8px 22px rgba(85,58,34,0.10);
-  pointer-events:none;
 }
 
 .fallback-tip{
@@ -1080,15 +1068,6 @@ button{
     height:86vh;
     border-radius:18px;
   }
-
-  .game-modal-close{
-    top:10px;
-    right:10px;
-    min-width:60px;
-    height:32px;
-    font-size:12px;
-  }
-
 
   .login-panel{width:95vw;}
 
@@ -1343,8 +1322,8 @@ button{
 
 <div id="gameModalMask" class="game-modal-mask hidden" aria-hidden="true">
   <div class="game-modal-box" role="dialog" aria-modal="true" aria-label="脸萌挑战">
-    <button class="game-modal-close" type="button" onclick="closeGameModal('manual')">关闭</button>
-    <iframe id="gameModalFrame" title="脸萌挑战" src="about:blank" allow="fullscreen; clipboard-read; clipboard-write"></iframe>
+    <button class="game-modal-close" type="button" onclick="closeGameModal()">关闭</button>
+    <iframe id="gameModalFrame" title="脸萌挑战"></iframe>
   </div>
 </div>
 
@@ -1382,25 +1361,8 @@ function isTinyScreen(){
   return window.innerWidth <= 540;
 }
 
-function clearDesktopOverlayStyles(){
-  if(!overlay) return;
-
-  overlay.style.left = "";
-  overlay.style.top = "";
-  overlay.style.width = "";
-  overlay.style.height = "";
-  root.style.setProperty("--bg-ui-scale", "1");
-
-  if(roomNav){
-    roomNav.style.transform = "";
-  }
-}
-
 function syncOverlayToImage(){
-  if(isTinyScreen()){
-    clearDesktopOverlayStyles();
-    return;
-  }
+  if(isTinyScreen()) return;
   if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
 
   const frame = bgFrame.getBoundingClientRect();
@@ -1675,12 +1637,6 @@ async function submitLogin(){
   }
 }
 
-let gameModalOpenToken = 0;
-
-function getGameModalBox(){
-  return gameModalMask.querySelector(".game-modal-box");
-}
-
 function normalizeGameUrl(url){
   const safeUrl = String(url || "").trim();
   return safeUrl && !/^(javascript|data):/i.test(safeUrl) ? safeUrl : "";
@@ -1691,29 +1647,30 @@ function openGameModal(url){
   if(!safeUrl) return;
 
   closeSiteNoticePanel();
-  gameModalOpenToken += 1;
 
-  const modalBox = getGameModalBox();
+  if(isTinyScreen()){
+    window.location.href = safeUrl;
+    return;
+  }
+
+  const currentUrl = gameModalFrame.getAttribute("data-current-src") || "";
+  const modalAlreadyOpen = !gameModalMask.classList.contains("hidden");
+
+  if(modalAlreadyOpen && currentUrl === safeUrl){
+    return;
+  }
 
   gameModalFrame.setAttribute("data-current-src", safeUrl);
+  gameModalFrame.src = safeUrl;
   gameModalMask.classList.remove("hidden");
   gameModalMask.setAttribute("aria-hidden", "false");
-  if(modalBox) modalBox.classList.add("loading");
-
-  gameModalFrame.src = safeUrl;
 }
 
-function closeGameModal(reason = ""){
-  if(reason !== "manual" && reason !== "escape") return;
-
-  gameModalOpenToken += 1;
+function closeGameModal(){
   gameModalMask.classList.add("hidden");
   gameModalMask.setAttribute("aria-hidden", "true");
   gameModalFrame.removeAttribute("data-current-src");
   gameModalFrame.src = "about:blank";
-
-  const modalBox = getGameModalBox();
-  if(modalBox) modalBox.classList.remove("loading");
 }
 
 function getGameNoticeItems(){
@@ -1883,20 +1840,9 @@ gameModalMask.addEventListener("click", (e) => {
   }
 });
 
-gameModalFrame.addEventListener("load", () => {
-  const modalBox = getGameModalBox();
-  if(modalBox) modalBox.classList.remove("loading");
-});
-
-gameModalFrame.addEventListener("error", () => {
-  const modalBox = getGameModalBox();
-  if(modalBox) modalBox.classList.remove("loading");
-  showTip("游戏没有正常加载，请关闭后重新打开。");
-});
-
 document.addEventListener("keydown", (e) => {
   if(e.key === "Escape" && !gameModalMask.classList.contains("hidden")){
-    closeGameModal("escape");
+    closeGameModal();
   }
 });
 
