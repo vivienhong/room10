@@ -829,24 +829,6 @@ button{
   box-shadow:inset 0 1px 0 rgba(255,247,230,0.95), 0 4px 12px rgba(112,83,52,0.10);
 }
 
-.game-modal-open-page{
-  position:absolute;
-  top:16px;
-  right:100px;
-  z-index:2;
-  min-width:96px;
-  height:34px;
-  border:none;
-  border-radius:12px;
-  background:rgba(255,250,243,0.88);
-  color:#6a4120;
-  font-size:13px;
-  font-weight:800;
-  cursor:pointer;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.95), 0 4px 12px rgba(112,83,52,0.08);
-}
-
-.game-modal-open-page:hover,
 .game-modal-close:hover{
   filter:brightness(1.02);
 }
@@ -1107,13 +1089,6 @@ button{
     font-size:12px;
   }
 
-  .game-modal-open-page{
-    top:10px;
-    right:78px;
-    min-width:86px;
-    height:32px;
-    font-size:12px;
-  }
 
   .login-panel{width:95vw;}
 
@@ -1368,7 +1343,6 @@ button{
 
 <div id="gameModalMask" class="game-modal-mask hidden" aria-hidden="true">
   <div class="game-modal-box" role="dialog" aria-modal="true" aria-label="脸萌挑战">
-    <button class="game-modal-open-page" type="button" onclick="openGamePage()">完整页</button>
     <button class="game-modal-close" type="button" onclick="closeGameModal('manual')">关闭</button>
     <iframe id="gameModalFrame" title="脸萌挑战" src="about:blank" allow="fullscreen; clipboard-read; clipboard-write"></iframe>
   </div>
@@ -1742,13 +1716,6 @@ function closeGameModal(reason = ""){
   if(modalBox) modalBox.classList.remove("loading");
 }
 
-function openGamePage(){
-  const currentUrl = gameModalFrame.getAttribute("data-current-src") || "game-name.html";
-  const safeUrl = normalizeGameUrl(currentUrl);
-  if(!safeUrl) return;
-  window.location.href = safeUrl;
-}
-
 function getGameNoticeItems(){
   try{
     const raw = localStorage.getItem("room10GameRecordNotices");
@@ -1924,7 +1891,7 @@ gameModalFrame.addEventListener("load", () => {
 gameModalFrame.addEventListener("error", () => {
   const modalBox = getGameModalBox();
   if(modalBox) modalBox.classList.remove("loading");
-  showTip("游戏没有正常加载，可以点“完整页”打开。");
+  showTip("游戏没有正常加载，请关闭后重新打开。");
 });
 
 document.addEventListener("keydown", (e) => {
