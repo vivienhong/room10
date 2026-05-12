@@ -351,7 +351,7 @@ button{
 
 #navOuter,
 #navScroll{
-  overflow:visible !important;
+  overflow:visible;
 }
 
 #navOuter{
@@ -364,8 +364,8 @@ button{
 #navScroll{
   width:100%;
   white-space:nowrap;
-  padding:0 !important;
-  margin:0 !important;
+  padding:0;
+  margin:0;
 }
 
 #roomNav{
@@ -611,11 +611,11 @@ button{
   }
 
   #overlay{
-    position:relative !important;
-    left:auto !important;
-    top:auto !important;
-    width:100% !important;
-    height:auto !important;
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    height:auto;
     display:flex;
     flex-direction:column;
     gap:10px;
@@ -631,7 +631,7 @@ button{
     width:100%;
     height:40px;
     z-index:30;
-    order:0;
+    order:1;
   }
 
   #topIdentityBar{
@@ -667,11 +667,11 @@ button{
   }
 
   #siteNoticePanel{
-    position:fixed;
-    top:58px;
-    right:10px;
-    left:10px;
-    width:auto;
+    position:absolute;
+    top:calc(100% + 8px);
+    right:calc(-48px);
+    left:auto;
+    width:min(320px, calc(100vw - 24px));
     max-height:60dvh;
     z-index:999;
   }
@@ -681,7 +681,7 @@ button{
     left:auto;
     top:auto;
     width:100%;
-    order:1;
+    order:0;
     z-index:20;
 
     --nav-btn-height:34px;
@@ -696,7 +696,7 @@ button{
     display:grid;
     grid-template-columns:repeat(2, minmax(0, 1fr));
     gap:7px;
-    transform:none !important;
+    transform:none;
   }
 
   .navBtn{
@@ -797,8 +797,8 @@ button{
             <button class="navBtn" data-room="game" type="button" onclick="enterRoom('game.html', false)">
               <span class="navLabel">游戏房</span>
               <span class="navEffect navEffectA">🎮</span>
-              <span class="navEffect navEffectB">◆</span>
-              <span class="navEffect navEffectC">🕹</span>
+              <span class="navEffect navEffectB">🎲</span>
+              <span class="navEffect navEffectC">👾</span>
             </button>
 
             <button class="navBtn" data-room="studio" type="button" onclick="enterRoom('studio-todo.html', true)">
@@ -864,11 +864,23 @@ function isTinyScreen(){
   return window.innerWidth <= 540;
 }
 
+function clearDesktopOverlayStyles(){
+  if(!overlay) return;
+  overlay.style.left = "";
+  overlay.style.top = "";
+  overlay.style.width = "";
+  overlay.style.height = "";
+  if(roomNav) roomNav.style.transform = "";
+}
+
 /* =========================================================
    底图贴合坐标系统
 ========================================================= */
 function syncOverlayToImage(){
-  if(isTinyScreen()) return;
+  if(isTinyScreen()){
+    clearDesktopOverlayStyles();
+    return;
+  }
   if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
 
   const frame = bgFrame.getBoundingClientRect();
@@ -907,7 +919,12 @@ function syncOverlayToImage(){
    房间按钮自动缩放，防止散开 / 溢出
 ========================================================= */
 function fitRoomNavToBar(){
-  if(!roomNav || !topBar || isTinyScreen()) return;
+  if(!roomNav || !topBar) return;
+
+  if(isTinyScreen()){
+    roomNav.style.transform = "";
+    return;
+  }
 
   roomNav.style.transform = "scale(1)";
 
@@ -1006,17 +1023,27 @@ function logout(){
 
   updateIdentityUI();
   renderNoticeList([]);
+  handleResponsiveLayout();
   window.dispatchEvent(new CustomEvent("room10:logout"));
 }
 
 function openLogin(targetPage = ""){
-  window.dispatchEvent(new CustomEvent("room10:open-login", {
-    detail:{ targetPage }
-  }));
+  const detail = { targetPage };
+  const event = new CustomEvent("room10:open-login", {
+    detail,
+    cancelable:true
+  });
 
-  if(!targetPage){
-    alert("请从大堂登录，或接入全站登录弹窗后这里会自动打开登录框。");
+  const handled = !window.dispatchEvent(event);
+  if(handled) return;
+
+  if(targetPage){
+    localStorage.setItem("room10PendingTargetPage", targetPage);
   }
+
+  window.location.href = targetPage
+    ? `index.html?login=1&target=${encodeURIComponent(targetPage)}`
+    : "index.html?login=1";
 }
 
 /* =========================================================
@@ -1107,6 +1134,14 @@ function closeNoticePanel(){
   siteNoticePanel.classList.remove("show");
 }
 
+function handleResponsiveLayout(){
+  if(isTinyScreen()){
+    clearDesktopOverlayStyles();
+    return;
+  }
+  syncOverlayToImage();
+}
+
 /* =========================================================
    初始化
 ========================================================= */
@@ -1143,7 +1178,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-window.addEventListener("resize", syncOverlayToImage);
+window.addEventListener("resize", handleResponsiveLayout);
 
 window.addEventListener("storage", event => {
   if(
@@ -1160,12 +1195,12 @@ window.addEventListener("storage", event => {
 });
 
 if(img && img.complete && img.naturalWidth){
-  syncOverlayToImage();
+  handleResponsiveLayout();
 }else if(img){
-  img.addEventListener("load", syncOverlayToImage, { once:true });
+  img.addEventListener("load", handleResponsiveLayout, { once:true });
 }
 
-setTimeout(syncOverlayToImage, 80);
+setTimeout(handleResponsiveLayout, 80);
 </script>
 </body>
 </html>
