@@ -217,6 +217,9 @@ body{
   min-height:0;
   overflow:auto;
   padding-right:2px;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
 }
 
 #nameListWrap::-webkit-scrollbar{
@@ -258,7 +261,7 @@ body{
     opacity .15s ease,
     background .15s ease,
     border-color .15s ease;
-  touch-action:none;
+  touch-action:manipulation;
 }
 
 .nameCard:hover{
@@ -938,14 +941,16 @@ body.stack-layout .nameCard{
   font-size:9.5px;
   min-height:30px;
   padding:5px 3px;
-  white-space:normal;
-  overflow:visible;
-  text-overflow:clip;
-  word-break:break-all;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  word-break:normal;
   display:flex;
   align-items:center;
   justify-content:center;
   line-height:1.15;
+  cursor:pointer;
+  touch-action:pan-y;
 }
 
 body.stack-layout #infoBox{
@@ -985,12 +990,14 @@ body.stack-layout .ctrlBtn{
   }
 
   body.stack-layout #nameList{
-    grid-template-columns:repeat(2, minmax(0, 1fr));
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:5px;
   }
 
   body.stack-layout .nameCard{
     font-size:9px;
     min-height:28px;
+    padding:4px 3px;
   }
 
   body.stack-layout #gameTitle{
@@ -1019,6 +1026,18 @@ body.stack-layout .ctrlBtn{
   body.stack-layout .ctrlBtn{
     font-size:9px;
     height:28px;
+  }
+}
+
+@media (max-width:420px){
+  body.stack-layout #nameList{
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+  }
+
+  body.stack-layout .nameCard{
+    font-size:8.5px;
+    min-height:26px;
+    padding:4px 2px;
   }
 }
 
