@@ -101,6 +101,8 @@ button{cursor:pointer;}
   display:flex;
   align-items:center;
   justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
 .soft-btn{
@@ -120,6 +122,20 @@ button{cursor:pointer;}
 .soft-btn.primary{background:linear-gradient(180deg, #f6d69c, #e7b96f); color:#663c1f;}
 .soft-btn:disabled{cursor:not-allowed; opacity:.58; transform:none;}
 
+.form-btn{
+  width:78px;
+  height:40px;
+  min-height:40px;
+  padding:0;
+  border-radius:14px;
+  flex:0 0 78px;
+  white-space:nowrap;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+}
+
 .game-stack{
   position:relative;
   z-index:1;
@@ -132,9 +148,9 @@ button{cursor:pointer;}
 
 .card{
   border-radius:24px;
-  background:rgba(255,250,243,.76);
-  border:1px solid rgba(255,255,255,.82);
-  box-shadow:0 10px 26px rgba(113,78,43,.10), inset 0 1px 0 rgba(255,255,255,.95);
+  background:rgba(255,250,243,.46);
+  border:1px solid rgba(255,255,255,.56);
+  box-shadow:0 10px 24px rgba(113,78,43,.08);
   backdrop-filter:blur(10px);
   -webkit-backdrop-filter:blur(10px);
 }
@@ -147,15 +163,9 @@ button{cursor:pointer;}
   grid-template-rows:auto auto minmax(0,1fr);
   gap:10px;
   overflow:hidden;
-}
-
-.play-card::before{
-  content:"";
-  position:absolute;
-  inset:12px;
-  border-radius:20px;
-  border:1px dashed rgba(187,135,83,.17);
-  pointer-events:none;
+  background:rgba(255,250,243,.34);
+  border-color:rgba(255,255,255,.46);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.58);
 }
 
 .game-no,
@@ -192,8 +202,8 @@ button{cursor:pointer;}
   z-index:1;
   border-radius:16px;
   padding:9px 13px;
-  background:rgba(255,248,236,.74);
-  border:1px solid rgba(255,255,255,.78);
+  background:rgba(255,248,236,.64);
+  border:1px solid rgba(255,255,255,.54);
   color:#8b6240;
   font-size:14px;
   line-height:1.45;
@@ -219,9 +229,19 @@ button{cursor:pointer;}
   align-items:center;
   padding:14px;
   border-radius:20px;
-  background:rgba(255,255,255,.30);
-  border:1px solid rgba(173,128,82,.18);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.72);
+  background:rgba(255,255,255,.18);
+}
+
+.control-zone{
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:10px;
+  width:100%;
+  padding:14px;
+  border-radius:20px;
+  background:rgba(255,255,255,.18);
 }
 
 .bomb-art-wrap{
@@ -281,35 +301,19 @@ button{cursor:pointer;}
   align-items:center;
   justify-content:center;
   gap:14px;
-  background:rgba(255,255,255,.64);
-  border:1px solid rgba(255,255,255,.86);
-  box-shadow:0 4px 12px rgba(126,86,48,.08), inset 0 1px 0 rgba(255,255,255,.86);
+  background:rgba(255,255,255,.48);
+  box-shadow:0 4px 12px rgba(126,86,48,.06);
   overflow:visible;
 }
 .range-label{color:#9a704b; font-size:13px; font-weight:950; white-space:nowrap; margin:0;}
 .range-value{color:#633916; font-size:clamp(32px, 5vw, 52px); font-weight:950; line-height:1; letter-spacing:.02em; white-space:nowrap;}
-
-.control-zone{
-  min-height:0;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:10px;
-  width:100%;
-  padding:14px;
-  border-radius:20px;
-  background:rgba(255,255,255,.30);
-  border:1px solid rgba(173,128,82,.18);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.72);
-}
 
 .meta-row{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px;}
 .meta-pill{
   min-height:50px;
   padding:7px;
   border-radius:16px;
-  background:rgba(255,255,255,.50);
-  border:1px solid rgba(255,255,255,.76);
+  background:rgba(255,255,255,.38);
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -322,8 +326,8 @@ button{cursor:pointer;}
 .action-panel{
   border-radius:20px;
   padding:13px;
-  background:rgba(255,255,255,.46);
-  border:1px solid rgba(255,255,255,.76);
+  background:rgba(255,255,255,.42);
+  border:1px solid rgba(255,255,255,.48);
 }
 .slider-top{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;}
 .chosen-number{color:#623917; font-size:32px; font-weight:950; line-height:1;}
@@ -344,6 +348,7 @@ button{cursor:pointer;}
 .big-action.secondary{background:linear-gradient(180deg, #f7ede0, #ecd5bb);}
 .big-action.danger{background:linear-gradient(180deg, #efb891, #dd8d62); color:#5d2d1b;}
 .big-action:disabled{cursor:not-allowed; opacity:.55; transform:none;}
+
 .final-number{
   display:flex;
   align-items:center;
@@ -360,22 +365,57 @@ button{cursor:pointer;}
   position:relative;
   z-index:1;
   display:grid;
-  grid-template-columns:1fr auto;
+  grid-template-columns:1fr;
   gap:10px;
-  align-items:end;
   padding:10px;
   border-radius:18px;
-  background:rgba(255,255,255,.40);
-  border:1px solid rgba(255,255,255,.72);
+  background:rgba(255,255,255,.34);
+  border:1px solid rgba(255,255,255,.48);
 }
-.field{display:flex; flex-direction:column; gap:5px; text-align:left;}
+
+.simple-login-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) 78px;
+  gap:8px;
+  align-items:end;
+}
+
+.simple-guest-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 78px;
+  gap:8px;
+  align-items:end;
+}
+
+.password-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 78px;
+  gap:8px;
+  align-items:end;
+}
+
+.login-message{
+  min-height:18px;
+  color:#986744;
+  font-size:12px;
+  line-height:1.35;
+  font-weight:850;
+}
+
+.field{display:flex; flex-direction:column; gap:5px; text-align:left; min-width:0;}
 .field label{color:#8b6240; font-size:13px; font-weight:950;}
 .field input{
-  width:100%; height:40px; border:none; outline:none;
-  border-radius:14px; padding:0 13px;
-  color:#644021; background:rgba(255,255,255,.72);
+  width:100%;
+  height:40px;
+  border:none;
+  outline:none;
+  border-radius:14px;
+  padding:0 13px;
+  color:#644021;
+  background:rgba(255,255,255,.72);
   border:1px solid rgba(177,130,82,.18);
-  font-size:15px; font-weight:850;
+  font-size:15px;
+  font-weight:850;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
 }
 
@@ -385,14 +425,22 @@ button{cursor:pointer;}
   grid-template-columns:1fr 1fr;
   gap:12px;
 }
-.list-card{min-height:0; padding:14px; overflow:hidden; display:flex; flex-direction:column;}
+.list-card{
+  min-height:0;
+  padding:14px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  background:rgba(255,250,243,.42);
+  border-color:rgba(255,255,255,.46);
+}
 .section-title{margin:0; color:#704525; font-size:18px; font-weight:950; flex:0 0 auto;}
 .participants,.moves{display:flex; flex-direction:column; gap:7px; margin-top:10px; min-height:0; overflow:auto; padding-right:3px;}
 .person-item,.move-item{
   border-radius:14px;
   padding:8px 10px;
-  background:rgba(255,255,255,.52);
-  border:1px solid rgba(255,255,255,.68);
+  background:rgba(255,255,255,.46);
+  border:1px solid rgba(255,255,255,.50);
   color:#7a5536;
   font-size:13px;
   line-height:1.4;
@@ -418,6 +466,256 @@ button{cursor:pointer;}
   text-align:center;
 }
 
+.modal-layer{
+  position:fixed;
+  inset:0;
+  z-index:120;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(73,45,24,.34);
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+
+.modal-card{
+  position:relative;
+  width:min(720px, 100%);
+  max-height:min(82dvh, 720px);
+  border-radius:28px;
+  padding:20px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255,239,194,.65), transparent 34%),
+    linear-gradient(180deg, rgba(255,253,248,.98), rgba(255,245,232,.94));
+  border:1px solid rgba(255,255,255,.88);
+  box-shadow:
+    0 24px 70px rgba(74,48,26,.26),
+    inset 0 1px 0 rgba(255,255,255,.96);
+  overflow:hidden;
+}
+
+.modal-close{
+  position:absolute;
+  right:14px;
+  top:14px;
+  z-index:2;
+  width:34px;
+  height:34px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(173,128,82,.18);
+  color:#744727;
+  font-size:22px;
+  line-height:1;
+  font-weight:900;
+  box-shadow:0 6px 16px rgba(96,62,32,.12);
+}
+
+.modal-head{
+  position:relative;
+  z-index:1;
+  padding-right:42px;
+  margin-bottom:14px;
+}
+
+.modal-kicker{
+  display:inline-flex;
+  align-items:center;
+  min-height:26px;
+  padding:0 10px;
+  border-radius:999px;
+  background:rgba(232,181,107,.20);
+  border:1px solid rgba(181,132,78,.16);
+  color:#956434;
+  font-size:12px;
+  font-weight:950;
+}
+
+.modal-title{
+  margin:8px 0 0;
+  color:#673b1a;
+  font-size:clamp(26px, 4vw, 42px);
+  line-height:1.05;
+  font-weight:950;
+  letter-spacing:.04em;
+}
+
+.modal-subtitle{
+  margin:8px 0 0;
+  color:#8a6344;
+  font-size:14px;
+  line-height:1.55;
+  font-weight:850;
+}
+
+.history-list{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-height:52dvh;
+  overflow:auto;
+  padding:2px 4px 2px 0;
+}
+
+.history-item{
+  border-radius:18px;
+  padding:12px;
+  background:rgba(255,255,255,.58);
+  border:1px solid rgba(255,255,255,.78);
+  box-shadow:0 7px 16px rgba(111,75,41,.08), inset 0 1px 0 rgba(255,255,255,.88);
+}
+
+.history-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:8px;
+}
+
+.history-no{
+  color:#673f20;
+  font-size:16px;
+  font-weight:950;
+}
+
+.history-status{
+  flex:0 0 auto;
+  min-height:24px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 10px;
+  border-radius:999px;
+  background:rgba(235,161,103,.24);
+  color:#7a3b22;
+  font-size:12px;
+  font-weight:950;
+}
+
+.history-meta{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0,1fr));
+  gap:8px;
+}
+
+.history-mini{
+  min-width:0;
+  border-radius:13px;
+  padding:8px;
+  background:rgba(255,248,237,.66);
+  border:1px solid rgba(255,255,255,.68);
+}
+
+.history-mini strong{
+  display:block;
+  color:#694121;
+  font-size:14px;
+  line-height:1.2;
+  font-weight:950;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.history-mini span{
+  display:block;
+  margin-top:3px;
+  color:#a17957;
+  font-size:11px;
+  font-weight:900;
+}
+
+.ending-card{
+  width:min(640px, 100%);
+  text-align:center;
+}
+
+.ending-bomb{
+  position:relative;
+  z-index:1;
+  width:96px;
+  height:96px;
+  margin:0 auto 10px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle, rgba(255,236,162,.62), rgba(237,149,91,.23) 56%, transparent 72%);
+  font-size:58px;
+  filter:drop-shadow(0 10px 16px rgba(88,55,32,.14));
+  animation:endingPop .42s ease-out both;
+}
+
+@keyframes endingPop{
+  from{transform:scale(.76); opacity:0;}
+  to{transform:scale(1); opacity:1;}
+}
+
+.ending-text{
+  position:relative;
+  z-index:1;
+  margin:12px 0 0;
+  border-radius:20px;
+  padding:14px;
+  background:rgba(255,255,255,.54);
+  border:1px solid rgba(255,255,255,.78);
+  color:#7b5233;
+  font-size:15px;
+  line-height:1.65;
+  font-weight:900;
+}
+
+.ending-stats{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+
+.ending-stat{
+  min-width:0;
+  border-radius:18px;
+  padding:12px 8px;
+  background:rgba(255,248,237,.66);
+  border:1px solid rgba(255,255,255,.74);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.82);
+}
+
+.ending-stat strong{
+  display:block;
+  color:#623917;
+  font-size:24px;
+  line-height:1.1;
+  font-weight:950;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.ending-stat span{
+  display:block;
+  margin-top:5px;
+  color:#9d7453;
+  font-size:12px;
+  font-weight:950;
+}
+
+.ending-actions{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:14px;
+}
+
 @media (max-height:760px){
   .page{padding:8px;}
   .bomb-shell{padding:12px; gap:9px; border-radius:24px;}
@@ -436,6 +734,12 @@ button{cursor:pointer;}
   .list-card{padding:12px;}
   .section-title{font-size:17px;}
   .person-item,.move-item{padding:7px 9px; font-size:12px;}
+  .modal-card{max-height:88dvh; padding:16px;}
+  .history-list{max-height:54dvh;}
+}
+
+@media (max-width:900px){
+  .simple-login-row{grid-template-columns:1fr 1fr 78px;}
 }
 
 @media (max-width:720px){
@@ -452,13 +756,33 @@ button{cursor:pointer;}
   .range-card{min-height:58px;}
   .bottom-grid{grid-template-columns:1fr;}
   .participants,.moves{max-height:220px;}
+  .modal-layer{align-items:flex-start; padding:12px; overflow:auto;}
+  .modal-card{margin-top:10px; border-radius:24px;}
+  .history-meta{grid-template-columns:repeat(2, minmax(0,1fr));}
+  .ending-stats{grid-template-columns:1fr;}
+}
+
+@media (max-width:560px){
+  .simple-login-row,
+  .simple-guest-row,
+  .password-row,
+  .ending-actions{
+    grid-template-columns:1fr;
+  }
+
+  .form-btn{
+    width:100%;
+    flex-basis:auto;
+  }
 }
 
 @media (max-width:480px){
   .bomb-title{font-size:32px;}
-  .guest-box{grid-template-columns:1fr;}
   .range-card{gap:10px;}
   .range-value{font-size:36px;}
+  .header-actions{width:100%; display:grid; grid-template-columns:1fr 1fr;}
+  .soft-btn{padding:0 10px;}
+  .modal-title{font-size:28px;}
 }
 </style>
 </head>
@@ -470,16 +794,17 @@ button{cursor:pointer;}
       <h1 class="bomb-title">拆弹专家</h1>
 
       <div class="header-actions">
+        <button id="historyBtn" class="soft-btn" type="button">历史战局</button>
         <button id="newGameBtn" class="soft-btn primary" type="button">开启新炸弹</button>
       </div>
     </header>
 
     <section class="game-stack">
       <section class="card play-card">
-        <div id="gameNo" class="game-no">还没有进行中的炸弹</div>
+        <div id="gameNo" class="game-no">还没有进行中的战局</div>
 
         <div id="statusNotice" class="notice">
-          当前没有进行中的炸弹。点击“开启新炸弹”开始。
+          点击“开启新炸弹”开始游戏。
         </div>
 
         <div class="core-stage">
@@ -510,11 +835,32 @@ button{cursor:pointer;}
             </div>
 
             <div id="guestBox" class="guest-box hidden">
-              <div class="field">
-                <label>游客名字</label>
-                <input id="guestNameInput" type="text" maxlength="12" placeholder="填写 1-12 个字">
+              <div class="simple-login-row">
+                <div class="field">
+                  <label>成员昵称</label>
+                  <input id="loginNicknameInput" type="text" maxlength="20" placeholder="昵称">
+                </div>
+
+                <div class="field">
+                  <label>成员钥匙</label>
+                  <div class="password-row">
+                    <input id="loginCodeInput" type="password" maxlength="32" placeholder="钥匙">
+                    <button id="toggleLoginCodeBtn" class="soft-btn form-btn" type="button">显示</button>
+                  </div>
+                </div>
+
+                <button id="submitLoginBtn" class="soft-btn primary form-btn" type="button">登录</button>
               </div>
-              <button id="useGuestBtn" class="soft-btn" type="button">游客参与</button>
+
+              <div id="loginMessage" class="login-message"></div>
+
+              <div class="simple-guest-row">
+                <div class="field">
+                  <label>游客名字</label>
+                  <input id="guestNameInput" type="text" maxlength="12" placeholder="1-12字">
+                </div>
+                <button id="useGuestBtn" class="soft-btn form-btn" type="button">游客参与</button>
+              </div>
             </div>
 
             <div id="normalActionPanel" class="action-panel hidden">
@@ -561,6 +907,41 @@ button{cursor:pointer;}
   </main>
 </div>
 
+<div id="historyModal" class="modal-layer hidden">
+  <section class="modal-card">
+    <button id="closeHistoryBtn" class="modal-close" type="button">×</button>
+    <div class="modal-head">
+      <div class="modal-kicker">风云榜</div>
+      <h2 class="modal-title">历史战局</h2>
+      <p class="modal-subtitle">这里显示最近结束的拆弹战局。当前游戏不会被打断。</p>
+    </div>
+    <div id="historyList" class="history-list">
+      <div class="empty-state">正在读取历史战局……</div>
+    </div>
+  </section>
+</div>
+
+<div id="endingModal" class="modal-layer hidden">
+  <section class="modal-card ending-card">
+    <button id="closeEndingBtn" class="modal-close" type="button">×</button>
+    <div class="ending-bomb">💥</div>
+    <div class="modal-head">
+      <div class="modal-kicker">结局播报</div>
+      <h2 id="endingTitle" class="modal-title">炸弹已引爆</h2>
+      <p class="modal-subtitle">本局结果已经记录。</p>
+    </div>
+
+    <div id="endingText" class="ending-text">拆弹记录整理中。</div>
+
+    <div id="endingStats" class="ending-stats"></div>
+
+    <div class="ending-actions">
+      <button id="endingHistoryBtn" class="big-action secondary" type="button">查看历史战局</button>
+      <button id="endingNewGameBtn" class="big-action" type="button">开启下一局</button>
+    </div>
+  </section>
+</div>
+
 <div id="resultToast" class="result-toast hidden"></div>
 
 <script>
@@ -570,6 +951,7 @@ const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 const bombShell = document.getElementById("bombShell");
 const newGameBtn = document.getElementById("newGameBtn");
+const historyBtn = document.getElementById("historyBtn");
 const gameNo = document.getElementById("gameNo");
 const identityChip = document.getElementById("identityChip");
 const rangeValue = document.getElementById("rangeValue");
@@ -579,6 +961,11 @@ const statusNotice = document.getElementById("statusNotice");
 const guestBox = document.getElementById("guestBox");
 const guestNameInput = document.getElementById("guestNameInput");
 const useGuestBtn = document.getElementById("useGuestBtn");
+const loginNicknameInput = document.getElementById("loginNicknameInput");
+const loginCodeInput = document.getElementById("loginCodeInput");
+const toggleLoginCodeBtn = document.getElementById("toggleLoginCodeBtn");
+const submitLoginBtn = document.getElementById("submitLoginBtn");
+const loginMessage = document.getElementById("loginMessage");
 const normalActionPanel = document.getElementById("normalActionPanel");
 const finalActionPanel = document.getElementById("finalActionPanel");
 const numberSlider = document.getElementById("numberSlider");
@@ -591,8 +978,21 @@ const participantsList = document.getElementById("participantsList");
 const movesList = document.getElementById("movesList");
 const resultToast = document.getElementById("resultToast");
 
+const historyModal = document.getElementById("historyModal");
+const closeHistoryBtn = document.getElementById("closeHistoryBtn");
+const historyList = document.getElementById("historyList");
+
+const endingModal = document.getElementById("endingModal");
+const closeEndingBtn = document.getElementById("closeEndingBtn");
+const endingTitle = document.getElementById("endingTitle");
+const endingText = document.getElementById("endingText");
+const endingStats = document.getElementById("endingStats");
+const endingHistoryBtn = document.getElementById("endingHistoryBtn");
+const endingNewGameBtn = document.getElementById("endingNewGameBtn");
+
 let currentGame = null;
 let busy = false;
+let historyBusy = false;
 let guestReady = false;
 
 function isLoggedIn(){ return localStorage.getItem("room10LoggedIn") === "true"; }
@@ -620,6 +1020,12 @@ function escapeHtml(value){
     .replace(/'/g, "&#39;");
 }
 
+function firstValue(source, key, fallback = ""){
+  return source && source[key] !== undefined && source[key] !== null && source[key] !== ""
+    ? source[key]
+    : fallback;
+}
+
 function setBusy(value){
   busy = !!value;
   claimBtn.disabled = busy;
@@ -627,6 +1033,8 @@ function setBusy(value){
   finalClaimBtn.disabled = busy;
   newGameBtn.disabled = busy;
   useGuestBtn.disabled = busy;
+  submitLoginBtn.disabled = busy;
+  toggleLoginCodeBtn.disabled = busy;
 }
 
 function showToast(message){
@@ -661,6 +1069,19 @@ function isMemberAvailable(){
   return isLoggedIn() && !!getCurrentUser().trim() && !!getCurrentMemberId().trim() && !!getCurrentMemberCode().trim();
 }
 
+function shouldAutoRefreshGame(){
+  return !!(
+    currentGame &&
+    currentGame.has_active_game &&
+    (
+      isMemberAvailable() ||
+      guestNameInput.value.trim() ||
+      loginNicknameInput.value.trim() ||
+      loginCodeInput.value.trim()
+    )
+  );
+}
+
 function updateIdentityUI(){
   if(isMemberAvailable()){
     identityChip.textContent = `当前玩家：${getCurrentUser()}｜${getRoleLabel()}`;
@@ -673,6 +1094,72 @@ function updateIdentityUI(){
     ? `当前玩家：${guestNameInput.value.trim()}｜游客`
     : "当前玩家：游客模式";
   guestBox.classList.remove("hidden");
+}
+
+function normalizeLoginResult(data){
+  if(Array.isArray(data)) return data[0] || null;
+  if(data && Array.isArray(data.data)) return data.data[0] || null;
+  return data || null;
+}
+
+async function submitLogin(){
+  const nickname = loginNicknameInput.value.trim();
+  const code = loginCodeInput.value.trim();
+
+  if(!nickname){
+    loginMessage.textContent = "请填写昵称。";
+    loginNicknameInput.focus();
+    return;
+  }
+
+  if(!code){
+    loginMessage.textContent = "请填写钥匙。";
+    loginCodeInput.focus();
+    return;
+  }
+
+  try{
+    setBusy(true);
+    loginMessage.textContent = "验证中……";
+
+    const { data, error } = await client.rpc("verify_member_login", {
+      input_nickname: nickname,
+      input_code: code
+    });
+
+    if(error){
+      console.error(error);
+      loginMessage.textContent = "登录失败，请检查昵称和钥匙。";
+      return;
+    }
+
+    const member = normalizeLoginResult(data);
+
+    if(!member || !member.member_id){
+      loginMessage.textContent = "昵称或钥匙不正确。";
+      return;
+    }
+
+    localStorage.setItem("room10LoggedIn", "true");
+    localStorage.setItem("room10User", member.nickname || nickname);
+    localStorage.setItem("room10MemberId", member.member_id);
+    localStorage.setItem("room10MemberCode", code);
+    localStorage.setItem("room10Role", member.role || "member");
+
+    guestReady = false;
+    guestNameInput.value = "";
+    loginCodeInput.value = "";
+    loginMessage.textContent = "";
+
+    updateIdentityUI();
+    renderGame();
+    showToast(`登录成功：${member.nickname || nickname}`);
+  }catch(err){
+    console.error(err);
+    loginMessage.textContent = "登录失败，请稍后再试。";
+  }finally{
+    setBusy(false);
+  }
 }
 
 function getActorPayload(){
@@ -688,7 +1175,7 @@ function getActorPayload(){
 
   const guestName = guestNameInput.value.trim();
   if(!guestName || guestName.length > 12){
-    return { ok:false, message:"游客名字需要 1-12 个字。" };
+    return { ok:false, message:"请先登录，或填写 1-12 个字的游客名字。" };
   }
 
   guestReady = true;
@@ -703,17 +1190,34 @@ function getActorPayload(){
   };
 }
 
+function getActorDisplayName(actor){
+  if(!actor) return "未知玩家";
+  return actor.actor_type === "guest"
+    ? (actor.guest_name || "游客")
+    : (actor.nickname || "成员");
+}
+
 function getCurrentActorKey(){
   if(isMemberAvailable()) return "member:" + getCurrentMemberId();
   const guestName = guestNameInput.value.trim().toLowerCase();
-  if(!guestName) return "";
-  return "guest:" + guestName;
+  return guestName ? "guest:" + guestName : "";
 }
 
 function isCurrentActorBlocked(){
   if(!currentGame || !currentGame.has_active_game) return false;
   const actorKey = getCurrentActorKey();
   return actorKey && currentGame.last_actor_key === actorKey;
+}
+
+function formatDateTime(value){
+  if(!value) return "--";
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return String(value);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  return `${month}-${day} ${hour}:${minute}`;
 }
 
 async function loadGame(){
@@ -746,6 +1250,7 @@ async function createGame(){
       return;
     }
     showToast(data?.message || "新的炸弹已经开启。");
+    closeEndingModal();
     await loadGame();
   }catch(err){
     console.error(err);
@@ -755,8 +1260,116 @@ async function createGame(){
   }
 }
 
+async function loadHistory(){
+  if(historyBusy) return;
+  historyBusy = true;
+  historyList.innerHTML = '<div class="empty-state">正在读取历史战局……</div>';
+
+  try{
+    const { data, error } = await client.rpc("get_bomb_game_history");
+    if(error){
+      console.error(error);
+      historyList.innerHTML = '<div class="empty-state">历史战局暂时读取失败。</div>';
+      return;
+    }
+    renderHistory(data || []);
+  }catch(err){
+    console.error(err);
+    historyList.innerHTML = '<div class="empty-state">历史战局暂时读取失败。</div>';
+  }finally{
+    historyBusy = false;
+  }
+}
+
+function renderHistory(items){
+  const list = Array.isArray(items) ? items : [];
+  if(!list.length){
+    historyList.innerHTML = '<div class="empty-state">还没有已结束的历史战局。</div>';
+    return;
+  }
+
+  historyList.innerHTML = list.map(item => `
+    <article class="history-item">
+      <div class="history-top">
+        <div class="history-no">第 ${escapeHtml(firstValue(item, "game_no", "--"))} 局</div>
+        <div class="history-status">${escapeHtml(firstValue(item, "status", "BOOM"))}</div>
+      </div>
+      <div class="history-meta">
+        <div class="history-mini">
+          <strong>${escapeHtml(firstValue(item, "exploded_actor_name", "未知玩家"))}</strong>
+          <span>爆炸玩家</span>
+        </div>
+        <div class="history-mini">
+          <strong>${escapeHtml(firstValue(item, "exploded_number", "--"))}</strong>
+          <span>爆炸数字</span>
+        </div>
+        <div class="history-mini">
+          <strong>${escapeHtml(firstValue(item, "round_count", "--"))}</strong>
+          <span>坚持轮数</span>
+        </div>
+        <div class="history-mini">
+          <strong>${escapeHtml(firstValue(item, "participant_count", "--"))}</strong>
+          <span>参与人数</span>
+        </div>
+      </div>
+      <div class="modal-subtitle">结束时间：${escapeHtml(formatDateTime(firstValue(item, "ended_at", "")))}</div>
+    </article>
+  `).join("");
+}
+
+function openHistoryModal(){
+  historyModal.classList.remove("hidden");
+  loadHistory();
+}
+
+function closeHistoryModal(){
+  historyModal.classList.add("hidden");
+}
+
+function buildEndingPayload(data, actor, claimNumberValue){
+  const game = currentGame || {};
+  const participantBase = Array.isArray(game.participants) ? game.participants.length : 0;
+
+  return {
+    gameNo:firstValue(data, "game_no", game.game_no || "--"),
+    loser:firstValue(data, "exploded_actor_name", getActorDisplayName(actor)),
+    explodedNumber:firstValue(data, "exploded_number", claimNumberValue ?? "--"),
+    roundCount:firstValue(data, "round_count", Number(game.round_count || 0) + 1),
+    participantCount:firstValue(data, "participant_count", Math.max(1, participantBase))
+  };
+}
+
+function showEndingModal(payload){
+  endingTitle.textContent = `第 ${payload.gameNo} 局炸弹已引爆`;
+  endingText.innerHTML = `
+    <strong>${escapeHtml(payload.loser)}</strong> 认领到了最终爆炸数字。
+    <br>本局在第 <strong>${escapeHtml(payload.roundCount)}</strong> 轮结束，记录已进入历史战局。
+  `;
+
+  endingStats.innerHTML = `
+    <div class="ending-stat">
+      <strong>${escapeHtml(payload.loser)}</strong>
+      <span>爆炸玩家</span>
+    </div>
+    <div class="ending-stat">
+      <strong>${escapeHtml(payload.explodedNumber)}</strong>
+      <span>爆炸数字</span>
+    </div>
+    <div class="ending-stat">
+      <strong>${escapeHtml(payload.participantCount)}</strong>
+      <span>参与人数</span>
+    </div>
+  `;
+
+  endingModal.classList.remove("hidden");
+}
+
+function closeEndingModal(){
+  endingModal.classList.add("hidden");
+}
+
 async function claimNumber(method){
-  if(!currentGame || !currentGame.has_active_game){ showToast("当前没有进行中的炸弹。"); return; }
+  if(!currentGame || !currentGame.has_active_game){ showToast("当前没有进行中的战局。"); return; }
   const actor = getActorPayload();
   if(!actor.ok){ showToast(actor.message); return; }
   if(isCurrentActorBlocked()){ showToast("不能连续认领数字，需要换一个人接手。"); return; }
@@ -781,8 +1394,15 @@ async function claimNumber(method){
       showToast("认领失败：" + (error.message || "请稍后再试"));
       return;
     }
+
     showToast(data?.message || "操作完成。");
-    if(data?.is_exploded) playBoom();
+
+    if(data?.is_exploded){
+      playBoom();
+      showEndingModal(buildEndingPayload(data, actor, data?.claim_number ?? claimNumberValue));
+      loadHistory();
+    }
+
     await loadGame();
   }catch(err){
     console.error(err);
@@ -793,10 +1413,12 @@ async function claimNumber(method){
 }
 
 async function claimFinalNumber(){
-  if(!currentGame || !currentGame.has_active_game){ showToast("当前没有进行中的炸弹。"); return; }
+  if(!currentGame || !currentGame.has_active_game){ showToast("当前没有进行中的战局。"); return; }
   const actor = getActorPayload();
   if(!actor.ok){ showToast(actor.message); return; }
   if(isCurrentActorBlocked()){ showToast("不能连续认领数字，需要换一个人接手。"); return; }
+
+  const finalClaimNumber = currentGame.final_remaining_number ?? currentGame.current_min ?? "--";
 
   try{
     setBusy(true);
@@ -815,8 +1437,15 @@ async function claimFinalNumber(){
       showToast("认领失败：" + (error.message || "请稍后再试"));
       return;
     }
+
     showToast(data?.message || "操作完成。");
-    if(data?.is_exploded) playBoom();
+
+    if(data?.is_exploded){
+      playBoom();
+      showEndingModal(buildEndingPayload(data, actor, data?.claim_number ?? finalClaimNumber));
+      loadHistory();
+    }
+
     await loadGame();
   }catch(err){
     console.error(err);
@@ -832,13 +1461,13 @@ function renderGame(){
   newGameBtn.classList.toggle("hidden", hasGame);
 
   if(!hasGame){
-    gameNo.textContent = "还没有进行中的炸弹";
+    gameNo.textContent = "还没有进行中的游戏";
     rangeValue.textContent = "-- - --";
     roundValue.textContent = "0";
     dangerValue.textContent = "待开启";
     statusNotice.innerHTML = isMemberAvailable()
-      ? "当前没有进行中的炸弹。点击 <strong>开启新炸弹</strong> 开始。"
-      : "当前没有进行中的炸弹。游客需要先填写名字，也可以回游戏房登录后作为成员参与。";
+      ? "点击 <strong>开启新炸弹</strong> 开始。"
+      : "可以登录，也可以游客参与。";
     normalActionPanel.classList.add("hidden");
     finalActionPanel.classList.add("hidden");
     participantsList.innerHTML = '<div class="empty-state">还没有人参与本局。</div>';
@@ -850,7 +1479,6 @@ function renderGame(){
   const min = Number(currentGame.current_min);
   const max = Number(currentGame.current_max);
   const phase = currentGame.phase || "normal";
-  const count = max - min + 1;
   const danger = getDangerLabel(min, max, phase);
   const blocked = isCurrentActorBlocked();
 
@@ -858,16 +1486,16 @@ function renderGame(){
   rangeValue.textContent = `${min} - ${max}`;
   roundValue.textContent = String(currentGame.round_count || 0);
   dangerValue.textContent = danger;
-  bombShell.classList.toggle("boiling", count <= 5 || phase === "final_waiting");
+  bombShell.classList.toggle("boiling", max - min + 1 <= 5 || phase === "final_waiting");
 
   if(!isMemberAvailable() && !guestNameInput.value.trim()){
-    statusNotice.innerHTML = "你当前是游客模式。请先填写游客名字，再认领数字。";
+    statusNotice.innerHTML = "请登录，或填写游客名字。";
   }else if(blocked){
     statusNotice.innerHTML = "上一手就是你认领的。现在需要 <strong>换一个人接手</strong>。";
   }else if(phase === "final_waiting"){
     statusNotice.innerHTML = "已经进入最终认领阶段。最后一个数字已经没有选择权了。";
   }else{
-    statusNotice.innerHTML = `当前范围是 <strong>${min} - ${max}</strong>。请选择一个数字，或者随机认领。`;
+    statusNotice.innerHTML = `当前范围是 <strong>${min} - ${max}</strong>。请选择数字或随机认领。`;
   }
 
   if(phase === "final_waiting"){
@@ -898,7 +1526,11 @@ function renderGame(){
 
 function renderParticipants(items){
   const list = Array.isArray(items) ? items : [];
-  if(!list.length){ participantsList.innerHTML = '<div class="empty-state">还没有人参与本局。</div>'; return; }
+  if(!list.length){
+    participantsList.innerHTML = '<div class="empty-state">还没有人参与本局。</div>';
+    return;
+  }
+
   participantsList.innerHTML = list.map(item => {
     const typeText = item.actor_type === "guest" ? "游客" : "成员";
     return `<div class="person-item"><strong>${escapeHtml(item.actor_name)}</strong><span>｜${typeText}</span><span>｜${Number(item.move_count || 0)} 次认领</span></div>`;
@@ -914,7 +1546,11 @@ function getMethodText(method){
 
 function renderMoves(items){
   const list = Array.isArray(items) ? items : [];
-  if(!list.length){ movesList.innerHTML = '<div class="empty-state">暂无操作记录。</div>'; return; }
+  if(!list.length){
+    movesList.innerHTML = '<div class="empty-state">暂无操作记录。</div>';
+    return;
+  }
+
   movesList.innerHTML = list.map(item => {
     const tags = [];
     if(item.is_exploded) tags.push("BOOM");
@@ -922,14 +1558,51 @@ function renderMoves(items){
     if(item.is_near_miss) tags.push("贴边");
     if(item.is_final_save) tags.push("甩锅成功");
     if(item.is_lucky_survive) tags.push("命硬");
+
     return `<div class="move-item"><strong>#${escapeHtml(item.move_no)} ${escapeHtml(item.actor_name)}</strong><span> ${getMethodText(item.claim_method)} ${escapeHtml(item.claim_number)}</span>${tags.length ? `<br><span>${tags.map(t => `「${escapeHtml(t)}」`).join(" ")}</span>` : ""}</div>`;
   }).join("");
 }
 
 newGameBtn.addEventListener("click", createGame);
+historyBtn.addEventListener("click", openHistoryModal);
+closeHistoryBtn.addEventListener("click", closeHistoryModal);
+closeEndingBtn.addEventListener("click", closeEndingModal);
+
+submitLoginBtn.addEventListener("click", submitLogin);
+
+toggleLoginCodeBtn.addEventListener("click", () => {
+  const willShow = loginCodeInput.type === "password";
+  loginCodeInput.type = willShow ? "text" : "password";
+  toggleLoginCodeBtn.textContent = willShow ? "隐藏" : "显示";
+});
+
+loginNicknameInput.addEventListener("keydown", event => {
+  if(event.key === "Enter") loginCodeInput.focus();
+});
+
+loginCodeInput.addEventListener("keydown", event => {
+  if(event.key === "Enter") submitLogin();
+});
+
+endingHistoryBtn.addEventListener("click", () => {
+  closeEndingModal();
+  openHistoryModal();
+});
+
+endingNewGameBtn.addEventListener("click", createGame);
+
+historyModal.addEventListener("click", event => {
+  if(event.target === historyModal) closeHistoryModal();
+});
+
+endingModal.addEventListener("click", event => {
+  if(event.target === endingModal) closeEndingModal();
+});
+
 claimBtn.addEventListener("click", () => claimNumber("manual"));
 randomBtn.addEventListener("click", () => claimNumber("random"));
 finalClaimBtn.addEventListener("click", claimFinalNumber);
+
 useGuestBtn.addEventListener("click", () => {
   const name = guestNameInput.value.trim();
   if(!name || name.length > 12){ showToast("游客名字需要 1-12 个字。"); return; }
@@ -938,16 +1611,29 @@ useGuestBtn.addEventListener("click", () => {
   renderGame();
   showToast(`已使用游客名字：${name}`);
 });
+
 numberSlider.addEventListener("input", () => {
   chosenNumber.textContent = numberSlider.value;
   claimBtn.textContent = `认领数字 ${numberSlider.value}`;
 });
-guestNameInput.addEventListener("input", () => { guestReady = false; renderGame(); });
-window.addEventListener("storage", () => { updateIdentityUI(); renderGame(); });
+
+guestNameInput.addEventListener("input", () => {
+  guestReady = false;
+  renderGame();
+});
+
+window.addEventListener("storage", () => {
+  updateIdentityUI();
+  renderGame();
+});
 
 updateIdentityUI();
 loadGame();
-setInterval(() => { if(document.hidden || busy) return; loadGame(); }, 8000);
+
+setInterval(() => {
+  if(document.hidden || busy || !shouldAutoRefreshGame()) return;
+  loadGame();
+}, 8000);
 </script>
 </body>
 </html>
