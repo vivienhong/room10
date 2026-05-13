@@ -4,337 +4,4033 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜花房</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{box-sizing:border-box;}
 
 :root{
-  --text:#5b4632;
-  --title:#6a5038;
-  --line:#d8c2a3;
-  --panel:rgba(255,249,240,.88);
-  --panel-strong:rgba(255,252,246,.93);
-  --btn:#c98e56;
-  --btn-hover:#b97d45;
-  --sub:#e7d3b7;
-  --sub-hover:#dcc29e;
-  --shadow:0 12px 28px rgba(0,0,0,.10);
-  --green:#5f7d3a;
-  --muted:#8e7c68;
+  --bg-ui-scale:1;
+
+  /* 当前页面坐标：花房页只改这里 */
+  --identity-right:7.35%;
+  --identity-top:6.46%;
+  --identity-width:calc(232px * var(--bg-ui-scale));
+  --identity-height:calc(38px * var(--bg-ui-scale));
+
+  --room-nav-left:27.2%;
+  --room-nav-top:6.35%;
+  --room-nav-width:45.5%;
+
+  --flower-app-left:8.8%;
+  --flower-app-top:22.2%;
+  --flower-app-width:66.8%;
+  --flower-app-height:67.6%;
+
+  /* 页面可改颜色，不改结构尺寸 */
+  --identity-bg:rgba(255,248,239,0.92);
+  --identity-inner-bg:rgba(255,252,247,0.96);
+  --identity-border:rgba(186,146,103,0.24);
+  --identity-text:#6c4523;
+  --identity-shadow:rgba(116,86,54,0.12);
+
+  --nav-text:#6e4827;
+  --nav-border:rgba(145,98,56,.34);
 }
 
 html,body{
   margin:0;
   width:100%;
-  min-height:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:#e7dfd4;
+  color:#5b4632;
 }
 
 body{
-  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
-  min-height:100vh;
-  min-height:100dvh;
-  color:var(--text);
-  overflow:hidden;
-  background:
-    linear-gradient(rgba(255,248,240,.12), rgba(255,248,240,.12)),
-    url("room-flower.png") center center / cover no-repeat,
-    linear-gradient(180deg,#f2e8d9 0%, #f8f0e6 100%);
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
-#page{
+button,input{
+  font-family:inherit;
+}
+
+.hidden{
+  display:none !important;
+}
+
+#room{
   position:relative;
   width:100vw;
   height:100vh;
   height:100dvh;
   overflow:hidden;
+  background:#e7dfd4;
 }
 
-.top-bar{
+#bgFrame{
   position:absolute;
-  top:3.5%;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:20;
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-  justify-content:center;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+  background:none;
 }
 
-.top-btn{
-  border:none;
+#bg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center center;
+  display:block;
+  user-select:none;
+  pointer-events:none;
+  -webkit-user-drag:none;
+}
+
+#overlay{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  z-index:2;
+  overflow:visible;
+  pointer-events:none;
+  --ui-scale:var(--bg-ui-scale, 1);
+}
+
+#overlay *{
+  pointer-events:auto;
+}
+
+
+/* =========================================================
+   花房背景特效：柔光 / 花瓣 / 叶片
+   背景氛围层，不影响点击，不遮挡顶部组件
+========================================================= */
+#flowerBgFx{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  overflow:hidden;
+  pointer-events:none;
+  user-select:none;
+  --fx-scale:var(--bg-ui-scale,1);
+}
+
+#flowerBgFx span{
+  position:absolute;
+  display:block;
+  pointer-events:none;
+  will-change:transform,opacity;
+}
+
+.fxGlow{
+  width:calc(6px * var(--fx-scale));
+  height:calc(6px * var(--fx-scale));
   border-radius:999px;
-  background:rgba(255,249,240,.94);
-  color:var(--text);
-  padding:10px 18px;
-  min-width:108px;
-  font-size:14px;
-  font-weight:700;
-  cursor:pointer;
-  box-shadow:var(--shadow);
-  border:1px solid rgba(216,194,163,.95);
-  transition:.2s ease;
+  background:rgba(255,226,154,.58);
+  box-shadow:
+    0 0 calc(10px * var(--fx-scale)) rgba(255,222,148,.48),
+    0 0 calc(22px * var(--fx-scale)) rgba(255,241,190,.28);
+  opacity:.18;
+  animation:flowerGlowTwinkle 6.8s ease-in-out infinite;
 }
 
-.top-btn:hover{
-  background:#f3e3c8;
-  transform:translateY(-1px);
+.fxPetal,
+.fxLeaf{
+  line-height:1;
+  text-shadow:
+    0 1px 2px rgba(255,255,255,.72),
+    0 3px 8px rgba(120,90,55,.12);
 }
 
-.main-panel{
-  position:absolute;
-  left:50%;
-  top:53%;
-  transform:translate(-50%,-50%);
-  width:min(900px, 90vw);
-  padding:30px 30px 26px;
-  background:var(--panel);
-  border:1px solid rgba(216,194,163,.9);
-  border-radius:26px;
-  box-shadow:var(--shadow);
-  backdrop-filter:blur(8px);
+.fxPetal{
+  color:rgba(232,139,162,.58);
+  font-size:calc(15px * var(--fx-scale));
+  opacity:.55;
+  animation:flowerPetalDrift 18s linear infinite;
 }
 
-.title{
-  margin:0 0 10px;
-  text-align:center;
-  font-size:clamp(24px,2.8vw,36px);
-  color:var(--title);
-  font-weight:800;
-  letter-spacing:.5px;
+.fxLeaf{
+  color:rgba(119,158,88,.50);
+  font-size:calc(15px * var(--fx-scale));
+  opacity:.48;
+  animation:flowerLeafDrift 22s linear infinite;
 }
 
-.subtitle{
-  margin:0 auto 20px;
-  text-align:center;
-  font-size:clamp(13px,1.5vw,16px);
-  color:#7a624c;
-  max-width:700px;
-  line-height:1.7;
+.fxPetal.p1{left:13%; top:0%; animation-delay:-3s; animation-duration:20s;}
+.fxPetal.p2{left:37%; top:-4%; animation-delay:-11s; animation-duration:23s; font-size:calc(12px * var(--fx-scale));}
+.fxPetal.p3{left:61%; top:-2%; animation-delay:-7s; animation-duration:21s;}
+.fxPetal.p4{left:84%; top:4%; animation-delay:-15s; animation-duration:24s; font-size:calc(13px * var(--fx-scale));}
+.fxPetal.p5{left:72%; top:22%; animation-delay:-5s; animation-duration:26s; opacity:.42;}
+.fxPetal.p6{left:48%; top:34%; animation-delay:-18s; animation-duration:25s; opacity:.38;}
+
+.fxLeaf.l1{left:18%; top:16%; animation-delay:-6s; animation-duration:26s;}
+.fxLeaf.l2{left:55%; top:8%; animation-delay:-15s; animation-duration:28s; font-size:calc(13px * var(--fx-scale));}
+.fxLeaf.l3{left:89%; top:25%; animation-delay:-9s; animation-duration:30s; opacity:.42;}
+.fxLeaf.l4{left:42%; top:58%; animation-delay:-20s; animation-duration:29s; opacity:.36;}
+
+.fxGlow.g1{left:24%; top:20%; animation-delay:-.6s;}
+.fxGlow.g2{left:46%; top:14%; animation-delay:-2.1s; transform:scale(1.35);}
+.fxGlow.g3{left:69%; top:25%; animation-delay:-3.7s;}
+.fxGlow.g4{left:35%; top:52%; animation-delay:-1.4s; transform:scale(.9);}
+.fxGlow.g5{left:76%; top:63%; animation-delay:-4.3s; transform:scale(1.15);}
+
+
+@keyframes flowerGlowTwinkle{
+  0%,100%{opacity:.10; transform:scale(.72);}
+  42%{opacity:.68; transform:scale(1.18);}
+  68%{opacity:.28; transform:scale(.95);}
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:16px;
-  margin-top:10px;
+@keyframes flowerPetalDrift{
+  0%{transform:translate3d(0,-12vh,0) rotate(0deg) scale(.86); opacity:0;}
+  12%{opacity:.52;}
+  42%{transform:translate3d(2.4vw,34vh,0) rotate(130deg) scale(1); opacity:.52;}
+  74%{transform:translate3d(-1.8vw,68vh,0) rotate(255deg) scale(.92); opacity:.36;}
+  100%{transform:translate3d(1vw,98vh,0) rotate(330deg) scale(.82); opacity:0;}
 }
 
-.card{
-  background:var(--panel-strong);
-  border:1px solid rgba(216,194,163,.95);
-  border-radius:20px;
-  padding:18px 18px 16px;
-  box-shadow:0 8px 18px rgba(0,0,0,.06);
+@keyframes flowerLeafDrift{
+  0%{transform:translate3d(0,-10vh,0) rotate(-22deg) scale(.82); opacity:0;}
+  16%{opacity:.46;}
+  50%{transform:translate3d(-2.8vw,38vh,0) rotate(70deg) scale(1); opacity:.42;}
+  100%{transform:translate3d(2vw,96vh,0) rotate(190deg) scale(.86); opacity:0;}
 }
 
-.card h3{
-  margin:0 0 10px;
-  font-size:18px;
-  color:#6d5238;
-}
 
-.card p{
-  margin:0;
-  font-size:14px;
-  line-height:1.75;
-  color:#6f5a45;
-}
-
-.notice{
-  margin-top:18px;
-  background:rgba(255,255,255,.45);
-  border:1px dashed rgba(95,125,58,.55);
-  border-radius:18px;
-  padding:14px 16px;
-  font-size:14px;
-  line-height:1.8;
-  color:#6f5a45;
-}
-
-.bottom-actions{
-  margin-top:22px;
-  display:flex;
-  justify-content:center;
-  gap:12px;
-  flex-wrap:wrap;
-}
-
-.action-btn{
-  border:none;
-  border-radius:14px;
-  background:var(--btn);
-  color:#fffdf8;
-  padding:11px 20px;
-  min-width:138px;
-  font-size:14px;
-  font-weight:700;
-  cursor:pointer;
-  box-shadow:0 8px 18px rgba(201,142,86,.24);
-  transition:.2s ease;
-}
-
-.action-btn:hover{
-  background:var(--btn-hover);
-  transform:translateY(-1px);
-}
-
-.action-btn.sub{
-  background:var(--sub);
-  color:#6a5038;
-  box-shadow:none;
-}
-
-.action-btn.sub:hover{
-  background:var(--sub-hover);
-}
-
-.corner-badge{
-  position:absolute;
-  right:18px;
-  bottom:18px;
-  z-index:20;
-  padding:8px 12px;
-  border-radius:999px;
-  background:rgba(255,250,244,.88);
-  border:1px solid rgba(216,194,163,.9);
-  font-size:12px;
-  color:#7d6853;
-  box-shadow:0 6px 16px rgba(0,0,0,.08);
-}
-
-@media (max-width: 760px){
-  .top-bar{
-    top:2.4%;
-    gap:8px;
+@media(max-width:540px){
+  #flowerBgFx{
+    position:fixed;
+    z-index:1;
+    --fx-scale:1;
   }
 
-  .top-btn{
-    min-width:92px;
-    padding:9px 14px;
+  .fxPetal.p5,
+  .fxPetal.p6,
+  .fxLeaf.l3,
+  .fxLeaf.l4,
+  .fxGlow.g4,
+  .fxGlow.g5{
+    display:none;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  #flowerBgFx{
+    display:none;
+  }
+}
+
+/* =========================================================
+   身份组件：全站统一结构
+========================================================= */
+#topActions{
+  position:absolute;
+  right:var(--identity-right);
+  top:var(--identity-top);
+  width:var(--identity-width);
+  height:var(--identity-height);
+  min-width:0;
+  min-height:0;
+  z-index:65;
+  pointer-events:none;
+}
+
+#topIdentityBar{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:stretch;
+  justify-content:flex-start;
+  gap:calc(5px * var(--ui-scale));
+  padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
+  border-radius:calc(13px * var(--ui-scale));
+  background:var(--identity-bg);
+  border:1px solid var(--identity-border);
+  box-shadow:
+    0 calc(10px * var(--ui-scale)) calc(24px * var(--ui-scale)) var(--identity-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  pointer-events:auto;
+  overflow:visible;
+  white-space:nowrap;
+}
+
+#topIdentityBadge,
+#loginOpenBtn,
+#logoutBtn,
+#siteNoticeBtn{
+  border-radius:calc(9px * var(--ui-scale));
+  background:var(--identity-inner-bg);
+  color:var(--identity-text);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 1px 4px rgba(112,83,52,0.05);
+  border:1px solid rgba(160,116,78,0.12);
+}
+
+#topIdentityBadge{
+  flex:1 1 auto;
+  min-width:0;
+  padding:0 calc(8px * var(--ui-scale));
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  white-space:nowrap;
+}
+
+#topIdentityBadge .identityText{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  line-height:1;
+}
+
+#loginOpenBtn,
+#logoutBtn{
+  appearance:none;
+  cursor:pointer;
+  width:calc(42px * var(--ui-scale));
+  min-width:calc(42px * var(--ui-scale));
+  flex:0 0 calc(42px * var(--ui-scale));
+  padding:0;
+  color:#67401f;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:800;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+  overflow:hidden;
+  white-space:nowrap;
+}
+
+#loginOpenBtn:hover,
+#logoutBtn:hover,
+#siteNoticeBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,0.94);
+}
+
+#siteNoticeWrap{
+  position:relative;
+  width:calc(30px * var(--ui-scale));
+  min-width:calc(30px * var(--ui-scale));
+  flex:0 0 calc(30px * var(--ui-scale));
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  overflow:visible;
+}
+
+#siteNoticeBtn{
+  appearance:none;
+  cursor:pointer;
+  position:relative;
+  width:100%;
+  height:100%;
+  padding:0;
+  font-size:calc(14px * var(--ui-scale));
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+#siteNoticeIcon{
+  display:block;
+  line-height:1;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
+}
+
+#siteNoticeCount{
+  position:absolute;
+  right:calc(-6px * var(--ui-scale));
+  top:calc(-6px * var(--ui-scale));
+  min-width:calc(18px * var(--ui-scale));
+  height:calc(18px * var(--ui-scale));
+  padding:0 calc(5px * var(--ui-scale));
+  border-radius:999px;
+  background:#c98c4f;
+  color:#fff9f1;
+  font-size:calc(9px * var(--ui-scale));
+  font-weight:900;
+  line-height:1;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:calc(2px * var(--ui-scale)) solid rgba(255,248,239,0.98);
+  box-shadow:0 2px 8px rgba(116,86,54,0.16);
+  z-index:3;
+}
+
+#siteNoticeBtn.hasNotice #siteNoticeCount{
+  display:flex;
+}
+
+#siteNoticePanel{
+  position:absolute;
+  top:calc(100% + 10px);
+  right:0;
+  width:min(calc(360px * var(--ui-scale)), 72vw);
+  max-height:min(calc(540px * var(--ui-scale)), 70vh);
+  overflow:auto;
+  padding:calc(12px * var(--ui-scale));
+  border-radius:calc(16px * var(--ui-scale));
+  background:rgba(255,249,241,0.98);
+  border:1px solid rgba(203,167,123,0.28);
+  box-shadow:0 16px 36px rgba(85,58,34,0.16);
+  display:none;
+  z-index:80;
+  text-align:left;
+}
+
+#siteNoticePanel.show{
+  display:block;
+}
+
+.siteNoticeTitle{
+  color:#6f4726;
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:900;
+  margin-bottom:calc(10px * var(--ui-scale));
+}
+
+.siteNoticeEmpty{
+  color:#8a6644;
+  font-size:calc(12px * var(--ui-scale));
+  line-height:1.6;
+  padding:6px 2px 2px;
+}
+
+.siteNoticeList{
+  display:flex;
+  flex-direction:column;
+  gap:calc(6px * var(--ui-scale));
+}
+
+.siteNoticeItem{
+  padding:calc(10px * var(--ui-scale));
+  border-radius:calc(12px * var(--ui-scale));
+  background:rgba(255,252,247,0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.92),
+    0 2px 8px rgba(120,92,63,0.05);
+}
+
+.siteNoticeItemTitle{
+  color:#6f4726;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:800;
+  line-height:1.5;
+  margin-bottom:4px;
+}
+
+.siteNoticeItemDesc{
+  color:#8a6644;
+  font-size:calc(11px * var(--ui-scale));
+  line-height:1.55;
+}
+
+/* =========================================================
+   房间切换按钮：花房页不显示“花房区”按钮
+========================================================= */
+#topBar{
+  position:absolute;
+  left:var(--room-nav-left);
+  top:var(--room-nav-top);
+  width:var(--room-nav-width);
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  z-index:55;
+  overflow:visible;
+  pointer-events:none;
+
+  --nav-btn-height:calc(40px * var(--ui-scale));
+  --nav-btn-px:calc(16px * var(--ui-scale));
+  --nav-btn-radius:calc(13px * var(--ui-scale));
+  --nav-btn-font:calc(14px * var(--ui-scale));
+  --nav-gap:calc(8px * var(--ui-scale));
+}
+
+#navOuter,
+#navScroll{
+  overflow:visible;
+}
+
+#navOuter{
+  flex:0 0 auto;
+  min-width:0;
+  width:100%;
+  pointer-events:auto;
+}
+
+#navScroll{
+  width:100%;
+  white-space:nowrap;
+  padding:0;
+  margin:0;
+}
+
+#roomNav{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--nav-gap);
+  transform-origin:left center;
+}
+
+.navBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  position:relative;
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:var(--nav-btn-height);
+  padding:0 var(--nav-btn-px);
+  border-radius:var(--nav-btn-radius);
+  color:var(--nav-text);
+  font-size:var(--nav-btn-font);
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+  overflow:visible;
+  isolation:isolate;
+  background:
+    linear-gradient(180deg, rgba(249,232,203,.90) 0%, rgba(226,195,152,.86) 100%);
+  border:1px solid var(--nav-border);
+  box-shadow:
+    0 1px 1px rgba(255,255,255,.48) inset,
+    0 2px 5px rgba(91,68,45,.13);
+  text-shadow:0 1px 0 rgba(255,255,255,.42);
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    color .18s ease,
+    filter .18s ease;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+.navBtn:hover,
+.navBtn:focus-visible{
+  color:#5f3d22;
+  background:
+    linear-gradient(180deg, rgba(252,238,215,.95) 0%, rgba(232,205,166,.90) 100%);
+  border-color:rgba(153,102,55,.48);
+  box-shadow:
+    0 1px 1px rgba(255,255,255,.55) inset,
+    0 3px 7px rgba(91,68,45,.15);
+  filter:brightness(1.015);
+}
+
+.navLabel{
+  position:relative;
+  z-index:5;
+  display:block;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.navEffect{
+  position:absolute;
+  pointer-events:none;
+  opacity:0;
+  z-index:4;
+  display:block;
+  font-weight:900;
+  line-height:1;
+  text-shadow:
+    0 1px 2px rgba(255,250,232,.82),
+    0 0 8px rgba(255,246,210,.52);
+  filter:saturate(.95);
+}
+
+.navEffectA{
+  left:8%;
+  top:-54%;
+  font-size:calc(var(--nav-btn-font) * .92);
+}
+
+.navEffectB{
+  right:8%;
+  top:-62%;
+  font-size:calc(var(--nav-btn-font) * .86);
+}
+
+.navEffectC{
+  left:50%;
+  top:-72%;
+  transform:translateX(-50%);
+  font-size:calc(var(--nav-btn-font) * 1.02);
+}
+
+@keyframes navFloatA{
+  0%,100%{ transform:translateY(4px) rotate(-8deg) scale(.82); opacity:0; }
+  20%,72%{ opacity:.86; }
+  50%{ transform:translateY(-5px) rotate(6deg) scale(1); opacity:.76; }
+}
+
+@keyframes navFloatB{
+  0%,100%{ transform:translateY(5px) rotate(9deg) scale(.78); opacity:0; }
+  24%,70%{ opacity:.78; }
+  52%{ transform:translateY(-6px) rotate(-7deg) scale(1); opacity:.68; }
+}
+
+@keyframes navFloatC{
+  0%,100%{ transform:translateX(-50%) translateY(6px) rotate(0deg) scale(.76); opacity:0; }
+  24%,70%{ opacity:.88; }
+  50%{ transform:translateX(-50%) translateY(-6px) rotate(2deg) scale(1); opacity:.78; }
+}
+
+.navBtn:hover .navEffectA,
+.navBtn:focus-visible .navEffectA{
+  animation:navFloatA 2.2s ease-in-out infinite;
+}
+
+.navBtn:hover .navEffectB,
+.navBtn:focus-visible .navEffectB{
+  animation:navFloatB 2.5s ease-in-out infinite;
+}
+
+.navBtn:hover .navEffectC,
+.navBtn:focus-visible .navEffectC{
+  animation:navFloatC 2.35s ease-in-out infinite;
+}
+
+/* 各房间特效颜色 */
+.navBtn[data-room="hall"] .navEffect{
+  color:rgba(255,205,96,.86);
+  text-shadow:
+    0 1px 2px rgba(255,250,232,.95),
+    0 0 10px rgba(255,215,105,.62);
+}
+
+.navBtn[data-room="manager"] .navEffect{
+  color:rgba(128,91,58,.82);
+}
+
+.navBtn[data-room="honor"] .navEffect{
+  color:rgba(205,143,45,.86);
+  text-shadow:
+    0 1px 2px rgba(255,250,232,.92),
+    0 0 8px rgba(255,220,130,.52);
+}
+
+.navBtn[data-room="game"] .navEffect{
+  color:rgba(117,91,150,.82);
+}
+
+.navBtn[data-room="studio"] .navEffect{
+  color:rgba(96,112,145,.84);
+}
+
+.navBtn[data-room="living"] .navEffect{
+  color:rgba(202,132,70,.82);
+}
+
+.navBtn[data-room="dorm"] .navEffect{
+  color:rgba(148,112,171,.78);
+}
+
+.navBtn[data-room="pets"] .navEffect{
+  color:rgba(131,111,78,.82);
+}
+
+
+/* =========================================================
+   花房真实功能面板：花市 + 我的花盆
+========================================================= */
+#flowerApp{
+  position:absolute;
+  left:var(--flower-app-left);
+  top:var(--flower-app-top);
+  width:var(--flower-app-width);
+  height:var(--flower-app-height);
+  z-index:20;
+  display:grid;
+  grid-template-columns:minmax(0, 1.72fr) minmax(calc(200px * var(--ui-scale)), .52fr);
+  gap:calc(10px * var(--ui-scale));
+  padding:calc(12px * var(--ui-scale));
+  pointer-events:auto;
+  border-radius:calc(24px * var(--ui-scale));
+  border:1px solid rgba(170,122,82,.24);
+  background:
+    linear-gradient(180deg, rgba(255,250,242,.83), rgba(250,236,216,.66));
+  box-shadow:
+    0 calc(16px * var(--ui-scale)) calc(38px * var(--ui-scale)) rgba(89,66,42,.12),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  backdrop-filter:blur(calc(11px * var(--ui-scale)));
+  -webkit-backdrop-filter:blur(calc(11px * var(--ui-scale)));
+  overflow:hidden;
+}
+
+.flowerPanel{
+  min-width:0;
+  min-height:0;
+  border-radius:calc(18px * var(--ui-scale));
+  border:1px solid rgba(170,122,82,.14);
+  background:rgba(255,253,248,.50);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.72),
+    0 calc(8px * var(--ui-scale)) calc(18px * var(--ui-scale)) rgba(90,67,43,.06);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.flowerPanelHeader{
+  flex:0 0 auto;
+  padding:calc(11px * var(--ui-scale)) calc(14px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  border-bottom:1px solid rgba(172,125,86,.13);
+}
+
+.flowerPanelTitle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:calc(10px * var(--ui-scale));
+  color:#6a4223;
+  font-size:calc(14px * var(--ui-scale));
+  font-weight:950;
+  line-height:1.15;
+}
+
+.flowerPanelSub{
+  margin-top:calc(5px * var(--ui-scale));
+  color:#8b6545;
+  font-size:calc(11px * var(--ui-scale));
+  line-height:1.45;
+}
+
+.flowerGoldPill{
+  flex:0 0 auto;
+  max-width:48%;
+  padding:calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(255,252,247,.82);
+  border:1px solid rgba(178,128,83,.16);
+  color:#744a27;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.flowerPanelBody{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(12px * var(--ui-scale));
+}
+
+.flowerPanelBody::-webkit-scrollbar{
+  width:calc(8px * var(--ui-scale));
+}
+
+.flowerPanelBody::-webkit-scrollbar-thumb{
+  background:rgba(160,111,72,.24);
+  border-radius:999px;
+}
+
+.flowerMarketGrid{
+  display:grid;
+  grid-template-columns:repeat(5, minmax(0, 1fr));
+  gap:calc(6px * var(--ui-scale));
+}
+
+.flowerCard{
+  min-width:0;
+  border-radius:calc(14px * var(--ui-scale));
+  background:rgba(255,253,248,.72);
+  border:1px solid rgba(175,128,87,.11);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.82),
+    0 calc(4px * var(--ui-scale)) calc(10px * var(--ui-scale)) rgba(96,72,46,.045);
+  padding:calc(8px * var(--ui-scale));
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:calc(5px * var(--ui-scale));
+}
+
+.flowerCardImgWrap{
+  width:100%;
+  aspect-ratio:1 / .88;
+  border-radius:calc(14px * var(--ui-scale));
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255,248,218,.76), rgba(255,244,231,.28) 56%, rgba(255,255,255,0) 72%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.flowerCardImg{
+  width:86%;
+  height:86%;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 calc(6px * var(--ui-scale)) calc(9px * var(--ui-scale)) rgba(116,83,47,.13));
+}
+
+.flowerCardName{
+  color:#694326;
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:950;
+  line-height:1.2;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.flowerCardPhrase{
+  min-height:auto;
+  color:#8b6849;
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.4;
+  text-align:center;
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.flowerCardMeta{
+  display:grid;
+  gap:calc(4px * var(--ui-scale));
+  color:#765236;
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.28;
+}
+
+.flowerMetaLine{
+  display:flex;
+  justify-content:space-between;
+  gap:calc(6px * var(--ui-scale));
+}
+
+.flowerMetaLine strong{
+  color:#6b4324;
+  font-weight:950;
+}
+
+.priceUp{color:#b36446;}
+.priceDown{color:#56805a;}
+.priceFlat{color:#8a6b4a;}
+
+.flowerActions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:calc(6px * var(--ui-scale));
+  margin-top:auto;
+}
+
+.flowerQtyBox{
+  display:grid;
+  grid-template-columns:auto minmax(0, 1fr) auto;
+  align-items:center;
+  gap:calc(5px * var(--ui-scale));
+  margin-top:calc(1px * var(--ui-scale));
+  padding:calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale));
+  border-radius:calc(10px * var(--ui-scale));
+  background:rgba(255,250,241,.62);
+  border:1px solid rgba(175,128,87,.10);
+}
+
+.flowerQtyLabel{
+  color:#8a6848;
+  font-size:calc(9.5px * var(--ui-scale));
+  font-weight:800;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.flowerQtyInput{
+  width:100%;
+  min-width:0;
+  height:calc(24px * var(--ui-scale));
+  padding:0 calc(6px * var(--ui-scale));
+  border-radius:calc(8px * var(--ui-scale));
+  border:1px solid rgba(153,104,62,.20);
+  background:rgba(255,253,248,.88);
+  color:#6a4223;
+  font-size:calc(11px * var(--ui-scale));
+  font-weight:900;
+  text-align:center;
+  outline:none;
+  box-shadow:inset 0 1px 2px rgba(118,82,45,.045);
+}
+
+.flowerQtyInput:focus{
+  border-color:rgba(166,113,64,.36);
+  box-shadow:0 0 0 calc(2px * var(--ui-scale)) rgba(218,179,111,.16);
+}
+
+.flowerQtyFiveBtn{
+  appearance:none;
+  cursor:pointer;
+  height:calc(24px * var(--ui-scale));
+  min-width:calc(34px * var(--ui-scale));
+  padding:0 calc(6px * var(--ui-scale));
+  border-radius:calc(8px * var(--ui-scale));
+  border:1px solid rgba(153,104,62,.18);
+  background:linear-gradient(180deg, rgba(255,244,220,.92), rgba(232,203,164,.82));
+  color:#6a4223;
+  font-size:calc(10.5px * var(--ui-scale));
+  font-weight:950;
+  line-height:1;
+  white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.70), 0 1px 3px rgba(101,75,45,.06);
+}
+
+.flowerQtyFiveBtn:hover{
+  filter:brightness(1.02);
+}
+
+
+.flowerActionBtn,
+.potActionBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  min-height:calc(28px * var(--ui-scale));
+  border-radius:calc(10px * var(--ui-scale));
+  color:#6a4223;
+  font-size:calc(11px * var(--ui-scale));
+  font-weight:950;
+  background:
+    linear-gradient(180deg, rgba(255,241,210,.96), rgba(230,199,157,.88));
+  border:1px solid rgba(153,104,62,.20);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.75),
+    0 2px 5px rgba(101,75,45,.08);
+  transition:transform .16s ease, filter .16s ease, opacity .16s ease;
+}
+
+.flowerActionBtn:hover,
+.potActionBtn:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.02);
+}
+
+.flowerActionBtn:disabled,
+.potActionBtn:disabled{
+  cursor:not-allowed;
+  opacity:.52;
+  transform:none;
+  filter:none;
+}
+
+.flowerStateBox{
+  margin-top:calc(6px * var(--ui-scale));
+  padding:calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border-radius:calc(13px * var(--ui-scale));
+  background:rgba(255,252,246,.66);
+  color:#775434;
+  font-size:calc(11.2px * var(--ui-scale));
+  line-height:1.35;
+  border:1px solid rgba(170,125,86,.13);
+}
+
+.flowerStateBox.error{
+  color:#8b3d2d;
+  background:rgba(255,238,232,.78);
+}
+
+.potPanel .flowerPanelBody{
+  display:flex;
+  flex-direction:column;
+  gap:calc(6px * var(--ui-scale));
+}
+
+.potStatusBlock{
+  flex:0 0 auto;
+  padding:calc(6px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  border-radius:calc(14px * var(--ui-scale));
+  background:rgba(255,252,246,.48);
+  border:1px solid rgba(178,128,83,.10);
+}
+
+.potStatusTitle{
+  color:#684226;
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:950;
+  line-height:1.25;
+  text-align:center;
+}
+
+.potStatusDesc{
+  margin-top:calc(3px * var(--ui-scale));
+  color:#856245;
+  font-size:calc(10.4px * var(--ui-scale));
+  line-height:1.38;
+  text-align:center;
+}
+
+.potStatusDescLine{
+  display:block;
+}
+
+.potImageStage{
+  flex:0 0 auto;
+  min-height:calc(122px * var(--ui-scale));
+  border-radius:calc(17px * var(--ui-scale));
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255,250,222,.78), rgba(255,246,232,.24) 60%, rgba(255,255,255,0) 76%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:calc(6px * var(--ui-scale));
+}
+
+.potStageInner{
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+#potImage{
+  width:52%;
+  max-height:calc(98px * var(--ui-scale));
+  object-fit:contain;
+  filter:drop-shadow(0 calc(7px * var(--ui-scale)) calc(10px * var(--ui-scale)) rgba(105,78,45,.14));
+}
+
+.potActions{
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:calc(6px * var(--ui-scale));
+}
+
+.potActions.single{
+  grid-template-columns:1fr;
+}
+
+.potActionBtn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:calc(27px * var(--ui-scale));
+  padding:0 calc(8px * var(--ui-scale));
+  border-radius:calc(9px * var(--ui-scale));
+  background:
+    linear-gradient(180deg, rgba(246,221,181,.98), rgba(214,170,112,.90));
+  border-color:rgba(132,89,47,.28);
+  color:#5e3b20;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.70),
+    0 2px 6px rgba(104,74,41,.10);
+}
+
+.potActionContent{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:calc(5px * var(--ui-scale));
+  line-height:1;
+}
+
+.potActionIcon{
+  width:calc(20px * var(--ui-scale));
+  height:calc(20px * var(--ui-scale));
+  object-fit:contain;
+  flex:0 0 auto;
+  padding:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  filter:drop-shadow(0 1px 1px rgba(96,65,35,.18));
+}
+
+.potCareStats{
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:calc(5px * var(--ui-scale));
+}
+
+.potStat{
+  min-width:0;
+  padding:calc(5px * var(--ui-scale)) calc(4px * var(--ui-scale));
+  border-radius:calc(12px * var(--ui-scale));
+  background:rgba(255,253,248,.58);
+  border:1px solid rgba(178,128,83,.10);
+  text-align:center;
+}
+
+.potStatIcon{
+  width:calc(16px * var(--ui-scale));
+  height:calc(16px * var(--ui-scale));
+  object-fit:contain;
+  vertical-align:middle;
+  margin-bottom:calc(3px * var(--ui-scale));
+}
+
+.potStatLabel{
+  color:#8a6747;
+  font-size:calc(9.2px * var(--ui-scale));
+  line-height:1.15;
+}
+
+.potStatValue{
+  color:#674225;
+  font-size:calc(12.5px * var(--ui-scale));
+  font-weight:950;
+  line-height:1.25;
+}
+
+.flowerBundleInventory{
+  flex:0 0 auto;
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  gap:calc(4px * var(--ui-scale));
+  padding:calc(2px * var(--ui-scale)) calc(4px * var(--ui-scale));
+}
+
+.flowerBundleItem{
+  min-width:calc(38px * var(--ui-scale));
+  height:calc(26px * var(--ui-scale));
+  padding:0 calc(5px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(255,253,248,.42);
+  border:1px solid rgba(178,128,83,.08);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:calc(2px * var(--ui-scale));
+  user-select:none;
+  pointer-events:none;
+}
+
+.flowerBundleIcon{
+  width:calc(18px * var(--ui-scale));
+  height:calc(18px * var(--ui-scale));
+  object-fit:contain;
+  display:block;
+  flex:0 0 auto;
+  filter:drop-shadow(0 2px 3px rgba(96,65,35,.10));
+}
+
+.flowerBundleName{
+  display:none;
+}
+
+.flowerBundleQty{
+  color:#674225;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:950;
+  line-height:1;
+  white-space:nowrap;
+}
+
+#flowerToast{
+  position:absolute;
+  left:50%;
+  top:calc(14px * var(--ui-scale));
+  transform:translateX(-50%) translateY(-8px);
+  min-width:calc(180px * var(--ui-scale));
+  max-width:56%;
+  padding:calc(8px * var(--ui-scale)) calc(14px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(247,252,238,.96);
+  color:#55713a;
+  border:1px solid rgba(129,166,89,.22);
+  font-size:calc(11.5px * var(--ui-scale));
+  font-weight:900;
+  line-height:1.35;
+  text-align:center;
+  box-shadow:
+    0 calc(8px * var(--ui-scale)) calc(20px * var(--ui-scale)) rgba(77,95,48,.12),
+    inset 0 1px 0 rgba(255,255,255,.80);
+  pointer-events:none;
+  opacity:0;
+  z-index:100;
+  transition:opacity .22s ease, transform .22s ease;
+}
+
+#flowerToast.error{
+  background:rgba(255,242,235,.96);
+  color:#8b4a35;
+  border-color:rgba(198,122,93,.22);
+  box-shadow:
+    0 calc(8px * var(--ui-scale)) calc(20px * var(--ui-scale)) rgba(120,70,45,.12),
+    inset 0 1px 0 rgba(255,255,255,.80);
+}
+
+#flowerToast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+.flowerGuestMask{
+  margin:auto;
+  width:min(520px, 92%);
+  padding:calc(22px * var(--ui-scale));
+  border-radius:calc(18px * var(--ui-scale));
+  background:rgba(255,250,243,.88);
+  border:1px solid rgba(170,122,82,.18);
+  box-shadow:0 calc(16px * var(--ui-scale)) calc(38px * var(--ui-scale)) rgba(90,67,43,.12);
+  text-align:center;
+  color:#745131;
+}
+
+.flowerGuestMask strong{
+  display:block;
+  color:#684226;
+  font-size:calc(18px * var(--ui-scale));
+  margin-bottom:calc(8px * var(--ui-scale));
+}
+
+.flowerMarketNote{
+  margin-top:calc(7px * var(--ui-scale));
+  padding:calc(7px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border-radius:calc(13px * var(--ui-scale));
+  background:linear-gradient(180deg, rgba(255,248,226,.76), rgba(255,242,218,.58));
+  border:1px solid rgba(203,160,105,.16);
+  color:#7d5b3b;
+  font-size:calc(10.3px * var(--ui-scale));
+  line-height:1.35;
+  box-shadow:0 calc(3px * var(--ui-scale)) calc(9px * var(--ui-scale)) rgba(108,78,45,.045), inset 0 1px 0 rgba(255,255,255,.72);
+  opacity:1;
+  transform:translateY(0);
+  transition:opacity .32s ease, transform .32s ease;
+}
+
+.flowerMarketNote.isChanging{
+  opacity:0;
+  transform:translateY(calc(5px * var(--ui-scale)));
+}
+
+
+
+/* =========================================================
+   首次进入花房奖励弹窗：花朵边框
+========================================================= */
+#flowerRewardModal{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(64,45,30,.30);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+}
+
+#flowerRewardModal.show{
+  display:flex;
+}
+
+.flowerRewardCard{
+  position:relative;
+  width:min(430px, 92vw);
+  padding:28px 24px 22px;
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,226,235,.68), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,240,181,.62), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,244,226,.96));
+  border:2px solid rgba(216,157,106,.35);
+  box-shadow:
+    0 22px 54px rgba(69,47,28,.24),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  color:#6a4223;
+  text-align:center;
+  overflow:hidden;
+  transform-origin:center center;
+}
+
+#flowerRewardModal.show .flowerRewardCard{
+  animation:flowerRewardPop .46s cubic-bezier(.2,1.15,.34,1) both;
+}
+
+#flowerRewardModal.claimed .flowerRewardCard{
+  animation:flowerRewardClaimedPulse .72s ease both;
+}
+
+.flowerRewardPetals{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:1;
+}
+
+.flowerRewardPetals span{
+  position:absolute;
+  top:-18px;
+  color:rgba(220,132,154,.56);
+  font-size:16px;
+  opacity:0;
+  text-shadow:0 2px 4px rgba(255,255,255,.76);
+}
+
+#flowerRewardModal.show .flowerRewardPetals span{
+  animation:flowerRewardPetalFall 1.35s ease-in-out both;
+}
+
+.flowerRewardPetals span:nth-child(1){left:12%; animation-delay:.05s;}
+.flowerRewardPetals span:nth-child(2){left:28%; animation-delay:.18s;}
+.flowerRewardPetals span:nth-child(3){left:48%; animation-delay:.02s;}
+.flowerRewardPetals span:nth-child(4){left:66%; animation-delay:.22s;}
+.flowerRewardPetals span:nth-child(5){left:82%; animation-delay:.10s;}
+
+.flowerRewardContent{
+  position:relative;
+  z-index:2;
+}
+
+@keyframes flowerRewardPop{
+  0%{opacity:0; transform:translateY(12px) scale(.88);}
+  62%{opacity:1; transform:translateY(0) scale(1.035);}
+  100%{opacity:1; transform:translateY(0) scale(1);}
+}
+
+@keyframes flowerRewardClaimedPulse{
+  0%,100%{transform:scale(1);}
+  42%{transform:scale(1.025); box-shadow:0 24px 58px rgba(69,47,28,.22), 0 0 0 8px rgba(255,222,145,.16), inset 0 1px 0 rgba(255,255,255,.9);}
+}
+
+@keyframes flowerRewardPetalFall{
+  0%{opacity:0; transform:translateY(-14px) rotate(0deg) scale(.78);}
+  20%{opacity:.85;}
+  100%{opacity:0; transform:translateY(145px) rotate(160deg) scale(1);}
+}
+
+.flowerRewardCard::before{
+  content:"✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  position:absolute;
+  left:12px;
+  right:12px;
+  top:9px;
+  color:rgba(209,120,148,.58);
+  font-size:16px;
+  letter-spacing:7px;
+  white-space:nowrap;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+.flowerRewardCard::after{
+  content:"✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  position:absolute;
+  left:12px;
+  right:12px;
+  bottom:8px;
+  color:rgba(199,145,75,.48);
+  font-size:15px;
+  letter-spacing:7px;
+  white-space:nowrap;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+.flowerRewardClose{
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:30px;
+  height:30px;
+  border:none;
+  border-radius:999px;
+  cursor:pointer;
+  background:rgba(255,250,242,.88);
+  color:#7b5636;
+  font-size:18px;
+  line-height:1;
+  font-weight:900;
+  box-shadow:0 2px 8px rgba(105,75,43,.10), inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.flowerRewardIcon{
+  width:62px;
+  height:62px;
+  margin:4px auto 10px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,246,226,.78);
+  border:1px solid rgba(220,164,102,.25);
+  box-shadow:0 8px 20px rgba(126,92,51,.10), inset 0 1px 0 rgba(255,255,255,.85);
+  font-size:34px;
+}
+
+.flowerRewardTitle{
+  font-size:18px;
+  font-weight:950;
+  line-height:1.25;
+  margin:0 28px 8px;
+  color:#b26a3a;
+}
+
+#flowerRewardModal.show .flowerRewardTitle{
+  animation:flowerRewardStamp .48s ease both;
+}
+
+.flowerRewardAchievementName{
+  position:relative;
+  display:inline-block;
+  max-width:100%;
+  margin:0 auto 9px;
+  padding:8px 18px;
+  border-radius:999px;
+  color:#6a4223;
+  font-size:22px;
+  font-weight:950;
+  line-height:1.15;
+  background:rgba(255,249,232,.72);
+  border:1px solid rgba(218,166,87,.24);
+  box-shadow:0 5px 14px rgba(126,92,51,.08), inset 0 1px 0 rgba(255,255,255,.82);
+  overflow:hidden;
+}
+
+.flowerRewardAchievementName::after{
+  content:"";
+  position:absolute;
+  inset:-30% auto -30% -42%;
+  width:36%;
+  background:linear-gradient(90deg, transparent, rgba(255,234,160,.80), transparent);
+  transform:skewX(-18deg);
+}
+
+#flowerRewardModal.show .flowerRewardAchievementName::after{
+  animation:flowerRewardSweep 1.35s ease .25s both;
+}
+
+.flowerRewardSectionTitle{
+  margin:10px 0 0;
+  color:#8a5c33;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+
+@keyframes flowerRewardStamp{
+  0%{opacity:0; transform:scale(1.16);}
+  72%{opacity:1; transform:scale(.96);}
+  100%{opacity:1; transform:scale(1);}
+}
+
+@keyframes flowerRewardSweep{
+  0%{left:-42%;}
+  100%{left:118%;}
+}
+
+.flowerRewardText{
+  color:#826046;
+  font-size:13px;
+  line-height:1.7;
+  margin:0 auto 14px;
+  white-space:pre-line;
+}
+
+
+.flowerRewardItems{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:8px;
+  margin:12px 0 16px;
+}
+
+.flowerRewardItem{
+  min-width:0;
+  padding:10px 6px 9px;
+  border-radius:16px;
+  background:rgba(255,252,247,.72);
+  border:1px solid rgba(196,139,86,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.82), 0 3px 10px rgba(116,86,54,.06);
+}
+
+#flowerRewardModal.show .flowerRewardItem{
+  animation:flowerRewardItemIn .42s ease both;
+}
+
+#flowerRewardModal.show .flowerRewardItem:nth-child(1){animation-delay:.18s;}
+#flowerRewardModal.show .flowerRewardItem:nth-child(2){animation-delay:.28s;}
+#flowerRewardModal.show .flowerRewardItem:nth-child(3){animation-delay:.38s;}
+
+@keyframes flowerRewardItemIn{
+  0%{opacity:0; transform:translateY(8px) scale(.96);}
+  100%{opacity:1; transform:translateY(0) scale(1);}
+}
+
+.flowerRewardItem img{
+  width:30px;
+  height:30px;
+  object-fit:contain;
+  display:block;
+  margin:0 auto 5px;
+  filter:drop-shadow(0 2px 3px rgba(96,65,35,.12));
+}
+
+.flowerRewardItemName{
+  font-size:11px;
+  color:#7b593b;
+  font-weight:900;
+  line-height:1.2;
+}
+
+.flowerRewardItemQty{
+  margin-top:2px;
+  font-size:13px;
+  color:#6a4223;
+  font-weight:950;
+  line-height:1.2;
+}
+
+.flowerRewardConfirm{
+  appearance:none;
+  cursor:pointer;
+  min-width:132px;
+  height:36px;
+  border-radius:999px;
+  border:1px solid rgba(153,104,62,.22);
+  background:linear-gradient(180deg, rgba(255,238,200,.96), rgba(227,187,132,.90));
+  color:#67401f;
+  font-size:13px;
+  font-weight:950;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72), 0 4px 12px rgba(112,80,42,.10);
+}
+
+.flowerRewardConfirm:hover,
+.flowerRewardClose:hover{
+  filter:brightness(1.02);
+}
+
+.flowerRewardConfirm:disabled{
+  cursor:wait;
+  opacity:.68;
+  filter:none;
+}
+
+#flowerRewardModal.claimed .flowerRewardItems,
+#flowerRewardModal.claimed .flowerRewardSectionTitle{
+  display:none;
+}
+
+#flowerRewardModal.claimed .flowerRewardConfirm{
+  display:none;
+}
+
+#flowerRewardModal.claimed .flowerRewardClose{
+  display:none;
+}
+
+@media(max-width:540px){
+  .flowerRewardCard{
+    width:min(360px, 92vw);
+    padding:26px 18px 20px;
+    border-radius:24px;
+  }
+
+  .flowerRewardTitle{
+    font-size:17px;
+  }
+
+  .flowerRewardAchievementName{
+    font-size:19px;
+    padding:7px 14px;
+  }
+
+  .flowerRewardText{
     font-size:12px;
   }
 
-  .main-panel{
-    width:min(92vw, 92vw);
-    top:54%;
-    padding:22px 18px 20px;
-    border-radius:22px;
+  .flowerRewardItems{
+    gap:6px;
   }
 
-  .grid{
-    grid-template-columns:1fr;
-    gap:12px;
+  .flowerRewardItem{
+    padding:8px 4px;
+  }
+}
+
+/* 登录弹窗 */
+#loginUI{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+
+#loginUI.show{
+  display:flex;
+}
+
+.login-panel{
+  position:relative;
+  width:min(720px,94vw);
+}
+
+.login-panel img{
+  width:100%;
+  display:block;
+  pointer-events:none;
+}
+
+#username,
+#password{
+  position:absolute;
+  left:36.2%;
+  height:8.1%;
+  border:none;
+  outline:none;
+  padding:0 10px;
+  font-size:18px;
+  color:#5b3e28;
+  background:transparent;
+  line-height:1.1;
+}
+
+#username{
+  top:40%;
+  width:27.5%;
+}
+
+#password{
+  top:56%;
+  width:20%;
+}
+
+#togglePassword{
+  position:absolute;
+  top:56%;
+  left:56%;
+  width:8%;
+  height:8.1%;
+  border:none;
+  cursor:pointer;
+  background:rgba(255,215,120,.15);
+  border-radius:6px;
+}
+
+#togglePassword:hover{
+  background:rgba(255,215,120,.35);
+  box-shadow:0 0 8px rgba(255,220,120,.6);
+}
+
+#loginBtn{
+  position:absolute;
+  top:68%;
+  left:40%;
+  width:20%;
+  height:9%;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+}
+
+#registerLink{
+  position:absolute;
+  top:50%;
+  left:52%;
+  transform:translateX(-50%);
+  color:#7a4f2b;
+  font-size:14px;
+  font-weight:600;
+  text-decoration:underline;
+  cursor:pointer;
+  background:none;
+  border:none;
+  padding:0;
+  white-space:nowrap;
+}
+
+#registerLink:hover{
+  color:#9b6334;
+}
+
+#loginMessage{
+  position:absolute;
+  top:34.8%;
+  left:53.5%;
+  transform:translateX(-50%);
+  text-align:center;
+  color:#7a4f2b;
+  font-size:14px;
+  font-weight:600;
+  width:42%;
+  max-width:320px;
+  white-space:normal;
+  line-height:1.25;
+}
+
+.closeBtn{
+  position:absolute;
+  top:4px;
+  right:6px;
+  border:none;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:white;
+  cursor:pointer;
+  font-size:18px;
+}
+
+/* =========================================================
+   540px 及以下手机版
+========================================================= */
+@media(max-width:540px){
+  html,body{
+    overflow-x:hidden;
+    overflow-y:auto;
+    height:auto;
+    min-height:100%;
   }
 
-  .card h3{
-    font-size:16px;
+  body{
+    display:block;
+    background:
+      linear-gradient(rgba(243,236,223,.72), rgba(243,236,223,.92)),
+      url("room-flower.png") center center / cover no-repeat fixed;
   }
 
-  .card p,
-  .notice{
-    font-size:13px;
+  #room{
+    width:100%;
+    min-height:100vh;
+    min-height:100dvh;
+    height:auto;
+    display:block;
+    overflow:visible;
+    padding:10px 12px 14px;
   }
 
-  .action-btn{
-    min-width:124px;
-    font-size:13px;
+  #bgFrame{
+    display:none;
   }
 
-  .corner-badge{
-    right:12px;
-    bottom:12px;
+  #overlay{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    height:auto;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    overflow:visible;
+    --ui-scale:1;
+    pointer-events:auto;
+  }
+
+  #topActions{
+    position:sticky;
+    top:10px;
+    right:auto;
+    left:auto;
+    width:100%;
+    height:40px;
+    z-index:30;
+    order:1;
+  }
+
+  #topIdentityBar{
+    gap:6px;
+    padding:5px 7px;
+    border-radius:14px;
+  }
+
+  #topIdentityBadge{
+    padding:0 9px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  #loginOpenBtn,
+  #logoutBtn{
+    width:42px;
+    min-width:42px;
+    flex-basis:42px;
+    font-size:11px;
+    border-radius:10px;
+  }
+
+  #siteNoticeWrap{
+    width:34px;
+    min-width:34px;
+    flex-basis:34px;
+  }
+
+  #siteNoticeBtn{
+    font-size:14px;
+    border-radius:10px;
+  }
+
+  #siteNoticePanel{
+    position:absolute;
+    top:calc(100% + 8px);
+    right:0;
+    left:auto;
+    width:min(320px, calc(100vw - 24px));
+    max-height:60dvh;
+    z-index:999;
+  }
+
+  #topBar{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    order:0;
+    z-index:20;
+
+    --nav-btn-height:34px;
+    --nav-btn-px:8px;
+    --nav-btn-radius:10px;
+    --nav-btn-font:12px;
+    --nav-gap:7px;
+  }
+
+  #roomNav{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:7px;
+    transform:none;
+  }
+
+  .navBtn{
+    width:100%;
+    min-width:0;
+    height:34px;
+    padding:0 8px;
+    font-size:12px;
+    border-radius:10px;
+    overflow:hidden;
+  }
+
+  .navEffect{
+    display:none;
+  }
+
+  #flowerApp{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    height:auto;
+    order:2;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:10px;
+    border-radius:20px;
+  }
+
+  .flowerPanel{
+    border-radius:18px;
+    max-height:none;
+  }
+
+  .flowerPanelHeader{
+    padding:14px 14px 9px;
+  }
+
+  .flowerPanelTitle{
+    font-size:18px;
+  }
+
+  .flowerPanelSub{
+    font-size:12px;
+  }
+
+  .flowerGoldPill{
+    max-width:52%;
     font-size:11px;
   }
-}
 
-@media (max-width: 420px){
-  .main-panel{
-    top:55%;
-    padding:18px 14px 16px;
+  .flowerPanelBody{
+    padding:12px;
+    overflow:visible;
   }
 
-  .subtitle{
+  .flowerMarketGrid{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  .flowerCard{
+    display:grid;
+    grid-template-columns:92px minmax(0, 1fr);
+    grid-template-areas:
+      "img name"
+      "img phrase"
+      "img meta"
+      "qty qty"
+      "actions actions";
+    align-items:center;
+    gap:7px 10px;
+  }
+
+  .flowerCardImgWrap{
+    grid-area:img;
+    aspect-ratio:1;
+  }
+
+  .flowerCardName{
+    grid-area:name;
+    text-align:left;
+    font-size:15px;
+  }
+
+  .flowerCardPhrase{
+    grid-area:phrase;
+    text-align:left;
+    min-height:auto;
+    font-size:11px;
+  }
+
+  .flowerCardMeta{
+    grid-area:meta;
+    font-size:11px;
+  }
+
+  .flowerActions{
+    grid-area:actions;
+  }
+
+  .flowerQtyBox{
+    grid-area:qty;
+    margin-top:0;
+    grid-template-columns:auto minmax(0, 1fr) minmax(0, 1fr);
+    justify-content:stretch;
+    width:100%;
+  }
+
+  .flowerQtyInput{
+    height:28px;
     font-size:12px;
   }
 
-  .card{
-    padding:14px;
-    border-radius:16px;
+  .flowerQtyFiveBtn{
+    width:100%;
+    min-width:0;
   }
 
-  .notice{
-    padding:12px 13px;
+  .potImageStage{
+    min-height:138px;
+  }
+
+  #potImage{
+    width:50%;
+    max-height:108px;
+  }
+
+  #flowerToast{
+    position:fixed;
+    top:74px;
+    bottom:auto;
+    max-width:calc(100vw - 28px);
+    --ui-scale:1;
+  }
+
+  #registerLink{
+    top:49.2%;
+    font-size:10px;
+  }
+
+  #username,
+  #password{
+    font-size:15px;
+    padding:0 7px;
+  }
+
+  #loginMessage{
+    top:34.1%;
+    width:46%;
+    font-size:9px;
+    line-height:1.18;
+  }
+}
+
+@media(max-width:380px){
+  .login-panel{
+    width:95vw;
+  }
+
+  #registerLink{
+    top:48.8%;
+    font-size:8px;
+  }
+
+  #username,
+  #password{
+    font-size:12px;
+    padding:0 5px;
+  }
+
+  #username{
+    top:40.1%;
+    left:36.25%;
+    width:27.1%;
+    height:7.9%;
+  }
+
+  #password{
+    top:56.05%;
+    left:36.25%;
+    width:19.7%;
+    height:7.9%;
+  }
+
+  #togglePassword{
+    top:56.05%;
+    left:55.9%;
+    width:8.2%;
+    height:7.9%;
+  }
+
+  #loginMessage{
+    top:34.8%;
+    left:53.4%;
+    width:44%;
+    font-size:7.8px;
+    line-height:1.16;
+    letter-spacing:0;
+  }
+
+  .closeBtn{
+    width:28px;
+    height:28px;
+    font-size:16px;
+    top:2px;
+    right:2px;
   }
 }
 </style>
 </head>
-<body>
 
-<div id="page">
-  <div class="top-bar">
-    <button class="top-btn" onclick="goHome()">返回首页</button>
-    <button class="top-btn" onclick="goPets()">去宠物区</button>
+<body>
+<div id="room">
+  <div id="bgFrame" aria-hidden="true">
+    <img id="bg" src="room-flower.png" alt="十号房花房背景" />
   </div>
 
-  <main class="main-panel">
-    <h1 class="title">十号房花房</h1>
-    <p class="subtitle">
-      这里是十号房的临时花房页面。后续可以扩展成花卉交易市场、随机价格系统、入仓持有、成员买卖记录、金币变化统计和每日行情展示。
-    </p>
+  <div id="flowerBgFx" aria-hidden="true">
+    <span class="fxPetal p1">✿</span>
+    <span class="fxPetal p2">❀</span>
+    <span class="fxPetal p3">✽</span>
+    <span class="fxPetal p4">✿</span>
+    <span class="fxPetal p5">❀</span>
+    <span class="fxPetal p6">✽</span>
+    <span class="fxLeaf l1">🍃</span>
+    <span class="fxLeaf l2">🍃</span>
+    <span class="fxLeaf l3">🍃</span>
+    <span class="fxLeaf l4">🍃</span>
+    <span class="fxGlow g1"></span>
+    <span class="fxGlow g2"></span>
+    <span class="fxGlow g3"></span>
+    <span class="fxGlow g4"></span>
+    <span class="fxGlow g5"></span>
 
-    <section class="grid">
-      <div class="card">
-        <h3>花卉市场</h3>
-        <p>
-          以后这里可以展示当前可买卖花卉、今日价格、涨跌趋势、稀有花种和库存情况。也可以做成你之前想要的类似股票的花卉交易玩法。
-        </p>
+  </div>
+
+  <div id="overlay">
+    <!-- 身份组件 -->
+    <div id="topActions">
+      <div id="topIdentityBar">
+        <div id="topIdentityBadge">
+          <span class="identityText" id="currentUserText">参观者</span>
+        </div>
+
+        <div id="siteNoticeWrap">
+          <button id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="查看花房维护提醒">
+            <span id="siteNoticeIcon">🔔</span>
+            <span id="siteNoticeCount">0</span>
+          </button>
+
+          <div id="siteNoticePanel" aria-live="polite" aria-hidden="true">
+            <div class="siteNoticeTitle">花房维护提醒</div>
+            <div id="siteNoticeContent">
+              <div class="siteNoticeEmpty">暂无需要维护的种子状态。</div>
+            </div>
+          </div>
+        </div>
+
+        <button id="loginOpenBtn" type="button">登录</button>
+        <button id="logoutBtn" class="hidden" type="button">登出</button>
       </div>
-
-      <div class="card">
-        <h3>金币系统联动</h3>
-        <p>
-          后续可接入演唱任务、后期任务、称号奖励带来的金币收入，再将成员金币用于买花、卖花、囤仓、回收和临时行情活动。
-        </p>
-      </div>
-
-      <div class="card">
-        <h3>成员操作区</h3>
-        <p>
-          以后这里可以增加“买入”“卖出”“查看持仓”“今日结算”“历史记录”“排行榜”等按钮，也可以做成公共市场或个人仓库双模式。
-        </p>
-      </div>
-
-      <div class="card">
-        <h3>扩展方向</h3>
-        <p>
-          后续可增加节日限定花、随机新闻事件、价格波动原因、系统刷新时间、特殊任务奖励花种，以及和宠物区互相联动的装饰道具。
-        </p>
-      </div>
-    </section>
-
-    <div class="notice">
-      当前为临时占位页。你可以先把这个页面上线，等你后面确定花卉系统的字段、价格逻辑和金币规则后，再接数据库和真实交易功能。
     </div>
 
-    <div class="bottom-actions">
-      <button class="action-btn" onclick="goHome()">返回首页</button>
-      <button class="action-btn sub" onclick="goPets()">切换到宠物区</button>
-    </div>
-  </main>
+    <!-- 房间切换按钮：花房页不显示“花房区”按钮 -->
+    <div id="topBar" aria-label="房间切换">
+      <div id="navOuter">
+        <div id="navScroll">
+          <nav id="roomNav">
+            <button class="navBtn" data-room="hall" type="button" onclick="enterRoom('index.html', false)">
+              <span class="navLabel">大堂</span>
+              <span class="navEffect navEffectA">✦</span>
+              <span class="navEffect navEffectB">✧</span>
+              <span class="navEffect navEffectC">★</span>
+            </button>
 
-  <div class="corner-badge">临时页面 · Flower</div>
+            <button class="navBtn" data-room="manager" type="button" onclick="enterManagerRoom()">
+              <span class="navLabel">宿管室</span>
+              <span class="navEffect navEffectA">✎</span>
+              <span class="navEffect navEffectB">▱</span>
+              <span class="navEffect navEffectC">✐</span>
+            </button>
+
+            <button class="navBtn" data-room="honor" type="button" onclick="enterRoom('honor.html', false)">
+              <span class="navLabel">荣誉墙</span>
+              <span class="navEffect navEffectA">🏆</span>
+              <span class="navEffect navEffectB">🏅</span>
+              <span class="navEffect navEffectC">✦</span>
+            </button>
+
+            <button class="navBtn" data-room="game" type="button" onclick="enterRoom('game.html', false)">
+              <span class="navLabel">游戏房</span>
+              <span class="navEffect navEffectA">🎮</span>
+              <span class="navEffect navEffectB">🎲</span>
+              <span class="navEffect navEffectC">👾</span>
+            </button>
+
+            <button class="navBtn" data-room="studio" type="button" onclick="enterRoom('studio-todo.html', true)">
+              <span class="navLabel">工作间</span>
+              <span class="navEffect navEffectA">🎙</span>
+              <span class="navEffect navEffectB">🎧</span>
+              <span class="navEffect navEffectC">◇</span>
+            </button>
+
+            <button class="navBtn" data-room="living" type="button" onclick="enterRoom('living.html', false)">
+              <span class="navLabel">客厅</span>
+              <span class="navEffect navEffectA">☕</span>
+              <span class="navEffect navEffectB">✦</span>
+              <span class="navEffect navEffectC">💬</span>
+            </button>
+
+            <button class="navBtn" data-room="dorm" type="button" onclick="enterRoom('dorm.html', true)">
+              <span class="navLabel">宿舍</span>
+              <span class="navEffect navEffectA">☁</span>
+              <span class="navEffect navEffectB">☾</span>
+              <span class="navEffect navEffectC">💤</span>
+            </button>
+
+            <button class="navBtn" data-room="pets" type="button" onclick="enterRoom('pets.html', false)">
+              <span class="navLabel">宠物区</span>
+              <span class="navEffect navEffectA">🐾</span>
+              <span class="navEffect navEffectB">♡</span>
+              <span class="navEffect navEffectC">🐱</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <!-- 花房真实功能面板 -->
+    <main id="flowerApp" aria-label="花房">
+      <section class="flowerPanel marketPanel">
+        <div class="flowerPanelHeader">
+          <div class="flowerPanelTitle">
+            <span>花市</span>
+            <span class="flowerGoldPill" id="flowerGoldPill">金币：--</span>
+          </div>
+          <div class="flowerPanelSub" id="marketSubText">下次价格刷新：计算中</div>
+        </div>
+        <div class="flowerPanelBody">
+          <div id="marketContent">
+            <div class="flowerGuestMask">
+              <strong>欢迎来到花房</strong>
+              登录后可以查看自己的花市价格、买卖花朵和照顾花盆。
+            </div>
+          </div>
+          <div id="marketMessage" class="flowerStateBox hidden"></div>
+        </div>
+      </section>
+
+      <section class="flowerPanel potPanel">
+        <div class="flowerPanelHeader">
+          <div class="flowerPanelTitle">
+            <span>我的花盆</span>
+          </div>
+          <div class="flowerPanelSub">照顾它慢慢长大，等它准备好时就可以收获。</div>
+        </div>
+        <div class="flowerPanelBody">
+          <div class="potStatusBlock">
+            <div class="potStatusTitle" id="potStatusTitle">空花盆</div>
+            <div class="potStatusDesc" id="potStatusDesc">登录后可以种下一颗种子。</div>
+          </div>
+
+          <div class="potImageStage">
+            <div class="potStageInner">
+              <img id="potImage" src="pot-empty.png" alt="当前花盆状态">
+            </div>
+          </div>
+
+          <div class="potActions single" id="potActions">
+            <button class="potActionBtn" type="button" onclick="openLogin()">登录后种花</button>
+          </div>
+
+          <div class="potCareStats" aria-label="花房道具库存">
+            <div class="potStat">
+              <img class="potStatIcon" src="seed.png" alt="">
+              <div class="potStatLabel">种子</div>
+              <div class="potStatValue" id="potSeedCount">0</div>
+            </div>
+            <div class="potStat">
+              <img class="potStatIcon" src="water.png" alt="">
+              <div class="potStatLabel">水</div>
+              <div class="potStatValue" id="potWaterCount">0</div>
+            </div>
+            <div class="potStat">
+              <img class="potStatIcon" src="fert.png" alt="">
+              <div class="potStatLabel">肥料</div>
+              <div class="potStatValue" id="potFertCount">0</div>
+            </div>
+          </div>
+
+          <div class="flowerBundleInventory" id="flowerBundleInventory" aria-label="我的花束库存"></div>
+
+          <div id="potMessage" class="flowerStateBox hidden"></div>
+        </div>
+      </section>
+
+      <div id="flowerToast" role="status" aria-live="polite"></div>
+    </main>
+  </div>
+</div>
+
+
+<div id="flowerRewardModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="flowerRewardTitle">
+  <div class="flowerRewardCard">
+    <div class="flowerRewardPetals" aria-hidden="true">
+      <span>✿</span><span>❀</span><span>✽</span><span>✿</span><span>❀</span>
+    </div>
+    <div class="flowerRewardContent">
+      <button class="flowerRewardClose" type="button" onclick="closeFlowerRewardModal()" aria-label="关闭奖励弹窗">×</button>
+      <div class="flowerRewardIcon">🌷</div>
+      <h2 class="flowerRewardTitle" id="flowerRewardTitle">🎉 解锁成就</h2>
+      <div class="flowerRewardAchievementName" id="flowerRewardAchievementName">第一次走进花房</div>
+      <p class="flowerRewardText" id="flowerRewardText">你推开花房的门，第一颗种子也在这里等你。</p>
+      <div class="flowerRewardSectionTitle" id="flowerRewardSectionTitle">成就奖励</div>
+      <div class="flowerRewardItems" id="flowerRewardItems" aria-label="获得奖励"></div>
+      <button class="flowerRewardConfirm" id="flowerRewardConfirmBtn" type="button" onclick="claimFlowerRewardFromModal()">领取成就奖励</button>
+    </div>
+  </div>
+</div>
+
+<div id="loginUI">
+  <div class="login-panel">
+    <img src="login.png" alt="登录框">
+    <input id="username" type="text" autocomplete="username">
+    <input id="password" type="password" autocomplete="current-password">
+    <button id="togglePassword" type="button" onclick="togglePassword()"></button>
+    <button id="loginBtn" type="button" onclick="login()"></button>
+    <button id="registerLink" type="button" onclick="goRegisterFromFlower()">新成员先登记哦</button>
+    <button class="closeBtn" type="button" onclick="closeLogin()">×</button>
+    <div id="loginMessage"></div>
+  </div>
 </div>
 
 <script>
-function goHome(){
-  window.location.href = "index.html";
+const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const STORAGE_KEYS = {
+  loggedIn:"room10LoggedIn",
+  user:"room10User",
+  role:"room10Role",
+  memberId:"room10MemberId",
+  memberCode:"room10MemberCode"
+};
+
+const img = document.getElementById("bg");
+const bgFrame = document.getElementById("bgFrame");
+const overlay = document.getElementById("overlay");
+const root = document.documentElement;
+const roomNav = document.getElementById("roomNav");
+const topBar = document.getElementById("topBar");
+
+const currentUserText = document.getElementById("currentUserText");
+const loginOpenBtn = document.getElementById("loginOpenBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const siteNoticeBtn = document.getElementById("siteNoticeBtn");
+const siteNoticePanel = document.getElementById("siteNoticePanel");
+const siteNoticeCount = document.getElementById("siteNoticeCount");
+const siteNoticeContent = document.getElementById("siteNoticeContent");
+
+const flowerGoldPill = document.getElementById("flowerGoldPill");
+const marketSubText = document.getElementById("marketSubText");
+const marketContent = document.getElementById("marketContent");
+const marketMessage = document.getElementById("marketMessage");
+
+const potImage = document.getElementById("potImage");
+const potStatusTitle = document.getElementById("potStatusTitle");
+const potStatusDesc = document.getElementById("potStatusDesc");
+const potSeedCount = document.getElementById("potSeedCount");
+const potWaterCount = document.getElementById("potWaterCount");
+const potFertCount = document.getElementById("potFertCount");
+const flowerBundleInventory = document.getElementById("flowerBundleInventory");
+const potActions = document.getElementById("potActions");
+const potMessage = document.getElementById("potMessage");
+const flowerToast = document.getElementById("flowerToast");
+const flowerRewardModal = document.getElementById("flowerRewardModal");
+const flowerRewardTitle = document.getElementById("flowerRewardTitle");
+const flowerRewardAchievementName = document.getElementById("flowerRewardAchievementName");
+const flowerRewardText = document.getElementById("flowerRewardText");
+const flowerRewardSectionTitle = document.getElementById("flowerRewardSectionTitle");
+const flowerRewardItems = document.getElementById("flowerRewardItems");
+const flowerRewardConfirmBtn = document.getElementById("flowerRewardConfirmBtn");
+
+let flowerRewardAutoCloseTimer = null;
+
+const flowerState = {
+  marketRows:[],
+  pot:null,
+  resources:{
+    seed:0,
+    water:0,
+    fertilizer:0
+  },
+  goldBalance:null,
+  dailyTipMessage:"",
+  busy:false
+};
+
+let witherCountdownTimer = null;
+let marketTipTimer = null;
+
+const authState = {
+  loggedIn:false,
+  nickname:"",
+  role:"visitor",
+  memberId:null,
+  memberCode:null
+};
+
+function isTinyScreen(){
+  return window.innerWidth <= 540;
 }
 
-function goPets(){
-  window.location.href = "pets.html";
+/* =========================================================
+   底图贴合坐标系统
+========================================================= */
+function clearDesktopOverlayStyles(){
+  if(!overlay) return;
+
+  overlay.style.left = "";
+  overlay.style.top = "";
+  overlay.style.width = "";
+  overlay.style.height = "";
+  root.style.setProperty("--bg-ui-scale","1");
+
+  if(roomNav){
+    roomNav.style.transform = "";
+  }
 }
+
+function syncOverlayToImage(){
+  if(isTinyScreen()){
+    clearDesktopOverlayStyles();
+    return;
+  }
+
+  if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
+
+  const frame = bgFrame.getBoundingClientRect();
+  const frameRatio = frame.width / frame.height;
+  const imageRatio = img.naturalWidth / img.naturalHeight;
+
+  let displayWidth;
+  let displayHeight;
+  let displayLeft;
+  let displayTop;
+
+  if(frameRatio > imageRatio){
+    displayHeight = frame.height;
+    displayWidth = displayHeight * imageRatio;
+    displayLeft = frame.left + (frame.width - displayWidth) / 2;
+    displayTop = frame.top;
+  }else{
+    displayWidth = frame.width;
+    displayHeight = displayWidth / imageRatio;
+    displayLeft = frame.left;
+    displayTop = frame.top + (frame.height - displayHeight) / 2;
+  }
+
+  overlay.style.left = `${displayLeft}px`;
+  overlay.style.top = `${displayTop}px`;
+  overlay.style.width = `${displayWidth}px`;
+  overlay.style.height = `${displayHeight}px`;
+
+  const scale = Math.max(0.34, Math.min(1.42, displayWidth / 1440));
+  root.style.setProperty("--bg-ui-scale", String(scale));
+
+  requestAnimationFrame(fitRoomNavToBar);
+}
+
+/* =========================================================
+   房间按钮自动缩放
+========================================================= */
+function fitRoomNavToBar(){
+  if(!roomNav || !topBar || isTinyScreen()) return;
+
+  roomNav.style.transform = "scale(1)";
+
+  const availableWidth = topBar.clientWidth;
+  const neededWidth = roomNav.scrollWidth;
+
+  if(!availableWidth || !neededWidth) return;
+
+  const fitScale = Math.min(1, availableWidth / neededWidth);
+  roomNav.style.transform = `scale(${fitScale})`;
+}
+
+/* =========================================================
+   通用工具
+========================================================= */
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function roleLabel(role){
+  const r = String(role || "").toLowerCase();
+  if(r === "owner") return "维修工";
+  if(r === "admin") return "宿管";
+  if(r === "member") return "房客";
+  if(r === "applying") return "申请中";
+  return "参观者";
+}
+
+function normalizeLoginInput(value){
+  return String(value || "").replace(/\u3000/g," ").trim();
+}
+
+function isLoggedIn(){
+  return localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
+}
+
+function readLocalAuth(){
+  authState.loggedIn = isLoggedIn();
+  authState.nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
+  authState.role = String(localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
+  authState.memberId = localStorage.getItem(STORAGE_KEYS.memberId) || null;
+  authState.memberCode = localStorage.getItem(STORAGE_KEYS.memberCode) || null;
+
+  return Boolean(authState.loggedIn && authState.nickname && authState.memberId);
+}
+
+function updateIdentity(member){
+  readLocalAuth();
+
+  const name = member?.nickname || authState.nickname || "";
+  const role = roleLabel(member?.role || authState.role);
+
+  if(!currentUserText || !loginOpenBtn || !logoutBtn) return;
+
+  if(!name || !authState.loggedIn){
+    currentUserText.textContent = "参观者";
+    loginOpenBtn.classList.remove("hidden");
+    logoutBtn.classList.add("hidden");
+    return;
+  }
+
+  currentUserText.textContent = `${name} | ${role}`;
+  loginOpenBtn.classList.add("hidden");
+  logoutBtn.classList.remove("hidden");
+}
+
+function handleLogout(){
+  localStorage.removeItem(STORAGE_KEYS.loggedIn);
+  localStorage.removeItem(STORAGE_KEYS.user);
+  localStorage.removeItem(STORAGE_KEYS.role);
+  localStorage.removeItem(STORAGE_KEYS.memberId);
+  localStorage.removeItem(STORAGE_KEYS.memberCode);
+
+  localStorage.removeItem("room10_user");
+  localStorage.removeItem("room10_current_user");
+  localStorage.removeItem("currentUser");
+  localStorage.removeItem("room10ApplicantSession");
+  localStorage.removeItem("room10ApplicationDraft");
+
+  closeNoticePanel();
+  updateIdentity();
+  renderSiteNotifications();
+  loadFlowerPage();
+}
+
+/* =========================================================
+   房间跳转
+========================================================= */
+function getManagerPageByRole(){
+  const role = String(authState.role || localStorage.getItem(STORAGE_KEYS.role) || "").toLowerCase();
+
+  if(role === "owner") return "manager-owner.html";
+  if(role === "admin") return "manager-admin.html";
+  if(role === "member") return "manager-member.html";
+
+  return "manager-visitor.html";
+}
+
+function enterManagerRoom(){
+  readLocalAuth();
+  window.location.href = getManagerPageByRole();
+}
+
+function enterRoom(page, needLogin){
+  const targetPage = String(page || "").trim();
+  if(!targetPage) return;
+
+  readLocalAuth();
+
+  if(needLogin && !authState.loggedIn){
+    openLogin();
+    return;
+  }
+
+  if((targetPage === "flower.html" || targetPage === "pets.html") && !authState.loggedIn){
+    window.location.href = `${targetPage}?mode=guest`;
+    return;
+  }
+
+  window.location.href = targetPage;
+}
+
+/* =========================================================
+   登录弹窗
+========================================================= */
+function openLogin(){
+  document.getElementById("loginUI")?.classList.add("show");
+  const msg = document.getElementById("loginMessage");
+  if(msg) msg.innerText = "";
+}
+
+function closeLogin(){
+  document.getElementById("loginUI")?.classList.remove("show");
+  const msg = document.getElementById("loginMessage");
+  if(msg) msg.innerText = "";
+}
+
+function togglePassword(){
+  const input = document.getElementById("password");
+  if(input) input.type = input.type === "password" ? "text" : "password";
+}
+
+function goRegisterFromFlower(){
+  sessionStorage.setItem("room10RegisterReturn","flower.html");
+  window.location.href = "register.html?from=flower.html";
+}
+
+async function login(){
+  const nicknameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+  const msg = document.getElementById("loginMessage");
+
+  const nickname = normalizeLoginInput(nicknameInput?.value);
+  const key = normalizeLoginInput(passwordInput?.value);
+
+  if(!msg) return;
+  msg.innerText = "";
+  msg.style.color = "#8b4a2d";
+
+  if(!nickname || !key){
+    msg.innerText = "还没填写完整呢";
+    return;
+  }
+
+  try{
+    const { data, error } = await supabaseClient.rpc("verify_member_login", {
+      input_nickname:nickname,
+      input_code:key
+    });
+
+    if(error){
+      console.error("KEY 登录失败：", error);
+      msg.innerText = `登录检查失败：${error.message || "请稍后再试"}`;
+      return;
+    }
+
+    if(!Array.isArray(data) || data.length === 0){
+      msg.innerText = "没有找到你的记录哎";
+      return;
+    }
+
+    const user = data[0] || {};
+
+    localStorage.setItem(STORAGE_KEYS.loggedIn,"true");
+    localStorage.setItem(STORAGE_KEYS.user,user.nickname || nickname);
+    localStorage.setItem(STORAGE_KEYS.role,user.role || "member");
+    localStorage.setItem(STORAGE_KEYS.memberId,user.member_id || user.id || "");
+    localStorage.setItem(STORAGE_KEYS.memberCode,key);
+
+    let roleMessage = "登录成功";
+    if(user.role === "owner") roleMessage = "维修工已上线";
+    else if(user.role === "admin") roleMessage = "宿管已上线";
+    else if(user.role === "member") roleMessage = "房客已登录";
+    else if(user.role === "applying") roleMessage = "当前身份为申请中";
+
+    msg.style.color = "#5f7d3a";
+    msg.innerText = roleMessage;
+
+    updateIdentity({
+      nickname:user.nickname || nickname,
+      role:user.role || "member"
+    });
+    await loadFlowerPage();
+
+    setTimeout(() => {
+      if(nicknameInput) nicknameInput.value = "";
+      if(passwordInput) passwordInput.value = "";
+      closeLogin();
+    }, 650);
+  }catch(e){
+    console.error("login() 查询异常：", e);
+    msg.innerText = `登录失败：${e?.message || "请稍后再试"}`;
+  }
+}
+
+
+/* =========================================================
+   花房真实功能：Supabase RPC
+========================================================= */
+function getFlowerAuth(){
+  readLocalAuth();
+  if(!authState.loggedIn || !authState.memberId){
+    return null;
+  }
+
+  if(!authState.memberCode){
+    return null;
+  }
+
+  return {
+    memberId:authState.memberId,
+    memberCode:authState.memberCode,
+    timezoneOffset:new Date().getTimezoneOffset()
+  };
+}
+
+function setFlowerBusy(isBusy){
+  flowerState.busy = Boolean(isBusy);
+  document.querySelectorAll(".flowerActionBtn,.potActionBtn").forEach(btn => {
+    btn.disabled = flowerState.busy || btn.dataset.disabled === "true";
+  });
+}
+
+
+function getFirstVisitRewardPromptKey(){
+  const memberId = authState.memberId || localStorage.getItem(STORAGE_KEYS.memberId) || "guest";
+  return `room10FlowerFirstVisitRewardPrompt:${memberId}`;
+}
+
+function getFirstVisitRewardClaimDateKey(){
+  const memberId = authState.memberId || localStorage.getItem(STORAGE_KEYS.memberId) || "guest";
+  return `room10FlowerFirstVisitRewardClaimDate:${memberId}`;
+}
+
+function markFirstVisitRewardClaimedToday(){
+  localStorage.setItem(getFirstVisitRewardClaimDateKey(), getFlowerLocalDateKey());
+}
+
+function isFirstVisitRewardClaimedToday(){
+  return localStorage.getItem(getFirstVisitRewardClaimDateKey()) === getFlowerLocalDateKey();
+}
+
+function renderFlowerUnlockRewards(rewards=[]){
+  if(!flowerRewardItems) return;
+
+  const list = Array.isArray(rewards) ? rewards.filter(Boolean) : [];
+  if(!list.length){
+    flowerRewardItems.innerHTML = "";
+    flowerRewardItems.style.display = "none";
+    return;
+  }
+
+  flowerRewardItems.style.display = "";
+  flowerRewardItems.innerHTML = list.map(item => {
+    const imgHtml = item.img
+      ? `<img src="${escapeHtml(item.img)}" alt="${escapeHtml(item.name || "奖励")}">`
+      : `<div class="flowerRewardItemIcon">${escapeHtml(item.icon || "✦")}</div>`;
+    return `
+      <div class="flowerRewardItem">
+        ${imgHtml}
+        <div class="flowerRewardItemName">${escapeHtml(item.name || "奖励")}</div>
+        <div class="flowerRewardItemQty">${escapeHtml(item.qty || "")}</div>
+      </div>`;
+  }).join("");
+}
+
+function resetFlowerRewardModalState(){
+  if(!flowerRewardModal) return;
+
+  if(flowerRewardAutoCloseTimer){
+    clearTimeout(flowerRewardAutoCloseTimer);
+    flowerRewardAutoCloseTimer = null;
+  }
+
+  flowerRewardModal.classList.remove("claimed");
+
+  if(flowerRewardConfirmBtn){
+    flowerRewardConfirmBtn.disabled = false;
+    flowerRewardConfirmBtn.style.display = "";
+  }
+}
+
+function showFlowerUnlockModal(options={}){
+  if(!flowerRewardModal){
+    showFlowerToast(`${options.title || "解锁提示"}：${options.name || "新的奖励"}`);
+    return;
+  }
+
+  resetFlowerRewardModalState();
+
+  const rewards = Array.isArray(options.rewards) ? options.rewards : [];
+  const hasRewards = rewards.length > 0;
+
+  if(flowerRewardTitle){
+    flowerRewardTitle.textContent = options.title || (options.type === "title" ? "🎉 解锁称号" : "🎉 解锁成就");
+  }
+
+  const iconEl = document.querySelector(".flowerRewardIcon");
+  if(iconEl){
+    iconEl.textContent = options.icon || (options.type === "title" ? "🏷️" : "🌷");
+  }
+
+  if(flowerRewardAchievementName){
+    flowerRewardAchievementName.textContent = options.name || "新的解锁";
+  }
+
+  if(flowerRewardText){
+    flowerRewardText.textContent = options.text || "新的内容已经解锁。";
+  }
+
+  if(flowerRewardSectionTitle){
+    flowerRewardSectionTitle.textContent = options.rewardTitle || "解锁奖励";
+    flowerRewardSectionTitle.style.display = hasRewards ? "" : "none";
+  }
+
+  renderFlowerUnlockRewards(rewards);
+
+  if(flowerRewardConfirmBtn){
+    const hasConfirm = typeof options.onConfirm === "function";
+    flowerRewardConfirmBtn.style.display = hasConfirm ? "" : "none";
+    flowerRewardConfirmBtn.textContent = options.buttonText || (hasRewards ? "领取奖励" : "知道啦");
+    flowerRewardConfirmBtn.onclick = hasConfirm ? options.onConfirm : closeFlowerRewardModal;
+  }
+
+  flowerRewardModal.classList.add("show");
+  flowerRewardModal.setAttribute("aria-hidden", "false");
+}
+
+function showFirstVisitFlowerRewardModal(){
+  showFlowerUnlockModal({
+    type:"achievement",
+    title:"🎉 解锁成就",
+    icon:"🌷",
+    name:"第一次走进花房",
+    text:"你推开花房的门，第一颗种子也在这里等你。\n以后每天登录花房可以自动领取水 ×1 和肥料 ×1。",
+    rewardTitle:"成就奖励",
+    rewards:[
+      { img:"water.png", name:"水", qty:"×5" },
+      { img:"fert.png", name:"肥料", qty:"×5" },
+      { img:"seed.png", name:"花种子", qty:"×1" }
+    ],
+    buttonText:"领取成就奖励",
+    onConfirm:claimFlowerRewardFromModal
+  });
+}
+
+function showFlowerUnlockClaimedState(options={}){
+  if(!flowerRewardModal) return;
+
+  resetFlowerRewardModalState();
+  flowerRewardModal.classList.add("claimed", "show");
+  flowerRewardModal.setAttribute("aria-hidden", "false");
+
+  if(flowerRewardTitle){
+    flowerRewardTitle.textContent = options.title || "奖励已领取";
+  }
+
+  const iconEl = document.querySelector(".flowerRewardIcon");
+  if(iconEl){
+    iconEl.textContent = options.icon || "🌷";
+  }
+
+  if(flowerRewardAchievementName){
+    flowerRewardAchievementName.textContent = options.name || "新的解锁";
+  }
+
+  if(flowerRewardText){
+    flowerRewardText.textContent = options.text || "奖励已放进背包。";
+  }
+
+  if(flowerRewardSectionTitle){
+    flowerRewardSectionTitle.style.display = "none";
+  }
+
+  renderFlowerUnlockRewards([]);
+
+  if(flowerRewardConfirmBtn){
+    flowerRewardConfirmBtn.disabled = true;
+    flowerRewardConfirmBtn.style.display = "none";
+    flowerRewardConfirmBtn.textContent = "奖励已领取";
+  }
+
+  flowerRewardAutoCloseTimer = setTimeout(() => {
+    closeFlowerRewardModal();
+  }, Number(options.autoCloseMs || 1300));
+}
+
+function showFlowerRewardClaimedState(row){
+  showFlowerUnlockClaimedState({
+    title:"奖励已领取",
+    icon:"🌷",
+    name:"第一次走进花房",
+    text:row?.already_claimed ? "这份成就奖励已经领取过啦。" : "入门礼物已经放进背包啦。",
+    autoCloseMs:1300
+  });
+}
+
+function closeFlowerRewardModal(){
+  if(!flowerRewardModal) return;
+
+  if(flowerRewardAutoCloseTimer){
+    clearTimeout(flowerRewardAutoCloseTimer);
+    flowerRewardAutoCloseTimer = null;
+  }
+
+  flowerRewardModal.classList.remove("show", "claimed");
+  flowerRewardModal.setAttribute("aria-hidden", "true");
+}
+
+function showFlowerToast(message, type="success"){
+  if(!flowerToast) return;
+  flowerToast.textContent = message || "";
+  flowerToast.classList.toggle("error", type === "error");
+  flowerToast.classList.add("show");
+  clearTimeout(showFlowerToast._timer);
+  showFlowerToast._timer = setTimeout(() => {
+    flowerToast.classList.remove("show");
+    flowerToast.classList.remove("error");
+  }, 2200);
+}
+
+function showBoxMessage(el, message, isError=false){
+  if(!el) return;
+  if(!message){
+    el.classList.add("hidden");
+    el.textContent = "";
+    el.classList.remove("error");
+    return;
+  }
+  el.textContent = message;
+  el.classList.toggle("error", Boolean(isError));
+  el.classList.remove("hidden");
+}
+
+function formatTimeLeft(value){
+  if(!value) return "--:--:--:--";
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return "--:--:--:--";
+  const diff = date.getTime() - Date.now();
+  if(diff <= 0) return "00:00:00:00";
+  return formatDurationClock(diff, true);
+}
+
+function padClock(value){
+  return String(Math.max(0, Math.floor(Number(value) || 0))).padStart(2, "0");
+}
+
+function formatDurationClock(diff, includeDays=true){
+  const safeDiff = Math.max(0, Number(diff) || 0);
+  const day = Math.floor(safeDiff / 86400000);
+  const hour = Math.floor((safeDiff % 86400000) / 3600000);
+  const minute = Math.floor((safeDiff % 3600000) / 60000);
+  const second = Math.floor((safeDiff % 60000) / 1000);
+
+  if(includeDays){
+    return `${padClock(day)}:${padClock(hour)}:${padClock(minute)}:${padClock(second)}`;
+  }
+
+  const totalHours = Math.floor(safeDiff / 3600000);
+  return `${padClock(totalHours)}:${padClock(minute)}:${padClock(second)}`;
+}
+
+function formatWitherCountdown(value){
+  if(!value) return "--:--:--:--";
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return "--:--:--:--";
+
+  const diff = date.getTime() - Date.now();
+  if(diff <= 0) return "00:00:00:00";
+
+  return formatDurationClock(diff, true);
+}
+
+function refreshWitherCountdowns(){
+  document.querySelectorAll("[data-wither-countdown]").forEach(el => {
+    el.textContent = formatWitherCountdown(el.dataset.witherCountdown);
+  });
+  updateMarketCountdown();
+}
+
+function startWitherCountdownTimer(){
+  if(witherCountdownTimer){
+    clearInterval(witherCountdownTimer);
+  }
+  refreshWitherCountdowns();
+  witherCountdownTimer = setInterval(refreshWitherCountdowns, 1000);
+}
+
+function getNextMarketRefreshCountdown(){
+  const now = new Date();
+  const next = new Date(now);
+
+  if(now.getHours() < 12){
+    next.setHours(12, 0, 0, 0);
+  }else{
+    next.setDate(next.getDate() + 1);
+    next.setHours(0, 0, 0, 0);
+  }
+
+  const diff = next.getTime() - now.getTime();
+  if(diff <= 0) return "00:00:00";
+
+  return formatDurationClock(diff, false);
+}
+
+function updateMarketCountdown(){
+  if(!marketSubText) return;
+  marketSubText.textContent = `下次价格刷新：${getNextMarketRefreshCountdown()}`;
+}
+
+function getPriceChangeHtml(change){
+  const n = Number(change) || 0;
+  if(n > 0) return `<span class="priceUp">↑ ${n}</span>`;
+  if(n < 0) return `<span class="priceDown">↓ ${Math.abs(n)}</span>`;
+  return `<span class="priceFlat">—</span>`;
+}
+
+function getFlowerDisplayName(row){
+  const name = String(row?.flower_name || "").trim();
+  if(row?.flower_key === "peony" || name.includes("芍药") || name.includes("牡丹")){
+    return "牡丹";
+  }
+  return name || "花束";
+}
+
+function getMarketRow(flowerKey){
+  const key = String(flowerKey || "");
+  return (flowerState.marketRows || []).find(row => String(row.flower_key || "") === key) || null;
+}
+
+function getRoundBoughtQuantity(row){
+  const candidates = [
+    row?.round_bought_quantity,
+    row?.round_buy_quantity,
+    row?.current_round_bought_quantity,
+    row?.current_round_buy_quantity,
+    row?.bought_quantity,
+    row?.buy_quantity,
+    row?.purchased_quantity,
+    row?.round_purchased_quantity
+  ];
+
+  for(const value of candidates){
+    const n = Number(value);
+    if(Number.isFinite(n) && n >= 0) return Math.floor(n);
+  }
+
+  return Math.max(0, Number(row?.owned_quantity) || 0);
+}
+
+function getRemainingBuyQuantity(row){
+  return Math.max(0, 5 - getRoundBoughtQuantity(row || {}));
+}
+
+function getCurrentGoldBalance(){
+  if(Number.isFinite(Number(flowerState.goldBalance))){
+    return Number(flowerState.goldBalance);
+  }
+  const text = String(flowerGoldPill?.textContent || "");
+  const match = text.match(/\d+/);
+  return match ? Number(match[0]) : 0;
+}
+
+function getMarketTips(){
+  const tips = [];
+
+  if(flowerState.dailyTipMessage){
+    tips.push(flowerState.dailyTipMessage);
+  }
+
+  tips.push(
+    "每轮每种花最多买入 5 朵。",
+    "当前金币达到 100 才能在花市进行交易。",
+    "买入后要等花市价格刷新一次才能卖出。",
+    "当天浇水和施肥各最多 3 次。"
+  );
+
+  if(getCurrentGoldBalance() < 100){
+    const insertIndex = flowerState.dailyTipMessage ? 1 : 0;
+    tips.splice(insertIndex, 0, "当前金币不足 100，暂时不能在花市买入。");
+  }
+
+  return tips;
+}
+
+function startMarketTipRotator(){
+  const tipEl = document.getElementById("marketTipText");
+  if(!tipEl) return;
+
+  if(marketTipTimer){
+    clearInterval(marketTipTimer);
+    marketTipTimer = null;
+  }
+
+  const tips = getMarketTips();
+  let index = 0;
+  tipEl.textContent = tips[index] || "";
+
+  if(tips.length <= 1) return;
+
+  marketTipTimer = setInterval(() => {
+    index = (index + 1) % tips.length;
+    tipEl.classList.add("isChanging");
+    setTimeout(() => {
+      tipEl.textContent = tips[index] || "";
+      tipEl.classList.remove("isChanging");
+    }, 260);
+  }, 3800);
+}
+
+function getMarketLimitNote(){
+  return getMarketTips()[0] || "";
+}
+
+function getFlowerLanguage(row){
+  const key = String(row?.flower_key || "");
+  const languageMap = {
+    daisy:"纯真、希望。",
+    lavender:"等待爱情、宁静。",
+    tulip:"博爱、体贴。",
+    rose:"友谊、祝福。",
+    peony:"富贵、圆满。"
+  };
+  return languageMap[key] || String(row?.display_phrase || row?.flower_language || "");
+}
+
+function getFreshBouquetImg(row){
+  const key = String(row?.flower_key || "");
+  const freshMap = {
+    daisy:"bouquet-daisy.png",
+    lavender:"bouquet-lavender.png",
+    tulip:"bouquet-tulip.png",
+    rose:"bouquet-rose.png",
+    peony:"bouquet-peony.png"
+  };
+
+  const imgPath = String(row?.bouquet_img || "").trim();
+  if(freshMap[key]) return freshMap[key];
+  if(imgPath && !imgPath.toLowerCase().includes("wither")) return imgPath;
+  return "bouquet-daisy.png";
+}
+
+function hasWitheredFlowers(row){
+  const quantityFields = [
+    row?.withered_quantity,
+    row?.wither_quantity,
+    row?.withered_owned_quantity,
+    row?.withered_count
+  ];
+
+  if(quantityFields.some(value => Number(value) > 0)) return true;
+
+  const statusText = String(row?.status || row?.holding_status || row?.inventory_status || "").toLowerCase();
+  if(statusText.includes("withered")) return true;
+
+  const date = new Date(row?.earliest_wither_at || "");
+  return !Number.isNaN(date.getTime()) && date.getTime() <= Date.now();
+}
+
+function getInventoryBouquetImg(row){
+  if(hasWitheredFlowers(row)) return "bouquet-withered.png";
+  return getFreshBouquetImg(row);
+}
+
+function renderFlowerBundleInventory(loggedOut=false){
+  if(!flowerBundleInventory) return;
+
+  if(loggedOut){
+    flowerBundleInventory.innerHTML = "";
+    return;
+  }
+
+  const list = Array.isArray(flowerState.marketRows) ? flowerState.marketRows : [];
+  const ownedList = list.filter(row => (Number(row?.owned_quantity) || 0) > 0);
+
+  if(!ownedList.length){
+    flowerBundleInventory.innerHTML = "";
+    return;
+  }
+
+  flowerBundleInventory.innerHTML = ownedList.map(row => {
+    const displayName = getFlowerDisplayName(row);
+    const owned = Number(row.owned_quantity) || 0;
+    return `
+      <div class="flowerBundleItem" title="${escapeHtml(displayName)} × ${owned}">
+        <img class="flowerBundleIcon" src="${escapeHtml(getInventoryBouquetImg(row))}" alt="${escapeHtml(displayName)}">
+        <div class="flowerBundleName">${escapeHtml(displayName)}</div>
+        <div class="flowerBundleQty">×${owned}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function getMarketQuantity(flowerKey){
+  const key = String(flowerKey || "");
+  const input = document.querySelector(`[data-flower-qty="${key}"]`);
+  const raw = Number(input?.value);
+  if(!Number.isFinite(raw)) return 1;
+  return Math.max(1, Math.floor(raw));
+}
+
+function setMarketQuantity(flowerKey, quantity){
+  const key = String(flowerKey || "");
+  const input = document.querySelector(`[data-flower-qty="${CSS.escape(key)}"]`);
+  const row = getMarketRow(key);
+  const remaining = row ? getRemainingBuyQuantity(row) : 5;
+  const target = Math.max(1, Math.min(5, remaining || 5, Math.floor(Number(quantity) || 1)));
+
+  if(input){
+    input.value = String(target);
+  }
+
+  if(remaining <= 0){
+    const displayName = getFlowerDisplayName(row || { flower_key:key });
+    showBoxMessage(marketMessage, `${displayName}这一轮已经买满啦，现在还能买 0 朵。`, true);
+  }
+}
+
+function setFlowerResources(seedQuantity, waterQuantity, fertilizerQuantity){
+  const seed = Math.max(0, Number(seedQuantity) || 0);
+  const water = Math.max(0, Number(waterQuantity) || 0);
+  const fertilizer = Math.max(0, Number(fertilizerQuantity) || 0);
+
+  flowerState.resources.seed = seed;
+  flowerState.resources.water = water;
+  flowerState.resources.fertilizer = fertilizer;
+}
+
+function getFlowerResources(){
+  return {
+    seed:Math.max(0, Number(flowerState.resources.seed) || 0),
+    water:Math.max(0, Number(flowerState.resources.water) || 0),
+    fertilizer:Math.max(0, Number(flowerState.resources.fertilizer) || 0)
+  };
+}
+
+async function claimFirstVisitFlowerReward(){
+  const auth = getFlowerAuth();
+  if(!auth){
+    setFlowerResources(0, 0, 0);
+    return null;
+  }
+
+  const { data, error } = await supabaseClient.rpc("claim_flower_first_visit_reward", {
+    p_member_id:auth.memberId,
+    p_member_code:auth.memberCode
+  });
+
+  if(error){
+    console.warn("花房首次奖励领取失败：", error);
+    throw error;
+  }
+
+  const row = Array.isArray(data) ? data[0] : data;
+  if(row){
+    setFlowerResources(row.seed_quantity, row.water_quantity, row.fertilizer_quantity);
+    updatePotResourceNumbers(false);
+  }
+
+  return row || null;
+}
+
+async function hasClaimedFirstVisitReward(){
+  const auth = getFlowerAuth();
+  if(!auth) return true;
+
+  try{
+    const { data:achievement, error:achievementError } = await supabaseClient
+      .from("achievements")
+      .select("id")
+      .eq("code", "first_visit_flower")
+      .maybeSingle();
+
+    if(achievementError || !achievement?.id){
+      return false;
+    }
+
+    const { data:owned, error:ownedError } = await supabaseClient
+      .from("member_achievements")
+      .select("id")
+      .eq("member_id", auth.memberId)
+      .eq("achievement_id", achievement.id)
+      .maybeSingle();
+
+    if(ownedError){
+      return false;
+    }
+
+    return Boolean(owned?.id);
+  }catch(err){
+    console.warn("首次花房奖励状态检查失败，改用本地提示兜底：", err);
+    return false;
+  }
+}
+
+async function promptFirstVisitRewardIfNeeded(){
+  const auth = getFlowerAuth();
+  if(!auth) return;
+
+  const promptKey = getFirstVisitRewardPromptKey();
+  if(localStorage.getItem(promptKey) === "done") return;
+
+  const claimed = await hasClaimedFirstVisitReward();
+  if(claimed){
+    localStorage.setItem(promptKey, "done");
+    return;
+  }
+
+  showFirstVisitFlowerRewardModal();
+}
+
+async function claimFlowerRewardFromModal(){
+  if(flowerRewardConfirmBtn){
+    flowerRewardConfirmBtn.disabled = true;
+    flowerRewardConfirmBtn.textContent = "领取中...";
+  }
+
+  try{
+    const row = await claimFirstVisitFlowerReward();
+    localStorage.setItem(getFirstVisitRewardPromptKey(), "done");
+    markFirstVisitRewardClaimedToday();
+    flowerState.dailyTipMessage = "";
+
+    await Promise.all([
+      loadMemberGold(),
+      loadFlowerMarket(),
+      loadFlowerPot()
+    ]);
+
+    showFlowerRewardClaimedState(row);
+    renderSiteNotifications();
+  }catch(err){
+    if(flowerRewardTitle){
+      flowerRewardTitle.textContent = "领取失败";
+    }
+    if(flowerRewardText){
+      flowerRewardText.textContent = err?.message || "成就奖励领取失败，请稍后再试。";
+    }
+    if(flowerRewardConfirmBtn){
+      flowerRewardConfirmBtn.disabled = false;
+      flowerRewardConfirmBtn.style.display = "";
+      flowerRewardConfirmBtn.textContent = "重新领取";
+      flowerRewardConfirmBtn.onclick = claimFlowerRewardFromModal;
+    }
+  }
+}
+
+async function claimDailyFlowerItems(){
+  const auth = getFlowerAuth();
+  if(!auth){
+    setFlowerResources(0, 0, 0);
+    return null;
+  }
+
+  const { data, error } = await supabaseClient.rpc("claim_flower_daily_items", {
+    p_member_id:auth.memberId,
+    p_member_code:auth.memberCode,
+    p_timezone_offset_minutes:auth.timezoneOffset
+  });
+
+  if(error){
+    console.warn("每日花房资源领取失败：", error);
+    return null;
+  }
+
+  const row = Array.isArray(data) ? data[0] : data;
+  if(row){
+    setFlowerResources(row.seed_quantity, row.water_quantity, row.fertilizer_quantity);
+    flowerState.dailyTipMessage = "今日资源已领取：水 ×1、肥料 ×1。";
+  }else{
+    flowerState.dailyTipMessage = "今日资源已领取。";
+  }
+  return row || null;
+}
+
+function renderLoggedOutFlower(){
+  flowerState.dailyTipMessage = "";
+  setFlowerResources(0, 0, 0);
+  if(flowerGoldPill) flowerGoldPill.textContent = "金币：--";
+  if(marketContent){
+    marketContent.innerHTML = `
+      <div class="flowerGuestMask">
+        <strong>欢迎来到花房</strong>
+        登录后可以查看自己的花市价格、买卖花朵和照顾花盆。
+      </div>
+    `;
+  }
+  showBoxMessage(marketMessage, "");
+  renderPotEmpty("登录后可以种下一颗种子。", true);
+}
+
+function renderMarket(rows){
+  const list = Array.isArray(rows) ? rows : [];
+
+  if(!marketContent) return;
+
+  if(!list.length){
+    marketContent.innerHTML = `
+      <div class="flowerGuestMask">
+        <strong>花市暂时没有数据</strong>
+        稍后再来看看，或者刷新页面重试。
+      </div>
+    `;
+    renderFlowerBundleInventory(false);
+    return;
+  }
+
+  updateMarketCountdown();
+
+  marketContent.innerHTML = `
+    <div class="flowerMarketGrid">
+      ${list.map(row => {
+        const owned = Number(row.owned_quantity) || 0;
+        const canSell = owned > 0;
+        const displayName = getFlowerDisplayName(row);
+        return `
+          <article class="flowerCard">
+            <div class="flowerCardImgWrap">
+              <img class="flowerCardImg" src="${escapeHtml(getFreshBouquetImg(row))}" alt="${escapeHtml(displayName)}">
+            </div>
+            <div class="flowerCardName">${escapeHtml(displayName)}</div>
+            <div class="flowerCardPhrase">${escapeHtml(getFlowerLanguage(row))}</div>
+            <div class="flowerCardMeta">
+              <div class="flowerMetaLine"><span>当前价格</span><strong>${Number(row.price) || 0} 金币</strong></div>
+              <div class="flowerMetaLine"><span>本轮变化</span><strong>${getPriceChangeHtml(row.price_change)}</strong></div>
+              <div class="flowerMetaLine"><span>我拥有</span><strong>${owned} 朵</strong></div>
+              <div class="flowerMetaLine"><span>枯萎倒计时</span><strong data-wither-countdown="${escapeHtml(row.earliest_wither_at || "")}">${formatWitherCountdown(row.earliest_wither_at)}</strong></div>
+            </div>
+            <div class="flowerQtyBox">
+              <span class="flowerQtyLabel">数量</span>
+              <input class="flowerQtyInput" data-flower-qty="${escapeHtml(row.flower_key)}" type="number" min="1" max="5" step="1" value="1" inputmode="numeric" aria-label="${escapeHtml(displayName)}买入数量">
+              <button class="flowerQtyFiveBtn" type="button" onclick="setMarketQuantity('${escapeHtml(row.flower_key)}', 5)" aria-label="将${escapeHtml(displayName)}买入数量设为5朵">5朵</button>
+            </div>
+            <div class="flowerActions">
+              <button class="flowerActionBtn" type="button" onclick="buyFlower('${escapeHtml(row.flower_key)}', getMarketQuantity('${escapeHtml(row.flower_key)}'))">买入</button>
+              <button class="flowerActionBtn" type="button" ${canSell ? "" : "data-disabled=\"true\" disabled"} onclick="sellFlower('${escapeHtml(row.flower_key)}')">卖出</button>
+            </div>
+          </article>
+        `;
+      }).join("")}
+    </div>
+    <div class="flowerMarketNote" id="marketTipText">${escapeHtml(getMarketLimitNote())}</div>
+  `;
+  renderFlowerBundleInventory(false);
+  startWitherCountdownTimer();
+  startMarketTipRotator();
+}
+
+function updatePotResourceNumbers(loggedOut=false){
+  const resources = getFlowerResources();
+  const seedText = loggedOut ? "0" : String(resources.seed);
+  const waterText = loggedOut ? "0" : String(resources.water);
+  const fertilizerText = loggedOut ? "0" : String(resources.fertilizer);
+
+  if(potSeedCount) potSeedCount.textContent = seedText;
+  if(potWaterCount) potWaterCount.textContent = waterText;
+  if(potFertCount) potFertCount.textContent = fertilizerText;
+
+  renderFlowerBundleInventory(loggedOut);
+}
+
+function renderPotEmpty(desc="当前是空花盆。", loggedOut=false){
+  if(potImage) potImage.src = "pot-empty.png";
+  if(potStatusTitle) potStatusTitle.textContent = "空花盆";
+  if(potStatusDesc) potStatusDesc.textContent = desc;
+
+  updatePotResourceNumbers(loggedOut);
+
+  if(potActions){
+    potActions.className = "potActions single";
+    potActions.innerHTML = loggedOut
+      ? `<button class="potActionBtn" type="button" onclick="openLogin()"><span class="potActionContent">登录后种花</span></button>`
+      : `<button class="potActionBtn" type="button" onclick="plantSeed()"><span class="potActionContent"><img class="potActionIcon" src="seed.png" alt="">种下种子</span></button>`;
+  }
+
+  showBoxMessage(potMessage, "");
+}
+
+function renderPot(row){
+  const pot = row || {};
+  const displayStatus = pot.display_status || pot.status || "empty";
+
+  if(displayStatus === "empty"){
+    renderPotEmpty("花盆空着，可以种下一颗种子。", false);
+    return;
+  }
+
+  if(potImage) potImage.src = pot.display_img || "pot-empty.png";
+  updatePotResourceNumbers(false);
+
+  if(displayStatus === "growing"){
+    if(potStatusTitle) potStatusTitle.textContent = "种植中";
+    if(potStatusDesc){
+      potStatusDesc.innerHTML = `
+        <span class="potStatusDescLine">它正在慢慢长大。</span>
+        <span class="potStatusDescLine">距离准备好大约还有：${formatTimeLeft(pot.mature_at)}</span>
+      `;
+    }
+    if(potActions){
+      const waterDisabled = getDailyCareRemaining("water") <= 0;
+      const fertilizerDisabled = getDailyCareRemaining("fertilizer") <= 0;
+      potActions.className = "potActions";
+      potActions.innerHTML = `
+        <button class="potActionBtn" type="button" ${waterDisabled ? "data-disabled=\"true\" disabled" : ""} onclick="careFlowerPot('water')" title="每天最多浇水 3 次"><span class="potActionContent"><img class="potActionIcon" src="water.png" alt="">浇水</span></button>
+        <button class="potActionBtn" type="button" ${fertilizerDisabled ? "data-disabled=\"true\" disabled" : ""} onclick="careFlowerPot('fertilizer')" title="每天最多施肥 3 次"><span class="potActionContent"><img class="potActionIcon" src="fert.png" alt="">施肥</span></button>
+      `;
+    }
+    showBoxMessage(potMessage, "");
+    return;
+  }
+
+  if(displayStatus === "ready"){
+    if(potStatusTitle) potStatusTitle.textContent = "可以收获了";
+    if(potStatusDesc) potStatusDesc.textContent = "它已经准备好啦，点击收获看看这次开出了什么花。";
+    if(potActions){
+      potActions.className = "potActions single";
+      potActions.innerHTML = `<button class="potActionBtn" type="button" onclick="harvestFlowerPot()"><span class="potActionContent">收获</span></button>`;
+    }
+    showBoxMessage(potMessage, "");
+    return;
+  }
+
+  if(displayStatus === "withered"){
+    if(potStatusTitle) potStatusTitle.textContent = "花盆枯萎了";
+    if(potStatusDesc) potStatusDesc.textContent = "这次没能正常收获，清理后可以重新种下一颗种子。";
+    if(potActions){
+      potActions.className = "potActions single";
+      potActions.innerHTML = `<button class="potActionBtn" type="button" onclick="clearWitheredFlowerPot()"><span class="potActionContent">清理花盆</span></button>`;
+    }
+    showBoxMessage(potMessage, "");
+  }
+}
+
+async function loadMemberGold(){
+  const auth = getFlowerAuth();
+  if(!auth){
+    if(flowerGoldPill) flowerGoldPill.textContent = "金币：--";
+    return null;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("members")
+    .select("gold_balance")
+    .eq("id", auth.memberId)
+    .eq("member_code", auth.memberCode)
+    .maybeSingle();
+
+  if(error){
+    console.warn("读取金币失败：", error);
+    if(flowerGoldPill) flowerGoldPill.textContent = "金币：读取失败";
+    return null;
+  }
+
+  const gold = Number(data?.gold_balance) || 0;
+  flowerState.goldBalance = gold;
+  if(flowerGoldPill) flowerGoldPill.textContent = `金币：${gold}`;
+  return gold;
+}
+
+async function loadFlowerMarket(){
+  const auth = getFlowerAuth();
+
+  if(!auth){
+    renderLoggedOutFlower();
+    return;
+  }
+
+  try{
+    const { data, error } = await supabaseClient.rpc("get_flower_market", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode,
+      p_timezone_offset_minutes:auth.timezoneOffset
+    });
+
+    if(error) throw error;
+
+    flowerState.marketRows = Array.isArray(data) ? data : [];
+    renderMarket(flowerState.marketRows);
+    showBoxMessage(marketMessage, "");
+  }catch(err){
+    console.error("读取花市失败：", err);
+    showBoxMessage(marketMessage, err?.message || "花市读取失败，请稍后再试。", true);
+  }
+}
+
+async function loadFlowerPot(){
+  const auth = getFlowerAuth();
+
+  if(!auth){
+    renderPotEmpty("登录后可以种下一颗种子。", true);
+    return;
+  }
+
+  try{
+    const { data, error } = await supabaseClient.rpc("get_flower_pot_status", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode
+    });
+
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    flowerState.pot = row || null;
+    renderPot(row);
+  }catch(err){
+    console.error("读取花盆失败：", err);
+    showBoxMessage(potMessage, err?.message || "花盆状态读取失败，请稍后再试。", true);
+  }
+}
+
+async function loadFlowerPage(){
+  readLocalAuth();
+
+  if(!authState.loggedIn || !authState.memberId || !authState.memberCode){
+    renderLoggedOutFlower();
+    if(authState.loggedIn && authState.memberId && !authState.memberCode){
+      showBoxMessage(marketMessage, "花房需要重新登录一次，才能进行真实买卖和种植。", true);
+      showBoxMessage(potMessage, "请先登出后重新登录。", true);
+    }
+    return;
+  }
+
+  const firstVisitClaimed = await hasClaimedFirstVisitReward();
+  const skipDailyForFirstVisitToday = firstVisitClaimed && isFirstVisitRewardClaimedToday();
+
+  if(firstVisitClaimed && !skipDailyForFirstVisitToday){
+    await claimDailyFlowerItems();
+  }else{
+    flowerState.dailyTipMessage = "";
+  }
+
+  await Promise.all([
+    loadMemberGold(),
+    loadFlowerMarket(),
+    loadFlowerPot()
+  ]);
+
+  renderSiteNotifications();
+
+  if(!firstVisitClaimed){
+    await promptFirstVisitRewardIfNeeded();
+  }
+}
+
+
+function formatMarketErrorMessage(message, displayName="花束"){
+  const text = String(message || "").trim();
+  const sellableMatch = text.match(/当前可卖\s*(\d+)\s*朵/);
+  const sellable = sellableMatch ? sellableMatch[1] : "0";
+
+  if(text.includes("刚买") || text.includes("价格刷新") || text.includes("刷新一次")){
+    return `${displayName}刚买回来，要等花市刷新一次后才能卖出。当前可卖 ${sellable} 朵。`;
+  }
+
+  return text || `${displayName}操作失败`;
+}
+
+async function buyFlower(flowerKey, quantity=1){
+  const auth = getFlowerAuth();
+  if(!auth){
+    openLogin();
+    return;
+  }
+
+  if(getCurrentGoldBalance() < 100){
+    showBoxMessage(marketMessage, "当前金币不足 100，暂时不能在花市买入。", true);
+    return;
+  }
+
+  const rowInfo = getMarketRow(flowerKey);
+  const displayName = getFlowerDisplayName(rowInfo || { flower_key:flowerKey });
+  const remaining = rowInfo ? getRemainingBuyQuantity(rowInfo) : 5;
+  const requestedQuantity = Math.max(1, Math.floor(Number(quantity) || 1));
+  const buyQuantity = Math.max(0, Math.min(remaining, requestedQuantity));
+
+  if(remaining <= 0){
+    showBoxMessage(marketMessage, `${displayName}这一轮已经买满啦，现在还能买 0 朵。`, true);
+    return;
+  }
+
+  if(requestedQuantity > remaining){
+    showBoxMessage(marketMessage, `${displayName}现在还能买 ${remaining} 朵，已按 ${remaining} 朵购买。`, true);
+  }
+
+  if(buyQuantity <= 0){
+    showBoxMessage(marketMessage, `请选择要买入的${displayName}数量。`, true);
+    return;
+  }
+
+  setFlowerBusy(true);
+  try{
+    const { data, error } = await supabaseClient.rpc("buy_flower", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode,
+      p_flower_key:flowerKey,
+      p_quantity:buyQuantity,
+      p_timezone_offset_minutes:auth.timezoneOffset
+    });
+
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    const actualQuantity = Number(row?.quantity) || buyQuantity;
+    const oldOwned = Number(rowInfo?.owned_quantity) || 0;
+    const newOwned = oldOwned + actualQuantity;
+    const message = requestedQuantity > remaining
+      ? `${displayName}现在最多还能买 ${remaining} 朵，已实际买入 ${actualQuantity} 朵；现在拥有 ${newOwned} 朵。`
+      : `${displayName}购买成功：实际买入 ${actualQuantity} 朵；现在拥有 ${newOwned} 朵。`;
+
+    await loadFlowerPage();
+    showBoxMessage(marketMessage, message, false);
+  }catch(err){
+    console.error("买花失败：", err);
+    showBoxMessage(marketMessage, err?.message || `${displayName}买花失败`, true);
+    await loadFlowerMarket();
+  }finally{
+    setFlowerBusy(false);
+  }
+}
+
+async function sellFlower(flowerKey){
+  const auth = getFlowerAuth();
+  if(!auth){
+    openLogin();
+    return;
+  }
+
+  const rowInfo = getMarketRow(flowerKey);
+  const displayName = getFlowerDisplayName(rowInfo || { flower_key:flowerKey });
+
+  setFlowerBusy(true);
+  try{
+    const { data, error } = await supabaseClient.rpc("sell_flower", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode,
+      p_flower_key:flowerKey,
+      p_quantity:1,
+      p_timezone_offset_minutes:auth.timezoneOffset
+    });
+
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    const actualQuantity = Number(row?.quantity) || 1;
+    await loadFlowerPage();
+    showBoxMessage(marketMessage, `${displayName}卖出成功：实际卖出 ${actualQuantity} 朵。`, false);
+  }catch(err){
+    console.error("卖花失败：", err);
+    showBoxMessage(marketMessage, formatMarketErrorMessage(err?.message, displayName), true);
+  }finally{
+    setFlowerBusy(false);
+  }
+}
+
+async function plantSeed(){
+  const auth = getFlowerAuth();
+  if(!auth){
+    openLogin();
+    return;
+  }
+
+  if(getFlowerResources().seed <= 0){
+    showFlowerToast("现在还没有种子哦", "error");
+    return;
+  }
+
+  setFlowerBusy(true);
+  try{
+    const { data, error } = await supabaseClient.rpc("plant_seed", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode
+    });
+
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    if(row && Object.prototype.hasOwnProperty.call(row, "seed_quantity")){
+      setFlowerResources(row.seed_quantity, flowerState.resources.water, flowerState.resources.fertilizer);
+    }
+    showFlowerToast(row?.message || "种下成功");
+    await loadFlowerPage();
+  }catch(err){
+    console.error("种下失败：", err);
+    showFlowerToast(err?.message || "种下失败", "error");
+  }finally{
+    setFlowerBusy(false);
+  }
+}
+
+function getFlowerLocalDateKey(){
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function getDailyCareStorageKey(careType){
+  const memberId = authState.memberId || localStorage.getItem(STORAGE_KEYS.memberId) || "guest";
+  return `room10FlowerDailyCare:${memberId}:${getFlowerLocalDateKey()}:${careType}`;
+}
+
+function getDailyCareCount(careType){
+  const count = Number(localStorage.getItem(getDailyCareStorageKey(careType)) || 0);
+  return Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
+}
+
+function getDailyCareRemaining(careType){
+  return Math.max(0, 3 - getDailyCareCount(careType));
+}
+
+function addDailyCareCount(careType){
+  const key = getDailyCareStorageKey(careType);
+  const next = Math.min(3, getDailyCareCount(careType) + 1);
+  localStorage.setItem(key, String(next));
+  return next;
+}
+
+async function careFlowerPot(careType){
+  const auth = getFlowerAuth();
+  if(!auth){
+    openLogin();
+    return;
+  }
+
+  const resources = getFlowerResources();
+  if(careType === "water" && getDailyCareRemaining("water") <= 0){
+    showFlowerToast("今天浇水次数已经用完啦", "error");
+    return;
+  }
+  if(careType === "fertilizer" && getDailyCareRemaining("fertilizer") <= 0){
+    showFlowerToast("今天施肥次数已经用完啦", "error");
+    return;
+  }
+  if(careType === "water" && resources.water <= 0){
+    showFlowerToast("今天的水不够啦", "error");
+    return;
+  }
+  if(careType === "fertilizer" && resources.fertilizer <= 0){
+    showFlowerToast("今天的肥料不够啦", "error");
+    return;
+  }
+
+  setFlowerBusy(true);
+  try{
+    const { data, error } = await supabaseClient.rpc("care_flower_pot", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode,
+      p_care_type:careType
+    });
+
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    if(row){
+      setFlowerResources(row.seed_quantity ?? flowerState.resources.seed, row.water_quantity, row.fertilizer_quantity);
+    }
+    addDailyCareCount(careType);
+    showFlowerToast(row?.message || "照顾成功");
+    await loadFlowerPage();
+  }catch(err){
+    console.error("照顾失败：", err);
+    showFlowerToast(err?.message || "照顾失败", "error");
+  }finally{
+    setFlowerBusy(false);
+  }
+}
+
+async function harvestFlowerPot(){
+  const auth = getFlowerAuth();
+  if(!auth){
+    openLogin();
+    return;
+  }
+
+  setFlowerBusy(true);
+  try{
+    const { data, error } = await supabaseClient.rpc("harvest_flower_pot", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode
+    });
+
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    showFlowerToast(row?.message || "收获成功");
+    await loadFlowerPage();
+  }catch(err){
+    console.error("收获失败：", err);
+    showFlowerToast(err?.message || "收获失败", "error");
+  }finally{
+    setFlowerBusy(false);
+  }
+}
+
+async function clearWitheredFlowerPot(){
+  const auth = getFlowerAuth();
+  if(!auth){
+    openLogin();
+    return;
+  }
+
+  setFlowerBusy(true);
+  try{
+    const { data, error } = await supabaseClient.rpc("clear_withered_flower_pot", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode
+    });
+
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    showFlowerToast(row?.message || "已清理");
+    await loadFlowerPage();
+  }catch(err){
+    console.error("清理失败：", err);
+    showFlowerToast(err?.message || "清理失败", "error");
+  }finally{
+    setFlowerBusy(false);
+  }
+}
+
+
+/* =========================================================
+   铃铛提醒
+========================================================= */
+function setNoticeCount(count){
+  const n = Number(count) || 0;
+  siteNoticeCount.textContent = n > 99 ? "99+" : String(n);
+  siteNoticeBtn.classList.toggle("hasNotice", n > 0);
+}
+
+function renderNoticeList(items){
+  const list = Array.isArray(items) ? items : [];
+
+  if(!list.length){
+    siteNoticeContent.innerHTML = '<div class="siteNoticeEmpty">暂无需要维护的花盆状态。</div>';
+    setNoticeCount(0);
+    return;
+  }
+
+  siteNoticeContent.innerHTML = `
+    <div class="siteNoticeList">
+      ${list.map(item => `
+        <div class="siteNoticeItem">
+          <div class="siteNoticeItemTitle">${escapeHtml(item.title || "提醒")}</div>
+          <div class="siteNoticeItemDesc">${escapeHtml(item.desc || "")}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+
+  setNoticeCount(list.length);
+}
+
+function toggleNoticePanel(force){
+  const shouldShow = typeof force === "boolean" ? force : !siteNoticePanel.classList.contains("show");
+  siteNoticePanel.classList.toggle("show", shouldShow);
+  siteNoticePanel.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+  siteNoticeBtn.setAttribute("aria-expanded", shouldShow ? "true" : "false");
+}
+
+function closeNoticePanel(){
+  toggleNoticePanel(false);
+}
+
+async function getSeedMaintenanceItems(){
+  const auth = getFlowerAuth();
+  if(!auth) return [];
+
+  try{
+    const { data, error } = await supabaseClient.rpc("get_flower_pot_status", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode
+    });
+
+    if(error) throw error;
+
+    const pot = Array.isArray(data) ? data[0] : data;
+    if(!pot) return [];
+
+    const items = [];
+    const status = pot.display_status || pot.status;
+
+    if(status === "ready"){
+      items.push({
+        title:"我的花盆可以收获了",
+        desc:"种植周期已经完成，记得进入花房收获。"
+      });
+    }
+
+    if(status === "withered"){
+      items.push({
+        title:"我的花盆需要清理",
+        desc:"花盆已经枯萎，清理后可以重新种下一颗种子。"
+      });
+    }
+
+    if(status === "growing" && Number(pot.interaction_count || 0) <= 0){
+      items.push({
+        title:"种子还没有被照顾",
+        desc:"小种子还没有被照顾，进去看看它吧。"
+      });
+    }
+
+    return items;
+  }catch(err){
+    console.warn("读取花房提醒失败：", err);
+    return [];
+  }
+}
+
+async function renderSiteNotifications(){
+  const items = await getSeedMaintenanceItems();
+  renderNoticeList(items);
+}
+
+/* =========================================================
+   初始化
+========================================================= */
+document.addEventListener("DOMContentLoaded", () => {
+  readLocalAuth();
+  updateIdentity();
+  loadFlowerPage();
+
+  if(siteNoticeBtn){
+    siteNoticeBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      toggleNoticePanel();
+    });
+  }
+
+  if(loginOpenBtn){
+    loginOpenBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      openLogin();
+    });
+  }
+
+  if(logoutBtn){
+    logoutBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      handleLogout();
+    });
+  }
+
+  document.addEventListener("click", event => {
+    if(siteNoticePanel && siteNoticeBtn){
+      if(siteNoticePanel.contains(event.target) || siteNoticeBtn.contains(event.target)) return;
+      closeNoticePanel();
+    }
+  });
+
+  if(flowerRewardModal){
+    flowerRewardModal.addEventListener("click", event => {
+      if(event.target === flowerRewardModal){
+        closeFlowerRewardModal();
+      }
+    });
+  }
+
+  document.addEventListener("keydown", event => {
+    if(event.key === "Escape"){
+      closeFlowerRewardModal();
+    }
+  });
+
+  document.getElementById("username")?.addEventListener("keydown", event => {
+    if(event.key === "Enter") login();
+  });
+
+  document.getElementById("password")?.addEventListener("keydown", event => {
+    if(event.key === "Enter") login();
+  });
+
+  syncOverlayToImage();
+});
+
+window.addEventListener("resize", syncOverlayToImage);
+window.addEventListener("orientationchange", syncOverlayToImage);
+
+window.addEventListener("storage", event => {
+  if(
+    event.key === STORAGE_KEYS.loggedIn ||
+    event.key === STORAGE_KEYS.user ||
+    event.key === STORAGE_KEYS.role ||
+    event.key === STORAGE_KEYS.memberId ||
+    event.key === STORAGE_KEYS.memberCode
+  ){
+    updateIdentity();
+    loadFlowerPage();
+  }
+});
+
+if(img && img.complete && img.naturalWidth){
+  syncOverlayToImage();
+}else if(img){
+  img.addEventListener("load", syncOverlayToImage, { once:true });
+}
+
+setTimeout(syncOverlayToImage, 120);
 </script>
-
 </body>
 </html>
