@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>拆弹专家｜十号房游戏房</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  color:#6b4326;
+  background:
+    radial-gradient(circle at 16% 8%, rgba(255,255,255,.78), rgba(255,255,255,0) 30%),
+    radial-gradient(circle at 84% 10%, rgba(255,222,160,.28), rgba(255,222,160,0) 32%),
+    linear-gradient(135deg, #fff3e5 0%, #f6dfc3 50%, #ead0b0 100%);
+}
+
+button,input{font-family:inherit;}
+button{cursor:pointer;}
+.hidden{display:none !important;}
+
+.page{
+  width:100%;
+  height:100%;
+  padding:12px;
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+}
+
+.bomb-shell{
+  position:relative;
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  border-radius:28px;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  background:linear-gradient(180deg, rgba(255,253,248,.92), rgba(255,246,233,.80));
+  border:1px solid rgba(255,255,255,.82);
+  box-shadow:
+    0 20px 54px rgba(94,62,34,.16),
+    inset 0 1px 0 rgba(255,255,255,.95);
+  overflow:hidden;
+}
+
+.bomb-shell::before{
+  content:"";
+  position:absolute;
+  inset:-10%;
+  background:
+    radial-gradient(circle at 10% 22%, rgba(255,205,122,.18) 0 7%, transparent 16%),
+    radial-gradient(circle at 85% 88%, rgba(203,139,82,.12) 0 8%, transparent 18%);
+  pointer-events:none;
+}
+
+.bomb-shell::after{
+  content:"✦  ✧     ✦     ✧";
+  position:absolute;
+  left:26%;
+  top:10px;
+  color:rgba(195,135,74,.22);
+  font-size:24px;
+  letter-spacing:1.3em;
+  white-space:nowrap;
+  pointer-events:none;
+}
+
+.bomb-header{
+  position:relative;
+  z-index:2;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:0 64px 0 2px;
+}
+
+.bomb-title{
+  margin:0;
+  color:#6a3f20;
+  font-size:clamp(32px, 4.4vw, 52px);
+  font-weight:950;
+  line-height:1;
+  letter-spacing:.06em;
+  text-shadow:0 1px 0 rgba(255,255,255,.75);
+}
+
+.header-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+}
+
+.soft-btn{
+  border:none;
+  border-radius:999px;
+  min-height:34px;
+  padding:0 14px;
+  background:rgba(255,252,247,.88);
+  color:#704729;
+  font-size:13px;
+  font-weight:900;
+  border:1px solid rgba(171,126,84,.18);
+  box-shadow:0 5px 14px rgba(117,80,43,.10), inset 0 1px 0 rgba(255,255,255,.94);
+  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.soft-btn:hover{transform:translateY(-1px); background:rgba(255,255,255,.96);}
+.soft-btn.primary{background:linear-gradient(180deg, #f6d69c, #e7b96f); color:#663c1f;}
+.soft-btn:disabled{cursor:not-allowed; opacity:.58; transform:none;}
+
+.game-stack{
+  position:relative;
+  z-index:1;
+  flex:1 1 auto;
+  min-height:0;
+  display:grid;
+  grid-template-rows:minmax(0, 1.16fr) minmax(150px, .78fr);
+  gap:12px;
+}
+
+.card{
+  border-radius:24px;
+  background:rgba(255,250,243,.76);
+  border:1px solid rgba(255,255,255,.82);
+  box-shadow:0 10px 26px rgba(113,78,43,.10), inset 0 1px 0 rgba(255,255,255,.95);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+.play-card{
+  position:relative;
+  min-height:0;
+  padding:14px;
+  display:grid;
+  grid-template-rows:auto auto minmax(0,1fr);
+  gap:10px;
+  overflow:hidden;
+}
+
+.play-card::before{
+  content:"";
+  position:absolute;
+  inset:12px;
+  border-radius:20px;
+  border:1px dashed rgba(187,135,83,.17);
+  pointer-events:none;
+}
+
+.game-no,
+.identity-chip{
+  min-width:0;
+  min-height:28px;
+  padding:0 11px;
+  border-radius:999px;
+  background:rgba(255,255,255,.58);
+  border:1px solid rgba(173,128,82,.16);
+  font-weight:950;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.game-no{
+  color:#7a4a25;
+  font-size:13px;
+}
+
+.identity-chip{
+  width:100%;
+  color:#775132;
+  font-size:12px;
+  text-align:center;
+}
+
+.notice{
+  position:relative;
+  z-index:1;
+  border-radius:16px;
+  padding:9px 13px;
+  background:rgba(255,248,236,.74);
+  border:1px solid rgba(255,255,255,.78);
+  color:#8b6240;
+  font-size:14px;
+  line-height:1.45;
+  font-weight:850;
+}
+.notice strong{color:#6d3f20;}
+
+.core-stage{
+  position:relative;
+  z-index:1;
+  min-height:0;
+  display:grid;
+  grid-template-columns:repeat(2, minmax(280px, 1fr));
+  gap:14px;
+  align-items:stretch;
+}
+
+.bomb-zone{
+  min-height:0;
+  display:grid;
+  grid-template-rows:minmax(108px, 1fr) auto;
+  gap:10px;
+  align-items:center;
+  padding:14px;
+  border-radius:20px;
+  background:rgba(255,255,255,.30);
+  border:1px solid rgba(173,128,82,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+.bomb-art-wrap{
+  position:relative;
+  width:min(260px, 88%);
+  max-height:100%;
+  aspect-ratio:1;
+  justify-self:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.bomb-art-glow{
+  position:absolute;
+  inset:13%;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(255,230,145,.42), rgba(255,136,83,.15) 48%, transparent 74%);
+  animation:bombPulse 2.2s ease-in-out infinite;
+}
+.bomb-art{
+  position:relative;
+  z-index:1;
+  width:86%;
+  height:86%;
+  object-fit:contain;
+  user-select:none;
+  -webkit-user-drag:none;
+  filter:drop-shadow(0 12px 16px rgba(88,55,32,.18));
+  animation:bombFloat 2.8s ease-in-out infinite;
+}
+.bomb-shell.boiling .bomb-art{animation:bombFloat 2.8s ease-in-out infinite, tinyShake .32s ease-in-out infinite;}
+.bomb-shell.boom{animation:screenShake .48s ease-in-out;}
+.boom-flash{
+  position:absolute;
+  left:50%; top:50%;
+  width:28px; height:28px;
+  border-radius:50%;
+  transform:translate(-50%,-50%) scale(.2);
+  background:radial-gradient(circle, #fff8bc 0%, #ffbf56 35%, #ff6b43 60%, rgba(255,107,67,0) 74%);
+  pointer-events:none;
+  z-index:30;
+  animation:boomFlash .72s ease-out forwards;
+}
+
+@keyframes bombFloat{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-6px) rotate(1deg);}}
+@keyframes bombPulse{0%,100%{transform:scale(.9);opacity:.45;}50%{transform:scale(1.08);opacity:.9;}}
+@keyframes tinyShake{0%,100%{margin-left:0;}25%{margin-left:-2px;}50%{margin-left:2px;}75%{margin-left:-1px;}}
+@keyframes screenShake{0%,100%{transform:translate(0,0) rotate(0);}15%{transform:translate(-7px,4px) rotate(-.7deg);}30%{transform:translate(8px,-5px) rotate(.7deg);}45%{transform:translate(-5px,-4px) rotate(-.5deg);}60%{transform:translate(6px,5px) rotate(.5deg);}75%{transform:translate(-3px,4px) rotate(0);}}
+@keyframes boomFlash{from{opacity:1;transform:translate(-50%,-50%) scale(.2);}to{opacity:0;transform:translate(-50%,-50%) scale(22);}}
+
+.range-card{
+  width:100%;
+  min-height:74px;
+  padding:10px 12px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  background:rgba(255,255,255,.64);
+  border:1px solid rgba(255,255,255,.86);
+  box-shadow:0 4px 12px rgba(126,86,48,.08), inset 0 1px 0 rgba(255,255,255,.86);
+  overflow:visible;
+}
+.range-label{color:#9a704b; font-size:13px; font-weight:950; white-space:nowrap; margin:0;}
+.range-value{color:#633916; font-size:clamp(32px, 5vw, 52px); font-weight:950; line-height:1; letter-spacing:.02em; white-space:nowrap;}
+
+.control-zone{
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:10px;
+  width:100%;
+  padding:14px;
+  border-radius:20px;
+  background:rgba(255,255,255,.30);
+  border:1px solid rgba(173,128,82,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+.meta-row{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px;}
+.meta-pill{
+  min-height:50px;
+  padding:7px;
+  border-radius:16px;
+  background:rgba(255,255,255,.50);
+  border:1px solid rgba(255,255,255,.76);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+}
+.meta-label{color:#a67a55; font-size:12px; font-weight:950;}
+.meta-value{color:#6e4526; font-size:16px; font-weight:950;}
+
+.action-panel{
+  border-radius:20px;
+  padding:13px;
+  background:rgba(255,255,255,.46);
+  border:1px solid rgba(255,255,255,.76);
+}
+.slider-top{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;}
+.chosen-number{color:#623917; font-size:32px; font-weight:950; line-height:1;}
+.range-slider{width:100%; accent-color:#d89b55;}
+.action-buttons{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:11px;}
+.action-buttons.single{grid-template-columns:1fr;}
+.big-action{
+  min-height:46px;
+  border:none;
+  border-radius:16px;
+  padding:0 14px;
+  color:#603718;
+  background:linear-gradient(180deg, #f5d59b, #e6b86f);
+  font-size:15px;
+  font-weight:950;
+  box-shadow:0 8px 18px rgba(121,79,39,.14), inset 0 1px 0 rgba(255,248,230,.96);
+}
+.big-action.secondary{background:linear-gradient(180deg, #f7ede0, #ecd5bb);}
+.big-action.danger{background:linear-gradient(180deg, #efb891, #dd8d62); color:#5d2d1b;}
+.big-action:disabled{cursor:not-allowed; opacity:.55; transform:none;}
+.final-number{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:72px;
+  border-radius:18px;
+  background:radial-gradient(circle at 50% 0%, rgba(255,230,142,.34), transparent 62%), rgba(255,255,255,.54);
+  color:#623817;
+  font-size:42px;
+  font-weight:950;
+}
+
+.guest-box{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  align-items:end;
+  padding:10px;
+  border-radius:18px;
+  background:rgba(255,255,255,.40);
+  border:1px solid rgba(255,255,255,.72);
+}
+.field{display:flex; flex-direction:column; gap:5px; text-align:left;}
+.field label{color:#8b6240; font-size:13px; font-weight:950;}
+.field input{
+  width:100%; height:40px; border:none; outline:none;
+  border-radius:14px; padding:0 13px;
+  color:#644021; background:rgba(255,255,255,.72);
+  border:1px solid rgba(177,130,82,.18);
+  font-size:15px; font-weight:850;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.bottom-grid{
+  min-height:0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.list-card{min-height:0; padding:14px; overflow:hidden; display:flex; flex-direction:column;}
+.section-title{margin:0; color:#704525; font-size:18px; font-weight:950; flex:0 0 auto;}
+.participants,.moves{display:flex; flex-direction:column; gap:7px; margin-top:10px; min-height:0; overflow:auto; padding-right:3px;}
+.person-item,.move-item{
+  border-radius:14px;
+  padding:8px 10px;
+  background:rgba(255,255,255,.52);
+  border:1px solid rgba(255,255,255,.68);
+  color:#7a5536;
+  font-size:13px;
+  line-height:1.4;
+  font-weight:760;
+}
+.person-item strong,.move-item strong{color:#67401f;}
+.empty-state{padding:18px 10px; color:#967153; font-size:14px; font-weight:850; line-height:1.7; text-align:center;}
+
+.result-toast{
+  position:fixed;
+  left:50%; bottom:16px;
+  transform:translateX(-50%);
+  z-index:99;
+  width:min(560px, calc(100vw - 28px));
+  border-radius:18px;
+  padding:13px 16px;
+  background:rgba(255,250,242,.98);
+  border:1px solid rgba(202,157,112,.24);
+  color:#704525;
+  box-shadow:0 16px 36px rgba(78,52,28,.18);
+  font-size:14px;
+  font-weight:900;
+  text-align:center;
+}
+
+@media (max-height:760px){
+  .page{padding:8px;}
+  .bomb-shell{padding:12px; gap:9px; border-radius:24px;}
+  .bomb-header{padding-right:64px;}
+  .bomb-title{font-size:clamp(28px, 4vw, 44px);}
+  .game-stack{gap:9px; grid-template-rows:minmax(0, 1.18fr) minmax(128px, .72fr);}
+  .play-card{padding:12px; gap:8px;}
+  .notice{padding:8px 12px; font-size:13px; line-height:1.36;}
+  .bomb-art-wrap{width:min(210px, 82%);}
+  .bomb-zone,.control-zone{padding:12px;}
+  .range-card{min-height:58px; padding:8px 10px;}
+  .range-value{font-size:clamp(28px, 4.4vw, 46px);}
+  .meta-pill{min-height:44px;}
+  .action-panel{padding:10px;}
+  .big-action{min-height:42px;}
+  .list-card{padding:12px;}
+  .section-title{font-size:17px;}
+  .person-item,.move-item{padding:7px 9px; font-size:12px;}
+}
+
+@media (max-width:720px){
+  html,body{overflow:auto;}
+  .page{height:auto; min-height:100dvh; align-items:flex-start; padding:10px;}
+  .bomb-shell{height:auto; min-height:calc(100dvh - 20px); overflow:visible; border-radius:24px; padding:12px;}
+  .bomb-header{padding-right:0; flex-direction:column; align-items:flex-start;}
+  .header-actions{justify-content:flex-start;}
+  .game-stack{display:flex; flex-direction:column; min-height:0;}
+  .play-card{min-height:auto;}
+  .core-stage{grid-template-columns:1fr;}
+  .bomb-zone{grid-template-rows:auto auto;}
+  .bomb-art-wrap{width:min(190px, 54vw);}
+  .range-card{min-height:58px;}
+  .bottom-grid{grid-template-columns:1fr;}
+  .participants,.moves{max-height:220px;}
+}
+
+@media (max-width:480px){
+  .bomb-title{font-size:32px;}
+  .guest-box{grid-template-columns:1fr;}
+  .range-card{gap:10px;}
+  .range-value{font-size:36px;}
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+  <main id="bombShell" class="bomb-shell">
+    <header class="bomb-header">
+      <h1 class="bomb-title">拆弹专家</h1>
+
+      <div class="header-actions">
+        <button id="newGameBtn" class="soft-btn primary" type="button">开启新炸弹</button>
+      </div>
+    </header>
+
+    <section class="game-stack">
+      <section class="card play-card">
+        <div id="gameNo" class="game-no">还没有进行中的炸弹</div>
+
+        <div id="statusNotice" class="notice">
+          当前没有进行中的炸弹。点击“开启新炸弹”开始。
+        </div>
+
+        <div class="core-stage">
+          <div class="bomb-zone">
+            <div class="bomb-art-wrap">
+              <div class="bomb-art-glow"></div>
+              <img class="bomb-art" src="boom.png" alt="拆弹专家炸弹图案">
+            </div>
+
+            <div class="range-card">
+              <div class="range-label">当前范围</div>
+              <div id="rangeValue" class="range-value">-- - --</div>
+            </div>
+          </div>
+
+          <div class="control-zone">
+            <div id="identityChip" class="identity-chip">当前玩家：参观者模式</div>
+
+            <div class="meta-row">
+              <div class="meta-pill">
+                <div class="meta-label">当前轮数</div>
+                <div id="roundValue" class="meta-value">0</div>
+              </div>
+              <div class="meta-pill">
+                <div class="meta-label">危险等级</div>
+                <div id="dangerValue" class="meta-value">待开启</div>
+              </div>
+            </div>
+
+            <div id="guestBox" class="guest-box hidden">
+              <div class="field">
+                <label>游客名字</label>
+                <input id="guestNameInput" type="text" maxlength="12" placeholder="填写 1-12 个字">
+              </div>
+              <button id="useGuestBtn" class="soft-btn" type="button">游客参与</button>
+            </div>
+
+            <div id="normalActionPanel" class="action-panel hidden">
+              <div class="slider-top">
+                <span class="range-label">选择数字</span>
+                <span id="chosenNumber" class="chosen-number">1</span>
+              </div>
+
+              <input id="numberSlider" class="range-slider" type="range" min="1" max="100" value="1">
+
+              <div class="action-buttons">
+                <button id="claimBtn" class="big-action" type="button">认领数字</button>
+                <button id="randomBtn" class="big-action secondary" type="button">随机认领</button>
+              </div>
+            </div>
+
+            <div id="finalActionPanel" class="action-panel hidden">
+              <div class="notice">最后只剩下这个数字了。没有选择，只有认领。</div>
+              <div id="finalNumber" class="final-number">--</div>
+              <div class="action-buttons single">
+                <button id="finalClaimBtn" class="big-action danger" type="button">认领剩余数字</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bottom-grid">
+        <div class="card list-card">
+          <h2 class="section-title">本局参与者</h2>
+          <div id="participantsList" class="participants">
+            <div class="empty-state">还没有人参与本局。</div>
+          </div>
+        </div>
+
+        <div class="card list-card">
+          <h2 class="section-title">最近操作</h2>
+          <div id="movesList" class="moves">
+            <div class="empty-state">暂无操作记录。</div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<div id="resultToast" class="result-toast hidden"></div>
+
+<script>
+const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+const bombShell = document.getElementById("bombShell");
+const newGameBtn = document.getElementById("newGameBtn");
+const gameNo = document.getElementById("gameNo");
+const identityChip = document.getElementById("identityChip");
+const rangeValue = document.getElementById("rangeValue");
+const roundValue = document.getElementById("roundValue");
+const dangerValue = document.getElementById("dangerValue");
+const statusNotice = document.getElementById("statusNotice");
+const guestBox = document.getElementById("guestBox");
+const guestNameInput = document.getElementById("guestNameInput");
+const useGuestBtn = document.getElementById("useGuestBtn");
+const normalActionPanel = document.getElementById("normalActionPanel");
+const finalActionPanel = document.getElementById("finalActionPanel");
+const numberSlider = document.getElementById("numberSlider");
+const chosenNumber = document.getElementById("chosenNumber");
+const claimBtn = document.getElementById("claimBtn");
+const randomBtn = document.getElementById("randomBtn");
+const finalNumber = document.getElementById("finalNumber");
+const finalClaimBtn = document.getElementById("finalClaimBtn");
+const participantsList = document.getElementById("participantsList");
+const movesList = document.getElementById("movesList");
+const resultToast = document.getElementById("resultToast");
+
+let currentGame = null;
+let busy = false;
+let guestReady = false;
+
+function isLoggedIn(){ return localStorage.getItem("room10LoggedIn") === "true"; }
+function getCurrentUser(){ return localStorage.getItem("room10User") || ""; }
+function getCurrentMemberId(){ return localStorage.getItem("room10MemberId") || ""; }
+function getCurrentMemberCode(){ return localStorage.getItem("room10MemberCode") || ""; }
+function getRole(){ return localStorage.getItem("room10Role") || ""; }
+
+function getRoleLabel(roleValue = getRole()){
+  const role = String(roleValue || "").toLowerCase();
+  if(role === "owner") return "维修工";
+  if(role === "admin") return "宿管";
+  if(role === "member") return "房客";
+  if(role === "applying") return "申请中";
+  if(isLoggedIn()) return "房客";
+  return "参观者";
+}
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function setBusy(value){
+  busy = !!value;
+  claimBtn.disabled = busy;
+  randomBtn.disabled = busy;
+  finalClaimBtn.disabled = busy;
+  newGameBtn.disabled = busy;
+  useGuestBtn.disabled = busy;
+}
+
+function showToast(message){
+  resultToast.textContent = message || "";
+  resultToast.classList.remove("hidden");
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => resultToast.classList.add("hidden"), 3200);
+}
+
+function playBoom(){
+  bombShell.classList.remove("boom");
+  void bombShell.offsetWidth;
+  bombShell.classList.add("boom");
+  const flash = document.createElement("div");
+  flash.className = "boom-flash";
+  bombShell.appendChild(flash);
+  setTimeout(() => flash.remove(), 900);
+}
+
+function getDangerLabel(min, max, phase){
+  if(phase === "final_waiting") return "最终认领";
+  const count = Number(max) - Number(min) + 1;
+  if(!Number.isFinite(count) || count <= 0) return "未知";
+  if(count <= 2) return "最终拆弹";
+  if(count <= 5) return "极危";
+  if(count <= 15) return "危险";
+  if(count <= 35) return "紧张";
+  return "安全";
+}
+
+function isMemberAvailable(){
+  return isLoggedIn() && !!getCurrentUser().trim() && !!getCurrentMemberId().trim() && !!getCurrentMemberCode().trim();
+}
+
+function updateIdentityUI(){
+  if(isMemberAvailable()){
+    identityChip.textContent = `当前玩家：${getCurrentUser()}｜${getRoleLabel()}`;
+    guestBox.classList.add("hidden");
+    guestReady = false;
+    return;
+  }
+
+  identityChip.textContent = guestReady && guestNameInput.value.trim()
+    ? `当前玩家：${guestNameInput.value.trim()}｜游客`
+    : "当前玩家：游客模式";
+  guestBox.classList.remove("hidden");
+}
+
+function getActorPayload(){
+  if(isMemberAvailable()){
+    return {
+      ok:true,
+      actor_type:"member",
+      nickname:getCurrentUser().trim(),
+      member_code:getCurrentMemberCode().trim(),
+      guest_name:null
+    };
+  }
+
+  const guestName = guestNameInput.value.trim();
+  if(!guestName || guestName.length > 12){
+    return { ok:false, message:"游客名字需要 1-12 个字。" };
+  }
+
+  guestReady = true;
+  updateIdentityUI();
+
+  return {
+    ok:true,
+    actor_type:"guest",
+    nickname:null,
+    member_code:null,
+    guest_name:guestName
+  };
+}
+
+function getCurrentActorKey(){
+  if(isMemberAvailable()) return "member:" + getCurrentMemberId();
+  const guestName = guestNameInput.value.trim().toLowerCase();
+  if(!guestName) return "";
+  return "guest:" + guestName;
+}
+
+function isCurrentActorBlocked(){
+  if(!currentGame || !currentGame.has_active_game) return false;
+  const actorKey = getCurrentActorKey();
+  return actorKey && currentGame.last_actor_key === actorKey;
+}
+
+async function loadGame(){
+  if(busy) return;
+  try{
+    setBusy(true);
+    const { data, error } = await client.rpc("get_current_bomb_game");
+    if(error){
+      console.error(error);
+      showToast("读取拆弹专家失败：" + (error.message || "请稍后再试"));
+      return;
+    }
+    currentGame = data || { has_active_game:false };
+    renderGame();
+  }catch(err){
+    console.error(err);
+    showToast("读取拆弹专家失败：" + (err.message || "请稍后再试"));
+  }finally{
+    setBusy(false);
+  }
+}
+
+async function createGame(){
+  try{
+    setBusy(true);
+    const { data, error } = await client.rpc("create_bomb_game");
+    if(error){
+      console.error(error);
+      showToast("开启失败：" + (error.message || "请稍后再试"));
+      return;
+    }
+    showToast(data?.message || "新的炸弹已经开启。");
+    await loadGame();
+  }catch(err){
+    console.error(err);
+    showToast("开启失败：" + (err.message || "请稍后再试"));
+  }finally{
+    setBusy(false);
+  }
+}
+
+async function claimNumber(method){
+  if(!currentGame || !currentGame.has_active_game){ showToast("当前没有进行中的炸弹。"); return; }
+  const actor = getActorPayload();
+  if(!actor.ok){ showToast(actor.message); return; }
+  if(isCurrentActorBlocked()){ showToast("不能连续认领数字，需要换一个人接手。"); return; }
+
+  const isRandom = method === "random";
+  const claimNumberValue = isRandom ? null : Number(numberSlider.value);
+
+  try{
+    setBusy(true);
+    const { data, error } = await client.rpc("claim_bomb_number", {
+      p_actor_type: actor.actor_type,
+      p_nickname: actor.nickname,
+      p_member_code: actor.member_code,
+      p_guest_name: actor.guest_name,
+      p_claim_number: claimNumberValue,
+      p_claim_method: isRandom ? "random" : "manual",
+      p_expected_game_id: currentGame.game_id,
+      p_expected_round_count: currentGame.round_count
+    });
+    if(error){
+      console.error(error);
+      showToast("认领失败：" + (error.message || "请稍后再试"));
+      return;
+    }
+    showToast(data?.message || "操作完成。");
+    if(data?.is_exploded) playBoom();
+    await loadGame();
+  }catch(err){
+    console.error(err);
+    showToast("认领失败：" + (err.message || "请稍后再试"));
+  }finally{
+    setBusy(false);
+  }
+}
+
+async function claimFinalNumber(){
+  if(!currentGame || !currentGame.has_active_game){ showToast("当前没有进行中的炸弹。"); return; }
+  const actor = getActorPayload();
+  if(!actor.ok){ showToast(actor.message); return; }
+  if(isCurrentActorBlocked()){ showToast("不能连续认领数字，需要换一个人接手。"); return; }
+
+  try{
+    setBusy(true);
+    const { data, error } = await client.rpc("claim_bomb_number", {
+      p_actor_type: actor.actor_type,
+      p_nickname: actor.nickname,
+      p_member_code: actor.member_code,
+      p_guest_name: actor.guest_name,
+      p_claim_number: null,
+      p_claim_method: "final_claim",
+      p_expected_game_id: currentGame.game_id,
+      p_expected_round_count: currentGame.round_count
+    });
+    if(error){
+      console.error(error);
+      showToast("认领失败：" + (error.message || "请稍后再试"));
+      return;
+    }
+    showToast(data?.message || "操作完成。");
+    if(data?.is_exploded) playBoom();
+    await loadGame();
+  }catch(err){
+    console.error(err);
+    showToast("认领失败：" + (err.message || "请稍后再试"));
+  }finally{
+    setBusy(false);
+  }
+}
+
+function renderGame(){
+  updateIdentityUI();
+  const hasGame = currentGame && currentGame.has_active_game;
+  newGameBtn.classList.toggle("hidden", hasGame);
+
+  if(!hasGame){
+    gameNo.textContent = "还没有进行中的炸弹";
+    rangeValue.textContent = "-- - --";
+    roundValue.textContent = "0";
+    dangerValue.textContent = "待开启";
+    statusNotice.innerHTML = isMemberAvailable()
+      ? "当前没有进行中的炸弹。点击 <strong>开启新炸弹</strong> 开始。"
+      : "当前没有进行中的炸弹。游客需要先填写名字，也可以回游戏房登录后作为成员参与。";
+    normalActionPanel.classList.add("hidden");
+    finalActionPanel.classList.add("hidden");
+    participantsList.innerHTML = '<div class="empty-state">还没有人参与本局。</div>';
+    movesList.innerHTML = '<div class="empty-state">暂无操作记录。</div>';
+    bombShell.classList.remove("boiling");
+    return;
+  }
+
+  const min = Number(currentGame.current_min);
+  const max = Number(currentGame.current_max);
+  const phase = currentGame.phase || "normal";
+  const count = max - min + 1;
+  const danger = getDangerLabel(min, max, phase);
+  const blocked = isCurrentActorBlocked();
+
+  gameNo.textContent = `第 ${currentGame.game_no} 局炸弹`;
+  rangeValue.textContent = `${min} - ${max}`;
+  roundValue.textContent = String(currentGame.round_count || 0);
+  dangerValue.textContent = danger;
+  bombShell.classList.toggle("boiling", count <= 5 || phase === "final_waiting");
+
+  if(!isMemberAvailable() && !guestNameInput.value.trim()){
+    statusNotice.innerHTML = "你当前是游客模式。请先填写游客名字，再认领数字。";
+  }else if(blocked){
+    statusNotice.innerHTML = "上一手就是你认领的。现在需要 <strong>换一个人接手</strong>。";
+  }else if(phase === "final_waiting"){
+    statusNotice.innerHTML = "已经进入最终认领阶段。最后一个数字已经没有选择权了。";
+  }else{
+    statusNotice.innerHTML = `当前范围是 <strong>${min} - ${max}</strong>。请选择一个数字，或者随机认领。`;
+  }
+
+  if(phase === "final_waiting"){
+    normalActionPanel.classList.add("hidden");
+    finalActionPanel.classList.remove("hidden");
+    finalNumber.textContent = String(currentGame.final_remaining_number ?? min);
+    finalClaimBtn.textContent = `认领剩余数字 ${currentGame.final_remaining_number ?? min}`;
+    finalClaimBtn.disabled = busy || blocked;
+  }else{
+    normalActionPanel.classList.remove("hidden");
+    finalActionPanel.classList.add("hidden");
+    numberSlider.min = String(min);
+    numberSlider.max = String(max);
+    let currentValue = Number(numberSlider.value);
+    if(!Number.isFinite(currentValue) || currentValue < min || currentValue > max){
+      currentValue = Math.floor((min + max) / 2);
+      numberSlider.value = String(currentValue);
+    }
+    chosenNumber.textContent = String(currentValue);
+    claimBtn.textContent = `认领数字 ${currentValue}`;
+    claimBtn.disabled = busy || blocked;
+    randomBtn.disabled = busy || blocked;
+  }
+
+  renderParticipants(currentGame.participants || []);
+  renderMoves(currentGame.recent_moves || []);
+}
+
+function renderParticipants(items){
+  const list = Array.isArray(items) ? items : [];
+  if(!list.length){ participantsList.innerHTML = '<div class="empty-state">还没有人参与本局。</div>'; return; }
+  participantsList.innerHTML = list.map(item => {
+    const typeText = item.actor_type === "guest" ? "游客" : "成员";
+    return `<div class="person-item"><strong>${escapeHtml(item.actor_name)}</strong><span>｜${typeText}</span><span>｜${Number(item.move_count || 0)} 次认领</span></div>`;
+  }).join("");
+}
+
+function getMethodText(method){
+  if(method === "random") return "随机认领";
+  if(method === "final_pick") return "最终选择";
+  if(method === "final_claim") return "最终认领";
+  return "手动认领";
+}
+
+function renderMoves(items){
+  const list = Array.isArray(items) ? items : [];
+  if(!list.length){ movesList.innerHTML = '<div class="empty-state">暂无操作记录。</div>'; return; }
+  movesList.innerHTML = list.map(item => {
+    const tags = [];
+    if(item.is_exploded) tags.push("BOOM");
+    if(item.is_random) tags.push("随机");
+    if(item.is_near_miss) tags.push("贴边");
+    if(item.is_final_save) tags.push("甩锅成功");
+    if(item.is_lucky_survive) tags.push("命硬");
+    return `<div class="move-item"><strong>#${escapeHtml(item.move_no)} ${escapeHtml(item.actor_name)}</strong><span> ${getMethodText(item.claim_method)} ${escapeHtml(item.claim_number)}</span>${tags.length ? `<br><span>${tags.map(t => `「${escapeHtml(t)}」`).join(" ")}</span>` : ""}</div>`;
+  }).join("");
+}
+
+newGameBtn.addEventListener("click", createGame);
+claimBtn.addEventListener("click", () => claimNumber("manual"));
+randomBtn.addEventListener("click", () => claimNumber("random"));
+finalClaimBtn.addEventListener("click", claimFinalNumber);
+useGuestBtn.addEventListener("click", () => {
+  const name = guestNameInput.value.trim();
+  if(!name || name.length > 12){ showToast("游客名字需要 1-12 个字。"); return; }
+  guestReady = true;
+  updateIdentityUI();
+  renderGame();
+  showToast(`已使用游客名字：${name}`);
+});
+numberSlider.addEventListener("input", () => {
+  chosenNumber.textContent = numberSlider.value;
+  claimBtn.textContent = `认领数字 ${numberSlider.value}`;
+});
+guestNameInput.addEventListener("input", () => { guestReady = false; renderGame(); });
+window.addEventListener("storage", () => { updateIdentityUI(); renderGame(); });
+
+updateIdentityUI();
+loadGame();
+setInterval(() => { if(document.hidden || busy) return; loadGame(); }, 8000);
+</script>
+</body>
+</html>
