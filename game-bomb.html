@@ -716,6 +716,90 @@ button{cursor:pointer;}
   margin-top:14px;
 }
 
+.award-card{
+  width:min(620px, 100%);
+  text-align:center;
+}
+
+.award-icon{
+  position:relative;
+  z-index:1;
+  width:88px;
+  height:88px;
+  margin:0 auto 10px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle, rgba(255,240,170,.72), rgba(229,170,91,.22) 58%, transparent 76%);
+  font-size:50px;
+  filter:drop-shadow(0 10px 16px rgba(88,55,32,.14));
+  animation:endingPop .42s ease-out both;
+}
+
+.award-list{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:12px;
+}
+
+.award-item{
+  border-radius:18px;
+  padding:12px;
+  background:rgba(255,255,255,.56);
+  border:1px solid rgba(255,255,255,.78);
+  box-shadow:0 7px 16px rgba(111,75,41,.08), inset 0 1px 0 rgba(255,255,255,.88);
+  text-align:left;
+}
+
+.award-type{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:24px;
+  padding:0 10px;
+  border-radius:999px;
+  background:rgba(235,161,103,.24);
+  color:#7a3b22;
+  font-size:12px;
+  font-weight:950;
+}
+
+.award-name{
+  margin-top:7px;
+  color:#673f20;
+  font-size:20px;
+  font-weight:950;
+  line-height:1.2;
+}
+
+.award-desc{
+  margin-top:5px;
+  color:#865f40;
+  font-size:13px;
+  line-height:1.5;
+  font-weight:850;
+}
+
+.award-condition{
+  margin-top:5px;
+  color:#a17957;
+  font-size:12px;
+  line-height:1.4;
+  font-weight:850;
+}
+
+.award-actions{
+  position:relative;
+  z-index:1;
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:1fr;
+}
+
 @media (max-height:760px){
   .page{padding:8px;}
   .bomb-shell{padding:12px; gap:9px; border-radius:24px;}
@@ -804,7 +888,7 @@ button{cursor:pointer;}
         <div id="gameNo" class="game-no">还没有进行中的战局</div>
 
         <div id="statusNotice" class="notice">
-          点击“开启新炸弹”开始游戏。
+          点击“开启新炸弹”开始。
         </div>
 
         <div class="core-stage">
@@ -928,7 +1012,7 @@ button{cursor:pointer;}
     <div class="modal-head">
       <div class="modal-kicker">结局播报</div>
       <h2 id="endingTitle" class="modal-title">炸弹已引爆</h2>
-      <p class="modal-subtitle">本局结果已经记录。</p>
+      <p id="endingSubtitle" class="modal-subtitle">本局结果已经记录。</p>
     </div>
 
     <div id="endingText" class="ending-text">拆弹记录整理中。</div>
@@ -938,6 +1022,26 @@ button{cursor:pointer;}
     <div class="ending-actions">
       <button id="endingHistoryBtn" class="big-action secondary" type="button">查看历史战局</button>
       <button id="endingNewGameBtn" class="big-action" type="button">开启下一局</button>
+    </div>
+  </section>
+</div>
+
+<div id="awardModal" class="modal-layer hidden">
+  <section class="modal-card award-card">
+    <button id="closeAwardBtn" class="modal-close" type="button">×</button>
+
+    <div class="award-icon">🏅</div>
+
+    <div class="modal-head">
+      <div class="modal-kicker">奖励解锁</div>
+      <h2 class="modal-title">获得新奖励</h2>
+      <p class="modal-subtitle">本局结束后解锁了新的称号/成就。</p>
+    </div>
+
+    <div id="awardList" class="award-list"></div>
+
+    <div class="award-actions">
+      <button id="awardOkBtn" class="big-action" type="button">收下奖励</button>
     </div>
   </section>
 </div>
@@ -985,13 +1089,20 @@ const historyList = document.getElementById("historyList");
 const endingModal = document.getElementById("endingModal");
 const closeEndingBtn = document.getElementById("closeEndingBtn");
 const endingTitle = document.getElementById("endingTitle");
+const endingSubtitle = document.getElementById("endingSubtitle");
 const endingText = document.getElementById("endingText");
 const endingStats = document.getElementById("endingStats");
 const endingHistoryBtn = document.getElementById("endingHistoryBtn");
 const endingNewGameBtn = document.getElementById("endingNewGameBtn");
 
+const awardModal = document.getElementById("awardModal");
+const closeAwardBtn = document.getElementById("closeAwardBtn");
+const awardOkBtn = document.getElementById("awardOkBtn");
+const awardList = document.getElementById("awardList");
+
 let currentGame = null;
 let busy = false;
+let loginBusy = false;
 let historyBusy = false;
 let guestReady = false;
 
@@ -1020,10 +1131,13 @@ function escapeHtml(value){
     .replace(/'/g, "&#39;");
 }
 
-function firstValue(source, key, fallback = ""){
-  return source && source[key] !== undefined && source[key] !== null && source[key] !== ""
-    ? source[key]
-    : fallback;
+function firstValue(source, keys, fallback = ""){
+  for(const key of keys){
+    if(source && source[key] !== undefined && source[key] !== null && source[key] !== ""){
+      return source[key];
+    }
+  }
+  return fallback;
 }
 
 function setBusy(value){
@@ -1033,8 +1147,13 @@ function setBusy(value){
   finalClaimBtn.disabled = busy;
   newGameBtn.disabled = busy;
   useGuestBtn.disabled = busy;
-  submitLoginBtn.disabled = busy;
-  toggleLoginCodeBtn.disabled = busy;
+  submitLoginBtn.disabled = busy || loginBusy;
+}
+
+function setLoginBusy(value){
+  loginBusy = !!value;
+  submitLoginBtn.disabled = loginBusy || busy;
+  toggleLoginCodeBtn.disabled = loginBusy;
 }
 
 function showToast(message){
@@ -1069,17 +1188,15 @@ function isMemberAvailable(){
   return isLoggedIn() && !!getCurrentUser().trim() && !!getCurrentMemberId().trim() && !!getCurrentMemberCode().trim();
 }
 
+function hasAnyPlayerInput(){
+  return isMemberAvailable()
+    || !!guestNameInput.value.trim()
+    || !!loginNicknameInput.value.trim()
+    || !!loginCodeInput.value.trim();
+}
+
 function shouldAutoRefreshGame(){
-  return !!(
-    currentGame &&
-    currentGame.has_active_game &&
-    (
-      isMemberAvailable() ||
-      guestNameInput.value.trim() ||
-      loginNicknameInput.value.trim() ||
-      loginCodeInput.value.trim()
-    )
-  );
+  return !!(currentGame && currentGame.has_active_game && hasAnyPlayerInput());
 }
 
 function updateIdentityUI(){
@@ -1119,7 +1236,7 @@ async function submitLogin(){
   }
 
   try{
-    setBusy(true);
+    setLoginBusy(true);
     loginMessage.textContent = "验证中……";
 
     const { data, error } = await client.rpc("verify_member_login", {
@@ -1158,7 +1275,7 @@ async function submitLogin(){
     console.error(err);
     loginMessage.textContent = "登录失败，请稍后再试。";
   }finally{
-    setBusy(false);
+    setLoginBusy(false);
   }
 }
 
@@ -1200,7 +1317,8 @@ function getActorDisplayName(actor){
 function getCurrentActorKey(){
   if(isMemberAvailable()) return "member:" + getCurrentMemberId();
   const guestName = guestNameInput.value.trim().toLowerCase();
-  return guestName ? "guest:" + guestName : "";
+  if(!guestName) return "";
+  return "guest:" + guestName;
 }
 
 function isCurrentActorBlocked(){
@@ -1269,13 +1387,23 @@ async function loadHistory(){
     const { data, error } = await client.rpc("get_bomb_game_history");
     if(error){
       console.error(error);
-      historyList.innerHTML = '<div class="empty-state">历史战局暂时读取失败。</div>';
+      historyList.innerHTML = `
+        <div class="empty-state">
+          历史战局暂时读取失败。<br>
+          如果数据库还没有创建 get_bomb_game_history 函数，需要先补充这个 RPC。
+        </div>
+      `;
       return;
     }
     renderHistory(data || []);
   }catch(err){
     console.error(err);
-    historyList.innerHTML = '<div class="empty-state">历史战局暂时读取失败。</div>';
+    historyList.innerHTML = `
+      <div class="empty-state">
+        历史战局暂时读取失败。<br>
+        请检查 get_bomb_game_history 是否已存在。
+      </div>
+    `;
   }finally{
     historyBusy = false;
   }
@@ -1288,33 +1416,43 @@ function renderHistory(items){
     return;
   }
 
-  historyList.innerHTML = list.map(item => `
-    <article class="history-item">
-      <div class="history-top">
-        <div class="history-no">第 ${escapeHtml(firstValue(item, "game_no", "--"))} 局</div>
-        <div class="history-status">${escapeHtml(firstValue(item, "status", "BOOM"))}</div>
-      </div>
-      <div class="history-meta">
-        <div class="history-mini">
-          <strong>${escapeHtml(firstValue(item, "exploded_actor_name", "未知玩家"))}</strong>
-          <span>爆炸玩家</span>
+  historyList.innerHTML = list.map(item => {
+    const gameNoValue = firstValue(item, ["game_no", "game_number", "no"], "--");
+    const loser = firstValue(item, ["exploded_actor_name", "loser_name", "actor_name", "final_actor_name"], "未知玩家");
+    const explodedNumber = firstValue(item, ["exploded_number", "bomb_number", "final_number", "claim_number"], "--");
+    const roundCount = firstValue(item, ["round_count", "total_rounds", "move_count"], "--");
+    const participantCount = firstValue(item, ["participant_count", "players_count", "actor_count"], "--");
+    const endedAt = firstValue(item, ["ended_at", "finished_at", "updated_at", "created_at"], "");
+    const status = firstValue(item, ["status_label", "result_label", "status"], "BOOM");
+
+    return `
+      <article class="history-item">
+        <div class="history-top">
+          <div class="history-no">第 ${escapeHtml(gameNoValue)} 局</div>
+          <div class="history-status">${escapeHtml(status)}</div>
         </div>
-        <div class="history-mini">
-          <strong>${escapeHtml(firstValue(item, "exploded_number", "--"))}</strong>
-          <span>爆炸数字</span>
+        <div class="history-meta">
+          <div class="history-mini">
+            <strong>${escapeHtml(loser)}</strong>
+            <span>爆炸玩家</span>
+          </div>
+          <div class="history-mini">
+            <strong>${escapeHtml(explodedNumber)}</strong>
+            <span>爆炸数字</span>
+          </div>
+          <div class="history-mini">
+            <strong>${escapeHtml(roundCount)}</strong>
+            <span>坚持轮数</span>
+          </div>
+          <div class="history-mini">
+            <strong>${escapeHtml(participantCount)}</strong>
+            <span>参与人数</span>
+          </div>
         </div>
-        <div class="history-mini">
-          <strong>${escapeHtml(firstValue(item, "round_count", "--"))}</strong>
-          <span>坚持轮数</span>
-        </div>
-        <div class="history-mini">
-          <strong>${escapeHtml(firstValue(item, "participant_count", "--"))}</strong>
-          <span>参与人数</span>
-        </div>
-      </div>
-      <div class="modal-subtitle">结束时间：${escapeHtml(formatDateTime(firstValue(item, "ended_at", "")))}</div>
-    </article>
-  `).join("");
+        <div class="modal-subtitle">结束时间：${escapeHtml(formatDateTime(endedAt))}</div>
+      </article>
+    `;
+  }).join("");
 }
 
 function openHistoryModal(){
@@ -1328,19 +1466,26 @@ function closeHistoryModal(){
 
 function buildEndingPayload(data, actor, claimNumberValue){
   const game = currentGame || {};
+  const loser = firstValue(data, ["exploded_actor_name", "loser_name", "actor_name"], getActorDisplayName(actor));
+  const gameNoValue = firstValue(data, ["game_no"], game.game_no || "--");
+  const explodedNumber = firstValue(data, ["exploded_number", "bomb_number", "final_number", "claim_number"], claimNumberValue ?? "--");
+  const roundCount = firstValue(data, ["round_count", "total_rounds"], Number(game.round_count || 0) + 1);
   const participantBase = Array.isArray(game.participants) ? game.participants.length : 0;
+  const participantCount = firstValue(data, ["participant_count", "players_count"], Math.max(1, participantBase));
 
   return {
-    gameNo:firstValue(data, "game_no", game.game_no || "--"),
-    loser:firstValue(data, "exploded_actor_name", getActorDisplayName(actor)),
-    explodedNumber:firstValue(data, "exploded_number", claimNumberValue ?? "--"),
-    roundCount:firstValue(data, "round_count", Number(game.round_count || 0) + 1),
-    participantCount:firstValue(data, "participant_count", Math.max(1, participantBase))
+    gameNo: gameNoValue,
+    loser,
+    explodedNumber,
+    roundCount,
+    participantCount,
+    message: data?.message || ""
   };
 }
 
 function showEndingModal(payload){
   endingTitle.textContent = `第 ${payload.gameNo} 局炸弹已引爆`;
+  endingSubtitle.textContent = "本局拆弹结果已经播报。";
   endingText.innerHTML = `
     <strong>${escapeHtml(payload.loser)}</strong> 认领到了最终爆炸数字。
     <br>本局在第 <strong>${escapeHtml(payload.roundCount)}</strong> 轮结束，记录已进入历史战局。
@@ -1368,8 +1513,53 @@ function closeEndingModal(){
   endingModal.classList.add("hidden");
 }
 
+function getAwardTypeLabel(type){
+  return type === "title" ? "称号" : "成就";
+}
+
+function showAwardModal(awards){
+  const list = Array.isArray(awards) ? awards : [];
+  if(!list.length) return;
+
+  awardList.innerHTML = list.map(item => `
+    <article class="award-item">
+      <div class="award-type">${escapeHtml(getAwardTypeLabel(item.award_type))}</div>
+      <div class="award-name">《${escapeHtml(item.award_name)}》</div>
+      <div class="award-desc">${escapeHtml(item.award_desc)}</div>
+      <div class="award-condition">${escapeHtml(item.condition_text)}</div>
+    </article>
+  `).join("");
+
+  awardModal.classList.remove("hidden");
+}
+
+function closeAwardModal(){
+  awardModal.classList.add("hidden");
+}
+
+async function checkBombAwards(gameId){
+  if(!isMemberAvailable() || !gameId) return;
+
+  try{
+    const { data, error } = await client.rpc("claim_bomb_awards_after_game", {
+      p_game_id: gameId,
+      p_member_id: getCurrentMemberId(),
+      p_member_code: getCurrentMemberCode()
+    });
+
+    if(error){
+      console.error(error);
+      return;
+    }
+
+    showAwardModal(data || []);
+  }catch(err){
+    console.error(err);
+  }
+}
+
 async function claimNumber(method){
-  if(!currentGame || !currentGame.has_active_game){ showToast("当前没有进行中的战局。"); return; }
+  if(!currentGame || !currentGame.has_active_game){ showToast("当前没有进行中的游戏。"); return; }
   const actor = getActorPayload();
   if(!actor.ok){ showToast(actor.message); return; }
   if(isCurrentActorBlocked()){ showToast("不能连续认领数字，需要换一个人接手。"); return; }
@@ -1398,9 +1588,15 @@ async function claimNumber(method){
     showToast(data?.message || "操作完成。");
 
     if(data?.is_exploded){
+      const endedGameId = currentGame.game_id;
+
       playBoom();
       showEndingModal(buildEndingPayload(data, actor, data?.claim_number ?? claimNumberValue));
       loadHistory();
+
+      setTimeout(() => {
+        checkBombAwards(endedGameId);
+      }, 450);
     }
 
     await loadGame();
@@ -1413,7 +1609,7 @@ async function claimNumber(method){
 }
 
 async function claimFinalNumber(){
-  if(!currentGame || !currentGame.has_active_game){ showToast("当前没有进行中的战局。"); return; }
+  if(!currentGame || !currentGame.has_active_game){ showToast("当前没有进行中的游戏。"); return; }
   const actor = getActorPayload();
   if(!actor.ok){ showToast(actor.message); return; }
   if(isCurrentActorBlocked()){ showToast("不能连续认领数字，需要换一个人接手。"); return; }
@@ -1441,9 +1637,15 @@ async function claimFinalNumber(){
     showToast(data?.message || "操作完成。");
 
     if(data?.is_exploded){
+      const endedGameId = currentGame.game_id;
+
       playBoom();
       showEndingModal(buildEndingPayload(data, actor, data?.claim_number ?? finalClaimNumber));
       loadHistory();
+
+      setTimeout(() => {
+        checkBombAwards(endedGameId);
+      }, 450);
     }
 
     await loadGame();
@@ -1461,7 +1663,7 @@ function renderGame(){
   newGameBtn.classList.toggle("hidden", hasGame);
 
   if(!hasGame){
-    gameNo.textContent = "还没有进行中的游戏";
+    gameNo.textContent = "还没有进行中的战局";
     rangeValue.textContent = "-- - --";
     roundValue.textContent = "0";
     dangerValue.textContent = "待开启";
@@ -1479,6 +1681,7 @@ function renderGame(){
   const min = Number(currentGame.current_min);
   const max = Number(currentGame.current_max);
   const phase = currentGame.phase || "normal";
+  const count = max - min + 1;
   const danger = getDangerLabel(min, max, phase);
   const blocked = isCurrentActorBlocked();
 
@@ -1486,7 +1689,7 @@ function renderGame(){
   rangeValue.textContent = `${min} - ${max}`;
   roundValue.textContent = String(currentGame.round_count || 0);
   dangerValue.textContent = danger;
-  bombShell.classList.toggle("boiling", max - min + 1 <= 5 || phase === "final_waiting");
+  bombShell.classList.toggle("boiling", count <= 5 || phase === "final_waiting");
 
   if(!isMemberAvailable() && !guestNameInput.value.trim()){
     statusNotice.innerHTML = "请登录，或填写游客名字。";
@@ -1526,11 +1729,7 @@ function renderGame(){
 
 function renderParticipants(items){
   const list = Array.isArray(items) ? items : [];
-  if(!list.length){
-    participantsList.innerHTML = '<div class="empty-state">还没有人参与本局。</div>';
-    return;
-  }
-
+  if(!list.length){ participantsList.innerHTML = '<div class="empty-state">还没有人参与本局。</div>'; return; }
   participantsList.innerHTML = list.map(item => {
     const typeText = item.actor_type === "guest" ? "游客" : "成员";
     return `<div class="person-item"><strong>${escapeHtml(item.actor_name)}</strong><span>｜${typeText}</span><span>｜${Number(item.move_count || 0)} 次认领</span></div>`;
@@ -1546,11 +1745,7 @@ function getMethodText(method){
 
 function renderMoves(items){
   const list = Array.isArray(items) ? items : [];
-  if(!list.length){
-    movesList.innerHTML = '<div class="empty-state">暂无操作记录。</div>';
-    return;
-  }
-
+  if(!list.length){ movesList.innerHTML = '<div class="empty-state">暂无操作记录。</div>'; return; }
   movesList.innerHTML = list.map(item => {
     const tags = [];
     if(item.is_exploded) tags.push("BOOM");
@@ -1558,7 +1753,6 @@ function renderMoves(items){
     if(item.is_near_miss) tags.push("贴边");
     if(item.is_final_save) tags.push("甩锅成功");
     if(item.is_lucky_survive) tags.push("命硬");
-
     return `<div class="move-item"><strong>#${escapeHtml(item.move_no)} ${escapeHtml(item.actor_name)}</strong><span> ${getMethodText(item.claim_method)} ${escapeHtml(item.claim_number)}</span>${tags.length ? `<br><span>${tags.map(t => `「${escapeHtml(t)}」`).join(" ")}</span>` : ""}</div>`;
   }).join("");
 }
@@ -1599,6 +1793,13 @@ endingModal.addEventListener("click", event => {
   if(event.target === endingModal) closeEndingModal();
 });
 
+closeAwardBtn.addEventListener("click", closeAwardModal);
+awardOkBtn.addEventListener("click", closeAwardModal);
+
+awardModal.addEventListener("click", event => {
+  if(event.target === awardModal) closeAwardModal();
+});
+
 claimBtn.addEventListener("click", () => claimNumber("manual"));
 randomBtn.addEventListener("click", () => claimNumber("random"));
 finalClaimBtn.addEventListener("click", claimFinalNumber);
@@ -1617,21 +1818,15 @@ numberSlider.addEventListener("input", () => {
   claimBtn.textContent = `认领数字 ${numberSlider.value}`;
 });
 
-guestNameInput.addEventListener("input", () => {
-  guestReady = false;
-  renderGame();
-});
-
-window.addEventListener("storage", () => {
-  updateIdentityUI();
-  renderGame();
-});
+guestNameInput.addEventListener("input", () => { guestReady = false; renderGame(); });
+window.addEventListener("storage", () => { updateIdentityUI(); renderGame(); });
 
 updateIdentityUI();
 loadGame();
 
 setInterval(() => {
-  if(document.hidden || busy || !shouldAutoRefreshGame()) return;
+  if(document.hidden || busy) return;
+  if(!shouldAutoRefreshGame()) return;
   loadGame();
 }, 8000);
 </script>
