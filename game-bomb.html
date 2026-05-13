@@ -895,7 +895,7 @@ button{cursor:pointer;}
           <div class="bomb-zone">
             <div class="bomb-art-wrap">
               <div class="bomb-art-glow"></div>
-              <img class="bomb-art" src="boom.png" alt="拆弹专家炸弹图案">
+              <img id="bombArt" class="bomb-art" src="boom.png" alt="拆弹专家炸弹图案">
             </div>
 
             <div class="range-card">
@@ -1054,6 +1054,7 @@ const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 const bombShell = document.getElementById("bombShell");
+const bombArt = document.getElementById("bombArt");
 const newGameBtn = document.getElementById("newGameBtn");
 const historyBtn = document.getElementById("historyBtn");
 const gameNo = document.getElementById("gameNo");
@@ -1101,6 +1102,7 @@ const awardOkBtn = document.getElementById("awardOkBtn");
 const awardList = document.getElementById("awardList");
 
 let currentGame = null;
+let bombExplodedVisible = false;
 let busy = false;
 let loginBusy = false;
 let historyBusy = false;
@@ -1164,9 +1166,13 @@ function showToast(message){
 }
 
 function playBoom(){
+  bombExplodedVisible = true;
+  bombArt.src = "boomboom.png";
+
   bombShell.classList.remove("boom");
   void bombShell.offsetWidth;
   bombShell.classList.add("boom");
+
   const flash = document.createElement("div");
   flash.className = "boom-flash";
   bombShell.appendChild(flash);
@@ -1360,6 +1366,8 @@ async function loadGame(){
 
 async function createGame(){
   try{
+    bombExplodedVisible = false;
+    bombArt.src = "boom.png";
     setBusy(true);
     const { data, error } = await client.rpc("create_bomb_game");
     if(error){
@@ -1660,6 +1668,7 @@ async function claimFinalNumber(){
 function renderGame(){
   updateIdentityUI();
   const hasGame = currentGame && currentGame.has_active_game;
+  bombArt.src = bombExplodedVisible ? "boomboom.png" : "boom.png";
   newGameBtn.classList.toggle("hidden", hasGame);
 
   if(!hasGame){
