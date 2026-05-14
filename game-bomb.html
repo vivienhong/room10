@@ -1106,6 +1106,7 @@ let bombExplodedVisible = false;
 let busy = false;
 let loginBusy = false;
 let historyBusy = false;
+let refreshBusy = false;
 let guestReady = false;
 
 function isLoggedIn(){ return localStorage.getItem("room10LoggedIn") === "true"; }
@@ -1199,10 +1200,6 @@ function hasAnyPlayerInput(){
     || !!guestNameInput.value.trim()
     || !!loginNicknameInput.value.trim()
     || !!loginCodeInput.value.trim();
-}
-
-function shouldAutoRefreshGame(){
-  return !!(currentGame && currentGame.has_active_game && hasAnyPlayerInput());
 }
 
 function updateIdentityUI(){
@@ -1344,23 +1341,72 @@ function formatDateTime(value){
   return `${month}-${day} ${hour}:${minute}`;
 }
 
-async function loadGame(){
-  if(busy) return;
+function getGameSignature(game){
+  if(!game || !game.has_active_game) return "no-active-game";
+
+  return JSON.stringify({
+    game_id: game.game_id || "",
+    game_no: game.game_no || "",
+    phase: game.phase || "",
+    current_min: game.current_min ?? "",
+    current_max: game.current_max ?? "",
+    final_remaining_number: game.final_remaining_number ?? "",
+    round_count: game.round_count ?? "",
+    last_actor_key: game.last_actor_key || "",
+    participants: game.participants || [],
+    recent_moves: game.recent_moves || []
+  });
+}
+
+async function loadGame(options = {}){
+  const force = !!options.force;
+  const silent = !!options.silent;
+
+  if(refreshBusy) return;
+  if(busy && !force) return;
+
+  refreshBusy = true;
+
   try{
-    setBusy(true);
+    if(!force && !silent) setBusy(true);
+
+    const oldSignature = getGameSignature(currentGame);
+    const oldGameId = currentGame?.game_id || "";
+
     const { data, error } = await client.rpc("get_current_bomb_game");
+
     if(error){
       console.error(error);
-      showToast("读取拆弹专家失败：" + (error.message || "请稍后再试"));
+      if(!silent) showToast("读取拆弹专家失败：" + (error.message || "请稍后再试"));
       return;
     }
-    currentGame = data || { has_active_game:false };
-    renderGame();
+
+    const nextGame = data || { has_active_game:false };
+    const newSignature = getGameSignature(nextGame);
+    const changed = oldSignature !== newSignature;
+
+    currentGame = nextGame;
+
+    if(force || changed){
+      renderGame();
+    }
+
+    if(
+      silent &&
+      changed &&
+      oldGameId &&
+      currentGame &&
+      currentGame.has_active_game &&
+      currentGame.game_id === oldGameId
+    ){
+      showToast("战局已同步更新。");
+    }
   }catch(err){
     console.error(err);
-    showToast("读取拆弹专家失败：" + (err.message || "请稍后再试"));
+    if(!silent) showToast("读取拆弹专家失败：" + (err.message || "请稍后再试"));
   }finally{
-    setBusy(false);
+    if(!force && !silent) setBusy(false);
+    refreshBusy = false;
   }
 }
 
@@ -1377,7 +1423,7 @@ async function createGame(){
     }
     showToast(data?.message || "新的炸弹已经开启。");
     closeEndingModal();
-    await loadGame();
+    await loadGame({ force:true });
   }catch(err){
     console.error(err);
     showToast("开启失败：" + (err.message || "请稍后再试"));
@@ -1607,7 +1653,7 @@ async function claimNumber(method){
       }, 450);
     }
 
-    await loadGame();
+    await loadGame({ force:true });
   }catch(err){
     console.error(err);
     showToast("认领失败：" + (err.message || "请稍后再试"));
@@ -1656,7 +1702,7 @@ async function claimFinalNumber(){
       }, 450);
     }
 
-    await loadGame();
+    await loadGame({ force:true });
   }catch(err){
     console.error(err);
     showToast("认领失败：" + (err.message || "请稍后再试"));
@@ -1834,9 +1880,11 @@ updateIdentityUI();
 loadGame();
 
 setInterval(() => {
-  if(document.hidden || busy) return;
-  if(!shouldAutoRefreshGame()) return;
-  loadGame();
+  if(document.hidden || busy || refreshBusy) return;
+  if(!currentGame || !currentGame.has_active_game) return;
+  if(!hasAnyPlayerInput()) return;
+
+  loadGame({ silent:true });
 }, 8000);
 </script>
 </body>
