@@ -90,7 +90,11 @@ button{
 
 #overlay{
   position:absolute;
-  z-index:1;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  z-index:2;
   overflow:visible;
   pointer-events:none;
   --ui-scale:var(--bg-ui-scale, 1);
@@ -99,6 +103,7 @@ button{
 #overlay *{
   pointer-events:auto;
 }
+
 
 /* =========================================================
    身份组件：全站统一结构
@@ -164,10 +169,15 @@ button{
 
 #topIdentityBadge .identityText{
   min-width:0;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  line-height:1;
+  line-height:normal;
+  padding-top:.06em;
 }
 
 #loginOpenBtn,
@@ -181,10 +191,11 @@ button{
   color:#67401f;
   font-size:calc(12px * var(--ui-scale));
   font-weight:800;
-  line-height:1;
+  line-height:normal;
   display:flex;
   align-items:center;
   justify-content:center;
+  padding-top:.06em;
   transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
   overflow:hidden;
   white-space:nowrap;
@@ -224,98 +235,12 @@ button{
 }
 
 #siteNoticeIcon{
-  display:block;
-  line-height:1;
-  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
-}
-
-#siteNoticeCount{
-  position:absolute;
-  right:calc(-6px * var(--ui-scale));
-  top:calc(-6px * var(--ui-scale));
-  min-width:calc(18px * var(--ui-scale));
-  height:calc(18px * var(--ui-scale));
-  padding:0 calc(5px * var(--ui-scale));
-  border-radius:999px;
-  background:#c98c4f;
-  color:#fff9f1;
-  font-size:calc(9px * var(--ui-scale));
-  font-weight:900;
-  line-height:1;
-  display:none;
+  width:100%;
+  height:100%;
+  display:flex;
   align-items:center;
   justify-content:center;
-  border:calc(2px * var(--ui-scale)) solid rgba(255,248,239,0.98);
-  box-shadow:0 2px 8px rgba(116,86,54,0.16);
-  z-index:3;
-}
-
-#siteNoticeBtn.hasNotice #siteNoticeCount{
-  display:flex;
-}
-
-#siteNoticePanel{
-  position:absolute;
-  top:calc(100% + 10px);
-  right:0;
-  width:min(calc(360px * var(--ui-scale)), 72vw);
-  max-height:min(calc(540px * var(--ui-scale)), 70vh);
-  overflow:auto;
-  padding:calc(12px * var(--ui-scale));
-  border-radius:calc(16px * var(--ui-scale));
-  background:rgba(255,249,241,0.98);
-  border:1px solid rgba(203,167,123,0.28);
-  box-shadow:0 16px 36px rgba(85,58,34,0.16);
-  display:none;
-  z-index:80;
-  text-align:left;
-}
-
-#siteNoticePanel.show{
-  display:block;
-}
-
-.siteNoticeTitle{
-  color:#6f4726;
-  font-size:calc(13px * var(--ui-scale));
-  font-weight:900;
-  margin-bottom:calc(10px * var(--ui-scale));
-}
-
-.siteNoticeEmpty{
-  color:#8a6644;
-  font-size:calc(12px * var(--ui-scale));
-  line-height:1.6;
-  padding:6px 2px 2px;
-}
-
-.siteNoticeList{
-  display:flex;
-  flex-direction:column;
-  gap:calc(8px * var(--ui-scale));
-}
-
-.siteNoticeItem{
-  padding:calc(10px * var(--ui-scale));
-  border-radius:calc(12px * var(--ui-scale));
-  background:rgba(255,252,247,0.82);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.92),
-    0 2px 8px rgba(120,92,63,0.05);
-}
-
-.siteNoticeItemTitle{
-  color:#6f4726;
-  font-size:calc(12px * var(--ui-scale));
-  font-weight:800;
-  line-height:1.5;
-  margin-bottom:4px;
-}
-
-.siteNoticeItemDesc{
-  color:#8a6644;
-  font-size:calc(11px * var(--ui-scale));
-  line-height:1.55;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
 }
 
 /* =========================================================
@@ -385,7 +310,6 @@ button{
   color:var(--nav-text);
   font-size:var(--nav-btn-font);
   font-weight:900;
-  line-height:1;
   white-space:nowrap;
   overflow:visible;
   isolation:isolate;
@@ -420,11 +344,15 @@ button{
 .navLabel{
   position:relative;
   z-index:5;
-  display:block;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   max-width:100%;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  height:100%;
+  overflow:visible;
   white-space:nowrap;
+  line-height:normal;
+  padding-top:.06em;
 }
 
 .navEffect{
@@ -524,6 +452,10 @@ button{
   color:rgba(202,132,70,.82);
 }
 
+.navBtn[data-room="dorm"] .navEffect{
+  color:rgba(148,112,171,.78);
+}
+
 .navBtn[data-room="pets"] .navEffect{
   color:rgba(131,111,78,.82);
 }
@@ -532,18 +464,28 @@ button{
   color:rgba(198,119,145,.82);
 }
 
+
 /* =========================================================
-   宿舍主体内容
+   宿舍主体内容：参考花房最满意版本，适配钱包记录 / 系统通知
+   不改房间按钮、身份组件、权限和数据库逻辑
 ========================================================= */
+:root{
+  --dorm-app-left:8.8%;
+  --dorm-app-top:22.2%;
+  --dorm-app-width:60.8%;
+  --dorm-app-height:58.5%;
+}
+
 #dormShell{
   position:absolute;
   left:50%;
   top:52.5%;
   transform:translate(-50%,-50%);
-  width:min(1180px,78vw);
-  height:min(650px,68vh);
+  width:min(1180px,78%);
+  height:min(650px,68%);
   display:grid;
-  grid-template-columns:230px minmax(420px,1fr) 245px;
+  grid-template-columns:230px minmax(0,1fr);
+  grid-template-rows:minmax(0,1fr);
   gap:22px;
   z-index:20;
 }
@@ -564,7 +506,9 @@ button{
   display:flex;
   flex-direction:column;
   gap:10px;
+  min-width:0;
   min-height:0;
+  overflow:hidden;
 }
 
 .sideBtn{
@@ -601,8 +545,9 @@ button{
 }
 
 #mascotBox{
-  margin-top:auto;
-  min-height:176px;
+  margin-top:12px;
+  flex:1 1 auto;
+  min-height:0;
   border-radius:20px;
   background:
     linear-gradient(180deg,rgba(255,249,232,.76),rgba(255,238,206,.58));
@@ -616,8 +561,9 @@ button{
 }
 
 #mascotBox img{
-  max-width:158px;
-  max-height:128px;
+  width:88%;
+  max-width:172px;
+  max-height:150px;
   object-fit:contain;
   display:block;
   filter:drop-shadow(0 8px 12px rgba(120,80,35,.13));
@@ -699,14 +645,18 @@ button{
 
 #mainPanel{
   padding:26px;
+  min-width:0;
   min-height:0;
   overflow:hidden;
 }
 
 .view{
   display:none;
+  width:100%;
   height:100%;
+  min-width:0;
   min-height:0;
+  overflow:hidden;
 }
 
 .view.active{
@@ -719,11 +669,18 @@ button{
   align-items:center;
   gap:16px;
   margin-bottom:18px;
+  min-width:0;
+  flex:0 0 auto;
+}
+
+.walletHeader > div:last-child{
+  min-width:0;
 }
 
 .walletIcon{
   width:56px;
   height:56px;
+  min-width:56px;
   border-radius:18px;
   background:
     radial-gradient(circle at 40% 22%,rgba(255,255,255,.72),transparent 30%),
@@ -765,19 +722,28 @@ button{
 .walletTitle{
   margin:0;
   font-size:30px;
+  line-height:1.1;
   font-weight:900;
   color:#6f4726;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .walletSub{
   margin:5px 0 0;
   font-size:13px;
+  line-height:1.3;
   color:#9b7656;
   font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .balanceCard{
   position:relative;
+  flex:0 0 auto;
   min-height:145px;
   border-radius:26px;
   padding:24px 28px;
@@ -823,12 +789,14 @@ button{
 
 .goldStats{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:14px;
   margin-top:16px;
+  flex:0 0 auto;
 }
 
 .statCard{
+  min-width:0;
   padding:17px;
   border-radius:18px;
   background:rgba(255,252,247,.68);
@@ -840,6 +808,9 @@ button{
   font-size:12px;
   font-weight:900;
   margin-bottom:8px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .statValue{
@@ -855,6 +826,7 @@ button{
   margin:0 0 14px;
   color:#6f4726;
   font-size:26px;
+  line-height:1.2;
   font-weight:900;
 }
 
@@ -862,6 +834,7 @@ button{
   margin:0 0 18px;
   color:#9b7656;
   font-size:13px;
+  line-height:1.4;
   font-weight:800;
 }
 
@@ -874,6 +847,7 @@ button{
   gap:10px;
   padding-top:16px;
   border-top:1px dashed rgba(170,117,62,.24);
+  overflow:hidden;
 }
 
 .walletLedgerHead{
@@ -893,92 +867,15 @@ button{
   display:flex;
   flex-direction:column;
   gap:8px;
-  flex:1;
+  flex:1 1 auto;
   min-height:0;
   overflow:auto;
   padding-right:4px;
-}
-
-.noticeCenter{
-  flex:1;
-  min-height:0;
-  overflow:auto;
-  padding-right:4px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.noticeRoomGroup{
-  border-radius:18px;
-  background:rgba(255,252,247,.62);
-  border:1px solid rgba(255,255,255,.58);
-  overflow:hidden;
-}
-
-.noticeRoomHeader{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:12px 14px;
-  color:#744b25;
-  font-size:14px;
-  font-weight:900;
-  background:rgba(255,246,231,.68);
-  border-bottom:1px dashed rgba(170,117,62,.18);
-}
-
-.noticeRoomCount{
-  flex:0 0 auto;
-  min-width:24px;
-  height:22px;
-  padding:0 8px;
-  border-radius:999px;
-  background:rgba(201,140,79,.16);
-  color:#9b6422;
-  font-size:12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.noticeRoomBody{
-  padding:11px 14px 13px;
-}
-
-.noticeRoomEmpty{
-  color:#92745a;
-  font-size:12px;
-  line-height:1.6;
-}
-
-.noticeRoomItem{
-  padding:9px 0;
-  border-bottom:1px dashed rgba(170,117,62,.16);
-}
-
-.noticeRoomItem:last-child{
-  border-bottom:none;
-}
-
-.noticeRoomItemTitle{
-  color:#6f4726;
-  font-size:13px;
-  font-weight:900;
-  line-height:1.45;
-}
-
-.noticeRoomItemDesc{
-  margin-top:3px;
-  color:#8a6644;
-  font-size:12px;
-  line-height:1.55;
 }
 
 .ledgerItem{
   display:grid;
-  grid-template-columns:28px 1fr auto;
+  grid-template-columns:28px minmax(0,1fr) auto;
   gap:12px;
   align-items:center;
   padding:11px 13px;
@@ -1021,6 +918,13 @@ button{
   font-size:11px;
 }
 
+.ledgerItem strong,
+.ledgerMeta{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
 .ledgerAmount{
   font-weight:900;
   font-size:16px;
@@ -1029,71 +933,122 @@ button{
 .ledgerAmount.in{color:#7aa02d;}
 .ledgerAmount.out{color:#d84f35;}
 
-.placeholderGrid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:14px;
-}
-
-.placeholderCard{
-  min-height:120px;
-  padding:18px;
-  border-radius:20px;
-  background:rgba(255,252,247,.62);
-  border:1px solid rgba(255,255,255,.58);
-}
-
-.placeholderCard h3{
-  margin:0 0 8px;
-  font-size:18px;
-  color:#744b25;
-}
-
-.placeholderCard p{
-  margin:0;
-  color:#92745a;
-  font-size:13px;
-  line-height:1.7;
-  font-weight:700;
-}
-
-#tipPanel{
-  padding:22px;
-  align-self:start;
-  margin-top:28px;
-}
-
-.tipTitle{
-  color:#7a4f27;
-  font-size:19px;
-  font-weight:900;
-  margin-bottom:14px;
-}
-
-.goldWayList{
+.noticeCenter{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding-right:4px;
   display:flex;
   flex-direction:column;
-  gap:9px;
+  gap:10px;
 }
 
-.goldWayItem{
-  padding:10px 12px;
-  border-radius:14px;
-  background:rgba(255,252,247,.58);
-  border:1px solid rgba(255,255,255,.52);
+.noticeRoomGroup{
+  flex:0 0 auto;
+  border-radius:18px;
+  background:rgba(255,252,247,.62);
+  border:1px solid rgba(255,255,255,.58);
+  overflow:hidden;
 }
 
-.goldWayName{
+.noticeRoomHeader{
+  appearance:none;
+  width:100%;
+  min-height:44px;
+  border:0;
+  cursor:pointer;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:10px;
+  padding:12px 14px;
   color:#744b25;
+  font-size:15px;
+  font-weight:900;
+  line-height:1.15;
+  text-align:left;
+  background:rgba(255,246,231,.68);
+  border-bottom:1px dashed rgba(170,117,62,.18);
+}
+
+.noticeRoomHeader span:first-child{
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.noticeRoomHeader::after{
+  content:"展开";
+  color:#a8753f;
+  font-size:11px;
+  font-weight:900;
+  opacity:.78;
+}
+
+.noticeRoomGroup.open .noticeRoomHeader::after{
+  content:"收起";
+}
+
+.noticeRoomCount{
+  flex:0 0 auto;
+  min-width:24px;
+  height:22px;
+  padding:0 8px;
+  border-radius:999px;
+  background:rgba(201,140,79,.16);
+  color:#9b6422;
+  font-size:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.noticeRoomBody{
+  display:none;
+  padding:11px 14px 13px;
+}
+
+.noticeRoomGroup.open .noticeRoomBody{
+  display:block;
+}
+
+.noticeRoomEmpty{
+  color:#92745a;
+  font-size:12px;
+  line-height:1.6;
+}
+
+.noticeRoomItem{
+  padding:9px 0;
+  border-bottom:1px dashed rgba(170,117,62,.16);
+}
+
+.noticeRoomItem:last-child{
+  border-bottom:none;
+}
+
+.noticeRoomItemTitle{
+  color:#6f4726;
   font-size:13px;
   font-weight:900;
+  line-height:1.45;
 }
 
-.goldWayDesc{
+.noticeRoomItemDesc{
+  margin-top:3px;
   color:#8a6644;
   font-size:12px;
-  line-height:1.5;
-  font-weight:700;
+  line-height:1.55;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.noticeRoomTime{
+  margin-top:3px;
+  color:#b18a65;
+  font-size:10px;
+  font-weight:800;
 }
 
 .emptyText,.errorText{
@@ -1105,79 +1060,962 @@ button{
 .emptyText{color:#947256;}
 .errorText{color:#9b4a35;}
 
-@media(max-width:1280px){
+
+
+/* =========================================================
+   我的任务 / 我的档案
+========================================================= */
+.taskList,
+.profileScroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding-right:4px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+
+.taskTabs{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin:0 0 10px;
+  padding:3px;
+  border-radius:999px;
+  background:rgba(255,252,247,.46);
+  border:1px solid rgba(255,255,255,.50);
+  flex:0 0 auto;
+}
+
+.taskTab{
+  appearance:none;
+  border:1px solid transparent;
+  border-radius:999px;
+  min-height:28px;
+  padding:0 11px;
+  cursor:pointer;
+  color:#7b583a;
+  font-size:12px;
+  font-weight:900;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease;
+  white-space:nowrap;
+}
+
+.taskTab:hover{
+  background:rgba(255,248,238,.68);
+}
+
+.taskTab.active{
+  color:#704622;
+  background:rgba(255,244,226,.90);
+  border-color:rgba(201,140,79,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 3px 8px rgba(135,86,40,.08);
+}
+
+.taskTab span{
+  min-width:17px;
+  height:17px;
+  border-radius:999px;
+  padding:0 5px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  line-height:1;
+  background:rgba(201,140,79,.14);
+  color:#9b6422;
+}
+
+.taskTab.active span{
+  background:rgba(201,140,79,.20);
+  color:#8a5528;
+}
+
+.taskCardCompact{
+  padding:10px 12px;
+}
+
+.taskCompactLine{
+  display:grid;
+  grid-template-columns:minmax(105px,.95fr) minmax(0,1.8fr) auto;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.taskCompactLine .taskCardTitle{
+  margin:0;
+  min-width:0;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.taskMetaInline{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  color:#92745a;
+  font-size:12px;
+  line-height:1.35;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+}
+
+.taskMetaInline span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.taskCompactLine .taskActionRow{
+  margin:0;
+  flex:0 0 auto;
+  justify-content:flex-end;
+}
+
+.taskDoneText{
+  color:#92745a;
+  font-size:12px;
+  line-height:1.35;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.taskCard,
+.profileCard{
+  border-radius:18px;
+  background:rgba(255,252,247,.64);
+  border:1px solid rgba(255,255,255,.58);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.68);
+  padding:14px;
+}
+
+.taskCardTitle,
+.profileCardTitle{
+  margin:0 0 10px;
+  color:#6f4726;
+  font-size:15px;
+  line-height:1.25;
+  font-weight:900;
+}
+
+.taskHint,
+.profileHint{
+  margin:0;
+  color:#92745a;
+  font-size:12px;
+  line-height:1.65;
+}
+
+.taskActionRow,
+.profileActionRow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+
+.dormMiniBtn,
+.dormSubBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  min-height:34px;
+  padding:0 14px;
+  border-radius:12px;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+  transition:transform .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+.dormMiniBtn{
+  background:#c98c4f;
+  color:#fffaf3;
+  box-shadow:0 4px 10px rgba(139,89,36,.12);
+}
+
+.dormMiniBtn:hover{background:#b9793f;transform:translateY(-1px);}
+
+.dormSubBtn{
+  background:rgba(239,219,190,.88);
+  color:#6f4726;
+}
+
+.dormSubBtn:hover{background:rgba(229,204,169,.96);transform:translateY(-1px);}
+
+.profileTop{
+  display:grid;
+  grid-template-columns:auto minmax(150px,1.05fr) minmax(180px,1fr) auto;
+  gap:14px;
+  align-items:center;
+}
+
+.profileTopInfo{
+  min-width:0;
+}
+
+.profileTopHonor{
+  min-width:0;
+  align-self:stretch;
+  display:flex;
+  align-items:center;
+  padding:10px 12px;
+  border-radius:16px;
+  background:rgba(255,246,231,.54);
+  border:1px solid rgba(201,140,79,.14);
+}
+
+.profileTopHonor .honorPills{
+  gap:5px;
+}
+
+.profileTopHonor .honorPill{
+  min-height:22px;
+  padding:0 8px;
+  font-size:10px;
+}
+
+.profileTopAction{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+}
+
+.profileAvatar{
+  width:72px;
+  height:72px;
+  border-radius:22px;
+  object-fit:cover;
+  background:rgba(255,244,226,.9);
+  border:1px solid rgba(184,132,75,.18);
+  box-shadow:0 8px 18px rgba(116,86,54,.12);
+}
+
+.profileNameLine{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.profileName{
+  color:#6f4726;
+  font-size:20px;
+  font-weight:900;
+  line-height:1.2;
+}
+
+.profileBadge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:24px;
+  padding:0 9px;
+  border-radius:999px;
+  background:rgba(201,140,79,.14);
+  color:#9b6422;
+  font-size:11px;
+  font-weight:900;
+}
+
+.profileMeta{
+  margin-top:6px;
+  color:#9b7656;
+  font-size:12px;
+  line-height:1.55;
+  font-weight:800;
+}
+
+.profileGrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.profileField{
+  min-width:0;
+  border-radius:14px;
+  background:rgba(255,255,255,.48);
+  border:1px solid rgba(255,255,255,.56);
+  padding:10px 11px;
+}
+
+.profileField.full{grid-column:1 / -1;}
+
+.profileLabel{
+  color:#9b7656;
+  font-size:11px;
+  font-weight:900;
+  margin-bottom:5px;
+}
+
+.profileValue{
+  color:#6f4726;
+  font-size:13px;
+  font-weight:800;
+  line-height:1.45;
+  word-break:break-word;
+  white-space:pre-wrap;
+}
+
+.skillPills,
+.honorPills{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+
+.skillPill,
+.honorPill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:25px;
+  padding:0 9px;
+  border-radius:999px;
+  background:rgba(255,246,231,.86);
+  border:1px solid rgba(201,140,79,.16);
+  color:#84582f;
+  font-size:11px;
+  font-weight:900;
+}
+
+.profileForm{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.profileForm label{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  color:#8a6644;
+  font-size:11px;
+  font-weight:900;
+}
+
+.profileForm label.full{grid-column:1 / -1;}
+
+.profileForm input,
+.profileForm select,
+.profileForm textarea{
+  width:100%;
+  border:1px solid rgba(201,140,79,.22);
+  border-radius:12px;
+  background:rgba(255,255,255,.72);
+  color:#6f4726;
+  outline:none;
+  padding:9px 10px;
+  font-size:12px;
+  font-weight:800;
+  font-family:inherit;
+}
+
+.profileForm textarea{
+  min-height:76px;
+  resize:vertical;
+  line-height:1.55;
+}
+
+.profileForm input:focus,
+.profileForm select:focus,
+.profileForm textarea:focus{
+  border-color:rgba(201,140,79,.58);
+  box-shadow:0 0 0 3px rgba(201,140,79,.10);
+  background:rgba(255,255,255,.92);
+}
+
+.profileEditNote,
+.profileStatus{
+  color:#9b7656;
+  font-size:12px;
+  line-height:1.6;
+  font-weight:800;
+}
+
+.profileStatus.success{color:#4d8a51;}
+.profileStatus.error{color:#a14f3f;}
+
+.profileCardHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.profileCardHead .profileCardTitle{
+  margin:0;
+}
+
+.profileEditQuick{
+  margin-left:auto;
+}
+
+@media(min-width:541px){
   #dormShell{
-    width:min(1060px,80vw);
-    height:min(610px,68vh);
-    grid-template-columns:205px minmax(390px,1fr) 220px;
-    gap:18px;
+    left:var(--dorm-app-left);
+    top:var(--dorm-app-top);
+    width:var(--dorm-app-width);
+    height:var(--dorm-app-height);
+    transform:none;
+    grid-template-columns:minmax(calc(158px * var(--ui-scale)), .32fr) minmax(0,1fr);
+    gap:calc(10px * var(--ui-scale));
+    padding:calc(12px * var(--ui-scale));
+    overflow:hidden;
+    pointer-events:auto;
+    border-radius:calc(24px * var(--ui-scale));
+    border:1px solid rgba(170,122,82,.24);
+    background:
+      linear-gradient(180deg, rgba(255,250,242,.83), rgba(250,236,216,.66));
+    box-shadow:
+      0 calc(16px * var(--ui-scale)) calc(38px * var(--ui-scale)) rgba(89,66,42,.12),
+      inset 0 1px 0 rgba(255,255,255,.88);
+    backdrop-filter:blur(calc(11px * var(--ui-scale)));
+    -webkit-backdrop-filter:blur(calc(11px * var(--ui-scale)));
+  }
+
+  #sidePanel,
+  #mainPanel{
+    height:100%;
+    margin:0;
+    border-radius:calc(18px * var(--ui-scale));
+    border:1px solid rgba(170,122,82,.14);
+    background:rgba(255,253,248,.50);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.72),
+      0 calc(8px * var(--ui-scale)) calc(18px * var(--ui-scale)) rgba(90,67,43,.06);
+  }
+
+  #sidePanel{
+    padding:calc(13px * var(--ui-scale)) calc(11px * var(--ui-scale));
+    gap:calc(10px * var(--ui-scale));
   }
 
   .sideBtn{
-    font-size:14px;
-    min-height:46px;
+    height:calc(44px * var(--ui-scale));
+    min-height:calc(44px * var(--ui-scale));
+    padding:0 calc(10px * var(--ui-scale));
+    border-radius:calc(13px * var(--ui-scale));
+    font-size:calc(13px * var(--ui-scale));
+    line-height:1.05;
   }
 
-  #mascotBox{min-height:164px;}
+  .sideIcon{
+    width:calc(22px * var(--ui-scale));
+    font-size:calc(16px * var(--ui-scale));
+  }
+
+  #mascotBox{
+    margin-top:calc(12px * var(--ui-scale));
+    padding:calc(8px * var(--ui-scale));
+    border-radius:calc(15px * var(--ui-scale));
+  }
 
   #mascotBox img{
-    max-width:138px;
-    max-height:112px;
-  }
-
-  .walletTitle{font-size:27px;}
-  .goldNumber{font-size:52px;}
-}
-
-@media(max-width:980px){
-  #dormShell{
-    width:82vw;
-    grid-template-columns:180px minmax(340px,1fr);
-  }
-
-  #tipPanel{display:none;}
-
-  .goldStats{grid-template-columns:1fr;}
-}
-
-@media(max-width:760px) and (min-width:541px){
-  #dormShell{
-    width:88vw;
-    height:70vh;
-    grid-template-columns:150px 1fr;
-    gap:12px;
-  }
-
-  #mainPanel{padding:20px;}
-
-  .sideBtn{
-    padding:0 10px;
-    font-size:13px;
-  }
-
-  .sideIcon{display:none;}
-
-  #mascotBox{min-height:150px;}
-
-  #mascotBox img{
-    max-width:106px;
-    max-height:90px;
+    max-width:calc(172px * var(--ui-scale));
+    max-height:calc(150px * var(--ui-scale));
   }
 
   #mascotBubble{
-    max-width:122px;
-    font-size:11px;
-    padding:5px 10px;
-    right:4px;
-    top:8px;
+    right:calc(7px * var(--ui-scale));
+    top:calc(8px * var(--ui-scale));
+    max-width:calc(136px * var(--ui-scale));
+    min-height:calc(24px * var(--ui-scale));
+    padding:calc(4px * var(--ui-scale)) calc(9px * var(--ui-scale));
+    font-size:calc(10.5px * var(--ui-scale));
   }
 
-  .walletTitle{font-size:24px;}
-  .goldNumber{font-size:44px;}
+  #mainPanel{
+    padding:calc(15px * var(--ui-scale)) calc(17px * var(--ui-scale));
+  }
+
+  .walletHeader{
+    gap:calc(10px * var(--ui-scale));
+    margin-bottom:calc(9px * var(--ui-scale));
+  }
+
+  .walletIcon{
+    width:calc(40px * var(--ui-scale));
+    height:calc(40px * var(--ui-scale));
+    min-width:calc(40px * var(--ui-scale));
+    border-radius:calc(13px * var(--ui-scale));
+  }
+
+  .walletIcon::before{
+    width:calc(22px * var(--ui-scale));
+    height:calc(22px * var(--ui-scale));
+    left:calc(8px * var(--ui-scale));
+    top:calc(11px * var(--ui-scale));
+    border-width:calc(2px * var(--ui-scale));
+  }
+
+  .walletIcon::after{
+    width:calc(18px * var(--ui-scale));
+    height:calc(18px * var(--ui-scale));
+    right:calc(7px * var(--ui-scale));
+    top:calc(14px * var(--ui-scale));
+    border-width:calc(2px * var(--ui-scale));
+  }
+
+  .walletTitle{
+    font-size:calc(22px * var(--ui-scale));
+  }
+
+  .walletSub{
+    margin:calc(4px * var(--ui-scale)) 0 0;
+    font-size:calc(11px * var(--ui-scale));
+  }
+
+  .balanceCard{
+    min-height:calc(88px * var(--ui-scale));
+    padding:calc(13px * var(--ui-scale)) calc(16px * var(--ui-scale));
+    border-radius:calc(18px * var(--ui-scale));
+  }
+
+  .balanceCard::after{
+    right:calc(17px * var(--ui-scale));
+    top:calc(14px * var(--ui-scale));
+    font-size:calc(40px * var(--ui-scale));
+  }
+
+  .goldLabel{
+    font-size:calc(12px * var(--ui-scale));
+    margin-bottom:calc(6px * var(--ui-scale));
+  }
+
+  .goldNumber{
+    font-size:calc(36px * var(--ui-scale));
+  }
+
+  .goldUnit{
+    font-size:calc(13px * var(--ui-scale));
+    margin-left:calc(6px * var(--ui-scale));
+  }
+
+  .goldStats{
+    gap:calc(7px * var(--ui-scale));
+    margin-top:calc(8px * var(--ui-scale));
+  }
+
+  .statCard{
+    padding:calc(8px * var(--ui-scale));
+    border-radius:calc(12px * var(--ui-scale));
+  }
+
+  .statLabel{
+    font-size:calc(9.5px * var(--ui-scale));
+    margin-bottom:calc(4px * var(--ui-scale));
+  }
+
+  .statValue{
+    font-size:calc(16px * var(--ui-scale));
+  }
+
+  .walletLedgerBlock{
+    margin-top:calc(8px * var(--ui-scale));
+    padding-top:calc(8px * var(--ui-scale));
+    gap:calc(6px * var(--ui-scale));
+  }
+
+  .walletLedgerHead .sectionTitle{
+    font-size:calc(16px * var(--ui-scale));
+    line-height:1.15;
+    margin-bottom:0;
+  }
+
+  .walletLedgerHead .sectionDesc{
+    display:none;
+  }
+
+  .ledgerList{
+    gap:calc(5px * var(--ui-scale));
+    padding-right:calc(3px * var(--ui-scale));
+  }
+
+  .ledgerItem{
+    grid-template-columns:calc(20px * var(--ui-scale)) minmax(0,1fr) auto;
+    gap:calc(7px * var(--ui-scale));
+    padding:calc(7px * var(--ui-scale)) calc(9px * var(--ui-scale));
+    border-radius:calc(11px * var(--ui-scale));
+    font-size:calc(11px * var(--ui-scale));
+  }
+
+  .ledgerArrow{
+    width:calc(19px * var(--ui-scale));
+    height:calc(19px * var(--ui-scale));
+    font-size:calc(10px * var(--ui-scale));
+  }
+
+  .ledgerItem strong{
+    font-size:calc(11px * var(--ui-scale));
+    line-height:1.15;
+    margin-bottom:calc(2px * var(--ui-scale));
+  }
+
+  .ledgerMeta{
+    font-size:calc(9px * var(--ui-scale));
+    line-height:1.15;
+  }
+
+  .ledgerAmount{
+    font-size:calc(12px * var(--ui-scale));
+  }
+
+  #view-notice .sectionTitle{
+    margin:0 0 calc(5px * var(--ui-scale));
+    font-size:calc(18px * var(--ui-scale));
+    line-height:1.18;
+    flex:0 0 auto;
+  }
+
+  #view-notice .sectionDesc{
+    margin:0 0 calc(8px * var(--ui-scale));
+    font-size:calc(10.5px * var(--ui-scale));
+    line-height:1.35;
+    flex:0 0 auto;
+  }
+
+  #dormNoticeCenter{
+    gap:calc(6px * var(--ui-scale));
+    padding-right:calc(5px * var(--ui-scale));
+  }
+
+  .noticeRoomGroup{
+    border-radius:calc(13px * var(--ui-scale));
+  }
+
+  .noticeRoomHeader{
+    min-height:calc(36px * var(--ui-scale));
+    gap:calc(8px * var(--ui-scale));
+    padding:calc(8px * var(--ui-scale)) calc(11px * var(--ui-scale));
+    font-size:calc(14px * var(--ui-scale));
+  }
+
+  .noticeRoomHeader::after{
+    font-size:calc(10px * var(--ui-scale));
+  }
+
+  .noticeRoomCount{
+    min-width:calc(22px * var(--ui-scale));
+    height:calc(20px * var(--ui-scale));
+    padding:0 calc(7px * var(--ui-scale));
+    font-size:calc(10.5px * var(--ui-scale));
+  }
+
+  .noticeRoomBody{
+    padding:calc(8px * var(--ui-scale)) calc(11px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  }
+
+  .noticeRoomItem{
+    padding:calc(7px * var(--ui-scale)) 0;
+  }
+
+  .noticeRoomItemTitle{
+    font-size:calc(12px * var(--ui-scale));
+  }
+
+  .noticeRoomItemDesc{
+    margin-top:calc(3px * var(--ui-scale));
+    font-size:calc(11px * var(--ui-scale));
+    line-height:1.45;
+  }
+
+  .noticeRoomTime{
+    margin-top:calc(3px * var(--ui-scale));
+    font-size:calc(9.5px * var(--ui-scale));
+  }
+
+
+  #view-tasks .sectionTitle,
+  #view-profile .sectionTitle{
+    margin:0 0 calc(5px * var(--ui-scale));
+    font-size:calc(18px * var(--ui-scale));
+    line-height:1.18;
+    flex:0 0 auto;
+  }
+
+  #view-tasks .sectionDesc,
+  #view-profile .sectionDesc{
+    margin:0 0 calc(8px * var(--ui-scale));
+    font-size:calc(10.5px * var(--ui-scale));
+    line-height:1.35;
+    flex:0 0 auto;
+  }
+
+  .taskList,
+  .profileScroll{
+    gap:calc(7px * var(--ui-scale));
+    padding-right:calc(5px * var(--ui-scale));
+  }
+
+  .taskCard,
+  .profileCard{
+    padding:calc(11px * var(--ui-scale));
+    border-radius:calc(14px * var(--ui-scale));
+  }
+
+  .taskCardTitle,
+  .profileCardTitle{
+    margin-bottom:calc(7px * var(--ui-scale));
+    font-size:calc(13px * var(--ui-scale));
+  }
+
+  .taskHint,
+  .profileHint,
+  .profileEditNote,
+  .profileStatus{
+    font-size:calc(10.5px * var(--ui-scale));
+  }
+
+  .profileTop{
+    gap:calc(10px * var(--ui-scale));
+  }
+
+  .profileAvatar{
+    width:calc(58px * var(--ui-scale));
+    height:calc(58px * var(--ui-scale));
+    border-radius:calc(17px * var(--ui-scale));
+  }
+
+  .profileName{
+    font-size:calc(17px * var(--ui-scale));
+  }
+
+  .profileBadge,
+  .skillPill,
+  .honorPill{
+    min-height:calc(22px * var(--ui-scale));
+    padding:0 calc(8px * var(--ui-scale));
+    font-size:calc(10px * var(--ui-scale));
+  }
+
+  .profileMeta,
+  .profileValue{
+    font-size:calc(10.8px * var(--ui-scale));
+  }
+
+  .profileGrid,
+  .profileForm{
+    gap:calc(7px * var(--ui-scale));
+  }
+
+  .profileField{
+    padding:calc(8px * var(--ui-scale));
+    border-radius:calc(12px * var(--ui-scale));
+  }
+
+  .profileLabel,
+  .profileForm label{
+    font-size:calc(9.5px * var(--ui-scale));
+  }
+
+  .profileForm input,
+  .profileForm select,
+  .profileForm textarea{
+    padding:calc(7px * var(--ui-scale)) calc(8px * var(--ui-scale));
+    border-radius:calc(10px * var(--ui-scale));
+    font-size:calc(10.5px * var(--ui-scale));
+  }
+
+  .profileForm textarea{
+    min-height:calc(60px * var(--ui-scale));
+  }
+
+  .dormMiniBtn,
+  .dormSubBtn{
+    min-height:calc(30px * var(--ui-scale));
+    padding:0 calc(12px * var(--ui-scale));
+    border-radius:calc(10px * var(--ui-scale));
+    font-size:calc(10.5px * var(--ui-scale));
+  }
+
+}
+
+
+/* 541px-1122px：档案顶部按钮改到第二行右侧，避免被主面板裁切 */
+@media(min-width:541px) and (max-width:1122px){
+  .profileTop{
+    grid-template-columns:auto minmax(0,1fr);
+    grid-template-areas:
+      "avatar info"
+      "honor honor"
+      "action action";
+    align-items:center;
+    gap:calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  }
+
+  .profileTop > .profileAvatar{
+    grid-area:avatar;
+  }
+
+  .profileTopInfo{
+    grid-area:info;
+  }
+
+  .profileTopHonor{
+    grid-area:honor;
+    align-self:auto;
+    min-height:calc(38px * var(--ui-scale));
+    padding:calc(7px * var(--ui-scale)) calc(9px * var(--ui-scale));
+  }
+
+  .profileTopAction{
+    grid-area:action;
+    width:100%;
+    justify-content:flex-end;
+    margin-top:calc(-2px * var(--ui-scale));
+  }
+
+  .profileEditQuick{
+    margin-left:0;
+    flex:0 0 auto;
+  }
+}
+
+@media(min-width:541px) and (max-width:760px){
+#dormShell{
+    grid-template-columns:minmax(calc(108px * var(--ui-scale)), .30fr) minmax(0,1fr);
+    gap:calc(8px * var(--ui-scale));
+    padding:calc(9px * var(--ui-scale));
+  }
+
+  #sidePanel{
+    padding:calc(10px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  }
+
+  .sideBtn{
+    height:calc(34px * var(--ui-scale));
+    min-height:calc(34px * var(--ui-scale));
+    font-size:calc(11px * var(--ui-scale));
+    padding:0 calc(6px * var(--ui-scale));
+  }
+
+  .sideIcon,
+  #mascotBox,
+  .walletIcon{
+    display:none;
+  }
+
+  #mainPanel{
+    padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  }
+
+  .walletTitle{
+    font-size:calc(18px * var(--ui-scale));
+  }
+
+  .walletSub{
+    font-size:calc(9.5px * var(--ui-scale));
+  }
+
+  .balanceCard{
+    min-height:calc(70px * var(--ui-scale));
+    padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  }
+
+  .goldNumber{
+    font-size:calc(30px * var(--ui-scale));
+  }
+
+  .statCard{
+    padding:calc(6px * var(--ui-scale));
+  }
+
+  .statLabel{
+    font-size:calc(8.5px * var(--ui-scale));
+  }
+
+  .statValue{
+    font-size:calc(13px * var(--ui-scale));
+  }
+
+  .taskTabs{
+    gap:4px;
+    margin-bottom:7px;
+    padding:2px;
+  }
+
+  .taskTab{
+    min-height:23px;
+    padding:0 7px;
+    font-size:9.5px;
+    gap:3px;
+  }
+
+  .taskTab span{
+    min-width:15px;
+    height:15px;
+    padding:0 4px;
+    font-size:8.5px;
+  }
+
+  .taskCardCompact{
+    padding:7px 8px;
+    border-radius:11px;
+  }
+
+  .taskCompactLine{
+    grid-template-columns:minmax(78px, .9fr) minmax(0, 2.2fr) auto;
+    gap:6px;
+  }
+
+  .taskCompactLine .taskCardTitle{
+    font-size:10.5px;
+  }
+
+  .taskMetaInline{
+    gap:6px;
+    font-size:9.4px;
+  }
+
+  .taskDoneText{
+    font-size:9.4px;
+  }
+
+  .taskCompactLine .dormMiniBtn,
+  .taskCompactLine .dormSubBtn{
+    min-height:23px;
+    padding:0 8px;
+    border-radius:8px;
+    font-size:9.5px;
+  }
+
+}
+
+
+/* 541px-760px：按钮略微收紧，避免压住档案内容 */
+@media(min-width:541px) and (max-width:760px){
+  .profileTopAction .dormMiniBtn,
+  .profileTopAction .dormSubBtn{
+    min-height:calc(25px * var(--ui-scale));
+    padding:0 calc(9px * var(--ui-scale));
+    font-size:calc(9.8px * var(--ui-scale));
+  }
+}
+
+@media(max-height:620px) and (min-width:541px){
+#view-notice .sectionDesc,
+  .walletLedgerHead .sectionDesc{
+    display:none;
+  }
 }
 
 /* =========================================================
-   540px 及以下手机版
+   540px 及以下手机版：顺序为房间切换 → 身份组件 → 主面板
 ========================================================= */
 @media(max-width:540px){
   html,body{
@@ -1222,6 +2060,42 @@ button{
     pointer-events:auto;
   }
 
+  #topBar{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    order:0;
+    z-index:20;
+    --nav-btn-height:34px;
+    --nav-btn-px:8px;
+    --nav-btn-radius:10px;
+    --nav-btn-font:12px;
+    --nav-gap:7px;
+  }
+
+  #roomNav{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+    transform:none;
+  }
+
+  .navBtn{
+    width:100%;
+    min-width:0;
+    height:34px;
+    padding:0 8px;
+    font-size:12px;
+    border-radius:10px;
+    overflow:hidden;
+  }
+
+  .navEffect{
+    display:none;
+  }
+
   #topActions{
     position:sticky;
     top:10px;
@@ -1264,55 +2138,7 @@ button{
     font-size:14px;
     border-radius:10px;
   }
-
-  #siteNoticePanel{
-    position:absolute;
-    top:calc(100% + 8px);
-    right:0;
-    left:auto;
-    width:min(320px, calc(100vw - 24px));
-    max-height:60dvh;
-    z-index:999;
-  }
-
-  #topBar{
-    position:relative;
-    left:auto;
-    top:auto;
-    width:100%;
-    order:0;
-    z-index:20;
-
-    --nav-btn-height:34px;
-    --nav-btn-px:8px;
-    --nav-btn-radius:10px;
-    --nav-btn-font:12px;
-    --nav-gap:7px;
-  }
-
-  #roomNav{
-    width:100%;
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-    gap:7px;
-    transform:none;
-  }
-
-  .navBtn{
-    width:100%;
-    min-width:0;
-    height:34px;
-    padding:0 8px;
-    font-size:12px;
-    border-radius:10px;
-    overflow:hidden;
-  }
-
-  .navEffect{
-    display:none;
-  }
-
-  #dormShell{
+#dormShell{
     position:relative;
     left:auto;
     top:auto;
@@ -1323,11 +2149,17 @@ button{
     display:flex;
     flex-direction:column;
     gap:12px;
+    padding:0;
+    background:transparent;
+    border:0;
+    box-shadow:none;
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
   }
 
   #sidePanel{
     display:grid;
-    grid-template-columns:repeat(2, minmax(0, 1fr));
+    grid-template-columns:repeat(2,minmax(0,1fr));
     gap:8px;
     overflow:visible;
     padding:10px;
@@ -1335,7 +2167,6 @@ button{
   }
 
   .sideBtn{
-    flex:none;
     width:100%;
     min-width:0;
     min-height:38px;
@@ -1345,23 +2176,40 @@ button{
     text-align:center;
   }
 
-
   .sideIcon{
     display:block;
     width:auto;
     flex:0 0 auto;
   }
 
-  #mascotBox{display:none;}
+  #mascotBox{
+    display:none;
+  }
 
   #mainPanel{
     padding:20px;
     min-height:520px;
+    overflow:visible;
+    border-radius:24px;
   }
 
-  .walletTitle{font-size:24px;}
+  .view{
+    height:auto;
+    min-height:0;
+    overflow:visible;
+  }
 
-  .balanceCard{padding:20px;}
+  .walletTitle{
+    font-size:24px;
+  }
+
+  .walletSub{
+    white-space:normal;
+  }
+
+  .balanceCard{
+    padding:20px;
+  }
 
   .balanceCard::after{
     right:22px;
@@ -1369,18 +2217,12 @@ button{
     font-size:52px;
   }
 
-  .goldNumber{font-size:44px;}
-
-  .goldStats{grid-template-columns:1fr;}
-
-  .placeholderGrid{grid-template-columns:1fr;}
-
-  #mainPanel{
-    overflow:visible;
+  .goldNumber{
+    font-size:44px;
   }
 
-  .view{
-    height:auto;
+  .goldStats{
+    grid-template-columns:1fr;
   }
 
   .walletLedgerBlock{
@@ -1407,8 +2249,55 @@ button{
     padding:10px 12px 12px;
   }
 
-  #tipPanel{display:none;}
+  .taskList,
+  .profileScroll{
+    overflow:visible;
+    padding-right:0;
+  }
+
+  .profileGrid,
+  .profileForm{
+    grid-template-columns:1fr;
+  }
+
+  .profileTop{
+    grid-template-columns:1fr;
+    text-align:center;
+    justify-items:center;
+  }
+
+  .profileNameLine,
+  .skillPills,
+  .honorPills,
+  .profileActionRow,
+  .taskActionRow{
+    justify-content:center;
+  }
 }
+
+@media (max-width:541px){
+  .taskTabs{
+    gap:6px;
+  }
+
+  .taskTab{
+    min-height:32px;
+    padding:0 6px;
+    font-size:11px;
+  }
+
+  .taskCardMain{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .taskCardMain .taskActionRow{
+    width:100%;
+    justify-content:flex-start;
+  }
+}
+
 </style>
 </head>
 
@@ -1427,17 +2316,10 @@ button{
         </div>
 
         <div id="siteNoticeWrap">
-          <button id="siteNoticeBtn" type="button" aria-label="查看提醒">
+          <button id="siteNoticeBtn" type="button" aria-label="打开系统通知">
             <span id="siteNoticeIcon">🔔</span>
-            <span id="siteNoticeCount">0</span>
           </button>
 
-          <div id="siteNoticePanel" aria-live="polite">
-            <div class="siteNoticeTitle">宿舍提醒</div>
-            <div id="siteNoticeContent">
-              <div class="siteNoticeEmpty">暂无提醒。</div>
-            </div>
-          </div>
         </div>
 
         <button id="loginOpenBtn" class="hidden" type="button">登录</button>
@@ -1457,6 +2339,13 @@ button{
               <span class="navEffect navEffectC">★</span>
             </button>
 
+            <button class="navBtn" data-room="living" type="button" onclick="enterRoom('living.html', false)">
+              <span class="navLabel">客厅</span>
+              <span class="navEffect navEffectA">☕</span>
+              <span class="navEffect navEffectB">✦</span>
+              <span class="navEffect navEffectC">💬</span>
+            </button>
+
             <button class="navBtn" data-room="manager" type="button" onclick="enterManagerRoom()">
               <span class="navLabel">宿管室</span>
               <span class="navEffect navEffectA">✎</span>
@@ -1471,13 +2360,6 @@ button{
               <span class="navEffect navEffectC">✦</span>
             </button>
 
-            <button class="navBtn" data-room="game" type="button" onclick="enterRoom('game.html', false)">
-              <span class="navLabel">游戏房</span>
-              <span class="navEffect navEffectA">🎮</span>
-              <span class="navEffect navEffectB">🎲</span>
-              <span class="navEffect navEffectC">👾</span>
-            </button>
-
             <button class="navBtn" data-room="studio" type="button" onclick="enterRoom('studio-todo.html', true)">
               <span class="navLabel">工作间</span>
               <span class="navEffect navEffectA">🎙</span>
@@ -1485,18 +2367,11 @@ button{
               <span class="navEffect navEffectC">◇</span>
             </button>
 
-            <button class="navBtn" data-room="living" type="button" onclick="enterRoom('living.html', false)">
-              <span class="navLabel">客厅</span>
-              <span class="navEffect navEffectA">☕</span>
-              <span class="navEffect navEffectB">✦</span>
-              <span class="navEffect navEffectC">💬</span>
-            </button>
-
-            <button class="navBtn" data-room="pets" type="button" onclick="enterRoom('pets.html', false)">
-              <span class="navLabel">宠物区</span>
-              <span class="navEffect navEffectA">🐾</span>
-              <span class="navEffect navEffectB">♡</span>
-              <span class="navEffect navEffectC">🐱</span>
+            <button class="navBtn" data-room="game" type="button" onclick="enterRoom('game.html', false)">
+              <span class="navLabel">游戏房</span>
+              <span class="navEffect navEffectA">🎮</span>
+              <span class="navEffect navEffectB">🎲</span>
+              <span class="navEffect navEffectC">👾</span>
             </button>
 
             <button class="navBtn" data-room="flower" type="button" onclick="enterRoom('flower.html', false)">
@@ -1505,6 +2380,13 @@ button{
               <span class="navEffect navEffectB">❀</span>
               <span class="navEffect navEffectC">🌸</span>
             </button>
+
+            <button class="navBtn" data-room="pets" type="button" onclick="enterRoom('pets.html', false)">
+              <span class="navLabel">宠物区</span>
+              <span class="navEffect navEffectA">🐾</span>
+              <span class="navEffect navEffectB">♡</span>
+              <span class="navEffect navEffectC">🐱</span>
+            </button>
           </nav>
         </div>
       </div>
@@ -1512,19 +2394,19 @@ button{
 
     <main id="dormShell">
       <aside id="sidePanel" class="glassPanel">
-        <button class="sideBtn active" data-view="wallet"><span class="sideIcon">🏠</span>钱包记录</button>
-        <button class="sideBtn" data-view="tasks"><span class="sideIcon">⭐</span>任务中心</button>
-        <button class="sideBtn" data-view="badges"><span class="sideIcon">🏆</span>成就徽章</button>
+        <button class="sideBtn active" data-view="tasks"><span class="sideIcon">📮</span>我的任务</button>
         <button class="sideBtn" data-view="notice"><span class="sideIcon">💌</span>系统通知</button>
+        <button class="sideBtn" data-view="wallet"><span class="sideIcon">🪙</span>钱包记录</button>
+        <button class="sideBtn" data-view="profile"><span class="sideIcon">📇</span>我的档案</button>
 
         <div id="mascotBox">
-          <img src="mascot-niuma.png" alt="十号房牛马吉祥物">
+          <img src="mascot-niuma(L).png" alt="十号房牛马吉祥物">
           <div id="mascotBubble" class="bubble-calm">收到啦</div>
         </div>
       </aside>
 
       <section id="mainPanel" class="glassPanel">
-        <div class="view active" id="view-wallet">
+        <div class="view" id="view-wallet">
           <div class="walletHeader">
             <div class="walletIcon" aria-hidden="true"></div>
             <div>
@@ -1565,56 +2447,33 @@ button{
           </div>
         </div>
 
-        <div class="view" id="view-tasks">
-          <h2 class="sectionTitle">任务中心</h2>
-          <p class="sectionDesc">这里之后可以显示你的待录音、待混音、待抽签项目。</p>
-          <div class="placeholderGrid">
-            <div class="placeholderCard"><h3>待录音</h3><p>统计你还没有交音的项目。</p></div>
-            <div class="placeholderCard"><h3>待混音</h3><p>统计你负责后期但还未交付的项目。</p></div>
-            <div class="placeholderCard"><h3>待抽签</h3><p>统计你已参与但还未完成歌词抽签的项目。</p></div>
-            <div class="placeholderCard"><h3>最近任务</h3><p>之后可接入项目表自动展示。</p></div>
-          </div>
-        </div>
-
-        <div class="view" id="view-badges">
-          <h2 class="sectionTitle">成就徽章</h2>
-          <p class="sectionDesc">这里之后可以接入称号和成就系统。</p>
-          <div class="placeholderGrid">
-            <div class="placeholderCard"><h3>演唱成就</h3><p>完成交音、发布后累计获得。</p></div>
-            <div class="placeholderCard"><h3>后期成就</h3><p>完成混音交付后累计获得。</p></div>
-          </div>
-        </div>
-
         <div class="view" id="view-notice">
           <h2 class="sectionTitle">系统通知</h2>
-          <p class="sectionDesc">这里集中显示全站通知，并按照房间分类查看。</p>
+          <p class="sectionDesc">这里集中显示需要跳转处理的提醒；默认收起，点击分类查看。</p>
           <div class="noticeCenter" id="dormNoticeCenter">
-            <div class="emptyText">正在整理全站通知……</div>
+            <div class="emptyText">正在整理系统通知……</div>
+          </div>
+        </div>
+
+        <div class="view active" id="view-tasks">
+          <h2 class="sectionTitle">我的任务</h2>
+          <div class="taskTabs" id="taskTabs" aria-label="我的任务分类">
+            <button class="taskTab active" type="button" data-task-tab="vocal_submit">待交音<span>0</span></button>
+            <button class="taskTab" type="button" data-task-tab="mix_submit">待后期<span>0</span></button>
+            <button class="taskTab" type="button" data-task-tab="claim">待认领<span>0</span></button>
+          </div>
+          <div class="taskList" id="taskList">
+            <div class="emptyText">正在读取我的任务……</div>
+          </div>
+        </div>
+
+        <div class="view" id="view-profile">
+          <h2 class="sectionTitle">我的档案</h2>
+          <div class="profileScroll" id="profileScroll">
+            <div class="emptyText">正在读取个人档案……</div>
           </div>
         </div>
       </section>
-
-      <aside id="tipPanel" class="glassPanel">
-        <div class="tipTitle">🪙 获取金币</div>
-        <div class="goldWayList">
-          <div class="goldWayItem">
-            <div class="goldWayName">交音</div>
-            <div class="goldWayDesc">提交录音后获得。</div>
-          </div>
-          <div class="goldWayItem">
-            <div class="goldWayName">发布</div>
-            <div class="goldWayDesc">作品发布后获得。</div>
-          </div>
-          <div class="goldWayItem">
-            <div class="goldWayName">后期</div>
-            <div class="goldWayDesc">完成混音后获得。</div>
-          </div>
-          <div class="goldWayItem">
-            <div class="goldWayName">用途</div>
-            <div class="goldWayDesc">之后可用于宠物、花房和装饰。</div>
-          </div>
-        </div>
-      </aside>
     </main>
   </div>
 </div>
@@ -1644,16 +2503,21 @@ const loginOpenBtn = document.getElementById("loginOpenBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 
 const siteNoticeBtn = document.getElementById("siteNoticeBtn");
-const siteNoticePanel = document.getElementById("siteNoticePanel");
-const siteNoticeCount = document.getElementById("siteNoticeCount");
-const siteNoticeContent = document.getElementById("siteNoticeContent");
 
 const authState = {
   loggedIn:false,
   nickname:"",
   role:"visitor",
-  memberId:null
+  memberId:null,
+  memberCode:""
 };
+
+let currentMemberProfile = null;
+let profileEditMode = false;
+let honorSummaryState = null;
+let dormTaskRows = [];
+let activeDormTaskTab = "vocal_submit";
+const recentDormTaskActions = new Map();
 
 const mascotLines = [
   { text:"在做了在做了", style:"work" },
@@ -1675,11 +2539,11 @@ const roomNoticeGroups = [
   { key:"manager", label:"宿管室", icon:"✎" },
   { key:"honor", label:"荣誉墙", icon:"🏆" },
   { key:"game", label:"游戏房", icon:"🎮" },
-  { key:"living", label:"客厅", icon:"☕" },
-  { key:"dorm", label:"宿舍", icon:"🏠" },
-  { key:"pets", label:"宠物区", icon:"🐾" },
-  { key:"flower", label:"花房区", icon:"✿" }
+  { key:"flower", label:"花房区", icon:"✿" },
+  { key:"pets", label:"宠物区", icon:"🐾" }
 ];
+
+const allowedNoticeRooms = new Set(roomNoticeGroups.map(room => room.key));
 
 function isTinyScreen(){
   return window.innerWidth <= 540;
@@ -1736,7 +2600,13 @@ function syncOverlayToImage(){
   overlay.style.width = `${displayWidth}px`;
   overlay.style.height = `${displayHeight}px`;
 
-  const scale = Math.max(0.34, Math.min(1.42, displayWidth / 1440));
+  /*
+    大屏缩放规则：
+    1440px = 1 倍；2400px 继续放大；3840px 继续放大；
+    约 4608px 后限制在 3.2 倍，适配 8K 时不让组件无限巨大。
+    关键：用背景图实际显示宽度 displayWidth 计算，保证文字、按钮、面板和背景图一起等比例变化。
+  */
+  const scale = Math.max(0.34, Math.min(3.2, displayWidth / 1440));
   root.style.setProperty("--bg-ui-scale", String(scale));
 
   requestAnimationFrame(fitRoomNavToBar);
@@ -1827,6 +2697,7 @@ function readLocalAuth(){
   authState.nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
   authState.role = String(localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
   authState.memberId = localStorage.getItem(STORAGE_KEYS.memberId) || null;
+  authState.memberCode = localStorage.getItem(STORAGE_KEYS.memberCode) || "";
 
   if(!authState.loggedIn || !authState.nickname || !authState.memberId){
     window.location.href = "index.html";
@@ -1904,79 +2775,507 @@ function enterRoom(page, needLogin){
 /* =========================================================
    铃铛提醒
 ========================================================= */
-function setNoticeCount(count){
-  const n = Number(count) || 0;
-  siteNoticeCount.textContent = n > 99 ? "99+" : String(n);
-  siteNoticeBtn.classList.toggle("hasNotice", n > 0);
+function noticeRoomKey(value){
+  const raw = String(value || "").trim().toLowerCase();
+
+  const aliases = {
+    work:"studio",
+    studio:"studio",
+    project:"studio",
+    projects:"studio",
+    manager:"manager",
+    admin:"manager",
+    honor:"honor",
+    honour:"honor",
+    achievement:"honor",
+    title:"honor",
+    titles:"honor",
+    game:"game",
+    games:"game",
+    pet:"pets",
+    pets:"pets",
+    flower:"flower",
+    flowers:"flower",
+    market:"flower"
+  };
+
+  const key = aliases[raw] || raw;
+  return allowedNoticeRooms.has(key) ? key : "";
 }
 
-function renderNoticeList(items){
-  const list = Array.isArray(items) ? items : [];
+function normalizeNoticeItem(item){
+  const roomKey = noticeRoomKey(item.room || item.room_key || item.roomKey || item.category || item.notice_room || item.source_room);
 
-  if(!list.length){
-    siteNoticeContent.innerHTML = '<div class="siteNoticeEmpty">暂无提醒。</div>';
-    setNoticeCount(0);
-    return;
-  }
+  return {
+    room:roomKey,
+    title:item.title || item.notice_title || item.subject || item.name || "系统通知",
+    desc:item.desc || item.description || item.content || item.message || item.body || item.notice_content || "",
+    created_at:item.created_at || item.createdAt || item.updated_at || item.time || null
+  };
+}
 
-  siteNoticeContent.innerHTML = `
-    <div class="siteNoticeList">
-      ${list.map(item => `
-        <div class="siteNoticeItem">
-          <div class="siteNoticeItemTitle">${escapeHtml(item.title || "提醒")}</div>
-          <div class="siteNoticeItemDesc">${escapeHtml(item.desc || "")}</div>
-        </div>
-      `).join("")}
-    </div>
-  `;
+function noticeVisibleToCurrentUser(item){
+  if(!item) return false;
 
-  setNoticeCount(list.length);
+  const targetMemberId = item.member_id || item.target_member_id || item.to_member_id || item.receiver_member_id || null;
+  const targetRole = String(item.role || item.target_role || item.receiver_role || "").toLowerCase();
+  const targetNickname = String(item.nickname || item.target_nickname || item.to_nickname || "").trim();
+
+  if(targetMemberId && authState.memberId && String(targetMemberId) !== String(authState.memberId)) return false;
+  if(targetRole && targetRole !== "all" && targetRole !== "member" && targetRole !== String(authState.role || "").toLowerCase()) return false;
+  if(targetNickname && authState.nickname && targetNickname !== authState.nickname) return false;
+
+  const isHidden = item.is_hidden === true || item.hidden === true || item.status === "hidden";
+  const isDeleted = item.is_deleted === true || item.deleted === true || item.status === "deleted";
+
+  return !isHidden && !isDeleted;
 }
 
 function renderDormNoticeCenter(items){
   const wrap = document.getElementById("dormNoticeCenter");
   if(!wrap) return;
 
-  const list = Array.isArray(items) ? items : [];
-  const byRoom = new Map();
+  const list = (Array.isArray(items) ? items : [])
+    .map(normalizeNoticeItem)
+    .filter(item => item.room && allowedNoticeRooms.has(item.room) && (item.title || item.desc));
 
+  const byRoom = new Map();
   roomNoticeGroups.forEach(room => byRoom.set(room.key, []));
 
   list.forEach(item => {
-    const key = String(item.room || item.roomKey || item.category || "dorm").toLowerCase();
-    const targetKey = byRoom.has(key) ? key : "dorm";
-    byRoom.get(targetKey).push(item);
+    if(byRoom.has(item.room)){
+      byRoom.get(item.room).push(item);
+    }
   });
 
   wrap.innerHTML = roomNoticeGroups.map(room => {
     const roomItems = byRoom.get(room.key) || [];
+    const shouldOpen = false;
+
     const body = roomItems.length
-      ? roomItems.map(item => `
-        <div class="noticeRoomItem">
-          <div class="noticeRoomItemTitle">${escapeHtml(item.title || "通知")}</div>
-          <div class="noticeRoomItemDesc">${escapeHtml(item.desc || item.description || "")}</div>
-        </div>
-      `).join("")
+      ? roomItems.map(item => {
+        const desc = item.desc || "暂无详细内容。";
+        const time = item.created_at ? formatDate(item.created_at) : "";
+        return `
+          <div class="noticeRoomItem">
+            <div class="noticeRoomItemTitle">${escapeHtml(item.title || "通知")}</div>
+            <div class="noticeRoomItemDesc">${escapeHtml(desc)}</div>
+            ${time ? `<div class="noticeRoomTime">${escapeHtml(time)}</div>` : ""}
+          </div>
+        `;
+      }).join("")
       : '<div class="noticeRoomEmpty">暂无通知。</div>';
 
     return `
-      <section class="noticeRoomGroup" data-room="${escapeHtml(room.key)}">
-        <div class="noticeRoomHeader">
+      <section class="noticeRoomGroup${shouldOpen ? " open" : ""}" data-room="${escapeHtml(room.key)}">
+        <button class="noticeRoomHeader" type="button">
           <span>${escapeHtml(room.icon)} ${escapeHtml(room.label)}</span>
           <span class="noticeRoomCount">${roomItems.length}</span>
-        </div>
+        </button>
         <div class="noticeRoomBody">${body}</div>
       </section>
     `;
   }).join("");
+
+  wrap.querySelectorAll(".noticeRoomHeader").forEach(header => {
+    header.addEventListener("click", () => {
+      const group = header.closest(".noticeRoomGroup");
+      if(group) group.classList.toggle("open");
+    });
+  });
 }
 
-function toggleNoticePanel(){
-  siteNoticePanel.classList.toggle("show");
+async function fetchSystemNoticesByRpc(){
+  const { data,error } = await supabaseClient.rpc("get_room10_system_notifications",{
+    p_member_id:authState.memberId,
+    p_member_code:authState.memberCode
+  });
+
+  if(error) throw error;
+  return Array.isArray(data) ? data : [];
 }
 
-function closeNoticePanel(){
-  siteNoticePanel.classList.remove("show");
+async function loadSystemNotices(){
+  try{
+    const rows = await fetchSystemNoticesByRpc();
+    const visibleItems = rows.filter(noticeVisibleToCurrentUser).map(normalizeNoticeItem);
+    renderDormNoticeCenter(visibleItems);
+  }catch(error){
+    console.error(error);
+    const wrap = document.getElementById("dormNoticeCenter");
+    if(wrap){
+      wrap.innerHTML = '<div class="errorText">系统通知读取失败，请检查 get_room10_system_notifications RPC 或 RLS 权限。</div>';
+    }
+  }
+}
+
+function activateDormView(target){
+  const buttons = document.querySelectorAll(".sideBtn");
+  const views = document.querySelectorAll(".view");
+
+  buttons.forEach(item => item.classList.toggle("active", item.dataset.view === target));
+  views.forEach(view => view.classList.toggle("active", view.id === `view-${target}`));
+}
+
+function jumpToSystemNotice(){
+  activateDormView("notice");
+}
+
+/* =========================================================
+   我的任务：读取 / 渲染 / 快捷操作
+========================================================= */
+function taskTypeLabel(type){
+  if(type === "vocal_submit" || type === "vocal_submitted") return "待交音";
+  if(type === "mix_submit" || type === "mix_submitted") return "待后期";
+  if(type === "claim" || type === "singer_claim" || type === "mix_claim" || type === "singer_claimed" || type === "mix_claimed") return "待认领";
+  return "我的任务";
+}
+
+function taskTabKey(type){
+  if(type === "vocal_submitted") return "vocal_submit";
+  if(type === "mix_submitted") return "mix_submit";
+  if(type === "singer_claim" || type === "mix_claim" || type === "singer_claimed" || type === "mix_claimed") return "claim";
+  return type;
+}
+
+function taskToneText(task){
+  const tone = String(task.project_tone || "").trim();
+  return tone ? `调：${escapeHtml(tone)}` : "";
+}
+
+function taskDateLine(task){
+  return task.release_date ? `预计发布：${escapeHtml(task.release_date)}` : "";
+}
+
+function taskOriginalLine(task){
+  return task.my_original_names ? `原唱：${escapeHtml(task.my_original_names)}` : "";
+}
+
+function taskSingerNeedLine(task){
+  const current = Number(task.singer_count || 0);
+  const target = Number(task.target_singer_count || 0);
+  const missing = Number(task.missing_singer_count || Math.max(target - current, 0));
+  if(target > 0) return `演唱人数：${current}/${target}${missing > 0 ? `，缺 ${missing} 人` : ""}`;
+  return `演唱人数：${current}`;
+}
+
+function taskSingerCountLine(task){
+  const singerCount = Number(task.singer_count || 0);
+  return `演唱人数：${singerCount}`;
+}
+
+function taskMainButtonHtml(task){
+  const projectId = escapeHtml(task.project_id);
+
+  if(task.task_type === "vocal_submit"){
+    return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="submit_vocal" data-project-id="${projectId}">交音</button>`;
+  }
+
+  if(task.task_type === "mix_submit"){
+    return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="submit_mix" data-project-id="${projectId}">交付</button>`;
+  }
+
+  if(task.task_type === "singer_claim"){
+    return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="claim_singer" data-project-id="${projectId}">认领</button>`;
+  }
+
+  if(task.task_type === "mix_claim"){
+    return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="claim_mix" data-project-id="${projectId}">认领后期</button>`;
+  }
+
+  if(task.task_type === "vocal_submitted"){
+    return `<button class="dormSubBtn dormTaskActionBtn" type="button" data-action="undo_vocal" data-project-id="${projectId}">撤回交音</button>`;
+  }
+
+  if(task.task_type === "mix_submitted"){
+    return `<button class="dormSubBtn dormTaskActionBtn" type="button" data-action="undo_mix" data-project-id="${projectId}">撤回</button>`;
+  }
+
+  if(task.task_type === "singer_claimed"){
+    return `<span class="taskDoneText">已认领，撤回请去工作间</span>`;
+  }
+
+  if(task.task_type === "mix_claimed"){
+    return `<span class="taskDoneText">已认领后期，撤回请去工作间</span>`;
+  }
+
+  return "";
+}
+
+function taskMetaItems(task){
+  const items = [];
+
+  const tone = taskToneText(task);
+  if(tone) items.push(tone);
+
+  if(task.task_type === "vocal_submit" || task.task_type === "vocal_submitted"){
+    const original = taskOriginalLine(task);
+    if(original) items.push(original);
+  }
+
+  if(task.task_type === "singer_claim" || task.task_type === "singer_claimed"){
+    items.push(taskSingerNeedLine(task));
+  }
+
+  if(task.task_type === "mix_claim" || task.task_type === "mix_claimed"){
+    items.push(taskSingerCountLine(task));
+  }
+
+  const dateLine = taskDateLine(task);
+  if(dateLine) items.push(dateLine);
+
+  return items;
+}
+
+function taskCardHtml(task){
+  const code = task.project_code ? `${escapeHtml(task.project_code)} ` : "";
+  const title = `${code}${escapeHtml(task.project_name || "未命名项目")}`;
+  const mainButton = taskMainButtonHtml(task);
+  const metaItems = taskMetaItems(task);
+
+  return `
+    <div class="taskCard taskCardCompact" data-task-type="${escapeHtml(task.task_type)}" data-project-id="${escapeHtml(task.project_id)}">
+      <div class="taskCompactLine">
+        <h3 class="taskCardTitle">${title}</h3>
+        <div class="taskMetaInline">
+          ${metaItems.map(item => `<span>${item}</span>`).join("")}
+        </div>
+        <div class="taskActionRow">
+          ${mainButton}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function compareProjectCode(a,b){
+  return String(a.project_code || "").localeCompare(String(b.project_code || ""), "zh-Hans-CN", { numeric:true });
+}
+
+function sortDormTaskRows(rows,tabKey){
+  const list = rows.slice();
+
+  if(tabKey === "vocal_submit"){
+    return list.sort((a,b) => {
+      const diff = Number(a.unsubmitted_count || 999999) - Number(b.unsubmitted_count || 999999);
+      return diff || compareProjectCode(a,b);
+    });
+  }
+
+  if(tabKey === "mix_submit"){
+    return list.sort((a,b) => {
+      const ad = a.release_date || "";
+      const bd = b.release_date || "";
+      if(ad && bd && ad !== bd) return ad.localeCompare(bd);
+      if(ad && !bd) return -1;
+      if(!ad && bd) return 1;
+      return compareProjectCode(a,b);
+    });
+  }
+
+  if(tabKey === "claim"){
+    return list.sort((a,b) => {
+      const ag = a.task_type === "singer_claim" || a.task_type === "singer_claimed" ? 1 : 2;
+      const bg = b.task_type === "singer_claim" || b.task_type === "singer_claimed" ? 1 : 2;
+      if(ag !== bg) return ag - bg;
+
+      const diff = Number(b.singer_count || 0) - Number(a.singer_count || 0);
+      return diff || compareProjectCode(a,b);
+    });
+  }
+
+  return list;
+}
+
+function mergedDormTaskRows(){
+  const recentRows = Array.from(recentDormTaskActions.values());
+  const recentIds = new Set(recentRows.map(item => String(item.project_id)));
+  const normalRows = (Array.isArray(dormTaskRows) ? dormTaskRows : []).filter(item => !recentIds.has(String(item.project_id)));
+  return recentRows.concat(normalRows);
+}
+
+function updateDormTaskTabs(rows){
+  const counts = { vocal_submit:0, mix_submit:0, claim:0 };
+  rows.forEach(item => {
+    const key = taskTabKey(item.task_type);
+    if(Object.prototype.hasOwnProperty.call(counts,key)) counts[key] += 1;
+  });
+
+  document.querySelectorAll(".taskTab").forEach(btn => {
+    const key = btn.dataset.taskTab;
+    btn.classList.toggle("active", key === activeDormTaskTab);
+    const badge = btn.querySelector("span");
+    if(badge) badge.textContent = String(counts[key] || 0);
+  });
+}
+
+function renderDormTasks(rows){
+  const list = document.getElementById("taskList");
+  if(!list) return;
+
+  const allRows = mergedDormTaskRows();
+  updateDormTaskTabs(allRows);
+
+  if(!allRows.length){
+    list.innerHTML = `
+      <div class="taskCard">
+        <h3 class="taskCardTitle">今天没有需要你处理的任务</h3>
+      </div>
+    `;
+    return;
+  }
+
+  const currentRows = sortDormTaskRows(
+    allRows.filter(item => taskTabKey(item.task_type) === activeDormTaskTab),
+    activeDormTaskTab
+  );
+
+  if(!currentRows.length){
+    list.innerHTML = `<div class="emptyText">${escapeHtml(taskTypeLabel(activeDormTaskTab))}暂无任务。</div>`;
+    return;
+  }
+
+  list.innerHTML = currentRows.map(taskCardHtml).join("");
+}
+
+async function loadDormTasks(){
+  const list = document.getElementById("taskList");
+  if(!list) return;
+
+  if(!authState.memberId || !authState.memberCode){
+    updateDormTaskTabs([]);
+    list.innerHTML = '<div class="errorText">请先登录后查看我的任务。</div>';
+    return;
+  }
+
+  list.innerHTML = '<div class="emptyText">正在读取我的任务……</div>';
+
+  try{
+    const { data,error } = await supabaseClient.rpc("get_dorm_work_tasks",{
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode
+    });
+
+    if(error) throw error;
+
+    dormTaskRows = Array.isArray(data) ? data : [];
+    renderDormTasks(dormTaskRows);
+  }catch(error){
+    console.error(error);
+    list.innerHTML = '<div class="errorText">我的任务读取失败，请检查 get_dorm_work_tasks RPC。</div>';
+  }
+}
+
+function findDormTask(projectId){
+  return dormTaskRows.find(item => String(item.project_id) === String(projectId))
+    || recentDormTaskActions.get(String(projectId))
+    || null;
+}
+
+async function runDormTaskAction(action,projectId){
+  if(!action || !projectId) return;
+
+  const task = findDormTask(projectId);
+  const fnMap = {
+    submit_vocal:"submit_dorm_vocal",
+    undo_vocal:"undo_dorm_vocal_submit",
+    submit_mix:"submit_dorm_mix",
+    undo_mix:"undo_dorm_mix_submit",
+    claim_singer:"claim_dorm_singer",
+    claim_mix:"claim_dorm_mix"
+  };
+
+  const fn = fnMap[action];
+  if(!fn) return;
+
+  try{
+    const { data,error } = await supabaseClient.rpc(fn,{
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode,
+      p_project_id:projectId
+    });
+
+    if(error) throw error;
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if(!result || result.ok !== true){
+      alert(result?.message || "操作失败，任务状态可能已变化。");
+      await loadDormTasks();
+      return;
+    }
+
+    if(action === "submit_vocal" && task){
+      recentDormTaskActions.set(String(projectId),{
+        ...task,
+        task_type:"vocal_submitted",
+        my_singer_submitted:true
+      });
+    }
+
+    if(action === "submit_mix" && task){
+      recentDormTaskActions.set(String(projectId),{
+        ...task,
+        task_type:"mix_submitted",
+        producer_completed:true
+      });
+    }
+
+    if(action === "claim_singer" && task){
+      recentDormTaskActions.set(String(projectId),{
+        ...task,
+        task_type:"singer_claimed",
+        singer_count:Number(task.singer_count || 0) + 1,
+        missing_singer_count:Math.max(Number(task.missing_singer_count || 0) - 1, 0)
+      });
+    }
+
+    if(action === "claim_mix" && task){
+      recentDormTaskActions.set(String(projectId),{
+        ...task,
+        task_type:"mix_claimed",
+        producer_member_id:authState.memberId,
+        producer_nickname:authState.nickname
+      });
+    }
+
+    if(action === "undo_vocal" || action === "undo_mix"){
+      recentDormTaskActions.delete(String(projectId));
+    }
+
+    await loadDormTasks();
+  }catch(error){
+    console.error(error);
+    alert(`操作失败：${error.message || "请检查任务 RPC"}`);
+    await loadDormTasks();
+  }
+}
+
+function bindDormTaskActions(){
+  const list = document.getElementById("taskList");
+  if(list){
+    list.addEventListener("click", event => {
+      const btn = event.target.closest(".dormTaskActionBtn");
+      if(!btn) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const action = btn.dataset.action;
+      const projectId = btn.dataset.projectId;
+      runDormTaskAction(action,projectId);
+    });
+  }
+
+  const tabs = document.getElementById("taskTabs");
+  if(tabs){
+    tabs.addEventListener("click", event => {
+      const btn = event.target.closest(".taskTab");
+      if(!btn) return;
+
+      activeDormTaskTab = btn.dataset.taskTab || "vocal_submit";
+      renderDormTasks(dormTaskRows);
+    });
+  }
 }
 
 /* =========================================================
@@ -1985,7 +3284,7 @@ function closeNoticePanel(){
 async function fetchCurrentMember(){
   const { data,error } = await supabaseClient
     .from("members")
-    .select("id,nickname,role,gold_balance,gold_total_earned,gold_total_spent")
+    .select("id,member_code,name,nickname,role,avatar_url,location,birthday_month,birthday_day,mbti,contact_qq,social_xiaohongshu,social_douyin,social_bilibili,social_weibo,joined_at,cohort,skills,public_message,gold_balance,gold_total_earned,gold_total_spent")
     .eq("id",authState.memberId)
     .maybeSingle();
 
@@ -2020,10 +3319,13 @@ async function loadGoldInfo(){
     return;
   }
 
+  currentMemberProfile = member;
   authState.nickname = member.nickname || authState.nickname;
   authState.role = member.role || authState.role;
 
   updateIdentity(member);
+  renderProfileView(member);
+  loadHonorSummary(member.id);
 
   setText("walletTitle",`${member.nickname || "成员"}的钱包记录`);
   setText("goldSub","金币余额与最近收支记录集中显示");
@@ -2089,19 +3391,485 @@ async function loadGoldLedger(memberId){
   }).join("");
 }
 
+
+/* =========================================================
+   我的档案
+========================================================= */
+function valueOrDash(value){
+  const text = String(value ?? "").trim();
+  return text || "未填写";
+}
+
+function formatBirthday(month,day){
+  if(!month || !day) return "未填写";
+  return `${Number(month)}月${Number(day)}日`;
+}
+
+function normalizeSkills(value){
+  if(Array.isArray(value)) return value.map(v => String(v).trim()).filter(Boolean);
+  return String(value || "")
+    .split(/[，,、/|\s]+/)
+    .map(v => v.trim())
+    .filter(Boolean);
+}
+
+function uniqueSkills(list){
+  const seen = new Set();
+  const result = [];
+  list.forEach(item => {
+    const value = String(item || "").trim();
+    if(!value) return;
+    const key = value.toLowerCase();
+    if(seen.has(key)) return;
+    seen.add(key);
+    result.push(value);
+  });
+  return result;
+}
+
+function skillPillsHtml(skills){
+  const list = uniqueSkills(normalizeSkills(skills));
+  if(!list.length) return '<span class="profileHint">暂未登记技能。</span>';
+  return `<div class="skillPills">${list.map(skill => `<span class="skillPill">${escapeHtml(skill)}</span>`).join("")}</div>`;
+}
+
+function honorSummaryHtml(summary){
+  if(!summary){
+    return '<span class="profileHint">荣誉摘要读取中……</span>';
+  }
+  if(summary.error){
+    return `<span class="profileHint">${escapeHtml(summary.error)}</span>`;
+  }
+  const recent = summary.recent ? `<span class="honorPill">最近获得：${escapeHtml(summary.recent)}</span>` : '<span class="honorPill">暂无最近记录</span>';
+  return `
+    <div class="honorPills">
+      <span class="honorPill">已领取称号：${Number(summary.titles || 0)} 个</span>
+      <span class="honorPill">已领取成就：${Number(summary.achievements || 0)} 个</span>
+      ${recent}
+    </div>
+  `;
+}
+
+function renderProfileView(member){
+  const wrap = document.getElementById("profileScroll");
+  if(!wrap) return;
+
+  if(!member){
+    wrap.innerHTML = '<div class="errorText">没有读取到当前成员档案。</div>';
+    return;
+  }
+
+  if(profileEditMode){
+    renderProfileEdit(member);
+    return;
+  }
+
+  const avatar = member.avatar_url || "";
+  const role = roleLabel(member.role || authState.role);
+  const cohort = member.cohort ? `<span class="profileBadge">${escapeHtml(member.cohort)}</span>` : "";
+  const honorHtml = honorSummaryHtml(honorSummaryState);
+
+  wrap.innerHTML = `
+    <div class="profileCard">
+      <div class="profileTop">
+        <img class="profileAvatar" src="${escapeHtml(avatar || 'mascot-niuma(L).png')}" alt="成员头像" onerror="this.src='mascot-niuma(L).png'">
+        <div class="profileTopInfo">
+          <div class="profileNameLine">
+            <div class="profileName">${escapeHtml(valueOrDash(member.name))}</div>
+            <span class="profileBadge">${escapeHtml(role)}</span>
+            ${cohort}
+          </div>
+          <div class="profileMeta">
+            昵称：${escapeHtml(valueOrDash(member.nickname))} ｜ 钥匙：${escapeHtml(valueOrDash(member.member_code || authState.memberCode))}<br>
+            登堂入室：${escapeHtml(valueOrDash(member.joined_at))}
+          </div>
+        </div>
+        <div class="profileTopHonor">
+          ${honorHtml}
+        </div>
+        <div class="profileTopAction">
+          <button class="dormMiniBtn profileEditQuick" type="button" onclick="openProfileEdit()">编辑档案</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="profileCard">
+      <h3 class="profileCardTitle">个人资料</h3>
+      <div class="profileGrid">
+        <div class="profileField"><div class="profileLabel">所在地</div><div class="profileValue">${escapeHtml(valueOrDash(member.location))}</div></div>
+        <div class="profileField"><div class="profileLabel">生日</div><div class="profileValue">${escapeHtml(formatBirthday(member.birthday_month, member.birthday_day))}</div></div>
+        <div class="profileField"><div class="profileLabel">MBTI</div><div class="profileValue">${escapeHtml(valueOrDash(member.mbti))}</div></div>
+        <div class="profileField"><div class="profileLabel">QQ</div><div class="profileValue">${escapeHtml(valueOrDash(member.contact_qq))}</div></div>
+      </div>
+    </div>
+
+    <div class="profileCard">
+      <h3 class="profileCardTitle">技能</h3>
+      ${skillPillsHtml(member.skills)}
+    </div>
+
+    <div class="profileCard">
+      <h3 class="profileCardTitle">社交账号</h3>
+      <div class="profileGrid">
+        <div class="profileField"><div class="profileLabel">小红书</div><div class="profileValue">${escapeHtml(valueOrDash(member.social_xiaohongshu))}</div></div>
+        <div class="profileField"><div class="profileLabel">抖音</div><div class="profileValue">${escapeHtml(valueOrDash(member.social_douyin))}</div></div>
+        <div class="profileField"><div class="profileLabel">B站</div><div class="profileValue">${escapeHtml(valueOrDash(member.social_bilibili))}</div></div>
+        <div class="profileField"><div class="profileLabel">微博</div><div class="profileValue">${escapeHtml(valueOrDash(member.social_weibo))}</div></div>
+      </div>
+    </div>
+
+    <div class="profileCard">
+      <h3 class="profileCardTitle">公开留言</h3>
+      <div class="profileValue">${escapeHtml(valueOrDash(member.public_message))}</div>
+    </div>
+  `;
+}
+
+function monthOptions(selected){
+  let html = '<option value="">月份</option>';
+  for(let i=1;i<=12;i++) html += `<option value="${i}" ${Number(selected) === i ? "selected" : ""}>${i}月</option>`;
+  return html;
+}
+
+function dayOptions(selected){
+  let html = '<option value="">日期</option>';
+  for(let i=1;i<=31;i++) html += `<option value="${i}" ${Number(selected) === i ? "selected" : ""}>${i}日</option>`;
+  return html;
+}
+
+function mbtiOptions(selected){
+  const list = ["","INTJ","INTP","ENTJ","ENTP","INFJ","INFP","ENFJ","ENFP","ISTJ","ISFJ","ESTJ","ESFJ","ISTP","ISFP","ESTP","ESFP"];
+  return list.map(item => `<option value="${escapeHtml(item)}" ${item === String(selected || "") ? "selected" : ""}>${item || "不填写"}</option>`).join("");
+}
+
+function renderProfileEdit(member){
+  const wrap = document.getElementById("profileScroll");
+  if(!wrap) return;
+
+  wrap.innerHTML = `
+    <div class="profileCard">
+      <div class="profileCardHead">
+        <h3 class="profileCardTitle">编辑我的档案</h3>
+        <div class="profileActionRow" style="margin-top:0;">
+          <button class="dormMiniBtn" type="button" onclick="saveProfileEdit()">保存修改</button>
+          <button class="dormSubBtn" type="button" onclick="cancelProfileEdit()">取消</button>
+        </div>
+      </div>
+      <form class="profileForm" id="profileEditForm">
+        <label>圈名
+          <input id="profileNameInput" type="text" maxlength="20" value="${escapeHtml(member.name || "")}" placeholder="请输入圈名">
+        </label>
+        <label>所在地
+          <input id="profileLocationInput" type="text" value="${escapeHtml(member.location || "")}" placeholder="中国地区填省份；海外填地区或国家">
+        </label>
+        <label>生日月份
+          <select id="profileBirthdayMonth">${monthOptions(member.birthday_month)}</select>
+        </label>
+        <label>生日日期
+          <select id="profileBirthdayDay">${dayOptions(member.birthday_day)}</select>
+        </label>
+        <label>MBTI
+          <select id="profileMbtiInput">${mbtiOptions(member.mbti)}</select>
+        </label>
+        <label>小红书
+          <input id="profileXhsInput" type="text" value="${escapeHtml(member.social_xiaohongshu || "")}" placeholder="没有可留空">
+        </label>
+        <label>抖音
+          <input id="profileDouyinInput" type="text" value="${escapeHtml(member.social_douyin || "")}" placeholder="没有可留空">
+        </label>
+        <label>B站
+          <input id="profileBilibiliInput" type="text" value="${escapeHtml(member.social_bilibili || "")}" placeholder="没有可留空">
+        </label>
+        <label>微博
+          <input id="profileWeiboInput" type="text" value="${escapeHtml(member.social_weibo || "")}" placeholder="没有可留空">
+        </label>
+        <label>申请新增技能
+          <input id="profileSkillInput" type="text" placeholder="例如：后期、修音、剪辑、海报……">
+        </label>
+        <label class="full">公开留言
+          <textarea id="profileMessageInput" maxlength="500" placeholder="这段内容会对外展示。">${escapeHtml(member.public_message || "")}</textarea>
+        </label>
+      </form>
+      <div id="profileStatus" class="profileStatus"></div>
+    </div>
+  `;
+}
+
+function openProfileEdit(){
+  profileEditMode = true;
+  renderProfileView(currentMemberProfile);
+}
+
+function cancelProfileEdit(){
+  profileEditMode = false;
+  renderProfileView(currentMemberProfile);
+}
+
+function setProfileStatus(message,type=""){
+  const el = document.getElementById("profileStatus");
+  if(!el) return;
+  el.textContent = message || "";
+  el.className = "profileStatus" + (type ? ` ${type}` : "");
+}
+
+function validateProfileName(value){
+  const text = String(value || "").trim();
+  return text.length >= 1 && text.length <= 20;
+}
+
+function validateProfileLocation(value){
+  const text = String(value || "").trim();
+  if(!text) return true;
+  const allowedLocations = [
+    "北京","天津","上海","重庆","河北","山西","辽宁","吉林","黑龙江","江苏","浙江","安徽","福建","江西","山东","河南","湖北","湖南","广东","海南","四川","贵州","云南","陕西","甘肃","青海","台湾","内蒙古","广西","西藏","宁夏","新疆","香港","澳门","美国","加拿大","美东","美西","美中"
+  ];
+  return allowedLocations.includes(text);
+}
+
+function standardSkillName(raw){
+  const value = String(raw || "").trim().toLowerCase();
+  if(!value) return { input:"", matched:"", status:"empty" };
+
+  const aliases = [
+    { name:"混音", values:["混音","后期","修音","贴唱","混","mix","mixing","mixer"] },
+    { name:"视频剪辑", values:["视频剪辑","剪辑","视频","pv","做视频","视频后期","video"] },
+    { name:"美工", values:["美工","海报","作图","排版","封面","设计","平面设计"] }
+  ];
+
+  const found = aliases.find(group => group.values.some(item => item.toLowerCase() === value));
+  if(found) return { input:raw.trim(), matched:found.name, status:"matched" };
+  return { input:raw.trim(), matched:"", status:"pending" };
+}
+
+function collectProfilePayload(){
+  return {
+    name:document.getElementById("profileNameInput")?.value.trim() || "",
+    location:document.getElementById("profileLocationInput")?.value.trim() || null,
+    birthday_month:document.getElementById("profileBirthdayMonth")?.value ? Number(document.getElementById("profileBirthdayMonth").value) : null,
+    birthday_day:document.getElementById("profileBirthdayDay")?.value ? Number(document.getElementById("profileBirthdayDay").value) : null,
+    mbti:document.getElementById("profileMbtiInput")?.value || null,
+    social_xiaohongshu:document.getElementById("profileXhsInput")?.value.trim() || null,
+    social_douyin:document.getElementById("profileDouyinInput")?.value.trim() || null,
+    social_bilibili:document.getElementById("profileBilibiliInput")?.value.trim() || null,
+    social_weibo:document.getElementById("profileWeiboInput")?.value.trim() || null,
+    public_message:document.getElementById("profileMessageInput")?.value.trim() || null
+  };
+}
+
+function fieldLabel(key){
+  const labels = {
+    name:"圈名",
+    location:"所在地",
+    birthday_month:"生日月份",
+    birthday_day:"生日日期",
+    mbti:"MBTI",
+    social_xiaohongshu:"小红书",
+    social_douyin:"抖音",
+    social_bilibili:"B站",
+    social_weibo:"微博",
+    public_message:"公开留言",
+    skills:"正式技能",
+    skill_request:"新增技能申请"
+  };
+  return labels[key] || key;
+}
+
+function stringifyFieldValue(value){
+  if(value === null || value === undefined || value === "") return "";
+  if(Array.isArray(value)) return value.join("、");
+  return String(value);
+}
+
+function diffProfileFields(oldMember,payload){
+  const changes = [];
+  Object.entries(payload).forEach(([key,newValue]) => {
+    const oldValue = oldMember ? oldMember[key] : null;
+    if(stringifyFieldValue(oldValue) !== stringifyFieldValue(newValue)){
+      changes.push({
+        field_key:key,
+        field_label:fieldLabel(key),
+        old_value:stringifyFieldValue(oldValue),
+        new_value:stringifyFieldValue(newValue),
+        change_type:"profile_update",
+        status:"pending"
+      });
+    }
+  });
+  return changes;
+}
+
+async function logProfileChanges(changes){
+  if(!changes.length) return;
+
+  const rows = changes.map(item => ({
+    member_id:authState.memberId,
+    member_code:authState.memberCode,
+    nickname:authState.nickname,
+    field_key:item.field_key,
+    field_label:item.field_label,
+    old_value:item.old_value,
+    new_value:item.new_value,
+    change_type:item.change_type || "profile_update",
+    status:item.status || "pending"
+  }));
+
+  try{
+    const { error } = await supabaseClient.from("member_profile_change_logs").insert(rows);
+    if(error) throw error;
+  }catch(error){
+    console.warn("成员资料修改记录表尚未可用，已跳过日志写入。", error);
+  }
+}
+
+async function checkProfileNameDuplicate(name){
+  const { data,error } = await supabaseClient
+    .from("members")
+    .select("id")
+    .eq("name",name)
+    .neq("id",authState.memberId)
+    .limit(1);
+
+  if(error) throw error;
+  return Array.isArray(data) && data.length > 0;
+}
+
+async function saveProfileEdit(){
+  if(!currentMemberProfile) return;
+  const payload = collectProfilePayload();
+  const skillInput = document.getElementById("profileSkillInput")?.value.trim() || "";
+  const skillMatch = standardSkillName(skillInput);
+  let changes = diffProfileFields(currentMemberProfile,payload);
+  let skillMessage = "";
+
+  if(!validateProfileName(payload.name)){
+    setProfileStatus("圈名不能为空，且最多 20 个字符。","error");
+    return;
+  }
+
+  if(!validateProfileLocation(payload.location)){
+    setProfileStatus("所在地仅可填写省份、美东/美西/美中、美国或加拿大。","error");
+    return;
+  }
+
+  if((payload.birthday_month && !payload.birthday_day) || (!payload.birthday_month && payload.birthday_day)){
+    setProfileStatus("生日月份和日期需要一起填写。","error");
+    return;
+  }
+
+  setProfileStatus("正在保存档案……");
+
+  try{
+    const duplicated = await checkProfileNameDuplicate(payload.name);
+    if(duplicated){
+      setProfileStatus("这个圈名已经有人使用了，请换一个。","error");
+      return;
+    }
+
+    const currentSkills = uniqueSkills(normalizeSkills(currentMemberProfile.skills));
+    if(skillMatch.status === "matched"){
+      if(!currentSkills.some(item => item === skillMatch.matched)){
+        const nextSkills = uniqueSkills([...currentSkills, skillMatch.matched]);
+        payload.skills = nextSkills.join(",");
+        changes.push({
+          field_key:"skills",
+          field_label:"正式技能",
+          old_value:currentSkills.join("、"),
+          new_value:nextSkills.join("、"),
+          change_type:"skill_auto_matched",
+          status:"pending"
+        });
+        skillMessage = `“${skillMatch.input}”已归并为正式技能「${skillMatch.matched}」。`;
+      }else{
+        skillMessage = `你已经有正式技能「${skillMatch.matched}」。`;
+      }
+    }else if(skillMatch.status === "pending"){
+      changes.push({
+        field_key:"skill_request",
+        field_label:"新增技能申请",
+        old_value:"",
+        new_value:skillMatch.input,
+        change_type:"skill_request",
+        status:"pending"
+      });
+      skillMessage = `“${skillMatch.input}”已作为新增技能申请，等待宿管确认。`;
+    }
+
+    if(!changes.length){
+      setProfileStatus(skillMessage || "没有检测到需要保存的修改。","success");
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("members")
+      .update(payload)
+      .eq("id",authState.memberId)
+      .eq("member_code",authState.memberCode);
+
+    if(error) throw error;
+
+    await logProfileChanges(changes);
+    const fresh = await fetchCurrentMember();
+    currentMemberProfile = fresh || { ...currentMemberProfile, ...payload };
+    if(currentMemberProfile.nickname) authState.nickname = currentMemberProfile.nickname;
+    if(currentMemberProfile.role) authState.role = currentMemberProfile.role;
+    updateIdentity(currentMemberProfile);
+    profileEditMode = false;
+    honorSummaryState = honorSummaryState;
+    renderProfileView(currentMemberProfile);
+  }catch(error){
+    console.error(error);
+    setProfileStatus(`保存失败：${error.message || "请检查 members 表更新权限"}`,"error");
+  }
+}
+
+async function loadHonorSummary(memberId){
+  if(!memberId) return;
+
+  try{
+    const [{ data:titleRows,error:titleError,count:titleCount }, { data:achievementRows,error:achievementError,count:achievementCount }] = await Promise.all([
+      supabaseClient
+        .from("member_titles")
+        .select("obtained_at,titles(name)", { count:"exact" })
+        .eq("member_id",memberId)
+        .order("obtained_at",{ ascending:false })
+        .limit(1),
+      supabaseClient
+        .from("member_achievements")
+        .select("obtained_at,achievements(name,description)", { count:"exact" })
+        .eq("member_id",memberId)
+        .order("obtained_at",{ ascending:false })
+        .limit(1)
+    ]);
+
+    if(titleError || achievementError) throw (titleError || achievementError);
+
+    const latestTitleTime = titleRows?.[0]?.obtained_at ? new Date(titleRows[0].obtained_at).getTime() : 0;
+    const latestAchievementTime = achievementRows?.[0]?.obtained_at ? new Date(achievementRows[0].obtained_at).getTime() : 0;
+    const latestTitleName = titleRows?.[0]?.titles?.name || "";
+    const latestAchievementName = achievementRows?.[0]?.achievements?.name || achievementRows?.[0]?.achievements?.description || "";
+
+    honorSummaryState = {
+      titles:Number(titleCount || 0),
+      achievements:Number(achievementCount || 0),
+      recent:latestTitleTime >= latestAchievementTime ? latestTitleName : latestAchievementName
+    };
+  }catch(error){
+    console.warn("荣誉摘要读取失败。", error);
+    honorSummaryState = { error:"荣誉摘要暂时无法读取。" };
+  }
+
+  if(!profileEditMode) renderProfileView(currentMemberProfile);
+}
+
 /* =========================================================
    页面交互
 ========================================================= */
 function bindSideTabs(){
   const buttons = document.querySelectorAll(".sideBtn");
-  const views = document.querySelectorAll(".view");
 
   buttons.forEach(btn => {
     btn.addEventListener("click",() => {
-      const target = btn.dataset.view;
-
-      buttons.forEach(item => item.classList.toggle("active",item === btn));
-      views.forEach(view => view.classList.toggle("active",view.id === `view-${target}`));
+      activateDormView(btn.dataset.view);
     });
   });
 }
@@ -2127,15 +3895,16 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   bindSideTabs();
+  bindDormTaskActions();
   loadGoldInfo();
-  renderNoticeList([]);
-  renderDormNoticeCenter([]);
+  loadSystemNotices();
+  loadDormTasks();
   setMascotBubbleOnce();
 
   if(siteNoticeBtn){
     siteNoticeBtn.addEventListener("click", event => {
       event.stopPropagation();
-      toggleNoticePanel();
+      jumpToSystemNotice();
     });
   }
 
@@ -2152,13 +3921,6 @@ document.addEventListener("DOMContentLoaded", () => {
       handleLogout();
     });
   }
-
-  document.addEventListener("click", event => {
-    if(siteNoticePanel && siteNoticeBtn){
-      if(siteNoticePanel.contains(event.target) || siteNoticeBtn.contains(event.target)) return;
-      closeNoticePanel();
-    }
-  });
 
   syncOverlayToImage();
 });
