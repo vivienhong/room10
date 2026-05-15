@@ -2150,6 +2150,18 @@ function renderClaimedAwardModal(items){
 
 function closeAwardModal(){
   awardModal.classList.add("hidden");
+  awardClaimBusy = false;
+  awardOkBtn.disabled = false;
+  awardOkBtn.dataset.awardState = "pending";
+  pendingAwardGameId = null;
+  pendingAwardItems = [];
+}
+
+function autoCloseAwardModal(delay = 1500){
+  clearTimeout(autoCloseAwardModal._timer);
+  autoCloseAwardModal._timer = setTimeout(() => {
+    closeAwardModal();
+  }, delay);
 }
 
 async function checkBombAwards(gameId = null){
@@ -2207,6 +2219,7 @@ async function claimVisibleBombAwards(){
     if(claimed.length){
       renderClaimedAwardModal(claimed);
       showToast("荣誉已领取。");
+      autoCloseAwardModal(1600);
     }else{
       closeAwardModal();
       showToast("暂无新的可领取荣誉。");
