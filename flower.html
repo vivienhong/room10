@@ -3200,6 +3200,30 @@ function getFlowerResources(){
   };
 }
 
+function updateFlowerResourcesFromRow(row, refreshUI=true){
+  if(!row || typeof row !== "object") return false;
+
+  const hasSeed = Object.prototype.hasOwnProperty.call(row, "seed_quantity");
+  const hasWater = Object.prototype.hasOwnProperty.call(row, "water_quantity");
+  const hasFertilizer = Object.prototype.hasOwnProperty.call(row, "fertilizer_quantity");
+
+  if(!hasSeed && !hasWater && !hasFertilizer) return false;
+
+  const current = getFlowerResources();
+
+  setFlowerResources(
+    hasSeed ? row.seed_quantity : current.seed,
+    hasWater ? row.water_quantity : current.water,
+    hasFertilizer ? row.fertilizer_quantity : current.fertilizer
+  );
+
+  if(refreshUI){
+    updatePotResourceNumbers(false);
+  }
+
+  return true;
+}
+
 async function claimFirstVisitFlowerReward(){
   const auth = getFlowerAuth();
   if(!auth){
@@ -3218,10 +3242,7 @@ async function claimFirstVisitFlowerReward(){
   }
 
   const row = Array.isArray(data) ? data[0] : data;
-  if(row){
-    setFlowerResources(row.seed_quantity, row.water_quantity, row.fertilizer_quantity);
-    updatePotResourceNumbers(false);
-  }
+  updateFlowerResourcesFromRow(row);
 
   return row || null;
 }
@@ -3330,8 +3351,7 @@ async function claimDailyFlowerItems(){
   }
 
   const row = Array.isArray(data) ? data[0] : data;
-  if(row){
-    setFlowerResources(row.seed_quantity, row.water_quantity, row.fertilizer_quantity);
+  if(updateFlowerResourcesFromRow(row)){
     flowerState.dailyTipMessage = "今日资源已领取：水 ×1、肥料 ×1。";
   }else{
     flowerState.dailyTipMessage = "今日资源已领取。";
@@ -3567,6 +3587,7 @@ async function loadFlowerPot(){
 
     const row = Array.isArray(data) ? data[0] : data;
     flowerState.pot = row || null;
+    updateFlowerResourcesFromRow(row, false);
     renderPot(row);
   }catch(err){
     console.error("读取花盆失败：", err);
@@ -3740,9 +3761,7 @@ async function plantSeed(){
     if(error) throw error;
 
     const row = Array.isArray(data) ? data[0] : data;
-    if(row && Object.prototype.hasOwnProperty.call(row, "seed_quantity")){
-      setFlowerResources(row.seed_quantity, flowerState.resources.water, flowerState.resources.fertilizer);
-    }
+    updateFlowerResourcesFromRow(row);
     showFlowerToast(row?.message || "种下成功");
     await loadFlowerPage();
   }catch(err){
@@ -3818,9 +3837,7 @@ async function careFlowerPot(careType){
     if(error) throw error;
 
     const row = Array.isArray(data) ? data[0] : data;
-    if(row){
-      setFlowerResources(row.seed_quantity ?? flowerState.resources.seed, row.water_quantity, row.fertilizer_quantity);
-    }
+    updateFlowerResourcesFromRow(row);
     addDailyCareCount(careType);
     showFlowerToast(row?.message || "照顾成功");
     await loadFlowerPage();
@@ -3930,55 +3947,39 @@ function closeNoticePanel(){
   toggleNoticePanel(false);
 }
 
-async function getSeedMaintenanceItems(){
+function getSeedMaintenanceItems(pot = flowerState.pot){
   const auth = getFlowerAuth();
-  if(!auth) return [];
+  if(!auth || !pot) return [];
 
-  try{
-    const { data, error } = await supabaseClient.rpc("get_flower_pot_status", {
-      p_member_id:auth.memberId,
-      p_member_code:auth.memberCode
+  const items = [];
+  const status = pot.display_status || pot.status;
+
+  if(status === "ready"){
+    items.push({
+      title:"我的花盆可以收获了",
+      desc:"种植周期已经完成，记得进入花房收获。"
     });
-
-    if(error) throw error;
-
-    const pot = Array.isArray(data) ? data[0] : data;
-    if(!pot) return [];
-
-    const items = [];
-    const status = pot.display_status || pot.status;
-
-    if(status === "ready"){
-      items.push({
-        title:"我的花盆可以收获了",
-        desc:"种植周期已经完成，记得进入花房收获。"
-      });
-    }
-
-    if(status === "withered"){
-      items.push({
-        title:"我的花盆需要清理",
-        desc:"花盆已经枯萎，清理后可以重新种下一颗种子。"
-      });
-    }
-
-    if(status === "growing" && Number(pot.interaction_count || 0) <= 0){
-      items.push({
-        title:"种子还没有被照顾",
-        desc:"小种子还没有被照顾，进去看看它吧。"
-      });
-    }
-
-    return items;
-  }catch(err){
-    console.warn("读取花房提醒失败：", err);
-    return [];
   }
+
+  if(status === "withered"){
+    items.push({
+      title:"我的花盆需要清理",
+      desc:"花盆已经枯萎，清理后可以重新种下一颗种子。"
+    });
+  }
+
+  if(status === "growing" && Number(pot.interaction_count || 0) <= 0){
+    items.push({
+      title:"种子还没有被照顾",
+      desc:"小种子还没有被照顾，进去看看它吧。"
+    });
+  }
+
+  return items;
 }
 
-async function renderSiteNotifications(){
-  const items = await getSeedMaintenanceItems();
-  renderNoticeList(items);
+function renderSiteNotifications(){
+  renderNoticeList(getSeedMaintenanceItems());
 }
 
 /* =========================================================
