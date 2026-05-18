@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>十号房｜宿管室</title>
+<title>十号房｜宿管室｜宿管</title>
+<!-- admin-profile-review-clean-v8 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -143,51 +144,69 @@ body{
   display:none !important;
 }
 
-/* ===== 页面提示 ===== */
+/* ===== 页面提示：居中自动关闭小弹窗 ===== */
 #pageNotice{
-  position:absolute;
-  left:25.7%;
-  top:4.6%;
-  width:50%;
-  min-height:42px;
-  padding:10px 14px;
-  border-radius:12px;
-  border:1px solid var(--line);
-  background:var(--info-bg);
+  position:fixed;
+  left:50%;
+  top:50%;
+  width:min(420px, calc(100vw - 40px));
+  min-height:0;
+  padding:14px 16px;
+  border-radius:16px;
+  border:1px solid rgba(216,194,163,.86);
+  background:rgba(247,238,225,.98);
   color:var(--info);
-  z-index:6;
+  z-index:3000;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:10px;
-  box-shadow:var(--shadow);
-  font-size:clamp(11px, .8vw, 14px);
-  line-height:1.4;
+  gap:12px;
+  box-shadow:0 18px 42px rgba(85,58,34,.18);
+  font-size:14px;
+  line-height:1.5;
+  transform:translate(-50%, -50%);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  pointer-events:auto;
+  animation:noticePopIn .18s ease both;
 }
 
 #pageNotice.notice-success{
-  background:var(--success-bg);
+  background:rgba(238,246,232,.98);
   color:var(--green);
 }
 
 #pageNotice.notice-error{
-  background:var(--error-bg);
+  background:rgba(251,236,235,.98);
   color:var(--red);
 }
 
 .notice-text{
   flex:1 1 auto;
+  text-align:center;
+  font-weight:800;
 }
 
 .notice-close{
   flex:0 0 auto;
+  width:24px;
+  height:24px;
   border:none;
-  background:transparent;
+  border-radius:999px;
+  background:rgba(234,217,188,.56);
   color:inherit;
   cursor:pointer;
   font-size:16px;
   line-height:1;
-  padding:0 2px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+@keyframes noticePopIn{
+  from{ opacity:0; transform:translate(-50%, -46%) scale(.96); }
+  to{ opacity:1; transform:translate(-50%, -50%) scale(1); }
 }
 
 /* ===== 右上角身份组件 ===== */
@@ -610,24 +629,11 @@ body{
   width:50%;
   height:79.2%;
   z-index:2;
-  overflow-y:auto;
-  overflow-x:hidden;
-  padding-right:8px;
-  scrollbar-width:thin;
-  scrollbar-color:#cfad82 rgba(255,255,255,.35);
+  overflow:hidden;
+  padding-right:0;
+  scrollbar-width:none;
 }
 
-#contentArea::-webkit-scrollbar{
-  width:8px;
-}
-#contentArea::-webkit-scrollbar-track{
-  background:rgba(255,255,255,.35);
-  border-radius:999px;
-}
-#contentArea::-webkit-scrollbar-thumb{
-  background:#cfad82;
-  border-radius:999px;
-}
 
 .card{
   position:relative;
@@ -694,9 +700,12 @@ body{
 
 /* ===== 管理视图 ===== */
 .admin-view-card{
-  min-height:100%;
+  height:100%;
+  min-height:0;
   display:flex;
   flex-direction:column;
+  overflow:hidden;
+  margin-bottom:0;
 }
 
 .admin-block{
@@ -736,12 +745,15 @@ body{
   flex:1 1 auto;
   min-height:0;
   overflow:auto;
-  padding-right:4px;
+  overflow-x:hidden;
+  padding-right:calc(4px * var(--ui-scale));
   scrollbar-width:thin;
   scrollbar-color:#cfad82 rgba(255,255,255,.35);
 }
 
-.module-scroll::-webkit-scrollbar{ width:8px; }
+.module-scroll::-webkit-scrollbar{
+  width:calc(7px * var(--ui-scale));
+}
 .module-scroll::-webkit-scrollbar-track{
   background:rgba(255,255,255,.35);
   border-radius:999px;
@@ -771,6 +783,7 @@ body{
   align-items:flex-start;
   gap:10px;
   margin-bottom:6px;
+  flex-wrap:wrap;
 }
 
 .apply-head strong{
@@ -781,7 +794,7 @@ body{
 .apply-time{
   font-size:clamp(11px, .72vw, 13px);
   color:var(--muted);
-  white-space:nowrap;
+  white-space:normal;
 }
 
 .apply-body{
@@ -870,11 +883,22 @@ body{
 .key-list-wrap{
   margin-top:6px;
   overflow:auto;
+  overflow-x:hidden;
   flex:1 1 auto;
   min-height:0;
   border:1px solid var(--line2);
   border-radius:10px;
   background:rgba(255,252,246,.75);
+  scrollbar-width:thin;
+  scrollbar-color:#cfad82 rgba(255,255,255,.35);
+}
+
+.key-list-wrap::-webkit-scrollbar{
+  width:calc(7px * var(--ui-scale));
+}
+.key-list-wrap::-webkit-scrollbar-thumb{
+  background:#cfad82;
+  border-radius:999px;
 }
 
 .key-storage-box{
@@ -935,34 +959,220 @@ body{
   font-weight:700;
 }
 
-/* ===== 维修日志 ===== */
-.log-list{
+/* 资料修改记录 */
+.single-review-block{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+}
+
+.profile-summary-list{
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:calc(7px * var(--ui-scale));
+  min-height:0;
 }
 
-.log-item{
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  padding:9px 10px;
-  border:1px solid var(--line2);
-  border-radius:10px;
-  background:rgba(255,252,246,.92);
-}
-
-.log-main{
-  font-size:clamp(11px, .76vw, 14px);
-  line-height:1.4;
+.profile-summary-item{
+  width:100%;
+  appearance:none;
+  border:1px solid rgba(216,194,163,.76);
+  border-radius:calc(12px * var(--ui-scale));
+  background:rgba(255,252,246,.94);
+  padding:calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
   color:#6b5a45;
+  text-align:left;
+  cursor:pointer;
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto;
+  gap:calc(5px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  align-items:center;
+  box-shadow:0 1px 3px rgba(116,86,54,.04);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
 }
 
-.log-time{
+.profile-summary-item:hover{
+  background:rgba(255,248,238,.98);
+  border-color:rgba(201,142,86,.52);
+}
+
+.profile-summary-title{
+  min-width:0;
+  color:var(--title);
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:900;
+  line-height:1.35;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  word-break:break-word;
+}
+
+.profile-summary-meta{
+  grid-column:1 / -1;
+  color:#8d755d;
+  font-size:calc(11px * var(--ui-scale));
+  line-height:1.45;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  word-break:break-word;
+}
+
+.log-status-badge{
   flex:0 0 auto;
-  font-size:clamp(11px, .7vw, 13px);
-  color:var(--muted);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:calc(22px * var(--ui-scale));
+  padding:0 calc(8px * var(--ui-scale));
+  border-radius:999px;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
   white-space:nowrap;
+  border:1px solid rgba(180,139,94,.24);
+}
+
+.log-status-logged{
+  color:#8b5b34;
+  background:#fff5e7;
+}
+
+.log-status-needs_edit{
+  color:var(--red);
+  background:#fbeceb;
+}
+
+.log-status-resolved{
+  color:var(--green);
+  background:#eef6e8;
+}
+
+.profile-detail-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(76,54,34,.28);
+  pointer-events:auto;
+}
+
+.profile-detail-dialog{
+  width:min(760px, calc(100vw - 36px));
+  max-height:min(78vh, 720px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:rgba(255,249,240,.98);
+}
+
+.profile-detail-head{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:14px 16px 10px;
+  border-bottom:1px solid rgba(216,194,163,.72);
+}
+
+.profile-detail-head h3{
+  margin:0;
+  color:var(--title);
+  font-size:16px;
+  line-height:1.25;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+.profile-detail-close{
+  appearance:none;
+  border:none;
+  background:rgba(234,217,188,.72);
+  color:#6b4524;
+  border-radius:999px;
+  width:30px;
+  height:30px;
+  cursor:pointer;
+  font-size:18px;
+  line-height:1;
+  font-weight:900;
+}
+
+.profile-detail-content{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding:12px 16px;
+  scrollbar-width:thin;
+  scrollbar-color:#cfad82 rgba(255,255,255,.35);
+}
+
+.profile-detail-content::-webkit-scrollbar{ width:8px; }
+.profile-detail-content::-webkit-scrollbar-thumb{
+  background:#cfad82;
+  border-radius:999px;
+}
+
+.profile-detail-meta{
+  color:#7a6755;
+  font-size:13px;
+  line-height:1.55;
+  margin-bottom:10px;
+}
+
+.profile-detail-values{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.profile-detail-value-box{
+  border:1px solid rgba(216,194,163,.75);
+  border-radius:12px;
+  background:rgba(255,255,255,.56);
+  padding:10px;
+  min-width:0;
+}
+
+.profile-detail-label{
+  color:#8d755d;
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+
+.profile-detail-text{
+  color:#6b5a45;
+  font-size:13px;
+  line-height:1.58;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.profile-detail-actions{
+  flex:0 0 auto;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  padding:10px 16px 14px;
+  border-top:1px solid rgba(216,194,163,.72);
+}
+
+.profile-detail-actions .inline-btn,
+.profile-detail-actions .sub-btn{
+  height:34px;
+  min-width:90px;
+  padding:0 14px;
+  font-size:13px;
+}
+
+@media (max-width: 720px){
+  .profile-detail-values{
+    grid-template-columns:1fr;
+  }
 }
 
 /* ===== 宿管室轻动态：柔光 / 钥匙浮光 / 空气粒子 / 纸张切换 ===== */
@@ -1126,8 +1336,9 @@ body{
     left:25.8%;
     top:16.2%;
     width:48.8%;
-    height:58.5%;
-    padding-right:calc(8px * var(--ui-scale));
+    height:61.2%;
+    padding-right:0;
+    overflow:hidden;
   }
 
   #adminSwitchPanel{
@@ -1155,18 +1366,19 @@ body{
   }
 
   .card{
-    padding:calc(12px * var(--ui-scale)) calc(14px * var(--ui-scale));
-    margin-bottom:calc(10px * var(--ui-scale));
+    padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+    margin-bottom:0;
     border-radius:calc(16px * var(--ui-scale));
   }
 
   .section-title{
-    margin-bottom:calc(8px * var(--ui-scale));
-    font-size:calc(18px * var(--ui-scale));
+    margin-bottom:calc(6px * var(--ui-scale));
+    font-size:calc(17px * var(--ui-scale));
   }
 
   .admin-view-card{
-    min-height:100%;
+    height:100%;
+    min-height:0;
   }
 
   .admin-view-card > .admin-block{
@@ -1176,8 +1388,8 @@ body{
   }
 
   .admin-block{
-    padding:calc(12px * var(--ui-scale));
-    margin-top:calc(9px * var(--ui-scale));
+    padding:calc(9px * var(--ui-scale)) calc(10px * var(--ui-scale));
+    margin-top:calc(7px * var(--ui-scale));
     border-radius:calc(12px * var(--ui-scale));
   }
 
@@ -1186,12 +1398,21 @@ body{
     font-size:calc(14px * var(--ui-scale));
   }
 
+  .admin-block > .module-scroll,
+  .admin-block > .key-storage-box,
+  .key-storage-box > .key-list-wrap{
+    flex:1 1 auto;
+    min-height:0;
+  }
+
+  .profile-summary-item{
+    min-height:auto;
+  }
+
   .module-note,
   .apply-body,
   .apply-meta,
   .vote-summary,
-  .log-main,
-  .log-time,
   .key-list th,
   .key-list td,
   .key-empty,
@@ -1329,16 +1550,17 @@ body{
   }
 
   #pageNotice{
-    position:relative;
-    left:auto;
+    position:fixed;
+    left:50%;
+    top:50%;
     right:auto;
-    top:auto;
     bottom:auto;
-    width:100%;
-    max-width:100%;
-    order:1;
+    width:min(360px, calc(100vw - 28px));
+    max-width:calc(100vw - 28px);
     margin:0;
-    transform:none;
+    transform:translate(-50%, -50%);
+    z-index:3000;
+    font-size:13px;
   }
 
   #topBar,
@@ -1467,13 +1689,11 @@ body{
     max-height:unset;
   }
 
-  .apply-head,
-  .log-item{
+  .apply-head{
     flex-direction:column;
     gap:4px;
   }
 
-  .log-time,
   .apply-time{
     white-space:normal;
   }
@@ -1525,13 +1745,13 @@ body{
           <div id="navScroll">
             <nav id="roomNav">
               <button class="navBtn" data-room="hall" type="button" onclick="location.href='index.html'"><span class="navLabel">大堂</span><span class="navActiveNote navActiveNoteA">✦</span><span class="navActiveNote navActiveNoteB">✧</span><span class="navActiveNote navActiveNoteC">★</span></button>
-              <button class="navBtn" data-room="honor" type="button" onclick="location.href='honor.html'"><span class="navLabel">荣誉墙</span><span class="navActiveNote navActiveNoteA">🏆</span><span class="navActiveNote navActiveNoteB">🏅</span><span class="navActiveNote navActiveNoteC">✦</span></button>
-              <button class="navBtn" data-room="game" type="button" onclick="location.href='game.html'"><span class="navLabel">游戏房</span><span class="navActiveNote navActiveNoteA">🎮</span><span class="navActiveNote navActiveNoteB">🎲</span><span class="navActiveNote navActiveNoteC">👾</span></button>
-              <button class="navBtn" data-room="studio" type="button" onclick="goNeedLogin('studio-todo.html')"><span class="navLabel">工作间</span><span class="navActiveNote navActiveNoteA">🎙</span><span class="navActiveNote navActiveNoteB">🎧</span><span class="navActiveNote navActiveNoteC">◇</span></button>
               <button class="navBtn" data-room="living" type="button" onclick="goNeedLogin('living.html')"><span class="navLabel">客厅</span><span class="navActiveNote navActiveNoteA">☕</span><span class="navActiveNote navActiveNoteB">💬</span><span class="navActiveNote navActiveNoteC">♡</span></button>
+              <button class="navBtn" data-room="honor" type="button" onclick="location.href='honor.html'"><span class="navLabel">荣誉墙</span><span class="navActiveNote navActiveNoteA">🏆</span><span class="navActiveNote navActiveNoteB">🏅</span><span class="navActiveNote navActiveNoteC">✦</span></button>
+              <button class="navBtn" data-room="studio" type="button" onclick="goNeedLogin('studio-todo.html')"><span class="navLabel">工作间</span><span class="navActiveNote navActiveNoteA">🎙</span><span class="navActiveNote navActiveNoteB">🎧</span><span class="navActiveNote navActiveNoteC">◇</span></button>
+              <button class="navBtn" data-room="game" type="button" onclick="location.href='game.html'"><span class="navLabel">游戏房</span><span class="navActiveNote navActiveNoteA">🎮</span><span class="navActiveNote navActiveNoteB">🎲</span><span class="navActiveNote navActiveNoteC">👾</span></button>
               <button class="navBtn" data-room="dorm" type="button" onclick="goNeedLogin('dorm.html')"><span class="navLabel">宿舍</span><span class="navActiveNote navActiveNoteA">☁</span><span class="navActiveNote navActiveNoteB">☾</span><span class="navActiveNote navActiveNoteC">🛏</span></button>
-              <button class="navBtn" data-room="pets" type="button" onclick="goNeedLogin('pets.html')"><span class="navLabel">宠物区</span><span class="navActiveNote navActiveNoteA">🐾</span><span class="navActiveNote navActiveNoteB">♡</span><span class="navActiveNote navActiveNoteC">🐱</span></button>
               <button class="navBtn" data-room="flower" type="button" onclick="goNeedLogin('flower.html')"><span class="navLabel">花房区</span><span class="navActiveNote navActiveNoteA">✿</span><span class="navActiveNote navActiveNoteB">❀</span><span class="navActiveNote navActiveNoteC">🌸</span></button>
+              <button class="navBtn" data-room="pets" type="button" onclick="goNeedLogin('pets.html')"><span class="navLabel">宠物区</span><span class="navActiveNote navActiveNoteA">🐾</span><span class="navActiveNote navActiveNoteB">♡</span><span class="navActiveNote navActiveNoteC">🐱</span></button>
             </nav>
           </div>
         </div>
@@ -1539,11 +1759,11 @@ body{
 
       <aside id="managerBriefCard" class="panel" aria-label="宿管室说明">
         <h3 class="brief-title">宿管室说明</h3>
-        <p class="brief-text">这里是宿管专用的管理页，用来处理入住申请、宿管申请、钥匙保管和近期维修记录。</p>
+        <p class="brief-text">这里是宿管专用的管理页，用来处理入住申请、宿管申请、钥匙保管和档案修改确认。</p>
         <ul class="brief-list">
           <li>入住申请可在档案夹内投票处理。</li>
           <li>钥匙状态请以钥匙保管处为准。</li>
-          <li>维修日志用于回看近期处理记录。</li>
+          <li>维修日志用于确认成员档案修改。</li>
         </ul>
         <div class="brief-sign">宿管查看｜请谨慎操作</div>
       </aside>
@@ -1606,14 +1826,25 @@ body{
         <section class="card panel hidden admin-view-card" id="adminLogsCard">
           <h2 class="section-title">维修日志</h2>
 
-          <div class="admin-block">
-            <div id="recentLogList" class="log-list module-scroll">
-              <div class="module-note">正在读取近期记录…</div>
+          <div class="admin-block profile-review-block single-review-block">
+            <div id="profileChangeLogList" class="profile-summary-list module-scroll">
+              <div class="module-note">正在读取档案修改记录…</div>
             </div>
           </div>
         </section>
 
       </main>
+
+      <div id="profileDetailOverlay" class="profile-detail-overlay hidden" aria-hidden="true">
+        <div class="profile-detail-dialog panel" role="dialog" aria-modal="true" aria-labelledby="profileDetailTitle">
+          <div class="profile-detail-head">
+            <h3 id="profileDetailTitle">档案修改详情</h3>
+            <button class="profile-detail-close" type="button" onclick="closeProfileChangeDetail()">×</button>
+          </div>
+          <div id="profileDetailContent" class="profile-detail-content"></div>
+          <div id="profileDetailActions" class="profile-detail-actions"></div>
+        </div>
+      </div>
 
     </div>
   </div>
@@ -1647,14 +1878,13 @@ const adminArchiveCard = document.getElementById("adminArchiveCard");
 const adminKeysCard = document.getElementById("adminKeysCard");
 const adminLogsCard = document.getElementById("adminLogsCard");
 
-const contentArea = document.getElementById("contentArea");
 
 const keyStorageLoading = document.getElementById("keyStorageLoading");
 const keyStorageError = document.getElementById("keyStorageError");
 const keyStorageEmpty = document.getElementById("keyStorageEmpty");
 const keyListWrap = document.getElementById("keyListWrap");
 const keyListBody = document.getElementById("keyListBody");
-const recentLogList = document.getElementById("recentLogList");
+const profileChangeLogList = document.getElementById("profileChangeLogList");
 
 const pageNotice = document.getElementById("pageNotice");
 const pageNoticeText = document.getElementById("pageNoticeText");
@@ -1664,6 +1894,7 @@ let archiveLoaded = false;
 let logsLoaded = false;
 let activeAdminTab = "archive";
 let actionBusyMap = {};
+let profileChangeRows = [];
 
 function isTinyScreen(){
   return window.innerWidth <= 540;
@@ -1714,7 +1945,7 @@ function syncManagerUIToImage(){
   managerUI.style.width = `${displayWidth}px`;
   managerUI.style.height = `${displayHeight}px`;
 
-  const scale = Math.max(0.34, Math.min(1.42, displayWidth / 1440));
+  const scale = Math.max(0.34, Math.min(3.2, displayWidth / 1440));
   root.style.setProperty("--bg-ui-scale", String(scale));
 
   requestAnimationFrame(fitRoomNavToBar);
@@ -1731,9 +1962,6 @@ function fitRoomNavToBar(){
   roomNav.style.transform = `scale(${scale})`;
 }
 
-function isMediumScrollScreen(){
-  return window.innerWidth > 540 && (window.innerWidth <= 900 || window.innerHeight <= 760);
-}
 
 function getStoredUser(){
   const oldLoggedIn = localStorage.getItem("room10LoggedIn") === "true";
@@ -1962,6 +2190,197 @@ async function logout(){
   window.location.href = "manager-visitor.html";
 }
 
+
+function getCurrentMemberCode(){
+  return localStorage.getItem("room10MemberCode") || "";
+}
+
+function profileLogStatusLabel(status){
+  const value = String(status || "").toLowerCase();
+  if(value === "resolved") return "已通过";
+  if(value === "needs_edit" || value === "needs_revision") return "已提醒重改";
+  if(value === "logged" || value === "pending") return "待确认";
+  return value || "待确认";
+}
+
+function profileLogStatusClass(status){
+  const value = String(status || "").toLowerCase();
+  if(value === "resolved") return "resolved";
+  if(value === "needs_edit" || value === "needs_revision") return "needs_edit";
+  return "logged";
+}
+
+function profileLogValue(value){
+  const text = String(value ?? "").trim();
+  return text || "（空）";
+}
+
+function renderProfileSummaryItem(item, index){
+  const status = String(item.status || "logged").toLowerCase();
+  const field = item.field_label || item.field_key || "资料";
+  const nickname = item.nickname || "成员";
+  const title = `${nickname} 修改了「${field}」`;
+  const time = formatTime(item.time || item.created_at);
+  const hint = status === "logged" || status === "pending"
+    ? "点击查看详情并决定通过或提醒重新修改"
+    : "点击查看详情";
+
+  return `
+    <button class="profile-summary-item" type="button" onclick="openProfileChangeDetail(${index})">
+      <span class="profile-summary-title">${escapeHtml(title)}</span>
+      <span class="log-status-badge log-status-${profileLogStatusClass(status)}">${escapeHtml(profileLogStatusLabel(status))}</span>
+      <span class="profile-summary-meta">${escapeHtml(time)}｜${escapeHtml(hint)}</span>
+    </button>
+  `;
+}
+
+function openProfileChangeDetail(index){
+  const item = profileChangeRows[index];
+  if(!item) return;
+
+  const overlay = document.getElementById("profileDetailOverlay");
+  const titleEl = document.getElementById("profileDetailTitle");
+  const contentEl = document.getElementById("profileDetailContent");
+  const actionsEl = document.getElementById("profileDetailActions");
+
+  if(!overlay || !titleEl || !contentEl || !actionsEl) return;
+
+  const status = String(item.status || "logged").toLowerCase();
+  const canHandle = status === "logged" || status === "pending";
+  const busy = isActionBusy("profile", item.id);
+  const field = item.field_label || item.field_key || "资料";
+  const nickname = item.nickname || "成员";
+  const note = item.review_note ? `<div class="profile-detail-meta">处理备注：${escapeHtml(item.review_note)}</div>` : "";
+
+  titleEl.textContent = `${nickname} 修改了「${field}」`;
+
+  contentEl.innerHTML = `
+    <div class="profile-detail-meta">
+      当前状态：${escapeHtml(profileLogStatusLabel(status))}<br>
+      修改时间：${escapeHtml(formatTime(item.time || item.created_at))}<br>
+      说明：成员档案已直接保存。通过代表确认这次修改没问题，可以保留；重新修改会提醒成员调整。
+    </div>
+    ${note}
+    <div class="profile-detail-values">
+      <div class="profile-detail-value-box">
+        <div class="profile-detail-label">修改前</div>
+        <div class="profile-detail-text">${escapeHtml(profileLogValue(item.old_value))}</div>
+      </div>
+      <div class="profile-detail-value-box">
+        <div class="profile-detail-label">修改后</div>
+        <div class="profile-detail-text">${escapeHtml(profileLogValue(item.new_value))}</div>
+      </div>
+    </div>
+  `;
+
+  actionsEl.innerHTML = canHandle ? `
+    <button class="sub-btn" type="button" onclick="closeProfileChangeDetail()">先不处理</button>
+    <button class="inline-btn" type="button" ${busy ? "disabled" : ""} onclick="approveProfileChange('${escapeHtml(item.id)}')">通过</button>
+    <button class="sub-btn" type="button" ${busy ? "disabled" : ""} onclick="requestProfileRevision('${escapeHtml(item.id)}')">重新修改</button>
+  ` : `
+    <button class="sub-btn" type="button" onclick="closeProfileChangeDetail()">关闭</button>
+  `;
+
+  overlay.classList.remove("hidden");
+  overlay.setAttribute("aria-hidden", "false");
+}
+
+function closeProfileChangeDetail(){
+  const overlay = document.getElementById("profileDetailOverlay");
+  if(!overlay) return;
+  overlay.classList.add("hidden");
+  overlay.setAttribute("aria-hidden", "true");
+}
+
+async function approveProfileChange(logId){
+  if(!isAdminRole(getRole())){
+    showNotice("只有宿管或维修工可以处理资料修改记录。", "error");
+    return;
+  }
+  if(isActionBusy("profile", logId)) return;
+  setActionBusy("profile", logId, true);
+
+  try{
+    const reviewer = await getCurrentMemberRecord();
+    if(!reviewer?.id){
+      showNotice("未读取到当前处理人信息，请重新登录。", "error");
+      return;
+    }
+
+    const { data, error } = await client.rpc("resolve_profile_change_log", {
+      p_log_id: logId,
+      p_reviewer_member_id: reviewer.id,
+      p_reviewer_member_code: getCurrentMemberCode() || null,
+      p_review_note: "确认本次修改可以保留。"
+    });
+
+    if(error) throw error;
+    const result = Array.isArray(data) ? data[0] : data;
+    if(result && result.ok === false){
+      showNotice(result.message || "处理失败。", "error");
+      return;
+    }
+
+    logsLoaded = false;
+    await loadProfileReviewLogs(true);
+    closeProfileChangeDetail();
+    showNotice("已通过，本次档案修改可以保留。", "success");
+  }catch(err){
+    console.error("approveProfileChange() 异常：", err);
+    showNotice("处理失败，请检查 resolve_profile_change_log RPC。", "error");
+  }finally{
+    setActionBusy("profile", logId, false);
+  }
+}
+
+async function requestProfileRevision(logId){
+  if(!isAdminRole(getRole())){
+    showNotice("只有宿管或维修工可以提醒成员重新修改。", "error");
+    return;
+  }
+  if(isActionBusy("profile", logId)) return;
+
+  const note = window.prompt("请填写提醒成员重新修改的原因：", "请重新调整这项档案内容。") || "";
+  if(!note.trim()){
+    showNotice("已取消提醒。", "info");
+    return;
+  }
+
+  setActionBusy("profile", logId, true);
+
+  try{
+    const reviewer = await getCurrentMemberRecord();
+    if(!reviewer?.id){
+      showNotice("未读取到当前处理人信息，请重新登录。", "error");
+      return;
+    }
+
+    const { data, error } = await client.rpc("request_profile_change_revision", {
+      p_log_id: logId,
+      p_reviewer_member_id: reviewer.id,
+      p_reviewer_member_code: getCurrentMemberCode() || null,
+      p_review_note: note.trim()
+    });
+
+    if(error) throw error;
+    const result = Array.isArray(data) ? data[0] : data;
+    if(result && result.ok === false){
+      showNotice(result.message || "提醒失败。", "error");
+      return;
+    }
+
+    logsLoaded = false;
+    await loadProfileReviewLogs(true);
+    closeProfileChangeDetail();
+    showNotice("已提醒成员重新修改。", "success");
+  }catch(err){
+    console.error("requestProfileRevision() 异常：", err);
+    showNotice("提醒失败，请检查 request_profile_change_revision RPC。", "error");
+  }finally{
+    setActionBusy("profile", logId, false);
+  }
+}
+
 async function getCurrentMemberRecord(){
   const nickname = getCurrentUser();
   if(!nickname) return null;
@@ -2020,17 +2439,13 @@ function setAdminTab(tab){
     switchLogsBtn.classList.add("active");
     adminLogsCard.classList.remove("hidden");
     activeCard = adminLogsCard;
-    loadRecentLogs();
+    loadProfileReviewLogs(true);
   }
 
   if(activeCard){
     activeCard.classList.remove("tab-enter");
     void activeCard.offsetWidth;
     activeCard.classList.add("tab-enter");
-  }
-
-  if(isMediumScrollScreen()){
-    contentArea.scrollTo({ top: 0, behavior: "smooth" });
   }
 }
 
@@ -2341,81 +2756,71 @@ async function loadAllApplications(force = false){
   }
 }
 
-function renderRecentLogs(rows){
-  if(!rows.length){
-    recentLogList.innerHTML = `<div class="module-note">当前没有近期记录。</div>`;
+function renderProfileChangeLogs(rows, errorMessage = ""){
+  if(!profileChangeLogList) return;
+
+  if(errorMessage){
+    profileChangeRows = [];
+    profileChangeLogList.innerHTML = `<div class="module-note">${escapeHtml(errorMessage)}</div>`;
     return;
   }
 
-  recentLogList.innerHTML = rows.map(item => `
-    <div class="log-item">
-      <div class="log-main">${escapeHtml(item.text)}</div>
-      <div class="log-time">${formatTime(item.time)}</div>
-    </div>
-  `).join("");
+  profileChangeRows = Array.isArray(rows) ? rows : [];
+
+  if(!profileChangeRows.length){
+    profileChangeLogList.innerHTML = `<div class="module-note">当前没有需要确认的档案修改记录。</div>`;
+    return;
+  }
+
+  profileChangeLogList.innerHTML = profileChangeRows
+    .map((item, index) => renderProfileSummaryItem(item, index))
+    .join("");
 }
 
-async function loadRecentLogs(force = false){
+async function loadProfileReviewLogs(force = false){
   if(logsLoaded && !force) return;
 
-  recentLogList.innerHTML = `<div class="module-note">正在读取近期记录…</div>`;
+  if(profileChangeLogList){
+    profileChangeLogList.innerHTML = `<div class="module-note">正在读取档案修改记录…</div>`;
+  }
 
   try{
-    const memberResult = await client
-      .from("applications")
-      .select("name, status, created_at")
-      .in("status", ["approved", "rejected", "registered"])
-      .order("created_at", { ascending: false })
-      .limit(12);
+    const reviewer = await getCurrentMemberRecord();
 
-    const adminResult = await client
-      .from("admin_applications")
-      .select("nickname, status, created_at, updated_at")
-      .in("status", ["approved", "rejected", "cancelled"])
-      .order("updated_at", { ascending: false })
-      .limit(12);
-
-    let logs = [];
-
-    if(!memberResult.error){
-      logs = logs.concat((memberResult.data || []).map(item => {
-        let action = "申请状态已更新";
-        if(item.status === "approved") action = "入住申请已通过";
-        if(item.status === "rejected") action = "入住申请未通过";
-        if(item.status === "registered") action = "已完成正式登记";
-
-        return {
-          text: `${item.name || "未命名"}：${action}`,
-          time: item.created_at
-        };
-      }));
-    }else{
-      console.error("读取入住日志失败：", memberResult.error);
+    if(!reviewer?.id){
+      renderProfileChangeLogs([], "未读取到当前处理人信息，请重新登录后再查看档案修改记录。");
+      return;
     }
 
-    if(!adminResult.error){
-      logs = logs.concat((adminResult.data || []).map(item => {
-        let action = "宿管申请状态已更新";
-        if(item.status === "approved") action = "宿管申请已通过";
-        if(item.status === "rejected") action = "宿管申请未通过";
-        if(item.status === "cancelled") action = "取消了宿管申请";
+    const profileResult = await client.rpc("get_manager_profile_change_logs", {
+      p_reviewer_member_id: reviewer.id,
+      p_reviewer_member_code: getCurrentMemberCode() || null,
+      p_limit: 50
+    });
 
-        return {
-          text: `${item.nickname || "未命名"}：${action}`,
-          time: item.updated_at || item.created_at
-        };
-      }));
-    }else{
-      console.error("读取宿管日志失败：", adminResult.error);
+    if(profileResult.error){
+      console.error("读取资料修改日志失败：", profileResult.error);
+      renderProfileChangeLogs([], `档案修改记录读取失败：${profileResult.error.message || "请先执行配套 SQL 创建 get_manager_profile_change_logs。"}`);
+      return;
     }
 
-    logs.sort((a, b) => new Date(b.time) - new Date(a.time));
-    renderRecentLogs(logs.slice(0, 12));
+    let profileRows = profileResult.data || [];
+
+
+    const visibleProfileLogs = (profileRows || [])
+      .filter(item => ["logged", "pending", "needs_edit", "needs_revision", "resolved"].includes(String(item.status || "").toLowerCase()))
+      .map(item => ({
+        ...item,
+        type:"profile_change",
+        time:item.created_at
+      }));
+
+    renderProfileChangeLogs(visibleProfileLogs);
     logsLoaded = true;
 
   }catch(err){
-    console.error("loadRecentLogs() 异常：", err);
-    recentLogList.innerHTML = `<div class="module-note">近期记录读取失败</div>`;
+    console.error("loadProfileReviewLogs() 异常：", err);
+    renderProfileChangeLogs([], "档案修改记录读取失败，请稍后再试。");
   }
 }
 
@@ -2616,7 +3021,7 @@ async function voteMemberApplication(applicationId, voteValue){
       archiveLoaded = false;
       logsLoaded = false;
       await loadAllApplications(true);
-      await loadRecentLogs(true);
+      await loadProfileReviewLogs(true);
       return;
     }
 
@@ -2666,7 +3071,7 @@ async function voteMemberApplication(applicationId, voteValue){
     logsLoaded = false;
     keyListLoaded = false;
     await loadAllApplications(true);
-    await loadRecentLogs(true);
+    await loadProfileReviewLogs(true);
     if(activeAdminTab === "keys"){
       await loadKeyStorage(true);
     }
@@ -2801,7 +3206,7 @@ async function voteAdminApplication(applicationId, voteValue){
       archiveLoaded = false;
       logsLoaded = false;
       await loadAllApplications(true);
-      await loadRecentLogs(true);
+      await loadProfileReviewLogs(true);
       return;
     }
 
@@ -2855,7 +3260,7 @@ async function voteAdminApplication(applicationId, voteValue){
     archiveLoaded = false;
     logsLoaded = false;
     await loadAllApplications(true);
-    await loadRecentLogs(true);
+    await loadProfileReviewLogs(true);
 
     showNotice(finalized ? "投票已结算。" : "投票已保存，结算前可继续修改。", finalized ? "success" : "info");
 
@@ -2931,6 +3336,21 @@ document.addEventListener("click", event => {
     closeSiteNoticePanel();
   }
 });
+
+document.addEventListener("keydown", event => {
+  if(event.key === "Escape"){
+    closeProfileChangeDetail();
+  }
+});
+
+const profileDetailOverlay = document.getElementById("profileDetailOverlay");
+if(profileDetailOverlay){
+  profileDetailOverlay.addEventListener("click", event => {
+    if(event.target === profileDetailOverlay){
+      closeProfileChangeDetail();
+    }
+  });
+}
 
 ensureAdminPage();
 
