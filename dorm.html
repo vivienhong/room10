@@ -933,6 +933,76 @@ button{
 .ledgerAmount.in{color:#7aa02d;}
 .ledgerAmount.out{color:#d84f35;}
 
+.inventoryList{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding-right:4px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  align-content:start;
+  gap:10px;
+}
+
+.inventoryItem{
+  min-width:0;
+  border-radius:18px;
+  background:rgba(255,252,247,.64);
+  border:1px solid rgba(255,255,255,.58);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.68);
+  padding:13px;
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr);
+  gap:10px;
+  align-items:center;
+}
+
+.inventoryIcon{
+  width:34px;
+  height:34px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,246,231,.86);
+  border:1px solid rgba(201,140,79,.16);
+  font-size:18px;
+  overflow:hidden;
+  flex:0 0 34px;
+}
+
+.inventoryIcon img{
+  width:72%;
+  height:72%;
+  object-fit:contain;
+  display:block;
+}
+
+.inventoryIcon .inventoryEmoji{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+  line-height:1;
+}
+
+.inventoryName{
+  min-width:0;
+  color:#6f4726;
+  font-size:13px;
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.inventoryQty{
+  margin-left:5px;
+  color:#c27932;
+  font-weight:900;
+}
+
 .noticeCenter{
   flex:1 1 auto;
   min-height:0;
@@ -1028,11 +1098,23 @@ button{
   border-bottom:none;
 }
 
+.noticeRoomTitleLine{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:10px;
+  min-width:0;
+}
+
 .noticeRoomItemTitle{
+  min-width:0;
   color:#6f4726;
   font-size:13px;
   font-weight:900;
   line-height:1.45;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .noticeRoomItemDesc{
@@ -1045,10 +1127,11 @@ button{
 }
 
 .noticeRoomTime{
-  margin-top:3px;
+  flex:0 0 auto;
   color:#b18a65;
   font-size:10px;
   font-weight:800;
+  white-space:nowrap;
 }
 
 .emptyText,.errorText{
@@ -1162,19 +1245,24 @@ button{
   min-width:0;
   display:flex;
   align-items:center;
-  gap:9px;
+  flex-wrap:wrap;
+  column-gap:9px;
+  row-gap:2px;
   color:#92745a;
   font-size:12px;
   line-height:1.35;
   font-weight:800;
-  white-space:nowrap;
-  overflow:hidden;
+  white-space:normal;
+  overflow:visible;
 }
 
 .taskMetaInline span{
+  flex:0 1 auto;
+  max-width:100%;
   min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  white-space:nowrap;
+  overflow:visible;
+  text-overflow:clip;
 }
 
 .taskCompactLine .taskActionRow{
@@ -1724,6 +1812,10 @@ button{
     padding:calc(7px * var(--ui-scale)) 0;
   }
 
+  .noticeRoomTitleLine{
+    gap:calc(8px * var(--ui-scale));
+  }
+
   .noticeRoomItemTitle{
     font-size:calc(12px * var(--ui-scale));
   }
@@ -1741,6 +1833,7 @@ button{
 
 
   #view-tasks .sectionTitle,
+  #view-inventory .sectionTitle,
   #view-profile .sectionTitle{
     margin:0 0 calc(5px * var(--ui-scale));
     font-size:calc(18px * var(--ui-scale));
@@ -1749,6 +1842,7 @@ button{
   }
 
   #view-tasks .sectionDesc,
+  #view-inventory .sectionDesc,
   #view-profile .sectionDesc{
     margin:0 0 calc(8px * var(--ui-scale));
     font-size:calc(10.5px * var(--ui-scale));
@@ -1760,6 +1854,30 @@ button{
   .profileScroll{
     gap:calc(7px * var(--ui-scale));
     padding-right:calc(5px * var(--ui-scale));
+  }
+
+  .inventoryList{
+    gap:calc(7px * var(--ui-scale));
+    padding-right:calc(5px * var(--ui-scale));
+    grid-template-columns:repeat(auto-fill,minmax(calc(120px * var(--ui-scale)),1fr));
+  }
+
+  .inventoryItem{
+    grid-template-columns:calc(28px * var(--ui-scale)) minmax(0,1fr);
+    gap:calc(8px * var(--ui-scale));
+    padding:calc(10px * var(--ui-scale));
+    border-radius:calc(14px * var(--ui-scale));
+  }
+
+  .inventoryIcon{
+    width:calc(28px * var(--ui-scale));
+    height:calc(28px * var(--ui-scale));
+    border-radius:calc(10px * var(--ui-scale));
+    font-size:calc(15px * var(--ui-scale));
+  }
+
+  .inventoryName{
+    font-size:calc(12px * var(--ui-scale));
   }
 
   .taskCard,
@@ -1978,7 +2096,8 @@ button{
   }
 
   .taskMetaInline{
-    gap:6px;
+    column-gap:6px;
+    row-gap:1px;
     font-size:9.4px;
   }
 
@@ -2231,9 +2350,14 @@ button{
   }
 
   .ledgerList,
-  .noticeCenter{
+  .noticeCenter,
+  .inventoryList{
     overflow:visible;
     padding-right:0;
+  }
+
+  .inventoryList{
+    grid-template-columns:1fr;
   }
 
   .walletLedgerHead .sectionTitle{
@@ -2397,6 +2521,7 @@ button{
         <button class="sideBtn active" data-view="tasks"><span class="sideIcon">📮</span>我的任务</button>
         <button class="sideBtn" data-view="notice"><span class="sideIcon">💌</span>系统通知</button>
         <button class="sideBtn" data-view="wallet"><span class="sideIcon">🪙</span>钱包记录</button>
+        <button class="sideBtn" data-view="inventory"><span class="sideIcon">🎒</span>我的背包</button>
         <button class="sideBtn" data-view="profile"><span class="sideIcon">📇</span>我的档案</button>
 
         <div id="mascotBox">
@@ -2449,9 +2574,15 @@ button{
 
         <div class="view" id="view-notice">
           <h2 class="sectionTitle">系统通知</h2>
-          <p class="sectionDesc">这里集中显示需要跳转处理的提醒；默认收起，点击分类查看。</p>
           <div class="noticeCenter" id="dormNoticeCenter">
             <div class="emptyText">正在整理系统通知……</div>
+          </div>
+        </div>
+
+        <div class="view" id="view-inventory">
+          <h2 class="sectionTitle">我的背包</h2>
+          <div class="inventoryList" id="inventoryList">
+            <div class="emptyText">正在读取我的道具……</div>
           </div>
         </div>
 
@@ -2518,6 +2649,8 @@ let honorSummaryState = null;
 let dormTaskRows = [];
 let activeDormTaskTab = "vocal_submit";
 const recentDormTaskActions = new Map();
+const DORM_ACTIVE_VIEW_KEY = "room10DormActiveView";
+const DORM_VIEW_KEYS = new Set(["tasks","notice","wallet","inventory","profile"]);
 
 const mascotLines = [
   { text:"在做了在做了", style:"work" },
@@ -2537,7 +2670,6 @@ const mascotLines = [
 const roomNoticeGroups = [
   { key:"studio", label:"工作间", icon:"🎙" },
   { key:"manager", label:"宿管室", icon:"✎" },
-  { key:"honor", label:"荣誉墙", icon:"🏆" },
   { key:"game", label:"游戏房", icon:"🎮" },
   { key:"flower", label:"花房区", icon:"✿" },
   { key:"pets", label:"宠物区", icon:"🐾" }
@@ -2669,6 +2801,13 @@ function formatDate(value){
   return `${d.getMonth()+1}/${d.getDate()}`;
 }
 
+function cleanNoticeSongText(value){
+  return String(value ?? "")
+    .replace(/《\s*(?:编号|项目编号|歌曲编号)?\s*[A-Za-z]*\d+[.．。]\s*([^》]+?)\s*》/g,"《$1》")
+    .replace(/(^|[：:\s])(?:编号|项目编号|歌曲编号)?\s*[A-Za-z]*\d+[.．。]\s*(?=《)/g,"$1")
+    .replace(/(^|[：:\s])(?:编号|项目编号|歌曲编号)[.．。]\s*(?=《)/g,"$1");
+}
+
 function isToday(value){
   const d = new Date(value);
   if(Number.isNaN(d.getTime())) return false;
@@ -2785,11 +2924,6 @@ function noticeRoomKey(value){
     projects:"studio",
     manager:"manager",
     admin:"manager",
-    honor:"honor",
-    honour:"honor",
-    achievement:"honor",
-    title:"honor",
-    titles:"honor",
     game:"game",
     games:"game",
     pet:"pets",
@@ -2806,10 +2940,13 @@ function noticeRoomKey(value){
 function normalizeNoticeItem(item){
   const roomKey = noticeRoomKey(item.room || item.room_key || item.roomKey || item.category || item.notice_room || item.source_room);
 
+  const rawTitle = item.title || item.notice_title || item.subject || item.name || "系统通知";
+  const rawDesc = item.desc || item.description || item.content || item.message || item.body || item.notice_content || "";
+
   return {
     room:roomKey,
-    title:item.title || item.notice_title || item.subject || item.name || "系统通知",
-    desc:item.desc || item.description || item.content || item.message || item.body || item.notice_content || "",
+    title:cleanNoticeSongText(rawTitle),
+    desc:cleanNoticeSongText(rawDesc),
     created_at:item.created_at || item.createdAt || item.updated_at || item.time || null
   };
 }
@@ -2858,9 +2995,11 @@ function renderDormNoticeCenter(items){
         const time = item.created_at ? formatDate(item.created_at) : "";
         return `
           <div class="noticeRoomItem">
-            <div class="noticeRoomItemTitle">${escapeHtml(item.title || "通知")}</div>
+            <div class="noticeRoomTitleLine">
+              <div class="noticeRoomItemTitle">${escapeHtml(item.title || "通知")}</div>
+              ${time ? `<div class="noticeRoomTime">${escapeHtml(time)}</div>` : ""}
+            </div>
             <div class="noticeRoomItemDesc">${escapeHtml(desc)}</div>
-            ${time ? `<div class="noticeRoomTime">${escapeHtml(time)}</div>` : ""}
           </div>
         `;
       }).join("")
@@ -2896,25 +3035,46 @@ async function fetchSystemNoticesByRpc(){
 }
 
 async function loadSystemNotices(){
+  const wrap = document.getElementById("dormNoticeCenter");
+  if(!wrap) return;
+
+  if(!authState.memberId || !authState.memberCode){
+    wrap.innerHTML = '<div class="errorText">请先登录后查看系统通知。</div>';
+    return;
+  }
+
   try{
+    /*
+      通知可见权限统一交给 get_room10_system_notifications RPC 处理。
+      前端不再按 localStorage 里的 role 做二次过滤，避免以下情况误删通知：
+      1. localStorage 角色缓存旧了；
+      2. owner 需要看到 creator/owner 类管理通知；
+      3. 数据库已经判定可见，但前端角色别名不一致。
+    */
     const rows = await fetchSystemNoticesByRpc();
-    const visibleItems = rows.filter(noticeVisibleToCurrentUser).map(normalizeNoticeItem);
-    renderDormNoticeCenter(visibleItems);
+    renderDormNoticeCenter(rows);
   }catch(error){
     console.error(error);
-    const wrap = document.getElementById("dormNoticeCenter");
-    if(wrap){
-      wrap.innerHTML = '<div class="errorText">系统通知读取失败，请检查 get_room10_system_notifications RPC 或 RLS 权限。</div>';
-    }
+    wrap.innerHTML = '<div class="errorText">系统通知读取失败，请检查 get_room10_system_notifications RPC 或 RLS 权限。</div>';
   }
 }
 
-function activateDormView(target){
+function activateDormView(target, saveState=true){
+  const nextView = DORM_VIEW_KEYS.has(target) ? target : "tasks";
   const buttons = document.querySelectorAll(".sideBtn");
   const views = document.querySelectorAll(".view");
 
-  buttons.forEach(item => item.classList.toggle("active", item.dataset.view === target));
-  views.forEach(view => view.classList.toggle("active", view.id === `view-${target}`));
+  buttons.forEach(item => item.classList.toggle("active", item.dataset.view === nextView));
+  views.forEach(view => view.classList.toggle("active", view.id === `view-${nextView}`));
+
+  if(saveState){
+    localStorage.setItem(DORM_ACTIVE_VIEW_KEY,nextView);
+  }
+}
+
+function restoreDormView(){
+  const saved = localStorage.getItem(DORM_ACTIVE_VIEW_KEY) || "tasks";
+  activateDormView(saved,false);
 }
 
 function jumpToSystemNotice(){
@@ -2940,7 +3100,14 @@ function taskTabKey(type){
 
 function taskToneText(task){
   const tone = String(task.project_tone || "").trim();
-  return tone ? `调：${escapeHtml(tone)}` : "";
+  if(!tone) return "";
+
+  const key = taskTabKey(task.task_type);
+  if(key === "vocal_submit" || key === "mix_submit"){
+    return escapeHtml(tone);
+  }
+
+  return `调：${escapeHtml(tone)}`;
 }
 
 function taskDateLine(task){
@@ -2948,7 +3115,7 @@ function taskDateLine(task){
 }
 
 function taskOriginalLine(task){
-  return task.my_original_names ? `原唱：${escapeHtml(task.my_original_names)}` : "";
+  return task.my_original_names ? `你负责：${escapeHtml(task.my_original_names)}` : "";
 }
 
 function taskSingerNeedLine(task){
@@ -3027,9 +3194,18 @@ function taskMetaItems(task){
   return items;
 }
 
+function formatTaskTitle(task){
+  const rawCode = String(task.project_code || "").trim();
+  const name = escapeHtml(task.project_name || "未命名项目");
+
+  if(!rawCode) return name;
+
+  const code = escapeHtml(rawCode.replace(/[.．。\s]+$/g,""));
+  return `${code}.${name}`;
+}
+
 function taskCardHtml(task){
-  const code = task.project_code ? `${escapeHtml(task.project_code)} ` : "";
-  const title = `${code}${escapeHtml(task.project_name || "未命名项目")}`;
+  const title = formatTaskTitle(task);
   const mainButton = taskMainButtonHtml(task);
   const metaItems = taskMetaItems(task);
 
@@ -3320,12 +3496,20 @@ async function loadGoldInfo(){
   }
 
   currentMemberProfile = member;
+  authState.memberId = member.id || authState.memberId;
+  authState.memberCode = member.member_code || authState.memberCode;
   authState.nickname = member.nickname || authState.nickname;
   authState.role = member.role || authState.role;
+
+  if(authState.memberId) localStorage.setItem(STORAGE_KEYS.memberId, authState.memberId);
+  if(authState.memberCode) localStorage.setItem(STORAGE_KEYS.memberCode, authState.memberCode);
+  if(authState.nickname) localStorage.setItem(STORAGE_KEYS.user, authState.nickname);
+  if(authState.role) localStorage.setItem(STORAGE_KEYS.role, authState.role);
 
   updateIdentity(member);
   renderProfileView(member);
   loadHonorSummary(member.id);
+  loadInventory();
 
   setText("walletTitle",`${member.nickname || "成员"}的钱包记录`);
   setText("goldSub","金币余额与最近收支记录集中显示");
@@ -3389,6 +3573,143 @@ async function loadGoldLedger(memberId){
       </div>
     `;
   }).join("");
+}
+
+
+/* =========================================================
+   我的背包
+========================================================= */
+function itemValue(item,keys){
+  for(const key of keys){
+    const value = item?.[key];
+    if(value !== null && value !== undefined && String(value).trim() !== "") return value;
+  }
+  return "";
+}
+
+function itemDisplayName(item){
+  return itemValue(item,["item_name","name","title","display_name","item_key","item_code","code","resource_name","resource_key"]) || "未命名道具";
+}
+
+function itemQuantity(item){
+  const value = itemValue(item,["quantity","qty","count","amount","item_count","balance","total"]);
+  const number = Number(value || 0);
+  return Number.isFinite(number) ? number : 0;
+}
+
+function itemSortOrder(item){
+  const number = Number(item?.sort_order ?? 9999);
+  return Number.isFinite(number) ? number : 9999;
+}
+
+function inventoryFallbackEmoji(item){
+  const key = String(`${item?.item_key || ""} ${item?.item_name || ""} ${item?.name || ""}`).toLowerCase();
+  if(key.includes("water") || key.includes("水")) return "💧";
+  if(key.includes("fertilizer") || key.includes("肥")) return "🌱";
+  if(key.includes("seed") || key.includes("种子")) return "🌰";
+  if(key.includes("flower") || key.includes("花")) return "🌸";
+  if(key.includes("pet") || key.includes("宠")) return "🐾";
+  if(key.includes("card") || key.includes("ticket") || key.includes("券") || key.includes("卡")) return "🎫";
+  if(key.includes("gift") || key.includes("box") || key.includes("礼包")) return "🎁";
+  return "🎒";
+}
+
+function itemIconHtml(item){
+  const rawIcon = String(itemValue(item,["item_icon","icon","emoji"])).trim();
+  const fallback = inventoryFallbackEmoji(item);
+
+  if(!rawIcon){
+    return `<span class="inventoryEmoji">${escapeHtml(fallback)}</span>`;
+  }
+
+  if(/^https?:\/\//i.test(rawIcon) || /\.(png|jpe?g|gif|webp|svg)$/i.test(rawIcon)){
+    const safeSrc = escapeHtml(rawIcon);
+    const safeFallback = escapeHtml(fallback);
+    return `<img src="${safeSrc}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'inventoryEmoji',textContent:'${safeFallback}'}))">`;
+  }
+
+  if(rawIcon.length <= 4){
+    return `<span class="inventoryEmoji">${escapeHtml(rawIcon)}</span>`;
+  }
+
+  return `<span class="inventoryEmoji">${escapeHtml(fallback)}</span>`;
+}
+
+function mergeInventoryRows(memberItems,itemTypes){
+  const typeMap = new Map((Array.isArray(itemTypes) ? itemTypes : []).map(type => [String(type.item_key), type]));
+
+  return (Array.isArray(memberItems) ? memberItems : []).map(row => ({
+    ...row,
+    ...(typeMap.get(String(row.item_key)) || {})
+  }));
+}
+
+function renderInventory(items){
+  const wrap = document.getElementById("inventoryList");
+  if(!wrap) return;
+
+  const rows = (Array.isArray(items) ? items : [])
+    .map(item => ({ item, qty:itemQuantity(item) }))
+    .filter(row => row.qty > 0)
+    .sort((a,b) => itemSortOrder(a.item) - itemSortOrder(b.item));
+
+  if(!rows.length){
+    wrap.innerHTML = '<div class="emptyText">当前背包暂无道具。</div>';
+    return;
+  }
+
+  wrap.innerHTML = rows.map(({ item, qty }) => `
+    <div class="inventoryItem">
+      <div class="inventoryIcon">${itemIconHtml(item)}</div>
+      <div>
+        <div class="inventoryName">${escapeHtml(itemDisplayName(item))}<span class="inventoryQty">×${qty}</span></div>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function loadInventory(){
+  const wrap = document.getElementById("inventoryList");
+  if(!wrap) return;
+
+  const memberId = currentMemberProfile?.id || authState.memberId;
+  if(!memberId){
+    wrap.innerHTML = '<div class="errorText">请先登录后查看我的背包。</div>';
+    return;
+  }
+
+  wrap.innerHTML = '<div class="emptyText">正在读取我的道具……</div>';
+
+  try{
+    const { data:memberItems,error:itemError } = await supabaseClient
+      .from("member_items")
+      .select("item_key,quantity,updated_at")
+      .eq("member_id",memberId)
+      .order("updated_at",{ ascending:false });
+
+    if(itemError) throw itemError;
+
+    const itemKeys = Array.from(new Set((memberItems || []).map(item => item.item_key).filter(Boolean)));
+    let itemTypes = [];
+
+    if(itemKeys.length){
+      const { data:typeRows,error:typeError } = await supabaseClient
+        .from("item_types")
+        .select("item_key,item_name,item_category,item_desc,item_icon,is_active,sort_order")
+        .in("item_key",itemKeys);
+
+      if(typeError){
+        console.warn("item_types 读取失败，背包将先显示 item_key。", typeError);
+      }else{
+        itemTypes = (Array.isArray(typeRows) ? typeRows : []).filter(item => item.is_active !== false);
+      }
+    }
+
+    renderInventory(mergeInventoryRows(memberItems,itemTypes));
+  }catch(error){
+    console.error(error);
+    wrap.innerHTML = `<div class="errorText">背包读取失败：${escapeHtml(error.message || "请检查 member_items / item_types 读取权限。")}</div>`;
+  }
 }
 
 
@@ -3638,7 +3959,7 @@ function standardSkillName(raw){
 
   const found = aliases.find(group => group.values.some(item => item.toLowerCase() === value));
   if(found) return { input:raw.trim(), matched:found.name, status:"matched" };
-  return { input:raw.trim(), matched:"", status:"pending" };
+  return { input:raw.trim(), matched:"", status:"unmatched" };
 }
 
 function collectProfilePayload(){
@@ -3691,7 +4012,7 @@ function diffProfileFields(oldMember,payload){
         old_value:stringifyFieldValue(oldValue),
         new_value:stringifyFieldValue(newValue),
         change_type:"profile_update",
-        status:"pending"
+        status:"logged"
       });
     }
   });
@@ -3710,7 +4031,7 @@ async function logProfileChanges(changes){
     old_value:item.old_value,
     new_value:item.new_value,
     change_type:item.change_type || "profile_update",
-    status:item.status || "pending"
+    status:item.status || "logged"
   }));
 
   try{
@@ -3776,22 +4097,22 @@ async function saveProfileEdit(){
           old_value:currentSkills.join("、"),
           new_value:nextSkills.join("、"),
           change_type:"skill_auto_matched",
-          status:"pending"
+          status:"logged"
         });
         skillMessage = `“${skillMatch.input}”已归并为正式技能「${skillMatch.matched}」。`;
       }else{
         skillMessage = `你已经有正式技能「${skillMatch.matched}」。`;
       }
-    }else if(skillMatch.status === "pending"){
+    }else if(skillMatch.status === "unmatched"){
       changes.push({
         field_key:"skill_request",
         field_label:"新增技能申请",
         old_value:"",
         new_value:skillMatch.input,
         change_type:"skill_request",
-        status:"pending"
+        status:"logged"
       });
-      skillMessage = `“${skillMatch.input}”已作为新增技能申请，等待宿管确认。`;
+      skillMessage = `“${skillMatch.input}”已记录给宿管查看，后续如需调整会提醒你。`;
     }
 
     if(!changes.length){
@@ -3886,7 +4207,7 @@ function setMascotBubbleOnce(){
 /* =========================================================
    初始化
 ========================================================= */
-document.addEventListener("DOMContentLoaded", () => {
+async function initDormPage(){
   if(!readLocalAuth()) return;
 
   updateIdentity({
@@ -3895,10 +4216,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   bindSideTabs();
+  restoreDormView();
   bindDormTaskActions();
-  loadGoldInfo();
-  loadSystemNotices();
-  loadDormTasks();
   setMascotBubbleOnce();
 
   if(siteNoticeBtn){
@@ -3923,6 +4242,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   syncOverlayToImage();
+
+  /*
+    先读取 members 表，回填 member_code / role / nickname 后，
+    再读取系统通知和我的任务。
+    这样即使登录缓存里缺少 room10MemberCode，也不会被误判为未登录。
+  */
+  await loadGoldInfo();
+
+  await Promise.all([
+    loadSystemNotices(),
+    loadDormTasks()
+  ]);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initDormPage();
 });
 
 window.addEventListener("resize", syncOverlayToImage);
