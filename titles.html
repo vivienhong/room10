@@ -1,269 +1,2480 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>十号房｜称号页</title>
+<title>十号房｜成就称号馆</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{box-sizing:border-box;}
 
+:root{
+  --bg-ui-scale:1;
+
+  --identity-right:7.35%;
+  --identity-top:6.46%;
+  --identity-width:calc(232px * var(--bg-ui-scale));
+  --identity-height:calc(38px * var(--bg-ui-scale));
+
+  --room-nav-left:27.2%;
+  --room-nav-top:6.35%;
+  --room-nav-width:45.5%;
+
+  /* 主面板坐标绑定底图实际显示区域：全站统一规则，不按分辨率单独改坐标 */
+  --honor-panel-left:20.4%;
+  --honor-panel-top:27.2%;
+  --honor-panel-width:61.8%;
+  --honor-panel-height:64.4%;
+
+  --identity-bg:rgba(255,248,239,0.92);
+  --identity-inner-bg:rgba(255,252,247,0.96);
+  --identity-border:rgba(186,146,103,0.24);
+  --identity-text:#6c4523;
+  --identity-shadow:rgba(116,86,54,0.12);
+
+  --nav-text:#6e4827;
+  --nav-border:rgba(145,98,56,.34);
+
+  --panel-border:rgba(198,145,79,.24);
+  --card-border:rgba(170,122,82,.16);
+  --brown:#6f4726;
+  --brown-soft:#9b7656;
+  --gold:#c98c4f;
+  --green:#72855a;
+}
+
 html,body{
   margin:0;
-  padding:0;
   width:100%;
-  min-height:100%;
-  font-family:Arial, Helvetica, sans-serif;
-  color:#5b4632;
+  height:100%;
+  overflow:hidden;
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left,#f5ecdb 0%,transparent 44%),
+    linear-gradient(180deg,#efe2cc 0%,#e9d8bd 100%);
+  color:var(--brown);
 }
 
 body{
-  min-height:100vh;
-  min-height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+button{font-family:inherit;}
+.hidden{display:none !important;}
+
+#room{
   position:relative;
-  overflow-x:hidden;
-  background:
-    linear-gradient(rgba(245,240,232,0.72), rgba(232,223,209,0.78)),
-    url("room-titles.png") center center / cover no-repeat fixed;
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  overflow:hidden;
 }
 
-body::before{
-  content:"";
-  position:fixed;
+#bgFrame{
+  position:absolute;
   inset:0;
-  background:rgba(255,255,255,0.14);
-  pointer-events:none;
   z-index:0;
+  overflow:hidden;
 }
 
-.page{
+#bg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center center;
+  display:block;
+  user-select:none;
+  pointer-events:none;
+  -webkit-user-drag:none;
+}
+
+#overlay{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  z-index:2;
+  overflow:visible;
+  pointer-events:none;
+  --ui-scale:var(--bg-ui-scale, 1);
+}
+
+#overlay *{pointer-events:auto;}
+
+/* =========================================================
+   身份组件：复制最满意版最终呈现结构
+========================================================= */
+#topActions{
+  position:absolute;
+  right:var(--identity-right);
+  top:var(--identity-top);
+  width:var(--identity-width);
+  height:var(--identity-height);
+  min-width:0;
+  min-height:0;
+  z-index:65;
+  pointer-events:none;
+}
+
+#topIdentityBar{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:stretch;
+  justify-content:flex-start;
+  gap:calc(5px * var(--ui-scale));
+  padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
+  border-radius:calc(13px * var(--ui-scale));
+  background:var(--identity-bg);
+  border:1px solid var(--identity-border);
+  box-shadow:
+    0 calc(10px * var(--ui-scale)) calc(24px * var(--ui-scale)) var(--identity-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  pointer-events:auto;
+  overflow:visible;
+  white-space:nowrap;
+}
+
+#topIdentityBadge,
+#loginOpenBtn,
+#logoutBtn,
+#siteNoticeBtn{
+  border-radius:calc(9px * var(--ui-scale));
+  background:var(--identity-inner-bg);
+  color:var(--identity-text);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 1px 4px rgba(112,83,52,0.05);
+  border:1px solid rgba(160,116,78,0.12);
+}
+
+#topIdentityBadge{
+  flex:1 1 auto;
+  min-width:0;
+  padding:0 calc(8px * var(--ui-scale));
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  white-space:nowrap;
+}
+
+#topIdentityBadge .identityText{
+  min-width:0;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  line-height:normal;
+  padding-top:.06em;
+}
+
+#loginOpenBtn,
+#logoutBtn{
+  appearance:none;
+  cursor:pointer;
+  width:calc(42px * var(--ui-scale));
+  min-width:calc(42px * var(--ui-scale));
+  flex:0 0 calc(42px * var(--ui-scale));
+  padding:0;
+  color:#67401f;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:800;
+  line-height:normal;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding-top:.06em;
+  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+  overflow:hidden;
+  white-space:nowrap;
+}
+
+#loginOpenBtn:hover,
+#logoutBtn:hover,
+#siteNoticeBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,0.94);
+}
+
+#siteNoticeWrap{
+  position:relative;
+  width:calc(30px * var(--ui-scale));
+  min-width:calc(30px * var(--ui-scale));
+  flex:0 0 calc(30px * var(--ui-scale));
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  overflow:visible;
+}
+
+#siteNoticeBtn{
+  appearance:none;
+  cursor:pointer;
+  position:relative;
+  width:100%;
+  height:100%;
+  padding:0;
+  font-size:calc(14px * var(--ui-scale));
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+#siteNoticeIcon{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
+}
+
+/* =========================================================
+   房间切换按钮：当前页面不显示“荣誉墙”
+========================================================= */
+#topBar{
+  position:absolute;
+  left:var(--room-nav-left);
+  top:var(--room-nav-top);
+  width:var(--room-nav-width);
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  z-index:55;
+  overflow:visible;
+  pointer-events:none;
+
+  --nav-btn-height:calc(40px * var(--ui-scale));
+  --nav-btn-px:calc(16px * var(--ui-scale));
+  --nav-btn-radius:calc(13px * var(--ui-scale));
+  --nav-btn-font:calc(14px * var(--ui-scale));
+  --nav-gap:calc(8px * var(--ui-scale));
+}
+
+#navOuter,#navScroll{overflow:visible;}
+#navOuter{flex:0 0 auto;min-width:0;width:100%;pointer-events:auto;}
+#navScroll{width:100%;white-space:nowrap;padding:0;margin:0;}
+
+#roomNav{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--nav-gap);
+  transform-origin:left center;
+}
+
+.navBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  position:relative;
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:var(--nav-btn-height);
+  padding:0 var(--nav-btn-px);
+  border-radius:var(--nav-btn-radius);
+  color:var(--nav-text);
+  font-size:var(--nav-btn-font);
+  font-weight:900;
+  white-space:nowrap;
+  overflow:visible;
+  isolation:isolate;
+  background:
+    linear-gradient(180deg, rgba(249,232,203,.90) 0%, rgba(226,195,152,.86) 100%);
+  border:1px solid var(--nav-border);
+  box-shadow:
+    0 1px 1px rgba(255,255,255,.48) inset,
+    0 2px 5px rgba(91,68,45,.13);
+  text-shadow:0 1px 0 rgba(255,255,255,.42);
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    color .18s ease,
+    filter .18s ease;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+.navBtn:hover,
+.navBtn:focus-visible{
+  color:#5f3d22;
+  background:
+    linear-gradient(180deg, rgba(252,238,215,.95) 0%, rgba(232,205,166,.90) 100%);
+  border-color:rgba(153,102,55,.48);
+  box-shadow:
+    0 1px 1px rgba(255,255,255,.55) inset,
+    0 3px 7px rgba(91,68,45,.15);
+  filter:brightness(1.015);
+}
+
+.navLabel{
+  position:relative;
+  z-index:5;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  max-width:100%;
+  height:100%;
+  overflow:visible;
+  white-space:nowrap;
+  line-height:normal;
+  padding-top:.06em;
+}
+
+.navEffect{
+  position:absolute;
+  pointer-events:none;
+  opacity:0;
+  z-index:4;
+  display:block;
+  font-weight:900;
+  line-height:1;
+  text-shadow:
+    0 1px 2px rgba(255,250,232,.82),
+    0 0 8px rgba(255,246,210,.52);
+  filter:saturate(.95);
+}
+
+.navEffectA{left:8%;top:-54%;font-size:calc(var(--nav-btn-font) * .92);}
+.navEffectB{right:8%;top:-62%;font-size:calc(var(--nav-btn-font) * .86);}
+.navEffectC{left:50%;top:-72%;transform:translateX(-50%);font-size:calc(var(--nav-btn-font) * 1.02);}
+
+@keyframes navFloatA{
+  0%,100%{ transform:translateY(4px) rotate(-8deg) scale(.82); opacity:0; }
+  20%,72%{ opacity:.86; }
+  50%{ transform:translateY(-5px) rotate(6deg) scale(1); opacity:.76; }
+}
+
+@keyframes navFloatB{
+  0%,100%{ transform:translateY(5px) rotate(9deg) scale(.78); opacity:0; }
+  24%,70%{ opacity:.78; }
+  52%{ transform:translateY(-6px) rotate(-7deg) scale(1); opacity:.68; }
+}
+
+@keyframes navFloatC{
+  0%,100%{ transform:translateX(-50%) translateY(6px) rotate(0deg) scale(.76); opacity:0; }
+  24%,70%{ opacity:.88; }
+  50%{ transform:translateX(-50%) translateY(-6px) rotate(2deg) scale(1); opacity:.78; }
+}
+
+.navBtn:hover .navEffectA,
+.navBtn:focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite;}
+.navBtn:hover .navEffectB,
+.navBtn:focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite;}
+.navBtn:hover .navEffectC,
+.navBtn:focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite;}
+
+.navBtn[data-room="hall"] .navEffect{
+  color:rgba(255,205,96,.86);
+  text-shadow:
+    0 1px 2px rgba(255,250,232,.95),
+    0 0 10px rgba(255,215,105,.62);
+}
+
+.navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82);}
+.navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82);}
+.navBtn[data-room="studio"] .navEffect{color:rgba(96,112,145,.84);}
+.navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82);}
+.navBtn[data-room="dorm"] .navEffect{color:rgba(148,112,171,.78);}
+.navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82);}
+.navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82);}
+
+/* =========================================================
+   成就称号馆主体：主面板坐标绑定底图，比例更接近正方形
+========================================================= */
+#honorShell{
+  position:absolute;
+  left:var(--honor-panel-left);
+  top:var(--honor-panel-top);
+  width:var(--honor-panel-width);
+  height:var(--honor-panel-height);
+  z-index:20;
+  padding:calc(13px * var(--ui-scale));
+  border-radius:calc(26px * var(--ui-scale));
+  border:1px solid var(--panel-border);
+  background:
+    linear-gradient(180deg, rgba(255,250,242,.84), rgba(250,236,216,.68));
+  box-shadow:
+    0 calc(16px * var(--ui-scale)) calc(38px * var(--ui-scale)) rgba(89,66,42,.12),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  backdrop-filter:blur(calc(10px * var(--ui-scale)));
+  -webkit-backdrop-filter:blur(calc(10px * var(--ui-scale)));
+  display:grid;
+  grid-template-rows:minmax(0,1fr);
+  gap:calc(8px * var(--ui-scale));
+  overflow:hidden;
+}
+
+
+.mineTools{
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:calc(8px * var(--ui-scale));
+  padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border-bottom:1px dashed rgba(170,117,62,.18);
+}
+
+
+.honorSummaryBox,
+.honorClaimBox,
+.honorMain,
+.honorMine{
+  border-radius:calc(18px * var(--ui-scale));
+  border:1px solid var(--card-border);
+  background:rgba(255,253,248,.56);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.72),
+    0 calc(8px * var(--ui-scale)) calc(18px * var(--ui-scale)) rgba(90,67,43,.06);
+}
+
+
+.sourceFilterBox{
+  position:relative;
+  flex:0 0 auto;
+  width:100%;
+  min-width:0;
+  min-height:0;
+  padding:calc(9px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  overflow:hidden;
+  border-bottom:1px dashed rgba(170,117,62,.18);
+  background:rgba(255,253,248,.30);
+}
+
+
+.filterSparkles{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  opacity:.85;
+}
+
+.filterSparkle{
+  position:absolute;
+  width:calc(5px * var(--ui-scale));
+  height:calc(5px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(210,151,75,.52);
+  box-shadow:0 0 calc(9px * var(--ui-scale)) rgba(229,178,92,.34);
+  opacity:.46;
+  animation:filterSparkleFloat 4.6s ease-in-out infinite;
+}
+
+.filterSparkle:nth-child(1){left:8%;top:62%;animation-delay:-.2s;}
+.filterSparkle:nth-child(2){left:28%;top:26%;animation-delay:-1.4s;transform:scale(.72);}
+.filterSparkle:nth-child(3){left:54%;top:70%;animation-delay:-2.1s;transform:scale(.86);}
+.filterSparkle:nth-child(4){left:82%;top:32%;animation-delay:-3.3s;transform:scale(.62);}
+.filterSparkle:nth-child(5){left:92%;top:76%;animation-delay:-1.0s;transform:scale(.78);}
+
+@keyframes filterSparkleFloat{
+  0%,100%{opacity:.18; transform:translateY(calc(4px * var(--ui-scale))) scale(.68);}
+  45%{opacity:.74; transform:translateY(calc(-6px * var(--ui-scale))) scale(1);}
+  70%{opacity:.36; transform:translateY(calc(-2px * var(--ui-scale))) scale(.82);}
+}
+
+.filterHead{
   position:relative;
   z-index:1;
-  width:min(1200px, 100%);
-  margin:0 auto;
-  padding:28px 18px 40px;
-}
-
-.topbar{
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  gap:12px;
-  margin-bottom:22px;
-  flex-wrap:wrap;
+  justify-content:space-between;
+  gap:calc(8px * var(--ui-scale));
+  color:#7a5537;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  line-height:1.2;
+  margin-bottom:calc(6px * var(--ui-scale));
 }
 
-.back-btn{
+.filterTitle{
   display:inline-flex;
   align-items:center;
-  justify-content:center;
-  min-width:110px;
-  height:42px;
-  padding:0 18px;
-  border:none;
-  border-radius:999px;
-  background:rgba(139,107,75,.92);
-  color:#fff;
-  font-size:15px;
+  gap:calc(5px * var(--ui-scale));
+  white-space:nowrap;
+}
+
+.filterTitle::before{
+  content:"✦";
+  color:rgba(196,132,62,.76);
+  font-size:calc(11px * var(--ui-scale));
+  animation:filterStarPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes filterStarPulse{
+  0%,100%{opacity:.42; transform:scale(.86) rotate(0deg);}
+  50%{opacity:.92; transform:scale(1.12) rotate(12deg);}
+}
+
+.filterCount{
+  color:#9a7659;
+  font-size:calc(9px * var(--ui-scale));
+  white-space:nowrap;
+}
+
+.sourceFilterTags{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:calc(6px * var(--ui-scale));
+}
+
+.sourceFilterBtn{
+  appearance:none;
   cursor:pointer;
-  box-shadow:0 6px 14px rgba(91,70,50,.18);
-  backdrop-filter:blur(4px);
+  border:1px solid rgba(201,140,79,.18);
+  min-height:calc(24px * var(--ui-scale));
+  padding:0 calc(10px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(255,248,238,.62);
+  color:#795334;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72);
+  transition:transform .16s ease, background .16s ease, border-color .16s ease, color .16s ease;
 }
 
-.back-btn:hover{
-  filter:brightness(1.05);
+.sourceFilterBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,243,224,.82);
+  border-color:rgba(190,126,62,.28);
 }
 
-.title-wrap{
-  flex:1;
-  min-width:240px;
+.sourceFilterBtn.active{
+  color:#fffaf3;
+  background:#b97a43;
+  border-color:rgba(158,96,44,.36);
+  box-shadow:0 calc(4px * var(--ui-scale)) calc(10px * var(--ui-scale)) rgba(142,89,41,.12);
 }
 
-.page-title{
-  margin:0;
-  font-size:34px;
-  line-height:1.2;
-  color:#6a5038;
-  text-shadow:0 1px 0 rgba(255,255,255,.45);
-}
-
-.page-subtitle{
-  margin:8px 0 0;
-  font-size:15px;
-  color:#866a4e;
-}
-
-.summary{
+.honorSummaryBox{
+  min-height:calc(58px * var(--ui-scale));
   display:grid;
-  grid-template-columns:repeat(3, minmax(0,1fr));
-  gap:14px;
-  margin-bottom:24px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:calc(6px * var(--ui-scale));
+  padding:calc(11px * var(--ui-scale));
+  align-content:center;
 }
 
-.summary-card{
-  background:rgba(255,250,243,.82);
-  border:1px solid rgba(229,212,191,.9);
-  border-radius:20px;
-  padding:18px 18px 16px;
-  box-shadow:0 8px 20px rgba(91,70,50,.08);
-  backdrop-filter:blur(10px);
+.honorClaimBox{
+  min-height:calc(58px * var(--ui-scale));
+  padding:calc(11px * var(--ui-scale));
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:calc(6px * var(--ui-scale));
 }
 
-.summary-label{
-  font-size:13px;
-  color:#9b7d5c;
-  margin-bottom:8px;
+
+.mineTools .honorSummaryBox,
+.mineTools .honorClaimBox{
+  width:100%;
+  flex:none;
 }
 
-.summary-value{
-  font-size:28px;
-  font-weight:700;
-  color:#6a5038;
+.mineTools .honorSummaryBox{
+  min-height:calc(54px * var(--ui-scale));
 }
 
-.member-grid{
-  display:grid;
-  grid-template-columns:repeat(3, minmax(0,1fr));
-  gap:18px;
+.mineTools .honorClaimBox{
+  min-height:calc(52px * var(--ui-scale));
 }
 
-.member-card{
-  background:rgba(255,249,240,.84);
-  border:1px solid rgba(227,208,180,.95);
-  border-radius:24px;
+
+.summaryCell{
+  min-width:0;
+  text-align:center;
+  border-radius:calc(13px * var(--ui-scale));
+  background:rgba(255,246,231,.58);
+  padding:calc(7px * var(--ui-scale)) calc(4px * var(--ui-scale));
+}
+
+.summaryNum{
+  display:block;
+  color:#c27932;
+  font-size:calc(20px * var(--ui-scale));
+  line-height:1.05;
+  font-weight:900;
+}
+
+.summaryLabel{
+  display:block;
+  margin-top:calc(4px * var(--ui-scale));
+  color:#92745a;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  white-space:nowrap;
   overflow:hidden;
-  box-shadow:0 10px 24px rgba(91,70,50,.08);
-  backdrop-filter:blur(10px);
+  text-overflow:ellipsis;
 }
 
-.member-head{
-  padding:18px 20px 14px;
-  background:linear-gradient(180deg, rgba(255,255,255,.58), rgba(248,240,229,.72));
-  border-bottom:1px solid #eadcc9;
+.claimAllBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  width:100%;
+  min-height:calc(34px * var(--ui-scale));
+  border-radius:calc(12px * var(--ui-scale));
+  background:#c98c4f;
+  color:#fffaf3;
+  box-shadow:0 4px 10px rgba(139,89,36,.12);
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:900;
+  white-space:nowrap;
+  transition:transform .16s ease, background .16s ease, box-shadow .16s ease;
 }
 
-.member-name{
-  margin:0;
-  font-size:24px;
-  color:#6a5038;
+.claimAllBtn:hover:not(:disabled){
+  background:#b9793f;
+  transform:translateY(-1px);
 }
 
-.member-meta{
-  margin-top:6px;
-  font-size:14px;
-  color:#937455;
+.claimAllBtn:disabled{
+  cursor:default;
+  background:rgba(239,219,190,.88);
+  color:#7a5a3b;
+  box-shadow:none;
 }
 
-.member-body{
-  padding:18px 20px 20px;
+.claimHint{
+  color:#92745a;
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.35;
+  font-weight:800;
+  text-align:center;
 }
 
-.count-row{
+.honorBody{
+  min-height:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(calc(320px * var(--ui-scale)), .46fr);
+  gap:calc(10px * var(--ui-scale));
+}
+
+.honorMain,
+.honorMine{
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
   display:flex;
-  justify-content:space-between;
+  flex-direction:column;
+}
+
+.panelHead{
+  flex:0 0 auto;
+  min-height:calc(48px * var(--ui-scale));
+  display:flex;
   align-items:center;
-  margin-bottom:14px;
-  padding-bottom:12px;
-  border-bottom:1px dashed #dfccb2;
+  justify-content:space-between;
+  gap:calc(10px * var(--ui-scale));
+  padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border-bottom:1px dashed rgba(170,117,62,.20);
 }
 
-.count-row span:first-child{
-  color:#8b6c4e;
-  font-size:14px;
+.panelTitle{
+  margin:0;
+  color:#6f4726;
+  font-size:calc(16px * var(--ui-scale));
+  line-height:1.2;
+  font-weight:900;
+  white-space:nowrap;
 }
 
-.count-badge{
-  min-width:54px;
-  height:32px;
-  padding:0 12px;
+.tabGroup{
+  display:flex;
+  align-items:center;
+  gap:calc(6px * var(--ui-scale));
+  padding:calc(3px * var(--ui-scale));
   border-radius:999px;
-  background:#f2e5d4;
-  color:#6a5038;
+  background:rgba(255,252,247,.46);
+  border:1px solid rgba(255,255,255,.50);
+}
+
+.tabBtn{
+  appearance:none;
+  border:1px solid transparent;
+  border-radius:999px;
+  min-height:calc(28px * var(--ui-scale));
+  padding:0 calc(11px * var(--ui-scale));
+  cursor:pointer;
+  color:#7b583a;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:900;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+}
+
+.tabBtn:hover{background:rgba(255,248,238,.68);}
+
+.tabBtn.active{
+  color:#704622;
+  background:rgba(255,244,226,.90);
+  border-color:rgba(201,140,79,.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.75),
+    0 3px 8px rgba(135,86,40,.08);
+}
+
+.honorList{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding:calc(12px * var(--ui-scale));
+  display:none;
+  flex-direction:column;
+  gap:calc(9px * var(--ui-scale));
+}
+
+.honorList.active{display:flex;}
+
+.honorCard{
+  position:relative;
+  flex:0 0 auto;
+  min-width:0;
+  padding:calc(12px * var(--ui-scale)) calc(13px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(18px * var(--ui-scale));
+  border-radius:calc(16px * var(--ui-scale));
+  background:rgba(255,252,247,.66);
+  border:1px solid rgba(255,255,255,.58);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.68);
+  overflow:hidden;
+}
+
+.honorCard::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:calc(10px * var(--ui-scale));
+  bottom:calc(10px * var(--ui-scale));
+  width:calc(5px * var(--ui-scale));
+  border-radius:0 999px 999px 0;
+  background:rgba(201,140,79,.55);
+}
+
+.honorCard.achievement::before{background:rgba(114,133,90,.58);}
+.honorCard.title::before{background:rgba(214,157,66,.58);}
+
+.cardTop{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:calc(10px * var(--ui-scale));
+  min-width:0;
+}
+
+.cardText{min-width:0;}
+
+.cardTitle{
+  margin:0;
+  color:#6f4726;
+  font-size:calc(14px * var(--ui-scale));
+  line-height:1.35;
+  font-weight:900;
+  word-break:break-word;
+}
+
+.cardSub{
+  margin:calc(4px * var(--ui-scale)) 0 0;
+  color:#92745a;
+  font-size:calc(11px * var(--ui-scale));
+  line-height:1.45;
+  font-weight:800;
+  word-break:break-word;
+}
+
+.cardBadge{
+  flex:0 0 auto;
+  min-height:calc(23px * var(--ui-scale));
+  padding:0 calc(9px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(201,140,79,.14);
+  color:#9b6422;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+}
+
+.metaRow{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:calc(6px * var(--ui-scale));
+  margin-top:calc(9px * var(--ui-scale));
+}
+
+.metaPill{
+  min-height:calc(23px * var(--ui-scale));
+  padding:0 calc(8px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(255,246,231,.70);
+  border:1px solid rgba(201,140,79,.13);
+  color:#84582f;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  font-weight:700;
 }
 
-.title-list{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
+.progressBox{margin-top:calc(9px * var(--ui-scale));}
 
-.title-tag{
-  padding:8px 12px;
+.progressLine{
+  height:calc(8px * var(--ui-scale));
   border-radius:999px;
-  background:rgba(255,255,255,.92);
-  border:1px solid #e6d7c5;
-  color:#6a5038;
-  font-size:14px;
-  line-height:1.2;
+  background:rgba(154,110,70,.14);
+  overflow:hidden;
 }
 
-.empty{
-  color:#a78a6a;
-  font-size:14px;
+.progressFill{
+  height:100%;
+  width:0;
+  border-radius:999px;
+  background:linear-gradient(90deg,rgba(114,133,90,.74),rgba(214,157,66,.72));
 }
 
-/* 翻页按钮 */
-.page-turn{
-  position:fixed;
-  top:50%;
-  transform:translateY(-50%);
-  z-index:20;
-  width:clamp(42px, 5vw, 68px);
-  height:clamp(42px, 5vw, 68px);
+.progressText{
+  margin-top:calc(5px * var(--ui-scale));
+  color:#9b7656;
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.35;
+  font-weight:800;
+}
+
+.unlockNames{
+  margin-top:calc(5px * var(--ui-scale));
+  color:#7c6046;
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.45;
+  font-weight:800;
+  word-break:break-word;
+}
+
+.actionBtn{
+  appearance:none;
   border:none;
-  border-radius:999px;
-  background:rgba(255,255,255,.45);
-  color:#6a5038;
-  font-size:clamp(20px, 2.2vw, 32px);
-  font-weight:700;
   cursor:pointer;
-  backdrop-filter:blur(10px);
-  box-shadow:
-    0 8px 18px rgba(91,70,50,.16),
-    inset 0 1px 0 rgba(255,255,255,.55);
+  min-height:calc(30px * var(--ui-scale));
+  margin-top:calc(10px * var(--ui-scale));
+  padding:0 calc(12px * var(--ui-scale));
+  border-radius:calc(11px * var(--ui-scale));
+  background:#c98c4f;
+  color:#fffaf3;
+  box-shadow:0 4px 10px rgba(139,89,36,.12);
+  font-size:calc(11px * var(--ui-scale));
+  font-weight:900;
+  white-space:nowrap;
 }
 
-.page-turn.left{
-  left:clamp(10px, 2vw, 24px);
+.actionBtn.done,
+.actionBtn:disabled{
+  background:rgba(239,219,190,.88);
+  color:#6f4726;
+  cursor:default;
+  box-shadow:none;
 }
 
-.page-turn.right{
-  right:clamp(10px, 2vw, 24px);
+
+.emptyText,.errorText{
+  color:#947256;
+  font-size:calc(12px * var(--ui-scale));
+  line-height:1.7;
+  padding:calc(12px * var(--ui-scale));
+  border-radius:calc(14px * var(--ui-scale));
+  background:rgba(255,252,247,.54);
+  border:1px dashed rgba(170,117,62,.22);
 }
 
-@media (max-width: 640px){
-  .page-turn{
+.errorText{color:#9b4a35;}
+
+.toast{
+  position:fixed;
+  left:50%;
+  top:50%;
+  z-index:100;
+  transform:translate(-50%,-50%) scale(.96);
+  max-width:min(420px,82vw);
+  padding:14px 18px;
+  border-radius:18px;
+  background:rgba(255,249,234,.96);
+  border:1px solid rgba(126,83,45,.24);
+  box-shadow:0 14px 34px rgba(67,43,24,.2);
+  color:#5d3c25;
+  font-size:14px;
+  text-align:center;
+  line-height:1.6;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+}
+
+/* 541px 以上都保持左右结构，只收紧尺寸 */
+@media(min-width:541px) and (max-width:1122px){
+  .sourceFilterBox{
+    min-width:calc(230px * var(--ui-scale));
+  }
+
+
+  .honorBody{
+    grid-template-columns:minmax(0,1fr) minmax(calc(280px * var(--ui-scale)), .46fr);
+  }
+
+  .tabBtn{
+    padding:0 calc(9px * var(--ui-scale));
+  }
+}
+
+@media(min-width:541px) and (max-width:760px){
+  /* 541px 以上仍保持网页版结构，避免 500 多 px 时突然切成另一套排版。 */
+  .sourceFilterBox{
+    min-width:0;
+    flex-basis:auto;
+    padding:calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  }
+
+  .sourceFilterTags{
+    gap:calc(5px * var(--ui-scale));
+  }
+
+  .sourceFilterBtn{
+    min-height:calc(22px * var(--ui-scale));
+    padding:0 calc(8px * var(--ui-scale));
+    font-size:calc(9px * var(--ui-scale));
+  }
+
+  .honorSummaryBox{
+    padding:calc(8px * var(--ui-scale));
+  }
+
+  .honorClaimBox{
+    padding:calc(8px * var(--ui-scale));
+  }
+
+  .summaryNum{
+    font-size:calc(16px * var(--ui-scale));
+  }
+
+  .summaryLabel,
+  .claimHint{
+    font-size:calc(8.5px * var(--ui-scale));
+  }
+
+  .claimAllBtn{
+    min-height:calc(28px * var(--ui-scale));
+    font-size:calc(10px * var(--ui-scale));
+  }
+
+  .honorBody{
+    grid-template-columns:minmax(0,1fr) minmax(calc(225px * var(--ui-scale)), .48fr);
+  }
+
+  .panelHead{
+    flex-direction:row;
+    align-items:center;
+    gap:calc(7px * var(--ui-scale));
+    min-height:calc(48px * var(--ui-scale));
+    padding:calc(9px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  }
+
+  .panelTitle{
+    font-size:calc(14px * var(--ui-scale));
+  }
+
+  .tabGroup{
+    width:auto;
+    flex:0 0 auto;
+    gap:calc(4px * var(--ui-scale));
+  }
+
+  .tabBtn{
+    flex:0 0 auto;
+    min-height:calc(25px * var(--ui-scale));
+    padding:0 calc(7px * var(--ui-scale));
+    font-size:calc(10px * var(--ui-scale));
+  }
+}
+
+/* =========================================================
+   540px 及以下手机版：房间切换 → 身份组件 → 主面板
+========================================================= */
+@media(max-width:540px){
+  html,body{
+    overflow-x:hidden;
+    overflow-y:auto;
+    height:auto;
+    min-height:100%;
+  }
+
+  body{
+    display:block;
+    background:
+      linear-gradient(rgba(243,236,223,.60), rgba(243,236,223,.88)),
+      url("honor-titles.png") center top / cover no-repeat fixed;
+  }
+
+  #room{
+    width:100%;
+    min-height:100vh;
+    min-height:100dvh;
+    height:auto;
+    display:block;
+    overflow:visible;
+    padding:10px 12px 16px;
+  }
+
+  #bgFrame{display:none;}
+
+  #overlay{
+    position:relative;
+    left:auto;
     top:auto;
-    bottom:16px;
+    width:100%;
+    height:auto;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    overflow:visible;
+    --ui-scale:1;
+    pointer-events:auto;
+  }
+
+  #topBar{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    order:0;
+    z-index:20;
+    --nav-btn-height:34px;
+    --nav-btn-px:8px;
+    --nav-btn-radius:10px;
+    --nav-btn-font:12px;
+    --nav-gap:7px;
+  }
+
+  #roomNav{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
     transform:none;
+  }
+
+  .navBtn{
+    width:100%;
+    min-width:0;
+    height:34px;
+    padding:0 8px;
+    font-size:12px;
+    border-radius:10px;
+    overflow:hidden;
+  }
+
+  .navEffect{display:none;}
+
+  #topActions{
+    position:sticky;
+    top:10px;
+    right:auto;
+    left:auto;
+    width:100%;
+    height:40px;
+    z-index:30;
+    order:1;
+  }
+
+  #topIdentityBar{
+    gap:6px;
+    padding:5px 7px;
+    border-radius:14px;
+  }
+
+  #topIdentityBadge{
+    padding:0 9px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  #loginOpenBtn,
+  #logoutBtn{
+    width:42px;
+    min-width:42px;
+    flex-basis:42px;
+    font-size:11px;
+    border-radius:10px;
+  }
+
+  #siteNoticeWrap{
+    width:34px;
+    min-width:34px;
+    flex-basis:34px;
+  }
+
+  #siteNoticeBtn{
+    font-size:14px;
+    border-radius:10px;
+  }
+
+  #honorShell{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    height:auto;
+    order:2;
+    padding:12px;
+    border-radius:24px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    overflow:visible;
+  }
+
+  .sourceFilterBox,
+  .honorSummaryBox,
+  .honorClaimBox{
+    width:100%;
+    min-width:0;
+  }
+
+  .honorBody{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .honorMain,
+  .honorMine{
+    min-height:0;
+    overflow:visible;
+  }
+
+  .panelHead{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .tabGroup{width:100%;}
+
+  .tabBtn{
+    flex:1;
+    font-size:12px;
+  }
+
+  .honorList{
+    max-height:none;
+    overflow:visible;
+  }
+
+  .cardTop{gap:8px;}
+  .cardTitle{font-size:14px;}
+
+  .cardSub,
+  .metaPill,
+  .progressText{
+    font-size:11px;
   }
 }
 </style>
 </head>
 
 <body>
-
-<!-- ✅ 已修正 -->
-<button class="page-turn left" onclick="location.href='gallery.html'">‹</button>
-<button class="page-turn right" onclick="location.href='achievements.html'">›</button>
-
-<div class="page">
-  <div class="topbar">
-    <button class="back-btn" onclick="history.back()">返回</button>
-    <div class="title-wrap">
-      <h1 class="page-title">十号房｜称号页</h1>
-      <p class="page-subtitle">暂时展示所有成员已获得称号数量与代表称号</p>
-    </div>
+<div id="room">
+  <div id="bgFrame">
+    <img id="bg" src="honor-titles.png" alt="十号房成就称号馆背景">
   </div>
 
-  <!-- 内容保持不变 -->
-  <!-- （你原来的卡片内容全部保留） -->
+  <div id="overlay">
+    <div id="topActions">
+      <div id="topIdentityBar">
+        <div id="topIdentityBadge">
+          <span class="identityText" id="currentUserText">参观者</span>
+        </div>
 
+        <div id="siteNoticeWrap">
+          <button id="siteNoticeBtn" type="button" aria-label="打开系统通知">
+            <span id="siteNoticeIcon">🔔</span>
+          </button>
+        </div>
+
+        <button id="loginOpenBtn" type="button">登录</button>
+        <button id="logoutBtn" class="hidden" type="button">登出</button>
+      </div>
+    </div>
+
+    <div id="topBar" aria-label="房间切换">
+      <div id="navOuter">
+        <div id="navScroll">
+          <nav id="roomNav">
+            <button class="navBtn" data-room="hall" type="button" onclick="enterRoom('index.html', false)">
+              <span class="navLabel">大堂</span>
+              <span class="navEffect navEffectA">✦</span>
+              <span class="navEffect navEffectB">✧</span>
+              <span class="navEffect navEffectC">★</span>
+            </button>
+
+            <button class="navBtn" data-room="living" type="button" onclick="enterRoom('living.html', false)">
+              <span class="navLabel">客厅</span>
+              <span class="navEffect navEffectA">☕</span>
+              <span class="navEffect navEffectB">✦</span>
+              <span class="navEffect navEffectC">💬</span>
+            </button>
+
+            <button class="navBtn" data-room="manager" type="button" onclick="enterManagerRoom()">
+              <span class="navLabel">宿管室</span>
+              <span class="navEffect navEffectA">✎</span>
+              <span class="navEffect navEffectB">▱</span>
+              <span class="navEffect navEffectC">✐</span>
+            </button>
+
+            <button class="navBtn" data-room="studio" type="button" onclick="enterRoom('studio-todo.html', true)">
+              <span class="navLabel">工作间</span>
+              <span class="navEffect navEffectA">🎙</span>
+              <span class="navEffect navEffectB">🎧</span>
+              <span class="navEffect navEffectC">◇</span>
+            </button>
+
+            <button class="navBtn" data-room="game" type="button" onclick="enterRoom('game.html', false)">
+              <span class="navLabel">游戏房</span>
+              <span class="navEffect navEffectA">🎮</span>
+              <span class="navEffect navEffectB">🎲</span>
+              <span class="navEffect navEffectC">👾</span>
+            </button>
+
+            <button class="navBtn" data-room="dorm" type="button" onclick="enterRoom('dorm.html', true)">
+              <span class="navLabel">宿舍</span>
+              <span class="navEffect navEffectA">🌙</span>
+              <span class="navEffect navEffectB">✦</span>
+              <span class="navEffect navEffectC">🛏</span>
+            </button>
+
+            <button class="navBtn" data-room="flower" type="button" onclick="enterRoom('flower.html', false)">
+              <span class="navLabel">花房区</span>
+              <span class="navEffect navEffectA">✿</span>
+              <span class="navEffect navEffectB">❀</span>
+              <span class="navEffect navEffectC">🌸</span>
+            </button>
+
+            <button class="navBtn" data-room="pets" type="button" onclick="enterRoom('pets.html', false)">
+              <span class="navLabel">宠物区</span>
+              <span class="navEffect navEffectA">🐾</span>
+              <span class="navEffect navEffectB">♡</span>
+              <span class="navEffect navEffectC">🐱</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <main id="honorShell">
+      <section class="honorBody">
+        <section class="honorMain">
+          <div class="panelHead">
+            <h2 class="panelTitle">共同荣誉</h2>
+            <div class="tabGroup">
+              <button class="tabBtn active" type="button" data-tab-group="community" data-target="communityAchievements">共同成就</button>
+              <button class="tabBtn" type="button" data-tab-group="community" data-target="communityTitles">共同称号</button>
+            </div>
+          </div>
+
+          <section class="sourceFilterBox" aria-label="来源筛选">
+          <div class="filterSparkles" aria-hidden="true">
+            <span class="filterSparkle"></span>
+            <span class="filterSparkle"></span>
+            <span class="filterSparkle"></span>
+            <span class="filterSparkle"></span>
+            <span class="filterSparkle"></span>
+          </div>
+          <div class="filterHead">
+            <span class="filterTitle">来源筛选</span>
+            <span class="filterCount" id="sourceFilterCount">全部 0 项</span>
+          </div>
+          <div class="sourceFilterTags" id="sourceFilterTags"></div>
+        </section>
+
+          <div class="honorList active" id="communityAchievements"></div>
+          <div class="honorList" id="communityTitles"></div>
+        </section>
+
+        <aside class="honorMine">
+          <div class="panelHead">
+            <h2 class="panelTitle">我的荣誉</h2>
+            <div class="tabGroup">
+              <button class="tabBtn active" type="button" data-tab-group="mine" data-target="myAchievements">我的成就</button>
+              <button class="tabBtn" type="button" data-tab-group="mine" data-target="myTitles">我的称号</button>
+            </div>
+          </div>
+
+          <div class="mineTools">
+<section class="honorSummaryBox">
+          <div class="summaryCell">
+            <span class="summaryNum" id="summaryAchievements">0</span>
+            <span class="summaryLabel">我的成就</span>
+          </div>
+          <div class="summaryCell">
+            <span class="summaryNum" id="summaryTitles">0</span>
+            <span class="summaryLabel">我的称号</span>
+          </div>
+          <div class="summaryCell">
+            <span class="summaryNum" id="summaryGold">0</span>
+            <span class="summaryLabel">可领金币</span>
+          </div>
+        </section>
+
+        <section class="honorClaimBox">
+          <button class="claimAllBtn" id="claimAllBtn" type="button" disabled>一键领取</button>
+          <div class="claimHint" id="claimHint">登录后查看</div>
+        </section>
+          </div>
+
+          <div class="honorList active" id="myAchievements"></div>
+          <div class="honorList" id="myTitles"></div>
+        </aside>
+      </section>
+    </main>
+  </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const STORAGE_KEYS = {
+  loggedIn:"room10LoggedIn",
+  user:"room10User",
+  role:"room10Role",
+  memberId:"room10MemberId",
+  memberCode:"room10MemberCode"
+};
+
+const img = document.getElementById("bg");
+const bgFrame = document.getElementById("bgFrame");
+const overlay = document.getElementById("overlay");
+const root = document.documentElement;
+const roomNav = document.getElementById("roomNav");
+const topBar = document.getElementById("topBar");
+
+const currentUserText = document.getElementById("currentUserText");
+const loginOpenBtn = document.getElementById("loginOpenBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const siteNoticeBtn = document.getElementById("siteNoticeBtn");
+const claimAllBtn = document.getElementById("claimAllBtn");
+const claimHint = document.getElementById("claimHint");
+
+const authState = {
+  loggedIn:false,
+  nickname:"",
+  role:"visitor",
+  memberId:null,
+  memberCode:""
+};
+
+let currentMember = null;
+let totalMemberCount = 0;
+
+let communityAchievementRows = [];
+let communityTitleRows = [];
+let myAchievementRows = [];
+let myTitleRows = [];
+let honorRewardLedger = [];
+let pendingHonorRewardItems = [];
+let membersById = new Map();
+let activeSourceFilter = "all";
+let sourceFilterOptions = [];
+
+/* =========================================================
+   底图贴合坐标系统
+========================================================= */
+function isTinyScreen(){
+  return window.innerWidth <= 540;
+}
+
+function clearDesktopOverlayStyles(){
+  if(!overlay) return;
+
+  overlay.style.left = "";
+  overlay.style.top = "";
+  overlay.style.width = "";
+  overlay.style.height = "";
+  root.style.setProperty("--bg-ui-scale","1");
+
+  if(roomNav){
+    roomNav.style.transform = "";
+  }
+}
+
+function syncOverlayToImage(){
+  if(isTinyScreen()){
+    clearDesktopOverlayStyles();
+    return;
+  }
+
+  if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
+
+  const frame = bgFrame.getBoundingClientRect();
+  const frameRatio = frame.width / frame.height;
+  const imageRatio = img.naturalWidth / img.naturalHeight;
+
+  let displayWidth;
+  let displayHeight;
+  let displayLeft;
+  let displayTop;
+
+  if(frameRatio > imageRatio){
+    displayHeight = frame.height;
+    displayWidth = displayHeight * imageRatio;
+    displayLeft = frame.left + (frame.width - displayWidth) / 2;
+    displayTop = frame.top;
+  }else{
+    displayWidth = frame.width;
+    displayHeight = displayWidth / imageRatio;
+    displayLeft = frame.left;
+    displayTop = frame.top + (frame.height - displayHeight) / 2;
+  }
+
+  overlay.style.left = `${displayLeft}px`;
+  overlay.style.top = `${displayTop}px`;
+  overlay.style.width = `${displayWidth}px`;
+  overlay.style.height = `${displayHeight}px`;
+
+  const scale = Math.max(0.34, Math.min(3.2, displayWidth / 1440));
+  root.style.setProperty("--bg-ui-scale", String(scale));
+
+  requestAnimationFrame(fitRoomNavToBar);
+}
+
+function fitRoomNavToBar(){
+  if(!roomNav || !topBar || isTinyScreen()) return;
+
+  roomNav.style.transform = "scale(1)";
+
+  const availableWidth = topBar.clientWidth;
+  const neededWidth = roomNav.scrollWidth;
+
+  if(!availableWidth || !neededWidth) return;
+
+  const fitScale = Math.min(1, availableWidth / neededWidth);
+  roomNav.style.transform = `scale(${fitScale})`;
+}
+
+/* =========================================================
+   通用工具
+========================================================= */
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function roleLabel(role){
+  const r = String(role || "").toLowerCase();
+  if(r === "owner") return "维修工";
+  if(r === "admin") return "宿管";
+  if(r === "member") return "房客";
+  if(r === "applying") return "申请中";
+  return "参观者";
+}
+
+function showToast(message){
+  const toast = document.getElementById("toast");
+  if(!toast) return;
+
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  clearTimeout(window.__honorToastTimer);
+  window.__honorToastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 1800);
+}
+
+function setListMessage(id,message,isError=false){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.innerHTML = `<div class="${isError ? "errorText" : "emptyText"}">${escapeHtml(message)}</div>`;
+}
+
+function numberValue(value){
+  const num = Number(value || 0);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function byRequirementValueDesc(a,b){
+  return numberValue(b.requirement_value) - numberValue(a.requirement_value);
+}
+
+function groupKeyFromHonor(item){
+  return String(item.requirement_key || item.source_group || item.code || item.id || "unknown");
+}
+
+function isHonorRewardClaimed(itemType,itemId){
+  const normalizedType = String(itemType || "").toLowerCase();
+  const normalizedId = String(itemId || "");
+  const expectedTable = normalizedType === "achievement" ? "achievements" : "titles";
+  const expectedSubcategory = normalizedType === "achievement"
+    ? "honor_achievement_reward"
+    : "honor_title_reward";
+  const marker = normalizedType === "achievement"
+    ? `achievement_id:${normalizedId}`
+    : `title_id:${normalizedId}`;
+
+  return honorRewardLedger.some(row => {
+    const relatedTable = String(row.related_table || "").toLowerCase();
+    const relatedId = String(row.related_id || "");
+    const subcategory = String(row.subcategory || "").toLowerCase();
+    const category = String(row.category || "").toLowerCase();
+    const note = String(row.note || "");
+
+    /*
+      gold_ledger.related_id 是 uuid，荣誉 id 是 bigint，
+      因此领取 RPC 会把 achievement_id/title_id 写进 note 作为稳定标记。
+      这里必须优先按 note marker 判断，否则刷新后会误判成“仍可领取”。
+    */
+    if(category === "honor" && subcategory === expectedSubcategory && relatedTable === expectedTable && note.includes(marker)){
+      return true;
+    }
+
+    /* 兼容以后如果 related_id 改成可存荣誉 id 的版本。 */
+    return relatedTable === expectedTable && relatedId === normalizedId && category === "honor";
+  });
+}
+
+function rewardActionHtml(itemType,item){
+  const rewardGold = numberValue(item.rewardGold);
+
+  if(rewardGold <= 0){
+    return "";
+  }
+
+  if(item.claimed){
+    return "";
+  }
+
+  return `<button class="actionBtn" type="button" data-claim-type="${escapeHtml(itemType)}" data-claim-id="${escapeHtml(item.id)}">领取奖励</button>`;
+}
+
+function rewardBadgeText(item){
+  if(numberValue(item.rewardGold) > 0){
+    return item.claimed ? "已领取" : "可领奖励";
+  }
+  return "已获得";
+}
+
+function rewardMetaHtml(item){
+  if(item.claimed || numberValue(item.rewardGold) <= 0){
+    return "";
+  }
+  return `<div class="metaRow"><span class="metaPill">奖励 ${numberValue(item.rewardGold)} 金币</span></div>`;
+}
+
+/* =========================================================
+   身份与房间跳转
+========================================================= */
+function readLocalAuth(){
+  authState.loggedIn = localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
+  authState.nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
+  authState.role = String(localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
+  authState.memberId = localStorage.getItem(STORAGE_KEYS.memberId) || null;
+  authState.memberCode = localStorage.getItem(STORAGE_KEYS.memberCode) || "";
+
+  return authState.loggedIn && !!authState.nickname;
+}
+
+function updateIdentity(){
+  const loggedIn = readLocalAuth();
+
+  if(!currentUserText || !loginOpenBtn || !logoutBtn) return;
+
+  if(!loggedIn){
+    currentUserText.textContent = "参观者";
+    loginOpenBtn.classList.remove("hidden");
+    logoutBtn.classList.add("hidden");
+    return;
+  }
+
+  currentUserText.textContent = `${authState.nickname} | ${roleLabel(authState.role)}`;
+  loginOpenBtn.classList.add("hidden");
+  logoutBtn.classList.remove("hidden");
+}
+
+function handleLogout(){
+  localStorage.removeItem(STORAGE_KEYS.loggedIn);
+  localStorage.removeItem(STORAGE_KEYS.user);
+  localStorage.removeItem(STORAGE_KEYS.role);
+  localStorage.removeItem(STORAGE_KEYS.memberId);
+  localStorage.removeItem(STORAGE_KEYS.memberCode);
+
+  localStorage.removeItem("room10_user");
+  localStorage.removeItem("room10_current_user");
+  localStorage.removeItem("currentUser");
+
+  currentMember = null;
+  updateIdentity();
+  loadHonorData();
+  showToast("已退出登录");
+}
+
+function getManagerPageByRole(){
+  const role = String(authState.role || localStorage.getItem(STORAGE_KEYS.role) || "").toLowerCase();
+
+  if(role === "owner") return "manager-owner.html";
+  if(role === "admin") return "manager-admin.html";
+  if(role === "member") return "manager-member.html";
+
+  return "manager-visitor.html";
+}
+
+function enterManagerRoom(){
+  window.location.href = getManagerPageByRole();
+}
+
+function enterRoom(page, needLogin){
+  const targetPage = String(page || "").trim();
+  if(!targetPage) return;
+
+  const loggedIn = readLocalAuth();
+
+  if(needLogin && !loggedIn){
+    showToast("该房间需要成员登录后进入");
+    window.location.href = "index.html";
+    return;
+  }
+
+  if((targetPage === "flower.html" || targetPage === "pets.html") && !loggedIn){
+    window.location.href = `${targetPage}?mode=guest`;
+    return;
+  }
+
+  window.location.href = targetPage;
+}
+
+/* =========================================================
+   Supabase 数据读取
+========================================================= */
+async function fetchCurrentMember(){
+  if(!readLocalAuth() || !authState.memberId) return null;
+
+  const { data,error } = await supabaseClient
+    .from("members")
+    .select("id,member_code,nickname,role,gold_balance")
+    .eq("id",authState.memberId)
+    .maybeSingle();
+
+  if(error) throw error;
+  if(!data) return null;
+
+  authState.memberId = data.id || authState.memberId;
+  authState.memberCode = data.member_code || authState.memberCode;
+  authState.nickname = data.nickname || authState.nickname;
+  authState.role = data.role || authState.role;
+
+  localStorage.setItem(STORAGE_KEYS.memberId,authState.memberId);
+  if(authState.memberCode) localStorage.setItem(STORAGE_KEYS.memberCode,authState.memberCode);
+  if(authState.nickname) localStorage.setItem(STORAGE_KEYS.user,authState.nickname);
+  if(authState.role) localStorage.setItem(STORAGE_KEYS.role,authState.role);
+
+  return data;
+}
+
+async function fetchTotalMembers(){
+  const { count,error } = await supabaseClient
+    .from("members")
+    .select("id", { count:"exact", head:true })
+    .in("role",["owner","admin","member"]);
+
+  if(error) throw error;
+  return Number(count || 0);
+}
+
+async function fetchMemberRows(){
+  const { data,error } = await supabaseClient
+    .from("members")
+    .select("id,nickname,role")
+    .in("role",["owner","admin","member"]);
+
+  if(error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+async function fetchAchievementRows(){
+  const { data,error } = await supabaseClient
+    .from("achievements")
+    .select("id,code,name,description,source_group,category,requirement_key,requirement_value,reward_gold")
+    .order("source_group",{ ascending:true })
+    .order("requirement_key",{ ascending:true })
+    .order("requirement_value",{ ascending:true });
+
+  if(error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+async function fetchTitleRows(){
+  const { data,error } = await supabaseClient
+    .from("titles")
+    .select("id,code,name,description,source_group,category,requirement_key,requirement_value,reward_gold")
+    .order("requirement_key",{ ascending:true })
+    .order("requirement_value",{ ascending:true });
+
+  if(error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+async function fetchAchievementRecords(){
+  const { data,error } = await supabaseClient
+    .from("member_achievements")
+    .select("achievement_id,member_id,obtained_at");
+
+  if(error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+async function fetchTitleRecords(){
+  const { data,error } = await supabaseClient
+    .from("member_titles")
+    .select("title_id,member_id,obtained_at");
+
+  if(error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+async function fetchHonorRewardLedger(memberId){
+  if(!memberId) return [];
+
+  const { data,error } = await supabaseClient
+    .from("gold_ledger")
+    .select("id,category,subcategory,related_table,related_id,amount,note,created_at")
+    .eq("member_id",memberId)
+    .eq("direction","in")
+    .order("created_at",{ ascending:false })
+    .limit(500);
+
+  if(error){
+    console.warn("金币奖励流水读取失败，奖励领取状态可能无法判断。", error);
+    return [];
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
+
+function normalizeSourceKey(raw){
+  const value = String(raw || "").trim().toLowerCase();
+  if(!value) return "";
+
+  if(["flower","flowers","flower_room","flower_market","花房","花房区"].includes(value)) return "flower";
+  if(["face","face_match","face-match","facematch","face_game","face_match_game","脸萌","脸萌匹配","脸萌挑战"].includes(value)) return "face_match";
+  if(["bomb","number_bomb","digital_bomb","bomb_game","number-bomb","拆弹","拆弹专家","数字炸弹"].includes(value)) return "number_bomb";
+  if(["game","games","game_room","gamehouse","游戏房"].includes(value)) return "game";
+  if(["pet","pets","pet_room","宠物","宠物区"].includes(value)) return "pet";
+  if(["honor","honor_wall","ranking","rank","荣誉墙"].includes(value)) return "honor";
+  if(["studio","work","project","song","工作间"].includes(value)) return "studio";
+  return value;
+}
+
+function inferSourceKey(item){
+  const candidates = [
+    item?.source_group,
+    item?.category,
+    item?.requirement_key,
+    item?.code
+  ].map(value => String(value || "").toLowerCase());
+
+  const joined = candidates.join(" ");
+
+  if(joined.includes("flower")) return "flower";
+  if(joined.includes("face")) return "face_match";
+  if(joined.includes("number_bomb") || joined.includes("digital_bomb") || joined.includes("bomb")) return "number_bomb";
+  if(joined.includes("pet")) return "pet";
+  if(joined.includes("honor") || joined.includes("rank")) return "honor";
+  if(joined.includes("studio") || joined.includes("song") || joined.includes("project")) return "studio";
+  if(joined.includes("game")) return "game";
+
+  return normalizeSourceKey(item?.source_group || item?.category) || "other";
+}
+
+function sourceLabel(key){
+  const map = {
+    all:"全部",
+    honor:"荣誉墙",
+    game:"游戏房",
+    face_match:"脸萌挑战",
+    number_bomb:"拆弹专家",
+    flower:"花房区",
+    pet:"宠物区",
+    studio:"工作间",
+    other:"其他"
+  };
+  return map[key] || key;
+}
+
+function sourceSortIndex(key){
+  const order = ["all","honor","game","face_match","number_bomb","flower","pet","studio","other"];
+  const idx = order.indexOf(key);
+  return idx >= 0 ? idx : 999;
+}
+
+function sourceMatches(item){
+  return activeSourceFilter === "all" || item.sourceKey === activeSourceFilter;
+}
+
+function filteredRows(rows){
+  return Array.isArray(rows) ? rows.filter(sourceMatches) : [];
+}
+
+function updateSourceFilterOptions(){
+  const countMap = new Map();
+  const allRows = [
+    ...communityAchievementRows,
+    ...communityTitleRows
+  ];
+
+  allRows.forEach(item => {
+    const key = item.sourceKey || "other";
+    countMap.set(key, (countMap.get(key) || 0) + 1);
+  });
+
+  const options = Array.from(countMap.entries())
+    .map(([key,count]) => ({ key, label:sourceLabel(key), count }))
+    .sort((a,b) => sourceSortIndex(a.key) - sourceSortIndex(b.key) || a.label.localeCompare(b.label,"zh-Hans-CN"));
+
+  const total = allRows.length;
+  sourceFilterOptions = [{ key:"all", label:"全部", count:total }, ...options];
+
+  if(activeSourceFilter !== "all" && !countMap.has(activeSourceFilter)){
+    activeSourceFilter = "all";
+  }
+}
+
+function renderSourceFilters(){
+  updateSourceFilterOptions();
+
+  const wrap = document.getElementById("sourceFilterTags");
+  const count = document.getElementById("sourceFilterCount");
+  if(!wrap) return;
+
+  wrap.innerHTML = sourceFilterOptions.map(option => `
+    <button class="sourceFilterBtn ${option.key === activeSourceFilter ? "active" : ""}" type="button" data-source-filter="${escapeHtml(option.key)}">
+      ${escapeHtml(option.label)}
+    </button>
+  `).join("");
+
+  if(count){
+    const current = sourceFilterOptions.find(option => option.key === activeSourceFilter) || sourceFilterOptions[0];
+    count.textContent = `${current.label} ${numberValue(current.count)} 项`;
+  }
+}
+
+function buildCommunityAchievements(achievements,records,memberMap){
+  const countMap = new Map();
+
+  records.forEach(row => {
+    const key = String(row.achievement_id || "");
+    if(!key) return;
+    if(!countMap.has(key)) countMap.set(key,new Set());
+    countMap.get(key).add(String(row.member_id || ""));
+  });
+
+  return achievements.map(item => {
+    const obtainedSet = countMap.get(String(item.id)) || new Set();
+    const obtainedCount = obtainedSet.size || 0;
+    const unlockedNames = Array.from(obtainedSet)
+      .map(memberId => memberMap?.get(String(memberId))?.nickname || "")
+      .filter(Boolean);
+    const isUnrevealed = obtainedCount <= 0 && numberValue(item.requirement_value) > 1;
+
+    return {
+      id:item.id,
+      code:item.code,
+      condition:item.description || "未填写达成条件",
+      stageName:isUnrevealed ? "？？？" : (item.name || "未命名阶段"),
+      progress:obtainedCount,
+      total:totalMemberCount,
+      rewardGold:numberValue(item.reward_gold),
+      sourceKey:inferSourceKey(item),
+      status:obtainedCount > 0 ? "已解锁" : "未公开",
+      unlockedNames,
+      requirement_key:item.requirement_key,
+      requirement_value:item.requirement_value
+    };
+  });
+}
+
+function buildCommunityTitles(titles,records,memberMap){
+  const countMap = new Map();
+
+  records.forEach(row => {
+    const key = String(row.title_id || "");
+    if(!key) return;
+    if(!countMap.has(key)) countMap.set(key,new Set());
+    countMap.get(key).add(String(row.member_id || ""));
+  });
+
+  return titles.map(item => {
+    const obtainedSet = countMap.get(String(item.id)) || new Set();
+    const unlockedNames = Array.from(obtainedSet)
+      .map(memberId => memberMap?.get(String(memberId))?.nickname || "")
+      .filter(Boolean);
+
+    return {
+    id:item.id,
+    code:item.code,
+    name:item.name || "未命名称号",
+    condition:item.description || "未填写获得条件",
+    obtainedCount:obtainedSet.size || 0,
+    unlockedNames,
+    rewardGold:numberValue(item.reward_gold),
+    sourceKey:inferSourceKey(item),
+    requirement_key:item.requirement_key,
+    requirement_value:item.requirement_value
+  };
+  });
+}
+
+function buildMyAchievements(achievements,records,memberId){
+  if(!memberId) return [];
+
+  const obtainedIds = new Set(
+    records
+      .filter(row => String(row.member_id) === String(memberId))
+      .map(row => String(row.achievement_id))
+  );
+
+  const obtained = achievements.filter(item => obtainedIds.has(String(item.id)));
+  const grouped = new Map();
+
+  obtained.forEach(item => {
+    const key = groupKeyFromHonor(item);
+    const prev = grouped.get(key);
+
+    if(!prev || numberValue(item.requirement_value) > numberValue(prev.requirement_value)){
+      grouped.set(key,item);
+    }
+  });
+
+  return Array.from(grouped.values())
+    .sort(byRequirementValueDesc)
+    .map(item => ({
+      id:item.id,
+      code:item.code,
+      stageName:item.name || "未命名阶段",
+      condition:item.description || "未填写达成条件",
+      rewardGold:numberValue(item.reward_gold),
+      sourceKey:inferSourceKey(item),
+      claimed:isHonorRewardClaimed("achievement",item.id),
+      requirement_key:item.requirement_key,
+      requirement_value:item.requirement_value
+    }));
+}
+
+function buildMyTitles(titles,records,memberId){
+  if(!memberId) return [];
+
+  const obtainedIds = new Set(
+    records
+      .filter(row => String(row.member_id) === String(memberId))
+      .map(row => String(row.title_id))
+  );
+
+  return titles
+    .filter(item => obtainedIds.has(String(item.id)))
+    .sort(byRequirementValueDesc)
+    .map(item => ({
+      id:item.id,
+      code:item.code,
+      name:item.name || "未命名称号",
+      condition:item.description || "未填写获得条件",
+      rewardGold:numberValue(item.reward_gold),
+      sourceKey:inferSourceKey(item),
+      claimed:isHonorRewardClaimed("title",item.id),
+      requirement_key:item.requirement_key,
+      requirement_value:item.requirement_value
+    }));
+}
+
+async function loadHonorData(){
+  updateIdentity();
+
+  setListMessage("communityAchievements","正在读取共同成就……");
+  setListMessage("communityTitles","正在读取共同称号……");
+  setListMessage("myAchievements",readLocalAuth() ? "正在读取我的成就……" : "登录后查看我的成就。");
+  setListMessage("myTitles",readLocalAuth() ? "正在读取我的称号……" : "登录后查看我的称号。");
+
+  try{
+    currentMember = await fetchCurrentMember();
+    updateIdentity();
+
+    const [
+      memberCount,
+      memberRows,
+      achievements,
+      titles,
+      achievementRecords,
+      titleRecords,
+      rewardLedger
+    ] = await Promise.all([
+      fetchTotalMembers(),
+      fetchMemberRows(),
+      fetchAchievementRows(),
+      fetchTitleRows(),
+      fetchAchievementRecords(),
+      fetchTitleRecords(),
+      fetchHonorRewardLedger(currentMember?.id || authState.memberId)
+    ]);
+
+    totalMemberCount = memberCount || 0;
+    membersById = new Map((memberRows || []).map(member => [String(member.id), member]));
+    honorRewardLedger = rewardLedger;
+
+    communityAchievementRows = buildCommunityAchievements(achievements,achievementRecords,membersById);
+    communityTitleRows = buildCommunityTitles(titles,titleRecords,membersById);
+    myAchievementRows = buildMyAchievements(achievements,achievementRecords,currentMember?.id || authState.memberId);
+    myTitleRows = buildMyTitles(titles,titleRecords,currentMember?.id || authState.memberId);
+
+    renderAll();
+  }catch(error){
+    console.error(error);
+    setListMessage("communityAchievements",`共同成就读取失败：${error.message || "请检查 achievements / member_achievements 权限。"}`,true);
+    setListMessage("communityTitles","共同称号读取失败，请检查 titles / member_titles 权限。",true);
+    setListMessage("myAchievements","我的成就读取失败。",true);
+    setListMessage("myTitles","我的称号读取失败。",true);
+    renderSummary();
+  }
+}
+
+/* =========================================================
+   荣誉内容渲染
+========================================================= */
+function pendingRewardGold(){
+  return pendingHonorRewardItems.reduce((sum,item) => sum + numberValue(item.rewardGold), 0);
+}
+
+function refreshPendingRewards(){
+  pendingHonorRewardItems = [];
+
+  if(readLocalAuth()){
+    myAchievementRows.forEach(item => {
+      if(!item.claimed && numberValue(item.rewardGold) > 0){
+        pendingHonorRewardItems.push({ itemType:"achievement", itemId:item.id, rewardGold:item.rewardGold });
+      }
+    });
+
+    myTitleRows.forEach(item => {
+      if(!item.claimed && numberValue(item.rewardGold) > 0){
+        pendingHonorRewardItems.push({ itemType:"title", itemId:item.id, rewardGold:item.rewardGold });
+      }
+    });
+  }
+
+  const count = pendingHonorRewardItems.length;
+  const gold = pendingRewardGold();
+
+  if(!readLocalAuth()){
+    claimAllBtn.disabled = true;
+    claimHint.textContent = "登录后查看";
+    return;
+  }
+
+  if(count <= 0){
+    claimAllBtn.disabled = true;
+    claimHint.textContent = "暂无可领取";
+    return;
+  }
+
+  claimAllBtn.disabled = false;
+  claimHint.textContent = `${count} 项｜${gold} 金币`;
+}
+
+function renderSummary(){
+  const loggedIn = readLocalAuth();
+
+  document.getElementById("summaryAchievements").textContent = loggedIn ? myAchievementRows.length : 0;
+  document.getElementById("summaryTitles").textContent = loggedIn ? myTitleRows.length : 0;
+  document.getElementById("summaryGold").textContent = loggedIn ? pendingRewardGold() : 0;
+
+  refreshPendingRewards();
+}
+
+function renderCommunityAchievements(){
+  const wrap = document.getElementById("communityAchievements");
+  if(!wrap) return;
+
+  const rows = filteredRows(communityAchievementRows);
+
+  if(!rows.length){
+    wrap.innerHTML = '<div class="emptyText">当前来源暂无共同成就记录。</div>';
+    return;
+  }
+
+  wrap.innerHTML = rows.map(item => {
+    const progress = numberValue(item.progress);
+    const total = numberValue(item.total);
+    const percent = total ? Math.min(100, Math.round(progress / total * 100)) : 0;
+    const hasUnlocked = progress > 0;
+    const title = hasUnlocked ? item.condition : "未公开成就";
+    const subtitle = hasUnlocked ? item.stageName : "已有成员解锁后公开详细条件";
+    const rewardText = hasUnlocked && numberValue(item.rewardGold) > 0 ? `<span class="metaPill">奖励 ${numberValue(item.rewardGold)} 金币</span>` : "";
+    const namesText = hasUnlocked && item.unlockedNames?.length ? `<div class="unlockNames">已解锁：${escapeHtml(item.unlockedNames.join("、"))}</div>` : "";
+
+    return `
+      <article class="honorCard achievement">
+        <div class="cardTop">
+          <div class="cardText">
+            <h3 class="cardTitle">${escapeHtml(title)}</h3>
+            <p class="cardSub">${escapeHtml(subtitle)}</p>
+          </div>
+          <span class="cardBadge">${escapeHtml(item.status)}</span>
+        </div>
+
+        ${rewardText ? `<div class="metaRow">${rewardText}</div>` : ""}
+
+        <div class="progressBox">
+          <div class="progressLine">
+            <div class="progressFill" style="width:${percent}%"></div>
+          </div>
+          <div class="progressText">共同进度：${progress}/${total}</div>
+          ${namesText}
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function renderCommunityTitles(){
+  const wrap = document.getElementById("communityTitles");
+  if(!wrap) return;
+
+  const rows = filteredRows(communityTitleRows);
+
+  if(!rows.length){
+    wrap.innerHTML = '<div class="emptyText">当前来源暂无共同称号记录。</div>';
+    return;
+  }
+
+  wrap.innerHTML = rows.map(item => {
+    const obtainedCount = numberValue(item.obtainedCount);
+    const hasUnlocked = obtainedCount > 0;
+    const title = hasUnlocked ? item.name : "未公开称号";
+    const subtitle = hasUnlocked ? item.condition : "已有成员获得后公开详细条件";
+    const total = numberValue(totalMemberCount);
+    const percent = total ? Math.min(100, Math.round(obtainedCount / total * 100)) : 0;
+    const rewardText = hasUnlocked && numberValue(item.rewardGold) > 0 ? `<span class="metaPill">奖励 ${numberValue(item.rewardGold)} 金币</span>` : "";
+    const namesText = hasUnlocked && item.unlockedNames?.length ? `<div class="unlockNames">已获得：${escapeHtml(item.unlockedNames.join("、"))}</div>` : "";
+
+    return `
+      <article class="honorCard title">
+        <div class="cardTop">
+          <div class="cardText">
+            <h3 class="cardTitle">${escapeHtml(title)}</h3>
+            <p class="cardSub">${escapeHtml(subtitle)}</p>
+          </div>
+          <span class="cardBadge">${obtainedCount}/${total}</span>
+        </div>
+
+        ${rewardText ? `<div class="metaRow">${rewardText}</div>` : ""}
+
+        <div class="progressBox">
+          <div class="progressLine">
+            <div class="progressFill" style="width:${percent}%"></div>
+          </div>
+          <div class="progressText">称号进度：${obtainedCount}/${total}</div>
+          ${namesText}
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function renderMyAchievements(){
+  const wrap = document.getElementById("myAchievements");
+  if(!wrap) return;
+
+  if(!readLocalAuth()){
+    wrap.innerHTML = '<div class="emptyText">登录后查看我的成就。</div>';
+    return;
+  }
+
+  const rows = filteredRows(myAchievementRows);
+
+  if(!rows.length){
+    wrap.innerHTML = '<div class="emptyText">当前来源下你还没有获得成就。</div>';
+    return;
+  }
+
+  wrap.innerHTML = rows.map(item => `
+    <article class="honorCard achievement">
+      <div class="cardTop">
+        <div class="cardText">
+          <h3 class="cardTitle">${escapeHtml(item.stageName)}</h3>
+          <p class="cardSub">${escapeHtml(item.condition)}</p>
+        </div>
+        <span class="cardBadge">${rewardBadgeText(item)}</span>
+      </div>
+
+      ${rewardMetaHtml(item)}
+
+      ${rewardActionHtml("achievement",item)}
+    </article>
+  `).join("");
+}
+
+function renderMyTitles(){
+  const wrap = document.getElementById("myTitles");
+  if(!wrap) return;
+
+  if(!readLocalAuth()){
+    wrap.innerHTML = '<div class="emptyText">登录后查看我的称号。</div>';
+    return;
+  }
+
+  const rows = filteredRows(myTitleRows);
+
+  if(!rows.length){
+    wrap.innerHTML = '<div class="emptyText">当前来源下你还没有获得称号。</div>';
+    return;
+  }
+
+  wrap.innerHTML = rows.map(item => `
+    <article class="honorCard title">
+      <div class="cardTop">
+        <div class="cardText">
+          <h3 class="cardTitle">${escapeHtml(item.name)}</h3>
+          <p class="cardSub">${escapeHtml(item.condition)}</p>
+        </div>
+        <span class="cardBadge">${rewardBadgeText(item)}</span>
+      </div>
+
+      ${rewardMetaHtml(item)}
+
+      ${rewardActionHtml("title",item)}
+    </article>
+  `).join("");
+}
+
+function renderAll(){
+  refreshPendingRewards();
+  renderSourceFilters();
+  renderSummary();
+  renderCommunityAchievements();
+  renderCommunityTitles();
+  renderMyAchievements();
+  renderMyTitles();
+  refreshPendingRewards();
+}
+
+/* =========================================================
+   领取奖励：需要数据库 RPC，避免前端直接写金币
+========================================================= */
+async function claimOneHonorReward(itemType,itemId){
+  if(!readLocalAuth() || !authState.memberId || !authState.memberCode){
+    showToast("请先登录后领取奖励");
+    return;
+  }
+
+  try{
+    const { data,error } = await supabaseClient.rpc("claim_honor_reward",{
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode,
+      p_item_type:itemType,
+      p_item_id:itemId
+    });
+
+    if(error) throw error;
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if(result && result.ok === false){
+      showToast(result.message || "奖励领取失败");
+      return;
+    }
+
+    showToast(result?.message || "奖励已领取");
+    await loadHonorData();
+  }catch(error){
+    console.error(error);
+    showToast("领取失败：请确认 claim_honor_reward RPC 已创建");
+  }
+}
+
+async function claimAllHonorRewards(){
+  if(!readLocalAuth() || !authState.memberId || !authState.memberCode){
+    showToast("请先登录后领取奖励");
+    return;
+  }
+
+  if(!pendingHonorRewardItems.length){
+    showToast("暂无可领取奖励");
+    return;
+  }
+
+  claimAllBtn.disabled = true;
+  claimHint.textContent = "领取中……";
+
+  try{
+    const { data,error } = await supabaseClient.rpc("claim_all_honor_rewards",{
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode
+    });
+
+    if(error) throw error;
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if(result && result.ok === false){
+      showToast(result.message || "一键领取失败");
+      await loadHonorData();
+      return;
+    }
+
+    const count = numberValue(result?.claimed_count);
+    const gold = numberValue(result?.total_gold);
+    showToast(result?.message || `已领取 ${count} 项奖励，共 ${gold} 金币`);
+    await loadHonorData();
+  }catch(error){
+    console.error(error);
+    showToast("一键领取失败：请确认 claim_all_honor_rewards RPC 已创建");
+    await loadHonorData();
+  }
+}
+
+/* =========================================================
+   页面交互
+========================================================= */
+function switchTab(btn){
+  const group = btn.dataset.tabGroup;
+  const target = btn.dataset.target;
+
+  if(!group || !target) return;
+
+  document.querySelectorAll(`.tabBtn[data-tab-group="${group}"]`).forEach(item => {
+    item.classList.toggle("active", item === btn);
+  });
+
+  const ids = group === "community"
+    ? ["communityAchievements","communityTitles"]
+    : ["myAchievements","myTitles"];
+
+  ids.forEach(id => {
+    const panel = document.getElementById(id);
+    if(panel) panel.classList.toggle("active", id === target);
+  });
+}
+
+function bindEvents(){
+  window.addEventListener("resize", syncOverlayToImage);
+
+  document.querySelectorAll(".tabBtn").forEach(btn => {
+    btn.addEventListener("click", () => switchTab(btn));
+  });
+
+  document.addEventListener("click", event => {
+    const filterBtn = event.target.closest("[data-source-filter]");
+    if(filterBtn){
+      activeSourceFilter = filterBtn.dataset.sourceFilter || "all";
+      renderAll();
+      return;
+    }
+
+    const claimBtn = event.target.closest("[data-claim-type][data-claim-id]");
+    if(claimBtn && !claimBtn.disabled){
+      claimOneHonorReward(claimBtn.dataset.claimType,claimBtn.dataset.claimId);
+      return;
+    }
+  });
+
+  if(claimAllBtn){
+    claimAllBtn.addEventListener("click", claimAllHonorRewards);
+  }
+
+  if(siteNoticeBtn){
+    siteNoticeBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      showToast(readLocalAuth() ? "荣誉通知后续接入这里。" : "登录后查看个人通知。");
+    });
+  }
+
+  if(loginOpenBtn){
+    loginOpenBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      window.location.href = "index.html";
+    });
+  }
+
+  if(logoutBtn){
+    logoutBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      handleLogout();
+    });
+  }
+}
+
+async function initHonorPage(){
+  updateIdentity();
+  bindEvents();
+  renderAll();
+  syncOverlayToImage();
+  await loadHonorData();
+}
+
+document.addEventListener("DOMContentLoaded", initHonorPage);
+
+window.addEventListener("storage", event => {
+  if(
+    event.key === STORAGE_KEYS.loggedIn ||
+    event.key === STORAGE_KEYS.user ||
+    event.key === STORAGE_KEYS.role ||
+    event.key === STORAGE_KEYS.memberId
+  ){
+    updateIdentity();
+    loadHonorData();
+  }
+});
+
+if(img && img.complete && img.naturalWidth){
+  syncOverlayToImage();
+}else if(img){
+  img.addEventListener("load", syncOverlayToImage, { once:true });
+}
+
+setTimeout(syncOverlayToImage, 120);
+</script>
 </body>
 </html>
