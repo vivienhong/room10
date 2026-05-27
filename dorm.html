@@ -838,6 +838,71 @@ button{
   font-weight:800;
 }
 
+
+.collectionBookCard{
+  appearance:none;
+  border:1px solid rgba(255,255,255,.58);
+  cursor:pointer;
+  position:relative;
+  min-width:0;
+  min-height:118px;
+  border-radius:18px;
+  background:rgba(255,252,247,.64);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.68);
+  padding:9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.collectionBookCard:hover,
+.collectionBookCard:focus-visible{
+  background:rgba(255,252,247,.78);
+}
+
+.collectionBookCard img{
+  width:100%;
+  height:100%;
+  max-width:132px;
+  max-height:104px;
+  object-fit:contain;
+  display:block;
+  user-select:none;
+  pointer-events:none;
+}
+
+.collectionBookCard::after{
+  content:"查看收集图鉴";
+  position:absolute;
+  left:50%;
+  bottom:7px;
+  transform:translateX(-50%) translateY(4px);
+  max-width:calc(100% - 14px);
+  padding:3px 8px;
+  border-radius:999px;
+  background:rgba(255,250,240,.92);
+  border:1px solid rgba(201,140,79,.16);
+  color:#84582f;
+  font-size:11px;
+  font-weight:900;
+  line-height:1.2;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .16s ease, transform .16s ease;
+}
+
+.collectionBookCard:hover::after,
+.collectionBookCard:focus-visible::after{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+.inventoryEmptyNote{
+  grid-column:1 / -1;
+}
+
 .walletLedgerBlock{
   margin-top:18px;
   flex:1 1 auto;
@@ -1850,6 +1915,24 @@ button{
     flex:0 0 auto;
   }
 
+
+  .collectionBookCard{
+    min-height:calc(104px * var(--ui-scale));
+    padding:calc(8px * var(--ui-scale));
+    border-radius:calc(14px * var(--ui-scale));
+  }
+
+  .collectionBookCard img{
+    max-width:calc(126px * var(--ui-scale));
+    max-height:calc(98px * var(--ui-scale));
+  }
+
+  .collectionBookCard::after{
+    bottom:calc(6px * var(--ui-scale));
+    padding:calc(3px * var(--ui-scale)) calc(7px * var(--ui-scale));
+    font-size:calc(10px * var(--ui-scale));
+  }
+
   .taskList,
   .profileScroll{
     gap:calc(7px * var(--ui-scale));
@@ -2030,6 +2113,17 @@ button{
 
   #mainPanel{
     padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  }
+
+
+  .collectionBookCard{
+    min-height:calc(92px * var(--ui-scale));
+    padding:calc(7px * var(--ui-scale));
+  }
+
+  .collectionBookCard img{
+    max-width:calc(112px * var(--ui-scale));
+    max-height:calc(88px * var(--ui-scale));
   }
 
   .walletTitle{
@@ -2360,6 +2454,17 @@ button{
     grid-template-columns:1fr;
   }
 
+
+  .collectionBookCard{
+    min-height:112px;
+    padding:9px;
+  }
+
+  .collectionBookCard img{
+    max-width:126px;
+    max-height:98px;
+  }
+
   .walletLedgerHead .sectionTitle{
     font-size:20px;
   }
@@ -2535,7 +2640,7 @@ button{
           <div class="walletHeader">
             <div class="walletIcon" aria-hidden="true"></div>
             <div>
-              <h1 class="walletTitle" id="walletTitle">钱包记录</h1>
+              <h1 class="walletTitle" id="walletTitle">钱包</h1>
               <p class="walletSub" id="goldSub">正在读取金币与收支记录……</p>
             </div>
           </div>
@@ -2782,6 +2887,21 @@ function roleLabel(role){
   return "参观者";
 }
 
+function cleanGoldLedgerNote(value){
+  const raw = String(value || "").trim();
+  if(!raw) return "";
+
+  const cleaned = raw
+    .replace(/（\s*title_id\s*:\s*\d+\s*）/g, "")
+    .replace(/\(\s*title_id\s*:\s*\d+\s*\)/g, "")
+    .replace(/（\s*achievement_id\s*:\s*\d+\s*）/g, "")
+    .replace(/\(\s*achievement_id\s*:\s*\d+\s*\)/g, "")
+    .replace(/历史金币余额校准[：:][^。]*。?/g, "金币余额调整")
+    .trim();
+
+  return cleaned || "金币变动";
+}
+
 function ledgerLabel(item){
   const sub = String(item.subcategory || "");
   if(sub === "submit") return "演唱交音奖励";
@@ -2791,7 +2911,9 @@ function ledgerLabel(item){
   if(sub === "pet_adopt") return "宠物领养";
   if(sub === "flower_buy") return "花房买入";
   if(sub === "flower_sell") return "花房卖出";
-  return item.note || item.subcategory || item.category || "金币变动";
+
+  const note = cleanGoldLedgerNote(item.note);
+  return note || item.subcategory || item.category || "金币变动";
 }
 
 function formatDate(value){
@@ -3482,7 +3604,7 @@ async function loadGoldInfo(){
     member = await fetchCurrentMember();
   }catch(error){
     console.error(error);
-    setText("walletTitle",`${authState.nickname || "成员"}的钱包记录`);
+    setText("walletTitle",`${authState.nickname || "成员"}的钱包`);
     setText("goldSub","金币信息读取失败，请检查 members 表读取权限。");
     setLedgerMessage("金币记录读取失败，请检查 gold_ledger 表读取权限。",true);
     return;
@@ -3511,7 +3633,7 @@ async function loadGoldInfo(){
   loadHonorSummary(member.id);
   loadInventory();
 
-  setText("walletTitle",`${member.nickname || "成员"}的钱包记录`);
+  setText("walletTitle",`${member.nickname || "成员"}的钱包`);
   setText("goldSub","金币余额与最近收支记录集中显示");
   setText("goldBalance",member.gold_balance ?? 0);
   setText("goldEarned",member.gold_total_earned ?? 0);
@@ -3555,7 +3677,8 @@ async function loadGoldLedger(memberId){
     const isIn = item.direction === "in";
     const sign = isIn ? "+" : "-";
     const title = ledgerLabel(item);
-    const note = item.note && item.note !== title ? item.note : "";
+    const cleanedNote = cleanGoldLedgerNote(item.note);
+    const note = cleanedNote && cleanedNote !== title ? cleanedNote : "";
 
     return `
       <div class="ledgerItem">
@@ -3579,6 +3702,18 @@ async function loadGoldLedger(memberId){
 /* =========================================================
    我的背包
 ========================================================= */
+function openCollectionBook(){
+  window.location.href = "book.html";
+}
+
+function collectionBookCardHtml(){
+  return `
+    <button class="collectionBookCard" type="button" onclick="openCollectionBook()" aria-label="打开收集图鉴">
+      <img src="book.png" alt="" loading="lazy">
+    </button>
+  `;
+}
+
 function itemValue(item,keys){
   for(const key of keys){
     const value = item?.[key];
@@ -3653,12 +3788,14 @@ function renderInventory(items){
     .filter(row => row.qty > 0)
     .sort((a,b) => itemSortOrder(a.item) - itemSortOrder(b.item));
 
+  const bookCard = collectionBookCardHtml();
+
   if(!rows.length){
-    wrap.innerHTML = '<div class="emptyText">当前背包暂无道具。</div>';
+    wrap.innerHTML = `${bookCard}<div class="emptyText inventoryEmptyNote">当前背包暂无道具。</div>`;
     return;
   }
 
-  wrap.innerHTML = rows.map(({ item, qty }) => `
+  wrap.innerHTML = bookCard + rows.map(({ item, qty }) => `
     <div class="inventoryItem">
       <div class="inventoryIcon">${itemIconHtml(item)}</div>
       <div>
