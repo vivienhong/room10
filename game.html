@@ -150,6 +150,10 @@ button{
 
 #overlay{
   position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
   z-index:1;
   overflow:visible;
   pointer-events:none;
@@ -336,10 +340,15 @@ button{
 
 #topIdentityBadge .identityText{
   min-width:0;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  line-height:1;
+  line-height:normal;
+  padding-top:.06em;
 }
 
 #loginOpenBtn,
@@ -353,10 +362,11 @@ button{
   color:#67401f;
   font-size:calc(12px * var(--ui-scale));
   font-weight:800;
-  line-height:1;
+  line-height:normal;
   display:flex;
   align-items:center;
   justify-content:center;
+  padding-top:.06em;
   transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
   overflow:hidden;
   white-space:nowrap;
@@ -382,7 +392,6 @@ button{
 
 #siteNoticeBtn{
   appearance:none;
-  border:none;
   cursor:pointer;
   position:relative;
   width:100%;
@@ -397,8 +406,11 @@ button{
 }
 
 #siteNoticeIcon{
-  display:block;
-  line-height:1;
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
 }
 
@@ -491,6 +503,27 @@ button{
   line-height:1.55;
 }
 
+.siteNoticeReadBtn{
+  appearance:none;
+  width:100%;
+  margin-top:calc(10px * var(--ui-scale));
+  min-height:calc(30px * var(--ui-scale));
+  border:none;
+  border-radius:calc(11px * var(--ui-scale));
+  background:rgba(239,213,171,0.82);
+  color:#6a4120;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255,247,230,0.95),
+    0 3px 9px rgba(112,83,52,0.08);
+}
+
+.siteNoticeReadBtn:hover{
+  background:rgba(239,213,171,0.96);
+}
+
 /* =========================================================
    房间切换按钮：游戏房页不显示“游戏房”按钮
 ========================================================= */
@@ -515,7 +548,7 @@ button{
 
 #navOuter,
 #navScroll{
-  overflow:visible !important;
+  overflow:visible;
 }
 
 #navOuter{
@@ -528,8 +561,8 @@ button{
 #navScroll{
   width:100%;
   white-space:nowrap;
-  padding:0 !important;
-  margin:0 !important;
+  padding:0;
+  margin:0;
 }
 
 #roomNav{
@@ -558,7 +591,6 @@ button{
   color:var(--nav-text);
   font-size:var(--nav-btn-font);
   font-weight:900;
-  line-height:1;
   white-space:nowrap;
   overflow:visible;
   isolation:isolate;
@@ -593,11 +625,15 @@ button{
 .navLabel{
   position:relative;
   z-index:5;
-  display:block;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   max-width:100%;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  height:100%;
+  overflow:visible;
   white-space:nowrap;
+  line-height:normal;
+  padding-top:.06em;
 }
 
 .navEffect{
@@ -683,6 +719,10 @@ button{
   text-shadow:
     0 1px 2px rgba(255,250,232,.92),
     0 0 8px rgba(255,220,130,.52);
+}
+
+.navBtn[data-room="game"] .navEffect{
+  color:rgba(117,91,150,.82);
 }
 
 .navBtn[data-room="studio"] .navEffect{
@@ -1002,6 +1042,7 @@ button{
     gap:10px;
     overflow:visible;
     --ui-scale:1;
+    pointer-events:auto;
   }
 
   #topActions{
@@ -1016,41 +1057,30 @@ button{
   }
 
   #topIdentityBar{
-    gap:5px;
-    padding:5px 6px;
+    gap:6px;
+    padding:5px 7px;
     border-radius:14px;
-    overflow:visible;
-    width:100%;
-    max-width:100%;
   }
 
   #topIdentityBadge{
-    flex:1 1 0;
-    min-width:0;
-    padding:0 8px;
+    padding:0 9px;
     font-size:12px;
     border-radius:10px;
   }
 
-  #topIdentityBadge .identityText{
-    display:block;
-    width:100%;
-    text-align:center;
-  }
-
   #loginOpenBtn,
   #logoutBtn{
-    width:38px;
-    min-width:38px;
-    flex:0 0 38px;
+    width:42px;
+    min-width:42px;
+    flex-basis:42px;
     font-size:11px;
     border-radius:10px;
   }
 
   #siteNoticeWrap{
-    width:32px;
-    min-width:32px;
-    flex:0 0 32px;
+    width:34px;
+    min-width:34px;
+    flex-basis:34px;
   }
 
   #siteNoticeBtn{
@@ -1285,6 +1315,342 @@ button{
 
   #loginSubmitBtn{top:67.8%;}
 }
+
+
+/* =========================================================
+   统一奖励 / 成就称号弹窗
+========================================================= */
+.reward-mask{
+  position:fixed;
+  inset:0;
+  z-index:120;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(64,45,30,.30);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+  --reward-scale:1;
+}
+
+.reward-mask.show{display:flex;}
+
+.reward-card{
+  position:relative;
+  width:min(calc(430px * var(--reward-scale)), calc(100vw - 28px));
+  max-height:calc(100dvh - 28px);
+  padding:calc(28px * var(--reward-scale)) calc(24px * var(--reward-scale)) calc(22px * var(--reward-scale));
+  border-radius:calc(26px * var(--reward-scale));
+  overflow:hidden auto;
+  text-align:center;
+  color:#6a4223;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,226,235,.68), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,240,181,.62), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,244,226,.96));
+  border:calc(2px * var(--reward-scale)) solid rgba(216,157,106,.35);
+  box-shadow:
+    0 calc(22px * var(--reward-scale)) calc(54px * var(--reward-scale)) rgba(69,47,28,.24),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  animation:rewardPop .42s cubic-bezier(.2,1.12,.34,1) both;
+}
+
+.reward-card::before,
+.reward-card::after{
+  position:absolute;
+  left:calc(12px * var(--reward-scale));
+  right:calc(12px * var(--reward-scale));
+  font-size:calc(15px * var(--reward-scale));
+  letter-spacing:calc(8px * var(--reward-scale));
+  white-space:nowrap;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+.reward-card::before{
+  content:"✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  top:calc(9px * var(--reward-scale));
+  color:rgba(209,120,148,.52);
+}
+
+.reward-card::after{
+  content:"✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  bottom:calc(8px * var(--reward-scale));
+  color:rgba(199,145,75,.44);
+}
+
+@keyframes rewardPop{
+  0%{opacity:0; transform:translateY(calc(12px * var(--reward-scale))) scale(.9);}
+  64%{opacity:1; transform:translateY(0) scale(1.025);}
+  100%{opacity:1; transform:translateY(0) scale(1);}
+}
+
+.reward-close{
+  position:absolute;
+  z-index:6;
+  top:calc(12px * var(--reward-scale));
+  right:calc(12px * var(--reward-scale));
+  width:calc(30px * var(--reward-scale));
+  height:calc(30px * var(--reward-scale));
+  border:none;
+  border-radius:999px;
+  background:rgba(255,250,242,.88);
+  color:#7b5636;
+  font-size:calc(18px * var(--reward-scale));
+  font-weight:900;
+  line-height:1;
+  cursor:pointer;
+  box-shadow:0 calc(2px * var(--reward-scale)) calc(8px * var(--reward-scale)) rgba(105,75,43,.10), inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.reward-petals{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  overflow:hidden;
+}
+
+.reward-petals span{
+  position:absolute;
+  top:calc(-18px * var(--reward-scale));
+  color:rgba(220,132,154,.56);
+  font-size:calc(16px * var(--reward-scale));
+  opacity:0;
+  text-shadow:0 calc(2px * var(--reward-scale)) calc(4px * var(--reward-scale)) rgba(255,255,255,.76);
+  animation:rewardPetalFall 1.35s ease-in-out both;
+}
+
+.reward-petals span:nth-child(1){left:12%; animation-delay:.05s;}
+.reward-petals span:nth-child(2){left:28%; animation-delay:.18s;}
+.reward-petals span:nth-child(3){left:48%; animation-delay:.02s;}
+.reward-petals span:nth-child(4){left:66%; animation-delay:.22s;}
+.reward-petals span:nth-child(5){left:82%; animation-delay:.10s;}
+
+@keyframes rewardPetalFall{
+  0%{opacity:0; transform:translateY(calc(-14px * var(--reward-scale))) rotate(0deg) scale(.78);}
+  20%{opacity:.85;}
+  100%{opacity:0; transform:translateY(calc(145px * var(--reward-scale))) rotate(160deg) scale(1);}
+}
+
+.reward-content{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.reward-icon{
+  width:calc(62px * var(--reward-scale));
+  height:calc(62px * var(--reward-scale));
+  margin:calc(4px * var(--reward-scale)) auto calc(12px * var(--reward-scale));
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,246,226,.78);
+  border:1px solid rgba(220,164,102,.25);
+  box-shadow:0 calc(8px * var(--reward-scale)) calc(20px * var(--reward-scale)) rgba(126,92,51,.10), inset 0 1px 0 rgba(255,255,255,.85);
+  font-size:calc(34px * var(--reward-scale));
+}
+
+.reward-label{
+  min-height:calc(25px * var(--reward-scale));
+  padding:0 calc(13px * var(--reward-scale));
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:rgba(255,249,232,.66);
+  border:1px solid rgba(218,166,87,.20);
+  color:#b26a3a;
+  font-size:calc(13px * var(--reward-scale));
+  font-weight:950;
+  line-height:1;
+  letter-spacing:.06em;
+  animation:rewardStamp .42s ease both;
+}
+
+.reward-title{
+  position:relative;
+  max-width:100%;
+  margin:calc(10px * var(--reward-scale)) auto calc(8px * var(--reward-scale));
+  padding:calc(8px * var(--reward-scale)) calc(18px * var(--reward-scale));
+  border-radius:999px;
+  color:#6a4223;
+  font-size:calc(22px * var(--reward-scale));
+  font-weight:950;
+  line-height:1.15;
+  background:rgba(255,249,232,.72);
+  border:1px solid rgba(218,166,87,.24);
+  box-shadow:0 calc(5px * var(--reward-scale)) calc(14px * var(--reward-scale)) rgba(126,92,51,.08), inset 0 1px 0 rgba(255,255,255,.82);
+  overflow:hidden;
+}
+
+.reward-title::after{
+  content:"";
+  position:absolute;
+  inset:-30% auto -30% -42%;
+  width:36%;
+  background:linear-gradient(90deg, transparent, rgba(255,234,160,.80), transparent);
+  transform:skewX(-18deg);
+  animation:rewardSweep 1.25s ease .22s both;
+}
+
+@keyframes rewardStamp{
+  0%{opacity:0; transform:scale(1.12);}
+  72%{opacity:1; transform:scale(.97);}
+  100%{opacity:1; transform:scale(1);}
+}
+
+@keyframes rewardSweep{
+  0%{left:-42%;}
+  100%{left:118%;}
+}
+
+.reward-desc{
+  width:100%;
+  max-width:calc(330px * var(--reward-scale));
+  margin:0 auto calc(14px * var(--reward-scale));
+  color:#826046;
+  font-size:calc(13px * var(--reward-scale));
+  line-height:1.65;
+  text-align:center;
+  white-space:pre-line;
+}
+
+.reward-section-title{
+  margin:0 0 calc(10px * var(--reward-scale));
+  color:#8a5c33;
+  font-size:calc(12px * var(--reward-scale));
+  font-weight:950;
+  line-height:1;
+  letter-spacing:.08em;
+}
+
+.reward-list{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  justify-content:center;
+  gap:calc(8px * var(--reward-scale));
+  margin:0 0 calc(16px * var(--reward-scale));
+}
+
+.reward-list.count-1{grid-template-columns:minmax(0, calc(120px * var(--reward-scale)));}
+.reward-list.count-2{grid-template-columns:repeat(2, minmax(0, calc(120px * var(--reward-scale))));}
+.reward-list.empty,
+.reward-section-title.empty{display:none;}
+
+.reward-item{
+  min-width:0;
+  min-height:calc(84px * var(--reward-scale));
+  padding:calc(10px * var(--reward-scale)) calc(7px * var(--reward-scale)) calc(9px * var(--reward-scale));
+  border-radius:calc(16px * var(--reward-scale));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,252,247,.72);
+  border:1px solid rgba(196,139,86,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.82), 0 calc(3px * var(--reward-scale)) calc(10px * var(--reward-scale)) rgba(116,86,54,.06);
+  animation:rewardItemIn .38s ease both;
+}
+
+.reward-item:nth-child(1){animation-delay:.14s;}
+.reward-item:nth-child(2){animation-delay:.24s;}
+.reward-item:nth-child(3){animation-delay:.34s;}
+.reward-item:nth-child(4){animation-delay:.44s;}
+
+@keyframes rewardItemIn{
+  0%{opacity:0; transform:translateY(calc(8px * var(--reward-scale))) scale(.96);}
+  100%{opacity:1; transform:translateY(0) scale(1);}
+}
+
+.reward-item-icon{
+  font-size:calc(28px * var(--reward-scale));
+  line-height:1;
+  margin-bottom:calc(7px * var(--reward-scale));
+}
+
+.reward-item-name{
+  width:100%;
+  color:#7b593b;
+  font-size:calc(11px * var(--reward-scale));
+  font-weight:900;
+  line-height:1.2;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.reward-item-amount{
+  margin-top:calc(3px * var(--reward-scale));
+  color:#6a4223;
+  font-size:calc(13px * var(--reward-scale));
+  font-weight:950;
+  line-height:1.2;
+  white-space:nowrap;
+}
+
+.reward-confirm{
+  min-width:calc(132px * var(--reward-scale));
+  height:calc(36px * var(--reward-scale));
+  border:1px solid rgba(153,104,62,.22);
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(255,238,200,.96), rgba(227,187,132,.90));
+  color:#67401f;
+  font-size:calc(13px * var(--reward-scale));
+  font-weight:950;
+  cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72), 0 calc(4px * var(--reward-scale)) calc(12px * var(--reward-scale)) rgba(112,80,42,.10);
+}
+
+.reward-mask[data-type="title"] .reward-card{
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,235,204,.72), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,229,154,.58), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,242,219,.96));
+}
+
+.reward-mask[data-type="daily"] .reward-card{
+  background:
+    radial-gradient(circle at 12% 16%, rgba(224,244,216,.70), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,239,181,.50), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(241,248,229,.96));
+}
+
+.reward-mask[data-type="gift"] .reward-card{
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,226,235,.74), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(223,235,255,.58), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,240,231,.96));
+}
+
+.reward-mask[data-type="item"] .reward-card,
+.reward-mask[data-type="gold"] .reward-card{
+  background:
+    radial-gradient(circle at 12% 16%, rgba(223,239,255,.66), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,240,181,.52), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(235,246,252,.94));
+}
+
+@media (max-width:540px){
+  .reward-mask{--reward-scale:.82; padding:14px;}
+}
+
+@media (max-width:380px), (max-height:590px){
+  .reward-mask{--reward-scale:.74;}
+}
+
+@media (max-width:340px){
+  .reward-list,
+  .reward-list.count-1,
+  .reward-list.count-2{grid-template-columns:1fr;}
+}
+
 </style>
 </head>
 
@@ -1337,6 +1703,13 @@ button{
               <span class="navEffect navEffectC">★</span>
             </button>
 
+            <button class="navBtn" data-room="living" type="button" onclick="enterRoom('living.html', false)">
+              <span class="navLabel">客厅</span>
+              <span class="navEffect navEffectA">☕</span>
+              <span class="navEffect navEffectB">✦</span>
+              <span class="navEffect navEffectC">💬</span>
+            </button>
+
             <button class="navBtn" data-room="manager" type="button" onclick="enterManagerRoom()">
               <span class="navLabel">宿管室</span>
               <span class="navEffect navEffectA">✎</span>
@@ -1358,25 +1731,11 @@ button{
               <span class="navEffect navEffectC">◇</span>
             </button>
 
-            <button class="navBtn" data-room="living" type="button" onclick="enterRoom('living.html', false)">
-              <span class="navLabel">客厅</span>
-              <span class="navEffect navEffectA">☕</span>
-              <span class="navEffect navEffectB">✦</span>
-              <span class="navEffect navEffectC">💬</span>
-            </button>
-
             <button class="navBtn" data-room="dorm" type="button" onclick="enterRoom('dorm.html', true)">
               <span class="navLabel">宿舍</span>
               <span class="navEffect navEffectA">☁</span>
               <span class="navEffect navEffectB">☾</span>
-              <span class="navEffect navEffectC">🛏</span>
-            </button>
-
-            <button class="navBtn" data-room="pets" type="button" onclick="enterRoom('pets.html', false)">
-              <span class="navLabel">宠物区</span>
-              <span class="navEffect navEffectA">🐾</span>
-              <span class="navEffect navEffectB">♡</span>
-              <span class="navEffect navEffectC">🐱</span>
+              <span class="navEffect navEffectC">💤</span>
             </button>
 
             <button class="navBtn" data-room="flower" type="button" onclick="enterRoom('flower.html', false)">
@@ -1384,6 +1743,13 @@ button{
               <span class="navEffect navEffectA">✿</span>
               <span class="navEffect navEffectB">❀</span>
               <span class="navEffect navEffectC">🌸</span>
+            </button>
+
+            <button class="navBtn" data-room="pets" type="button" onclick="enterRoom('pets.html', false)">
+              <span class="navLabel">宠物区</span>
+              <span class="navEffect navEffectA">🐾</span>
+              <span class="navEffect navEffectB">♡</span>
+              <span class="navEffect navEffectC">🐱</span>
             </button>
           </nav>
         </div>
@@ -1402,9 +1768,9 @@ button{
           <div class="game-status ready">可进入</div>
         </button>
 
-        <button class="game-btn is-coming-soon" type="button" onclick="openReservedGame('time-answer')">
+        <button class="game-btn" type="button" onclick="openGameModal('game-time.html', '时间的答案')">
           <div class="game-name">时间的答案</div>
-          <div class="game-status">待更新</div>
+          <div class="game-status ready">可进入</div>
         </button>
 
         <button class="game-btn is-coming-soon" type="button" onclick="openReservedGame('mango-hit')">
@@ -1444,6 +1810,32 @@ button{
   </div>
 </div>
 
+
+
+<div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
+  <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
+    <div class="reward-petals" aria-hidden="true">
+      <span>✿</span>
+      <span>❀</span>
+      <span>✽</span>
+      <span>✿</span>
+      <span>❀</span>
+    </div>
+
+    <button class="reward-close" type="button" aria-label="关闭" onclick="closeRewardModal()">×</button>
+
+    <div class="reward-content">
+      <div class="reward-icon" id="rewardIcon" aria-hidden="true">🏆</div>
+      <div class="reward-label" id="rewardLabel">成就达成</div>
+      <h2 class="reward-title" id="rewardTitle">奖励已领取</h2>
+      <p class="reward-desc" id="rewardDesc">奖励已经记录完成。</p>
+      <div class="reward-section-title" id="rewardSectionTitle">奖励内容</div>
+      <div class="reward-list" id="rewardList"></div>
+      <button class="reward-confirm" type="button" onclick="closeRewardModal()">收下奖励</button>
+    </div>
+  </section>
+</div>
+
 <div id="fallbackTip" class="fallback-tip">未能读取图片边缘颜色，已使用默认柔和背景。</div>
 
 <script>
@@ -1475,11 +1867,147 @@ const gameModalFrame = document.getElementById("gameModalFrame");
 
 const PENDING_REDIRECT_KEY = "room10_pending_redirect";
 
+
+/* =========================================================
+   统一奖励 / 成就称号弹窗接口
+   可供 iframe 小游戏或本页数据库返回 awards 后调用
+========================================================= */
+const rewardTypeMeta = {
+  achievement:{label:"成就达成", icon:"🏆"},
+  title:{label:"获得称号", icon:"🎖️"},
+  daily:{label:"日常奖励", icon:"☀️"},
+  gift:{label:"礼包领取", icon:"🎁"},
+  item:{label:"道具获得", icon:"🧺"},
+  gold:{label:"金币奖励", icon:"🪙"}
+};
+
+const rewardIconMap = {
+  金币:"🪙",
+  种子:"🌱",
+  宠物粮:"🥣",
+  医疗卡:"💊",
+  亲密度:"💗",
+  道具:"🧺",
+  成就:"🏆",
+  称号:"🎖️"
+};
+
+let pendingAwardModals = [];
+
+function normalizeRewardItem(item){
+  if(typeof item === "string"){
+    return {name:item, amount:"", unit:"", icon:rewardIconMap[item] || "✨"};
+  }
+
+  return {
+    name:item?.name || "奖励",
+    amount:item?.amount ?? "",
+    unit:item?.unit || "",
+    icon:item?.icon || rewardIconMap[item?.name] || "✨",
+    prefix:item?.prefix || ""
+  };
+}
+
+function formatRewardAmount(item){
+  if(item.amount === "" || item.amount === null || item.amount === undefined) return "";
+  if(typeof item.amount === "number"){
+    const sign = item.amount > 0 ? "+" : "";
+    return `${sign}${item.amount}${item.unit || ""}`;
+  }
+  return `${item.prefix || ""}${item.amount}${item.unit || ""}`;
+}
+
+function renderRewards(rewards){
+  const list = document.getElementById("rewardList");
+  const sectionTitle = document.getElementById("rewardSectionTitle");
+  if(!list || !sectionTitle) return;
+
+  list.innerHTML = "";
+  list.className = "reward-list";
+  sectionTitle.className = "reward-section-title";
+
+  if(!rewards.length){
+    list.classList.add("empty");
+    sectionTitle.classList.add("empty");
+    return;
+  }
+
+  list.classList.add(`count-${Math.min(rewards.length, 3)}`);
+
+  rewards.forEach(reward => {
+    const item = document.createElement("div");
+    item.className = "reward-item";
+    item.innerHTML = `
+      <div class="reward-item-icon">${escapeHtml(reward.icon)}</div>
+      <div class="reward-item-name">${escapeHtml(reward.name)}</div>
+      <div class="reward-item-amount">${escapeHtml(formatRewardAmount(reward))}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function showRewardModal(options = {}){
+  const mask = document.getElementById("rewardMask");
+  if(!mask) return;
+
+  const type = options.type || options.award_type || "achievement";
+  const meta = rewardTypeMeta[type] || rewardTypeMeta.achievement;
+  const rewards = Array.isArray(options.rewards || options.reward_items)
+    ? (options.rewards || options.reward_items).map(normalizeRewardItem)
+    : [];
+
+  mask.dataset.type = type;
+  document.getElementById("rewardIcon").textContent = options.icon || meta.icon;
+  document.getElementById("rewardLabel").textContent = options.label || meta.label;
+  document.getElementById("rewardTitle").textContent = options.title || options.award_name || options.name || "奖励已领取";
+  document.getElementById("rewardDesc").textContent = options.desc || options.award_desc || options.description || "奖励已经记录完成。";
+
+  renderRewards(rewards);
+  mask.classList.add("show");
+  mask.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeRewardModal(){
+  const mask = document.getElementById("rewardMask");
+  if(!mask) return;
+  mask.classList.remove("show");
+  mask.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  playNextAwardModal();
+}
+
+function playAwardModals(awards = []){
+  pendingAwardModals = Array.isArray(awards) ? awards.slice() : [];
+  playNextAwardModal();
+}
+
+function playNextAwardModal(){
+  if(!pendingAwardModals.length) return;
+  showRewardModal(pendingAwardModals.shift());
+}
+
+function handleGameAwardMessage(event){
+  const data = event?.data || {};
+  if(!data || typeof data !== "object") return;
+
+  if(data.type === "room10:award"){
+    showRewardModal(data.payload || {});
+  }
+
+  if(data.type === "room10:awards"){
+    playAwardModals(data.payload || data.awards || []);
+  }
+}
+
+window.addEventListener("message", handleGameAwardMessage);
+
+
 const RESERVED_GAMES = {
   "time-answer": {
     title:"时间的答案",
-    url:"game-time-answer.html",
-    enabled:false,
+    url:"game-time.html",
+    enabled:true,
     message:"《时间的答案》还在施工中，待更新。"
   },
   "mango-hit": {
@@ -1548,13 +2076,19 @@ function syncOverlayToImage(){
   overlay.style.top = `${displayTop}px`;
   overlay.style.width = `${displayWidth}px`;
   overlay.style.height = `${displayHeight}px`;
-  const scale = Math.max(0.34, Math.min(2.35, displayWidth / 1440));
+  /*
+    大屏缩放规则：
+    1440px = 1 倍；2400px 继续放大；3840px 继续放大；
+    约 4608px 后限制在 3.2 倍，适配 8K 时不让组件无限巨大。
+    关键：用背景图实际显示宽度 displayWidth 计算，保证文字、按钮、面板和背景图一起等比例变化。
+  */
+  const scale = Math.max(0.34, Math.min(3.2, displayWidth / 1440));
   root.style.setProperty("--bg-ui-scale", String(scale));
 
   const panelWidthPercentRaw = getComputedStyle(root).getPropertyValue("--game-panel-width").trim();
   const panelWidthPercent = Number(panelWidthPercentRaw.replace("%", "")) || 48;
   const panelDesignWidth = Number(getComputedStyle(root).getPropertyValue("--game-panel-design-width")) || 690;
-  const panelScale = Math.max(0.42, Math.min(2.35, (displayWidth * (panelWidthPercent / 100)) / panelDesignWidth));
+  const panelScale = Math.max(0.42, Math.min(3.2, (displayWidth * (panelWidthPercent / 100)) / panelDesignWidth));
   root.style.setProperty("--game-panel-scale", String(panelScale));
 
   requestAnimationFrame(fitRoomNavToBar);
@@ -1584,6 +2118,14 @@ function getRole(){
 
 function getCurrentUser(){
   return localStorage.getItem("room10User") || "";
+}
+
+function getCurrentMemberId(){
+  return localStorage.getItem("room10MemberId") || "";
+}
+
+function getCurrentMemberCode(){
+  return localStorage.getItem("room10MemberCode") || "";
 }
 
 function escapeHtml(value){
@@ -1859,21 +2401,13 @@ function closeGameModal(){
   gameModalFrame.src = "about:blank";
 }
 
-function getGameNoticeItems(){
-  try{
-    const raw = localStorage.getItem("room10GameRecordNotices");
-    if(!raw) return [];
-    const data = JSON.parse(raw);
-    if(!Array.isArray(data)) return [];
-    return data
-      .map(item => typeof item === "string" ? { title:"游戏记录提醒", desc:item } : {
-        title:item?.title || "游戏记录提醒",
-        desc:item?.message || item?.desc || ""
-      })
-      .filter(item => item.desc);
-  }catch{
-    return [];
+let latestGameNoticeIds = [];
+
+function getNoticeEmptyText(){
+  if(!isLoggedIn()){
+    return "登录后会显示属于你的游戏记录提醒。";
   }
+  return "目前没有新的游戏记录提醒。";
 }
 
 function setNoticeCount(count){
@@ -1882,37 +2416,119 @@ function setNoticeCount(count){
   siteNoticeBtn.classList.toggle("hasNotice", n > 0);
 }
 
+function renderNoticeLoading(){
+  siteNoticeContent.innerHTML = '<div class="siteNoticeEmpty">正在读取通知……</div>';
+}
+
+function renderNoticeError(message){
+  siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">${escapeHtml(message || "通知读取失败，请稍后再试。")}</div>`;
+  setNoticeCount(0);
+}
+
 function renderNoticeList(items){
   const list = Array.isArray(items) ? items : [];
+  latestGameNoticeIds = list.map(item => item.id).filter(Boolean);
 
   if(!list.length){
-    siteNoticeContent.innerHTML = '<div class="siteNoticeEmpty">如果有人超过你的游戏记录，会在这里通知你。</div>';
+    siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">${escapeHtml(getNoticeEmptyText())}</div>`;
     setNoticeCount(0);
     return;
   }
 
   siteNoticeContent.innerHTML = `
     <div class="siteNoticeList">
-      ${list.map(item => `
-        <div class="siteNoticeItem">
-          <div class="siteNoticeItemTitle">${escapeHtml(item.title || "提醒")}</div>
-          <div class="siteNoticeItemDesc">${escapeHtml(item.desc || "")}</div>
-        </div>
-      `).join("")}
+      ${list.map(item => {
+        const itemTitle = String(item.title || "游戏记录提醒").trim();
+        return `
+          <div class="siteNoticeItem">
+            <div class="siteNoticeItemTitle">${escapeHtml(itemTitle)}</div>
+          </div>
+        `;
+      }).join("")}
     </div>
+    <button class="siteNoticeReadBtn" type="button" onclick="markAllGameNoticesRead()">全部已读</button>
   `;
 
   setNoticeCount(list.length);
 }
 
-function refreshGameNotice(){
-  renderNoticeList(getGameNoticeItems());
+async function fetchGameNoticeItems(){
+  const memberId = getCurrentMemberId().trim();
+  const memberCode = getCurrentMemberCode().trim();
+
+  if(!isLoggedIn() || !memberId || !memberCode){
+    return [];
+  }
+
+  const { data, error } = await client.rpc("get_member_notifications", {
+    p_member_id: memberId,
+    p_member_code: memberCode,
+    p_channel: "game",
+    p_limit: 20
+  });
+
+  if(error){
+    console.error("读取游戏通知失败：", error);
+    throw error;
+  }
+
+  return (Array.isArray(data) ? data : []).map(item => ({
+    id:item.notice_id || item.id,
+    title:item.title || "游戏记录提醒",
+    message:item.message || item.desc || "",
+    createdAt:item.created_at || ""
+  }));
 }
 
-function toggleSiteNoticePanel(){
+async function refreshGameNotice(){
+  if(!siteNoticeContent || !siteNoticeBtn) return;
+
+  try{
+    renderNoticeLoading();
+    const items = await fetchGameNoticeItems();
+    renderNoticeList(items);
+  }catch(err){
+    renderNoticeError(err?.message || "通知读取失败，请稍后再试。");
+  }
+}
+
+async function markAllGameNoticesRead(){
+  const memberId = getCurrentMemberId().trim();
+  const memberCode = getCurrentMemberCode().trim();
+
+  if(!isLoggedIn() || !memberId || !memberCode || !latestGameNoticeIds.length){
+    renderNoticeList([]);
+    return;
+  }
+
+  try{
+    const { error } = await client.rpc("mark_member_notifications_read", {
+      p_member_id: memberId,
+      p_member_code: memberCode,
+      p_notice_ids: latestGameNoticeIds
+    });
+
+    if(error){
+      console.error("标记游戏通知已读失败：", error);
+      renderNoticeError(error.message || "标记已读失败，请稍后再试。");
+      return;
+    }
+
+    latestGameNoticeIds = [];
+    renderNoticeList([]);
+  }catch(err){
+    console.error("标记游戏通知已读异常：", err);
+    renderNoticeError(err?.message || "标记已读失败，请稍后再试。");
+  }
+}
+
+async function toggleSiteNoticePanel(){
   if(!siteNoticePanel) return;
-  refreshGameNotice();
+  const willShow = !siteNoticePanel.classList.contains("show");
   siteNoticePanel.classList.toggle("show");
+  if(willShow){
+    await refreshGameNotice();
+  }
 }
 
 function closeSiteNoticePanel(){
@@ -2018,6 +2634,13 @@ loginMask.addEventListener("click", (e) => {
   if(e.target === loginMask) closeLogin(false);
 });
 
+const rewardMask = document.getElementById("rewardMask");
+if(rewardMask){
+  rewardMask.addEventListener("click", (e) => {
+    if(e.target === rewardMask) closeRewardModal();
+  });
+}
+
 gameModalMask.addEventListener("click", (e) => {
   if(e.target === gameModalMask){
     e.preventDefault();
@@ -2027,7 +2650,15 @@ gameModalMask.addEventListener("click", (e) => {
 });
 
 document.addEventListener("keydown", (e) => {
-  if(e.key === "Escape" && !gameModalMask.classList.contains("hidden")){
+  if(e.key !== "Escape") return;
+
+  const rewardMask = document.getElementById("rewardMask");
+  if(rewardMask && rewardMask.classList.contains("show")){
+    closeRewardModal();
+    return;
+  }
+
+  if(!gameModalMask.classList.contains("hidden")){
     closeGameModal();
   }
 });
