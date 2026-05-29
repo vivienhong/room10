@@ -11,37 +11,67 @@
 
 :root{
   --bg-ui-scale:1;
+  --ui-scale:1;
+  --room-nav-scale:var(--ui-scale);
+  --identity-scale:var(--ui-scale);
+  --reward-modal-scale:1;
 
-  /* 当前页面坐标：花房页只改这里 */
+  /* 身份组件：使用全站通用模板 */
   --identity-right:7.35%;
   --identity-top:6.46%;
-  --identity-width:calc(232px * var(--bg-ui-scale));
-  --identity-height:calc(38px * var(--bg-ui-scale));
+  --identity-base-width:232;
+  --identity-base-height:38;
+  --identity-bg:rgba(255,250,244,0.88);
+  --identity-inner-bg:rgba(255,253,249,0.92);
+  --identity-border:rgba(170,132,101,0.20);
+  --identity-text:#6f5746;
+  --identity-shadow:rgba(106,78,55,0.08);
+  --identity-name-y:0em;
+  --identity-notice-y:0em;
+  --identity-button-y:0em;
 
-  --room-nav-left:27.2%;
+  /* 房间按钮：使用全站通用模板，底图百分比绑定 */
   --room-nav-top:6.35%;
-  --room-nav-width:45.5%;
+  --room-nav-start-left:25.83%;
+  --room-nav-btn-width:4.72%;
+  --room-nav-btn-height:5.10%;
+  --room-nav-gap:0.486%;
+
+  --room-nav-hall-left:var(--room-nav-start-left);
+  --room-nav-living-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 1);
+  --room-nav-manager-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 2);
+  --room-nav-honor-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 3);
+  --room-nav-studio-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 4);
+  --room-nav-game-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 5);
+  --room-nav-dorm-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 6);
+  --room-nav-flower-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 7);
+  --room-nav-pets-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 8);
+
+  --room-nav-text:#6f5746;
+  --room-nav-border:rgba(158,122,93,.26);
+  --room-nav-current-text:#5d4738;
+  --room-nav-current-border:rgba(151,111,82,.42);
+  --room-nav-paper:rgba(255,250,242,.78);
+  --room-nav-paper-2:rgba(246,235,219,.74);
+  --room-nav-wash:rgba(214,185,157,.20);
+  --room-nav-current-bg:rgba(239,224,205,.86);
+
+  /* 奖励弹窗基础颜色 */
+  --reward-ink:#6b5141;
+  --reward-text:#7d6557;
+  --reward-line:rgba(190,143,112,0.24);
+  --reward-soft-line:rgba(174,132,103,0.14);
+  --ink:var(--reward-ink);
+  --text:var(--reward-text);
+  --line:var(--reward-line);
+  --soft-line:var(--reward-soft-line);
+  --card-shadow:rgba(106,78,55,0.20);
 
   --flower-app-left:8.8%;
   --flower-app-top:22.2%;
   --flower-app-width:66.8%;
   --flower-app-height:67.6%;
 
-  /* 页面可改颜色，不改结构尺寸 */
-  --identity-bg:rgba(255,248,239,0.92);
-  --identity-inner-bg:rgba(255,252,247,0.96);
-  --identity-border:rgba(186,146,103,0.24);
-  --identity-text:#6c4523;
-  --identity-shadow:rgba(116,86,54,0.12);
-
-  --nav-text:#6e4827;
-  --nav-border:rgba(145,98,56,.34);
-
-  /* 文字垂直校准：房间按钮与身份组件分开，避免互相影响 */
-  --nav-label-y:0.045em;
-  --identity-text-y:0.015em;
-  --identity-button-y:0.01em;
-  --notice-icon-y:0em;
 }
 
 html,body{
@@ -112,6 +142,25 @@ button,input{
 
 #overlay *{
   pointer-events:auto;
+}
+
+/* 修复：#overlay * 的优先级高于 .roomNavLayer，会把整层房间按钮层变成透明遮罩，挡住花市买卖按钮 */
+#overlay .roomNavLayer{
+  pointer-events:none!important;
+}
+
+#overlay .roomNavLayer .navBtn{
+  pointer-events:auto!important;
+}
+
+#overlay .roomIdentity{
+  pointer-events:none!important;
+}
+
+#overlay .roomIdentity .roomIdentityBar,
+#overlay .roomIdentity button,
+#overlay .roomIdentity .identityNoticePanel{
+  pointer-events:auto!important;
 }
 
 
@@ -235,348 +284,104 @@ button,input{
 }
 
 /* =========================================================
-   身份组件：全站统一结构
+   房间按钮组件
 ========================================================= */
-#topActions{
+.roomNavLayer{
   position:absolute;
-  right:var(--identity-right);
-  top:var(--identity-top);
-  width:var(--identity-width);
-  height:var(--identity-height);
-  min-width:0;
-  min-height:0;
-  z-index:65;
-  pointer-events:none;
-}
-
-#topIdentityBar{
-  width:100%;
-  height:100%;
-  display:flex;
-  align-items:stretch;
-  justify-content:flex-start;
-  gap:calc(5px * var(--ui-scale));
-  padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
-  border-radius:calc(13px * var(--ui-scale));
-  background:var(--identity-bg);
-  border:1px solid var(--identity-border);
-  box-shadow:
-    0 calc(10px * var(--ui-scale)) calc(24px * var(--ui-scale)) var(--identity-shadow),
-    inset 0 1px 0 rgba(255,255,255,0.9);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  pointer-events:auto;
-  overflow:visible;
-  white-space:nowrap;
-}
-
-#topIdentityBadge,
-#loginOpenBtn,
-#logoutBtn,
-#siteNoticeBtn{
-  border-radius:calc(9px * var(--ui-scale));
-  background:var(--identity-inner-bg);
-  color:var(--identity-text);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    0 1px 4px rgba(112,83,52,0.05);
-  border:1px solid rgba(160,116,78,0.12);
-}
-
-#topIdentityBadge{
-  flex:1 1 auto;
-  min-width:0;
-  padding:0 calc(8px * var(--ui-scale));
-  font-size:calc(13px * var(--ui-scale));
-  font-weight:800;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  white-space:nowrap;
-}
-
-#topIdentityBadge .identityText{
-  min-width:0;
-  height:auto;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  line-height:1;
-  padding-top:0;
-  transform:translateY(var(--identity-text-y));
-}
-
-#loginOpenBtn,
-#logoutBtn{
-  appearance:none;
-  cursor:pointer;
-  width:calc(42px * var(--ui-scale));
-  min-width:calc(42px * var(--ui-scale));
-  flex:0 0 calc(42px * var(--ui-scale));
-  padding:var(--identity-button-y) 0 0;
-  color:#67401f;
-  font-size:calc(12px * var(--ui-scale));
-  font-weight:800;
-  line-height:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
-  overflow:hidden;
-  white-space:nowrap;
-}
-
-#loginOpenBtn:hover,
-#logoutBtn:hover,
-#siteNoticeBtn:hover{
-  transform:translateY(-1px);
-  background:rgba(255,255,255,0.94);
-}
-
-#siteNoticeWrap{
-  position:relative;
-  width:calc(30px * var(--ui-scale));
-  min-width:calc(30px * var(--ui-scale));
-  flex:0 0 calc(30px * var(--ui-scale));
-  display:flex;
-  align-items:stretch;
-  justify-content:center;
-  overflow:visible;
-}
-
-#siteNoticeBtn{
-  appearance:none;
-  cursor:pointer;
-  position:relative;
-  width:100%;
-  height:100%;
-  padding:0;
-  font-size:calc(14px * var(--ui-scale));
-  font-weight:800;
-  line-height:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
-}
-
-#siteNoticeIcon{
-  width:100%;
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  line-height:1;
-  transform:translateY(var(--notice-icon-y));
-  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
-}
-
-#siteNoticeCount{
-  position:absolute;
-  right:calc(-6px * var(--ui-scale));
-  top:calc(-6px * var(--ui-scale));
-  min-width:calc(18px * var(--ui-scale));
-  height:calc(18px * var(--ui-scale));
-  padding:0 calc(5px * var(--ui-scale));
-  border-radius:999px;
-  background:#c98c4f;
-  color:#fff9f1;
-  font-size:calc(9px * var(--ui-scale));
-  font-weight:900;
-  line-height:1;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  border:calc(2px * var(--ui-scale)) solid rgba(255,248,239,0.98);
-  box-shadow:0 2px 8px rgba(116,86,54,0.16);
-  z-index:3;
-}
-
-#siteNoticeBtn.hasNotice #siteNoticeCount{
-  display:flex;
-}
-
-#siteNoticePanel{
-  position:absolute;
-  top:calc(100% + 10px);
-  right:0;
-  width:min(calc(360px * var(--ui-scale)), 72vw);
-  max-height:min(calc(540px * var(--ui-scale)), 70vh);
-  overflow:auto;
-  padding:calc(12px * var(--ui-scale));
-  border-radius:calc(16px * var(--ui-scale));
-  background:rgba(255,249,241,0.98);
-  border:1px solid rgba(203,167,123,0.28);
-  box-shadow:0 16px 36px rgba(85,58,34,0.16);
-  display:none;
-  z-index:80;
-  text-align:left;
-}
-
-#siteNoticePanel.show{
-  display:block;
-}
-
-.siteNoticeTitle{
-  color:#6f4726;
-  font-size:calc(13px * var(--ui-scale));
-  font-weight:900;
-  margin-bottom:calc(10px * var(--ui-scale));
-}
-
-.siteNoticeEmpty{
-  color:#8a6644;
-  font-size:calc(12px * var(--ui-scale));
-  line-height:1.6;
-  padding:6px 2px 2px;
-}
-
-.siteNoticeList{
-  display:flex;
-  flex-direction:column;
-  gap:calc(6px * var(--ui-scale));
-}
-
-.siteNoticeItem{
-  padding:calc(10px * var(--ui-scale));
-  border-radius:calc(12px * var(--ui-scale));
-  background:rgba(255,252,247,0.82);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.92),
-    0 2px 8px rgba(120,92,63,0.05);
-}
-
-.siteNoticeItemTitle{
-  color:#6f4726;
-  font-size:calc(12px * var(--ui-scale));
-  font-weight:800;
-  line-height:1.5;
-  margin-bottom:4px;
-}
-
-.siteNoticeItemDesc{
-  color:#8a6644;
-  font-size:calc(11px * var(--ui-scale));
-  line-height:1.55;
-}
-
-/* =========================================================
-   房间切换按钮：花房页不显示“花房区”按钮
-========================================================= */
-#topBar{
-  position:absolute;
-  left:var(--room-nav-left);
-  top:var(--room-nav-top);
-  width:var(--room-nav-width);
-  display:flex;
-  align-items:flex-start;
-  justify-content:flex-start;
+  inset:0;
   z-index:55;
-  overflow:visible;
   pointer-events:none;
-
-  --nav-fit-scale:1;
-  --nav-scale:calc(var(--ui-scale) * var(--nav-fit-scale));
-  --nav-btn-height:calc(40px * var(--nav-scale));
-  --nav-btn-px:calc(16px * var(--nav-scale));
-  --nav-btn-radius:calc(13px * var(--nav-scale));
-  --nav-btn-font:calc(14px * var(--nav-scale));
-  --nav-gap:calc(8px * var(--nav-scale));
-}
-
-#navOuter,
-#navScroll{
-  overflow:visible;
-}
-
-#navOuter{
-  flex:0 0 auto;
-  min-width:0;
-  width:100%;
-  pointer-events:auto;
-}
-
-#navScroll{
-  width:100%;
-  white-space:nowrap;
-  padding:0;
-  margin:0;
-}
-
-#roomNav{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:var(--nav-gap);
+  --s:var(--room-nav-scale,1);
+  --nav-btn-radius:calc(15px * var(--s));
+  --nav-btn-font:calc(15px * var(--s));
+  --nav-btn-border:calc(1px * var(--s));
+  --nav-btn-shadow-y:calc(3px * var(--s));
+  --nav-btn-shadow-blur:calc(8px * var(--s));
 }
 
 .navBtn{
   appearance:none;
   border:none;
   cursor:pointer;
-  position:relative;
-  flex:0 0 auto;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height:var(--nav-btn-height);
-  padding:0 var(--nav-btn-px);
+  position:absolute;
+  top:var(--room-nav-top);
+  width:var(--room-nav-btn-width);
+  height:var(--room-nav-btn-height);
+  min-width:0;
+  min-height:0;
+  padding:0;
   border-radius:var(--nav-btn-radius);
-  color:var(--nav-text);
+  color:var(--room-nav-text);
   font-size:var(--nav-btn-font);
   font-weight:900;
-  line-height:1;
   white-space:nowrap;
   overflow:visible;
   isolation:isolate;
   background:
-    linear-gradient(180deg, rgba(249,232,203,.90) 0%, rgba(226,195,152,.86) 100%);
-  border:1px solid var(--nav-border);
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,.56), transparent 40%),
+    radial-gradient(circle at 78% 74%, var(--room-nav-wash), transparent 48%),
+    linear-gradient(180deg, var(--room-nav-paper) 0%, var(--room-nav-paper-2) 100%);
+  border:var(--nav-btn-border) solid var(--room-nav-border);
   box-shadow:
-    0 1px 1px rgba(255,255,255,.48) inset,
-    0 2px 5px rgba(91,68,45,.13);
-  text-shadow:0 1px 0 rgba(255,255,255,.42);
-  transition:
-    background .18s ease,
-    border-color .18s ease,
-    box-shadow .18s ease,
-    color .18s ease,
-    filter .18s ease;
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.64),
+    0 calc(2px * var(--s)) calc(7px * var(--s)) rgba(96,70,48,.10);
+  text-shadow:0 calc(1px * var(--s)) 0 rgba(255,255,255,.38);
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;
   font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  pointer-events:auto;
 }
 
-.navBtn:hover,
-.navBtn:focus-visible{
+.navBtn[data-room="hall"]{left:var(--room-nav-hall-left);}
+.navBtn[data-room="living"]{left:var(--room-nav-living-left);}
+.navBtn[data-room="manager"]{left:var(--room-nav-manager-left);}
+.navBtn[data-room="honor"]{left:var(--room-nav-honor-left);}
+.navBtn[data-room="studio"]{left:var(--room-nav-studio-left);}
+.navBtn[data-room="game"]{left:var(--room-nav-game-left);}
+.navBtn[data-room="dorm"]{left:var(--room-nav-dorm-left);}
+.navBtn[data-room="flower"]{left:var(--room-nav-flower-left);}
+.navBtn[data-room="pets"]{left:var(--room-nav-pets-left);}
+
+.navBtn:not(.is-current):hover,
+.navBtn:not(.is-current):focus-visible{
   color:#5f3d22;
   background:
-    linear-gradient(180deg, rgba(252,238,215,.95) 0%, rgba(232,205,166,.90) 100%);
-  border-color:rgba(153,102,55,.48);
+    radial-gradient(circle at 20% 24%, rgba(255,255,255,.66), transparent 42%),
+    radial-gradient(circle at 80% 78%, rgba(207,170,143,.24), transparent 50%),
+    linear-gradient(180deg, rgba(255,252,246,.88) 0%, rgba(239,226,210,.82) 100%);
+  border-color:rgba(151,112,84,.36);
   box-shadow:
-    0 1px 1px rgba(255,255,255,.55) inset,
-    0 3px 7px rgba(91,68,45,.15);
-  filter:brightness(1.015);
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.70),
+    0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.12);
+  filter:saturate(1.02);
+}
+
+.navBtn.is-current{
+  cursor:default;
+  color:var(--room-nav-current-text);
+  background:
+    radial-gradient(circle at 22% 22%, rgba(255,255,255,.62), transparent 42%),
+    radial-gradient(circle at 80% 80%, rgba(190,151,126,.26), transparent 50%),
+    linear-gradient(180deg, rgba(246,235,222,.94) 0%, var(--room-nav-current-bg) 100%);
+  border-color:var(--room-nav-current-border);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.68),
+    0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.13),
+    0 0 0 calc(2px * var(--s)) rgba(255,253,248,.46);
+  filter:none;
 }
 
 .navLabel{
   position:relative;
   z-index:5;
+  width:100%;
+  height:100%;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  max-width:100%;
-  height:auto;
   overflow:visible;
   white-space:nowrap;
-  line-height:1;
-  padding-top:0;
-  transform:translateY(var(--nav-label-y));
+  line-height:normal;
+  padding-top:.06em;
 }
 
 .navEffect{
@@ -588,100 +393,281 @@ button,input{
   font-weight:900;
   line-height:1;
   text-shadow:
-    0 1px 2px rgba(255,250,232,.82),
-    0 0 8px rgba(255,246,210,.52);
+    0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.82),
+    0 0 calc(8px * var(--s)) rgba(255,246,210,.52);
   filter:saturate(.95);
 }
 
-.navEffectA{
-  left:8%;
-  top:-54%;
-  font-size:calc(var(--nav-btn-font) * .92);
-}
-
-.navEffectB{
-  right:8%;
-  top:-62%;
-  font-size:calc(var(--nav-btn-font) * .86);
-}
-
-.navEffectC{
-  left:50%;
-  top:-72%;
-  transform:translateX(-50%);
-  font-size:calc(var(--nav-btn-font) * 1.02);
-}
+.navEffectA{left:8%;top:-54%;font-size:calc(var(--nav-btn-font) * .92);}
+.navEffectB{right:8%;top:-62%;font-size:calc(var(--nav-btn-font) * .86);}
+.navEffectC{left:50%;top:-72%;transform:translateX(-50%);font-size:calc(var(--nav-btn-font) * 1.02);}
 
 @keyframes navFloatA{
-  0%,100%{ transform:translateY(4px) rotate(-8deg) scale(.82); opacity:0; }
+  0%,100%{ transform:translateY(calc(4px * var(--s))) rotate(-8deg) scale(.82); opacity:0; }
   20%,72%{ opacity:.86; }
-  50%{ transform:translateY(-5px) rotate(6deg) scale(1); opacity:.76; }
+  50%{ transform:translateY(calc(-5px * var(--s))) rotate(6deg) scale(1); opacity:.76; }
 }
-
 @keyframes navFloatB{
-  0%,100%{ transform:translateY(5px) rotate(9deg) scale(.78); opacity:0; }
+  0%,100%{ transform:translateY(calc(5px * var(--s))) rotate(9deg) scale(.78); opacity:0; }
   24%,70%{ opacity:.78; }
-  52%{ transform:translateY(-6px) rotate(-7deg) scale(1); opacity:.68; }
+  52%{ transform:translateY(calc(-6px * var(--s))) rotate(-7deg) scale(1); opacity:.68; }
 }
-
 @keyframes navFloatC{
-  0%,100%{ transform:translateX(-50%) translateY(6px) rotate(0deg) scale(.76); opacity:0; }
+  0%,100%{ transform:translateX(-50%) translateY(calc(6px * var(--s))) rotate(0deg) scale(.76); opacity:0; }
   24%,70%{ opacity:.88; }
-  50%{ transform:translateX(-50%) translateY(-6px) rotate(2deg) scale(1); opacity:.78; }
+  50%{ transform:translateX(-50%) translateY(calc(-6px * var(--s))) rotate(2deg) scale(1); opacity:.78; }
 }
 
-.navBtn:hover .navEffectA,
-.navBtn:focus-visible .navEffectA{
-  animation:navFloatA 2.2s ease-in-out infinite;
+.navBtn:not(.is-current):hover .navEffectA,
+.navBtn:not(.is-current):focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite;}
+.navBtn:not(.is-current):hover .navEffectB,
+.navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite;}
+.navBtn:not(.is-current):hover .navEffectC,
+.navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite;}
+.navBtn.is-current .navEffect{display:none;}
+
+.navBtn[data-room="hall"] .navEffect{color:rgba(255,205,96,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.95),0 0 calc(10px * var(--s)) rgba(255,215,105,.62);}
+.navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82);}
+.navBtn[data-room="honor"] .navEffect{color:rgba(205,143,45,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.92),0 0 calc(8px * var(--s)) rgba(255,220,130,.52);}
+.navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82);}
+.navBtn[data-room="studio"] .navEffect{color:rgba(96,112,145,.84);}
+.navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82);}
+.navBtn[data-room="dorm"] .navEffect{color:rgba(148,112,171,.78);}
+.navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82);}
+.navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82);}
+
+/* =========================================================
+   身份组件
+========================================================= */
+.roomIdentity{
+  --s:var(--identity-scale,1);
+  position:absolute;
+  right:var(--identity-right);
+  top:var(--identity-top);
+  width:calc(var(--identity-base-width) * 1px * var(--s));
+  height:calc(var(--identity-base-height) * 1px * var(--s));
+  min-width:calc(var(--identity-base-width) * 1px * var(--s));
+  min-height:calc(var(--identity-base-height) * 1px * var(--s));
+  z-index:70;
+  pointer-events:none;
+  overflow:visible;
 }
 
-.navBtn:hover .navEffectB,
-.navBtn:focus-visible .navEffectB{
-  animation:navFloatB 2.5s ease-in-out infinite;
+.roomIdentityBar{
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-template-columns:minmax(calc(130px * var(--s)),1fr) calc(30px * var(--s)) calc(42px * var(--s));
+  gap:calc(5px * var(--s));
+  padding:calc(4px * var(--s)) calc(5px * var(--s));
+  border-radius:calc(13px * var(--s));
+  background:var(--identity-bg);
+  border:calc(1px * var(--s)) solid var(--identity-border);
+  box-shadow:
+    0 calc(10px * var(--s)) calc(24px * var(--s)) var(--identity-shadow),
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.9);
+  backdrop-filter:blur(calc(8px * var(--s)));
+  -webkit-backdrop-filter:blur(calc(8px * var(--s)));
+  pointer-events:auto;
+  overflow:visible;
+  white-space:nowrap;
 }
 
-.navBtn:hover .navEffectC,
-.navBtn:focus-visible .navEffectC{
-  animation:navFloatC 2.35s ease-in-out infinite;
+.identityNameBox,
+.identityNoticeBtn,
+.identityAuthBtn{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  border-radius:calc(9px * var(--s));
+  background:var(--identity-inner-bg);
+  color:var(--identity-text);
+  border:calc(1px * var(--s)) solid rgba(160,116,78,0.12);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.95),
+    0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,0.05);
 }
 
-/* 各房间特效颜色 */
-.navBtn[data-room="hall"] .navEffect{
-  color:rgba(255,205,96,.86);
-  text-shadow:
-    0 1px 2px rgba(255,250,232,.95),
-    0 0 10px rgba(255,215,105,.62);
+.identityNameBox{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 calc(8px * var(--s));
+  overflow:visible;
 }
 
-.navBtn[data-room="manager"] .navEffect{
-  color:rgba(128,91,58,.82);
+.identityNameText{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  max-width:100%;
+  color:var(--identity-text);
+  font-size:calc(13px * var(--s));
+  font-weight:850;
+  line-height:1.22;
+  letter-spacing:0;
+  white-space:nowrap;
+  overflow:visible;
+  text-overflow:clip;
+  transform:translateY(var(--identity-name-y));
 }
 
-.navBtn[data-room="honor"] .navEffect{
-  color:rgba(205,143,45,.86);
-  text-shadow:
-    0 1px 2px rgba(255,250,232,.92),
-    0 0 8px rgba(255,220,130,.52);
+.identityNameText.isOverflowSafe{overflow:hidden;text-overflow:ellipsis;}
+
+.identityNoticeWrap{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:visible;
 }
 
-.navBtn[data-room="game"] .navEffect{
-  color:rgba(117,91,150,.82);
+.identityNoticeBtn,
+.identityAuthBtn{
+  appearance:none;
+  cursor:pointer;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
 }
 
-.navBtn[data-room="studio"] .navEffect{
-  color:rgba(96,112,145,.84);
+.identityNoticeBtn{
+  width:100%;
+  height:100%;
+  font-size:calc(14px * var(--s));
 }
 
-.navBtn[data-room="living"] .navEffect{
-  color:rgba(202,132,70,.82);
+.identityNoticeIcon{
+  display:flex;
+  width:100%;
+  height:100%;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  transform:translateY(var(--identity-notice-y));
+  filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,0.55));
 }
 
-.navBtn[data-room="dorm"] .navEffect{
-  color:rgba(148,112,171,.78);
+.identityNoticeCount{
+  position:absolute;
+  right:calc(-6px * var(--s));
+  top:calc(-6px * var(--s));
+  min-width:calc(18px * var(--s));
+  height:calc(18px * var(--s));
+  padding:0 calc(5px * var(--s));
+  border-radius:999px;
+  background:#b98f72;
+  color:#fffaf6;
+  font-size:calc(9px * var(--s));
+  font-weight:900;
+  line-height:1;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:calc(2px * var(--s)) solid rgba(255,248,239,0.98);
+  box-shadow:0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(116,86,54,0.16);
+  z-index:3;
 }
 
-.navBtn[data-room="pets"] .navEffect{
-  color:rgba(131,111,78,.82);
+.identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex;}
+
+.identityAuthBtn{
+  width:100%;
+  height:100%;
+  color:#6f5746;
+  font-size:calc(12px * var(--s));
+  font-weight:850;
+  line-height:1.18;
+  white-space:nowrap;
+  overflow:visible;
+}
+
+.identityAuthText{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1.18;
+  transform:translateY(var(--identity-button-y));
+}
+
+.identityNoticeBtn:hover,
+.identityAuthBtn:hover{
+  transform:translateY(calc(-1px * var(--s)));
+  background:rgba(255,255,255,0.94);
+}
+
+.identityNoticePanel{
+  position:absolute;
+  top:calc(100% + 10px * var(--s));
+  right:0;
+  width:min(calc(360px * var(--s)),72vw);
+  max-height:min(calc(540px * var(--s)),70vh);
+  overflow:auto;
+  padding:calc(12px * var(--s));
+  border-radius:calc(16px * var(--s));
+  background:rgba(255,249,241,0.98);
+  border:calc(1px * var(--s)) solid rgba(203,167,123,0.28);
+  box-shadow:0 calc(16px * var(--s)) calc(36px * var(--s)) rgba(85,58,34,0.16);
+  display:none;
+  z-index:80;
+  text-align:left;
+}
+
+.identityNoticePanel.show{display:block;}
+
+.identityNoticeTitle{
+  color:#6f4726;
+  font-size:calc(13px * var(--s));
+  font-weight:900;
+  margin-bottom:calc(10px * var(--s));
+}
+
+.identityNoticeEmpty{
+  color:#8a6644;
+  font-size:calc(12px * var(--s));
+  line-height:1.6;
+  padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s));
+}
+
+
+
+
+.siteNoticeEmpty{
+  color:#8a6644;
+  font-size:calc(12px * var(--identity-scale,1));
+  line-height:1.6;
+  padding:6px 2px 2px;
+}
+
+.siteNoticeList{
+  display:flex;
+  flex-direction:column;
+  gap:calc(6px * var(--identity-scale,1));
+}
+
+.siteNoticeItem{
+  padding:calc(10px * var(--identity-scale,1));
+  border-radius:calc(12px * var(--identity-scale,1));
+  background:rgba(255,252,247,0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.92),
+    0 2px 8px rgba(120,92,63,0.05);
+}
+
+.siteNoticeItemTitle{
+  color:#6f4726;
+  font-size:calc(12px * var(--identity-scale,1));
+  font-weight:800;
+  line-height:1.5;
+  margin-bottom:4px;
+}
+
+.siteNoticeItemDesc{
+  color:#8a6644;
+  font-size:calc(11px * var(--identity-scale,1));
+  line-height:1.55;
 }
 
 
@@ -896,6 +882,8 @@ button,input{
 }
 
 .flowerQtyInput{
+  appearance:textfield;
+  -moz-appearance:textfield;
   width:100%;
   min-width:0;
   height:calc(24px * var(--ui-scale));
@@ -904,9 +892,12 @@ button,input{
   border:1px solid rgba(153,104,62,.20);
   background:rgba(255,253,248,.88);
   color:#6a4223;
-  font-size:calc(11px * var(--ui-scale));
+  font-size:calc(10.5px * var(--ui-scale));
   font-weight:900;
+  line-height:calc(22px * var(--ui-scale));
   text-align:center;
+  vertical-align:middle;
+  font-family:inherit;
   outline:none;
   box-shadow:inset 0 1px 2px rgba(118,82,45,.045);
 }
@@ -914,6 +905,12 @@ button,input{
 .flowerQtyInput:focus{
   border-color:rgba(166,113,64,.36);
   box-shadow:0 0 0 calc(2px * var(--ui-scale)) rgba(218,179,111,.16);
+}
+
+.flowerQtyInput::-webkit-outer-spin-button,
+.flowerQtyInput::-webkit-inner-spin-button{
+  -webkit-appearance:none;
+  margin:0;
 }
 
 .flowerQtyFiveBtn{
@@ -1259,345 +1256,427 @@ button,input{
 }
 
 
-/* =========================================================
-   首次进入花房奖励弹窗：花朵边框
-   只在这里统一缩放，避免小屏弹窗过大；不影响页面其他布局
-========================================================= */
-#flowerRewardModal{
-  position:fixed;
-  inset:0;
-  z-index:1000;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:calc(18px * var(--reward-scale));
-  background:rgba(64,45,30,.30);
-  backdrop-filter:blur(calc(5px * var(--reward-scale)));
-  -webkit-backdrop-filter:blur(calc(5px * var(--reward-scale)));
-  --reward-scale:1;
+/* =========================
+   统一奖励弹窗（来自独立测试页）
+========================= */
+
+.reward-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(64, 45, 30, 0.30);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  --reward-scale: var(--reward-modal-scale, 1);
 }
 
-#flowerRewardModal.show{
-  display:flex;
+.reward-mask.show {
+  display: flex!important;
 }
 
-.flowerRewardCard{
-  position:relative;
-  width:min(calc(430px * var(--reward-scale)), calc(100vw - 28px));
-  max-height:calc(100dvh - (28px * var(--reward-scale)));
-  padding:calc(28px * var(--reward-scale)) calc(24px * var(--reward-scale)) calc(22px * var(--reward-scale));
-  border-radius:calc(26px * var(--reward-scale));
+.reward-card {
+  position: relative;
+  width: min(calc(430px * var(--reward-scale)), calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  padding:
+    calc(28px * var(--reward-scale))
+    calc(24px * var(--reward-scale))
+    calc(22px * var(--reward-scale));
+  border-radius: calc(26px * var(--reward-scale));
+  overflow: hidden auto;
+  text-align: center;
+  color: var(--ink);
   background:
     radial-gradient(circle at 12% 16%, rgba(255,226,235,.68), transparent 30%),
     radial-gradient(circle at 86% 18%, rgba(255,240,181,.62), transparent 32%),
     linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,244,226,.96));
-  border:calc(2px * var(--reward-scale)) solid rgba(216,157,106,.35);
+  border: calc(2px * var(--reward-scale)) solid var(--line);
   box-shadow:
-    0 calc(22px * var(--reward-scale)) calc(54px * var(--reward-scale)) rgba(69,47,28,.24),
+    0 calc(22px * var(--reward-scale)) calc(54px * var(--reward-scale)) var(--card-shadow),
     inset 0 1px 0 rgba(255,255,255,.9);
-  color:#6a4223;
-  text-align:center;
-  overflow:hidden auto;
-  transform-origin:center center;
-  scrollbar-width:thin;
+  animation: rewardPop .42s cubic-bezier(.2, 1.12, .34, 1) both;
 }
 
-.flowerRewardCard::-webkit-scrollbar{
-  width:calc(7px * var(--reward-scale));
+.reward-card::before,
+.reward-card::after {
+  position: absolute;
+  left: calc(12px * var(--reward-scale));
+  right: calc(12px * var(--reward-scale));
+  font-size: calc(15px * var(--reward-scale));
+  letter-spacing: calc(8px * var(--reward-scale));
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.flowerRewardCard::-webkit-scrollbar-thumb{
-  background:rgba(160,111,72,.24);
-  border-radius:999px;
+.reward-card::before {
+  content: "✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  top: calc(9px * var(--reward-scale));
+  color: rgba(209, 120, 148, 0.52);
 }
 
-#flowerRewardModal.show .flowerRewardCard{
-  animation:flowerRewardPop .46s cubic-bezier(.2,1.15,.34,1) both;
+.reward-card::after {
+  content: "✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  bottom: calc(8px * var(--reward-scale));
+  color: rgba(199, 145, 75, 0.44);
 }
 
-#flowerRewardModal.claimed .flowerRewardCard{
-  animation:flowerRewardClaimedPulse .72s ease both;
+@keyframes rewardPop {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(12px * var(--reward-scale))) scale(.9);
+  }
+  64% {
+    opacity: 1;
+    transform: translateY(0) scale(1.025);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.flowerRewardPetals{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  overflow:hidden;
-  z-index:1;
+.reward-close {
+  position: absolute;
+  z-index: 6;
+  top: calc(12px * var(--reward-scale));
+  right: calc(12px * var(--reward-scale));
+  width: calc(30px * var(--reward-scale));
+  height: calc(30px * var(--reward-scale));
+  border: none;
+  border-radius: 999px;
+  background: rgba(255,250,242,.88);
+  color: #7b5636;
+  font-size: calc(18px * var(--reward-scale));
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    0 calc(2px * var(--reward-scale)) calc(8px * var(--reward-scale)) rgba(105,75,43,.10),
+    inset 0 1px 0 rgba(255,255,255,.9);
 }
 
-.flowerRewardPetals span{
-  position:absolute;
-  top:calc(-18px * var(--reward-scale));
-  color:rgba(220,132,154,.56);
-  font-size:calc(16px * var(--reward-scale));
-  opacity:0;
-  text-shadow:0 calc(2px * var(--reward-scale)) calc(4px * var(--reward-scale)) rgba(255,255,255,.76);
+.reward-close:hover {
+  filter: brightness(1.02);
 }
 
-#flowerRewardModal.show .flowerRewardPetals span{
-  animation:flowerRewardPetalFall 1.35s ease-in-out both;
+.reward-petals {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-.flowerRewardPetals span:nth-child(1){left:12%; animation-delay:.05s;}
-.flowerRewardPetals span:nth-child(2){left:28%; animation-delay:.18s;}
-.flowerRewardPetals span:nth-child(3){left:48%; animation-delay:.02s;}
-.flowerRewardPetals span:nth-child(4){left:66%; animation-delay:.22s;}
-.flowerRewardPetals span:nth-child(5){left:82%; animation-delay:.10s;}
-
-.flowerRewardContent{
-  position:relative;
-  z-index:2;
+.reward-petals span {
+  position: absolute;
+  top: calc(-18px * var(--reward-scale));
+  color: rgba(220,132,154,.56);
+  font-size: calc(16px * var(--reward-scale));
+  opacity: 0;
+  text-shadow:
+    0 calc(2px * var(--reward-scale)) calc(4px * var(--reward-scale)) rgba(255,255,255,.76);
+  animation: rewardPetalFall 1.35s ease-in-out both;
 }
 
-@keyframes flowerRewardPop{
-  0%{opacity:0; transform:translateY(calc(12px * var(--reward-scale))) scale(.88);}
-  62%{opacity:1; transform:translateY(0) scale(1.035);}
-  100%{opacity:1; transform:translateY(0) scale(1);}
+.reward-petals span:nth-child(1) { left: 12%; animation-delay: .05s; }
+.reward-petals span:nth-child(2) { left: 28%; animation-delay: .18s; }
+.reward-petals span:nth-child(3) { left: 48%; animation-delay: .02s; }
+.reward-petals span:nth-child(4) { left: 66%; animation-delay: .22s; }
+.reward-petals span:nth-child(5) { left: 82%; animation-delay: .10s; }
+
+@keyframes rewardPetalFall {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(-14px * var(--reward-scale))) rotate(0deg) scale(.78);
+  }
+  20% {
+    opacity: .85;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(145px * var(--reward-scale))) rotate(160deg) scale(1);
+  }
 }
 
-@keyframes flowerRewardClaimedPulse{
-  0%,100%{transform:scale(1);}
-  42%{transform:scale(1.025); box-shadow:0 calc(24px * var(--reward-scale)) calc(58px * var(--reward-scale)) rgba(69,47,28,.22), 0 0 0 calc(8px * var(--reward-scale)) rgba(255,222,145,.16), inset 0 1px 0 rgba(255,255,255,.9);}
+.reward-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-@keyframes flowerRewardPetalFall{
-  0%{opacity:0; transform:translateY(calc(-14px * var(--reward-scale))) rotate(0deg) scale(.78);}
-  20%{opacity:.85;}
-  100%{opacity:0; transform:translateY(calc(145px * var(--reward-scale))) rotate(160deg) scale(1);}
+.reward-icon {
+  width: calc(62px * var(--reward-scale));
+  height: calc(62px * var(--reward-scale));
+  margin:
+    calc(4px * var(--reward-scale))
+    auto
+    calc(12px * var(--reward-scale));
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,246,226,.78);
+  border: 1px solid rgba(220,164,102,.25);
+  box-shadow:
+    0 calc(8px * var(--reward-scale)) calc(20px * var(--reward-scale)) rgba(126,92,51,.10),
+    inset 0 1px 0 rgba(255,255,255,.85);
+  font-size: calc(34px * var(--reward-scale));
 }
 
-.flowerRewardCard::before{
-  content:"✿  ❀  ✽  ✿  ❀  ✽  ✿";
-  position:absolute;
-  left:calc(12px * var(--reward-scale));
-  right:calc(12px * var(--reward-scale));
-  top:calc(9px * var(--reward-scale));
-  color:rgba(209,120,148,.58);
-  font-size:calc(16px * var(--reward-scale));
-  letter-spacing:calc(7px * var(--reward-scale));
-  white-space:nowrap;
-  overflow:hidden;
-  pointer-events:none;
+.reward-label {
+  min-height: calc(25px * var(--reward-scale));
+  padding: 0 calc(13px * var(--reward-scale));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255,249,232,.66);
+  border: 1px solid rgba(218,166,87,.20);
+  color: #b26a3a;
+  font-size: calc(13px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .06em;
+  animation: rewardStamp .42s ease both;
 }
 
-.flowerRewardCard::after{
-  content:"✿  ❀  ✽  ✿  ❀  ✽  ✿";
-  position:absolute;
-  left:calc(12px * var(--reward-scale));
-  right:calc(12px * var(--reward-scale));
-  bottom:calc(8px * var(--reward-scale));
-  color:rgba(199,145,75,.48);
-  font-size:calc(15px * var(--reward-scale));
-  letter-spacing:calc(7px * var(--reward-scale));
-  white-space:nowrap;
-  overflow:hidden;
-  pointer-events:none;
+.reward-title {
+  position: relative;
+  max-width: 100%;
+  margin:
+    calc(10px * var(--reward-scale))
+    auto
+    calc(8px * var(--reward-scale));
+  padding:
+    calc(8px * var(--reward-scale))
+    calc(18px * var(--reward-scale));
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: calc(22px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1.15;
+  background: rgba(255,249,232,.72);
+  border: 1px solid rgba(218,166,87,.24);
+  box-shadow:
+    0 calc(5px * var(--reward-scale)) calc(14px * var(--reward-scale)) rgba(126,92,51,.08),
+    inset 0 1px 0 rgba(255,255,255,.82);
+  overflow: hidden;
 }
 
-.flowerRewardClose{
-  position:absolute;
-  top:calc(12px * var(--reward-scale));
-  right:calc(12px * var(--reward-scale));
-  width:calc(30px * var(--reward-scale));
-  height:calc(30px * var(--reward-scale));
-  border:none;
-  border-radius:999px;
-  cursor:pointer;
-  background:rgba(255,250,242,.88);
-  color:#7b5636;
-  font-size:calc(18px * var(--reward-scale));
-  line-height:1;
-  font-weight:900;
-  box-shadow:0 calc(2px * var(--reward-scale)) calc(8px * var(--reward-scale)) rgba(105,75,43,.10), inset 0 1px 0 rgba(255,255,255,.9);
+.reward-title::after {
+  content: "";
+  position: absolute;
+  inset: -30% auto -30% -42%;
+  width: 36%;
+  background: linear-gradient(90deg, transparent, rgba(255,234,160,.80), transparent);
+  transform: skewX(-18deg);
+  animation: rewardSweep 1.25s ease .22s both;
 }
 
-.flowerRewardIcon{
-  width:calc(62px * var(--reward-scale));
-  height:calc(62px * var(--reward-scale));
-  margin:calc(4px * var(--reward-scale)) auto calc(10px * var(--reward-scale));
-  border-radius:999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(255,246,226,.78);
-  border:1px solid rgba(220,164,102,.25);
-  box-shadow:0 calc(8px * var(--reward-scale)) calc(20px * var(--reward-scale)) rgba(126,92,51,.10), inset 0 1px 0 rgba(255,255,255,.85);
-  font-size:calc(34px * var(--reward-scale));
+@keyframes rewardStamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(.97);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.flowerRewardTitle{
-  font-size:calc(18px * var(--reward-scale));
-  font-weight:950;
-  line-height:1.25;
-  margin:0 calc(28px * var(--reward-scale)) calc(8px * var(--reward-scale));
-  color:#b26a3a;
+@keyframes rewardSweep {
+  0% { left: -42%; }
+  100% { left: 118%; }
 }
 
-#flowerRewardModal.show .flowerRewardTitle{
-  animation:flowerRewardStamp .48s ease both;
+.reward-desc {
+  width: 100%;
+  max-width: calc(330px * var(--reward-scale));
+  margin: 0 auto calc(14px * var(--reward-scale));
+  color: var(--text);
+  font-size: calc(13px * var(--reward-scale));
+  line-height: 1.65;
+  text-align: center;
+  white-space: pre-line;
 }
 
-.flowerRewardAchievementName{
-  position:relative;
-  display:inline-block;
-  max-width:100%;
-  margin:0 auto calc(9px * var(--reward-scale));
-  padding:calc(8px * var(--reward-scale)) calc(18px * var(--reward-scale));
-  border-radius:999px;
-  color:#6a4223;
-  font-size:calc(22px * var(--reward-scale));
-  font-weight:950;
-  line-height:1.15;
-  background:rgba(255,249,232,.72);
-  border:1px solid rgba(218,166,87,.24);
-  box-shadow:0 calc(5px * var(--reward-scale)) calc(14px * var(--reward-scale)) rgba(126,92,51,.08), inset 0 1px 0 rgba(255,255,255,.82);
-  overflow:hidden;
+.reward-section-title {
+  margin: 0 0 calc(10px * var(--reward-scale));
+  color: #8a5c33;
+  font-size: calc(12px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .08em;
 }
 
-.flowerRewardAchievementName::after{
-  content:"";
-  position:absolute;
-  inset:-30% auto -30% -42%;
-  width:36%;
-  background:linear-gradient(90deg, transparent, rgba(255,234,160,.80), transparent);
-  transform:skewX(-18deg);
+.reward-list {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-content: center;
+  gap: calc(8px * var(--reward-scale));
+  margin: 0 0 calc(16px * var(--reward-scale));
 }
 
-#flowerRewardModal.show .flowerRewardAchievementName::after{
-  animation:flowerRewardSweep 1.35s ease .25s both;
+.reward-list.count-1 {
+  grid-template-columns: minmax(0, calc(120px * var(--reward-scale)));
 }
 
-.flowerRewardSectionTitle{
-  margin:calc(10px * var(--reward-scale)) 0 0;
-  color:#8a5c33;
-  font-size:calc(12px * var(--reward-scale));
-  font-weight:950;
-  letter-spacing:.08em;
+.reward-list.count-2 {
+  grid-template-columns: repeat(2, minmax(0, calc(120px * var(--reward-scale))));
 }
 
-@keyframes flowerRewardStamp{
-  0%{opacity:0; transform:scale(1.16);}
-  72%{opacity:1; transform:scale(.96);}
-  100%{opacity:1; transform:scale(1);}
+.reward-list.empty {
+  display: none;
 }
 
-@keyframes flowerRewardSweep{
-  0%{left:-42%;}
-  100%{left:118%;}
+.reward-section-title.empty {
+  display: none;
 }
 
-.flowerRewardText{
-  color:#826046;
-  font-size:calc(13px * var(--reward-scale));
-  line-height:1.7;
-  margin:0 auto calc(14px * var(--reward-scale));
-  white-space:pre-line;
+.reward-item {
+  min-width: 0;
+  min-height: calc(84px * var(--reward-scale));
+  padding:
+    calc(10px * var(--reward-scale))
+    calc(7px * var(--reward-scale))
+    calc(9px * var(--reward-scale));
+  border-radius: calc(16px * var(--reward-scale));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,252,247,.72);
+  border: 1px solid var(--soft-line);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.82),
+    0 calc(3px * var(--reward-scale)) calc(10px * var(--reward-scale)) rgba(116,86,54,.06);
+  animation: rewardItemIn .38s ease both;
 }
 
-.flowerRewardItems{
-  display:grid;
-  grid-template-columns:repeat(3, minmax(0, 1fr));
-  gap:calc(8px * var(--reward-scale));
-  margin:calc(12px * var(--reward-scale)) 0 calc(16px * var(--reward-scale));
+.reward-item:nth-child(1) { animation-delay: .14s; }
+.reward-item:nth-child(2) { animation-delay: .24s; }
+.reward-item:nth-child(3) { animation-delay: .34s; }
+.reward-item:nth-child(4) { animation-delay: .44s; }
+
+@keyframes rewardItemIn {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(8px * var(--reward-scale))) scale(.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.flowerRewardItem{
-  min-width:0;
-  padding:calc(10px * var(--reward-scale)) calc(6px * var(--reward-scale)) calc(9px * var(--reward-scale));
-  border-radius:calc(16px * var(--reward-scale));
-  background:rgba(255,252,247,.72);
-  border:1px solid rgba(196,139,86,.16);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.82), 0 calc(3px * var(--reward-scale)) calc(10px * var(--reward-scale)) rgba(116,86,54,.06);
+.reward-item-icon {
+  font-size: calc(28px * var(--reward-scale));
+  line-height: 1;
+  margin-bottom: calc(7px * var(--reward-scale));
+  filter: drop-shadow(
+    0 calc(2px * var(--reward-scale))
+    calc(3px * var(--reward-scale))
+    rgba(96,65,35,.12)
+  );
 }
 
-#flowerRewardModal.show .flowerRewardItem{
-  animation:flowerRewardItemIn .42s ease both;
+.reward-item-name {
+  width: 100%;
+  color: #7b593b;
+  font-size: calc(11px * var(--reward-scale));
+  font-weight: 900;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-#flowerRewardModal.show .flowerRewardItem:nth-child(1){animation-delay:.18s;}
-#flowerRewardModal.show .flowerRewardItem:nth-child(2){animation-delay:.28s;}
-#flowerRewardModal.show .flowerRewardItem:nth-child(3){animation-delay:.38s;}
-
-@keyframes flowerRewardItemIn{
-  0%{opacity:0; transform:translateY(calc(8px * var(--reward-scale))) scale(.96);}
-  100%{opacity:1; transform:translateY(0) scale(1);}
+.reward-item-amount {
+  margin-top: calc(3px * var(--reward-scale));
+  color: var(--ink);
+  font-size: calc(13px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.flowerRewardItem img{
-  width:calc(30px * var(--reward-scale));
-  height:calc(30px * var(--reward-scale));
-  object-fit:contain;
-  display:block;
-  margin:0 auto calc(5px * var(--reward-scale));
-  filter:drop-shadow(0 calc(2px * var(--reward-scale)) calc(3px * var(--reward-scale)) rgba(96,65,35,.12));
+.reward-confirm {
+  min-width: calc(132px * var(--reward-scale));
+  height: calc(36px * var(--reward-scale));
+  border: 1px solid rgba(153,104,62,.22);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,238,200,.96), rgba(227,187,132,.90));
+  color: #67401f;
+  font-size: calc(13px * var(--reward-scale));
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.72),
+    0 calc(4px * var(--reward-scale)) calc(12px * var(--reward-scale)) rgba(112,80,42,.10);
 }
 
-.flowerRewardItemName{
-  font-size:calc(11px * var(--reward-scale));
-  color:#7b593b;
-  font-weight:900;
-  line-height:1.2;
+.reward-confirm:hover {
+  filter: brightness(1.02);
 }
 
-.flowerRewardItemQty{
-  margin-top:calc(2px * var(--reward-scale));
-  font-size:calc(13px * var(--reward-scale));
-  color:#6a4223;
-  font-weight:950;
-  line-height:1.2;
+/* 不同类型轻微换色 */
+
+.reward-mask[data-type="title"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,235,204,.72), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,229,154,.58), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,242,219,.96));
 }
 
-.flowerRewardConfirm{
-  appearance:none;
-  cursor:pointer;
-  min-width:calc(132px * var(--reward-scale));
-  height:calc(36px * var(--reward-scale));
-  border-radius:999px;
-  border:1px solid rgba(153,104,62,.22);
-  background:linear-gradient(180deg, rgba(255,238,200,.96), rgba(227,187,132,.90));
-  color:#67401f;
-  font-size:calc(13px * var(--reward-scale));
-  font-weight:950;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.72), 0 calc(4px * var(--reward-scale)) calc(12px * var(--reward-scale)) rgba(112,80,42,.10);
+.reward-mask[data-type="daily"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(224,244,216,.70), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,239,181,.50), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(241,248,229,.96));
 }
 
-.flowerRewardConfirm:hover,
-.flowerRewardClose:hover{
-  filter:brightness(1.02);
+.reward-mask[data-type="gift"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,226,235,.74), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(223,235,255,.58), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,240,231,.96));
 }
 
-.flowerRewardConfirm:disabled{
-  cursor:wait;
-  opacity:.68;
-  filter:none;
+.reward-mask[data-type="item"] .reward-card,
+.reward-mask[data-type="gold"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(223,239,255,.66), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,240,181,.52), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(235,246,252,.94));
 }
 
-#flowerRewardModal.claimed .flowerRewardItems,
-#flowerRewardModal.claimed .flowerRewardSectionTitle{
-  display:none;
+
+@media (max-width: 540px) {
+  .reward-mask {
+    padding: 14px;
+  }
 }
 
-#flowerRewardModal.claimed .flowerRewardConfirm{
-  display:none;
+@media (max-width: 340px) {
+  .reward-list,
+  .reward-list.count-1,
+  .reward-list.count-2 {
+    grid-template-columns: 1fr;
+  }
 }
 
-#flowerRewardModal.claimed .flowerRewardClose{
-  display:none;
-}
-
-@media(max-width:680px), (max-height:760px){
-  #flowerRewardModal{--reward-scale:.9;}
-}
-
-@media(max-width:540px), (max-height:680px){
-  #flowerRewardModal{--reward-scale:.82;}
-}
-
-@media(max-width:380px), (max-height:590px){
-  #flowerRewardModal{--reward-scale:.74;}
-}
 
 /* 登录弹窗 */
 #loginUI{
@@ -1771,50 +1850,61 @@ button,input{
     pointer-events:auto;
   }
 
-  #topActions{
-    position:sticky;
-    top:10px;
-    right:auto;
-    left:auto;
+  .roomNavLayer{
+    position:relative;
+    inset:auto;
     width:100%;
-    height:40px;
-    z-index:30;
-    order:1;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+    order:0;
+    z-index:20;
+    pointer-events:auto;
+    --s:1;
   }
 
-  #topIdentityBar{
+  .navBtn{
+    position:relative;
+    left:auto!important;
+    top:auto!important;
+    width:100%;
+    height:32px;
+    min-width:0;
+    min-height:32px;
+    border-radius:10px;
+    font-size:12px;
+    overflow:hidden;
+  }
+
+  .navLabel{padding-top:.04em;}
+  .navEffect{display:none;}
+
+  .roomIdentity{
+    --s:1;
+    position:relative;
+    right:auto;
+    top:auto;
+    width:100%;
+    min-width:0;
+    height:40px;
+    min-height:40px;
+    order:1;
+    z-index:30;
+  }
+
+  .roomIdentityBar{
+    grid-template-columns:minmax(0,1fr) 34px 42px;
     gap:6px;
     padding:5px 7px;
     border-radius:14px;
   }
 
-  #topIdentityBadge{
-    padding:0 9px;
-    font-size:12px;
-    border-radius:10px;
-  }
+  .identityNameBox{padding:0 9px;border-radius:10px;}
+  .identityNameText{font-size:12px;line-height:1.22;}
+  .identityNoticeBtn{font-size:14px;border-radius:10px;}
+  .identityAuthBtn{font-size:11px;border-radius:10px;}
 
-  #loginOpenBtn,
-  #logoutBtn{
-    width:42px;
-    min-width:42px;
-    flex-basis:42px;
-    font-size:11px;
-    border-radius:10px;
-  }
-
-  #siteNoticeWrap{
-    width:34px;
-    min-width:34px;
-    flex-basis:34px;
-  }
-
-  #siteNoticeBtn{
-    font-size:14px;
-    border-radius:10px;
-  }
-
-  #siteNoticePanel{
+  .identityNoticePanel{
     position:absolute;
     top:calc(100% + 8px);
     right:0;
@@ -1822,45 +1912,6 @@ button,input{
     width:min(320px, calc(100vw - 24px));
     max-height:60dvh;
     z-index:999;
-  }
-
-  #topBar{
-    position:relative;
-    left:auto;
-    top:auto;
-    width:100%;
-    order:0;
-    z-index:20;
-
-    --nav-fit-scale:1;
-    --nav-scale:1;
-    --nav-btn-height:34px;
-    --nav-btn-px:8px;
-    --nav-btn-radius:10px;
-    --nav-btn-font:12px;
-    --nav-gap:7px;
-  }
-
-  #roomNav{
-    width:100%;
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-    gap:7px;
-    transform:none;
-  }
-
-  .navBtn{
-    width:100%;
-    min-width:0;
-    height:34px;
-    padding:0 8px;
-    font-size:12px;
-    border-radius:10px;
-    overflow:hidden;
-  }
-
-  .navEffect{
-    display:none;
   }
 
   #flowerApp{
@@ -1960,6 +2011,7 @@ button,input{
   .flowerQtyInput{
     height:28px;
     font-size:12px;
+    line-height:26px;
   }
 
   .flowerQtyFiveBtn{
@@ -2085,96 +2137,78 @@ button,input{
   </div>
 
   <div id="overlay">
+    <!-- 房间按钮 -->
+    <nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换">
+      <button class="navBtn" data-room="hall" type="button" data-url="index.html" data-login="false">
+        <span class="navLabel">大堂</span>
+        <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
+      </button>
+
+      <button class="navBtn" data-room="living" type="button" data-url="living.html" data-login="true">
+        <span class="navLabel">客厅</span>
+        <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
+      </button>
+
+      <button class="navBtn" data-room="manager" type="button" data-manager="true">
+        <span class="navLabel">宿管室</span>
+        <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
+      </button>
+
+      <button class="navBtn" data-room="honor" type="button" data-url="honor.html" data-login="false">
+        <span class="navLabel">荣誉墙</span>
+        <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
+      </button>
+
+      <button class="navBtn" data-room="studio" type="button" data-url="studio-todo.html" data-login="true">
+        <span class="navLabel">工作间</span>
+        <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
+      </button>
+
+      <button class="navBtn" data-room="game" type="button" data-url="game.html" data-login="false">
+        <span class="navLabel">游戏房</span>
+        <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span>
+      </button>
+
+      <button class="navBtn" data-room="dorm" type="button" data-url="dorm.html" data-login="true">
+        <span class="navLabel">宿舍</span>
+        <span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span>
+      </button>
+
+      <button class="navBtn" data-room="flower" type="button" data-url="flower.html" data-login="false">
+        <span class="navLabel">花房区</span>
+        <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
+      </button>
+
+      <button class="navBtn" data-room="pets" type="button" data-url="pets.html" data-login="false">
+        <span class="navLabel">宠物区</span>
+        <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
+      </button>
+    </nav>
+
     <!-- 身份组件 -->
-    <div id="topActions">
-      <div id="topIdentityBar">
-        <div id="topIdentityBadge">
-          <span class="identityText" id="currentUserText">参观者</span>
+    <section class="roomIdentity" id="roomIdentity" aria-label="当前身份">
+      <div class="roomIdentityBar">
+        <div class="identityNameBox">
+          <span class="identityNameText" id="identityNameText">参观者</span>
         </div>
 
-        <div id="siteNoticeWrap">
-          <button id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="查看花房维护提醒">
-            <span id="siteNoticeIcon">🔔</span>
-            <span id="siteNoticeCount">0</span>
+        <div class="identityNoticeWrap">
+          <button class="identityNoticeBtn" id="identityNoticeBtn" type="button" aria-expanded="false" aria-controls="identityNoticePanel" aria-label="查看花房维护提醒">
+            <span class="identityNoticeIcon">🔔</span>
           </button>
+          <span class="identityNoticeCount" id="identityNoticeCount">0</span>
 
-          <div id="siteNoticePanel" aria-live="polite" aria-hidden="true">
-            <div class="siteNoticeTitle">花房维护提醒</div>
-            <div id="siteNoticeContent">
-              <div class="siteNoticeEmpty">暂无需要维护的种子状态。</div>
-            </div>
+          <div class="identityNoticePanel" id="identityNoticePanel" aria-live="polite" aria-hidden="true">
+            <div class="identityNoticeTitle">花房维护提醒</div>
+            <div class="identityNoticeEmpty" id="identityNoticeContent">暂无需要维护的种子状态。</div>
           </div>
         </div>
 
-        <button id="loginOpenBtn" type="button">登录</button>
-        <button id="logoutBtn" class="hidden" type="button">登出</button>
+        <button class="identityAuthBtn" id="identityAuthBtn" type="button">
+          <span class="identityAuthText">登录</span>
+        </button>
       </div>
-    </div>
-
-    <!-- 房间切换按钮：花房页不显示“花房区”按钮 -->
-    <div id="topBar" aria-label="房间切换">
-      <div id="navOuter">
-        <div id="navScroll">
-          <nav id="roomNav">
-            <button class="navBtn" data-room="hall" type="button" onclick="enterRoom('index.html', false)">
-              <span class="navLabel">大堂</span>
-              <span class="navEffect navEffectA">✦</span>
-              <span class="navEffect navEffectB">✧</span>
-              <span class="navEffect navEffectC">★</span>
-            </button>
-
-            <button class="navBtn" data-room="living" type="button" onclick="enterRoom('living.html', false)">
-              <span class="navLabel">客厅</span>
-              <span class="navEffect navEffectA">☕</span>
-              <span class="navEffect navEffectB">✦</span>
-              <span class="navEffect navEffectC">💬</span>
-            </button>
-
-            <button class="navBtn" data-room="manager" type="button" onclick="enterManagerRoom()">
-              <span class="navLabel">宿管室</span>
-              <span class="navEffect navEffectA">✎</span>
-              <span class="navEffect navEffectB">▱</span>
-              <span class="navEffect navEffectC">✐</span>
-            </button>
-
-            <button class="navBtn" data-room="honor" type="button" onclick="enterRoom('honor.html', false)">
-              <span class="navLabel">荣誉墙</span>
-              <span class="navEffect navEffectA">🏆</span>
-              <span class="navEffect navEffectB">🏅</span>
-              <span class="navEffect navEffectC">✦</span>
-            </button>
-
-            <button class="navBtn" data-room="studio" type="button" onclick="enterRoom('studio-todo.html', true)">
-              <span class="navLabel">工作间</span>
-              <span class="navEffect navEffectA">🎙</span>
-              <span class="navEffect navEffectB">🎧</span>
-              <span class="navEffect navEffectC">◇</span>
-            </button>
-
-            <button class="navBtn" data-room="game" type="button" onclick="enterRoom('game.html', false)">
-              <span class="navLabel">游戏房</span>
-              <span class="navEffect navEffectA">🎮</span>
-              <span class="navEffect navEffectB">🎲</span>
-              <span class="navEffect navEffectC">👾</span>
-            </button>
-
-            <button class="navBtn" data-room="dorm" type="button" onclick="enterRoom('dorm.html', true)">
-              <span class="navLabel">宿舍</span>
-              <span class="navEffect navEffectA">☁</span>
-              <span class="navEffect navEffectB">☾</span>
-              <span class="navEffect navEffectC">💤</span>
-            </button>
-
-            <button class="navBtn" data-room="pets" type="button" onclick="enterRoom('pets.html', false)">
-              <span class="navLabel">宠物区</span>
-              <span class="navEffect navEffectA">🐾</span>
-              <span class="navEffect navEffectB">♡</span>
-              <span class="navEffect navEffectC">🐱</span>
-            </button>
-          </nav>
-        </div>
-      </div>
-    </div>
+    </section>
 
     <!-- 花房真实功能面板 -->
     <main id="flowerApp" aria-label="花房">
@@ -2250,23 +2284,40 @@ button,input{
 </div>
 
 
-<div id="flowerRewardModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="flowerRewardTitle">
-  <div class="flowerRewardCard">
-    <div class="flowerRewardPetals" aria-hidden="true">
-      <span>✿</span><span>❀</span><span>✽</span><span>✿</span><span>❀</span>
-    </div>
-    <div class="flowerRewardContent">
-      <button class="flowerRewardClose" type="button" onclick="closeFlowerRewardModal()" aria-label="关闭奖励弹窗">×</button>
-      <div class="flowerRewardIcon">🌷</div>
-      <h2 class="flowerRewardTitle" id="flowerRewardTitle">🎉 解锁成就</h2>
-      <div class="flowerRewardAchievementName" id="flowerRewardAchievementName">第一次走进花房</div>
-      <p class="flowerRewardText" id="flowerRewardText">你推开花房的门，第一颗种子也在这里等你。</p>
-      <div class="flowerRewardSectionTitle" id="flowerRewardSectionTitle">成就奖励</div>
-      <div class="flowerRewardItems" id="flowerRewardItems" aria-label="获得奖励"></div>
-      <button class="flowerRewardConfirm" id="flowerRewardConfirmBtn" type="button" onclick="claimFlowerRewardFromModal()">领取成就奖励</button>
-    </div>
+<!-- 统一奖励弹窗：原样来自 reward-modal-test.html -->
+<div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
+    <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
+      <div class="reward-petals" aria-hidden="true">
+        <span>✿</span>
+        <span>❀</span>
+        <span>✽</span>
+        <span>✿</span>
+        <span>❀</span>
+      </div>
+
+      <button class="reward-close" type="button" aria-label="关闭" onclick="closeRewardModal()">×</button>
+
+      <div class="reward-content">
+        <div class="reward-icon" id="rewardIcon" aria-hidden="true">🏆</div>
+
+        <div class="reward-label" id="rewardLabel">成就达成</div>
+
+        <h2 class="reward-title" id="rewardTitle">新手照顾员</h2>
+
+        <p class="reward-desc" id="rewardDesc">
+          成就达成：累计照顾宠物 1 次
+        </p>
+
+        <div class="reward-section-title" id="rewardSectionTitle">奖励内容</div>
+
+        <div class="reward-list" id="rewardList"></div>
+
+        <button class="reward-confirm" type="button">收下奖励</button>
+      </div>
+    </section>
   </div>
-</div>
+
+
 
 <div id="loginUI">
   <div class="login-panel">
@@ -2298,17 +2349,15 @@ const img = document.getElementById("bg");
 const bgFrame = document.getElementById("bgFrame");
 const overlay = document.getElementById("overlay");
 const root = document.documentElement;
-const roomNav = document.getElementById("roomNav");
-const topBar = document.getElementById("topBar");
 
-const currentUserText = document.getElementById("currentUserText");
-const loginOpenBtn = document.getElementById("loginOpenBtn");
-const logoutBtn = document.getElementById("logoutBtn");
+const currentUserText = document.getElementById("identityNameText");
+const identityAuthBtn = document.getElementById("identityAuthBtn");
+const identityAuthText = identityAuthBtn?.querySelector(".identityAuthText");
 
-const siteNoticeBtn = document.getElementById("siteNoticeBtn");
-const siteNoticePanel = document.getElementById("siteNoticePanel");
-const siteNoticeCount = document.getElementById("siteNoticeCount");
-const siteNoticeContent = document.getElementById("siteNoticeContent");
+const siteNoticeBtn = document.getElementById("identityNoticeBtn");
+const siteNoticePanel = document.getElementById("identityNoticePanel");
+const siteNoticeCount = document.getElementById("identityNoticeCount");
+const siteNoticeContent = document.getElementById("identityNoticeContent");
 
 const flowerGoldPill = document.getElementById("flowerGoldPill");
 const marketSubText = document.getElementById("marketSubText");
@@ -2325,15 +2374,9 @@ const flowerBundleInventory = document.getElementById("flowerBundleInventory");
 const potActions = document.getElementById("potActions");
 const potMessage = document.getElementById("potMessage");
 const flowerToast = document.getElementById("flowerToast");
-const flowerRewardModal = document.getElementById("flowerRewardModal");
-const flowerRewardTitle = document.getElementById("flowerRewardTitle");
-const flowerRewardAchievementName = document.getElementById("flowerRewardAchievementName");
-const flowerRewardText = document.getElementById("flowerRewardText");
-const flowerRewardSectionTitle = document.getElementById("flowerRewardSectionTitle");
-const flowerRewardItems = document.getElementById("flowerRewardItems");
-const flowerRewardConfirmBtn = document.getElementById("flowerRewardConfirmBtn");
 
 let flowerRewardAutoCloseTimer = null;
+let rewardConfirmHandler = null;
 
 const flowerState = {
   marketRows:[],
@@ -2345,11 +2388,15 @@ const flowerState = {
   },
   goldBalance:null,
   dailyTipMessage:"",
+  paperTips:[],
   busy:false
 };
 
 let witherCountdownTimer = null;
 let marketTipTimer = null;
+let marketTipResumeTimer = null;
+let marketTipCycleId = 0;
+let marketTipIndex = 0;
 
 const authState = {
   loggedIn:false,
@@ -2366,6 +2413,19 @@ function isTinyScreen(){
 /* =========================================================
    底图贴合坐标系统
 ========================================================= */
+function setRewardModalScaleForViewport(displayWidth){
+  let scale;
+
+  if(isTinyScreen()){
+    scale = Math.max(0.58, Math.min(0.82, (window.innerWidth - 56) / 430));
+  }else{
+    const width = Number(displayWidth || window.innerWidth || 900);
+    scale = Math.max(0.58, Math.min(1.15, width / 900));
+  }
+
+  root.style.setProperty("--reward-modal-scale", String(scale));
+}
+
 function clearDesktopOverlayStyles(){
   if(!overlay) return;
 
@@ -2373,12 +2433,12 @@ function clearDesktopOverlayStyles(){
   overlay.style.top = "";
   overlay.style.width = "";
   overlay.style.height = "";
+
   root.style.setProperty("--bg-ui-scale","1");
-
-  if(topBar){
-    topBar.style.setProperty("--nav-fit-scale","1");
-  }
-
+  root.style.setProperty("--ui-scale","1");
+  root.style.setProperty("--room-nav-scale","1");
+  root.style.setProperty("--identity-scale","1");
+  setRewardModalScaleForViewport();
 }
 
 function syncOverlayToImage(){
@@ -2415,40 +2475,14 @@ function syncOverlayToImage(){
   overlay.style.width = `${displayWidth}px`;
   overlay.style.height = `${displayHeight}px`;
 
-  /*
-    大屏缩放规则：
-    1440px = 1 倍；2400px 继续放大；3840px 继续放大；
-    约 4608px 后限制在 3.2 倍，适配 8K 时不让组件无限巨大。
-    关键：用背景图实际显示宽度 displayWidth 计算，保证文字、按钮、面板和背景图一起等比例变化。
-  */
-  const rawScale = Math.max(0.34, Math.min(3.2, displayWidth / 1440));
-  const scale = Math.round(rawScale * 1000) / 1000;
+  const scale = Math.max(0.45, Math.min(3.2, displayWidth / 1440));
+  const navScale = Math.max(0.38, Math.min(3.2, displayWidth / 1440));
+
   root.style.setProperty("--bg-ui-scale", String(scale));
-
-  requestAnimationFrame(fitRoomNavToBar);
-}
-
-/* =========================================================
-   房间按钮自动缩放
-========================================================= */
-function fitRoomNavToBar(){
-  if(!roomNav || !topBar || isTinyScreen()) return;
-
-  /*
-    不再用 transform:scale() 缩放整组按钮。
-    transform 缩放会让中文文字在某些宽度节点出现小数像素重采样，
-    看起来忽上忽下。这里改为缩放 CSS 尺寸变量，让按钮高度、字号、
-    padding、gap 一起按真实尺寸重算，文字垂直位置更稳定。
-  */
-  topBar.style.setProperty("--nav-fit-scale","1");
-  const availableWidth = topBar.clientWidth;
-  const neededWidth = roomNav.scrollWidth;
-
-  if(!availableWidth || !neededWidth) return;
-
-  const rawFitScale = Math.min(1, availableWidth / neededWidth);
-  const fitScale = Math.floor(rawFitScale * 1000) / 1000;
-  topBar.style.setProperty("--nav-fit-scale", String(fitScale));
+  root.style.setProperty("--ui-scale", String(scale));
+  root.style.setProperty("--room-nav-scale", String(navScale));
+  root.style.setProperty("--identity-scale", String(scale));
+  setRewardModalScaleForViewport(displayWidth);
 }
 
 /* =========================================================
@@ -2496,18 +2530,16 @@ function updateIdentity(member){
   const name = member?.nickname || authState.nickname || "";
   const role = roleLabel(member?.role || authState.role);
 
-  if(!currentUserText || !loginOpenBtn || !logoutBtn) return;
+  if(!currentUserText || !identityAuthText) return;
 
   if(!name || !authState.loggedIn){
     currentUserText.textContent = "参观者";
-    loginOpenBtn.classList.remove("hidden");
-    logoutBtn.classList.add("hidden");
+    identityAuthText.textContent = "登录";
     return;
   }
 
-  currentUserText.textContent = `${name} | ${role}`;
-  loginOpenBtn.classList.add("hidden");
-  logoutBtn.classList.remove("hidden");
+  currentUserText.textContent = `${name}｜${role}`;
+  identityAuthText.textContent = "登出";
 }
 
 function handleLogout(){
@@ -2564,6 +2596,40 @@ function enterRoom(page, needLogin){
   }
 
   window.location.href = targetPage;
+}
+
+function setupRoomNav(currentRoom){
+  const buttons = document.querySelectorAll(".roomNavLayer .navBtn");
+  const current = String(currentRoom || "").trim();
+
+  buttons.forEach(btn => {
+    const room = btn.dataset.room || "";
+    const isCurrent = room === current;
+
+    btn.classList.toggle("is-current", isCurrent);
+
+    if(isCurrent){
+      btn.setAttribute("aria-current","page");
+      btn.setAttribute("tabindex","-1");
+    }else{
+      btn.removeAttribute("aria-current");
+      btn.removeAttribute("tabindex");
+    }
+
+    btn.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if(btn.classList.contains("is-current")) return;
+
+      if(btn.dataset.manager === "true"){
+        enterManagerRoom();
+        return;
+      }
+
+      enterRoom(btn.dataset.url, btn.dataset.login === "true");
+    });
+  });
 }
 
 /* =========================================================
@@ -2706,100 +2772,199 @@ function isFirstVisitRewardClaimedToday(){
   return localStorage.getItem(getFirstVisitRewardClaimDateKey()) === getFlowerLocalDateKey();
 }
 
-function renderFlowerUnlockRewards(rewards=[]){
-  if(!flowerRewardItems) return;
+const rewardTypeMeta = {
+  achievement:{ label:"成就达成", icon:"🏆" },
+  title:{ label:"获得称号", icon:"🎖️" },
+  daily:{ label:"日常奖励", icon:"☀️" },
+  gift:{ label:"礼包领取", icon:"🎁" },
+  item:{ label:"道具获得", icon:"🧺" },
+  gold:{ label:"金币奖励", icon:"🪙" }
+};
 
-  const list = Array.isArray(rewards) ? rewards.filter(Boolean) : [];
-  if(!list.length){
-    flowerRewardItems.innerHTML = "";
-    flowerRewardItems.style.display = "none";
+const rewardIconMap = {
+  金币:"🪙",
+  水:"💧",
+  肥料:"🌱",
+  花种子:"🌰",
+  种子:"🌱",
+  宠物粮:"🥣",
+  医疗卡:"💊",
+  亲密度:"💗",
+  道具:"🧺",
+  成就:"🏆",
+  称号:"🎖️"
+};
+
+function normalizeRewardItem(item){
+  if(typeof item === "string"){
+    return {
+      name:item,
+      amount:"",
+      unit:"",
+      icon:rewardIconMap[item] || "✨"
+    };
+  }
+
+  return {
+    name:item.name || "奖励",
+    amount:item.amount ?? item.qty ?? "",
+    unit:item.unit || "",
+    icon:item.icon || rewardIconMap[item.name] || "✨",
+    img:item.img || "",
+    prefix:item.prefix || ""
+  };
+}
+
+function formatRewardAmount(item){
+  if(item.amount === "" || item.amount === null || item.amount === undefined){
+    return "";
+  }
+
+  if(typeof item.amount === "number"){
+    const sign = item.amount > 0 ? "+" : "";
+    return `${sign}${item.amount}${item.unit || ""}`;
+  }
+
+  return `${item.prefix || ""}${item.amount}${item.unit || ""}`;
+}
+
+function renderRewards(rewards){
+  const list = document.getElementById("rewardList");
+  const sectionTitle = document.getElementById("rewardSectionTitle");
+  if(!list || !sectionTitle) return;
+
+  list.innerHTML = "";
+  list.className = "reward-list";
+  sectionTitle.className = "reward-section-title";
+
+  if(!rewards.length){
+    list.classList.add("empty");
+    sectionTitle.classList.add("empty");
     return;
   }
 
-  flowerRewardItems.style.display = "";
-  flowerRewardItems.innerHTML = list.map(item => {
-    const imgHtml = item.img
-      ? `<img src="${escapeHtml(item.img)}" alt="${escapeHtml(item.name || "奖励")}">`
-      : `<div class="flowerRewardItemIcon">${escapeHtml(item.icon || "✦")}</div>`;
-    return `
-      <div class="flowerRewardItem">
-        ${imgHtml}
-        <div class="flowerRewardItemName">${escapeHtml(item.name || "奖励")}</div>
-        <div class="flowerRewardItemQty">${escapeHtml(item.qty || "")}</div>
-      </div>`;
-  }).join("");
+  list.classList.add(`count-${Math.min(rewards.length, 3)}`);
+
+  rewards.forEach(reward => {
+    const item = document.createElement("div");
+    item.className = "reward-item";
+
+    const iconHtml = reward.img
+      ? `<img src="${escapeHtml(reward.img)}" alt="" style="width:calc(30px * var(--reward-scale));height:calc(30px * var(--reward-scale));object-fit:contain;display:block;margin:0 auto calc(6px * var(--reward-scale));">`
+      : `<div class="reward-item-icon">${escapeHtml(reward.icon)}</div>`;
+
+    item.innerHTML = `
+      ${iconHtml}
+      <div class="reward-item-name">${escapeHtml(reward.name)}</div>
+      <div class="reward-item-amount">${escapeHtml(formatRewardAmount(reward))}</div>
+    `;
+
+    list.appendChild(item);
+  });
 }
 
-function resetFlowerRewardModalState(){
-  if(!flowerRewardModal) return;
+function showRewardModal(options={}){
+  const mask = document.getElementById("rewardMask");
+  if(!mask) return;
 
   if(flowerRewardAutoCloseTimer){
     clearTimeout(flowerRewardAutoCloseTimer);
     flowerRewardAutoCloseTimer = null;
   }
 
-  flowerRewardModal.classList.remove("claimed");
+  const type = options.type || "achievement";
+  const meta = rewardTypeMeta[type] || rewardTypeMeta.achievement;
+  const rewards = Array.isArray(options.rewards)
+    ? options.rewards.map(normalizeRewardItem)
+    : [];
 
-  if(flowerRewardConfirmBtn){
-    flowerRewardConfirmBtn.disabled = false;
-    flowerRewardConfirmBtn.style.display = "";
+  mask.dataset.type = type;
+
+  const icon = document.getElementById("rewardIcon");
+  const label = document.getElementById("rewardLabel");
+  const title = document.getElementById("rewardTitle");
+  const desc = document.getElementById("rewardDesc");
+  const confirm = document.querySelector(".reward-confirm");
+
+  if(icon) icon.textContent = options.icon || meta.icon;
+  if(label) label.textContent = options.label || meta.label;
+  if(title) title.textContent = options.title || "奖励已领取";
+  if(desc) desc.textContent = options.desc || "奖励已经记录完成。";
+
+  renderRewards(rewards);
+
+  rewardConfirmHandler = typeof options.onConfirm === "function" ? options.onConfirm : null;
+
+  if(confirm){
+    confirm.disabled = false;
+    confirm.style.display = options.hideConfirm ? "none" : "";
+    confirm.textContent = options.confirmText || "收下奖励";
+  }
+
+  mask.classList.add("show");
+  mask.style.display = "flex";
+  mask.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+
+  if(options.autoCloseMs){
+    flowerRewardAutoCloseTimer = setTimeout(() => {
+      closeRewardModal();
+    }, Number(options.autoCloseMs));
   }
 }
 
-function showFlowerUnlockModal(options={}){
-  if(!flowerRewardModal){
-    showFlowerToast(`${options.title || "解锁提示"}：${options.name || "新的奖励"}`);
+function closeRewardModal(){
+  const mask = document.getElementById("rewardMask");
+  if(!mask) return;
+
+  if(flowerRewardAutoCloseTimer){
+    clearTimeout(flowerRewardAutoCloseTimer);
+    flowerRewardAutoCloseTimer = null;
+  }
+
+  rewardConfirmHandler = null;
+  mask.classList.remove("show");
+  mask.style.display = "";
+  mask.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+function closeFlowerRewardModal(){
+  closeRewardModal();
+}
+
+function handleRewardConfirm(){
+  if(typeof rewardConfirmHandler === "function"){
+    rewardConfirmHandler();
     return;
   }
+  closeRewardModal();
+}
 
-  resetFlowerRewardModalState();
-
+function showFlowerUnlockModal(options={}){
   const rewards = Array.isArray(options.rewards) ? options.rewards : [];
-  const hasRewards = rewards.length > 0;
+  const type = options.type === "title" ? "title" : "achievement";
 
-  if(flowerRewardTitle){
-    flowerRewardTitle.textContent = options.title || (options.type === "title" ? "🎉 解锁称号" : "🎉 解锁成就");
-  }
-
-  const iconEl = document.querySelector(".flowerRewardIcon");
-  if(iconEl){
-    iconEl.textContent = options.icon || (options.type === "title" ? "🏷️" : "🌷");
-  }
-
-  if(flowerRewardAchievementName){
-    flowerRewardAchievementName.textContent = options.name || "新的解锁";
-  }
-
-  if(flowerRewardText){
-    flowerRewardText.textContent = options.text || "新的内容已经解锁。";
-  }
-
-  if(flowerRewardSectionTitle){
-    flowerRewardSectionTitle.textContent = options.rewardTitle || "解锁奖励";
-    flowerRewardSectionTitle.style.display = hasRewards ? "" : "none";
-  }
-
-  renderFlowerUnlockRewards(rewards);
-
-  if(flowerRewardConfirmBtn){
-    const hasConfirm = typeof options.onConfirm === "function";
-    flowerRewardConfirmBtn.style.display = hasConfirm ? "" : "none";
-    flowerRewardConfirmBtn.textContent = options.buttonText || (hasRewards ? "领取奖励" : "知道啦");
-    flowerRewardConfirmBtn.onclick = hasConfirm ? options.onConfirm : closeFlowerRewardModal;
-  }
-
-  flowerRewardModal.classList.add("show");
-  flowerRewardModal.setAttribute("aria-hidden", "false");
+  showRewardModal({
+    type,
+    icon:options.icon || (type === "title" ? "🏷️" : "🌷"),
+    label:options.label || (type === "title" ? "获得称号" : "成就达成"),
+    title:options.name || "新的解锁",
+    desc:options.text || "新的内容已经解锁。",
+    rewards,
+    confirmText:options.buttonText || (rewards.length ? "领取奖励" : "知道啦"),
+    onConfirm:typeof options.onConfirm === "function" ? options.onConfirm : null,
+    hideConfirm:typeof options.onConfirm !== "function" && !rewards.length
+  });
 }
 
 function showFirstVisitFlowerRewardModal(){
   showFlowerUnlockModal({
     type:"achievement",
-    title:"🎉 解锁成就",
     icon:"🌷",
+    label:"成就达成",
     name:"第一次走进花房",
     text:"你推开花房的门，第一颗种子也在这里等你。\n以后每天登录花房可以自动领取水 ×1 和肥料 ×1。",
-    rewardTitle:"成就奖励",
     rewards:[
       { img:"water.png", name:"水", qty:"×5" },
       { img:"fert.png", name:"肥料", qty:"×5" },
@@ -2811,66 +2976,25 @@ function showFirstVisitFlowerRewardModal(){
 }
 
 function showFlowerUnlockClaimedState(options={}){
-  if(!flowerRewardModal) return;
-
-  resetFlowerRewardModalState();
-  flowerRewardModal.classList.add("claimed", "show");
-  flowerRewardModal.setAttribute("aria-hidden", "false");
-
-  if(flowerRewardTitle){
-    flowerRewardTitle.textContent = options.title || "奖励已领取";
-  }
-
-  const iconEl = document.querySelector(".flowerRewardIcon");
-  if(iconEl){
-    iconEl.textContent = options.icon || "🌷";
-  }
-
-  if(flowerRewardAchievementName){
-    flowerRewardAchievementName.textContent = options.name || "新的解锁";
-  }
-
-  if(flowerRewardText){
-    flowerRewardText.textContent = options.text || "奖励已放进背包。";
-  }
-
-  if(flowerRewardSectionTitle){
-    flowerRewardSectionTitle.style.display = "none";
-  }
-
-  renderFlowerUnlockRewards([]);
-
-  if(flowerRewardConfirmBtn){
-    flowerRewardConfirmBtn.disabled = true;
-    flowerRewardConfirmBtn.style.display = "none";
-    flowerRewardConfirmBtn.textContent = "奖励已领取";
-  }
-
-  flowerRewardAutoCloseTimer = setTimeout(() => {
-    closeFlowerRewardModal();
-  }, Number(options.autoCloseMs || 1300));
+  showRewardModal({
+    type:"achievement",
+    icon:options.icon || "🌷",
+    label:options.label || "奖励已领取",
+    title:options.name || "新的解锁",
+    desc:options.text || "奖励已放进背包。",
+    rewards:[],
+    hideConfirm:true,
+    autoCloseMs:Number(options.autoCloseMs || 1300)
+  });
 }
 
 function showFlowerRewardClaimedState(row){
   showFlowerUnlockClaimedState({
-    title:"奖励已领取",
     icon:"🌷",
     name:"第一次走进花房",
     text:row?.already_claimed ? "这份成就奖励已经领取过啦。" : "入门礼物已经放进背包啦。",
     autoCloseMs:1300
   });
-}
-
-function closeFlowerRewardModal(){
-  if(!flowerRewardModal) return;
-
-  if(flowerRewardAutoCloseTimer){
-    clearTimeout(flowerRewardAutoCloseTimer);
-    flowerRewardAutoCloseTimer = null;
-  }
-
-  flowerRewardModal.classList.remove("show", "claimed");
-  flowerRewardModal.setAttribute("aria-hidden", "true");
 }
 
 function showFlowerToast(message, type="success"){
@@ -3018,6 +3142,36 @@ function getRemainingBuyQuantity(row){
   return Math.max(0, 5 - getRoundBoughtQuantity(row || {}));
 }
 
+function getSellableQuantity(row){
+  if(!row || typeof row !== "object") return 0;
+
+  const candidates = [
+    row?.sellable_quantity,
+    row?.current_sellable_quantity,
+    row?.available_sell_quantity,
+    row?.sellable_owned_quantity,
+    row?.ready_sell_quantity,
+    row?.owned_quantity
+  ];
+
+  for(const value of candidates){
+    const n = Number(value);
+    if(Number.isFinite(n) && n >= 0) return Math.floor(n);
+  }
+
+  return 0;
+}
+
+function setMarketQuantityInput(flowerKey, quantity){
+  const key = String(flowerKey || "");
+  const input = document.querySelector(`[data-flower-qty="${CSS.escape(key)}"]`);
+  const target = Math.max(1, Math.floor(Number(quantity) || 1));
+
+  if(input){
+    input.value = String(target);
+  }
+}
+
 function getCurrentGoldBalance(){
   if(Number.isFinite(Number(flowerState.goldBalance))){
     return Number(flowerState.goldBalance);
@@ -3027,51 +3181,181 @@ function getCurrentGoldBalance(){
   return match ? Number(match[0]) : 0;
 }
 
-function getMarketTips(){
-  const tips = [];
+function normalizeFlowerTip(value){
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-  if(flowerState.dailyTipMessage){
-    tips.push(flowerState.dailyTipMessage);
+function addUniqueFlowerTip(list, tip){
+  const clean = normalizeFlowerTip(tip);
+  if(!clean) return;
+  if(!list.some(item => normalizeFlowerTip(item) === clean)){
+    list.push(clean);
   }
+}
 
-  tips.push(
-    "每轮每种花最多买入 5 朵。",
-    "当前金币达到 100 才能在花市进行交易。",
-    "买入后要等花市价格刷新一次才能卖出。",
+function getFallbackFlowerTips(){
+  const tips = [
+    "花市每 12 小时刷新一次价格，买入后至少等下一轮刷新才能卖出。",
+    "每轮每种花最多买入 5 朵；点击「5朵」会自动填入当前可用的最大数量。",
+    "卖出时以数量框为准；如果数量超过当前可卖数量，系统会自动按最大可卖数量处理。",
+    "当前金币达到 100 才能在花市进行买入交易。",
     "当天浇水和施肥各最多 3 次。"
-  );
+  ];
 
   if(getCurrentGoldBalance() < 100){
-    const insertIndex = flowerState.dailyTipMessage ? 1 : 0;
-    tips.splice(insertIndex, 0, "当前金币不足 100，暂时不能在花市买入。");
+    tips.splice(3, 0, "当前金币不足 100，暂时不能在花市买入。");
   }
 
   return tips;
 }
 
-function startMarketTipRotator(){
-  const tipEl = document.getElementById("marketTipText");
-  if(!tipEl) return;
+async function loadFlowerPaperTips(){
+  const auth = getFlowerAuth();
+  flowerState.paperTips = [];
+
+  if(!auth){
+    return [];
+  }
+
+  /*
+    预留给未来扭蛋机「花房提示小纸条」：
+    后续数据库只要提供 get_flower_tip_notes RPC，并返回当前成员已经拥有/曾经获得过的小纸条提示，
+    这里会自动合并进花市滚动提示。没有这个 RPC 时不会影响当前花房页面使用。
+  */
+  try{
+    const { data, error } = await supabaseClient.rpc("get_flower_tip_notes", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode
+    });
+
+    if(error){
+      flowerState.paperTips = [];
+      return [];
+    }
+
+    const rows = Array.isArray(data) ? data : (data ? [data] : []);
+    const tips = [];
+    rows.forEach(row => {
+      const tip = typeof row === "string"
+        ? row
+        : (row?.tip_text || row?.content || row?.message || row?.description || row?.note_text || "");
+      addUniqueFlowerTip(tips, tip);
+    });
+
+    flowerState.paperTips = tips;
+    return tips;
+  }catch(_err){
+    flowerState.paperTips = [];
+    return [];
+  }
+}
+
+function getMarketTips(){
+  const tips = [];
+
+  if(flowerState.dailyTipMessage){
+    addUniqueFlowerTip(tips, flowerState.dailyTipMessage);
+  }
+
+  (flowerState.paperTips || []).forEach(tip => addUniqueFlowerTip(tips, tip));
+  getFallbackFlowerTips().forEach(tip => addUniqueFlowerTip(tips, tip));
+
+  return tips;
+}
+function clearMarketTipTimers(clearResume=true){
+  marketTipCycleId += 1;
 
   if(marketTipTimer){
     clearInterval(marketTipTimer);
     marketTipTimer = null;
   }
 
+  if(clearResume && marketTipResumeTimer){
+    clearTimeout(marketTipResumeTimer);
+    marketTipResumeTimer = null;
+  }
+}
+
+function updateMarketTipText(tipEl, tips, nextIndex, animate=true){
+  if(!tipEl || !Array.isArray(tips) || !tips.length) return;
+
+  marketTipIndex = ((Number(nextIndex) || 0) % tips.length + tips.length) % tips.length;
+  const text = tips[marketTipIndex] || "";
+
+  if(!animate){
+    tipEl.classList.remove("isChanging");
+    tipEl.textContent = text;
+    return;
+  }
+
+  const cycleId = marketTipCycleId;
+  tipEl.classList.add("isChanging");
+
+  setTimeout(() => {
+    if(cycleId !== marketTipCycleId) return;
+    tipEl.textContent = text;
+    tipEl.classList.remove("isChanging");
+  }, 260);
+}
+
+function startMarketTipRotator(options={}){
+  const tipEl = document.getElementById("marketTipText");
+  if(!tipEl) return;
+
+  clearMarketTipTimers();
+
   const tips = getMarketTips();
-  let index = 0;
-  tipEl.textContent = tips[index] || "";
+  if(!tips.length){
+    tipEl.textContent = "";
+    tipEl.classList.remove("isChanging");
+    return;
+  }
+
+  if(!options.preserveIndex){
+    marketTipIndex = 0;
+  }
+
+  updateMarketTipText(tipEl, tips, marketTipIndex, false);
 
   if(tips.length <= 1) return;
 
+  const cycleId = marketTipCycleId;
   marketTipTimer = setInterval(() => {
-    index = (index + 1) % tips.length;
-    tipEl.classList.add("isChanging");
-    setTimeout(() => {
-      tipEl.textContent = tips[index] || "";
-      tipEl.classList.remove("isChanging");
-    }, 260);
-  }, 3800);
+    if(cycleId !== marketTipCycleId) return;
+    updateMarketTipText(tipEl, tips, marketTipIndex + 1, true);
+  }, 3200);
+}
+
+function showMarketOperationMessage(message, isError=false, holdMs=7200){
+  /*
+    操作结果只显示在下方状态提示框，避免和上方滚动小提示重复。
+    滚动提示暂停一段时间后会按当前最新提示列表继续轮播，不会卡在某一条旧提示。
+    普通提示刷新节奏应短于操作提示停留时间，避免用户觉得滚动条停太久。
+  */
+  showBoxMessage(marketMessage, message, isError);
+
+  const tipEl = document.getElementById("marketTipText");
+  if(!tipEl || !message) return;
+
+  const holdTime = Math.max(5200, Number(holdMs) || 7200);
+  clearMarketTipTimers();
+
+  const tips = getMarketTips();
+  if(tips.length){
+    updateMarketTipText(tipEl, tips, marketTipIndex, false);
+  }
+
+  marketTipResumeTimer = setTimeout(() => {
+    marketTipResumeTimer = null;
+
+    if(marketMessage && marketMessage.textContent === String(message || "")){
+      showBoxMessage(marketMessage, "");
+    }
+
+    startMarketTipRotator({ preserveIndex:true });
+  }, holdTime);
 }
 
 function getMarketLimitNote(){
@@ -3159,29 +3443,48 @@ function renderFlowerBundleInventory(loggedOut=false){
 
 function getMarketQuantity(flowerKey){
   const key = String(flowerKey || "");
-  const input = document.querySelector(`[data-flower-qty="${key}"]`);
+  const input = document.querySelector(`[data-flower-qty="${CSS.escape(key)}"]`);
   const raw = Number(input?.value);
   if(!Number.isFinite(raw)) return 1;
   return Math.max(1, Math.floor(raw));
 }
 
-function setMarketQuantity(flowerKey, quantity){
-  const key = String(flowerKey || "");
-  const input = document.querySelector(`[data-flower-qty="${CSS.escape(key)}"]`);
-  const row = getMarketRow(key);
-  const remaining = row ? getRemainingBuyQuantity(row) : 5;
-  const target = Math.max(1, Math.min(5, remaining || 5, Math.floor(Number(quantity) || 1)));
 
-  if(input){
-    input.value = String(target);
+function setMarketMaxQuantity(flowerKey){
+  const key = String(flowerKey || "");
+  const row = getMarketRow(key);
+  const displayName = getFlowerDisplayName(row || { flower_key:key });
+  const owned = Math.max(0, Math.floor(Number(row?.owned_quantity) || 0));
+  const sellable = getSellableQuantity(row);
+  const remainingBuy = row ? getRemainingBuyQuantity(row) : 5;
+
+  /*
+    「5朵」是快速填数量，不直接决定买入或卖出。
+    优先按当前背包/可卖数量填入，解决拥有 4 朵时点击「5朵」没有自动变成 4 的问题；
+    如果当前没有花可卖，再按本轮还能买入的最大数量填入。
+  */
+  let target = 1;
+  let message = "";
+
+  if(owned > 0 || sellable > 0){
+    target = Math.min(5, Math.max(sellable, owned));
+    if(target < 5){
+      message = `${displayName}当前最多可选 ${target} 朵，已自动填入最大数量。`;
+    }
+  }else{
+    target = Math.min(5, Math.max(0, remainingBuy));
+    if(remainingBuy <= 0){
+      target = 1;
+      message = `${displayName}这一轮已经买满啦，现在还能买 0 朵。`;
+    }
   }
 
-  if(remaining <= 0){
-    const displayName = getFlowerDisplayName(row || { flower_key:key });
-    showBoxMessage(marketMessage, `${displayName}这一轮已经买满啦，现在还能买 0 朵。`, true);
+  setMarketQuantityInput(key, target);
+
+  if(message){
+    showMarketOperationMessage(message, remainingBuy <= 0 && owned <= 0 && sellable <= 0, 7600);
   }
 }
-
 function setFlowerResources(seedQuantity, waterQuantity, fertilizerQuantity){
   const seed = Math.max(0, Number(seedQuantity) || 0);
   const water = Math.max(0, Number(waterQuantity) || 0);
@@ -3297,9 +3600,10 @@ async function promptFirstVisitRewardIfNeeded(){
 }
 
 async function claimFlowerRewardFromModal(){
-  if(flowerRewardConfirmBtn){
-    flowerRewardConfirmBtn.disabled = true;
-    flowerRewardConfirmBtn.textContent = "领取中...";
+  const confirm = document.querySelector(".reward-confirm");
+  if(confirm){
+    confirm.disabled = true;
+    confirm.textContent = "领取中...";
   }
 
   try{
@@ -3317,18 +3621,16 @@ async function claimFlowerRewardFromModal(){
     showFlowerRewardClaimedState(row);
     renderSiteNotifications();
   }catch(err){
-    if(flowerRewardTitle){
-      flowerRewardTitle.textContent = "领取失败";
-    }
-    if(flowerRewardText){
-      flowerRewardText.textContent = err?.message || "成就奖励领取失败，请稍后再试。";
-    }
-    if(flowerRewardConfirmBtn){
-      flowerRewardConfirmBtn.disabled = false;
-      flowerRewardConfirmBtn.style.display = "";
-      flowerRewardConfirmBtn.textContent = "重新领取";
-      flowerRewardConfirmBtn.onclick = claimFlowerRewardFromModal;
-    }
+    showRewardModal({
+      type:"achievement",
+      icon:"🌷",
+      label:"领取失败",
+      title:"奖励领取失败",
+      desc:err?.message || "成就奖励领取失败，请稍后再试。",
+      rewards:[],
+      confirmText:"重新领取",
+      onConfirm:claimFlowerRewardFromModal
+    });
   }
 }
 
@@ -3361,6 +3663,7 @@ async function claimDailyFlowerItems(){
 
 function renderLoggedOutFlower(){
   flowerState.dailyTipMessage = "";
+  flowerState.paperTips = [];
   setFlowerResources(0, 0, 0);
   if(flowerGoldPill) flowerGoldPill.textContent = "金币：--";
   if(marketContent){
@@ -3415,11 +3718,11 @@ function renderMarket(rows){
             <div class="flowerQtyBox">
               <span class="flowerQtyLabel">数量</span>
               <input class="flowerQtyInput" data-flower-qty="${escapeHtml(row.flower_key)}" type="number" min="1" max="5" step="1" value="1" inputmode="numeric" aria-label="${escapeHtml(displayName)}买入数量">
-              <button class="flowerQtyFiveBtn" type="button" onclick="setMarketQuantity('${escapeHtml(row.flower_key)}', 5)" aria-label="将${escapeHtml(displayName)}买入数量设为5朵">5朵</button>
+              <button class="flowerQtyFiveBtn" type="button" onclick="setMarketMaxQuantity('${escapeHtml(row.flower_key)}')" aria-label="将${escapeHtml(displayName)}数量设为当前最大可用数量">5朵</button>
             </div>
             <div class="flowerActions">
               <button class="flowerActionBtn" type="button" onclick="buyFlower('${escapeHtml(row.flower_key)}', getMarketQuantity('${escapeHtml(row.flower_key)}'))">买入</button>
-              <button class="flowerActionBtn" type="button" ${canSell ? "" : "data-disabled=\"true\" disabled"} onclick="sellFlower('${escapeHtml(row.flower_key)}')">卖出</button>
+              <button class="flowerActionBtn" type="button" ${canSell ? "" : "data-disabled=\"true\" disabled"} onclick="sellFlower('${escapeHtml(row.flower_key)}', getMarketQuantity('${escapeHtml(row.flower_key)}'))">卖出</button>
             </div>
           </article>
         `;
@@ -3616,6 +3919,8 @@ async function loadFlowerPage(){
     flowerState.dailyTipMessage = "";
   }
 
+  await loadFlowerPaperTips();
+
   await Promise.all([
     loadMemberGold(),
     loadFlowerMarket(),
@@ -3650,7 +3955,7 @@ async function buyFlower(flowerKey, quantity=1){
   }
 
   if(getCurrentGoldBalance() < 100){
-    showBoxMessage(marketMessage, "当前金币不足 100，暂时不能在花市买入。", true);
+    showMarketOperationMessage("当前金币不足 100，暂时不能在花市买入。", true);
     return;
   }
 
@@ -3661,16 +3966,17 @@ async function buyFlower(flowerKey, quantity=1){
   const buyQuantity = Math.max(0, Math.min(remaining, requestedQuantity));
 
   if(remaining <= 0){
-    showBoxMessage(marketMessage, `${displayName}这一轮已经买满啦，现在还能买 0 朵。`, true);
+    showMarketOperationMessage(`${displayName}这一轮已经买满啦，现在还能买 0 朵。`, true);
     return;
   }
 
   if(requestedQuantity > remaining){
-    showBoxMessage(marketMessage, `${displayName}现在还能买 ${remaining} 朵，已按 ${remaining} 朵购买。`, true);
+    setMarketQuantityInput(flowerKey, remaining);
+    showMarketOperationMessage(`${displayName}现在最多还能买 ${remaining} 朵，已按 ${remaining} 朵购买。`, true);
   }
 
   if(buyQuantity <= 0){
-    showBoxMessage(marketMessage, `请选择要买入的${displayName}数量。`, true);
+    showMarketOperationMessage(`请选择要买入的${displayName}数量。`, true);
     return;
   }
 
@@ -3695,17 +4001,17 @@ async function buyFlower(flowerKey, quantity=1){
       : `${displayName}购买成功：实际买入 ${actualQuantity} 朵；现在拥有 ${newOwned} 朵。`;
 
     await loadFlowerPage();
-    showBoxMessage(marketMessage, message, false);
+    showMarketOperationMessage(message, false);
   }catch(err){
     console.error("买花失败：", err);
-    showBoxMessage(marketMessage, err?.message || `${displayName}买花失败`, true);
+    showMarketOperationMessage(err?.message || `${displayName}买花失败`, true);
     await loadFlowerMarket();
   }finally{
     setFlowerBusy(false);
   }
 }
 
-async function sellFlower(flowerKey){
+async function sellFlower(flowerKey, quantity=1){
   const auth = getFlowerAuth();
   if(!auth){
     openLogin();
@@ -3714,6 +4020,24 @@ async function sellFlower(flowerKey){
 
   const rowInfo = getMarketRow(flowerKey);
   const displayName = getFlowerDisplayName(rowInfo || { flower_key:flowerKey });
+  const sellable = getSellableQuantity(rowInfo);
+  const requestedQuantity = Math.max(1, Math.floor(Number(quantity) || 1));
+  const sellQuantity = Math.max(0, Math.min(sellable, requestedQuantity));
+
+  if(sellable <= 0){
+    showMarketOperationMessage(`${displayName}当前没有可以卖出的花。`, true);
+    return;
+  }
+
+  if(requestedQuantity > sellable){
+    setMarketQuantityInput(flowerKey, sellable);
+    showMarketOperationMessage(`${displayName}当前最多只能卖 ${sellable} 朵，已按 ${sellable} 朵卖出。`, true);
+  }
+
+  if(sellQuantity <= 0){
+    showMarketOperationMessage(`请选择要卖出的${displayName}数量。`, true);
+    return;
+  }
 
   setFlowerBusy(true);
   try{
@@ -3721,19 +4045,19 @@ async function sellFlower(flowerKey){
       p_member_id:auth.memberId,
       p_member_code:auth.memberCode,
       p_flower_key:flowerKey,
-      p_quantity:1,
+      p_quantity:sellQuantity,
       p_timezone_offset_minutes:auth.timezoneOffset
     });
 
     if(error) throw error;
 
     const row = Array.isArray(data) ? data[0] : data;
-    const actualQuantity = Number(row?.quantity) || 1;
+    const actualQuantity = Number(row?.quantity) || sellQuantity;
     await loadFlowerPage();
-    showBoxMessage(marketMessage, `${displayName}卖出成功：实际卖出 ${actualQuantity} 朵。`, false);
+    showMarketOperationMessage(`${displayName}卖出成功：实际卖出 ${actualQuantity} 朵。`, false);
   }catch(err){
     console.error("卖花失败：", err);
-    showBoxMessage(marketMessage, formatMarketErrorMessage(err?.message, displayName), true);
+    showMarketOperationMessage(formatMarketErrorMessage(err?.message, displayName), true);
   }finally{
     setFlowerBusy(false);
   }
@@ -3987,6 +4311,7 @@ function renderSiteNotifications(){
 ========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
   readLocalAuth();
+  setupRoomNav("flower");
   updateIdentity();
   loadFlowerPage();
 
@@ -3997,17 +4322,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if(loginOpenBtn){
-    loginOpenBtn.addEventListener("click", event => {
+  if(identityAuthBtn){
+    identityAuthBtn.addEventListener("click", event => {
       event.stopPropagation();
-      openLogin();
-    });
-  }
-
-  if(logoutBtn){
-    logoutBtn.addEventListener("click", event => {
-      event.stopPropagation();
-      handleLogout();
+      if(authState.loggedIn){
+        handleLogout();
+      }else{
+        openLogin();
+      }
     });
   }
 
@@ -4018,11 +4340,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  if(flowerRewardModal){
-    flowerRewardModal.addEventListener("click", event => {
-      if(event.target === flowerRewardModal){
-        closeFlowerRewardModal();
+  const rewardMask = document.getElementById("rewardMask");
+  if(rewardMask){
+    rewardMask.addEventListener("click", event => {
+      if(event.target === rewardMask){
+        closeRewardModal();
       }
+    });
+  }
+
+  const rewardConfirm = document.querySelector(".reward-confirm");
+  if(rewardConfirm){
+    rewardConfirm.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      handleRewardConfirm();
     });
   }
 
