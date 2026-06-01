@@ -15,18 +15,20 @@
   --line:rgba(216,157,106,0.35);
   --soft-line:rgba(196,139,86,0.16);
   --card-shadow:rgba(69,47,28,0.24);
-  --bg-ui-scale:1;
+  --identity-scale:1;
 
-  --identity-right:7.35%;
-  --identity-top:8%;
-  --identity-width:calc(232px * var(--bg-ui-scale));
-  --identity-height:calc(38px * var(--bg-ui-scale));
-
-  --identity-bg:rgba(255,248,239,0.92);
-  --identity-inner-bg:rgba(255,252,247,0.96);
-  --identity-border:rgba(186,146,103,0.24);
-  --identity-text:#6c4523;
-  --identity-shadow:rgba(116,86,54,0.12);
+  --identity-right:5.20%;
+  --identity-top:5.15%;
+  --identity-base-width:232;
+  --identity-base-height:38;
+  --identity-bg:rgba(255,250,244,0.88);
+  --identity-inner-bg:rgba(255,253,249,0.92);
+  --identity-border:rgba(170,132,101,0.20);
+  --identity-text:#6f5746;
+  --identity-shadow:rgba(106,78,55,0.08);
+  --identity-name-y:0em;
+  --identity-notice-y:0em;
+  --identity-button-y:0em;
 }
 
 html,body{
@@ -98,193 +100,201 @@ button{
 }
 
 /* =========================================================
-   身份组件：全站统一结构，首页不显示房间切换按钮
+   身份组件：使用全站通用模板结构，首页不显示房间切换按钮
 ========================================================= */
 #topActions{
+  --s:var(--identity-scale,1);
   position:absolute;
   right:var(--identity-right);
   top:var(--identity-top);
-  width:var(--identity-width);
-  height:var(--identity-height);
-  min-width:0;
-  min-height:0;
+  width:calc(var(--identity-base-width) * 1px * var(--s));
+  height:calc(var(--identity-base-height) * 1px * var(--s));
+  min-width:calc(var(--identity-base-width) * 1px * var(--s));
+  min-height:calc(var(--identity-base-height) * 1px * var(--s));
   z-index:20;
   pointer-events:none;
-  --ui-scale:var(--bg-ui-scale, 1);
+  overflow:visible;
 }
 
 #topIdentityBar{
   width:100%;
   height:100%;
-  display:flex;
-  align-items:stretch;
-  justify-content:flex-start;
-  gap:calc(5px * var(--ui-scale));
-  padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
-  border-radius:calc(13px * var(--ui-scale));
+  display:grid;
+  grid-template-columns:minmax(calc(130px * var(--s)),1fr) calc(30px * var(--s)) calc(42px * var(--s));
+  gap:calc(5px * var(--s));
+  padding:calc(4px * var(--s)) calc(5px * var(--s));
+  border-radius:calc(13px * var(--s));
   background:var(--identity-bg);
-  border:1px solid var(--identity-border);
+  border:calc(1px * var(--s)) solid var(--identity-border);
   box-shadow:
-    0 calc(10px * var(--ui-scale)) calc(24px * var(--ui-scale)) var(--identity-shadow),
-    inset 0 1px 0 rgba(255,255,255,0.9);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
+    0 calc(10px * var(--s)) calc(24px * var(--s)) var(--identity-shadow),
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.9);
+  backdrop-filter:blur(calc(8px * var(--s)));
+  -webkit-backdrop-filter:blur(calc(8px * var(--s)));
   pointer-events:auto;
   overflow:visible;
   white-space:nowrap;
 }
 
 #topIdentityBadge,
+#siteNoticeBtn,
 #loginOpenBtn,
-#logoutBtn,
-#siteNoticeBtn{
-  border-radius:calc(9px * var(--ui-scale));
+#logoutBtn{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  border-radius:calc(9px * var(--s));
   background:var(--identity-inner-bg);
   color:var(--identity-text);
+  border:calc(1px * var(--s)) solid rgba(160,116,78,0.12);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    0 1px 4px rgba(112,83,52,0.05);
-  border:1px solid rgba(160,116,78,0.12);
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.95),
+    0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,0.05);
 }
 
 #topIdentityBadge{
-  flex:1 1 auto;
-  min-width:0;
-  padding:0 calc(8px * var(--ui-scale));
-  font-size:calc(13px * var(--ui-scale));
-  font-weight:800;
   display:flex;
   align-items:center;
   justify-content:center;
-  overflow:hidden;
-  white-space:nowrap;
+  padding:0 calc(8px * var(--s));
+  overflow:visible;
 }
 
 #topIdentityBadge .identityText{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  line-height:1;
-}
-
-#loginOpenBtn,
-#logoutBtn{
-  appearance:none;
-  cursor:pointer;
-  width:calc(42px * var(--ui-scale));
-  min-width:calc(42px * var(--ui-scale));
-  flex:0 0 calc(42px * var(--ui-scale));
-  padding:0;
-  color:#67401f;
-  font-size:calc(12px * var(--ui-scale));
-  font-weight:800;
-  line-height:1;
-  display:flex;
+  display:inline-flex;
   align-items:center;
   justify-content:center;
-  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
-  overflow:hidden;
+  max-width:100%;
+  color:var(--identity-text);
+  font-size:calc(13px * var(--s));
+  font-weight:850;
+  line-height:1.22;
+  letter-spacing:0;
   white-space:nowrap;
-}
-
-#loginOpenBtn:hover,
-#logoutBtn:hover,
-#siteNoticeBtn:hover{
-  transform:translateY(-1px);
-  background:rgba(255,255,255,0.94);
+  overflow:visible;
+  text-overflow:clip;
+  transform:translateY(var(--identity-name-y));
 }
 
 #siteNoticeWrap{
   position:relative;
-  width:calc(30px * var(--ui-scale));
-  min-width:calc(30px * var(--ui-scale));
-  flex:0 0 calc(30px * var(--ui-scale));
-  display:flex;
-  align-items:stretch;
-  justify-content:center;
+  width:100%;
+  height:100%;
   overflow:visible;
 }
 
-#siteNoticeBtn{
+#siteNoticeBtn,
+#loginOpenBtn,
+#logoutBtn{
   appearance:none;
-  border:none;
   cursor:pointer;
-  position:relative;
-  width:100%;
-  height:100%;
   padding:0;
-  font-size:calc(14px * var(--ui-scale));
-  font-weight:800;
   display:flex;
   align-items:center;
   justify-content:center;
-  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+  line-height:1;
+  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
+}
+
+#siteNoticeBtn{
+  width:100%;
+  height:100%;
+  font-size:calc(14px * var(--s));
 }
 
 #siteNoticeIcon{
-  display:block;
+  display:flex;
+  width:100%;
+  height:100%;
+  align-items:center;
+  justify-content:center;
   line-height:1;
-  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
+  transform:translateY(var(--identity-notice-y));
+  filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,0.55));
 }
 
 #siteNoticeCount{
   position:absolute;
-  right:calc(-6px * var(--ui-scale));
-  top:calc(-6px * var(--ui-scale));
-  min-width:calc(18px * var(--ui-scale));
-  height:calc(18px * var(--ui-scale));
-  padding:0 calc(5px * var(--ui-scale));
+  right:calc(-6px * var(--s));
+  top:calc(-6px * var(--s));
+  min-width:calc(18px * var(--s));
+  height:calc(18px * var(--s));
+  padding:0 calc(5px * var(--s));
   border-radius:999px;
-  background:#c98c4f;
-  color:#fff9f1;
-  font-size:calc(9px * var(--ui-scale));
+  background:#b98f72;
+  color:#fffaf6;
+  font-size:calc(9px * var(--s));
   font-weight:900;
   line-height:1;
   display:none;
   align-items:center;
   justify-content:center;
-  border:calc(2px * var(--ui-scale)) solid rgba(255,248,239,0.98);
-  box-shadow:0 2px 8px rgba(116,86,54,0.16);
+  border:calc(2px * var(--s)) solid rgba(255,248,239,0.98);
+  box-shadow:0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(116,86,54,0.16);
   z-index:3;
 }
 
-#siteNoticeBtn.hasNotice #siteNoticeCount{
+#siteNoticeBtn.hasNotice + #siteNoticeCount{
   display:flex;
+}
+
+#loginOpenBtn,
+#logoutBtn{
+  width:100%;
+  height:100%;
+  color:#6f5746;
+  font-size:calc(12px * var(--s));
+  font-weight:850;
+  line-height:1.18;
+  white-space:nowrap;
+  overflow:visible;
+}
+
+.identityAuthText{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1.18;
+  transform:translateY(var(--identity-button-y));
+}
+
+#siteNoticeBtn:hover,
+#loginOpenBtn:hover,
+#logoutBtn:hover{
+  transform:translateY(calc(-1px * var(--s)));
+  background:rgba(255,255,255,0.94);
 }
 
 #siteNoticePanel{
   position:absolute;
-  top:calc(100% + 10px);
+  top:calc(100% + 10px * var(--s));
   right:0;
-  width:min(calc(360px * var(--ui-scale)), 72vw);
-  max-height:min(calc(540px * var(--ui-scale)), 70vh);
+  width:min(calc(360px * var(--s)), 72vw);
+  max-height:min(calc(540px * var(--s)), 70vh);
   overflow:auto;
-  padding:calc(12px * var(--ui-scale));
-  border-radius:calc(16px * var(--ui-scale));
+  padding:calc(12px * var(--s));
+  border-radius:calc(16px * var(--s));
   background:rgba(255,249,241,0.98);
-  border:1px solid rgba(203,167,123,0.28);
-  box-shadow:0 16px 36px rgba(85,58,34,0.16);
+  border:calc(1px * var(--s)) solid rgba(203,167,123,0.28);
+  box-shadow:0 calc(16px * var(--s)) calc(36px * var(--s)) rgba(85,58,34,0.16);
   display:none;
   z-index:80;
   text-align:left;
 }
 
-#siteNoticePanel.show{
-  display:block;
-}
+#siteNoticePanel.show{display:block;}
 
 .siteNoticeHeader{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:8px;
-  margin-bottom:calc(10px * var(--ui-scale));
+  gap:calc(8px * var(--s));
+  margin-bottom:calc(10px * var(--s));
 }
 
 .siteNoticeTitle{
   color:#6f4726;
-  font-size:calc(13px * var(--ui-scale));
+  font-size:calc(13px * var(--s));
   font-weight:900;
 }
 
@@ -293,73 +303,67 @@ button{
   border:none;
   background:transparent;
   color:#9a7957;
-  font-size:calc(10px * var(--ui-scale));
+  font-size:calc(10px * var(--s));
   font-weight:700;
   cursor:pointer;
-  padding:2px 4px;
-  border-radius:8px;
+  padding:calc(2px * var(--s)) calc(4px * var(--s));
+  border-radius:calc(8px * var(--s));
 }
 
-.noticeClear:hover{
-  background:rgba(201,142,86,.12);
-  color:#7c5834;
-}
+.noticeClear:hover{background:rgba(201,142,86,.12);color:#7c5834;}
 
 .siteNoticeEmpty{
   color:#8a6644;
-  font-size:calc(12px * var(--ui-scale));
+  font-size:calc(12px * var(--s));
   line-height:1.6;
-  padding:6px 2px 2px;
+  padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s));
 }
 
 .siteNoticeList{
   display:flex;
   flex-direction:column;
-  gap:calc(8px * var(--ui-scale));
+  gap:calc(8px * var(--s));
 }
 
 .siteNoticeItem{
   display:flex;
-  gap:calc(8px * var(--ui-scale));
+  gap:calc(8px * var(--s));
   align-items:flex-start;
-  padding:calc(10px * var(--ui-scale));
-  border-radius:calc(12px * var(--ui-scale));
+  padding:calc(10px * var(--s));
+  border-radius:calc(12px * var(--s));
   background:rgba(255,252,247,0.82);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.92),
-    0 2px 8px rgba(120,92,63,0.05);
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.92),
+    0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(120,92,63,0.05);
 }
 
 .siteNoticeItemIcon{
-  width:calc(22px * var(--ui-scale));
-  height:calc(22px * var(--ui-scale));
+  width:calc(22px * var(--s));
+  height:calc(22px * var(--s));
   border-radius:999px;
   display:flex;
   align-items:center;
   justify-content:center;
   flex:0 0 auto;
-  font-size:calc(11px * var(--ui-scale));
+  font-size:calc(11px * var(--s));
   background:rgba(217,163,100,.16);
   color:#8a5a2c;
 }
 
-.siteNoticeItemText{
-  flex:1;
-  min-width:0;
-}
+.siteNoticeItemText{flex:1;min-width:0;}
 
 .siteNoticeItemTitle{
   color:#6f4726;
-  font-size:calc(12px * var(--ui-scale));
+  font-size:calc(12px * var(--s));
   font-weight:800;
   line-height:1.5;
   word-break:break-word;
 }
 
 .siteNoticeItemDesc{
-  margin-top:2px;
+  margin-top:calc(2px * var(--s));
   color:#8a6644;
-  font-size:calc(11px * var(--ui-scale));
+  font-size:calc(11px * var(--s));
   line-height:1.55;
   word-break:break-word;
 }
@@ -413,11 +417,10 @@ button{
   pointer-events:none;
 }
 
-#username{
+#username,
+#password{
   position:absolute;
-  top:40%;
   left:36.2%;
-  width:27.5%;
   height:8.1%;
   border:none;
   outline:none;
@@ -428,19 +431,14 @@ button{
   line-height:1.1;
 }
 
+#username{
+  top:40%;
+  width:27.5%;
+}
+
 #password{
-  position:absolute;
   top:56%;
-  left:36.2%;
   width:20%;
-  height:8.1%;
-  border:none;
-  outline:none;
-  padding:0 10px;
-  font-size:18px;
-  color:#5b3e28;
-  background:transparent;
-  line-height:1.1;
 }
 
 #togglePassword{
@@ -518,8 +516,6 @@ button{
   cursor:pointer;
   font-size:18px;
 }
-
-
 
 /* =========================
    统一奖励弹窗：首页礼包领取共用
@@ -781,6 +777,13 @@ button{
   filter:drop-shadow(0 calc(2px * var(--reward-scale)) calc(3px * var(--reward-scale)) rgba(96,65,35,.12));
 }
 
+.reward-item-icon img{
+  display:block;
+  width:calc(34px * var(--reward-scale));
+  height:calc(34px * var(--reward-scale));
+  object-fit:contain;
+}
+
 .reward-item-name{
   width:100%;
   color:#7b593b;
@@ -988,7 +991,6 @@ button{
   #loginBtn{top:67.8%;}
 }
 
-
 @media (max-width: 540px){
   .reward-mask{--reward-scale:.82;padding:14px;}
 }
@@ -1014,19 +1016,19 @@ button{
     <canvas id="seasonLayer" aria-hidden="true"></canvas>
 
     <!-- 首页只保留身份组件，不加房间切换组件 -->
-    <div id="topActions">
-      <div id="topIdentityBar">
-        <div id="topIdentityBadge">
-          <span class="identityText" id="currentUserText">参观者</span>
+    <div id="topActions" class="roomIdentity">
+      <div id="topIdentityBar" class="roomIdentityBar">
+        <div id="topIdentityBadge" class="identityNameBox">
+          <span class="identityText identityNameText" id="currentUserText">参观者</span>
         </div>
 
-        <div id="siteNoticeWrap">
-          <button id="siteNoticeBtn" type="button" aria-label="消息通知">
-            <span id="siteNoticeIcon">🔔</span>
-            <span id="siteNoticeCount">0</span>
+        <div id="siteNoticeWrap" class="identityNoticeWrap">
+          <button id="siteNoticeBtn" class="identityNoticeBtn" type="button" aria-label="消息通知">
+            <span id="siteNoticeIcon" class="identityNoticeIcon">🔔</span>
           </button>
+          <span id="siteNoticeCount" class="identityNoticeCount">0</span>
 
-          <div id="siteNoticePanel" aria-live="polite">
+          <div id="siteNoticePanel" class="identityNoticePanel" aria-live="polite">
             <div class="siteNoticeHeader">
               <div class="siteNoticeTitle">通知中心</div>
               <button id="noticeClearBtn" class="noticeClear" type="button">全部已读</button>
@@ -1038,8 +1040,8 @@ button{
           </div>
         </div>
 
-        <button id="loginOpenBtn" type="button">登录</button>
-        <button id="logoutBtn" class="hidden" type="button">登出</button>
+        <button id="loginOpenBtn" class="identityAuthBtn" type="button"><span class="identityAuthText">登录</span></button>
+        <button id="logoutBtn" class="identityAuthBtn hidden" type="button"><span class="identityAuthText">登出</span></button>
       </div>
     </div>
 
@@ -1101,7 +1103,6 @@ button{
   </div>
 </div>
 
-
 <div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
   <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
     <div class="reward-petals" aria-hidden="true">
@@ -1152,6 +1153,7 @@ let rewardQueue = [];
 let rewardModalShowing = false;
 let rewardAfterCloseCallback = null;
 let holidayGiftCheckInFlight = false;
+let anniversaryCheckInFlight = false;
 
 let seasonEffectState = { rafId: 0, onResize: null };
 let homeImageLoadBound = false;
@@ -1310,28 +1312,11 @@ function syncHomeTopbarScale(){
   const stageWidth = Number(rect?.width || 0);
   if(!topActions || !stageWidth) return;
 
-  const scale = Math.max(0.34, Math.min(3.2, stageWidth / 1440));
-  root.style.setProperty("--bg-ui-scale", String(scale));
+  const identityScale = Math.max(0.34, Math.min(3.2, stageWidth / 1629));
+  root.style.setProperty("--identity-scale", String(identityScale));
 
-  if(stageWidth >= 1600){
-    root.style.setProperty("--identity-top", "7.55%");
-    root.style.setProperty("--identity-right", "7.1%");
-  }else if(stageWidth >= 1200){
-    root.style.setProperty("--identity-top", "7.2%");
-    root.style.setProperty("--identity-right", "4.2%");
-  }else if(stageWidth >= 900){
-    root.style.setProperty("--identity-top", "6.2%");
-    root.style.setProperty("--identity-right", "2.6%");
-  }else if(stageWidth >= 620){
-    root.style.setProperty("--identity-top", "4%");
-    root.style.setProperty("--identity-right", "1.8%");
-  }else if(stageWidth >= 430){
-    root.style.setProperty("--identity-top", "2%");
-    root.style.setProperty("--identity-right", "1.2%");
-  }else{
-    root.style.setProperty("--identity-top", "1%");
-    root.style.setProperty("--identity-right", ".8%");
-  }
+  root.style.setProperty("--identity-top", "5.15%");
+  root.style.setProperty("--identity-right", "5.20%");
 }
 
 function isLoggedIn(){
@@ -1352,7 +1337,7 @@ function getRoleLabel(role){
     owner: "维修工",
     admin: "宿管",
     member: "房客",
-    applying: "申请中",
+    applying: "申请人",
     visitor: "参观者"
   };
   return map[String(role || "visitor").toLowerCase()] || "参观者";
@@ -1381,7 +1366,6 @@ function escapeHtml(str){
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
-
 
 const rewardTypeMeta = {
   achievement:{ label:"成就达成", icon:"🏆" },
@@ -1436,6 +1420,23 @@ function formatRewardAmount(item){
   return `${item.prefix || ""}${item.amount}${item.unit || ""}`;
 }
 
+function isImageIcon(icon){
+  return /\.(png|jpg|jpeg|gif|webp|svg)(\?.*)?$/i.test(String(icon || "").trim());
+}
+
+function renderRewardIcon(icon, name = "奖励"){
+  const safeIcon = String(icon || "").trim();
+  if(!safeIcon){
+    return "✨";
+  }
+
+  if(isImageIcon(safeIcon)){
+    return `<img src="${escapeHtml(safeIcon)}" alt="${escapeHtml(name || "奖励")}" loading="lazy">`;
+  }
+
+  return escapeHtml(safeIcon);
+}
+
 function renderRewards(rewards){
   const list = document.getElementById("rewardList");
   const sectionTitle = document.getElementById("rewardSectionTitle");
@@ -1457,7 +1458,7 @@ function renderRewards(rewards){
     const item = document.createElement("div");
     item.className = "reward-item";
     item.innerHTML = `
-      <div class="reward-item-icon">${escapeHtml(reward.icon)}</div>
+      <div class="reward-item-icon">${renderRewardIcon(reward.icon, reward.name)}</div>
       <div class="reward-item-name">${escapeHtml(reward.name)}</div>
       <div class="reward-item-amount">${escapeHtml(formatRewardAmount(reward))}</div>
     `;
@@ -1548,6 +1549,53 @@ function hasCheckedHolidayGiftToday(memberId){
 
 function markHolidayGiftCheckedToday(memberId){
   sessionStorage.setItem(HOLIDAY_GIFT_CHECK_KEY, getHolidayGiftCheckSignature(memberId));
+}
+
+async function maybeClaimJoinAnniversaryAchievements(options = {}){
+  if(!isLoggedIn() || anniversaryCheckInFlight) return false;
+
+  const user = getCurrentUser();
+  const memberId = String(user.memberId || "").trim();
+  const memberCode = String(user.memberCode || "").trim();
+  if(!memberId || !memberCode) return false;
+
+  anniversaryCheckInFlight = true;
+
+  try{
+    const { data, error } = await client.rpc("claim_join_anniversary_achievements", {
+      p_member_id: memberId,
+      p_member_code: memberCode,
+      p_local_date: getLocalDateString()
+    });
+
+    if(error){
+      console.warn("加入周年成就检查失败：", error);
+      return false;
+    }
+
+    const claims = Array.isArray(data?.claims) ? data.claims : [];
+    if(!data?.claimed_any || claims.length === 0){
+      return false;
+    }
+
+    claims.forEach((claim, index) => {
+      const modal = claim?.modal || {};
+      const isLast = index === claims.length - 1;
+      showRewardModal({
+        type: modal.type || "achievement",
+        title: modal.title || claim?.achievement_name || "加入周年",
+        desc: modal.desc || "周年成就已达成。",
+        rewards: Array.isArray(modal.rewards) ? modal.rewards : []
+      }, isLast ? options.afterAllRewards : null);
+    });
+
+    return true;
+  }catch(err){
+    console.warn("加入周年成就检查异常：", err);
+    return false;
+  }finally{
+    anniversaryCheckInFlight = false;
+  }
 }
 
 async function maybeClaimLoginHolidayGifts(options = {}){
@@ -1866,6 +1914,9 @@ async function safeSyncHomeUI(options = {}){
     applyCurrentHomeBackground();
     syncHomeTopbarScale();
     await updateLogoutDisplay();
+    if(!options.skipAnniversaryCheck){
+      await maybeClaimJoinAnniversaryAchievements();
+    }
     if(!options.skipHolidayGiftCheck){
       await maybeClaimLoginHolidayGifts();
     }
@@ -2018,21 +2069,17 @@ async function login(){
 
     noticeCache.at = 0;
 
-    let roleMessage = "登录成功";
-    if(user.role === "owner"){
-      roleMessage = "维修工已上线";
-    }else if(user.role === "admin"){
-      roleMessage = "宿管已上线";
-    }else if(user.role === "member"){
-      roleMessage = "房客已登录";
-    }else if(user.role === "applying"){
-      roleMessage = "当前身份为申请中";
-    }
+    const roleMessageMap = {
+      owner: "维修工已上线",
+      admin: "宿管已上线",
+      member: "房客已登录",
+      applying: "当前身份为申请中"
+    };
 
     msg.style.color = "#5f7d3a";
-    msg.innerText = roleMessage;
+    msg.innerText = roleMessageMap[user.role] || "登录成功";
 
-    await safeSyncHomeUI({ skipHolidayGiftCheck:true });
+    await safeSyncHomeUI({ skipHolidayGiftCheck:true, skipAnniversaryCheck:true });
 
     setTimeout(async () => {
       const targetPage = getPendingRedirect();
@@ -2047,13 +2094,26 @@ async function login(){
       passwordInput.value = "";
       closeLogin(true);
 
+      const claimedAnniversary = await maybeClaimJoinAnniversaryAchievements({
+        force:true
+      });
+
       const claimedGift = await maybeClaimLoginHolidayGifts({
         force:true,
         afterAllRewards:goTarget
       });
 
-      if(!claimedGift){
+      if(!claimedAnniversary && !claimedGift){
         goTarget();
+      }else if(claimedAnniversary && !claimedGift){
+        const lastIndex = rewardQueue.length - 1;
+        if(lastIndex >= 0){
+          rewardQueue[lastIndex].afterClose = goTarget;
+        }else if(!rewardModalShowing){
+          goTarget();
+        }else{
+          rewardAfterCloseCallback = goTarget;
+        }
       }
     }, 700);
   }catch(e){
@@ -2087,7 +2147,6 @@ function closeLogin(keepRedirect = true){
     clearPendingRedirect();
   }
 }
-
 
 function getManagerPageByRole(){
   if(!isLoggedIn()) return "manager-visitor.html";
@@ -2424,7 +2483,6 @@ document.getElementById("password").addEventListener("keydown", (e) => {
     login();
   }
 });
-
 
 const rewardMask = document.getElementById("rewardMask");
 if(rewardMask){
