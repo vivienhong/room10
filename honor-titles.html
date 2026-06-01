@@ -1,0 +1,2827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜成就称号馆</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;}
+
+:root{
+  --bg-ui-scale:1;
+  --ui-scale:var(--bg-ui-scale,1);
+  --room-nav-scale:var(--ui-scale);
+  --identity-scale:var(--ui-scale);
+
+  /* 身份组件：采用全站通用模板 */
+  --identity-right:7.35%;
+  --identity-top:6.46%;
+  --identity-base-width:232;
+  --identity-base-height:38;
+  --identity-bg:rgba(255,250,244,0.88);
+  --identity-inner-bg:rgba(255,253,249,0.92);
+  --identity-border:rgba(170,132,101,0.20);
+  --identity-text:#6f5746;
+  --identity-shadow:rgba(106,78,55,0.08);
+  --identity-name-y:0em;
+  --identity-notice-y:0em;
+  --identity-button-y:0em;
+
+  /* 房间按钮：采用全站通用模板，按底图百分比四角绑定 */
+  --room-nav-top:6.35%;
+  --room-nav-start-left:25.83%;
+  --room-nav-btn-width:4.72%;
+  --room-nav-btn-height:5.10%;
+  --room-nav-gap:0.486%;
+
+  --room-nav-hall-left:var(--room-nav-start-left);
+  --room-nav-living-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 1);
+  --room-nav-manager-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 2);
+  --room-nav-honor-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 3);
+  --room-nav-studio-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 4);
+  --room-nav-game-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 5);
+  --room-nav-dorm-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 6);
+  --room-nav-flower-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 7);
+  --room-nav-pets-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 8);
+
+  --room-nav-text:#6f5746;
+  --room-nav-border:rgba(158,122,93,.26);
+  --room-nav-current-text:#5d4738;
+  --room-nav-current-border:rgba(151,111,82,.42);
+  --room-nav-paper:rgba(255,250,242,.78);
+  --room-nav-paper-2:rgba(246,235,219,.74);
+  --room-nav-wash:rgba(214,185,157,.20);
+  --room-nav-current-bg:rgba(239,224,205,.86);
+
+  /* 主面板坐标绑定底图实际显示区域：全站统一规则，不按分辨率单独改坐标 */
+  --honor-panel-left:20.4%;
+  --honor-panel-top:27.2%;
+  --honor-panel-width:61.8%;
+  --honor-panel-height:64.4%;
+
+  --panel-border:rgba(198,145,79,.24);
+  --card-border:rgba(170,122,82,.16);
+  --brown:#6f4726;
+  --brown-soft:#9b7656;
+  --gold:#c98c4f;
+  --green:#72855a;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left,#f5ecdb 0%,transparent 44%),
+    linear-gradient(180deg,#efe2cc 0%,#e9d8bd 100%);
+  color:var(--brown);
+}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+button{font-family:inherit;}
+.hidden{display:none !important;}
+
+#room{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  overflow:hidden;
+}
+
+#bgFrame{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+}
+
+#bg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center center;
+  display:block;
+  user-select:none;
+  pointer-events:none;
+  -webkit-user-drag:none;
+}
+
+#overlay{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  z-index:2;
+  overflow:visible;
+  pointer-events:none;
+  --ui-scale:var(--bg-ui-scale, 1);
+}
+
+#overlay *{pointer-events:auto;}
+
+/* =========================================================
+   房间按钮与身份组件：全站通用模板版
+========================================================= */
+#overlay .roomNavLayer{pointer-events:none!important;}
+#overlay .roomNavLayer .navBtn{pointer-events:auto!important;}
+#overlay .roomIdentity{pointer-events:none!important;}
+#overlay .roomIdentity .roomIdentityBar,
+#overlay .roomIdentity button,
+#overlay .roomIdentity .identityNoticePanel{pointer-events:auto!important;}
+
+/* =========================================================
+   房间按钮组件
+========================================================= */
+.roomNavLayer{
+  position:absolute;
+  inset:0;
+  z-index:55;
+  pointer-events:none;
+  --s:var(--room-nav-scale,1);
+  --nav-btn-radius:calc(15px * var(--s));
+  --nav-btn-font:calc(15px * var(--s));
+  --nav-btn-border:calc(1px * var(--s));
+  --nav-btn-shadow-y:calc(3px * var(--s));
+  --nav-btn-shadow-blur:calc(8px * var(--s));
+}
+
+.navBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  position:absolute;
+  top:var(--room-nav-top);
+  width:var(--room-nav-btn-width);
+  height:var(--room-nav-btn-height);
+  min-width:0;
+  min-height:0;
+  padding:0;
+  border-radius:var(--nav-btn-radius);
+  color:var(--room-nav-text);
+  font-size:var(--nav-btn-font);
+  font-weight:900;
+  white-space:nowrap;
+  overflow:visible;
+  isolation:isolate;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,.56), transparent 40%),
+    radial-gradient(circle at 78% 74%, var(--room-nav-wash), transparent 48%),
+    linear-gradient(180deg, var(--room-nav-paper) 0%, var(--room-nav-paper-2) 100%);
+  border:var(--nav-btn-border) solid var(--room-nav-border);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.64),
+    0 calc(2px * var(--s)) calc(7px * var(--s)) rgba(96,70,48,.10);
+  text-shadow:0 calc(1px * var(--s)) 0 rgba(255,255,255,.38);
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  pointer-events:auto;
+}
+
+.navBtn[data-room="hall"]{left:var(--room-nav-hall-left);}
+.navBtn[data-room="living"]{left:var(--room-nav-living-left);}
+.navBtn[data-room="manager"]{left:var(--room-nav-manager-left);}
+.navBtn[data-room="honor"]{left:var(--room-nav-honor-left);}
+.navBtn[data-room="studio"]{left:var(--room-nav-studio-left);}
+.navBtn[data-room="game"]{left:var(--room-nav-game-left);}
+.navBtn[data-room="dorm"]{left:var(--room-nav-dorm-left);}
+.navBtn[data-room="flower"]{left:var(--room-nav-flower-left);}
+.navBtn[data-room="pets"]{left:var(--room-nav-pets-left);}
+
+.navBtn:not(.is-current):hover,
+.navBtn:not(.is-current):focus-visible{
+  color:#5f3d22;
+  background:
+    radial-gradient(circle at 20% 24%, rgba(255,255,255,.66), transparent 42%),
+    radial-gradient(circle at 80% 78%, rgba(207,170,143,.24), transparent 50%),
+    linear-gradient(180deg, rgba(255,252,246,.88) 0%, rgba(239,226,210,.82) 100%);
+  border-color:rgba(151,112,84,.36);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.70),
+    0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.12);
+  filter:saturate(1.02);
+}
+
+.navBtn.is-current{
+  cursor:default;
+  color:var(--room-nav-current-text);
+  background:
+    radial-gradient(circle at 22% 22%, rgba(255,255,255,.62), transparent 42%),
+    radial-gradient(circle at 80% 80%, rgba(190,151,126,.26), transparent 50%),
+    linear-gradient(180deg, rgba(246,235,222,.94) 0%, var(--room-nav-current-bg) 100%);
+  border-color:var(--room-nav-current-border);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.68),
+    0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.13),
+    0 0 0 calc(2px * var(--s)) rgba(255,253,248,.46);
+  filter:none;
+}
+
+.navLabel{
+  position:relative;
+  z-index:5;
+  width:100%;
+  height:100%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  overflow:visible;
+  white-space:nowrap;
+  line-height:normal;
+  padding-top:.06em;
+}
+
+.navEffect{
+  position:absolute;
+  pointer-events:none;
+  opacity:0;
+  z-index:4;
+  display:block;
+  font-weight:900;
+  line-height:1;
+  text-shadow:
+    0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.82),
+    0 0 calc(8px * var(--s)) rgba(255,246,210,.52);
+  filter:saturate(.95);
+}
+
+.navEffectA{left:8%;top:-54%;font-size:calc(var(--nav-btn-font) * .92);}
+.navEffectB{right:8%;top:-62%;font-size:calc(var(--nav-btn-font) * .86);}
+.navEffectC{left:50%;top:-72%;transform:translateX(-50%);font-size:calc(var(--nav-btn-font) * 1.02);}
+
+@keyframes navFloatA{
+  0%,100%{ transform:translateY(calc(4px * var(--s))) rotate(-8deg) scale(.82); opacity:0; }
+  20%,72%{ opacity:.86; }
+  50%{ transform:translateY(calc(-5px * var(--s))) rotate(6deg) scale(1); opacity:.76; }
+}
+@keyframes navFloatB{
+  0%,100%{ transform:translateY(calc(5px * var(--s))) rotate(9deg) scale(.78); opacity:0; }
+  24%,70%{ opacity:.78; }
+  52%{ transform:translateY(calc(-6px * var(--s))) rotate(-7deg) scale(1); opacity:.68; }
+}
+@keyframes navFloatC{
+  0%,100%{ transform:translateX(-50%) translateY(calc(6px * var(--s))) rotate(0deg) scale(.76); opacity:0; }
+  24%,70%{ opacity:.88; }
+  50%{ transform:translateX(-50%) translateY(calc(-6px * var(--s))) rotate(2deg) scale(1); opacity:.78; }
+}
+
+.navBtn:not(.is-current):hover .navEffectA,
+.navBtn:not(.is-current):focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite;}
+.navBtn:not(.is-current):hover .navEffectB,
+.navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite;}
+.navBtn:not(.is-current):hover .navEffectC,
+.navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite;}
+.navBtn.is-current .navEffect{display:none;}
+
+.navBtn[data-room="hall"] .navEffect{color:rgba(255,205,96,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.95),0 0 calc(10px * var(--s)) rgba(255,215,105,.62);}
+.navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82);}
+.navBtn[data-room="honor"] .navEffect{color:rgba(205,143,45,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.92),0 0 calc(8px * var(--s)) rgba(255,220,130,.52);}
+.navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82);}
+.navBtn[data-room="studio"] .navEffect{color:rgba(96,112,145,.84);}
+.navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82);}
+.navBtn[data-room="dorm"] .navEffect{color:rgba(148,112,171,.78);}
+.navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82);}
+.navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82);}
+
+/* =========================================================
+   身份组件
+========================================================= */
+.roomIdentity{
+  --s:var(--identity-scale,1);
+  position:absolute;
+  right:var(--identity-right);
+  top:var(--identity-top);
+  width:calc(var(--identity-base-width) * 1px * var(--s));
+  height:calc(var(--identity-base-height) * 1px * var(--s));
+  min-width:calc(var(--identity-base-width) * 1px * var(--s));
+  min-height:calc(var(--identity-base-height) * 1px * var(--s));
+  z-index:70;
+  pointer-events:none;
+  overflow:visible;
+}
+
+.roomIdentityBar{
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-template-columns:minmax(calc(130px * var(--s)),1fr) calc(30px * var(--s)) calc(42px * var(--s));
+  gap:calc(5px * var(--s));
+  padding:calc(4px * var(--s)) calc(5px * var(--s));
+  border-radius:calc(13px * var(--s));
+  background:var(--identity-bg);
+  border:calc(1px * var(--s)) solid var(--identity-border);
+  box-shadow:
+    0 calc(10px * var(--s)) calc(24px * var(--s)) var(--identity-shadow),
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.9);
+  backdrop-filter:blur(calc(8px * var(--s)));
+  -webkit-backdrop-filter:blur(calc(8px * var(--s)));
+  pointer-events:auto;
+  overflow:visible;
+  white-space:nowrap;
+}
+
+.identityNameBox,
+.identityNoticeBtn,
+.identityAuthBtn{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  border-radius:calc(9px * var(--s));
+  background:var(--identity-inner-bg);
+  color:var(--identity-text);
+  border:calc(1px * var(--s)) solid rgba(160,116,78,0.12);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.95),
+    0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,0.05);
+}
+
+.identityNameBox{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 calc(8px * var(--s));
+  overflow:visible;
+}
+
+.identityNameText{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  max-width:100%;
+  color:var(--identity-text);
+  font-size:calc(13px * var(--s));
+  font-weight:850;
+  line-height:1.22;
+  letter-spacing:0;
+  white-space:nowrap;
+  overflow:visible;
+  text-overflow:clip;
+  transform:translateY(var(--identity-name-y));
+}
+
+.identityNameText.isOverflowSafe{overflow:hidden;text-overflow:ellipsis;}
+
+.identityNoticeWrap{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+
+.identityNoticeBtn,
+.identityAuthBtn{
+  appearance:none;
+  cursor:pointer;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
+}
+
+.identityNoticeBtn{
+  width:100%;
+  height:100%;
+  font-size:calc(14px * var(--s));
+}
+
+.identityNoticeIcon{
+  display:flex;
+  width:100%;
+  height:100%;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  transform:translateY(var(--identity-notice-y));
+  filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,0.55));
+}
+
+.identityNoticeCount{
+  position:absolute;
+  right:calc(-6px * var(--s));
+  top:calc(-6px * var(--s));
+  min-width:calc(18px * var(--s));
+  height:calc(18px * var(--s));
+  padding:0 calc(5px * var(--s));
+  border-radius:999px;
+  background:#b98f72;
+  color:#fffaf6;
+  font-size:calc(9px * var(--s));
+  font-weight:900;
+  line-height:1;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:calc(2px * var(--s)) solid rgba(255,248,239,0.98);
+  box-shadow:0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(116,86,54,0.16);
+  z-index:3;
+}
+
+.identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex;}
+
+.identityAuthBtn{
+  width:100%;
+  height:100%;
+  color:#6f5746;
+  font-size:calc(12px * var(--s));
+  font-weight:850;
+  line-height:1.18;
+  white-space:nowrap;
+  overflow:visible;
+}
+
+.identityAuthText{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1.18;
+  transform:translateY(var(--identity-button-y));
+}
+
+.identityNoticeBtn:hover,
+.identityAuthBtn:hover{
+  transform:translateY(calc(-1px * var(--s)));
+  background:rgba(255,255,255,0.94);
+}
+
+.identityNoticePanel{
+  position:absolute;
+  top:calc(100% + 10px * var(--s));
+  right:0;
+  width:min(calc(360px * var(--s)),72vw);
+  max-height:min(calc(540px * var(--s)),70vh);
+  overflow:auto;
+  padding:calc(12px * var(--s));
+  border-radius:calc(16px * var(--s));
+  background:rgba(255,249,241,0.98);
+  border:calc(1px * var(--s)) solid rgba(203,167,123,0.28);
+  box-shadow:0 calc(16px * var(--s)) calc(36px * var(--s)) rgba(85,58,34,0.16);
+  display:none;
+  z-index:80;
+  text-align:left;
+}
+
+.identityNoticePanel.show{display:block;}
+
+.identityNoticeTitle{
+  color:#6f4726;
+  font-size:calc(13px * var(--s));
+  font-weight:900;
+  margin-bottom:calc(10px * var(--s));
+}
+
+.identityNoticeEmpty{
+  color:#8a6644;
+  font-size:calc(12px * var(--s));
+  line-height:1.6;
+  padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s));
+}
+
+/* =========================================================
+   成就称号馆主体：主面板坐标绑定底图，比例更接近正方形
+========================================================= */
+#honorShell{
+  position:absolute;
+  left:var(--honor-panel-left);
+  top:var(--honor-panel-top);
+  width:var(--honor-panel-width);
+  height:var(--honor-panel-height);
+  z-index:20;
+  padding:calc(13px * var(--ui-scale));
+  border-radius:calc(26px * var(--ui-scale));
+  border:1px solid var(--panel-border);
+  background:
+    linear-gradient(180deg, rgba(255,250,242,.84), rgba(250,236,216,.68));
+  box-shadow:
+    0 calc(16px * var(--ui-scale)) calc(38px * var(--ui-scale)) rgba(89,66,42,.12),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  backdrop-filter:blur(calc(10px * var(--ui-scale)));
+  -webkit-backdrop-filter:blur(calc(10px * var(--ui-scale)));
+  display:grid;
+  grid-template-rows:minmax(0,1fr);
+  gap:calc(8px * var(--ui-scale));
+  overflow:hidden;
+}
+
+
+.mineTools{
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:calc(8px * var(--ui-scale));
+  padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border-bottom:1px dashed rgba(170,117,62,.18);
+}
+
+
+.honorSummaryBox,
+.honorClaimBox,
+.honorMain,
+.honorMine{
+  border-radius:calc(18px * var(--ui-scale));
+  border:1px solid var(--card-border);
+  background:rgba(255,253,248,.56);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.72),
+    0 calc(8px * var(--ui-scale)) calc(18px * var(--ui-scale)) rgba(90,67,43,.06);
+}
+
+
+.sourceFilterBox{
+  position:relative;
+  flex:0 0 auto;
+  width:100%;
+  min-width:0;
+  min-height:0;
+  padding:calc(9px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  overflow:hidden;
+  border-bottom:1px dashed rgba(170,117,62,.18);
+  background:rgba(255,253,248,.30);
+}
+
+
+.filterSparkles{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  opacity:.85;
+}
+
+.filterSparkle{
+  position:absolute;
+  width:calc(5px * var(--ui-scale));
+  height:calc(5px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(210,151,75,.52);
+  box-shadow:0 0 calc(9px * var(--ui-scale)) rgba(229,178,92,.34);
+  opacity:.46;
+  animation:filterSparkleFloat 4.6s ease-in-out infinite;
+}
+
+.filterSparkle:nth-child(1){left:8%;top:62%;animation-delay:-.2s;}
+.filterSparkle:nth-child(2){left:28%;top:26%;animation-delay:-1.4s;transform:scale(.72);}
+.filterSparkle:nth-child(3){left:54%;top:70%;animation-delay:-2.1s;transform:scale(.86);}
+.filterSparkle:nth-child(4){left:82%;top:32%;animation-delay:-3.3s;transform:scale(.62);}
+.filterSparkle:nth-child(5){left:92%;top:76%;animation-delay:-1.0s;transform:scale(.78);}
+
+@keyframes filterSparkleFloat{
+  0%,100%{opacity:.18; transform:translateY(calc(4px * var(--ui-scale))) scale(.68);}
+  45%{opacity:.74; transform:translateY(calc(-6px * var(--ui-scale))) scale(1);}
+  70%{opacity:.36; transform:translateY(calc(-2px * var(--ui-scale))) scale(.82);}
+}
+
+.filterHead{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:calc(8px * var(--ui-scale));
+  color:#7a5537;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  line-height:1.2;
+  margin-bottom:calc(6px * var(--ui-scale));
+}
+
+.filterTitle{
+  display:inline-flex;
+  align-items:center;
+  gap:calc(5px * var(--ui-scale));
+  white-space:nowrap;
+}
+
+.filterTitle::before{
+  content:"✦";
+  color:rgba(196,132,62,.76);
+  font-size:calc(11px * var(--ui-scale));
+  animation:filterStarPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes filterStarPulse{
+  0%,100%{opacity:.42; transform:scale(.86) rotate(0deg);}
+  50%{opacity:.92; transform:scale(1.12) rotate(12deg);}
+}
+
+.filterCount{
+  color:#9a7659;
+  font-size:calc(9px * var(--ui-scale));
+  white-space:nowrap;
+}
+
+.sourceFilterTags{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:calc(6px * var(--ui-scale));
+}
+
+.sourceFilterBtn{
+  appearance:none;
+  cursor:pointer;
+  border:1px solid rgba(201,140,79,.18);
+  min-height:calc(24px * var(--ui-scale));
+  padding:0 calc(10px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(255,248,238,.62);
+  color:#795334;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72);
+  transition:transform .16s ease, background .16s ease, border-color .16s ease, color .16s ease;
+}
+
+.sourceFilterBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,243,224,.82);
+  border-color:rgba(190,126,62,.28);
+}
+
+.sourceFilterBtn.active{
+  color:#fffaf3;
+  background:#b97a43;
+  border-color:rgba(158,96,44,.36);
+  box-shadow:0 calc(4px * var(--ui-scale)) calc(10px * var(--ui-scale)) rgba(142,89,41,.12);
+}
+
+.honorSummaryBox{
+  min-height:calc(58px * var(--ui-scale));
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:calc(6px * var(--ui-scale));
+  padding:calc(11px * var(--ui-scale));
+  align-content:center;
+}
+
+.honorClaimBox{
+  min-height:calc(58px * var(--ui-scale));
+  padding:calc(11px * var(--ui-scale));
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:calc(6px * var(--ui-scale));
+}
+
+
+.mineTools .honorSummaryBox,
+.mineTools .honorClaimBox{
+  width:100%;
+  flex:none;
+}
+
+.mineTools .honorSummaryBox{
+  min-height:calc(54px * var(--ui-scale));
+}
+
+.mineTools .honorClaimBox{
+  min-height:calc(52px * var(--ui-scale));
+}
+
+
+.summaryCell{
+  min-width:0;
+  text-align:center;
+  border-radius:calc(13px * var(--ui-scale));
+  background:rgba(255,246,231,.58);
+  padding:calc(7px * var(--ui-scale)) calc(4px * var(--ui-scale));
+}
+
+.summaryNum{
+  display:block;
+  color:#c27932;
+  font-size:calc(20px * var(--ui-scale));
+  line-height:1.05;
+  font-weight:900;
+}
+
+.summaryLabel{
+  display:block;
+  margin-top:calc(4px * var(--ui-scale));
+  color:#92745a;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.claimAllBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  width:100%;
+  min-height:calc(34px * var(--ui-scale));
+  border-radius:calc(12px * var(--ui-scale));
+  background:#c98c4f;
+  color:#fffaf3;
+  box-shadow:0 4px 10px rgba(139,89,36,.12);
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:900;
+  white-space:nowrap;
+  transition:transform .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+.claimAllBtn:hover:not(:disabled){
+  background:#b9793f;
+  transform:translateY(-1px);
+}
+
+.claimAllBtn:disabled{
+  cursor:default;
+  background:rgba(239,219,190,.88);
+  color:#7a5a3b;
+  box-shadow:none;
+}
+
+.claimHint{
+  color:#92745a;
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.35;
+  font-weight:800;
+  text-align:center;
+}
+
+.honorBody{
+  min-height:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(calc(320px * var(--ui-scale)), .46fr);
+  gap:calc(10px * var(--ui-scale));
+}
+
+.honorMain,
+.honorMine{
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.panelHead{
+  flex:0 0 auto;
+  min-height:calc(48px * var(--ui-scale));
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:calc(10px * var(--ui-scale));
+  padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border-bottom:1px dashed rgba(170,117,62,.20);
+}
+
+.panelTitle{
+  margin:0;
+  color:#6f4726;
+  font-size:calc(16px * var(--ui-scale));
+  line-height:1.2;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.panelTitleArea{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:calc(8px * var(--ui-scale));
+}
+
+.branchNav{
+  display:flex;
+  align-items:center;
+  gap:calc(6px * var(--ui-scale));
+  flex-wrap:wrap;
+}
+
+.branchBtn{
+  appearance:none;
+  border:1px solid rgba(201,140,79,.18);
+  cursor:pointer;
+  min-height:calc(27px * var(--ui-scale));
+  padding:0 calc(10px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(255,248,238,.62);
+  color:#795334;
+  font-size:calc(11px * var(--ui-scale));
+  font-weight:900;
+  white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72);
+  transition:transform .16s ease, background .16s ease, border-color .16s ease;
+}
+
+.branchBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,243,224,.82);
+  border-color:rgba(190,126,62,.28);
+}
+
+.tabGroup{
+  display:flex;
+  align-items:center;
+  gap:calc(6px * var(--ui-scale));
+  padding:calc(3px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(255,252,247,.46);
+  border:1px solid rgba(255,255,255,.50);
+}
+
+.tabBtn{
+  appearance:none;
+  border:1px solid transparent;
+  border-radius:999px;
+  min-height:calc(28px * var(--ui-scale));
+  padding:0 calc(11px * var(--ui-scale));
+  cursor:pointer;
+  color:#7b583a;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:900;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+}
+
+.tabBtn:hover{background:rgba(255,248,238,.68);}
+
+.tabBtn.active{
+  color:#704622;
+  background:rgba(255,244,226,.90);
+  border-color:rgba(201,140,79,.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.75),
+    0 3px 8px rgba(135,86,40,.08);
+}
+
+.honorList{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding:calc(12px * var(--ui-scale));
+  display:none;
+  flex-direction:column;
+  gap:calc(9px * var(--ui-scale));
+}
+
+.honorList.active{display:flex;}
+
+.honorCard{
+  position:relative;
+  flex:0 0 auto;
+  min-width:0;
+  padding:calc(12px * var(--ui-scale)) calc(13px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(18px * var(--ui-scale));
+  border-radius:calc(16px * var(--ui-scale));
+  background:rgba(255,252,247,.66);
+  border:1px solid rgba(255,255,255,.58);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.68);
+  overflow:hidden;
+}
+
+.honorCard::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:calc(10px * var(--ui-scale));
+  bottom:calc(10px * var(--ui-scale));
+  width:calc(5px * var(--ui-scale));
+  border-radius:0 999px 999px 0;
+  background:rgba(201,140,79,.55);
+}
+
+.honorCard.achievement::before{background:rgba(114,133,90,.58);}
+.honorCard.title::before{background:rgba(214,157,66,.58);}
+
+.cardTop{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:calc(10px * var(--ui-scale));
+  min-width:0;
+}
+
+.cardText{min-width:0;}
+
+.cardTitle{
+  margin:0;
+  color:#6f4726;
+  font-size:calc(14px * var(--ui-scale));
+  line-height:1.35;
+  font-weight:900;
+  word-break:break-word;
+}
+
+.cardSub{
+  margin:calc(4px * var(--ui-scale)) 0 0;
+  color:#92745a;
+  font-size:calc(11px * var(--ui-scale));
+  line-height:1.45;
+  font-weight:800;
+  word-break:break-word;
+}
+
+.cardBadge{
+  flex:0 0 auto;
+  min-height:calc(23px * var(--ui-scale));
+  padding:0 calc(9px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(201,140,79,.14);
+  color:#9b6422;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+}
+
+.metaRow{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:calc(6px * var(--ui-scale));
+  margin-top:calc(9px * var(--ui-scale));
+}
+
+.metaPill{
+  min-height:calc(23px * var(--ui-scale));
+  padding:0 calc(8px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(255,246,231,.70);
+  border:1px solid rgba(201,140,79,.13);
+  color:#84582f;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.progressBox{margin-top:calc(9px * var(--ui-scale));}
+
+.progressLine{
+  height:calc(8px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(154,110,70,.14);
+  overflow:hidden;
+}
+
+.progressFill{
+  height:100%;
+  width:0;
+  border-radius:999px;
+  background:linear-gradient(90deg,rgba(114,133,90,.74),rgba(214,157,66,.72));
+}
+
+.progressText{
+  margin-top:calc(5px * var(--ui-scale));
+  color:#9b7656;
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.35;
+  font-weight:800;
+}
+
+.unlockNames{
+  margin-top:calc(5px * var(--ui-scale));
+  color:#7c6046;
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.45;
+  font-weight:800;
+  word-break:break-word;
+}
+
+.actionBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  min-height:calc(30px * var(--ui-scale));
+  margin-top:calc(10px * var(--ui-scale));
+  padding:0 calc(12px * var(--ui-scale));
+  border-radius:calc(11px * var(--ui-scale));
+  background:#c98c4f;
+  color:#fffaf3;
+  box-shadow:0 4px 10px rgba(139,89,36,.12);
+  font-size:calc(11px * var(--ui-scale));
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.actionBtn.done,
+.actionBtn:disabled{
+  background:rgba(239,219,190,.88);
+  color:#6f4726;
+  cursor:default;
+  box-shadow:none;
+}
+
+
+.emptyText,.errorText{
+  color:#947256;
+  font-size:calc(12px * var(--ui-scale));
+  line-height:1.7;
+  padding:calc(12px * var(--ui-scale));
+  border-radius:calc(14px * var(--ui-scale));
+  background:rgba(255,252,247,.54);
+  border:1px dashed rgba(170,117,62,.22);
+}
+
+.errorText{color:#9b4a35;}
+
+.toast{
+  position:fixed;
+  left:50%;
+  top:50%;
+  z-index:100;
+  transform:translate(-50%,-50%) scale(.96);
+  max-width:min(420px,82vw);
+  padding:14px 18px;
+  border-radius:18px;
+  background:rgba(255,249,234,.96);
+  border:1px solid rgba(126,83,45,.24);
+  box-shadow:0 14px 34px rgba(67,43,24,.2);
+  color:#5d3c25;
+  font-size:14px;
+  text-align:center;
+  line-height:1.6;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+}
+
+/* 541px 以上都保持左右结构，只收紧尺寸 */
+@media(min-width:541px) and (max-width:1122px){
+  .sourceFilterBox{
+    min-width:calc(230px * var(--ui-scale));
+  }
+
+
+  .honorBody{
+    grid-template-columns:minmax(0,1fr) minmax(calc(280px * var(--ui-scale)), .46fr);
+  }
+
+  .tabBtn{
+    padding:0 calc(9px * var(--ui-scale));
+  }
+}
+
+@media(min-width:541px) and (max-width:760px){
+  /* 541px 以上仍保持网页版结构，避免 500 多 px 时突然切成另一套排版。 */
+  .sourceFilterBox{
+    min-width:0;
+    flex-basis:auto;
+    padding:calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  }
+
+  .sourceFilterTags{
+    gap:calc(5px * var(--ui-scale));
+  }
+
+  .sourceFilterBtn{
+    min-height:calc(22px * var(--ui-scale));
+    padding:0 calc(8px * var(--ui-scale));
+    font-size:calc(9px * var(--ui-scale));
+  }
+
+  .honorSummaryBox{
+    padding:calc(8px * var(--ui-scale));
+  }
+
+  .honorClaimBox{
+    padding:calc(8px * var(--ui-scale));
+  }
+
+  .summaryNum{
+    font-size:calc(16px * var(--ui-scale));
+  }
+
+  .summaryLabel,
+  .claimHint{
+    font-size:calc(8.5px * var(--ui-scale));
+  }
+
+  .claimAllBtn{
+    min-height:calc(28px * var(--ui-scale));
+    font-size:calc(10px * var(--ui-scale));
+  }
+
+  .honorBody{
+    grid-template-columns:minmax(0,1fr) minmax(calc(225px * var(--ui-scale)), .48fr);
+  }
+
+  .panelHead{
+    flex-direction:row;
+    align-items:center;
+    gap:calc(7px * var(--ui-scale));
+    min-height:calc(48px * var(--ui-scale));
+    padding:calc(9px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  }
+
+  .panelTitle{
+    font-size:calc(14px * var(--ui-scale));
+  }
+
+  .tabGroup{
+    width:auto;
+    flex:0 0 auto;
+    gap:calc(4px * var(--ui-scale));
+  }
+
+  .tabBtn{
+    flex:0 0 auto;
+    min-height:calc(25px * var(--ui-scale));
+    padding:0 calc(7px * var(--ui-scale));
+    font-size:calc(10px * var(--ui-scale));
+  }
+}
+
+/* =========================================================
+   540px 及以下手机版：房间切换 → 身份组件 → 主面板
+========================================================= */
+@media(max-width:540px){
+  html,body{
+    overflow-x:hidden;
+    overflow-y:auto;
+    height:auto;
+    min-height:100%;
+  }
+
+  body{
+    display:block;
+    background:
+      linear-gradient(rgba(243,236,223,.60), rgba(243,236,223,.88)),
+      url("honor-titles.png") center top / cover no-repeat fixed;
+  }
+
+  #room{
+    width:100%;
+    min-height:100vh;
+    min-height:100dvh;
+    height:auto;
+    display:block;
+    overflow:visible;
+    padding:10px 12px 16px;
+  }
+
+  #bgFrame{display:none;}
+
+  #overlay{
+    position:relative;
+    left:auto!important;
+    top:auto!important;
+    width:100%!important;
+    height:auto!important;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    overflow:visible;
+    --ui-scale:1;
+    pointer-events:auto;
+  }
+
+  .roomNavLayer{
+    position:relative;
+    inset:auto;
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+    order:0;
+    z-index:20;
+    pointer-events:auto;
+    --s:1;
+  }
+
+  .navBtn{
+    position:relative;
+    left:auto!important;
+    top:auto!important;
+    width:100%;
+    height:32px;
+    min-width:0;
+    min-height:32px;
+    border-radius:10px;
+    font-size:12px;
+    overflow:hidden;
+  }
+
+  .navLabel{padding-top:.04em;}
+  .navEffect{display:none;}
+
+  .roomIdentity{
+    --s:1;
+    position:relative;
+    right:auto;
+    top:auto;
+    width:100%;
+    min-width:0;
+    height:40px;
+    min-height:40px;
+    order:1;
+    z-index:30;
+  }
+
+  .roomIdentityBar{
+    grid-template-columns:minmax(0,1fr) 34px 42px;
+    gap:6px;
+    padding:5px 7px;
+    border-radius:14px;
+  }
+
+  .identityNameBox{padding:0 9px;border-radius:10px;}
+  .identityNameText{font-size:12px;line-height:1.22;}
+  .identityNoticeBtn{font-size:14px;border-radius:10px;}
+  .identityAuthBtn{font-size:11px;border-radius:10px;}
+
+  .identityNoticePanel{
+    position:fixed;
+    top:58px;
+    left:12px;
+    right:12px;
+    width:auto;
+    max-height:60dvh;
+    padding:14px;
+    border-radius:18px;
+    z-index:999;
+  }
+
+  #honorShell{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    height:auto;
+    order:2;
+    padding:12px;
+    border-radius:24px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    overflow:visible;
+  }
+
+  .sourceFilterBox,
+  .honorSummaryBox,
+  .honorClaimBox{
+    width:100%;
+    min-width:0;
+  }
+
+  .honorBody{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .honorMain,
+  .honorMine{
+    min-height:0;
+    overflow:visible;
+  }
+
+  .panelHead{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .panelTitleArea{
+    width:100%;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+  }
+
+  .branchNav{width:100%;}
+
+  .branchBtn{
+    flex:1 1 auto;
+    min-height:30px;
+    font-size:11px;
+  }
+
+  .tabGroup{width:100%;}
+
+  .tabBtn{
+    flex:1;
+    font-size:12px;
+  }
+
+  .honorList{
+    max-height:none;
+    overflow:visible;
+  }
+
+  .cardTop{gap:8px;}
+  .cardTitle{font-size:14px;}
+
+  .cardSub,
+  .metaPill,
+  .progressText{
+    font-size:11px;
+  }
+}
+</style>
+</head>
+
+<body>
+<div id="room">
+  <div id="bgFrame">
+    <img id="bg" src="honor-titles.png" alt="十号房成就称号馆背景">
+  </div>
+
+  <div id="overlay">
+    <!-- 房间按钮：全站通用模板版 -->
+    <nav class="roomNavLayer" id="roomNav" aria-label="房间切换">
+      <button class="navBtn" data-room="hall" type="button" onclick="enterRoom('index.html', false)">
+        <span class="navLabel">大堂</span>
+        <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
+      </button>
+
+      <button class="navBtn" data-room="living" type="button" onclick="enterRoom('living.html', true)">
+        <span class="navLabel">客厅</span>
+        <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
+      </button>
+
+      <button class="navBtn" data-room="manager" type="button" onclick="enterManagerRoom()">
+        <span class="navLabel">宿管室</span>
+        <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
+      </button>
+
+      <button class="navBtn is-current" data-room="honor" type="button" aria-current="page">
+        <span class="navLabel">荣誉墙</span>
+        <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
+      </button>
+
+      <button class="navBtn" data-room="studio" type="button" onclick="enterRoom('studio-todo.html', true)">
+        <span class="navLabel">工作间</span>
+        <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
+      </button>
+
+      <button class="navBtn" data-room="game" type="button" onclick="enterRoom('game.html', false)">
+        <span class="navLabel">游戏房</span>
+        <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span>
+      </button>
+
+      <button class="navBtn" data-room="dorm" type="button" onclick="enterRoom('dorm.html', true)">
+        <span class="navLabel">宿舍</span>
+        <span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span>
+      </button>
+
+      <button class="navBtn" data-room="flower" type="button" onclick="enterRoom('flower.html', false)">
+        <span class="navLabel">花房区</span>
+        <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
+      </button>
+
+      <button class="navBtn" data-room="pets" type="button" onclick="enterRoom('pets.html', false)">
+        <span class="navLabel">宠物区</span>
+        <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
+      </button>
+    </nav>
+
+    <!-- 身份组件：全站通用模板版 -->
+    <section class="roomIdentity" id="roomIdentity" aria-label="当前身份">
+      <div class="roomIdentityBar">
+        <div class="identityNameBox">
+          <span class="identityNameText" id="currentUserText">参观者</span>
+        </div>
+
+        <div class="identityNoticeWrap">
+          <button class="identityNoticeBtn" id="siteNoticeBtn" type="button" aria-label="打开通知">
+            <span class="identityNoticeIcon" id="siteNoticeIcon">🔔</span>
+          </button>
+          <span class="identityNoticeCount" id="identityNoticeCount">0</span>
+
+          <div class="identityNoticePanel" id="identityNoticePanel" aria-live="polite">
+            <div class="identityNoticeTitle">通知</div>
+            <div class="identityNoticeEmpty" id="identityNoticeContent">登录后查看个人通知。</div>
+          </div>
+        </div>
+
+        <button class="identityAuthBtn" id="loginOpenBtn" type="button">
+          <span class="identityAuthText">登录</span>
+        </button>
+        <button class="identityAuthBtn hidden" id="logoutBtn" type="button">
+          <span class="identityAuthText">登出</span>
+        </button>
+      </div>
+    </section>
+
+    <main id="honorShell">
+      <section class="honorBody">
+        <section class="honorMain">
+          <div class="panelHead">
+            <div class="panelTitleArea">
+              <h2 class="panelTitle">共同荣誉</h2>
+              <div class="branchNav" aria-label="荣誉墙分支导航">
+                <button class="branchBtn" type="button" onclick="window.location.href='honor.html'">返回荣誉墙</button>
+                <button class="branchBtn" type="button" onclick="window.location.href='honor-gallery.html'">作品展览</button>
+              </div>
+            </div>
+            <div class="tabGroup">
+              <button class="tabBtn active" type="button" data-tab-group="community" data-target="communityAchievements">共同成就</button>
+              <button class="tabBtn" type="button" data-tab-group="community" data-target="communityTitles">共同称号</button>
+            </div>
+          </div>
+
+          <section class="sourceFilterBox" aria-label="来源筛选">
+          <div class="filterSparkles" aria-hidden="true">
+            <span class="filterSparkle"></span>
+            <span class="filterSparkle"></span>
+            <span class="filterSparkle"></span>
+            <span class="filterSparkle"></span>
+            <span class="filterSparkle"></span>
+          </div>
+          <div class="filterHead">
+            <span class="filterTitle">来源筛选</span>
+            <span class="filterCount" id="sourceFilterCount">全部 0 项</span>
+          </div>
+          <div class="sourceFilterTags" id="sourceFilterTags"></div>
+        </section>
+
+          <div class="honorList active" id="communityAchievements"></div>
+          <div class="honorList" id="communityTitles"></div>
+        </section>
+
+        <aside class="honorMine">
+          <div class="panelHead">
+            <h2 class="panelTitle">我的荣誉</h2>
+            <div class="tabGroup">
+              <button class="tabBtn active" type="button" data-tab-group="mine" data-target="myAchievements">我的成就</button>
+              <button class="tabBtn" type="button" data-tab-group="mine" data-target="myTitles">我的称号</button>
+            </div>
+          </div>
+
+          <div class="mineTools">
+<section class="honorSummaryBox">
+          <div class="summaryCell">
+            <span class="summaryNum" id="summaryAchievements">0</span>
+            <span class="summaryLabel">我的成就</span>
+          </div>
+          <div class="summaryCell">
+            <span class="summaryNum" id="summaryTitles">0</span>
+            <span class="summaryLabel">我的称号</span>
+          </div>
+          <div class="summaryCell">
+            <span class="summaryNum" id="summaryGold">0</span>
+            <span class="summaryLabel">可领金币</span>
+          </div>
+        </section>
+
+        <section class="honorClaimBox">
+          <button class="claimAllBtn" id="claimAllBtn" type="button" disabled>一键领取</button>
+          <div class="claimHint" id="claimHint">登录后查看</div>
+        </section>
+          </div>
+
+          <div class="honorList active" id="myAchievements"></div>
+          <div class="honorList" id="myTitles"></div>
+        </aside>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const STORAGE_KEYS = {
+  loggedIn:"room10LoggedIn",
+  user:"room10User",
+  role:"room10Role",
+  memberId:"room10MemberId",
+  memberCode:"room10MemberCode"
+};
+
+const img = document.getElementById("bg");
+const bgFrame = document.getElementById("bgFrame");
+const overlay = document.getElementById("overlay");
+const root = document.documentElement;
+const currentUserText = document.getElementById("currentUserText");
+const loginOpenBtn = document.getElementById("loginOpenBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const siteNoticeBtn = document.getElementById("siteNoticeBtn");
+const claimAllBtn = document.getElementById("claimAllBtn");
+const claimHint = document.getElementById("claimHint");
+
+const authState = {
+  loggedIn:false,
+  nickname:"",
+  role:"visitor",
+  memberId:null,
+  memberCode:""
+};
+
+let currentMember = null;
+let totalMemberCount = 0;
+
+let communityAchievementRows = [];
+let communityTitleRows = [];
+let myAchievementRows = [];
+let myTitleRows = [];
+let honorRewardLedger = [];
+let honorItemRewardLedger = [];
+let honorRewardItemRows = [];
+let honorSourceGroupRows = [];
+let honorSourceGroupMap = new Map();
+let pendingHonorRewardItems = [];
+let membersById = new Map();
+let activeSourceFilter = "all";
+let sourceFilterOptions = [];
+
+const DEFAULT_HONOR_SOURCE_GROUPS = [
+  { source_group:"anniversary", room_key:"home", display_name:"十号房", sort_order:10, is_active:true, show_in_honor_filter:true },
+  { source_group:"flower", room_key:"flower", display_name:"花房区", sort_order:20, is_active:true, show_in_honor_filter:true },
+  { source_group:"game", room_key:"game", display_name:"游戏房", sort_order:30, is_active:true, show_in_honor_filter:true },
+  { source_group:"number_bomb", room_key:"game", display_name:"拆弹专家", sort_order:40, is_active:true, show_in_honor_filter:true },
+  { source_group:"face_match", room_key:"game", display_name:"脸萌挑战", sort_order:50, is_active:true, show_in_honor_filter:true },
+  { source_group:"time_answer", room_key:"game", display_name:"时间的答案", sort_order:60, is_active:true, show_in_honor_filter:true },
+  { source_group:"pet", room_key:"pets", display_name:"宠物区", sort_order:70, is_active:true, show_in_honor_filter:true },
+  { source_group:"pets", room_key:"pets", display_name:"宠物区", sort_order:70, is_active:true, show_in_honor_filter:true },
+  { source_group:"honor", room_key:"honor", display_name:"荣誉房", sort_order:80, is_active:true, show_in_honor_filter:true },
+  { source_group:"studio", room_key:"studio", display_name:"工作间", sort_order:90, is_active:true, show_in_honor_filter:false },
+  { source_group:"studio_project", room_key:"studio", display_name:"歌曲协作", sort_order:100, is_active:true, show_in_honor_filter:false },
+  { source_group:"studio_vocal", room_key:"studio", display_name:"音域记录", sort_order:110, is_active:true, show_in_honor_filter:false },
+  { source_group:"holiday", room_key:"home", display_name:"节日礼包", sort_order:120, is_active:true, show_in_honor_filter:false },
+  { source_group:"other", room_key:"other", display_name:"其他", sort_order:999, is_active:true, show_in_honor_filter:true }
+];
+
+function rebuildHonorSourceGroupMap(sourceGroups){
+  const merged = new Map();
+
+  DEFAULT_HONOR_SOURCE_GROUPS.forEach(row => {
+    merged.set(normalizeSourceKey(row.source_group), { ...row });
+  });
+
+  (sourceGroups || []).forEach(row => {
+    const key = normalizeSourceKey(row.source_group);
+    if(!key) return;
+    merged.set(key, {
+      source_group:key,
+      room_key:row.room_key || merged.get(key)?.room_key || key,
+      display_name:row.display_name || merged.get(key)?.display_name || key,
+      sort_order:Number.isFinite(Number(row.sort_order)) ? Number(row.sort_order) : (merged.get(key)?.sort_order ?? 999),
+      is_active:row.is_active !== false,
+      show_in_honor_filter:row.show_in_honor_filter !== false,
+      note:row.note || merged.get(key)?.note || ""
+    });
+  });
+
+  honorSourceGroupMap = merged;
+  return merged;
+}
+
+/* =========================================================
+   底图贴合坐标系统
+========================================================= */
+function isTinyScreen(){
+  return window.innerWidth <= 540;
+}
+
+function clearDesktopOverlayStyles(){
+  if(!overlay) return;
+
+  overlay.style.left = "";
+  overlay.style.top = "";
+  overlay.style.width = "";
+  overlay.style.height = "";
+  root.style.setProperty("--bg-ui-scale","1");
+}
+
+function syncOverlayToImage(){
+  if(isTinyScreen()){
+    clearDesktopOverlayStyles();
+    return;
+  }
+
+  if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
+
+  const frame = bgFrame.getBoundingClientRect();
+  const frameRatio = frame.width / frame.height;
+  const imageRatio = img.naturalWidth / img.naturalHeight;
+
+  let displayWidth;
+  let displayHeight;
+  let displayLeft;
+  let displayTop;
+
+  if(frameRatio > imageRatio){
+    displayHeight = frame.height;
+    displayWidth = displayHeight * imageRatio;
+    displayLeft = frame.left + (frame.width - displayWidth) / 2;
+    displayTop = frame.top;
+  }else{
+    displayWidth = frame.width;
+    displayHeight = displayWidth / imageRatio;
+    displayLeft = frame.left;
+    displayTop = frame.top + (frame.height - displayHeight) / 2;
+  }
+
+  overlay.style.left = `${displayLeft}px`;
+  overlay.style.top = `${displayTop}px`;
+  overlay.style.width = `${displayWidth}px`;
+  overlay.style.height = `${displayHeight}px`;
+
+  const scale = Math.max(0.34, Math.min(3.2, displayWidth / 1440));
+  root.style.setProperty("--bg-ui-scale", String(scale));
+
+}
+
+/* =========================================================
+   通用工具
+========================================================= */
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function roleLabel(role){
+  const r = String(role || "").toLowerCase();
+  if(r === "owner") return "维修工";
+  if(r === "admin") return "宿管";
+  if(r === "member") return "房客";
+  if(r === "applying") return "申请中";
+  return "参观者";
+}
+
+function showToast(message){
+  const toast = document.getElementById("toast");
+  if(!toast) return;
+
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  clearTimeout(window.__honorToastTimer);
+  window.__honorToastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 1800);
+}
+
+function setListMessage(id,message,isError=false){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.innerHTML = `<div class="${isError ? "errorText" : "emptyText"}">${escapeHtml(message)}</div>`;
+}
+
+function numberValue(value){
+  const num = Number(value || 0);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function byRequirementValueDesc(a,b){
+  return numberValue(b.requirement_value) - numberValue(a.requirement_value);
+}
+
+function groupKeyFromHonor(item){
+  return String(item.requirement_key || item.source_group || item.code || item.id || "unknown");
+}
+
+function getHonorItemRewards(itemType,itemId){
+  const normalizedType = String(itemType || "").toLowerCase();
+  const normalizedId = String(itemId || "");
+  return honorRewardItemRows
+    .filter(row =>
+      String(row.honor_type || "").toLowerCase() === normalizedType &&
+      String(row.honor_id || "") === normalizedId &&
+      row.is_active !== false
+    )
+    .sort((a,b) => numberValue(a.sort_order) - numberValue(b.sort_order) || String(a.item_key || "").localeCompare(String(b.item_key || "")));
+}
+
+function isHonorGoldRewardClaimed(itemType,itemId){
+  const normalizedType = String(itemType || "").toLowerCase();
+  const normalizedId = String(itemId || "");
+  const expectedTable = normalizedType === "achievement" ? "achievements" : "titles";
+  const expectedSubcategory = normalizedType === "achievement"
+    ? "honor_achievement_reward"
+    : "honor_title_reward";
+  const marker = normalizedType === "achievement"
+    ? `achievement_id:${normalizedId}`
+    : `title_id:${normalizedId}`;
+
+  return honorRewardLedger.some(row => {
+    const relatedTable = String(row.related_table || "").toLowerCase();
+    const relatedId = String(row.related_id || "");
+    const subcategory = String(row.subcategory || "").toLowerCase();
+    const category = String(row.category || "").toLowerCase();
+    const note = String(row.note || "");
+
+    if(category === "honor" && subcategory === expectedSubcategory && relatedTable === expectedTable && note.includes(marker)){
+      return true;
+    }
+
+    return relatedTable === expectedTable && relatedId === normalizedId && category === "honor";
+  });
+}
+
+function isHonorItemRewardClaimed(itemType,itemId,itemKey){
+  const normalizedType = String(itemType || "").toLowerCase();
+  const normalizedId = String(itemId || "");
+  const normalizedItemKey = String(itemKey || "");
+  const expectedTable = normalizedType === "achievement" ? "achievements" : "titles";
+  const expectedSourceType = normalizedType === "achievement"
+    ? "honor_achievement_reward"
+    : "honor_title_reward";
+  const marker = normalizedType === "achievement"
+    ? `achievement_id:${normalizedId}`
+    : `title_id:${normalizedId}`;
+
+  return honorItemRewardLedger.some(row => {
+    const itemMatch = String(row.item_key || "") === normalizedItemKey;
+    const sourceMatch = String(row.source_type || "").toLowerCase() === expectedSourceType;
+    const tableMatch = String(row.related_table || "").toLowerCase() === expectedTable;
+    const noteMatch = String(row.note || "").includes(marker);
+    return itemMatch && sourceMatch && tableMatch && noteMatch;
+  });
+}
+
+function getClaimableRewardInfo(itemType,item){
+  const itemId = item?.id;
+  const rewardGold = numberValue(item?.rewardGold);
+  const itemRewards = Array.isArray(item?.itemRewards) ? item.itemRewards : getHonorItemRewards(itemType,itemId);
+
+  const goldClaimable = rewardGold > 0 && !isHonorGoldRewardClaimed(itemType,itemId);
+  const claimableItemRewards = itemRewards.filter(reward =>
+    !isHonorItemRewardClaimed(itemType,itemId,reward.item_key)
+  );
+
+  const totalItemQuantity = claimableItemRewards.reduce((sum,reward) => sum + numberValue(reward.quantity), 0);
+
+  return {
+    goldClaimable,
+    claimableItemRewards,
+    hasClaimable: goldClaimable || claimableItemRewards.length > 0,
+    totalGold: goldClaimable ? rewardGold : 0,
+    totalItemQuantity
+  };
+}
+
+function isHonorRewardClaimed(itemType,itemOrId){
+  const itemId = typeof itemOrId === "object" && itemOrId !== null ? itemOrId.id : itemOrId;
+  const rewardGold = typeof itemOrId === "object" && itemOrId !== null
+    ? numberValue(itemOrId.rewardGold ?? itemOrId.reward_gold)
+    : 0;
+  const itemRewards = typeof itemOrId === "object" && itemOrId !== null && Array.isArray(itemOrId.itemRewards)
+    ? itemOrId.itemRewards
+    : getHonorItemRewards(itemType,itemId);
+
+  const goldClaimed = rewardGold > 0 ? isHonorGoldRewardClaimed(itemType,itemId) : true;
+  const itemsClaimed = itemRewards.every(reward => isHonorItemRewardClaimed(itemType,itemId,reward.item_key));
+
+  return goldClaimed && itemsClaimed;
+}
+
+function rewardPillHtml(itemType,item,onlyUnclaimed=false){
+  const rewardGold = numberValue(item.rewardGold);
+  const itemRewards = Array.isArray(item.itemRewards) ? item.itemRewards : getHonorItemRewards(itemType,item.id);
+  const parts = [];
+
+  if(rewardGold > 0 && (!onlyUnclaimed || !isHonorGoldRewardClaimed(itemType,item.id))){
+    parts.push(`<span class="metaPill">金币 ${rewardGold}</span>`);
+  }
+
+  itemRewards.forEach(reward => {
+    if(onlyUnclaimed && isHonorItemRewardClaimed(itemType,item.id,reward.item_key)) return;
+    parts.push(`<span class="metaPill">${escapeHtml(reward.item_name || reward.item_key)} ×${numberValue(reward.quantity)}</span>`);
+  });
+
+  return parts.join("");
+}
+
+function rewardActionHtml(itemType,item){
+  const claimable = getClaimableRewardInfo(itemType,item);
+
+  if(!claimable.hasClaimable){
+    return "";
+  }
+
+  return `<button class="actionBtn" type="button" data-claim-type="${escapeHtml(itemType)}" data-claim-id="${escapeHtml(item.id)}">领取奖励</button>`;
+}
+
+function rewardBadgeText(item){
+  const itemType = item.itemType || "achievement";
+  const hasReward = numberValue(item.rewardGold) > 0 || (Array.isArray(item.itemRewards) && item.itemRewards.length > 0);
+
+  if(!hasReward){
+    return "已获得";
+  }
+
+  return getClaimableRewardInfo(itemType,item).hasClaimable ? "可领奖励" : "已领取";
+}
+
+function rewardMetaHtml(item){
+  const itemType = item.itemType || "achievement";
+  const html = rewardPillHtml(itemType,item,true);
+  if(!html) return "";
+  return `<div class="metaRow">${html}</div>`;
+}
+
+/* =========================================================
+   身份与房间跳转
+========================================================= */
+function readLocalAuth(){
+  authState.loggedIn = localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
+  authState.nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
+  authState.role = String(localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
+  authState.memberId = localStorage.getItem(STORAGE_KEYS.memberId) || null;
+  authState.memberCode = localStorage.getItem(STORAGE_KEYS.memberCode) || "";
+
+  return authState.loggedIn && !!authState.nickname;
+}
+
+function updateIdentity(){
+  const loggedIn = readLocalAuth();
+
+  if(!currentUserText || !loginOpenBtn || !logoutBtn) return;
+
+  if(!loggedIn){
+    currentUserText.textContent = "参观者";
+    loginOpenBtn.classList.remove("hidden");
+    logoutBtn.classList.add("hidden");
+    return;
+  }
+
+  currentUserText.textContent = `${authState.nickname} | ${roleLabel(authState.role)}`;
+  loginOpenBtn.classList.add("hidden");
+  logoutBtn.classList.remove("hidden");
+}
+
+function handleLogout(){
+  localStorage.removeItem(STORAGE_KEYS.loggedIn);
+  localStorage.removeItem(STORAGE_KEYS.user);
+  localStorage.removeItem(STORAGE_KEYS.role);
+  localStorage.removeItem(STORAGE_KEYS.memberId);
+  localStorage.removeItem(STORAGE_KEYS.memberCode);
+
+  localStorage.removeItem("room10_user");
+  localStorage.removeItem("room10_current_user");
+  localStorage.removeItem("currentUser");
+
+  currentMember = null;
+  updateIdentity();
+  loadHonorData();
+  showToast("已退出登录");
+}
+
+function getManagerPageByRole(){
+  const role = String(authState.role || localStorage.getItem(STORAGE_KEYS.role) || "").toLowerCase();
+
+  if(role === "owner") return "manager-owner.html";
+  if(role === "admin") return "manager-admin.html";
+  if(role === "member") return "manager-member.html";
+
+  return "manager-visitor.html";
+}
+
+function enterManagerRoom(){
+  window.location.href = getManagerPageByRole();
+}
+
+function enterRoom(page, needLogin){
+  const targetPage = String(page || "").trim();
+  if(!targetPage) return;
+
+  const loggedIn = readLocalAuth();
+
+  if(needLogin && !loggedIn){
+    showToast("该房间需要成员登录后进入");
+    window.location.href = "index.html";
+    return;
+  }
+
+  if((targetPage === "flower.html" || targetPage === "pets.html") && !loggedIn){
+    window.location.href = `${targetPage}?mode=guest`;
+    return;
+  }
+
+  window.location.href = targetPage;
+}
+
+/* =========================================================
+   Supabase 数据读取
+========================================================= */
+async function fetchCurrentMember(){
+  if(!readLocalAuth() || !authState.memberId) return null;
+
+  const { data,error } = await supabaseClient
+    .from("members")
+    .select("id,member_code,nickname,role,gold_balance")
+    .eq("id",authState.memberId)
+    .maybeSingle();
+
+  if(error) throw error;
+  if(!data) return null;
+
+  authState.memberId = data.id || authState.memberId;
+  authState.memberCode = data.member_code || authState.memberCode;
+  authState.nickname = data.nickname || authState.nickname;
+  authState.role = data.role || authState.role;
+
+  localStorage.setItem(STORAGE_KEYS.memberId,authState.memberId);
+  if(authState.memberCode) localStorage.setItem(STORAGE_KEYS.memberCode,authState.memberCode);
+  if(authState.nickname) localStorage.setItem(STORAGE_KEYS.user,authState.nickname);
+  if(authState.role) localStorage.setItem(STORAGE_KEYS.role,authState.role);
+
+  return data;
+}
+
+async function fetchTotalMembers(){
+  const { count,error } = await supabaseClient
+    .from("members")
+    .select("id", { count:"exact", head:true })
+    .in("role",["owner","admin","member"]);
+
+  if(error) throw error;
+  return Number(count || 0);
+}
+
+async function fetchMemberRows(){
+  const { data,error } = await supabaseClient
+    .from("members")
+    .select("id,nickname,role")
+    .in("role",["owner","admin","member"]);
+
+  if(error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+async function fetchAchievementRows(){
+  const { data,error } = await supabaseClient
+    .from("achievements")
+    .select("id,code,name,description,source_group,room_key,category,requirement_key,requirement_type,requirement_value,reward_gold,sort_order")
+    .order("source_group",{ ascending:true })
+    .order("requirement_key",{ ascending:true })
+    .order("requirement_value",{ ascending:true })
+    .order("sort_order",{ ascending:true });
+
+  if(error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+async function fetchTitleRows(){
+  const { data,error } = await supabaseClient
+    .from("titles")
+    .select("id,code,name,description,source_group,room_key,category,requirement_key,requirement_type,requirement_value,reward_gold,sort_order")
+    .order("source_group",{ ascending:true })
+    .order("requirement_key",{ ascending:true })
+    .order("requirement_value",{ ascending:true })
+    .order("sort_order",{ ascending:true });
+
+  if(error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+async function fetchAchievementRecords(){
+  const { data,error } = await supabaseClient
+    .from("member_achievements")
+    .select("achievement_id,member_id,obtained_at");
+
+  if(error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+async function fetchTitleRecords(){
+  const { data,error } = await supabaseClient
+    .from("member_titles")
+    .select("title_id,member_id,obtained_at");
+
+  if(error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+async function fetchHonorRewardLedger(memberId){
+  if(!memberId) return [];
+
+  const { data,error } = await supabaseClient
+    .from("gold_ledger")
+    .select("id,category,subcategory,related_table,related_id,amount,note,created_at")
+    .eq("member_id",memberId)
+    .eq("direction","in")
+    .order("created_at",{ ascending:false })
+    .limit(500);
+
+  if(error){
+    console.warn("金币奖励流水读取失败，奖励领取状态可能无法判断。", error);
+    return [];
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
+
+async function fetchHonorSourceGroups(){
+  const { data,error } = await supabaseClient
+    .from("honor_source_groups")
+    .select("source_group,room_key,display_name,sort_order,is_active,show_in_honor_filter,note")
+    .eq("is_active",true)
+    .order("sort_order",{ ascending:true })
+    .order("source_group",{ ascending:true });
+
+  if(error){
+    console.warn("荣誉来源配置读取失败，将使用内置中文标签兜底。", error);
+    return DEFAULT_HONOR_SOURCE_GROUPS;
+  }
+
+  return Array.isArray(data) ? data : DEFAULT_HONOR_SOURCE_GROUPS;
+}
+
+async function fetchHonorRewardItems(){
+  const { data,error } = await supabaseClient
+    .from("honor_reward_items")
+    .select("id,honor_type,honor_id,item_key,quantity,sort_order,is_active,note")
+    .eq("is_active",true)
+    .order("honor_type",{ ascending:true })
+    .order("honor_id",{ ascending:true })
+    .order("sort_order",{ ascending:true });
+
+  if(error){
+    console.warn("荣誉物品奖励配置读取失败。", error);
+    return [];
+  }
+
+  const rows = Array.isArray(data) ? data : [];
+  const itemKeys = Array.from(new Set(rows.map(row => row.item_key).filter(Boolean)));
+
+  if(!itemKeys.length) return rows;
+
+  const { data:itemRows,error:itemError } = await supabaseClient
+    .from("item_types")
+    .select("item_key,item_name,item_icon,is_active")
+    .in("item_key",itemKeys);
+
+  if(itemError){
+    console.warn("荣誉奖励物品名称读取失败。", itemError);
+    return rows;
+  }
+
+  const itemMap = new Map((itemRows || []).map(item => [String(item.item_key), item]));
+
+  return rows.map(row => {
+    const item = itemMap.get(String(row.item_key)) || {};
+    return {
+      ...row,
+      item_name:item.item_name || row.item_key,
+      item_icon:item.item_icon || ""
+    };
+  });
+}
+
+async function fetchHonorItemRewardLedger(memberId){
+  if(!memberId) return [];
+
+  const { data,error } = await supabaseClient
+    .from("member_item_ledger")
+    .select("id,item_key,source_type,source_detail,related_table,related_id,note,created_at")
+    .eq("member_id",memberId)
+    .eq("direction","in")
+    .in("source_type",["honor_achievement_reward","honor_title_reward"])
+    .order("created_at",{ ascending:false })
+    .limit(1000);
+
+  if(error){
+    console.warn("荣誉物品奖励流水读取失败，材料领取状态可能无法判断。", error);
+    return [];
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
+
+function normalizeSourceKey(raw){
+  const value = String(raw || "").trim().toLowerCase();
+  if(!value) return "";
+
+  if(["pets","pet_room","宠物","宠物区"].includes(value)) return "pet";
+  if(["aniversary","join_anniversary","member_join_years","周年","初来乍到"].includes(value)) return "anniversary";
+  return value;
+}
+
+function inferSourceKey(item){
+  return normalizeSourceKey(item?.source_group || item?.category) || "other";
+}
+
+function getSourceConfig(key){
+  const normalizedKey = normalizeSourceKey(key);
+  return honorSourceGroupMap.get(normalizedKey) || honorSourceGroupMap.get("other") || null;
+}
+
+function sourceLabel(key){
+  const config = getSourceConfig(key);
+  return config?.display_name || normalizeSourceKey(key) || "其他";
+}
+
+function sourceSortIndex(key){
+  const config = getSourceConfig(key);
+  return Number.isFinite(Number(config?.sort_order)) ? Number(config.sort_order) : 999;
+}
+
+function sourceIsVisible(key){
+  const config = getSourceConfig(key);
+  return config ? config.show_in_honor_filter !== false && config.is_active !== false : true;
+}
+
+function sourceMatches(item){
+  return activeSourceFilter === "all" || item.sourceKey === activeSourceFilter;
+}
+
+function filteredRows(rows){
+  return Array.isArray(rows) ? rows.filter(sourceMatches) : [];
+}
+
+function getActiveCommunityTarget(){
+  const activeBtn = document.querySelector('.tabBtn[data-tab-group="community"].active');
+  return activeBtn?.dataset?.target || "communityAchievements";
+}
+
+function getSourceFilterBaseRows(){
+  /*
+    来源标签按当前共同荣誉标签页生成：
+    - 共同成就：只显示有成就内容的来源
+    - 共同称号：只显示有称号内容的来源
+    这样荣誉房如果当前只有称号，就不会在“共同成就”下显示荣誉房标签。
+  */
+  return getActiveCommunityTarget() === "communityTitles"
+    ? communityTitleRows
+    : communityAchievementRows;
+}
+
+function updateSourceFilterOptions(){
+  const countMap = new Map();
+  const sourceRows = getSourceFilterBaseRows();
+
+  sourceRows.forEach(item => {
+    const key = normalizeSourceKey(item.sourceKey || "other") || "other";
+    if(!sourceIsVisible(key)) return;
+    countMap.set(key, (countMap.get(key) || 0) + 1);
+  });
+
+  const options = Array.from(countMap.entries())
+    .map(([key,count]) => ({ key, label:sourceLabel(key), count }))
+    .sort((a,b) => sourceSortIndex(a.key) - sourceSortIndex(b.key) || a.label.localeCompare(b.label,"zh-Hans-CN"));
+
+  const total = Array.from(countMap.values()).reduce((sum,count) => sum + count, 0);
+  sourceFilterOptions = [{ key:"all", label:"全部", count:total }, ...options];
+
+  if(activeSourceFilter !== "all" && !countMap.has(activeSourceFilter)){
+    activeSourceFilter = "all";
+  }
+}
+
+function renderSourceFilters(){
+  updateSourceFilterOptions();
+
+  const wrap = document.getElementById("sourceFilterTags");
+  const count = document.getElementById("sourceFilterCount");
+  if(!wrap) return;
+
+  wrap.innerHTML = sourceFilterOptions.map(option => `
+    <button class="sourceFilterBtn ${option.key === activeSourceFilter ? "active" : ""}" type="button" data-source-filter="${escapeHtml(option.key)}">
+      ${escapeHtml(option.label)}
+    </button>
+  `).join("");
+
+  if(count){
+    const current = sourceFilterOptions.find(option => option.key === activeSourceFilter) || sourceFilterOptions[0];
+    count.textContent = `${current.label} ${numberValue(current.count)} 项`;
+  }
+}
+
+function buildCommunityAchievements(achievements,records,memberMap){
+  const countMap = new Map();
+
+  records.forEach(row => {
+    const key = String(row.achievement_id || "");
+    if(!key) return;
+    if(!countMap.has(key)) countMap.set(key,new Set());
+    countMap.get(key).add(String(row.member_id || ""));
+  });
+
+  return achievements.map(item => {
+    const obtainedSet = countMap.get(String(item.id)) || new Set();
+    const obtainedCount = obtainedSet.size || 0;
+    const unlockedNames = Array.from(obtainedSet)
+      .map(memberId => memberMap?.get(String(memberId))?.nickname || "")
+      .filter(Boolean);
+    const isUnrevealed = obtainedCount <= 0 && numberValue(item.requirement_value) > 1;
+
+    return {
+      id:item.id,
+      code:item.code,
+      condition:item.description || "未填写达成条件",
+      stageName:isUnrevealed ? "？？？" : (item.name || "未命名阶段"),
+      progress:obtainedCount,
+      total:totalMemberCount,
+      rewardGold:numberValue(item.reward_gold),
+      itemRewards:getHonorItemRewards("achievement",item.id),
+      itemType:"achievement",
+      sourceKey:inferSourceKey(item),
+      status:obtainedCount > 0 ? "已解锁" : "未公开",
+      unlockedNames,
+      requirement_key:item.requirement_key,
+      requirement_value:item.requirement_value
+    };
+  });
+}
+
+function buildCommunityTitles(titles,records,memberMap){
+  const countMap = new Map();
+
+  records.forEach(row => {
+    const key = String(row.title_id || "");
+    if(!key) return;
+    if(!countMap.has(key)) countMap.set(key,new Set());
+    countMap.get(key).add(String(row.member_id || ""));
+  });
+
+  return titles.map(item => {
+    const obtainedSet = countMap.get(String(item.id)) || new Set();
+    const unlockedNames = Array.from(obtainedSet)
+      .map(memberId => memberMap?.get(String(memberId))?.nickname || "")
+      .filter(Boolean);
+
+    return {
+    id:item.id,
+    code:item.code,
+    name:item.name || "未命名称号",
+    condition:item.description || "未填写获得条件",
+    obtainedCount:obtainedSet.size || 0,
+    unlockedNames,
+    rewardGold:numberValue(item.reward_gold),
+    itemRewards:getHonorItemRewards("title",item.id),
+    itemType:"title",
+    sourceKey:inferSourceKey(item),
+    requirement_key:item.requirement_key,
+    requirement_value:item.requirement_value
+  };
+  });
+}
+
+function buildMyAchievements(achievements,records,memberId){
+  if(!memberId) return [];
+
+  const obtainedIds = new Set(
+    records
+      .filter(row => String(row.member_id) === String(memberId))
+      .map(row => String(row.achievement_id))
+  );
+
+  const obtained = achievements.filter(item => obtainedIds.has(String(item.id)));
+  const grouped = new Map();
+
+  obtained.forEach(item => {
+    const key = groupKeyFromHonor(item);
+    const prev = grouped.get(key);
+
+    if(!prev || numberValue(item.requirement_value) > numberValue(prev.requirement_value)){
+      grouped.set(key,item);
+    }
+  });
+
+  return Array.from(grouped.values())
+    .sort(byRequirementValueDesc)
+    .map(item => ({
+      id:item.id,
+      code:item.code,
+      stageName:item.name || "未命名阶段",
+      condition:item.description || "未填写达成条件",
+      rewardGold:numberValue(item.reward_gold),
+      itemRewards:getHonorItemRewards("achievement",item.id),
+      itemType:"achievement",
+      sourceKey:inferSourceKey(item),
+      claimed:isHonorRewardClaimed("achievement",item),
+      requirement_key:item.requirement_key,
+      requirement_value:item.requirement_value
+    }));
+}
+
+function buildMyTitles(titles,records,memberId){
+  if(!memberId) return [];
+
+  const obtainedIds = new Set(
+    records
+      .filter(row => String(row.member_id) === String(memberId))
+      .map(row => String(row.title_id))
+  );
+
+  return titles
+    .filter(item => obtainedIds.has(String(item.id)))
+    .sort(byRequirementValueDesc)
+    .map(item => ({
+      id:item.id,
+      code:item.code,
+      name:item.name || "未命名称号",
+      condition:item.description || "未填写获得条件",
+      rewardGold:numberValue(item.reward_gold),
+      itemRewards:getHonorItemRewards("title",item.id),
+      itemType:"title",
+      sourceKey:inferSourceKey(item),
+      claimed:isHonorRewardClaimed("title",item),
+      requirement_key:item.requirement_key,
+      requirement_value:item.requirement_value
+    }));
+}
+
+async function loadHonorData(){
+  updateIdentity();
+
+  setListMessage("communityAchievements","正在读取共同成就……");
+  setListMessage("communityTitles","正在读取共同称号……");
+  setListMessage("myAchievements",readLocalAuth() ? "正在读取我的成就……" : "登录后查看我的成就。");
+  setListMessage("myTitles",readLocalAuth() ? "正在读取我的称号……" : "登录后查看我的称号。");
+
+  try{
+    currentMember = await fetchCurrentMember();
+    updateIdentity();
+
+    const [
+      memberCount,
+      memberRows,
+      achievements,
+      titles,
+      achievementRecords,
+      titleRecords,
+      rewardLedger,
+      itemRewardLedger,
+      rewardItems,
+      sourceGroups
+    ] = await Promise.all([
+      fetchTotalMembers(),
+      fetchMemberRows(),
+      fetchAchievementRows(),
+      fetchTitleRows(),
+      fetchAchievementRecords(),
+      fetchTitleRecords(),
+      fetchHonorRewardLedger(currentMember?.id || authState.memberId),
+      fetchHonorItemRewardLedger(currentMember?.id || authState.memberId),
+      fetchHonorRewardItems(),
+      fetchHonorSourceGroups()
+    ]);
+
+    totalMemberCount = memberCount || 0;
+    membersById = new Map((memberRows || []).map(member => [String(member.id), member]));
+    honorRewardLedger = rewardLedger;
+    honorItemRewardLedger = itemRewardLedger;
+    honorRewardItemRows = rewardItems;
+    honorSourceGroupRows = sourceGroups;
+    rebuildHonorSourceGroupMap(sourceGroups);
+
+    communityAchievementRows = buildCommunityAchievements(achievements,achievementRecords,membersById);
+    communityTitleRows = buildCommunityTitles(titles,titleRecords,membersById);
+    myAchievementRows = buildMyAchievements(achievements,achievementRecords,currentMember?.id || authState.memberId);
+    myTitleRows = buildMyTitles(titles,titleRecords,currentMember?.id || authState.memberId);
+
+    renderAll();
+  }catch(error){
+    console.error(error);
+    setListMessage("communityAchievements",`共同成就读取失败：${error.message || "请检查 achievements / member_achievements 权限。"}`,true);
+    setListMessage("communityTitles","共同称号读取失败，请检查 titles / member_titles 权限。",true);
+    setListMessage("myAchievements","我的成就读取失败。",true);
+    setListMessage("myTitles","我的称号读取失败。",true);
+    renderSummary();
+  }
+}
+
+/* =========================================================
+   荣誉内容渲染
+========================================================= */
+function pendingRewardGold(){
+  return pendingHonorRewardItems.reduce((sum,item) => sum + numberValue(item.rewardGold), 0);
+}
+
+function pendingRewardItemQuantity(){
+  return pendingHonorRewardItems.reduce((sum,item) => sum + numberValue(item.itemQuantity), 0);
+}
+
+function refreshPendingRewards(){
+  pendingHonorRewardItems = [];
+
+  if(readLocalAuth()){
+    myAchievementRows.forEach(item => {
+      const claimable = getClaimableRewardInfo("achievement",item);
+      if(claimable.hasClaimable){
+        pendingHonorRewardItems.push({
+          itemType:"achievement",
+          itemId:item.id,
+          rewardGold:claimable.totalGold,
+          itemQuantity:claimable.totalItemQuantity
+        });
+      }
+    });
+
+    myTitleRows.forEach(item => {
+      const claimable = getClaimableRewardInfo("title",item);
+      if(claimable.hasClaimable){
+        pendingHonorRewardItems.push({
+          itemType:"title",
+          itemId:item.id,
+          rewardGold:claimable.totalGold,
+          itemQuantity:claimable.totalItemQuantity
+        });
+      }
+    });
+  }
+
+  const count = pendingHonorRewardItems.length;
+  const gold = pendingRewardGold();
+  const itemQuantity = pendingRewardItemQuantity();
+
+  if(!readLocalAuth()){
+    claimAllBtn.disabled = true;
+    claimHint.textContent = "登录后查看";
+    return;
+  }
+
+  if(count <= 0){
+    claimAllBtn.disabled = true;
+    claimHint.textContent = "暂无可领取";
+    return;
+  }
+
+  claimAllBtn.disabled = false;
+
+  const parts = [`${count} 项`];
+  if(gold > 0) parts.push(`${gold} 金币`);
+  if(itemQuantity > 0) parts.push(`${itemQuantity} 个材料`);
+  claimHint.textContent = parts.join("｜");
+}
+
+function renderSummary(){
+  const loggedIn = readLocalAuth();
+
+  refreshPendingRewards();
+
+  document.getElementById("summaryAchievements").textContent = loggedIn ? myAchievementRows.length : 0;
+  document.getElementById("summaryTitles").textContent = loggedIn ? myTitleRows.length : 0;
+  document.getElementById("summaryGold").textContent = loggedIn ? pendingRewardGold() : 0;
+}
+
+function cardTopHtml(title,subtitle,badge){
+  return `
+    <div class="cardTop">
+      <div class="cardText">
+        <h3 class="cardTitle">${escapeHtml(title)}</h3>
+        <p class="cardSub">${escapeHtml(subtitle)}</p>
+      </div>
+      <span class="cardBadge">${escapeHtml(badge)}</span>
+    </div>
+  `;
+}
+
+function honorCardHtml(kind,topHtml,bodyHtml=""){
+  return `
+    <article class="honorCard ${kind}">
+      ${topHtml}
+      ${bodyHtml}
+    </article>
+  `;
+}
+
+function myHonorCardHtml(kind,itemType,item,title,subtitle){
+  return honorCardHtml(
+    kind,
+    cardTopHtml(title,subtitle,rewardBadgeText(item)),
+    `
+      ${rewardMetaHtml(item)}
+      ${rewardActionHtml(itemType,item)}
+    `
+  );
+}
+
+function renderCommunityAchievements(){
+  const wrap = document.getElementById("communityAchievements");
+  if(!wrap) return;
+
+  const rows = filteredRows(communityAchievementRows);
+
+  if(!rows.length){
+    wrap.innerHTML = '<div class="emptyText">当前来源暂无共同成就记录。</div>';
+    return;
+  }
+
+  wrap.innerHTML = rows.map(item => {
+    const progress = numberValue(item.progress);
+    const total = numberValue(item.total);
+    const percent = total ? Math.min(100, Math.round(progress / total * 100)) : 0;
+    const hasUnlocked = progress > 0;
+    const title = hasUnlocked ? item.stageName : "未公开成就";
+    const subtitle = hasUnlocked ? item.condition : "已有成员解锁后公开详细条件";
+    const rewardText = hasUnlocked ? rewardPillHtml("achievement",item,false) : "";
+    const namesText = hasUnlocked && item.unlockedNames?.length
+      ? `<div class="unlockNames">已解锁：${escapeHtml(item.unlockedNames.join("、"))}</div>`
+      : "";
+
+    return honorCardHtml(
+      "achievement",
+      cardTopHtml(title,subtitle,item.status),
+      `
+        ${rewardText ? `<div class="metaRow">${rewardText}</div>` : ""}
+        <div class="progressBox">
+          <div class="progressLine">
+            <div class="progressFill" style="width:${percent}%"></div>
+          </div>
+          <div class="progressText">共同进度：${progress}/${total}</div>
+          ${namesText}
+        </div>
+      `
+    );
+  }).join("");
+}
+
+function renderCommunityTitles(){
+  const wrap = document.getElementById("communityTitles");
+  if(!wrap) return;
+
+  const rows = filteredRows(communityTitleRows);
+
+  if(!rows.length){
+    wrap.innerHTML = '<div class="emptyText">当前来源暂无共同称号记录。</div>';
+    return;
+  }
+
+  wrap.innerHTML = rows.map(item => {
+    const obtainedCount = numberValue(item.obtainedCount);
+    const hasUnlocked = obtainedCount > 0;
+    const title = hasUnlocked ? item.name : "未公开称号";
+    const subtitle = hasUnlocked ? item.condition : "已有成员获得后公开详细条件";
+    const total = numberValue(totalMemberCount);
+    const percent = total ? Math.min(100, Math.round(obtainedCount / total * 100)) : 0;
+    const rewardText = hasUnlocked ? rewardPillHtml("title",item,false) : "";
+    const namesText = hasUnlocked && item.unlockedNames?.length
+      ? `<div class="unlockNames">已获得：${escapeHtml(item.unlockedNames.join("、"))}</div>`
+      : "";
+
+    return honorCardHtml(
+      "title",
+      cardTopHtml(title,subtitle,`${obtainedCount}/${total}`),
+      `
+        ${rewardText ? `<div class="metaRow">${rewardText}</div>` : ""}
+        <div class="progressBox">
+          <div class="progressLine">
+            <div class="progressFill" style="width:${percent}%"></div>
+          </div>
+          <div class="progressText">称号进度：${obtainedCount}/${total}</div>
+          ${namesText}
+        </div>
+      `
+    );
+  }).join("");
+}
+
+function renderMyAchievements(){
+  const wrap = document.getElementById("myAchievements");
+  if(!wrap) return;
+
+  if(!readLocalAuth()){
+    wrap.innerHTML = '<div class="emptyText">登录后查看我的成就。</div>';
+    return;
+  }
+
+  const rows = filteredRows(myAchievementRows);
+
+  if(!rows.length){
+    wrap.innerHTML = '<div class="emptyText">当前来源下你还没有获得成就。</div>';
+    return;
+  }
+
+  wrap.innerHTML = rows
+    .map(item => myHonorCardHtml("achievement","achievement",item,item.stageName,item.condition))
+    .join("");
+}
+
+function renderMyTitles(){
+  const wrap = document.getElementById("myTitles");
+  if(!wrap) return;
+
+  if(!readLocalAuth()){
+    wrap.innerHTML = '<div class="emptyText">登录后查看我的称号。</div>';
+    return;
+  }
+
+  const rows = filteredRows(myTitleRows);
+
+  if(!rows.length){
+    wrap.innerHTML = '<div class="emptyText">当前来源下你还没有获得称号。</div>';
+    return;
+  }
+
+  wrap.innerHTML = rows
+    .map(item => myHonorCardHtml("title","title",item,item.name,item.condition))
+    .join("");
+}
+
+function renderAll(){
+  renderSourceFilters();
+  renderSummary();
+  renderCommunityAchievements();
+  renderCommunityTitles();
+  renderMyAchievements();
+  renderMyTitles();
+}
+
+/* =========================================================
+   领取奖励：需要数据库 RPC，避免前端直接写金币
+========================================================= */
+async function claimOneHonorReward(itemType,itemId){
+  if(!readLocalAuth() || !authState.memberId || !authState.memberCode){
+    showToast("请先登录后领取奖励");
+    return;
+  }
+
+  try{
+    const { data,error } = await supabaseClient.rpc("claim_honor_reward",{
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode,
+      p_item_type:itemType,
+      p_item_id:itemId
+    });
+
+    if(error) throw error;
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if(result && result.ok === false){
+      showToast(result.message || "奖励领取失败");
+      return;
+    }
+
+    showToast(result?.message || "奖励已领取");
+    await loadHonorData();
+  }catch(error){
+    console.error(error);
+    showToast("领取失败：请确认 claim_honor_reward RPC 已创建");
+  }
+}
+
+async function claimAllHonorRewards(){
+  if(!readLocalAuth() || !authState.memberId || !authState.memberCode){
+    showToast("请先登录后领取奖励");
+    return;
+  }
+
+  if(!pendingHonorRewardItems.length){
+    showToast("暂无可领取奖励");
+    return;
+  }
+
+  claimAllBtn.disabled = true;
+  claimHint.textContent = "领取中……";
+
+  try{
+    const { data,error } = await supabaseClient.rpc("claim_all_honor_rewards",{
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode
+    });
+
+    if(error) throw error;
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if(result && result.ok === false){
+      showToast(result.message || "一键领取失败");
+      await loadHonorData();
+      return;
+    }
+
+    const count = numberValue(result?.claimed_count);
+    const gold = numberValue(result?.total_gold);
+    showToast(result?.message || `已领取 ${count} 项奖励，共 ${gold} 金币`);
+    await loadHonorData();
+  }catch(error){
+    console.error(error);
+    showToast("一键领取失败：请确认 claim_all_honor_rewards RPC 已创建");
+    await loadHonorData();
+  }
+}
+
+/* =========================================================
+   页面交互
+========================================================= */
+function switchTab(btn){
+  const group = btn.dataset.tabGroup;
+  const target = btn.dataset.target;
+
+  if(!group || !target) return;
+
+  document.querySelectorAll(`.tabBtn[data-tab-group="${group}"]`).forEach(item => {
+    item.classList.toggle("active", item === btn);
+  });
+
+  const ids = group === "community"
+    ? ["communityAchievements","communityTitles"]
+    : ["myAchievements","myTitles"];
+
+  ids.forEach(id => {
+    const panel = document.getElementById(id);
+    if(panel) panel.classList.toggle("active", id === target);
+  });
+
+  if(group === "community"){
+    renderAll();
+  }
+}
+
+function bindEvents(){
+  window.addEventListener("resize", syncOverlayToImage);
+
+  document.querySelectorAll(".tabBtn").forEach(btn => {
+    btn.addEventListener("click", () => switchTab(btn));
+  });
+
+  document.addEventListener("click", event => {
+    const filterBtn = event.target.closest("[data-source-filter]");
+    if(filterBtn){
+      activeSourceFilter = filterBtn.dataset.sourceFilter || "all";
+      renderAll();
+      return;
+    }
+
+    const claimBtn = event.target.closest("[data-claim-type][data-claim-id]");
+    if(claimBtn && !claimBtn.disabled){
+      claimOneHonorReward(claimBtn.dataset.claimType,claimBtn.dataset.claimId);
+      return;
+    }
+  });
+
+  if(claimAllBtn){
+    claimAllBtn.addEventListener("click", claimAllHonorRewards);
+  }
+
+  if(siteNoticeBtn){
+    siteNoticeBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      showToast(readLocalAuth() ? "荣誉通知后续接入这里。" : "登录后查看个人通知。");
+    });
+  }
+
+  if(loginOpenBtn){
+    loginOpenBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      window.location.href = "index.html";
+    });
+  }
+
+  if(logoutBtn){
+    logoutBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      handleLogout();
+    });
+  }
+}
+
+async function initHonorPage(){
+  updateIdentity();
+  bindEvents();
+  renderAll();
+  syncOverlayToImage();
+  await loadHonorData();
+}
+
+document.addEventListener("DOMContentLoaded", initHonorPage);
+
+window.addEventListener("storage", event => {
+  if(
+    event.key === STORAGE_KEYS.loggedIn ||
+    event.key === STORAGE_KEYS.user ||
+    event.key === STORAGE_KEYS.role ||
+    event.key === STORAGE_KEYS.memberId
+  ){
+    updateIdentity();
+    loadHonorData();
+  }
+});
+
+if(img && img.complete && img.naturalWidth){
+  syncOverlayToImage();
+}else if(img){
+  img.addEventListener("load", syncOverlayToImage, { once:true });
+}
+
+setTimeout(syncOverlayToImage, 120);
+</script>
+</body>
+</html>
