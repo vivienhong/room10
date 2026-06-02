@@ -144,7 +144,7 @@ button,input{
   pointer-events:auto;
 }
 
-/* 修复：#overlay * 的优先级高于 .roomNavLayer，会把整层房间按钮层变成透明遮罩，挡住花市买卖按钮 */
+/* 通用模板点击层控制 */
 #overlay .roomNavLayer{
   pointer-events:none!important;
 }
@@ -162,7 +162,6 @@ button,input{
 #overlay .roomIdentity .identityNoticePanel{
   pointer-events:auto!important;
 }
-
 
 /* =========================================================
    花房背景特效：柔光 / 花瓣 / 叶片
@@ -237,7 +236,6 @@ button,input{
 .fxGlow.g4{left:35%; top:52%; animation-delay:-1.4s; transform:scale(.9);}
 .fxGlow.g5{left:76%; top:63%; animation-delay:-4.3s; transform:scale(1.15);}
 
-
 @keyframes flowerGlowTwinkle{
   0%,100%{opacity:.10; transform:scale(.72);}
   42%{opacity:.68; transform:scale(1.18);}
@@ -258,7 +256,6 @@ button,input{
   50%{transform:translate3d(-2.8vw,38vh,0) rotate(70deg) scale(1); opacity:.42;}
   100%{transform:translate3d(2vw,96vh,0) rotate(190deg) scale(.86); opacity:0;}
 }
-
 
 @media(max-width:540px){
   #flowerBgFx{
@@ -631,9 +628,6 @@ button,input{
   padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s));
 }
 
-
-
-
 .siteNoticeEmpty{
   color:#8a6644;
   font-size:calc(12px * var(--identity-scale,1));
@@ -669,7 +663,6 @@ button,input{
   font-size:calc(11px * var(--identity-scale,1));
   line-height:1.55;
 }
-
 
 /* =========================================================
    花房真实功能面板：花市 + 我的花盆
@@ -962,9 +955,29 @@ button,input{
 .flowerActionBtn:disabled,
 .potActionBtn:disabled{
   cursor:not-allowed;
-  opacity:.52;
+  opacity:1;
+  color:#a39a91;
+  background:
+    linear-gradient(180deg, rgba(232,229,224,.92), rgba(205,200,194,.86));
+  border-color:rgba(150,142,134,.26);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.58),
+    0 1px 3px rgba(101,75,45,.04);
   transform:none;
-  filter:none;
+  filter:grayscale(.38);
+}
+
+.flowerActionBtn:disabled,
+.flowerActionBtn[data-disabled="true"],
+.potActionBtn:disabled,
+.potActionBtn[data-disabled="true"]{
+  pointer-events:none;
+}
+
+.flowerActionBtn:disabled:hover,
+.potActionBtn:disabled:hover{
+  transform:none;
+  filter:grayscale(.38);
 }
 
 .flowerStateBox{
@@ -1101,6 +1114,34 @@ button,input{
   gap:calc(5px * var(--ui-scale));
 }
 
+.potUsedStats{
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:calc(5px * var(--ui-scale));
+}
+
+.potUsedStat{
+  min-width:0;
+  padding:calc(5px * var(--ui-scale)) calc(6px * var(--ui-scale));
+  border-radius:calc(12px * var(--ui-scale));
+  background:rgba(255,250,241,.54);
+  border:1px solid rgba(178,128,83,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:calc(5px * var(--ui-scale));
+  color:#765236;
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.2;
+}
+
+.potUsedStat strong{
+  color:#674225;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:950;
+}
+
 .potStat{
   min-width:0;
   padding:calc(5px * var(--ui-scale)) calc(4px * var(--ui-scale));
@@ -1175,6 +1216,232 @@ button,input{
   font-weight:950;
   line-height:1;
   white-space:nowrap;
+}
+
+.flowerMerchantEntry{
+  flex:0 0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:calc(4px * var(--ui-scale));
+  padding:0 calc(4px * var(--ui-scale));
+}
+
+.flowerMerchantBtn{
+  width:100%;
+  min-height:calc(30px * var(--ui-scale));
+  border-radius:calc(12px * var(--ui-scale));
+  background:
+    radial-gradient(circle at 18% 24%, rgba(255,255,255,.58), transparent 44%),
+    linear-gradient(180deg, rgba(255,233,195,.98), rgba(216,169,111,.92));
+  border-color:rgba(135,91,48,.30);
+  color:#5f3b1f;
+}
+
+.flowerMerchantBtn .potActionContent{
+  gap:calc(6px * var(--ui-scale));
+}
+
+.flowerMerchantModalMask{
+  position:absolute;
+  inset:0;
+  z-index:90;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:calc(22px * var(--ui-scale));
+  background:rgba(64,45,30,.18);
+  backdrop-filter:blur(calc(4px * var(--ui-scale)));
+  -webkit-backdrop-filter:blur(calc(4px * var(--ui-scale)));
+  pointer-events:auto;
+}
+
+.flowerMerchantModalMask.show{
+  display:flex;
+}
+
+.flowerMerchantModal{
+  position:relative;
+  width:min(calc(760px * var(--ui-scale)), 82%);
+  max-height:min(calc(620px * var(--ui-scale)), 78%);
+  display:flex;
+  flex-direction:column;
+  border-radius:calc(24px * var(--ui-scale));
+  border:1px solid rgba(170,122,82,.24);
+  background:
+    linear-gradient(180deg, rgba(255,250,242,.94), rgba(250,236,216,.88));
+  box-shadow:
+    0 calc(18px * var(--ui-scale)) calc(44px * var(--ui-scale)) rgba(89,66,42,.18),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  backdrop-filter:blur(calc(11px * var(--ui-scale)));
+  -webkit-backdrop-filter:blur(calc(11px * var(--ui-scale)));
+  overflow:hidden;
+  color:#5b4632;
+}
+
+.flowerMerchantModalHeader{
+  flex:0 0 auto;
+  padding:calc(14px * var(--ui-scale)) calc(18px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border-bottom:1px solid rgba(172,125,86,.13);
+}
+
+.flowerMerchantModalTitle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:calc(12px * var(--ui-scale));
+  color:#6a4223;
+  font-size:calc(16px * var(--ui-scale));
+  font-weight:950;
+  line-height:1.15;
+}
+
+.flowerMerchantModalSub{
+  margin-top:calc(6px * var(--ui-scale));
+  color:#8b6545;
+  font-size:calc(11.5px * var(--ui-scale));
+  line-height:1.45;
+}
+
+.flowerMerchantClose{
+  appearance:none;
+  cursor:pointer;
+  flex:0 0 auto;
+  width:calc(30px * var(--ui-scale));
+  height:calc(30px * var(--ui-scale));
+  border-radius:999px;
+  border:1px solid rgba(153,104,62,.18);
+  background:rgba(255,252,247,.88);
+  color:#6a4223;
+  font-size:calc(18px * var(--ui-scale));
+  font-weight:950;
+  line-height:1;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75), 0 2px 5px rgba(101,75,45,.08);
+}
+
+.flowerMerchantModalBody{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding:calc(12px * var(--ui-scale));
+}
+
+.flowerMerchantModalBody::-webkit-scrollbar{
+  width:calc(8px * var(--ui-scale));
+}
+
+.flowerMerchantModalBody::-webkit-scrollbar-thumb{
+  background:rgba(160,111,72,.24);
+  border-radius:999px;
+}
+
+.flowerMerchantPanels{
+  display:block;
+}
+
+.flowerMerchantPanel{
+  min-width:0;
+  border-radius:calc(18px * var(--ui-scale));
+  border:1px solid rgba(170,122,82,.14);
+  background:rgba(255,253,248,.54);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72), 0 calc(8px * var(--ui-scale)) calc(18px * var(--ui-scale)) rgba(90,67,43,.06);
+  overflow:hidden;
+}
+
+.flowerMerchantPanelHead{
+  padding:calc(11px * var(--ui-scale)) calc(14px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  border-bottom:1px solid rgba(172,125,86,.13);
+  color:#6a4223;
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:950;
+}
+
+.flowerMerchantPanelContent{
+  padding:calc(12px * var(--ui-scale));
+  color:#775434;
+  font-size:calc(11.2px * var(--ui-scale));
+  line-height:1.55;
+}
+
+.flowerMerchantList{
+  display:grid;
+  gap:calc(7px * var(--ui-scale));
+}
+
+.flowerMerchantItem{
+  display:grid;
+  grid-template-columns:calc(52px * var(--ui-scale)) minmax(0,1fr);
+  align-items:center;
+  gap:calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  padding:calc(8px * var(--ui-scale));
+  border-radius:calc(14px * var(--ui-scale));
+  background:rgba(255,253,248,.68);
+  border:1px solid rgba(175,128,87,.11);
+}
+
+.flowerMerchantItem img{
+  width:calc(48px * var(--ui-scale));
+  height:calc(48px * var(--ui-scale));
+  object-fit:contain;
+  filter:drop-shadow(0 calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale)) rgba(116,83,47,.12));
+}
+
+.flowerMerchantItemName{
+  color:#694326;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:950;
+  line-height:1.25;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.flowerMerchantItemMeta{
+  margin-top:calc(2px * var(--ui-scale));
+  color:#8b6849;
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.35;
+}
+
+.flowerMerchantItemAction{
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:calc(6px * var(--ui-scale));
+  width:100%;
+}
+
+.flowerMerchantSellBtn{
+  appearance:none;
+  cursor:pointer;
+  min-width:calc(54px * var(--ui-scale));
+  height:calc(26px * var(--ui-scale));
+  padding:0 calc(9px * var(--ui-scale));
+  border-radius:999px;
+  border:1px solid rgba(153,104,62,.20);
+  background:linear-gradient(180deg, rgba(255,238,200,.96), rgba(227,187,132,.90));
+  color:#67401f;
+  font-size:calc(10.5px * var(--ui-scale));
+  font-weight:950;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72), 0 calc(2px * var(--ui-scale)) calc(7px * var(--ui-scale)) rgba(112,80,42,.08);
+}
+
+.flowerMerchantSellBtn:disabled{
+  cursor:not-allowed;
+  color:#a39a91;
+  background:linear-gradient(180deg, rgba(232,229,224,.92), rgba(205,200,194,.86));
+  border-color:rgba(150,142,134,.26);
+  box-shadow:none;
+}
+
+.flowerMerchantEmpty{
+  padding:calc(18px * var(--ui-scale)) calc(14px * var(--ui-scale));
+  border-radius:calc(16px * var(--ui-scale));
+  background:rgba(255,252,246,.62);
+  border:1px solid rgba(170,125,86,.13);
+  text-align:center;
+  color:#856245;
 }
 
 #flowerToast{
@@ -1255,6 +1522,344 @@ button,input{
   transform:translateY(calc(5px * var(--ui-scale)));
 }
 
+/* =========================================================
+   花房商人：数量选择 + 卡片内确认
+========================================================= */
+.flowerMerchantQtyLabel{
+  color:#8a6848;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.flowerMerchantQtyInput{
+  width:100%;
+  min-width:0;
+  height:calc(26px * var(--ui-scale));
+  padding:0 calc(7px * var(--ui-scale));
+  border-radius:calc(9px * var(--ui-scale));
+  border:1px solid rgba(153,104,62,.18);
+  background:rgba(255,253,248,.88);
+  color:#674225;
+  font-size:calc(11px * var(--ui-scale));
+  font-weight:950;
+  text-align:center;
+  outline:none;
+}
+
+.flowerMerchantMaxBtn,
+.flowerMerchantCancelBtn{
+  appearance:none;
+  cursor:pointer;
+  height:calc(26px * var(--ui-scale));
+  padding:0 calc(9px * var(--ui-scale));
+  border-radius:999px;
+  border:1px solid rgba(153,104,62,.18);
+  background:rgba(255,252,247,.86);
+  color:#6a4223;
+  font-size:calc(10.5px * var(--ui-scale));
+  font-weight:950;
+  white-space:nowrap;
+}
+
+.flowerMerchantConfirmRow{
+  grid-column:1 / -1;
+  display:none;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:calc(6px * var(--ui-scale));
+  padding-top:calc(5px * var(--ui-scale));
+  color:#7b5839;
+  font-size:calc(10.5px * var(--ui-scale));
+  line-height:1.35;
+}
+
+.flowerMerchantItem.is-confirming .flowerMerchantConfirmRow{
+  display:flex;
+}
+
+.flowerMerchantItem.is-confirming .flowerMerchantSellBtn{
+  display:none;
+}
+
+.flowerMerchantConfirmBtn{
+  appearance:none;
+  cursor:pointer;
+  height:calc(26px * var(--ui-scale));
+  padding:0 calc(10px * var(--ui-scale));
+  border-radius:999px;
+  border:1px solid rgba(153,104,62,.22);
+  background:linear-gradient(180deg, rgba(255,238,200,.96), rgba(227,187,132,.90));
+  color:#67401f;
+  font-size:calc(10.5px * var(--ui-scale));
+  font-weight:950;
+}
+
+/* =========================================================
+   手机版花房商人：按钮下方内嵌展开
+   电脑端仍使用原弹窗；手机端避免 fixed 弹窗跳到视口上方。
+========================================================= */
+.flowerMerchantInlinePanel{
+  display:none;
+  width:100%;
+  margin-top:calc(8px * var(--ui-scale));
+  border-radius:calc(17px * var(--ui-scale));
+  border:1px solid rgba(170,122,82,.18);
+  background:rgba(255,253,248,.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.72),
+    0 calc(8px * var(--ui-scale)) calc(18px * var(--ui-scale)) rgba(90,67,43,.06);
+  overflow:hidden;
+}
+
+.flowerMerchantInlinePanel.show{
+  display:block;
+}
+
+.flowerMerchantInlineHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:calc(8px * var(--ui-scale));
+  padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  border-bottom:1px solid rgba(172,125,86,.12);
+}
+
+.flowerMerchantInlineTitle{
+  color:#6a4223;
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:950;
+  line-height:1.2;
+}
+
+.flowerMerchantInlineSub{
+  margin-top:calc(4px * var(--ui-scale));
+  color:#8b6545;
+  font-size:calc(10.5px * var(--ui-scale));
+  line-height:1.45;
+}
+
+.flowerMerchantInlineClose{
+  appearance:none;
+  cursor:pointer;
+  flex:0 0 auto;
+  width:calc(26px * var(--ui-scale));
+  height:calc(26px * var(--ui-scale));
+  border-radius:999px;
+  border:1px solid rgba(153,104,62,.18);
+  background:rgba(255,252,247,.88);
+  color:#6a4223;
+  font-size:calc(16px * var(--ui-scale));
+  font-weight:950;
+  line-height:1;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75), 0 2px 5px rgba(101,75,45,.08);
+}
+
+.flowerMerchantInlineBody{
+  padding:calc(10px * var(--ui-scale));
+}
+
+@media(max-width:540px){
+  .flowerMerchantModalMask{
+    display:none!important;
+  }
+
+  .flowerMerchantInlinePanel{
+    --ui-scale:1;
+    margin-top:8px;
+    border-radius:16px;
+  }
+
+  .flowerMerchantInlineHeader{
+    padding:10px 12px 8px;
+  }
+
+  .flowerMerchantInlineTitle{
+    font-size:14px;
+  }
+
+  .flowerMerchantInlineSub{
+    font-size:11px;
+  }
+
+  .flowerMerchantInlineClose{
+    width:28px;
+    height:28px;
+    font-size:17px;
+  }
+
+  .flowerMerchantInlineBody{
+    padding:10px;
+    max-height:calc(78dvh - 118px);
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .flowerMerchantInlineBody::-webkit-scrollbar{
+    width:6px;
+  }
+
+  .flowerMerchantInlineBody::-webkit-scrollbar-thumb{
+    background:rgba(160,111,72,.24);
+    border-radius:999px;
+  }
+
+  .flowerMerchantInlinePanel .flowerMerchantItem{
+    grid-template-columns:48px minmax(0,1fr);
+  }
+
+  .flowerMerchantInlinePanel .flowerMerchantItem img{
+    width:44px;
+    height:44px;
+  }
+
+  .flowerMerchantInlinePanel .flowerMerchantItemAction{
+    grid-template-columns:auto minmax(0,1fr) auto auto;
+  }
+}
+
+/* =========================================================
+   右侧花盆栏压缩：网页版尽量完整显示，不让右栏内部滚动
+========================================================= */
+@media(min-width:541px){
+  .potPanel .flowerPanelBody{
+    overflow:hidden;
+    gap:calc(4px * var(--ui-scale));
+    padding:calc(7px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  }
+
+  .potStatusBlock{
+    padding:calc(5px * var(--ui-scale)) calc(7px * var(--ui-scale));
+    border-radius:calc(12px * var(--ui-scale));
+  }
+
+  .potStatusTitle{
+    font-size:calc(12px * var(--ui-scale));
+    line-height:1.18;
+  }
+
+  .potStatusDesc{
+    margin-top:calc(2px * var(--ui-scale));
+    font-size:calc(9.3px * var(--ui-scale));
+    line-height:1.26;
+  }
+
+  .potImageStage{
+    flex:1 1 auto;
+    min-height:0;
+    max-height:calc(108px * var(--ui-scale));
+    padding:calc(3px * var(--ui-scale));
+    border-radius:calc(14px * var(--ui-scale));
+  }
+
+  #potImage{
+    width:48%;
+    max-height:calc(84px * var(--ui-scale));
+  }
+
+  .potActions{
+    gap:calc(4px * var(--ui-scale));
+  }
+
+  .potActionBtn{
+    min-height:calc(24px * var(--ui-scale));
+    border-radius:calc(8px * var(--ui-scale));
+    font-size:calc(10px * var(--ui-scale));
+  }
+
+  .potActionIcon{
+    width:calc(17px * var(--ui-scale));
+    height:calc(17px * var(--ui-scale));
+  }
+
+  .potCareStats,
+  .potUsedStats{
+    gap:calc(4px * var(--ui-scale));
+  }
+
+  .potStat{
+    padding:calc(4px * var(--ui-scale)) calc(3px * var(--ui-scale));
+    border-radius:calc(10px * var(--ui-scale));
+  }
+
+  .potStatIcon{
+    width:calc(14px * var(--ui-scale));
+    height:calc(14px * var(--ui-scale));
+    margin-bottom:calc(2px * var(--ui-scale));
+  }
+
+  .potStatLabel{
+    font-size:calc(8.5px * var(--ui-scale));
+  }
+
+  .potStatValue{
+    font-size:calc(11px * var(--ui-scale));
+  }
+
+  .potUsedStat{
+    padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
+    border-radius:calc(10px * var(--ui-scale));
+    font-size:calc(9.1px * var(--ui-scale));
+    gap:calc(3px * var(--ui-scale));
+  }
+
+  .potUsedStat strong{
+    font-size:calc(11px * var(--ui-scale));
+  }
+
+  .flowerBundleInventory{
+    gap:calc(3px * var(--ui-scale));
+    padding:0 calc(3px * var(--ui-scale));
+  }
+
+  .flowerBundleItem{
+    min-width:calc(34px * var(--ui-scale));
+    height:calc(22px * var(--ui-scale));
+    padding:0 calc(4px * var(--ui-scale));
+  }
+
+  .flowerBundleIcon{
+    width:calc(15px * var(--ui-scale));
+    height:calc(15px * var(--ui-scale));
+  }
+
+  .flowerBundleQty{
+    font-size:calc(9px * var(--ui-scale));
+  }
+
+  .flowerMerchantBtn{
+    min-height:calc(27px * var(--ui-scale));
+    border-radius:calc(10px * var(--ui-scale));
+  }
+}
+
+/* =========================================================
+   手机版花市操作提示：固定在视口下方，不撑长页面
+========================================================= */
+@media(max-width:540px){
+  #marketMessage{
+    position:fixed;
+    left:14px;
+    right:14px;
+    bottom:calc(14px + env(safe-area-inset-bottom, 0px));
+    z-index:180;
+    margin:0;
+    max-height:30dvh;
+    overflow:auto;
+    padding:10px 13px;
+    border-radius:16px;
+    font-size:12px;
+    line-height:1.45;
+    box-shadow:
+      0 10px 26px rgba(90,67,43,.16),
+      inset 0 1px 0 rgba(255,255,255,.82);
+  }
+
+  #marketMessage.hidden{
+    display:none!important;
+  }
+}
 
 /* =========================
    统一奖励弹窗（来自独立测试页）
@@ -1662,7 +2267,6 @@ button,input{
     linear-gradient(180deg, rgba(255,253,247,.98), rgba(235,246,252,.94));
 }
 
-
 @media (max-width: 540px) {
   .reward-mask {
     padding: 14px;
@@ -1676,7 +2280,6 @@ button,input{
     grid-template-columns: 1fr;
   }
 }
-
 
 /* 登录弹窗 */
 #loginUI{
@@ -2272,17 +2875,65 @@ button,input{
             </div>
           </div>
 
+          <div class="potUsedStats" aria-label="当前花盆已照顾次数">
+            <div class="potUsedStat">💧 已浇水 <strong id="potUsedWaterCount">0</strong></div>
+            <div class="potUsedStat">🌱 已施肥 <strong id="potUsedFertCount">0</strong></div>
+          </div>
+
           <div class="flowerBundleInventory" id="flowerBundleInventory" aria-label="我的花束库存"></div>
+
+          <div class="flowerMerchantEntry" id="flowerMerchantEntry" aria-label="花房商人入口">
+            <button class="potActionBtn flowerMerchantBtn" id="flowerMerchantBtn" type="button" onclick="openFlowerMerchant()">
+              <span class="potActionContent">🧺 花房商人</span>
+            </button>
+
+            <section class="flowerMerchantInlinePanel" id="flowerMerchantInlinePanel" aria-hidden="true">
+              <header class="flowerMerchantInlineHeader">
+                <div>
+                  <div class="flowerMerchantInlineTitle">🧺 花房商人</div>
+                  <div class="flowerMerchantInlineSub">只收自己种出来的花束；花市买来的花不能交给商人。</div>
+                </div>
+                <button class="flowerMerchantInlineClose" type="button" onclick="closeFlowerMerchant()" aria-label="收起花房商人">×</button>
+              </header>
+              <div class="flowerMerchantInlineBody">
+                <div class="flowerMerchantPanelContent" id="flowerMerchantInlineInventory">
+                  <div class="flowerMerchantEmpty">当前还没有可交给商人的花束。</div>
+                </div>
+              </div>
+            </section>
+          </div>
 
           <div id="potMessage" class="flowerStateBox hidden"></div>
         </div>
       </section>
 
       <div id="flowerToast" role="status" aria-live="polite"></div>
+
+      <div class="flowerMerchantModalMask" id="flowerMerchantModal" aria-hidden="true" onclick="handleFlowerMerchantMaskClick(event)">
+        <section class="flowerMerchantModal" role="dialog" aria-modal="true" aria-labelledby="flowerMerchantTitle">
+          <header class="flowerMerchantModalHeader">
+            <div class="flowerMerchantModalTitle">
+              <span id="flowerMerchantTitle">🧺 花房商人</span>
+              <button class="flowerMerchantClose" type="button" onclick="closeFlowerMerchant()" aria-label="关闭花房商人弹窗">×</button>
+            </div>
+            <div class="flowerMerchantModalSub">花房商人只收自己种出来的花束；花市买来的花不能交给商人。</div>
+          </header>
+
+          <div class="flowerMerchantModalBody">
+            <div class="flowerMerchantPanels">
+              <section class="flowerMerchantPanel">
+                <div class="flowerMerchantPanelHead">可交给商人的花束</div>
+                <div class="flowerMerchantPanelContent" id="flowerMerchantInventory">
+                  <div class="flowerMerchantEmpty">当前还没有可交给商人的花束。</div>
+                </div>
+              </section>
+</div>
+          </div>
+</section>
+      </div>
     </main>
   </div>
 </div>
-
 
 <!-- 统一奖励弹窗：原样来自 reward-modal-test.html -->
 <div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
@@ -2316,8 +2967,6 @@ button,input{
       </div>
     </section>
   </div>
-
-
 
 <div id="loginUI">
   <div class="login-panel">
@@ -2370,6 +3019,8 @@ const potStatusDesc = document.getElementById("potStatusDesc");
 const potSeedCount = document.getElementById("potSeedCount");
 const potWaterCount = document.getElementById("potWaterCount");
 const potFertCount = document.getElementById("potFertCount");
+const potUsedWaterCount = document.getElementById("potUsedWaterCount");
+const potUsedFertCount = document.getElementById("potUsedFertCount");
 const flowerBundleInventory = document.getElementById("flowerBundleInventory");
 const potActions = document.getElementById("potActions");
 const potMessage = document.getElementById("potMessage");
@@ -2389,6 +3040,8 @@ const flowerState = {
   goldBalance:null,
   dailyTipMessage:"",
   paperTips:[],
+  merchantRows:[],
+  merchantGroups:[],
   busy:false
 };
 
@@ -2725,7 +3378,6 @@ async function login(){
   }
 }
 
-
 /* =========================================================
    花房真实功能：Supabase RPC
 ========================================================= */
@@ -2751,8 +3403,8 @@ function setFlowerBusy(isBusy){
   document.querySelectorAll(".flowerActionBtn,.potActionBtn").forEach(btn => {
     btn.disabled = flowerState.busy || btn.dataset.disabled === "true";
   });
+  refreshMarketActionButtons();
 }
-
 
 function getFirstVisitRewardPromptKey(){
   const memberId = authState.memberId || localStorage.getItem(STORAGE_KEYS.memberId) || "guest";
@@ -3118,6 +3770,37 @@ function getMarketRow(flowerKey){
   return (flowerState.marketRows || []).find(row => String(row.flower_key || "") === key) || null;
 }
 
+function getMarketFreshHoldingQuantity(row){
+  if(!row || typeof row !== "object") return 0;
+
+  /*
+    这里用于判断“市场新鲜花最多持有 5 朵”的买入上限。
+    不能使用 market_fresh_quantity：它在当前 RPC 中表示“新鲜且已过可卖轮次的数量”，
+    刚买入本轮的市场花会是 owned_quantity > 0，但 market_fresh_quantity = 0。
+    如果用 market_fresh_quantity，会把已经持有的花误判成 0，导致按钮仍可点，最后被数据库拦截失败。
+  */
+  const marketSpecificCandidates = [
+    row?.market_active_quantity,
+    row?.market_holding_quantity,
+    row?.market_owned_quantity,
+    row?.current_market_quantity,
+    row?.active_market_quantity,
+    row?.market_fresh_total_quantity,
+    row?.market_fresh_holding_quantity,
+    row?.current_market_fresh_quantity,
+    row?.fresh_market_quantity,
+    row?.market_fresh_owned_quantity
+  ];
+
+  for(const value of marketSpecificCandidates){
+    const n = Number(value);
+    if(Number.isFinite(n) && n >= 0) return Math.floor(n);
+  }
+
+  const owned = Number(row?.owned_quantity);
+  return Number.isFinite(owned) && owned >= 0 ? Math.floor(owned) : 0;
+}
+
 function getRoundBoughtQuantity(row){
   const candidates = [
     row?.round_bought_quantity,
@@ -3135,7 +3818,8 @@ function getRoundBoughtQuantity(row){
     if(Number.isFinite(n) && n >= 0) return Math.floor(n);
   }
 
-  return Math.max(0, Number(row?.owned_quantity) || 0);
+  /* 5 朵限制只针对市场新鲜花；优先使用数据库返回的市场新鲜持有量。 */
+  return getMarketFreshHoldingQuantity(row);
 }
 
 function getRemainingBuyQuantity(row){
@@ -3150,8 +3834,7 @@ function getSellableQuantity(row){
     row?.current_sellable_quantity,
     row?.available_sell_quantity,
     row?.sellable_owned_quantity,
-    row?.ready_sell_quantity,
-    row?.owned_quantity
+    row?.ready_sell_quantity
   ];
 
   for(const value of candidates){
@@ -3162,13 +3845,37 @@ function getSellableQuantity(row){
   return 0;
 }
 
+function getMarketWitheredQuantity(row){
+  if(!row || typeof row !== "object") return 0;
+
+  const candidates = [
+    row?.market_withered_quantity,
+    row?.withered_market_quantity,
+    row?.market_clear_quantity
+  ];
+
+  for(const value of candidates){
+    const n = Number(value);
+    if(Number.isFinite(n) && n >= 0) return Math.floor(n);
+  }
+
+  return 0;
+}
+
+function getMarketWiltingQuantity(row){
+  if(!row || typeof row !== "object") return 0;
+  const n = Number(row?.market_wilting_quantity);
+  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+}
+
 function setMarketQuantityInput(flowerKey, quantity){
   const key = String(flowerKey || "");
   const input = document.querySelector(`[data-flower-qty="${CSS.escape(key)}"]`);
-  const target = Math.max(1, Math.floor(Number(quantity) || 1));
+  const target = Math.max(1, Math.min(5, Math.floor(Number(quantity) || 1)));
 
   if(input){
     input.value = String(target);
+    refreshMarketActionButtons();
   }
 }
 
@@ -3179,6 +3886,78 @@ function getCurrentGoldBalance(){
   const text = String(flowerGoldPill?.textContent || "");
   const match = text.match(/\d+/);
   return match ? Number(match[0]) : 0;
+}
+
+function getMarketPrice(row){
+  const price = Number(row?.price);
+  return Number.isFinite(price) && price > 0 ? price : 0;
+}
+
+function getMaxAffordableBuyQuantity(row){
+  const gold = getCurrentGoldBalance();
+  const price = getMarketPrice(row);
+
+  if(gold < 100 || price <= 0) return 0;
+
+  return Math.max(0, Math.floor(gold / price));
+}
+
+function getMaxBuyQuantityForRow(row){
+  if(!row || typeof row !== "object") return 0;
+
+  const remaining = getRemainingBuyQuantity(row);
+  const affordable = getMaxAffordableBuyQuantity(row);
+
+  return Math.max(0, Math.min(5, remaining, affordable));
+}
+
+function getBuyDisabledReason(row){
+  const displayName = getFlowerDisplayName(row || {});
+  const gold = getCurrentGoldBalance();
+  const price = getMarketPrice(row);
+  const remaining = getRemainingBuyQuantity(row || {});
+
+  if(gold < 100) return "金币不足 100，暂时不能买入";
+  if(remaining <= 0) return `${displayName}当前市场持有已满 5 朵`;
+  if(price <= 0) return "当前价格异常，暂时不能买入";
+  if(Math.floor(gold / price) <= 0) return "金币不足，无法买入 1 朵";
+  return "";
+}
+
+function refreshMarketActionButtons(){
+  document.querySelectorAll("[data-market-buy-btn]").forEach(btn => {
+    const row = getMarketRow(btn.dataset.flowerKey);
+    const disabled = !row || getMaxBuyQuantityForRow(row) <= 0;
+    btn.disabled = flowerState.busy || disabled;
+    btn.dataset.disabled = disabled ? "true" : "false";
+    btn.title = disabled ? getBuyDisabledReason(row) : "买入所选数量";
+  });
+
+  document.querySelectorAll("[data-market-sell-btn]").forEach(btn => {
+    const row = getMarketRow(btn.dataset.flowerKey);
+    const disabled = !row || getSellableQuantity(row) <= 0;
+    btn.disabled = flowerState.busy || disabled;
+    btn.dataset.disabled = disabled ? "true" : "false";
+    btn.title = disabled ? "当前没有可以卖出的市场花" : "卖出所选数量";
+  });
+
+  document.querySelectorAll("[data-market-clear-btn]").forEach(btn => {
+    const row = getMarketRow(btn.dataset.flowerKey);
+    const disabled = !row || getMarketWitheredQuantity(row) <= 0;
+    btn.disabled = flowerState.busy || disabled;
+    btn.dataset.disabled = disabled ? "true" : "false";
+    btn.title = disabled ? "当前没有需要清理的枯萎市场花" : "清理枯萎市场花";
+  });
+}
+
+function handleMarketQuantityInput(flowerKey){
+  const key = String(flowerKey || "");
+  const input = document.querySelector(`[data-flower-qty="${CSS.escape(key)}"]`);
+  if(!input) return;
+
+  const value = Math.max(1, Math.min(5, Math.floor(Number(input.value) || 1)));
+  input.value = String(value);
+  refreshMarketActionButtons();
 }
 
 function normalizeFlowerTip(value){
@@ -3200,6 +3979,7 @@ function getFallbackFlowerTips(){
     "花市每 12 小时刷新一次价格，买入后至少等下一轮刷新才能卖出。",
     "每轮每种花最多买入 5 朵；点击「5朵」会自动填入当前可用的最大数量。",
     "卖出时以数量框为准；如果数量超过当前可卖数量，系统会自动按最大可卖数量处理。",
+    "市场花彻底枯萎后不能卖，只能清理，清理时有低概率获得肥料。",
     "当前金币达到 100 才能在花市进行买入交易。",
     "当天浇水和施肥各最多 3 次。"
   ];
@@ -3363,6 +4143,9 @@ function getMarketLimitNote(){
 }
 
 function getFlowerLanguage(row){
+  const fromDb = String(row?.display_phrase || row?.flower_language || "").trim();
+  if(fromDb) return fromDb;
+
   const key = String(row?.flower_key || "");
   const languageMap = {
     daisy:"纯真、希望。",
@@ -3371,10 +4154,13 @@ function getFlowerLanguage(row){
     rose:"友谊、祝福。",
     peony:"富贵、圆满。"
   };
-  return languageMap[key] || String(row?.display_phrase || row?.flower_language || "");
+  return languageMap[key] || "";
 }
 
 function getFreshBouquetImg(row){
+  const imgPath = String(row?.bouquet_img || "").trim();
+  if(imgPath && !imgPath.toLowerCase().includes("wither")) return imgPath;
+
   const key = String(row?.flower_key || "");
   const freshMap = {
     daisy:"bouquet-daisy.png",
@@ -3384,10 +4170,7 @@ function getFreshBouquetImg(row){
     peony:"bouquet-peony.png"
   };
 
-  const imgPath = String(row?.bouquet_img || "").trim();
-  if(freshMap[key]) return freshMap[key];
-  if(imgPath && !imgPath.toLowerCase().includes("wither")) return imgPath;
-  return "bouquet-daisy.png";
+  return freshMap[key] || "bouquet-daisy.png";
 }
 
 function hasWitheredFlowers(row){
@@ -3441,6 +4224,396 @@ function renderFlowerBundleInventory(loggedOut=false){
   }).join("");
 }
 
+function getMerchantFlowerMeta(row){
+  const key = String(row?.flower_key || "");
+  return getMarketRow(key) || {
+    flower_key:key,
+    flower_name:key === "low_quality" ? "低品质花束" : "花束",
+    bouquet_img:"bouquet-daisy.png"
+  };
+}
+
+function getMerchantFlowerDisplayName(row){
+  if(String(row?.flower_key || "") === "low_quality") return "低品质花束";
+  return getFlowerDisplayName(getMerchantFlowerMeta(row));
+}
+
+function getMerchantQualityText(row){
+  const quality = String(row?.quality || "");
+  const status = String(row?.status || "");
+  const stage = String(row?.harvest_stage || "");
+
+  if(quality === "planted_fresh") return "新鲜花束";
+  if(quality === "low_quality") return "品相一般";
+  if(quality === "wilting"){
+    if(stage.includes("late") || stage.includes("heavy")) return "花瓣发干";
+    if(status === "withering") return "花色变暗";
+    return "有些打蔫";
+  }
+  return "可交易花束";
+}
+
+function getMerchantBouquetImg(row){
+  if(String(row?.quality || "") === "wilting") return "bouquet-withered.png";
+  return getFreshBouquetImg(getMerchantFlowerMeta(row));
+}
+
+function isMerchantEligibleHolding(row){
+  if(!row || typeof row !== "object") return false;
+  if(String(row.source || "") !== "harvest") return false;
+  if(!["planted_fresh", "low_quality", "wilting"].includes(String(row.quality || ""))) return false;
+  if(!row.is_sellable) return false;
+  if(!Number.isFinite(Number(row.quantity)) || Number(row.quantity) <= 0) return false;
+  if(!["fresh", "withering"].includes(String(row.status || ""))) return false;
+
+  const witherAt = new Date(row.wither_at || "");
+  if(!Number.isNaN(witherAt.getTime()) && witherAt.getTime() <= Date.now()) return false;
+
+  return true;
+}
+
+function getMerchantGroupBaseKey(row){
+  const quality = String(row?.quality || "");
+  const flowerKey = String(row?.flower_key || "");
+
+  /* 前台只合并同一种新鲜正常花束；低品质和逐渐枯萎按状态/折扣拆开，避免好坏中和。 */
+  if(quality === "planted_fresh" && String(row?.status || "") === "fresh"){
+    return [flowerKey, quality, "fresh"].join("|");
+  }
+
+  return [
+    flowerKey,
+    quality,
+    String(row?.status || ""),
+    String(row?.harvest_stage || ""),
+    String(row?.sell_multiplier ?? ""),
+    String(row?.wither_at || "")
+  ].join("|");
+}
+
+function buildMerchantGroups(rows=[]){
+  const groupMap = new Map();
+  const validRows = (Array.isArray(rows) ? rows : []).filter(isMerchantEligibleHolding);
+
+  validRows.forEach(row => {
+    const baseKey = getMerchantGroupBaseKey(row);
+    if(!groupMap.has(baseKey)){
+      groupMap.set(baseKey, {
+        key:`merchantGroup${groupMap.size}`,
+        baseKey,
+        flower_key:row.flower_key,
+        displayName:getMerchantFlowerDisplayName(row),
+        qualityText:getMerchantQualityText(row),
+        img:getMerchantBouquetImg(row),
+        wither_at:row.wither_at || null,
+        totalQuantity:0,
+        rows:[]
+      });
+    }
+
+    const group = groupMap.get(baseKey);
+    const quantity = Math.max(0, Math.floor(Number(row.quantity) || 0));
+    group.totalQuantity += quantity;
+    group.rows.push({ ...row, quantity });
+
+    if(row.wither_at && (!group.wither_at || new Date(row.wither_at) < new Date(group.wither_at))){
+      group.wither_at = row.wither_at;
+    }
+  });
+
+  const groups = [...groupMap.values()];
+  groups.forEach(group => {
+    group.rows.sort((a,b) => new Date(a.wither_at || a.acquired_at || 0) - new Date(b.wither_at || b.acquired_at || 0));
+  });
+  return groups;
+}
+
+async function loadFlowerMerchantRows(){
+  const auth = getFlowerAuth();
+  flowerState.merchantRows = [];
+  flowerState.merchantGroups = [];
+
+  if(!auth) return [];
+
+  const { data, error } = await supabaseClient
+    .from("flower_holdings")
+    .select("id,member_id,flower_key,quantity,source,status,quality,sell_multiplier,harvest_stage,is_sellable,acquired_at,fresh_until,wither_at,note")
+    .eq("member_id", auth.memberId)
+    .eq("source", "harvest")
+    .gt("quantity", 0)
+    .eq("is_sellable", true)
+    .in("status", ["fresh", "withering"])
+    .in("quality", ["planted_fresh", "low_quality", "wilting"])
+    .order("wither_at", { ascending:true });
+
+  if(error) throw error;
+
+  const rows = (Array.isArray(data) ? data : []).filter(isMerchantEligibleHolding);
+  flowerState.merchantRows = rows;
+  flowerState.merchantGroups = buildMerchantGroups(rows);
+  return rows;
+}
+
+function getMerchantGroup(groupKey){
+  return (flowerState.merchantGroups || []).find(group => group.key === groupKey) || null;
+}
+
+function getFlowerMerchantInventoryBoxes(){
+  return [
+    document.getElementById("flowerMerchantInventory"),
+    document.getElementById("flowerMerchantInlineInventory")
+  ].filter(Boolean);
+}
+
+function setFlowerMerchantInventoryHtml(html){
+  getFlowerMerchantInventoryBoxes().forEach(box => {
+    box.innerHTML = html;
+  });
+}
+
+function renderFlowerMerchantInventory(rows=flowerState.merchantRows){
+  const groups = buildMerchantGroups(rows);
+  flowerState.merchantGroups = groups;
+
+  if(!groups.length){
+    setFlowerMerchantInventoryHtml(`<div class="flowerMerchantEmpty">当前没有可交给商人的花束。</div>`);
+    return;
+  }
+
+  const html = `
+    <div class="flowerMerchantList">
+      ${groups.map(group => {
+        const witherText = group.wither_at ? `｜剩余 ${formatWitherCountdown(group.wither_at)}` : "";
+        return `
+          <div class="flowerMerchantItem" data-merchant-group="${escapeHtml(group.key)}">
+            <img src="${escapeHtml(group.img)}" alt="${escapeHtml(group.displayName)}">
+            <div>
+              <div class="flowerMerchantItemName">${escapeHtml(group.displayName)}</div>
+              <div class="flowerMerchantItemMeta">${escapeHtml(group.qualityText)}｜共 ${group.totalQuantity} 朵${escapeHtml(witherText)}</div>
+            </div>
+            <div class="flowerMerchantItemAction">
+              <span class="flowerMerchantQtyLabel">数量</span>
+              <input class="flowerMerchantQtyInput" type="number" min="1" max="${group.totalQuantity}" step="1" value="1" inputmode="numeric" data-merchant-qty="${escapeHtml(group.key)}" oninput="handleMerchantQuantityInput('${escapeHtml(group.key)}')" aria-label="${escapeHtml(group.displayName)}出售数量">
+              <button class="flowerMerchantMaxBtn" type="button" onclick="setMerchantGroupQuantity('${escapeHtml(group.key)}', ${group.totalQuantity})">最大</button>
+              <button class="flowerMerchantSellBtn" type="button" data-merchant-sell-btn onclick="prepareSellMerchantGroup('${escapeHtml(group.key)}')">交给商人</button>
+            </div>
+            <div class="flowerMerchantConfirmRow">
+              <span data-merchant-confirm-text="${escapeHtml(group.key)}">确认交给商人？</span>
+              <button class="flowerMerchantCancelBtn" type="button" onclick="cancelSellMerchantGroup('${escapeHtml(group.key)}')">取消</button>
+              <button class="flowerMerchantConfirmBtn" type="button" onclick="confirmSellMerchantGroup('${escapeHtml(group.key)}')">确认出售</button>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+
+  setFlowerMerchantInventoryHtml(html);
+}
+
+function getMerchantGroupQuantity(groupKey){
+  const group = getMerchantGroup(groupKey);
+  const input = document.querySelector(`[data-merchant-qty="${CSS.escape(groupKey)}"]`);
+  const max = Math.max(1, Math.floor(Number(group?.totalQuantity) || 1));
+  const raw = Math.floor(Number(input?.value) || 1);
+  return Math.max(1, Math.min(max, raw));
+}
+
+function setMerchantGroupQuantity(groupKey, quantity){
+  const group = getMerchantGroup(groupKey);
+  const input = document.querySelector(`[data-merchant-qty="${CSS.escape(groupKey)}"]`);
+  if(!group || !input) return;
+
+  const max = Math.max(1, Math.floor(Number(group.totalQuantity) || 1));
+  input.value = String(Math.max(1, Math.min(max, Math.floor(Number(quantity) || 1))));
+  updateMerchantConfirmText(groupKey);
+}
+
+function handleMerchantQuantityInput(groupKey){
+  setMerchantGroupQuantity(groupKey, getMerchantGroupQuantity(groupKey));
+}
+
+function updateMerchantConfirmText(groupKey){
+  const group = getMerchantGroup(groupKey);
+  const target = document.querySelector(`[data-merchant-confirm-text="${CSS.escape(groupKey)}"]`);
+  if(!group || !target) return;
+
+  const quantity = getMerchantGroupQuantity(groupKey);
+  target.textContent = `确认把「${group.displayName}」×${quantity} 交给花房商人吗？`;
+}
+
+function prepareSellMerchantGroup(groupKey){
+  document.querySelectorAll(".flowerMerchantItem.is-confirming").forEach(item => item.classList.remove("is-confirming"));
+  const card = document.querySelector(`[data-merchant-group="${CSS.escape(groupKey)}"]`);
+  if(!card) return;
+  updateMerchantConfirmText(groupKey);
+  card.classList.add("is-confirming");
+}
+
+function cancelSellMerchantGroup(groupKey){
+  const card = document.querySelector(`[data-merchant-group="${CSS.escape(groupKey)}"]`);
+  if(card) card.classList.remove("is-confirming");
+}
+
+function scrollFlowerMerchantIntoView(){
+  if(!isTinyScreen()) return;
+
+  const panel = document.getElementById("flowerMerchantInlinePanel");
+  const entry = document.getElementById("flowerMerchantEntry");
+  const target = panel?.classList.contains("show") ? panel : entry;
+  if(!target) return;
+
+  requestAnimationFrame(() => {
+    const rect = target.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    const top = window.scrollY + rect.top - Math.max(10, Math.min(72, (viewportHeight - Math.min(rect.height, viewportHeight * 0.72)) / 2));
+    window.scrollTo({
+      top:Math.max(0, top),
+      behavior:"smooth"
+    });
+  });
+}
+
+async function openFlowerMerchant(){
+  const auth = getFlowerAuth();
+  if(!auth){
+    openLogin();
+    return;
+  }
+
+  const modal = document.getElementById("flowerMerchantModal");
+  const inlinePanel = document.getElementById("flowerMerchantInlinePanel");
+  const useInline = isTinyScreen();
+
+  if(useInline){
+    if(modal){
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+    }
+    if(inlinePanel){
+      inlinePanel.classList.add("show");
+      inlinePanel.setAttribute("aria-hidden", "false");
+      scrollFlowerMerchantIntoView();
+    }
+  }else{
+    if(inlinePanel){
+      inlinePanel.classList.remove("show");
+      inlinePanel.setAttribute("aria-hidden", "true");
+    }
+    if(modal){
+      modal.classList.add("show");
+      modal.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  setFlowerMerchantInventoryHtml(`<div class="flowerMerchantEmpty">正在查看可交易花束...</div>`);
+
+  try{
+    const rows = await loadFlowerMerchantRows();
+    renderFlowerMerchantInventory(rows);
+    scrollFlowerMerchantIntoView();
+  }catch(err){
+    console.error("读取花房商人库存失败：", err);
+    setFlowerMerchantInventoryHtml(`<div class="flowerMerchantEmpty">花房商人库存读取失败，请稍后再试。</div>`);
+    scrollFlowerMerchantIntoView();
+  }
+}
+
+function closeFlowerMerchant(){
+  const modal = document.getElementById("flowerMerchantModal");
+  const inlinePanel = document.getElementById("flowerMerchantInlinePanel");
+
+  if(modal){
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  if(inlinePanel){
+    inlinePanel.classList.remove("show");
+    inlinePanel.setAttribute("aria-hidden", "true");
+  }
+}
+
+function handleFlowerMerchantMaskClick(event){
+  if(event?.target?.id === "flowerMerchantModal"){
+    closeFlowerMerchant();
+  }
+}
+
+async function sellMerchantHolding(holdingId, quantity){
+  const auth = getFlowerAuth();
+  if(!auth) throw new Error("请先登录");
+
+  const { data, error } = await supabaseClient.rpc("sell_flower_to_merchant", {
+    p_member_id:auth.memberId,
+    p_member_code:auth.memberCode,
+    p_holding_id:String(holdingId),
+    p_quantity:Math.max(1, Math.floor(Number(quantity) || 1)),
+    p_timezone_offset_minutes:auth.timezoneOffset
+  });
+
+  if(error) throw error;
+  return Array.isArray(data) ? data[0] : data;
+}
+
+async function confirmSellMerchantGroup(groupKey){
+  const auth = getFlowerAuth();
+  if(!auth){
+    openLogin();
+    return;
+  }
+
+  const group = getMerchantGroup(groupKey);
+  if(!group){
+    showFlowerToast("没有找到这组花束", "error");
+    return;
+  }
+
+  let remaining = getMerchantGroupQuantity(groupKey);
+  if(remaining <= 0){
+    showFlowerToast("请选择要交给商人的数量", "error");
+    return;
+  }
+
+  document.querySelectorAll("[data-merchant-sell-btn], .flowerMerchantConfirmBtn, .flowerMerchantCancelBtn").forEach(btn => {
+    btn.disabled = true;
+  });
+
+  let soldQuantity = 0;
+  let totalIncome = 0;
+
+  try{
+    for(const holding of group.rows){
+      if(remaining <= 0) break;
+      const take = Math.min(remaining, Math.max(0, Math.floor(Number(holding.quantity) || 0)));
+      if(take <= 0) continue;
+
+      const row = await sellMerchantHolding(holding.id, take);
+      soldQuantity += Number(row?.sold_quantity) || take;
+      totalIncome += Number(row?.total_income) || 0;
+      remaining -= take;
+    }
+
+    await Promise.all([
+      loadMemberGold(),
+      loadFlowerMarket(),
+      loadFlowerPot()
+    ]);
+
+    const rows = await loadFlowerMerchantRows();
+    renderFlowerMerchantInventory(rows);
+
+    const incomeText = totalIncome > 0 ? `，获得 ${totalIncome} 金币` : "";
+    showFlowerToast(`花房商人收购成功：${group.displayName} ×${soldQuantity}${incomeText}`);
+  }catch(err){
+    console.error("花房商人交易失败：", err);
+    showFlowerToast(err?.message || "花房商人交易失败", "error");
+    document.querySelectorAll("[data-merchant-sell-btn], .flowerMerchantConfirmBtn, .flowerMerchantCancelBtn").forEach(btn => {
+      btn.disabled = false;
+    });
+  }
+}
+
 function getMarketQuantity(flowerKey){
   const key = String(flowerKey || "");
   const input = document.querySelector(`[data-flower-qty="${CSS.escape(key)}"]`);
@@ -3449,40 +4622,39 @@ function getMarketQuantity(flowerKey){
   return Math.max(1, Math.floor(raw));
 }
 
-
 function setMarketMaxQuantity(flowerKey){
   const key = String(flowerKey || "");
   const row = getMarketRow(key);
   const displayName = getFlowerDisplayName(row || { flower_key:key });
-  const owned = Math.max(0, Math.floor(Number(row?.owned_quantity) || 0));
   const sellable = getSellableQuantity(row);
+  const clearable = getMarketWitheredQuantity(row);
   const remainingBuy = row ? getRemainingBuyQuantity(row) : 5;
 
-  /*
-    「5朵」是快速填数量，不直接决定买入或卖出。
-    优先按当前背包/可卖数量填入，解决拥有 4 朵时点击「5朵」没有自动变成 4 的问题；
-    如果当前没有花可卖，再按本轮还能买入的最大数量填入。
-  */
   let target = 1;
   let message = "";
 
-  if(owned > 0 || sellable > 0){
-    target = Math.min(5, Math.max(sellable, owned));
+  if(sellable > 0){
+    target = Math.min(5, sellable);
     if(target < 5){
-      message = `${displayName}当前最多可选 ${target} 朵，已自动填入最大数量。`;
+      message = `${displayName}当前最多可卖 ${target} 朵，已自动填入最大数量。`;
+    }
+  }else if(clearable > 0){
+    target = Math.min(5, clearable);
+    if(target < 5){
+      message = `${displayName}当前有 ${clearable} 朵枯萎市场花需要清理。`;
     }
   }else{
     target = Math.min(5, Math.max(0, remainingBuy));
     if(remainingBuy <= 0){
       target = 1;
-      message = `${displayName}这一轮已经买满啦，现在还能买 0 朵。`;
+      message = `${displayName}当前市场持有已满 5 朵，现在还能买 0 朵。`;
     }
   }
 
   setMarketQuantityInput(key, target);
 
   if(message){
-    showMarketOperationMessage(message, remainingBuy <= 0 && owned <= 0 && sellable <= 0, 7600);
+    showMarketOperationMessage(message, remainingBuy <= 0 && sellable <= 0 && clearable <= 0, 7600);
   }
 }
 function setFlowerResources(seedQuantity, waterQuantity, fertilizerQuantity){
@@ -3700,8 +4872,18 @@ function renderMarket(rows){
     <div class="flowerMarketGrid">
       ${list.map(row => {
         const owned = Number(row.owned_quantity) || 0;
-        const canSell = owned > 0;
+        const sellable = getSellableQuantity(row);
+        const withered = getMarketWitheredQuantity(row);
+        const wilting = getMarketWiltingQuantity(row);
+        const canSell = sellable > 0;
+        const canClear = withered > 0 && !canSell;
+        const canBuy = getMaxBuyQuantityForRow(row) > 0;
         const displayName = getFlowerDisplayName(row);
+        const flowerKey = String(row.flower_key || "");
+        const sellTitle = wilting > 0 ? "卖出所选数量；开始枯萎的市场花会按折扣价卖出" : "卖出所选数量";
+        const secondButton = canClear
+          ? `<button class="flowerActionBtn" type="button" data-market-clear-btn data-flower-key="${escapeHtml(flowerKey)}" title="清理枯萎市场花" onclick="clearWitheredMarketFlower('${escapeHtml(flowerKey)}')">清理</button>`
+          : `<button class="flowerActionBtn" type="button" data-market-sell-btn data-flower-key="${escapeHtml(flowerKey)}" data-disabled="${canSell ? "false" : "true"}" ${canSell ? "" : "disabled"} title="${escapeHtml(canSell ? sellTitle : "当前没有可以卖出的市场花")}" onclick="sellFlower('${escapeHtml(flowerKey)}', getMarketQuantity('${escapeHtml(flowerKey)}'))">卖出</button>`;
         return `
           <article class="flowerCard">
             <div class="flowerCardImgWrap">
@@ -3713,16 +4895,18 @@ function renderMarket(rows){
               <div class="flowerMetaLine"><span>当前价格</span><strong>${Number(row.price) || 0} 金币</strong></div>
               <div class="flowerMetaLine"><span>本轮变化</span><strong>${getPriceChangeHtml(row.price_change)}</strong></div>
               <div class="flowerMetaLine"><span>我拥有</span><strong>${owned} 朵</strong></div>
+              ${wilting > 0 ? `<div class="flowerMetaLine"><span>折扣可卖</span><strong>${wilting} 朵</strong></div>` : ""}
+              ${withered > 0 ? `<div class="flowerMetaLine"><span>待清理</span><strong>${withered} 朵</strong></div>` : ""}
               <div class="flowerMetaLine"><span>枯萎倒计时</span><strong data-wither-countdown="${escapeHtml(row.earliest_wither_at || "")}">${formatWitherCountdown(row.earliest_wither_at)}</strong></div>
             </div>
             <div class="flowerQtyBox">
               <span class="flowerQtyLabel">数量</span>
-              <input class="flowerQtyInput" data-flower-qty="${escapeHtml(row.flower_key)}" type="number" min="1" max="5" step="1" value="1" inputmode="numeric" aria-label="${escapeHtml(displayName)}买入数量">
-              <button class="flowerQtyFiveBtn" type="button" onclick="setMarketMaxQuantity('${escapeHtml(row.flower_key)}')" aria-label="将${escapeHtml(displayName)}数量设为当前最大可用数量">5朵</button>
+              <input class="flowerQtyInput" data-flower-qty="${escapeHtml(flowerKey)}" type="number" min="1" max="5" step="1" value="1" inputmode="numeric" oninput="handleMarketQuantityInput('${escapeHtml(flowerKey)}')" aria-label="${escapeHtml(displayName)}买卖数量">
+              <button class="flowerQtyFiveBtn" type="button" onclick="setMarketMaxQuantity('${escapeHtml(flowerKey)}')" aria-label="将${escapeHtml(displayName)}数量设为当前最大可用数量">最大</button>
             </div>
             <div class="flowerActions">
-              <button class="flowerActionBtn" type="button" onclick="buyFlower('${escapeHtml(row.flower_key)}', getMarketQuantity('${escapeHtml(row.flower_key)}'))">买入</button>
-              <button class="flowerActionBtn" type="button" ${canSell ? "" : "data-disabled=\"true\" disabled"} onclick="sellFlower('${escapeHtml(row.flower_key)}', getMarketQuantity('${escapeHtml(row.flower_key)}'))">卖出</button>
+              <button class="flowerActionBtn" type="button" data-market-buy-btn data-flower-key="${escapeHtml(flowerKey)}" data-disabled="${canBuy ? "false" : "true"}" ${canBuy ? "" : "disabled"} title="${escapeHtml(canBuy ? "买入所选数量" : getBuyDisabledReason(row))}" onclick="buyFlower('${escapeHtml(flowerKey)}', getMarketQuantity('${escapeHtml(flowerKey)}'))">买入</button>
+              ${secondButton}
             </div>
           </article>
         `;
@@ -3730,6 +4914,7 @@ function renderMarket(rows){
     </div>
     <div class="flowerMarketNote" id="marketTipText">${escapeHtml(getMarketLimitNote())}</div>
   `;
+  refreshMarketActionButtons();
   renderFlowerBundleInventory(false);
   startWitherCountdownTimer();
   startMarketTipRotator();
@@ -3748,12 +4933,21 @@ function updatePotResourceNumbers(loggedOut=false){
   renderFlowerBundleInventory(loggedOut);
 }
 
+function updatePotUsedCareNumbers(pot=null, loggedOut=false){
+  const waterCount = loggedOut ? 0 : Math.max(0, Math.floor(Number(pot?.water_count) || 0));
+  const fertilizerCount = loggedOut ? 0 : Math.max(0, Math.floor(Number(pot?.fertilizer_count) || 0));
+
+  if(potUsedWaterCount) potUsedWaterCount.textContent = String(waterCount);
+  if(potUsedFertCount) potUsedFertCount.textContent = String(fertilizerCount);
+}
+
 function renderPotEmpty(desc="当前是空花盆。", loggedOut=false){
   if(potImage) potImage.src = "pot-empty.png";
   if(potStatusTitle) potStatusTitle.textContent = "空花盆";
   if(potStatusDesc) potStatusDesc.textContent = desc;
 
   updatePotResourceNumbers(loggedOut);
+  updatePotUsedCareNumbers(null, true);
 
   if(potActions){
     potActions.className = "potActions single";
@@ -3776,6 +4970,7 @@ function renderPot(row){
 
   if(potImage) potImage.src = pot.display_img || "pot-empty.png";
   updatePotResourceNumbers(false);
+  updatePotUsedCareNumbers(pot, false);
 
   if(displayStatus === "growing"){
     if(potStatusTitle) potStatusTitle.textContent = "种植中";
@@ -3801,6 +4996,17 @@ function renderPot(row){
   if(displayStatus === "ready"){
     if(potStatusTitle) potStatusTitle.textContent = "可以收获了";
     if(potStatusDesc) potStatusDesc.textContent = "它已经准备好啦，点击收获看看这次开出了什么花。";
+    if(potActions){
+      potActions.className = "potActions single";
+      potActions.innerHTML = `<button class="potActionBtn" type="button" onclick="harvestFlowerPot()"><span class="potActionContent">收获</span></button>`;
+    }
+    showBoxMessage(potMessage, "");
+    return;
+  }
+
+  if(displayStatus === "wilting"){
+    if(potStatusTitle) potStatusTitle.textContent = "逐渐枯萎中";
+    if(potStatusDesc) potStatusDesc.textContent = "花已经开始变蔫，现在仍可收获，但交给花房商人时会按品质折扣。";
     if(potActions){
       potActions.className = "potActions single";
       potActions.innerHTML = `<button class="potActionBtn" type="button" onclick="harvestFlowerPot()"><span class="potActionContent">收获</span></button>`;
@@ -3934,7 +5140,6 @@ async function loadFlowerPage(){
   }
 }
 
-
 function formatMarketErrorMessage(message, displayName="花束"){
   const text = String(message || "").trim();
   const sellableMatch = text.match(/当前可卖\s*(\d+)\s*朵/);
@@ -3962,17 +5167,24 @@ async function buyFlower(flowerKey, quantity=1){
   const rowInfo = getMarketRow(flowerKey);
   const displayName = getFlowerDisplayName(rowInfo || { flower_key:flowerKey });
   const remaining = rowInfo ? getRemainingBuyQuantity(rowInfo) : 5;
+  const maxBuy = rowInfo ? getMaxBuyQuantityForRow(rowInfo) : 0;
   const requestedQuantity = Math.max(1, Math.floor(Number(quantity) || 1));
-  const buyQuantity = Math.max(0, Math.min(remaining, requestedQuantity));
+  const buyQuantity = Math.max(0, Math.min(maxBuy, requestedQuantity));
 
-  if(remaining <= 0){
-    showMarketOperationMessage(`${displayName}这一轮已经买满啦，现在还能买 0 朵。`, true);
+  if(maxBuy <= 0){
+    showMarketOperationMessage(getBuyDisabledReason(rowInfo) || `${displayName}暂时不能买入。`, true);
+    refreshMarketActionButtons();
     return;
   }
 
-  if(requestedQuantity > remaining){
-    setMarketQuantityInput(flowerKey, remaining);
-    showMarketOperationMessage(`${displayName}现在最多还能买 ${remaining} 朵，已按 ${remaining} 朵购买。`, true);
+  if(remaining <= 0){
+    showMarketOperationMessage(`${displayName}当前市场持有已满 5 朵，现在还能买 0 朵。`, true);
+    return;
+  }
+
+  if(requestedQuantity > maxBuy){
+    setMarketQuantityInput(flowerKey, maxBuy);
+    showMarketOperationMessage(`${displayName}当前最多还能买 ${maxBuy} 朵，已按 ${maxBuy} 朵购买。`, true);
   }
 
   if(buyQuantity <= 0){
@@ -3996,16 +5208,16 @@ async function buyFlower(flowerKey, quantity=1){
     const actualQuantity = Number(row?.quantity) || buyQuantity;
     const oldOwned = Number(rowInfo?.owned_quantity) || 0;
     const newOwned = oldOwned + actualQuantity;
-    const message = requestedQuantity > remaining
-      ? `${displayName}现在最多还能买 ${remaining} 朵，已实际买入 ${actualQuantity} 朵；现在拥有 ${newOwned} 朵。`
+    const message = requestedQuantity > maxBuy
+      ? `${displayName}当前最多还能买 ${maxBuy} 朵，已实际买入 ${actualQuantity} 朵；现在拥有 ${newOwned} 朵。`
       : `${displayName}购买成功：实际买入 ${actualQuantity} 朵；现在拥有 ${newOwned} 朵。`;
 
     await loadFlowerPage();
     showMarketOperationMessage(message, false);
   }catch(err){
     console.error("买花失败：", err);
-    showMarketOperationMessage(err?.message || `${displayName}买花失败`, true);
     await loadFlowerMarket();
+    showMarketOperationMessage(err?.message || `${displayName}买花失败`, true);
   }finally{
     setFlowerBusy(false);
   }
@@ -4057,6 +5269,7 @@ async function sellFlower(flowerKey, quantity=1){
     showMarketOperationMessage(`${displayName}卖出成功：实际卖出 ${actualQuantity} 朵。`, false);
   }catch(err){
     console.error("卖花失败：", err);
+    await loadFlowerMarket();
     showMarketOperationMessage(formatMarketErrorMessage(err?.message, displayName), true);
   }finally{
     setFlowerBusy(false);
@@ -4217,8 +5430,21 @@ async function clearWitheredFlowerPot(){
     if(error) throw error;
 
     const row = Array.isArray(data) ? data[0] : data;
-    showFlowerToast(row?.message || "已清理");
     await loadFlowerPage();
+
+    if(row?.got_fertilizer || Number(row?.fertilizer_quantity) > 0){
+      showRewardModal({
+        type:"item",
+        icon:"🌱",
+        label:"道具获得",
+        title:"清理花盆",
+        desc:"清理枯萎花盆时，意外翻到了一点肥料。",
+        rewards:[{ img:"fert.png", name:"肥料", amount:`×${Number(row?.fertilizer_quantity) || 1}` }],
+        autoCloseMs:2200
+      });
+    }else{
+      showFlowerToast(row?.message || "已清理花盆");
+    }
   }catch(err){
     console.error("清理失败：", err);
     showFlowerToast(err?.message || "清理失败", "error");
@@ -4227,6 +5453,69 @@ async function clearWitheredFlowerPot(){
   }
 }
 
+async function clearWitheredMarketFlower(flowerKey){
+  const auth = getFlowerAuth();
+  if(!auth){
+    openLogin();
+    return;
+  }
+
+  const key = String(flowerKey || "").trim();
+  const rowInfo = getMarketRow(key);
+  const displayName = getFlowerDisplayName(rowInfo || { flower_key:key });
+
+  setFlowerBusy(true);
+  try{
+    const { data:holdings, error:holdingError } = await supabaseClient
+      .from("flower_holdings")
+      .select("id,flower_key,quantity,source,status,quality,wither_at,acquired_at")
+      .eq("member_id", auth.memberId)
+      .eq("flower_key", key)
+      .eq("source", "market")
+      .gt("quantity", 0)
+      .or(`status.eq.withered,quality.eq.market_withered,wither_at.lte.${new Date().toISOString()}`)
+      .order("acquired_at", { ascending:true });
+
+    if(holdingError) throw holdingError;
+
+    const target = Array.isArray(holdings) ? holdings[0] : null;
+    if(!target?.id){
+      showMarketOperationMessage(`${displayName}当前没有需要清理的枯萎市场花。`, true);
+      await loadFlowerMarket();
+      return;
+    }
+
+    const { data, error } = await supabaseClient.rpc("clear_withered_market_flower", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode,
+      p_holding_id:target.id
+    });
+
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    await loadFlowerPage();
+
+    if(row?.got_fertilizer || Number(row?.fertilizer_quantity) > 0){
+      showRewardModal({
+        type:"item",
+        icon:"🌱",
+        label:"道具获得",
+        title:"清理枯萎市场花",
+        desc:"清理时意外翻到了一点肥料。",
+        rewards:[{ img:"fert.png", name:"肥料", amount:`×${Number(row?.fertilizer_quantity) || 1}` }],
+        autoCloseMs:2200
+      });
+    }else{
+      showMarketOperationMessage(row?.message || `${displayName}枯萎市场花已清理。`, false);
+    }
+  }catch(err){
+    console.error("清理枯萎市场花失败：", err);
+    showMarketOperationMessage(err?.message || `${displayName}清理失败`, true);
+  }finally{
+    setFlowerBusy(false);
+  }
+}
 
 /* =========================================================
    铃铛提醒
@@ -4360,6 +5649,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("keydown", event => {
     if(event.key === "Escape"){
+      closeFlowerMerchant();
       closeFlowerRewardModal();
     }
   });
@@ -4375,7 +5665,16 @@ document.addEventListener("DOMContentLoaded", () => {
   syncOverlayToImage();
 });
 
-window.addEventListener("resize", syncOverlayToImage);
+window.addEventListener("resize", () => {
+  syncOverlayToImage();
+  if(isTinyScreen()){
+    const modal = document.getElementById("flowerMerchantModal");
+    if(modal){
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+    }
+  }
+});
 window.addEventListener("orientationchange", syncOverlayToImage);
 
 window.addEventListener("storage", event => {
