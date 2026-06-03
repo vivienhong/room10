@@ -629,820 +629,129 @@
 
 
 
+
 /* =========================================================
-   FINAL CLEAN LOCK：项目委托页使用最满意版顶部组件
-   保留项目委托业务内容，只统一房间按钮 / 身份组件 / 手机版顺序
+   通用模板同步：房间按钮 / 身份组件 / 工作间页面切换
+   项目委托页不接入成就称号奖励弹窗
 ========================================================= */
 :root{
   --bg-ui-scale:1;
+  --ui-scale:var(--bg-ui-scale);
+  --room-nav-scale:var(--ui-scale);
+  --identity-scale:var(--ui-scale);
   --identity-right:7.35%;
   --identity-top:6.46%;
-  --identity-width:calc(232px * var(--bg-ui-scale));
-  --identity-height:calc(38px * var(--bg-ui-scale));
-  --room-nav-left:27.2%;
+  --identity-base-width:232;
+  --identity-base-height:38;
+  --identity-bg:rgba(255,250,244,0.88);
+  --identity-inner-bg:rgba(255,253,249,0.92);
+  --identity-border:rgba(170,132,101,0.20);
+  --identity-text:#6f5746;
+  --identity-shadow:rgba(106,78,55,0.08);
+  --identity-name-y:0em;
+  --identity-notice-y:0em;
+  --identity-button-y:0em;
   --room-nav-top:6.35%;
-  --room-nav-width:45.5%;
-  --identity-bg:rgba(255,248,239,0.92);
-  --identity-inner-bg:rgba(255,252,247,0.96);
-  --identity-border:rgba(186,146,103,0.24);
-  --identity-text:#6c4523;
-  --identity-shadow:rgba(116,86,54,0.12);
-  --nav-text:#6e4827;
-  --nav-border:rgba(145,98,56,.34);
+  --room-nav-start-left:25.83%;
+  --room-nav-btn-width:4.72%;
+  --room-nav-btn-height:5.10%;
+  --room-nav-gap:0.486%;
+  --room-nav-hall-left:var(--room-nav-start-left);
+  --room-nav-living-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 1);
+  --room-nav-manager-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 2);
+  --room-nav-honor-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 3);
+  --room-nav-studio-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 4);
+  --room-nav-game-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 5);
+  --room-nav-dorm-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 6);
+  --room-nav-flower-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 7);
+  --room-nav-pets-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 8);
+  --room-nav-text:#6f5746;
+  --room-nav-border:rgba(158,122,93,.26);
+  --room-nav-current-text:#5d4738;
+  --room-nav-current-border:rgba(151,111,82,.42);
+  --room-nav-paper:rgba(255,250,242,.78);
+  --room-nav-paper-2:rgba(246,235,219,.74);
+  --room-nav-wash:rgba(214,185,157,.20);
+  --room-nav-current-bg:rgba(239,224,205,.86);
 }
 .hidden{display:none !important;}
 #overlay{
+  z-index:2;
   overflow:visible !important;
-  --ui-scale:var(--bg-ui-scale, 1) !important;
-  --overlay-ui-scale:var(--bg-ui-scale, 1) !important;
-  --project-panel-scale:var(--bg-ui-scale, 1) !important;
+  --ui-scale:var(--bg-ui-scale,1);
+  --overlay-ui-scale:var(--bg-ui-scale,1);
+  --project-panel-scale:var(--bg-ui-scale,1);
 }
+#overlay .roomNavLayer,#overlay .roomIdentity{pointer-events:none !important;}
+#overlay .roomNavLayer .navBtn,
+#overlay .roomIdentity .roomIdentityBar,
+#overlay .roomIdentity button,
+#overlay .roomIdentity .identityNoticePanel{pointer-events:auto !important;}
 
-/* 房间切换按钮：学习 studio-todo */
-#topBar{
-  position:absolute !important;
-  left:var(--room-nav-left) !important;
-  top:var(--room-nav-top) !important;
-  width:var(--room-nav-width) !important;
-  display:flex !important;
-  align-items:flex-start !important;
-  justify-content:flex-start !important;
-  z-index:55 !important;
-  overflow:visible !important;
-  pointer-events:none !important;
-  transform:none !important;
-  background:transparent !important;
-  border:none !important;
-  padding:0 !important;
-  margin:0 !important;
-  --nav-btn-height:calc(40px * var(--ui-scale));
-  --nav-btn-px:calc(16px * var(--ui-scale));
-  --nav-btn-radius:calc(13px * var(--ui-scale));
-  --nav-btn-font:calc(14px * var(--ui-scale));
-  --nav-gap:calc(8px * var(--ui-scale));
-}
-#navOuter,#navScroll{overflow:visible !important;}
-#navOuter{flex:0 0 auto !important;min-width:0 !important;width:100% !important;pointer-events:auto !important;}
-#navScroll{width:100% !important;white-space:nowrap !important;padding:0 !important;margin:0 !important;}
-#roomNav{
-  width:100% !important;
-  max-width:100% !important;
-  min-width:0 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:space-between !important;
-  gap:var(--nav-gap) !important;
-  transform-origin:left center !important;
-}
-.navBtn{
-  appearance:none !important;
-  border:none !important;
-  cursor:pointer !important;
-  position:relative !important;
-  flex:0 0 auto !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  height:var(--nav-btn-height) !important;
-  padding:0 var(--nav-btn-px) !important;
-  border-radius:var(--nav-btn-radius) !important;
-  color:var(--nav-text) !important;
-  font-size:var(--nav-btn-font) !important;
-  font-weight:900 !important;
-  line-height:1 !important;
-  white-space:nowrap !important;
-  overflow:visible !important;
-  isolation:isolate !important;
-  background:linear-gradient(180deg, rgba(249,232,203,.90) 0%, rgba(226,195,152,.86) 100%) !important;
-  border:1px solid var(--nav-border) !important;
-  box-shadow:0 1px 1px rgba(255,255,255,.48) inset,0 2px 5px rgba(91,68,45,.13) !important;
-  text-shadow:0 1px 0 rgba(255,255,255,.42) !important;
-  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease !important;
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif !important;
-}
-.navBtn:hover,.navBtn:focus-visible{
-  transform:none !important;
-  color:#5f3d22 !important;
-  background:linear-gradient(180deg, rgba(252,238,215,.95) 0%, rgba(232,205,166,.90) 100%) !important;
-  border-color:rgba(153,102,55,.48) !important;
-  box-shadow:0 1px 1px rgba(255,255,255,.55) inset,0 3px 7px rgba(91,68,45,.15) !important;
-  filter:brightness(1.015) !important;
-}
-.navBtn.active{color:#fffaf2 !important;background:linear-gradient(180deg, rgba(207,149,88,.96) 0%, rgba(183,117,61,.96) 100%) !important;border-color:rgba(255,239,213,.68) !important;box-shadow:0 1px 0 rgba(255,232,200,.55) inset,0 3px 8px rgba(92,63,38,.18) !important;}
-.navBtn::before,.navBtn::after{content:none !important;}
-.navLabel{position:relative !important;z-index:5 !important;display:block !important;max-width:100% !important;overflow:hidden !important;text-overflow:ellipsis !important;white-space:nowrap !important;}
-.navEffect{position:absolute !important;pointer-events:none !important;opacity:0;z-index:4 !important;display:block !important;font-weight:900 !important;line-height:1 !important;text-shadow:0 1px 2px rgba(255,250,232,.82),0 0 8px rgba(255,246,210,.52) !important;filter:saturate(.95) !important;}
-.navEffectA{left:8% !important;top:-54% !important;font-size:calc(var(--nav-btn-font) * .92) !important;}
-.navEffectB{right:8% !important;top:-62% !important;font-size:calc(var(--nav-btn-font) * .86) !important;}
-.navEffectC{left:50% !important;top:-72% !important;transform:translateX(-50%) !important;font-size:calc(var(--nav-btn-font) * 1.02) !important;}
-@keyframes navFloatA{0%,100%{transform:translateY(4px) rotate(-8deg) scale(.82);opacity:0;}20%,72%{opacity:.86;}50%{transform:translateY(-5px) rotate(6deg) scale(1);opacity:.76;}}
-@keyframes navFloatB{0%,100%{transform:translateY(5px) rotate(9deg) scale(.78);opacity:0;}24%,70%{opacity:.78;}52%{transform:translateY(-6px) rotate(-7deg) scale(1);opacity:.68;}}
-@keyframes navFloatC{0%,100%{transform:translateX(-50%) translateY(6px) rotate(0deg) scale(.76);opacity:0;}24%,70%{opacity:.88;}50%{transform:translateX(-50%) translateY(-6px) rotate(2deg) scale(1);opacity:.78;}}
-.navBtn:hover .navEffectA,.navBtn:focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite !important;}
-.navBtn:hover .navEffectB,.navBtn:focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite !important;}
-.navBtn:hover .navEffectC,.navBtn:focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite !important;}
-.navBtn[data-room="hall"] .navEffect{color:rgba(255,205,96,.86) !important;}
-.navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82) !important;}
-.navBtn[data-room="honor"] .navEffect{color:rgba(205,143,45,.86) !important;}
-.navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82) !important;}
-.navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82) !important;}
-.navBtn[data-room="dorm"] .navEffect{color:rgba(150,118,170,.78) !important;}
-.navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82) !important;}
-.navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82) !important;}
-/* 身份组件：最满意版 topActions / topIdentityBar，不再保留旧身份系统 */
-#topActions{
-  position:absolute !important;
-  right:var(--identity-right) !important;
-  top:var(--identity-top) !important;
-  width:var(--identity-width) !important;
-  height:var(--identity-height) !important;
-  min-width:0 !important;
-  min-height:0 !important;
-  z-index:65 !important;
-  pointer-events:none !important;
-}
-#topIdentityBar{
-  width:100% !important;
-  height:100% !important;
-  display:flex !important;
-  align-items:stretch !important;
-  justify-content:flex-start !important;
-  gap:calc(5px * var(--ui-scale)) !important;
-  padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale)) !important;
-  border-radius:calc(13px * var(--ui-scale)) !important;
-  background:var(--identity-bg) !important;
-  border:1px solid var(--identity-border) !important;
-  box-shadow:0 calc(10px * var(--ui-scale)) calc(24px * var(--ui-scale)) var(--identity-shadow),inset 0 1px 0 rgba(255,255,255,0.9) !important;
-  backdrop-filter:blur(8px) !important;
-  -webkit-backdrop-filter:blur(8px) !important;
-  pointer-events:auto !important;
-  overflow:visible !important;
-  white-space:nowrap !important;
-}
-#topIdentityBadge,#loginOpenBtn,#logoutBtn,#siteNoticeBtn{
-  border-radius:calc(9px * var(--ui-scale)) !important;
-  background:var(--identity-inner-bg) !important;
-  color:var(--identity-text) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.95),0 1px 4px rgba(112,83,52,0.05) !important;
-  border:1px solid rgba(160,116,78,0.12) !important;
-}
-#topIdentityBadge{
-  flex:1 1 auto !important;
-  min-width:0 !important;
-  padding:0 calc(8px * var(--ui-scale)) !important;
-  font-size:calc(13px * var(--ui-scale)) !important;
-  font-weight:800 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  overflow:hidden !important;
-  white-space:nowrap !important;
-}
-#topIdentityBadge .identityText{
-  min-width:0 !important;
-  overflow:hidden !important;
-  text-overflow:ellipsis !important;
-  white-space:nowrap !important;
-  line-height:1 !important;
-  font-size:inherit !important;
-  text-align:center !important;
-}
-#loginOpenBtn,#logoutBtn{
-  appearance:none !important;
-  cursor:pointer !important;
-  width:calc(42px * var(--ui-scale)) !important;
-  min-width:calc(42px * var(--ui-scale)) !important;
-  flex:0 0 calc(42px * var(--ui-scale)) !important;
-  height:auto !important;
-  min-height:0 !important;
-  padding:0 !important;
-  color:#67401f !important;
-  font-size:calc(12px * var(--ui-scale)) !important;
-  font-weight:800 !important;
-  line-height:1 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  transition:transform .18s ease,background .18s ease,box-shadow .18s ease !important;
-  overflow:hidden !important;
-  white-space:nowrap !important;
-}
-#loginOpenBtn:hover,#logoutBtn:hover,#siteNoticeBtn:hover{transform:translateY(-1px) !important;background:rgba(255,255,255,0.94) !important;}
-#loginOpenBtn.hidden,#loginOpenBtn[hidden],#logoutBtn.hidden,#logoutBtn[hidden]{display:none !important;}
-#siteNoticeWrap{position:relative !important;width:calc(30px * var(--ui-scale)) !important;min-width:calc(30px * var(--ui-scale)) !important;flex:0 0 calc(30px * var(--ui-scale)) !important;display:flex !important;align-items:stretch !important;justify-content:center !important;overflow:visible !important;}
-#siteNoticeBtn{appearance:none !important;cursor:pointer !important;position:relative !important;width:100% !important;height:100% !important;min-width:0 !important;min-height:0 !important;padding:0 !important;font-size:calc(14px * var(--ui-scale)) !important;font-weight:800 !important;display:flex !important;align-items:center !important;justify-content:center !important;transition:transform .18s ease,background .18s ease,box-shadow .18s ease !important;overflow:visible !important;}
-#siteNoticeIcon{display:block !important;line-height:1 !important;filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55)) !important;}
-#siteNoticeCount{position:absolute !important;right:calc(-6px * var(--ui-scale)) !important;top:calc(-6px * var(--ui-scale)) !important;min-width:calc(18px * var(--ui-scale)) !important;height:calc(18px * var(--ui-scale)) !important;padding:0 calc(5px * var(--ui-scale)) !important;border-radius:999px !important;background:#c98c4f !important;color:#fff9f1 !important;font-size:calc(9px * var(--ui-scale)) !important;font-weight:900 !important;line-height:1 !important;display:none;align-items:center !important;justify-content:center !important;border:calc(2px * var(--ui-scale)) solid rgba(255,248,239,0.98) !important;box-shadow:0 2px 8px rgba(116,86,54,0.16) !important;z-index:3 !important;}
-#siteNoticeBtn.hasNotice #siteNoticeCount{display:flex !important;}
-#siteNoticePanel{position:absolute !important;top:calc(100% + 10px) !important;right:0 !important;width:min(calc(360px * var(--ui-scale)),72vw) !important;max-height:min(calc(540px * var(--ui-scale)),70vh) !important;overflow:auto !important;padding:calc(12px * var(--ui-scale)) !important;border-radius:calc(16px * var(--ui-scale)) !important;background:rgba(255,249,241,0.98) !important;border:1px solid rgba(203,167,123,0.28) !important;box-shadow:0 16px 36px rgba(85,58,34,0.16) !important;display:none;z-index:80 !important;text-align:left !important;}
-#siteNoticePanel.show{display:block !important;}
-.siteNoticeTitle{color:#6f4726 !important;font-size:calc(13px * var(--ui-scale)) !important;font-weight:900 !important;margin-bottom:calc(10px * var(--ui-scale)) !important;}
-.siteNoticeEmpty{color:#8a6644 !important;font-size:calc(12px * var(--ui-scale)) !important;line-height:1.6 !important;padding:6px 2px 2px !important;}
-.siteNoticeList{display:flex !important;flex-direction:column !important;gap:calc(8px * var(--ui-scale)) !important;}
-.siteNoticeItem{padding:calc(10px * var(--ui-scale)) !important;border-radius:calc(12px * var(--ui-scale)) !important;background:rgba(255,252,247,0.82) !important;box-shadow:inset 0 1px 0 rgba(255,255,255,0.92),0 2px 8px rgba(120,92,63,0.05) !important;}
-.siteNoticeItemTitle{color:#6f4726 !important;font-size:calc(12px * var(--ui-scale)) !important;font-weight:800 !important;line-height:1.5 !important;margin-bottom:4px !important;}
-.siteNoticeItemDesc{color:#8a6644 !important;font-size:calc(11px * var(--ui-scale)) !important;line-height:1.55 !important;margin-bottom:calc(10px * var(--ui-scale)) !important;}
-.siteNoticeAction{appearance:none !important;border:none !important;cursor:pointer !important;min-height:calc(31px * var(--ui-scale)) !important;padding:0 12px !important;border-radius:10px !important;background:linear-gradient(180deg,#efd5ab 0%,#dfbd8a 100%) !important;color:#6a4120 !important;font-size:calc(11px * var(--ui-scale)) !important;font-weight:800 !important;}
+.roomNavLayer{position:absolute;inset:0;z-index:55;pointer-events:none;--s:var(--room-nav-scale,1);--nav-btn-radius:calc(15px * var(--s));--nav-btn-font:calc(15px * var(--s));--nav-btn-border:calc(1px * var(--s));}
+.navBtn{appearance:none;border:none;cursor:pointer;position:absolute;top:var(--room-nav-top);width:var(--room-nav-btn-width);height:var(--room-nav-btn-height);min-width:0;min-height:0;padding:0;border-radius:var(--nav-btn-radius);color:var(--room-nav-text);font-size:var(--nav-btn-font);font-weight:900;white-space:nowrap;overflow:visible;isolation:isolate;background:radial-gradient(circle at 18% 22%, rgba(255,255,255,.56), transparent 40%),radial-gradient(circle at 78% 74%, var(--room-nav-wash), transparent 48%),linear-gradient(180deg, var(--room-nav-paper) 0%, var(--room-nav-paper-2) 100%);border:var(--nav-btn-border) solid var(--room-nav-border);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.64),0 calc(2px * var(--s)) calc(7px * var(--s)) rgba(96,70,48,.10);text-shadow:0 calc(1px * var(--s)) 0 rgba(255,255,255,.38);transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;}
+.navBtn[data-room="hall"]{left:var(--room-nav-hall-left);} .navBtn[data-room="living"]{left:var(--room-nav-living-left);} .navBtn[data-room="manager"]{left:var(--room-nav-manager-left);} .navBtn[data-room="honor"]{left:var(--room-nav-honor-left);} .navBtn[data-room="studio"]{left:var(--room-nav-studio-left);} .navBtn[data-room="game"]{left:var(--room-nav-game-left);} .navBtn[data-room="dorm"]{left:var(--room-nav-dorm-left);} .navBtn[data-room="flower"]{left:var(--room-nav-flower-left);} .navBtn[data-room="pets"]{left:var(--room-nav-pets-left);}
+.navBtn:not(.is-current):hover,.navBtn:not(.is-current):focus-visible{color:#5f3d22;background:radial-gradient(circle at 20% 24%, rgba(255,255,255,.66), transparent 42%),radial-gradient(circle at 80% 78%, rgba(207,170,143,.24), transparent 50%),linear-gradient(180deg, rgba(255,252,246,.88) 0%, rgba(239,226,210,.82) 100%);border-color:rgba(151,112,84,.36);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.70),0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.12);filter:saturate(1.02);}
+.navBtn.is-current{cursor:default;color:var(--room-nav-current-text);background:radial-gradient(circle at 22% 22%, rgba(255,255,255,.62), transparent 42%),radial-gradient(circle at 80% 80%, rgba(190,151,126,.26), transparent 50%),linear-gradient(180deg, rgba(246,235,222,.94) 0%, var(--room-nav-current-bg) 100%);border-color:var(--room-nav-current-border);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.68),0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.13),0 0 0 calc(2px * var(--s)) rgba(255,253,248,.46);filter:none;}
+.navLabel{position:relative;z-index:5;width:100%;height:100%;display:inline-flex;align-items:center;justify-content:center;overflow:visible;white-space:nowrap;line-height:normal;padding-top:.06em;}
+.navEffect{position:absolute;pointer-events:none;opacity:0;z-index:4;display:block;font-weight:900;line-height:1;text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.82),0 0 calc(8px * var(--s)) rgba(255,246,210,.52);filter:saturate(.95);}
+.navEffectA{left:8%;top:-54%;font-size:calc(var(--nav-btn-font) * .92);} .navEffectB{right:8%;top:-62%;font-size:calc(var(--nav-btn-font) * .86);} .navEffectC{left:50%;top:-72%;transform:translateX(-50%);font-size:calc(var(--nav-btn-font) * 1.02);}
+@keyframes navFloatA{0%,100%{transform:translateY(calc(4px * var(--s))) rotate(-8deg) scale(.82);opacity:0;}20%,72%{opacity:.86;}50%{transform:translateY(calc(-5px * var(--s))) rotate(6deg) scale(1);opacity:.76;}}
+@keyframes navFloatB{0%,100%{transform:translateY(calc(5px * var(--s))) rotate(9deg) scale(.78);opacity:0;}24%,70%{opacity:.78;}52%{transform:translateY(calc(-6px * var(--s))) rotate(-7deg) scale(1);opacity:.68;}}
+@keyframes navFloatC{0%,100%{transform:translateX(-50%) translateY(calc(6px * var(--s))) rotate(0deg) scale(.76);opacity:0;}24%,70%{opacity:.88;}50%{transform:translateX(-50%) translateY(calc(-6px * var(--s))) rotate(2deg) scale(1);opacity:.78;}}
+.navBtn:not(.is-current):hover .navEffectA,.navBtn:not(.is-current):focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite;} .navBtn:not(.is-current):hover .navEffectB,.navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite;} .navBtn:not(.is-current):hover .navEffectC,.navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite;} .navBtn.is-current .navEffect{display:none;}
+.navBtn[data-room="hall"] .navEffect{color:rgba(255,205,96,.86);} .navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82);} .navBtn[data-room="honor"] .navEffect{color:rgba(205,143,45,.86);} .navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82);} .navBtn[data-room="studio"] .navEffect{color:rgba(96,112,145,.84);} .navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82);} .navBtn[data-room="dorm"] .navEffect{color:rgba(148,112,171,.78);} .navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82);} .navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82);}
 
+.roomIdentity{--s:var(--identity-scale,1);position:absolute;right:var(--identity-right);top:var(--identity-top);width:calc(var(--identity-base-width) * 1px * var(--s));height:calc(var(--identity-base-height) * 1px * var(--s));min-width:calc(var(--identity-base-width) * 1px * var(--s));min-height:calc(var(--identity-base-height) * 1px * var(--s));z-index:90;pointer-events:none;overflow:visible;}
+.roomIdentityBar{width:100%;height:100%;display:grid;grid-template-columns:minmax(calc(130px * var(--s)),1fr) calc(30px * var(--s)) calc(42px * var(--s));gap:calc(5px * var(--s));padding:calc(4px * var(--s)) calc(5px * var(--s));border-radius:calc(13px * var(--s));background:var(--identity-bg);border:calc(1px * var(--s)) solid var(--identity-border);box-shadow:0 calc(10px * var(--s)) calc(24px * var(--s)) var(--identity-shadow),inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.9);backdrop-filter:blur(calc(8px * var(--s)));-webkit-backdrop-filter:blur(calc(8px * var(--s)));pointer-events:auto;overflow:visible;white-space:nowrap;}
+.identityNameBox,.identityNoticeBtn,.identityAuthBtn{min-width:0;min-height:0;height:100%;border-radius:calc(9px * var(--s));background:var(--identity-inner-bg);color:var(--identity-text);border:calc(1px * var(--s)) solid rgba(160,116,78,0.12);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.95),0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,0.05);}
+.identityNameBox{display:flex;align-items:center;justify-content:center;padding:0 calc(8px * var(--s));overflow:hidden;} .identityNameText{display:inline-flex;align-items:center;justify-content:center;max-width:100%;color:var(--identity-text);font-size:calc(13px * var(--s));font-weight:850;line-height:1.22;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transform:translateY(var(--identity-name-y));}
+.identityNoticeWrap{position:relative;width:100%;height:100%;overflow:visible;} .identityNoticeBtn,.identityAuthBtn{appearance:none;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;line-height:1;transition:transform .18s ease,background .18s ease,box-shadow .18s ease;} .identityNoticeBtn{width:100%;height:100%;font-size:calc(14px * var(--s));} .identityNoticeIcon{display:flex;width:100%;height:100%;align-items:center;justify-content:center;line-height:1;transform:translateY(var(--identity-notice-y));filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,0.55));}
+.identityNoticeCount{position:absolute;right:calc(-6px * var(--s));top:calc(-6px * var(--s));min-width:calc(18px * var(--s));height:calc(18px * var(--s));padding:0 calc(5px * var(--s));border-radius:999px;background:#b98f72;color:#fffaf6;font-size:calc(9px * var(--s));font-weight:900;line-height:1;display:none;align-items:center;justify-content:center;border:calc(2px * var(--s)) solid rgba(255,248,239,0.98);box-shadow:0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(116,86,54,0.16);z-index:3;}
+.identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex;} .identityAuthBtn{width:100%;height:100%;color:#6f5746;font-size:calc(12px * var(--s));font-weight:850;line-height:1.18;white-space:nowrap;overflow:visible;} .identityAuthText{display:inline-flex;align-items:center;justify-content:center;line-height:1.18;transform:translateY(var(--identity-button-y));}
+.identityNoticeBtn:hover,.identityAuthBtn:hover{transform:translateY(calc(-1px * var(--s)));background:rgba(255,255,255,0.94);}
+.identityNoticePanel{position:absolute;top:calc(100% + 10px * var(--s));right:0;width:min(calc(360px * var(--s)),72vw);max-height:min(calc(540px * var(--s)),70vh);overflow:auto;padding:calc(12px * var(--s));border-radius:calc(16px * var(--s));background:rgba(255,249,241,0.98);border:calc(1px * var(--s)) solid rgba(203,167,123,0.28);box-shadow:0 calc(16px * var(--s)) calc(36px * var(--s)) rgba(85,58,34,0.16);display:none;z-index:120;text-align:left;} .identityNoticePanel.show{display:block;}
+.identityNoticeTitle,.siteNoticeTitle{color:#6f4726;font-size:calc(13px * var(--s));font-weight:900;margin-bottom:calc(10px * var(--s));} .identityNoticeEmpty,.siteNoticeEmpty{color:#8a6644;font-size:calc(12px * var(--s));line-height:1.6;padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s));} .siteNoticeList{display:flex;flex-direction:column;gap:calc(8px * var(--s));}
 
-/* 项目委托页自身布局：按最满意版绑定底图 */
-@media(min-width:541px){
-  #taskPanel{
-    left:var(--task-panel-left-bound,9.2%) !important;
-    right:var(--task-panel-right-bound,22.4%) !important;
-    top:var(--task-panel-top-bound,18%) !important;
-    bottom:var(--task-panel-bottom-bound,12%) !important;
-    width:auto !important;
-    height:auto !important;
-    min-width:0 !important;
-    min-height:0 !important;
-    transform:none !important;
-    transform-origin:top left !important;
-  }
-  #panelSwitch{
-    position:absolute !important;
-    right:auto !important;
-    left:var(--panel-switch-left) !important;
-    top:var(--panel-switch-top) !important;
-    transform:none !important;
-    width:var(--panel-switch-w) !important;
-    height:var(--panel-switch-h) !important;
-    padding:var(--panel-switch-pad-y) var(--panel-switch-pad-x) !important;
-    border-radius:var(--panel-switch-radius) !important;
-    gap:var(--panel-switch-gap) !important;
-    display:flex !important;
-    flex-direction:column !important;
-    justify-content:space-between !important;
-    align-items:stretch !important;
-    overflow:hidden !important;
-  }
-  .switchBtn{
-    flex:1 1 0 !important;
-    min-height:0 !important;
-    height:auto !important;
-    padding:0 var(--switch-btn-pad-x) !important;
-    border-radius:var(--switch-btn-radius) !important;
-    font-size:var(--switch-font) !important;
-    line-height:1.05 !important;
-    display:flex !important;
-    align-items:center !important;
-    justify-content:center !important;
-    overflow:hidden !important;
-    white-space:nowrap !important;
-    transform:none !important;
-  }
+/* 项目委托页自身功能样式 */
+.bonusValue{color:#5d3a1c !important;font-size:calc(18px * var(--ui-scale)) !important;font-weight:950 !important;line-height:1.1 !important;letter-spacing:-.01em !important;}.bonusValue .bonusNumber{font-size:1.08em !important;font-weight:950 !important;}.bonusValue .bonusUnit{margin-left:.22em !important;font-size:.72em !important;font-weight:700 !important;color:#7f5b36 !important;letter-spacing:0 !important;}
+.submitFeatureRow{display:grid;grid-template-columns:minmax(0,1fr);gap:calc(10px * var(--ui-scale));margin:0 0 calc(10px * var(--ui-scale));}.submitFeatureCard,.quickOriginalBox{padding:calc(9px * var(--ui-scale)) calc(12px * var(--ui-scale));border-radius:calc(12px * var(--ui-scale));background:rgba(255,252,247,0.34);border:1px solid rgba(255,255,255,0.34);}.submitFeatureTitle{color:#744a28;font-size:var(--project-font-lg);font-weight:800;margin:0 0 calc(7px * var(--ui-scale));}.submitModeGroup{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(6px * var(--ui-scale));}.submitModeBtn{appearance:none;border:none;cursor:pointer;height:calc(36px * var(--ui-scale));border-radius:calc(10px * var(--ui-scale));background:rgba(255,252,247,0.56);color:#744b25;font-size:var(--project-font-base);font-weight:700;box-shadow:inset 0 1px 0 rgba(255,255,255,0.75),0 2px 6px rgba(116,86,54,0.06);transition:transform .18s ease, filter .18s ease, background .18s ease;}.submitModeBtn:hover{transform:translateY(calc(-1px * var(--ui-scale)));filter:brightness(1.03);}.submitModeBtn.active{background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);color:#fff9f1;}.wheelToolBtn:disabled{cursor:not-allowed !important;opacity:.55 !important;transform:none !important;filter:none !important;}
+.quickOriginalBox{margin:0 0 calc(8px * var(--ui-scale));padding:calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));background:rgba(255,252,247,0.30);}.quickOriginalInner{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:calc(8px * var(--ui-scale));align-items:stretch;}#quickOriginalInput{width:100%;min-height:calc(58px * var(--ui-scale));max-height:calc(92px * var(--ui-scale));resize:vertical;border:none;outline:none;border-radius:calc(10px * var(--ui-scale));padding:calc(8px * var(--ui-scale)) calc(11px * var(--ui-scale));background:rgba(255,252,247,0.68);color:#5f3b1d;font-size:var(--project-font-base);line-height:1.35;box-shadow:inset 0 1px 0 rgba(255,255,255,0.7);}.quickOriginalActions{display:flex;flex-direction:column;gap:calc(6px * var(--ui-scale));}.quickOriginalBtn{appearance:none;border:none;cursor:pointer;min-width:calc(64px * var(--ui-scale));height:calc(30px * var(--ui-scale));border-radius:calc(9px * var(--ui-scale));background:rgba(255,252,247,0.62);color:#744b25;font-size:var(--project-font-sm);font-weight:800;box-shadow:inset 0 1px 0 rgba(255,255,255,0.78),0 2px 6px rgba(116,86,54,0.06);}.quickOriginalBtn.primary{background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);color:#fff9f1;}.quickOriginalHint{margin-top:calc(5px * var(--ui-scale));color:#8a6644;font-size:var(--project-font-sm);font-weight:600;line-height:1.35;}
+
+#panelSwitch{position:absolute;left:104.9%;top:10.9%;width:16.55%;height:27.15%;box-sizing:border-box;padding:calc(14px * var(--ui-scale)) calc(12px * var(--ui-scale));border-radius:var(--project-radius-md);background:rgba(255,248,239,0.9);border:1px solid rgba(186,146,103,0.24);box-shadow:0 10px 24px rgba(116,86,54,0.12), inset 0 1px 0 rgba(255,255,255,0.86);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;gap:calc(8px * var(--ui-scale));z-index:30;overflow:hidden;}.switchBtn{appearance:none;border:none;cursor:pointer;width:100%;flex:1 1 0;min-height:0;height:auto;padding:0 calc(8px * var(--ui-scale));border-radius:calc(13px * var(--ui-scale));background:rgba(231,214,185,0.92);color:#744b25;text-decoration:none;font-size:var(--project-font-base);font-weight:700;line-height:1.05;text-align:center;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,247,233,0.95), 0 2px 6px rgba(116,86,54,0.08);transition:filter .18s ease, background .18s ease;}.switchBtn:hover{filter:brightness(1.03);}.switchBtn.active{background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);color:#fff9f1;box-shadow:inset 0 1px 0 rgba(255,224,188,0.55), 0 4px 10px rgba(116,86,54,0.14);}
+
+@media (min-width:541px){
+  #overlay{--project-font-xs:calc(11px * var(--bg-ui-scale, 1));--project-font-sm:calc(12px * var(--bg-ui-scale, 1));--project-font-md:calc(13px * var(--bg-ui-scale, 1));--project-font-base:calc(13px * var(--bg-ui-scale, 1));--project-font-lg:calc(16px * var(--bg-ui-scale, 1));--project-font-xl:calc(16px * var(--bg-ui-scale, 1));--project-font-hero:calc(18px * var(--bg-ui-scale, 1));--submit-scale:var(--bg-ui-scale, 1);}
+  #taskPanel{left:var(--task-panel-left-bound,9.2%);right:var(--task-panel-right-bound,22.4%);top:var(--task-panel-top-bound,18%);bottom:var(--task-panel-bottom-bound,12%);width:auto;height:auto;min-width:0;min-height:0;transform:none;transform-origin:top left;}
+  #panelSwitch{left:var(--panel-switch-left);top:var(--panel-switch-top);width:var(--panel-switch-w);height:var(--panel-switch-h);padding:var(--panel-switch-pad-y) var(--panel-switch-pad-x);border-radius:var(--panel-switch-radius);gap:var(--panel-switch-gap);} .switchBtn{padding:0 var(--switch-btn-pad-x);border-radius:var(--switch-btn-radius);font-size:var(--switch-font);}
+  #signupDetailPane{padding:calc(16px * var(--submit-scale)) calc(16px * var(--submit-scale)) calc(12px * var(--submit-scale));} #signupHeader{gap:calc(10px * var(--submit-scale));margin-bottom:calc(8px * var(--submit-scale));} #signupTitle{font-size:calc(18px * var(--submit-scale));line-height:1.2;font-weight:800;} #signupStatus{padding:calc(5px * var(--submit-scale)) calc(10px * var(--submit-scale));font-size:calc(11px * var(--submit-scale));line-height:1;} #signupBody{padding-right:calc(4px * var(--submit-scale));}
+  .rowGridFour,.producerReleaseRow,.rewardGrid,.submitFeatureRow{gap:calc(10px * var(--submit-scale));margin-bottom:calc(10px * var(--submit-scale));} .signupSection{margin-bottom:calc(10px * var(--submit-scale));} .signupSectionTitle,.submitFeatureTitle{font-size:calc(16px * var(--submit-scale));line-height:1.2;font-weight:900;margin-bottom:calc(8px * var(--submit-scale));} .sectionTitleRow{gap:calc(10px * var(--submit-scale));margin-bottom:calc(8px * var(--submit-scale));} .sectionTitleActions{gap:calc(8px * var(--submit-scale));}
+  .colCard,.memberPickerWrap,.rewardCard,.submitFeatureCard,.quickOriginalBox{padding:calc(9px * var(--submit-scale)) calc(10px * var(--submit-scale));border-radius:calc(12px * var(--submit-scale));}.colCard{min-height:calc(64px * var(--submit-scale));}.colLabel,.memberPickerLabel,.rewardLabel,.originalRoleHeader .headerCell,.quickOriginalHint,.lotteryHintText{font-size:calc(12px * var(--submit-scale));line-height:1.35;font-weight:700;}.colValue,.rewardValue{font-size:calc(13px * var(--submit-scale));line-height:1.35;font-weight:800;}.rewardHint{font-size:calc(11px * var(--submit-scale));line-height:1.45;}
+  .signupInput,.signupNumber,.signupDate,.assignInput,.originalInput,#quickOriginalInput{min-height:calc(36px * var(--submit-scale));padding:0 calc(11px * var(--submit-scale));border-radius:calc(11px * var(--submit-scale));font-size:calc(13px * var(--submit-scale));line-height:1.35;} #quickOriginalInput{padding-top:calc(8px * var(--submit-scale));padding-bottom:calc(8px * var(--submit-scale));min-height:calc(58px * var(--submit-scale));max-height:calc(92px * var(--submit-scale));}
+  .typeBtnGroup,.submitModeGroup,.memberGrid{gap:calc(6px * var(--submit-scale));}.typeBtn,.memberBtn,.submitModeBtn,.roleToolBtn,.rowActionBtn,.quickOriginalBtn,.signupActionBtn{height:calc(32px * var(--submit-scale));min-height:calc(32px * var(--submit-scale));padding:0 calc(11px * var(--submit-scale));border-radius:calc(10px * var(--submit-scale));font-size:calc(12px * var(--submit-scale));line-height:1;font-weight:800;}.typeBtn,.submitModeBtn{height:calc(34px * var(--submit-scale));}.memberBtn{min-width:calc(56px * var(--submit-scale));}.roleToolBtn{min-width:auto;}.signupActionBtn{min-width:calc(98px * var(--submit-scale));}
+  .originalRoleBoard{border-radius:calc(14px * var(--submit-scale));margin-bottom:calc(10px * var(--submit-scale));}.originalRoleHeader,.originalRoleRow{gap:calc(8px * var(--submit-scale));padding:calc(9px * var(--submit-scale)) calc(10px * var(--submit-scale));} #signupFooter{gap:calc(8px * var(--submit-scale));margin-top:calc(8px * var(--submit-scale));}
 }
-
 @media(max-width:540px){
-  html,body{
-    width:100% !important;
-    min-height:100% !important;
-    height:auto !important;
-    overflow-x:hidden !important;
-    overflow-y:auto !important;
-  }
-  body{
-    display:block !important;
-    background:linear-gradient(180deg,#efe4d5 0%,#e4d5c4 100%) !important;
-  }
-  #room{
-    width:100% !important;
-    min-height:100vh !important;
-    min-height:100dvh !important;
-    height:auto !important;
-    display:block !important;
-    overflow:visible !important;
-    padding:10px 12px 14px !important;
-    background:linear-gradient(180deg,#efe4d5 0%,#e4d5c4 100%) !important;
-  }
-  #bgFrame{position:fixed !important;inset:0 !important;opacity:.16 !important;pointer-events:none !important;}
-  #bg{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;object-fit:cover !important;filter:saturate(.92) blur(.2px) !important;}
-  #overlay{
-    position:relative !important;
-    left:auto !important;top:auto !important;inset:auto !important;
-    width:100% !important;height:auto !important;min-height:100dvh !important;
-    display:flex !important;flex-direction:column !important;gap:10px !important;
-    overflow:visible !important;padding:0 !important;pointer-events:auto !important;
-    --ui-scale:1 !important;--bg-ui-scale:1 !important;--overlay-ui-scale:1 !important;--project-panel-scale:1 !important;
-    --project-radius-lg:18px !important;--project-radius-md:16px !important;--project-radius-sm:10px !important;
-    --project-font-xs:10px !important;--project-font-sm:11px !important;--project-font-md:12px !important;--project-font-base:13px !important;--project-font-lg:14px !important;--project-font-xl:16px !important;--project-font-hero:18px !important;--project-btn-h:34px !important;
-  }
-  #topBar{
-    position:relative !important;left:auto !important;top:auto !important;width:100% !important;
-    order:0 !important;z-index:20 !important;margin:0 !important;padding:0 !important;
-    background:transparent !important;border:none !important;transform:none !important;
-    --nav-btn-height:34px;--nav-btn-px:8px;--nav-btn-radius:10px;--nav-btn-font:12px;--nav-gap:7px;
-  }
-  #navOuter,#navScroll{width:100% !important;overflow:visible !important;padding:0 !important;margin:0 !important;}
-  #roomNav{width:100% !important;display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:7px !important;transform:none !important;min-width:0 !important;max-width:none !important;}
-  .navBtn{width:100% !important;min-width:0 !important;height:34px !important;padding:0 8px !important;font-size:12px !important;border-radius:10px !important;overflow:hidden !important;}
-  .navEffect{display:none !important;}
-  #topActions{position:sticky !important;top:10px !important;right:auto !important;left:auto !important;width:100% !important;height:40px !important;z-index:30 !important;order:1 !important;}
-  #topIdentityBar{gap:6px !important;padding:5px 7px !important;border-radius:14px !important;}
-  #topIdentityBadge{padding:0 9px !important;font-size:12px !important;border-radius:10px !important;}
-  #loginOpenBtn,#logoutBtn{width:42px !important;min-width:42px !important;flex-basis:42px !important;font-size:11px !important;border-radius:10px !important;}
-  #loginOpenBtn.hidden,#loginOpenBtn[hidden],#logoutBtn.hidden,#logoutBtn[hidden]{display:none !important;}
-  #siteNoticeWrap{width:34px !important;min-width:34px !important;flex-basis:34px !important;}
-  #siteNoticeBtn{font-size:14px !important;border-radius:10px !important;}
-  #siteNoticePanel{position:absolute !important;top:calc(100% + 8px) !important;right:0 !important;left:auto !important;width:min(320px,calc(100vw - 24px)) !important;max-height:60dvh !important;z-index:999 !important;}
-  #taskPanel{
-    position:relative !important;left:auto !important;right:auto !important;top:auto !important;bottom:auto !important;
-    width:100% !important;max-width:100% !important;height:auto !important;min-height:auto !important;
-    transform:none !important;order:2 !important;margin:0 !important;border-radius:0 !important;
-    background:transparent !important;border:none !important;box-shadow:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;overflow:visible !important;
-  }
-  #taskPanel::before{display:none !important;}
-  #panelSwitch{
-    position:relative !important;left:auto !important;right:auto !important;top:auto !important;bottom:auto !important;
-    width:100% !important;height:auto !important;display:flex !important;flex-direction:row !important;gap:6px !important;
-    padding:4px !important;margin:0 0 6px !important;border-radius:16px !important;
-    background:rgba(255,248,239,.38) !important;border:1px solid rgba(168,123,81,.16) !important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.56),0 2px 7px rgba(116,86,54,.06) !important;
-  }
-  .switchBtn{flex:1 1 0 !important;min-height:30px !important;height:30px !important;padding:0 6px !important;border-radius:10px !important;font-size:12px !important;line-height:1 !important;}
-  .panelView,#signupView{position:relative !important;inset:auto !important;width:100% !important;height:auto !important;overflow:visible !important;}
-  #signupPanelInner{width:100% !important;height:auto !important;min-height:auto !important;}
-  #signupDetailPane{
-    width:100% !important;height:auto !important;min-height:auto !important;
-    padding:14px 12px 14px !important;border-radius:18px !important;background:rgba(255,255,255,.36) !important;
-    border:1px solid rgba(255,255,255,.46) !important;box-shadow:0 10px 26px rgba(122,96,68,.10), inset 0 1px 0 rgba(255,255,255,.58) !important;
-    backdrop-filter:blur(10px) !important;-webkit-backdrop-filter:blur(10px) !important;display:flex !important;flex-direction:column !important;
-  }
-  #signupHeader{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:8px !important;margin-bottom:10px !important;}
-  #signupTitle{font-size:20px !important;line-height:1.18 !important;}
-  #signupStatus{padding:4px 8px !important;font-size:12px !important;}
-  #signupBody{height:auto !important;min-height:auto !important;overflow:visible !important;padding-right:0 !important;}
-  .rowGridFour,.producerReleaseRow,.rewardGrid,.submitFeatureRow{display:grid !important;grid-template-columns:1fr !important;gap:9px !important;margin-bottom:10px !important;}
-  .typeBtnGroup{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:6px !important;margin-bottom:10px !important;}
-  .colCard,.memberPickerWrap,.rewardCard,.submitFeatureCard,.quickOriginalBox{min-height:auto !important;padding:10px !important;border-radius:12px !important;}
-  .colLabel,.memberPickerLabel,.rewardLabel,.submitFeatureTitle{font-size:12px !important;margin-bottom:5px !important;}
-  .signupSectionTitle{font-size:15px !important;margin-bottom:8px !important;}
-  .colValue,.rewardValue{font-size:15px !important;}
-  .signupInput,.signupNumber,.signupDate,.assignInput,.originalInput{min-height:36px !important;height:36px !important;padding:0 11px !important;border-radius:11px !important;font-size:13px !important;}
-  .typeBtn,.memberBtn,.roleToolBtn,.rowActionBtn,.submitModeBtn,.quickOriginalBtn{min-width:auto !important;height:32px !important;padding:0 11px !important;border-radius:10px !important;font-size:12px !important;}
-  .submitModeGroup,.submitWheelGroup{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
-  .quickOriginalInner{grid-template-columns:1fr !important;}
-  .quickOriginalActions{flex-direction:row !important;}
-  #quickOriginalInput{min-height:64px !important;max-height:none !important;font-size:13px !important;}
-  .originalRoleHeader{display:none !important;}
-  .originalRoleRow{display:grid !important;grid-template-columns:1fr !important;gap:7px !important;padding:10px !important;}
-  #signupFooter{display:grid !important;grid-template-columns:1fr 1fr !important;gap:8px !important;margin-top:10px !important;}
-  .signupActionBtn{width:100% !important;min-width:0 !important;height:38px !important;padding:0 10px !important;border-radius:12px !important;font-size:13px !important;}
-  #toastBox{width:min(360px,90vw) !important;border-radius:18px !important;padding:18px 16px 15px !important;}
-  #toastTitle{font-size:17px !important;}
-  #toastMessage{font-size:12px !important;}
+  html,body{width:100%;min-height:100%;height:auto;overflow-x:hidden;overflow-y:auto;} body{display:block;background:linear-gradient(180deg,#efe4d5 0%,#e4d5c4 100%);} #room{width:100%;min-height:100vh;min-height:100dvh;height:auto;display:block;overflow:visible;padding:10px 12px 14px;background:linear-gradient(180deg,#efe4d5 0%,#e4d5c4 100%);} #bgFrame{position:fixed;inset:0;opacity:.16;pointer-events:none;} #bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.92) blur(.2px);} #overlay{position:relative;left:auto;top:auto;inset:auto;width:100%;height:auto;min-height:100dvh;display:flex;flex-direction:column;gap:10px;overflow:visible;padding:0;pointer-events:auto;--ui-scale:1;--bg-ui-scale:1;--overlay-ui-scale:1;--project-panel-scale:1;--project-radius-lg:18px;--project-radius-md:16px;--project-radius-sm:10px;--project-font-xs:10px;--project-font-sm:11px;--project-font-md:12px;--project-font-base:13px;--project-font-lg:14px;--project-font-xl:16px;--project-font-hero:18px;--project-btn-h:34px;}
+  .roomNavLayer{position:relative;inset:auto;order:0;z-index:20;width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;--s:1;} .navBtn{position:relative;top:auto;left:auto !important;width:100%;height:34px;min-width:0;padding:0;font-size:12px;border-radius:10px;overflow:hidden;} .navEffect{display:none;}
+  .roomIdentity{position:sticky;top:10px;right:auto;left:auto;width:100%;height:40px;min-width:0;min-height:40px;z-index:120;order:1;--s:1;} .roomIdentityBar{gap:6px;padding:5px 7px;border-radius:14px;grid-template-columns:minmax(0,1fr) 34px 42px;} .identityNameBox{padding:0 9px;border-radius:10px;} .identityNameText{font-size:12px;} .identityAuthBtn{font-size:11px;border-radius:10px;} .identityNoticeBtn{font-size:14px;border-radius:10px;} .identityNoticePanel{top:calc(100% + 8px);right:0;width:min(320px,calc(100vw - 24px));max-height:60dvh;z-index:160;}
+  #taskPanel{position:relative;left:auto;right:auto;top:auto;bottom:auto;width:100%;max-width:100%;height:auto;min-height:auto;transform:none;order:2;margin:0;border-radius:0;background:transparent;border:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;overflow:visible;} #taskPanel::before{display:none;} #panelSwitch{position:relative;left:auto;right:auto;top:auto;bottom:auto;width:100%;height:auto;display:flex;flex-direction:row;gap:6px;padding:4px;margin:0 0 6px;border-radius:16px;background:rgba(255,248,239,.38);border:1px solid rgba(168,123,81,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.56),0 2px 7px rgba(116,86,54,.06);backdrop-filter:none;-webkit-backdrop-filter:none;} .switchBtn{flex:1 1 0;min-height:30px;height:30px;padding:0 6px;border-radius:10px;font-size:12px;line-height:1;}
+  .panelView,#signupView{position:relative;inset:auto;width:100%;height:auto;overflow:visible;} #signupPanelInner{width:100%;height:auto;min-height:auto;} #signupDetailPane{width:100%;height:auto;min-height:auto;padding:14px 12px 14px;border-radius:18px;background:rgba(255,255,255,.36);border:1px solid rgba(255,255,255,.46);box-shadow:0 10px 26px rgba(122,96,68,.10), inset 0 1px 0 rgba(255,255,255,.58);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;flex-direction:column;} #signupHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;} #signupTitle{font-size:20px;line-height:1.18;} #signupStatus{padding:4px 8px;font-size:12px;} #signupBody{height:auto;min-height:auto;overflow:visible;padding-right:0;}
+  .rowGridFour,.producerReleaseRow,.rewardGrid,.submitFeatureRow{display:grid;grid-template-columns:1fr;gap:9px;margin-bottom:10px;}.typeBtnGroup{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:10px;}.colCard,.memberPickerWrap,.rewardCard,.submitFeatureCard,.quickOriginalBox{min-height:auto;padding:10px;border-radius:12px;}.colLabel,.memberPickerLabel,.rewardLabel,.submitFeatureTitle{font-size:12px;margin-bottom:5px;}.signupSectionTitle{font-size:15px;margin-bottom:8px;}.colValue,.rewardValue{font-size:15px;}.signupInput,.signupNumber,.signupDate,.assignInput,.originalInput{min-height:36px;height:36px;padding:0 11px;border-radius:11px;font-size:13px;}.typeBtn,.memberBtn,.roleToolBtn,.rowActionBtn,.submitModeBtn,.quickOriginalBtn{min-width:auto;height:32px;padding:0 11px;border-radius:10px;font-size:12px;}.submitModeGroup{grid-template-columns:repeat(2,minmax(0,1fr));}.quickOriginalInner{grid-template-columns:minmax(0,1fr) auto;align-items:stretch;}.quickOriginalActions{flex-direction:column;min-width:66px;}#quickOriginalInput{min-height:64px;max-height:none;font-size:13px;}.originalRoleHeader{display:none;}.originalRoleRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px;gap:6px;align-items:center;padding:8px;}.originalRoleRow .originalInput{width:100%;min-width:0;}.originalRoleRow .rowActionBtn{width:34px;min-width:34px;height:36px;padding:0;font-size:12px;}#signupFooter{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}.signupActionBtn{width:100%;min-width:0;height:38px;padding:0 10px;border-radius:12px;font-size:13px;}#toastBox{width:min(360px,90vw);border-radius:18px;padding:18px 16px 15px;}#toastTitle{font-size:17px;}#toastMessage{font-size:12px;}
 }
-
-.bonusValue{color:#5d3a1c !important;font-size:calc(18px * var(--ui-scale)) !important;font-weight:950 !important;line-height:1.1 !important;letter-spacing:-.01em !important;}
-.bonusValue .bonusNumber{font-size:1.08em !important;font-weight:950 !important;}
-.bonusValue .bonusUnit{margin-left:.22em !important;font-size:.72em !important;font-weight:700 !important;color:#7f5b36 !important;letter-spacing:0 !important;}
 
 /* =========================================================
-   项目委托功能补丁：独立命名，避免影响房间按钮 / 身份组件 / 页面切换
+   MOBILE ONLY FIX：修正手机版页面切换组件字号
+   保留为独立覆盖，避免被前面的 .switchBtn 手机版规则压回 12px
+   仅影响 #panelSwitch 内部文字，不改桌面版、不改业务逻辑
 ========================================================= */
-.submitFeatureRow{
-  display:grid;
-  grid-template-columns:minmax(0,1fr);
-  gap:calc(10px * var(--ui-scale));
-  margin:0 0 calc(10px * var(--ui-scale));
-}
-.submitFeatureCard{
-  padding:calc(9px * var(--ui-scale)) calc(12px * var(--ui-scale));
-  border-radius:12px;
-  background:rgba(255,252,247,0.34);
-  border:1px solid rgba(255,255,255,0.34);
-}
-.submitFeatureTitle{
-  color:#744a28;
-  font-size:var(--project-font-lg);
-  font-weight:800;
-  margin:0 0 calc(7px * var(--ui-scale));
-}
-.submitModeGroup{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:6px;
-}
-.submitModeBtn{
-  appearance:none;
-  border:none;
-  cursor:pointer;
-  height:calc(36px * var(--ui-scale));
-  border-radius:10px;
-  background:rgba(255,252,247,0.56);
-  color:#744b25;
-  font-size:var(--project-font-base);
-  font-weight:700;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.75),
-    0 2px 6px rgba(116,86,54,0.06);
-  transition:transform .18s ease, filter .18s ease, background .18s ease;
-}
-.submitModeBtn:hover{
-  transform:translateY(-1px);
-  filter:brightness(1.03);
-}
-.submitModeBtn.active{
-  background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
-  color:#fff9f1;
-}
-.wheelToolBtn:disabled{
-  cursor:not-allowed !important;
-  opacity:.55 !important;
-  transform:none !important;
-  filter:none !important;
-}
-.quickOriginalBox{
-  margin:0 0 calc(8px * var(--ui-scale));
-  padding:calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
-  border-radius:12px;
-  background:rgba(255,252,247,0.30);
-  border:1px solid rgba(255,255,255,0.34);
-}
-.quickOriginalInner{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  gap:8px;
-  align-items:stretch;
-}
-#quickOriginalInput{
-  width:100%;
-  min-height:calc(36px * var(--ui-scale));
-  max-height:calc(72px * var(--ui-scale));
-  resize:vertical;
-  border:none;
-  outline:none;
-  border-radius:10px;
-  padding:calc(8px * var(--ui-scale)) calc(11px * var(--ui-scale));
-  background:rgba(255,252,247,0.68);
-  color:#5f3b1d;
-  font-size:var(--project-font-base);
-  line-height:1.35;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.7);
-}
-.quickOriginalActions{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-.quickOriginalBtn{
-  appearance:none;
-  border:none;
-  cursor:pointer;
-  min-width:64px;
-  height:calc(30px * var(--ui-scale));
-  border-radius:9px;
-  background:rgba(255,252,247,0.62);
-  color:#744b25;
-  font-size:var(--project-font-sm);
-  font-weight:800;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.78),
-    0 2px 6px rgba(116,86,54,0.06);
-}
-.quickOriginalBtn.primary{
-  background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);
-  color:#fff9f1;
-}
-.quickOriginalHint{
-  margin-top:5px;
-  color:#8a6644;
-  font-size:var(--project-font-sm);
-  font-weight:600;
-  line-height:1.35;
-}
-@media (min-width:541px){
-  .submitFeatureRow{
-    gap:calc(var(--submit-grid-gap, 10px) * var(--bg-scale, 1)) !important;
-    margin-bottom:calc(var(--submit-section-gap, 10px) * var(--bg-scale, 1)) !important;
-  }
-  .submitFeatureCard,
-  .quickOriginalBox{
-    padding:calc(var(--submit-card-pad-y, 9px) * var(--bg-scale, 1)) calc(var(--submit-card-pad-x, 12px) * var(--bg-scale, 1)) !important;
-    border-radius:calc(var(--submit-card-radius, 12px) * var(--bg-scale, 1)) !important;
-  }
-  .submitFeatureTitle{
-    font-size:calc(var(--submit-label-font, 15px) * var(--bg-scale, 1)) !important;
-    margin-bottom:calc(var(--submit-label-gap, 7px) * var(--bg-scale, 1)) !important;
-  }
-  .submitModeBtn{
-    height:calc(var(--submit-type-h, 36px) * var(--bg-scale, 1)) !important;
-    border-radius:calc(var(--submit-input-radius, 10px) * var(--bg-scale, 1)) !important;
-    font-size:calc(var(--submit-btn-font, 13px) * var(--bg-scale, 1)) !important;
-  }
-  #quickOriginalInput{
-    min-height:calc(var(--submit-input-h, 36px) * var(--bg-scale, 1)) !important;
-    font-size:calc(var(--submit-input-font, 13px) * var(--bg-scale, 1)) !important;
-  }
-  .quickOriginalBtn{
-    height:calc(var(--submit-tool-h, 30px) * var(--bg-scale, 1)) !important;
-    font-size:calc(var(--submit-tool-font, 12px) * var(--bg-scale, 1)) !important;
-  }
-  .quickOriginalHint{
-    font-size:calc(var(--submit-hint-font, 11px) * var(--bg-scale, 1)) !important;
-  }
-}
-@media (max-width:540px){
-  .submitFeatureRow{
-    grid-template-columns:1fr !important;
-    gap:9px !important;
-    margin-bottom:10px !important;
-  }
-  .submitFeatureCard,
-  .quickOriginalBox{
-    padding:10px !important;
-    border-radius:12px !important;
-  }
-  .submitFeatureTitle{
-    font-size:15px !important;
-    margin-bottom:8px !important;
-  }
-  .submitModeBtn,
-  .quickOriginalBtn{
-    height:32px !important;
-    font-size:12px !important;
-    border-radius:10px !important;
-  }
-  .quickOriginalInner{
-    grid-template-columns:1fr !important;
-  }
-  .quickOriginalActions{
-    flex-direction:row !important;
-  }
-  #quickOriginalInput{
-    min-height:64px !important;
-    max-height:none !important;
+@media(max-width:540px){
+  #panelSwitch .switchBtn{
     font-size:13px !important;
-  }
-}
-
-
-/* =========================================================
-   FINAL PAGE SWITCH + SUBMIT FONT LOCK：项目委托页复制待处理页页面切换组件
-   并学习工作间主面板字号设置；不改 Supabase 与发布任务逻辑
-========================================================= */
-#panelSwitch{
-  position:absolute !important;
-  left:104.9% !important;
-  top:10.9% !important;
-  width:16.55% !important;
-  height:27.15% !important;
-  box-sizing:border-box !important;
-  padding:calc(14px * var(--ui-scale)) calc(12px * var(--ui-scale)) !important;
-  border-radius:var(--project-radius-md) !important;
-  background:rgba(255,248,239,0.9) !important;
-  border:1px solid rgba(186,146,103,0.24) !important;
-  box-shadow:0 10px 24px rgba(116,86,54,0.12), inset 0 1px 0 rgba(255,255,255,0.86) !important;
-  backdrop-filter:blur(8px) !important;
-  -webkit-backdrop-filter:blur(8px) !important;
-  display:flex !important;
-  flex-direction:column !important;
-  justify-content:space-between !important;
-  align-items:stretch !important;
-  gap:calc(8px * var(--ui-scale)) !important;
-  z-index:30 !important;
-  overflow:hidden !important;
-}
-.switchBtn{
-  appearance:none !important;
-  border:none !important;
-  cursor:pointer !important;
-  width:100% !important;
-  flex:1 1 0 !important;
-  min-height:0 !important;
-  height:auto !important;
-  padding:0 calc(8px * var(--ui-scale)) !important;
-  border-radius:calc(13px * var(--ui-scale)) !important;
-  background:rgba(231,214,185,0.92) !important;
-  color:#744b25 !important;
-  text-decoration:none !important;
-  font-size:var(--project-font-base) !important;
-  font-weight:700 !important;
-  line-height:1.05 !important;
-  text-align:center !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  white-space:nowrap !important;
-  overflow:hidden !important;
-  box-shadow:inset 0 1px 0 rgba(255,247,233,0.95), 0 2px 6px rgba(116,86,54,0.08) !important;
-  transition:transform .18s ease, filter .18s ease, background .18s ease !important;
-}
-.switchBtn:hover{
-  transform:none !important;
-  filter:brightness(1.03) !important;
-}
-.switchBtn.active{
-  background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%) !important;
-  color:#fff9f1 !important;
-  box-shadow:inset 0 1px 0 rgba(255,224,188,0.55), 0 4px 10px rgba(116,86,54,0.14) !important;
-}
-
-@media (min-width:541px){
-  #overlay{
-    --project-font-xs:calc(11px * var(--bg-ui-scale, 1)) !important;
-    --project-font-sm:calc(12px * var(--bg-ui-scale, 1)) !important;
-    --project-font-md:calc(13px * var(--bg-ui-scale, 1)) !important;
-    --project-font-base:calc(13px * var(--bg-ui-scale, 1)) !important;
-    --project-font-lg:calc(16px * var(--bg-ui-scale, 1)) !important;
-    --project-font-xl:calc(16px * var(--bg-ui-scale, 1)) !important;
-    --project-font-hero:calc(18px * var(--bg-ui-scale, 1)) !important;
-    --submit-scale:var(--bg-ui-scale, 1) !important;
-  }
-
-  #panelSwitch{
-    left:var(--panel-switch-left) !important;
-    top:var(--panel-switch-top) !important;
-    width:var(--panel-switch-w) !important;
-    height:var(--panel-switch-h) !important;
-    padding:var(--panel-switch-pad-y) var(--panel-switch-pad-x) !important;
-    border-radius:var(--panel-switch-radius) !important;
-    gap:var(--panel-switch-gap) !important;
-  }
-  .switchBtn{
-    padding:0 var(--switch-btn-pad-x) !important;
-    border-radius:var(--switch-btn-radius) !important;
-    font-size:var(--switch-font) !important;
-  }
-
-  #signupDetailPane{
-    padding:calc(16px * var(--submit-scale)) calc(16px * var(--submit-scale)) calc(12px * var(--submit-scale)) !important;
-  }
-  #signupHeader{
-    gap:calc(10px * var(--submit-scale)) !important;
-    margin-bottom:calc(8px * var(--submit-scale)) !important;
-  }
-  #signupTitle{
-    font-size:calc(18px * var(--submit-scale)) !important;
-    line-height:1.2 !important;
     font-weight:800 !important;
-  }
-  #signupStatus{
-    padding:calc(5px * var(--submit-scale)) calc(10px * var(--submit-scale)) !important;
-    font-size:calc(11px * var(--submit-scale)) !important;
-    line-height:1 !important;
-  }
-  #signupBody{
-    padding-right:calc(4px * var(--submit-scale)) !important;
-  }
-
-  .rowGridFour{
-    gap:calc(10px * var(--submit-scale)) !important;
-    margin-bottom:calc(10px * var(--submit-scale)) !important;
-  }
-  .producerReleaseRow,
-  .rewardGrid,
-  .submitFeatureRow{
-    gap:calc(10px * var(--submit-scale)) !important;
-    margin-bottom:calc(10px * var(--submit-scale)) !important;
-  }
-  .signupSection{
-    margin-bottom:calc(10px * var(--submit-scale)) !important;
-  }
-  .signupSectionTitle,
-  .submitFeatureTitle{
-    font-size:calc(16px * var(--submit-scale)) !important;
-    line-height:1.2 !important;
-    font-weight:900 !important;
-    margin-bottom:calc(8px * var(--submit-scale)) !important;
-  }
-  .sectionTitleRow{
-    gap:calc(10px * var(--submit-scale)) !important;
-    margin-bottom:calc(8px * var(--submit-scale)) !important;
-  }
-  .sectionTitleActions{
-    gap:calc(8px * var(--submit-scale)) !important;
-  }
-
-  .colCard,
-  .memberPickerWrap,
-  .rewardCard,
-  .submitFeatureCard,
-  .quickOriginalBox{
-    padding:calc(9px * var(--submit-scale)) calc(10px * var(--submit-scale)) !important;
-    border-radius:calc(12px * var(--submit-scale)) !important;
-  }
-  .colCard{
-    min-height:calc(64px * var(--submit-scale)) !important;
-  }
-  .colLabel,
-  .memberPickerLabel,
-  .rewardLabel,
-  .originalRoleHeader .headerCell,
-  .quickOriginalHint,
-  .lotteryHintText{
-    font-size:calc(12px * var(--submit-scale)) !important;
-    line-height:1.35 !important;
-    font-weight:700 !important;
-  }
-  .colValue,
-  .rewardValue{
-    font-size:calc(13px * var(--submit-scale)) !important;
-    line-height:1.35 !important;
-    font-weight:800 !important;
-  }
-  .rewardHint{
-    font-size:calc(11px * var(--submit-scale)) !important;
-    line-height:1.45 !important;
-  }
-
-  .signupInput,
-  .signupNumber,
-  .signupDate,
-  .assignInput,
-  .originalInput,
-  #quickOriginalInput{
-    min-height:calc(36px * var(--submit-scale)) !important;
-    padding:0 calc(11px * var(--submit-scale)) !important;
-    border-radius:calc(11px * var(--submit-scale)) !important;
-    font-size:calc(13px * var(--submit-scale)) !important;
-    line-height:1.35 !important;
-  }
-  #quickOriginalInput{
-    padding-top:calc(8px * var(--submit-scale)) !important;
-    padding-bottom:calc(8px * var(--submit-scale)) !important;
-    min-height:calc(58px * var(--submit-scale)) !important;
-    max-height:calc(92px * var(--submit-scale)) !important;
-  }
-
-  .typeBtnGroup,
-  .submitModeGroup,
-  .memberGrid{
-    gap:calc(6px * var(--submit-scale)) !important;
-  }
-  .typeBtn,
-  .memberBtn,
-  .submitModeBtn,
-  .roleToolBtn,
-  .rowActionBtn,
-  .quickOriginalBtn,
-  .signupActionBtn{
-    height:calc(32px * var(--submit-scale)) !important;
-    min-height:calc(32px * var(--submit-scale)) !important;
-    padding:0 calc(11px * var(--submit-scale)) !important;
-    border-radius:calc(10px * var(--submit-scale)) !important;
-    font-size:calc(12px * var(--submit-scale)) !important;
-    line-height:1 !important;
-    font-weight:800 !important;
-  }
-  .typeBtn,
-  .submitModeBtn{
-    height:calc(34px * var(--submit-scale)) !important;
-  }
-  .memberBtn{
-    min-width:calc(56px * var(--submit-scale)) !important;
-  }
-  .roleToolBtn{
-    min-width:auto !important;
-  }
-  .signupActionBtn{
-    min-width:calc(98px * var(--submit-scale)) !important;
-  }
-
-  .originalRoleBoard{
-    border-radius:calc(14px * var(--submit-scale)) !important;
-    margin-bottom:calc(10px * var(--submit-scale)) !important;
-  }
-  .originalRoleHeader,
-  .originalRoleRow{
-    gap:calc(8px * var(--submit-scale)) !important;
-    padding:calc(9px * var(--submit-scale)) calc(10px * var(--submit-scale)) !important;
-  }
-  #signupFooter{
-    gap:calc(8px * var(--submit-scale)) !important;
-    margin-top:calc(8px * var(--submit-scale)) !important;
-  }
-}
-
-@media(max-width:540px){
-  #panelSwitch{
-    position:relative !important;
-    left:auto !important;
-    right:auto !important;
-    top:auto !important;
-    bottom:auto !important;
-    width:100% !important;
-    height:auto !important;
-    display:flex !important;
-    flex-direction:row !important;
-    gap:6px !important;
-    padding:4px !important;
-    margin:0 0 6px !important;
-    border-radius:16px !important;
-    background:rgba(255,248,239,.38) !important;
-    border:1px solid rgba(168,123,81,.16) !important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.56), 0 2px 7px rgba(116,86,54,.06) !important;
-    backdrop-filter:none !important;
-    -webkit-backdrop-filter:none !important;
-  }
-  .switchBtn{
-    flex:1 1 0 !important;
-    min-height:30px !important;
-    height:30px !important;
-    padding:0 6px !important;
-    border-radius:10px !important;
-    font-size:12px !important;
-    line-height:1 !important;
+    line-height:1.15 !important;
+    letter-spacing:0 !important;
+    white-space:nowrap !important;
   }
 }
 
@@ -1455,80 +764,32 @@
     </div>
 
     <div id="overlay">
-      <div id="topBar">
-        <div id="navOuter">
-          <div id="navScroll">
-            <nav id="roomNav" aria-label="房间切换">
-              <button class="navBtn" data-room="hall" type="button">
-                <span class="navLabel">大堂</span>
-                <span class="navEffect navEffectA">✦</span>
-                <span class="navEffect navEffectB">✧</span>
-                <span class="navEffect navEffectC">★</span>
-              </button>
-              <button class="navBtn" data-room="living" type="button">
-                <span class="navLabel">客厅</span>
-                <span class="navEffect navEffectA">☕</span>
-                <span class="navEffect navEffectB">💬</span>
-                <span class="navEffect navEffectC">☕</span>
-              </button>
-              <button class="navBtn" data-room="manager" type="button">
-                <span class="navLabel">宿管室</span>
-                <span class="navEffect navEffectA">✎</span>
-                <span class="navEffect navEffectB">▱</span>
-                <span class="navEffect navEffectC">✐</span>
-              </button>
-              <button class="navBtn" data-room="honor" type="button">
-                <span class="navLabel">荣誉墙</span>
-                <span class="navEffect navEffectA">🏆</span>
-                <span class="navEffect navEffectB">🏅</span>
-                <span class="navEffect navEffectC">✦</span>
-              </button>
-              <button class="navBtn" data-room="game" type="button">
-                <span class="navLabel">游戏房</span>
-                <span class="navEffect navEffectA">🎮</span>
-                <span class="navEffect navEffectB">🎲</span>
-                <span class="navEffect navEffectC">👾</span>
-              </button>
-              <button class="navBtn" data-room="dorm" type="button">
-                <span class="navLabel">宿舍</span>
-                <span class="navEffect navEffectA">☁</span>
-                <span class="navEffect navEffectB">◦</span>
-                <span class="navEffect navEffectC">☾</span>
-              </button>
-              <button class="navBtn" data-room="flower" type="button">
-                <span class="navLabel">花房区</span>
-                <span class="navEffect navEffectA">✿</span>
-                <span class="navEffect navEffectB">❀</span>
-                <span class="navEffect navEffectC">✽</span>
-              </button>
-              <button class="navBtn" data-room="pets" type="button">
-                <span class="navLabel">宠物区</span>
-                <span class="navEffect navEffectA">🐾</span>
-                <span class="navEffect navEffectB">♡</span>
-                <span class="navEffect navEffectC">🐾</span>
-              </button>
-            </nav>
-          </div>
-        </div>
-      </div>
+      <nav class="roomNavLayer" aria-label="房间切换">
+        <button class="navBtn" data-room="hall" type="button"><span class="navLabel">大堂</span><span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span></button>
+        <button class="navBtn" data-room="living" type="button"><span class="navLabel">客厅</span><span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">💬</span><span class="navEffect navEffectC">☕</span></button>
+        <button class="navBtn" data-room="manager" type="button"><span class="navLabel">宿管室</span><span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span></button>
+        <button class="navBtn" data-room="honor" type="button"><span class="navLabel">荣誉墙</span><span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span></button>
+        <button class="navBtn is-current" data-room="studio" type="button"><span class="navLabel">工作间</span><span class="navEffect navEffectA">♪</span><span class="navEffect navEffectB">♫</span><span class="navEffect navEffectC">♬</span></button>
+        <button class="navBtn" data-room="game" type="button"><span class="navLabel">游戏房</span><span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span></button>
+        <button class="navBtn" data-room="dorm" type="button"><span class="navLabel">宿舍</span><span class="navEffect navEffectA">☁</span><span class="navEffect navEffectB">◦</span><span class="navEffect navEffectC">☾</span></button>
+        <button class="navBtn" data-room="flower" type="button"><span class="navLabel">花房区</span><span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">✽</span></button>
+        <button class="navBtn" data-room="pets" type="button"><span class="navLabel">宠物区</span><span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐾</span></button>
+      </nav>
 
-      <div id="topActions">
-        <div id="topIdentityBar">
-          <div id="topIdentityBadge">
-            <span class="identityText" id="currentUserText">读取中</span>
-          </div>
-          <div id="siteNoticeWrap">
-            <button id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="查看提醒">
-              <span id="siteNoticeIcon" aria-hidden="true">🔔</span>
-              <span id="siteNoticeCount">0</span>
+      <div class="roomIdentity">
+        <div class="roomIdentityBar">
+          <div class="identityNameBox"><span class="identityNameText" id="identityNameText">读取中</span></div>
+          <div class="identityNoticeWrap" id="siteNoticeWrap">
+            <button class="identityNoticeBtn" id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="查看提醒">
+              <span class="identityNoticeIcon" aria-hidden="true">🔔</span>
             </button>
-            <div id="siteNoticePanel" aria-hidden="true">
-              <div class="siteNoticeTitle">待处理提醒</div>
-              <div id="siteNoticeBody" class="siteNoticeEmpty">暂无提醒</div>
+            <span class="identityNoticeCount" id="siteNoticeCount">0</span>
+            <div class="identityNoticePanel" id="siteNoticePanel" aria-hidden="true">
+              <div class="identityNoticeTitle">待处理提醒</div>
+              <div id="siteNoticeBody" class="identityNoticeEmpty">暂无提醒</div>
             </div>
           </div>
-          <button id="loginOpenBtn" class="hidden" type="button">登录</button>
-          <button id="logoutBtn" type="button">登出</button>
+          <button class="identityAuthBtn" id="identityAuthBtn" type="button"><span class="identityAuthText">登出</span></button>
         </div>
       </div>
 
@@ -1743,17 +1004,10 @@
   const room = document.getElementById("room");
   const bg = document.getElementById("bg");
   const overlay = document.getElementById("overlay");
-  const topBar = document.getElementById("topBar");
-  const navOuter = document.getElementById("navOuter");
-  const navScroll = document.getElementById("navScroll");
-  const roomNav = document.getElementById("roomNav");
+  const roomNav = document.querySelector(".roomNavLayer");
   const panelSwitch = document.getElementById("panelSwitch");
-  const topActions = document.getElementById("topActions");
-  const topIdentityBar = document.getElementById("topIdentityBar");
-  const topIdentityBadge = document.getElementById("topIdentityBadge");
-  const currentUserText = document.getElementById("currentUserText");
-  const loginOpenBtn = document.getElementById("loginOpenBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
+  const currentUserText = document.getElementById("identityNameText");
+  const identityAuthBtn = document.getElementById("identityAuthBtn");
   const siteNoticeBtn = document.getElementById("siteNoticeBtn");
   const siteNoticeCount = document.getElementById("siteNoticeCount");
   const siteNoticePanel = document.getElementById("siteNoticePanel");
@@ -1927,27 +1181,19 @@
 
     if (!authState.loggedIn || !nickname) {
       currentUserText.textContent = "参观者";
-      if (loginOpenBtn) {
-        loginOpenBtn.classList.remove("hidden");
-        loginOpenBtn.hidden = false;
-        loginOpenBtn.style.display = "flex";
-      }
-      if (logoutBtn) {
-        logoutBtn.classList.add("hidden");
-        logoutBtn.hidden = true;
-        logoutBtn.style.display = "none";
+      if (identityAuthBtn) {
+        identityAuthBtn.hidden = false;
+        identityAuthBtn.classList.remove("hidden");
+        identityAuthBtn.querySelector(".identityAuthText").textContent = "登录";
+        identityAuthBtn.dataset.action = "login";
       }
     } else {
       currentUserText.textContent = `${nickname} | ${roleLabel}`;
-      if (loginOpenBtn) {
-        loginOpenBtn.classList.add("hidden");
-        loginOpenBtn.hidden = true;
-        loginOpenBtn.style.display = "none";
-      }
-      if (logoutBtn) {
-        logoutBtn.classList.remove("hidden");
-        logoutBtn.hidden = false;
-        logoutBtn.style.display = "flex";
+      if (identityAuthBtn) {
+        identityAuthBtn.hidden = false;
+        identityAuthBtn.classList.remove("hidden");
+        identityAuthBtn.querySelector(".identityAuthText").textContent = "登出";
+        identityAuthBtn.dataset.action = "logout";
       }
     }
 
@@ -1964,7 +1210,7 @@
     const count = items.length;
     siteNoticeBtn.classList.toggle("hasNotice", count > 0);
     siteNoticeCount.textContent = count > 99 ? "99+" : String(count);
-    siteNoticeBody.className = count ? "siteNoticeList" : "siteNoticeEmpty";
+    siteNoticeBody.className = count ? "siteNoticeList" : "identityNoticeEmpty siteNoticeEmpty";
     siteNoticeBody.innerHTML = count ? items.join("") : "暂无提醒";
   }
 
@@ -2921,62 +2167,21 @@
   }
 
   function fitRoomNavToBar() {
-    if (!roomNav || !topBar) return;
-    const overlayRect = overlay?.getBoundingClientRect?.();
-    if (overlayRect && overlayRect.width <= 540) {
-      roomNav.style.transform = "";
-      return;
-    }
-
-    roomNav.style.transform = "scale(1)";
-    const availableWidth = topBar.clientWidth;
-    const neededWidth = roomNav.scrollWidth;
-    if (!availableWidth || !neededWidth) return;
-    const fitScale = Math.min(1, availableWidth / neededWidth);
-    roomNav.style.transform = `scale(${fitScale})`;
+    // 通用模板的房间按钮外框使用底图百分比绑定，不再进行整组 transform 缩放。
   }
 
-
   function syncTopUiLayout() {
-    if (!overlay || !topBar || !roomNav || !panelSwitch || !topActions || !topIdentityBar) return;
-
+    if (!overlay || !panelSwitch) return;
     const overlayRect = overlay.getBoundingClientRect();
     const scale = parseFloat(getComputedStyle(overlay).getPropertyValue("--bg-ui-scale")) || 1;
 
-    overlay.style.setProperty("--nav-btn-height", `${(40 * scale).toFixed(2)}px`);
-    overlay.style.setProperty("--nav-btn-px", `${(16 * scale).toFixed(2)}px`);
-    overlay.style.setProperty("--nav-btn-radius", `${(13 * scale).toFixed(2)}px`);
-    overlay.style.setProperty("--nav-btn-font", `${(14 * scale).toFixed(2)}px`);
-    overlay.style.setProperty("--nav-gap", `${(8 * scale).toFixed(2)}px`);
-
-    overlay.style.removeProperty("--identity-right");
-    overlay.style.removeProperty("--identity-top");
-    overlay.style.removeProperty("--identity-width");
-    overlay.style.removeProperty("--identity-height");
-
-    topBar.style.left = "";
-    topBar.style.top = "";
-    topBar.style.width = "";
-    topBar.style.transform = "";
-    topBar.style.overflow = "";
-    roomNav.style.transformOrigin = "left center";
-
     if (overlayRect.width <= 540) {
-      navScroll && (navScroll.scrollLeft = 0);
-      topBar.style.left = "";
-      topBar.style.top = "";
-      topBar.style.width = "";
-      topBar.style.transform = "";
-      roomNav.style.transform = "";
-      panelSwitch.style.left = "";
-      panelSwitch.style.top = "";
-      panelSwitch.style.width = "";
-      panelSwitch.style.height = "";
-      requestAnimationFrame(fitTopBarIdentityContent);
+      requestAnimationFrame(() => {
+        fitTopBarIdentityContent();
+        fitPanelSwitchText();
+      });
       return;
     }
-
-    requestAnimationFrame(fitRoomNavToBar);
 
     overlay.style.setProperty("--panel-switch-left", "104.9%");
     overlay.style.setProperty("--panel-switch-top", "10.9%");
@@ -2986,8 +2191,6 @@
     overlay.style.setProperty("--panel-switch-pad-x", `${(12 * scale).toFixed(2)}px`);
     overlay.style.setProperty("--panel-switch-radius", `${(20 * scale).toFixed(2)}px`);
     overlay.style.setProperty("--panel-switch-gap", `${(8 * scale).toFixed(2)}px`);
-    overlay.style.setProperty("--switch-btn-h", `${(40 * scale).toFixed(2)}px`);
-    overlay.style.setProperty("--switch-btn-pad-y", `${(8 * scale).toFixed(2)}px`);
     overlay.style.setProperty("--switch-btn-pad-x", `${(12 * scale).toFixed(2)}px`);
     overlay.style.setProperty("--switch-btn-radius", `${(13 * scale).toFixed(2)}px`);
     overlay.style.setProperty("--switch-font", `${(13 * scale).toFixed(2)}px`);
@@ -3016,8 +2219,6 @@
         overlay.style.setProperty("--overlay-ui-scale", "1");
         overlay.style.setProperty("--project-panel-scale", "1");
       }
-      if (roomNav) roomNav.style.transform = "";
-      if (navScroll) navScroll.scrollLeft = 0;
       requestAnimationFrame(syncTopUiLayout);
       return;
     }
@@ -3283,7 +2484,13 @@
     toggleSiteNoticePanel();
   });
 
-  logoutBtn?.addEventListener("click", handleLogout);
+  identityAuthBtn?.addEventListener("click", () => {
+    if (identityAuthBtn.dataset.action === "login") {
+      window.location.href = "index.html";
+      return;
+    }
+    handleLogout();
+  });
 
   bg.addEventListener("load", syncOverlayToImage);
   window.addEventListener("resize", syncOverlayToImage);
