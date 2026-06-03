@@ -35,8 +35,18 @@
   --identity-text:#6f5746;
   --identity-shadow:rgba(106,78,55,0.08);
   --identity-name-y:0em;
+  --identity-separator-y:0em;
+  --identity-role-y:0em;
   --identity-notice-y:0em;
   --identity-button-y:0em;
+
+  /* 手机版身份文字独立校准：昵称 / 分隔符 / 身份 / 铃铛 / 登录按钮 */
+  --identity-mobile-name-y:0em;
+  --identity-mobile-separator-y:0em;
+  --identity-mobile-role-y:0em;
+  --identity-mobile-notice-y:0em;
+  --identity-mobile-button-y:0em;
+  --identity-notice-mobile-top:58px;
 
   /* =========================================================
      房间按钮坐标
@@ -383,17 +393,36 @@ button{
   justify-content:center;
   max-width:100%;
   color:var(--identity-text);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
   font-size:calc(13px * var(--s));
   font-weight:850;
-  line-height:1.22;
+  line-height:1;
   letter-spacing:0;
   white-space:nowrap;
   overflow:visible;
   text-overflow:clip;
-  transform:translateY(var(--identity-name-y));
 }
 
 .identityNameText.isOverflowSafe{overflow:hidden;text-overflow:ellipsis;}
+
+.identityNamePart{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  line-height:1;
+  white-space:nowrap;
+  font:inherit;
+}
+
+.identityNickname{transform:translateY(var(--identity-name-y));}
+.identitySeparator{
+  margin:0 .08em;
+  color:rgba(111,87,70,.78);
+  font-weight:800;
+  transform:translateY(var(--identity-separator-y));
+}
+.identityRole{transform:translateY(var(--identity-role-y));}
 
 .identityNoticeWrap{
   position:relative;
@@ -492,7 +521,7 @@ button{
   border:calc(1px * var(--s)) solid rgba(203,167,123,0.28);
   box-shadow:0 calc(16px * var(--s)) calc(36px * var(--s)) rgba(85,58,34,0.16);
   display:none;
-  z-index:80;
+  z-index:950;
   text-align:left;
 }
 
@@ -2329,13 +2358,15 @@ button{
 
   #overlay{
     position:relative;
-    left:auto;
-    top:auto;
-    width:100%;
-    height:auto;
+    left:auto!important;
+    top:auto!important;
+    width:100%!important;
+    height:auto!important;
     display:flex;
     flex-direction:column;
     gap:10px;
+    margin:0!important;
+    padding:0!important;
     overflow:visible;
     --ui-scale:1;
     pointer-events:auto;
@@ -2345,30 +2376,57 @@ button{
     position:relative;
     inset:auto;
     width:100%;
+    height:106px;
+    min-height:106px;
+    max-height:106px;
     display:grid;
     grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:repeat(3,32px);
     gap:5px;
+    margin:0!important;
+    padding:0!important;
+    align-content:start;
     order:0;
     z-index:20;
     pointer-events:auto;
     --s:1;
   }
 
-  .navBtn{
+  .roomNavLayer .navBtn{
     position:relative;
     left:auto!important;
     top:auto!important;
+    display:flex!important;
+    align-items:center;
+    justify-content:center;
     width:100%;
     height:32px;
     min-width:0;
     min-height:32px;
+    max-height:32px;
+    margin:0!important;
+    padding:0!important;
     border-radius:10px;
     font-size:12px;
+    line-height:1;
+    white-space:nowrap;
     overflow:hidden;
   }
 
-  .navLabel{padding-top:.04em;}
-  .navEffect{display:none;}
+  .roomNavLayer .navBtn.is-current{
+    display:flex!important;
+    visibility:visible!important;
+  }
+
+  .roomNavLayer .navLabel{
+    height:100%;
+    padding-top:.04em;
+    line-height:1;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+
+  .roomNavLayer .navEffect{display:none;}
 
   .roomIdentity{
     --s:1;
@@ -2380,7 +2438,7 @@ button{
     height:40px;
     min-height:40px;
     order:1;
-    z-index:30;
+    z-index:90;
   }
 
   .roomIdentityBar{
@@ -2390,21 +2448,70 @@ button{
     border-radius:14px;
   }
 
-  .identityNameBox{padding:0 9px;border-radius:10px;}
-  .identityNameText{font-size:12px;line-height:1.22;}
-  .identityNoticeBtn{font-size:14px;border-radius:10px;}
-  .identityAuthBtn{font-size:11px;border-radius:10px;}
+  .identityNameBox{
+    padding:0 9px;
+    border-radius:10px;
+    overflow:visible;
+  }
+
+  .identityNameText{
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
+    font-size:12px;
+    font-weight:850;
+    line-height:1;
+    letter-spacing:0;
+    white-space:nowrap;
+    overflow:visible;
+  }
+
+  .identityNamePart{
+    line-height:1;
+    white-space:nowrap;
+  }
+
+  .identityNickname{transform:translateY(var(--identity-mobile-name-y));}
+  .identitySeparator{
+    margin:0 .08em;
+    color:rgba(111,87,70,.78);
+    font-size:12px;
+    font-weight:800;
+    transform:translateY(var(--identity-mobile-separator-y));
+  }
+  .identityRole{transform:translateY(var(--identity-mobile-role-y));}
+
+  .identityNoticeBtn{
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
+    font-size:14px;
+    border-radius:10px;
+  }
+
+  .identityNoticeIcon{transform:translateY(var(--identity-mobile-notice-y));}
+
+  .identityAuthBtn{
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
+    font-size:11px;
+    font-weight:850;
+    line-height:1;
+    border-radius:10px;
+  }
+
+  .identityAuthText{
+    line-height:1;
+    transform:translateY(var(--identity-mobile-button-y));
+  }
 
   .identityNoticePanel{
-    position:fixed;
-    top:58px;
-    left:12px;
-    right:12px;
-    width:auto;
-    max-height:60dvh;
+    position:fixed!important;
+    top:var(--identity-notice-mobile-top,58px)!important;
+    left:12px!important;
+    right:12px!important;
+    width:calc(100vw - 24px)!important;
+    min-width:0!important;
+    max-width:calc(100vw - 24px)!important;
+    max-height:calc(100dvh - var(--identity-notice-mobile-top,58px) - 14px)!important;
     padding:14px;
     border-radius:18px;
-    z-index:999;
+    z-index:990;
   }
 
 
@@ -2646,7 +2753,11 @@ button{
     <section class="roomIdentity" id="roomIdentity" aria-label="当前身份">
       <div class="roomIdentityBar">
         <div class="identityNameBox">
-          <span class="identityNameText" id="currentUserText">读取中</span>
+          <span class="identityNameText" id="currentUserText">
+            <span class="identityNamePart identityNickname" id="identityNickname">读取中</span>
+            <span class="identityNamePart identitySeparator hidden" id="identitySeparator">｜</span>
+            <span class="identityNamePart identityRole hidden" id="identityRole">参观者</span>
+          </span>
         </div>
 
         <div class="identityNoticeWrap">
@@ -2775,6 +2886,9 @@ const bgFrame = document.getElementById("bgFrame");
 const overlay = document.getElementById("overlay");
 const root = document.documentElement;
 const currentUserText = document.getElementById("currentUserText");
+const identityNickname = document.getElementById("identityNickname");
+const identitySeparator = document.getElementById("identitySeparator");
+const identityRole = document.getElementById("identityRole");
 const identityAuthBtn = document.getElementById("identityAuthBtn");
 const identityAuthText = identityAuthBtn ? identityAuthBtn.querySelector(".identityAuthText") : null;
 const identityNoticeCount = document.getElementById("identityNoticeCount");
@@ -2903,7 +3017,7 @@ function roleLabel(role){
   if(r === "owner") return "维修工";
   if(r === "admin") return "宿管";
   if(r === "member") return "房客";
-  if(r === "applying") return "申请中";
+  if(r === "applying") return "申请人";
   return "参观者";
 }
 
@@ -2995,12 +3109,26 @@ function updateIdentity(member){
   if(!currentUserText) return;
 
   if(!name){
-    currentUserText.textContent = "参观者";
+    if(identityNickname) identityNickname.textContent = "参观者";
+    if(identitySeparator) identitySeparator.classList.add("hidden");
+    if(identityRole){
+      identityRole.classList.add("hidden");
+      identityRole.textContent = "参观者";
+    }
+    if(!identityNickname) currentUserText.textContent = "参观者";
     if(identityAuthText) identityAuthText.textContent = "登录";
     return;
   }
 
-  currentUserText.textContent = `${name} | ${role}`;
+  if(identityNickname && identitySeparator && identityRole){
+    identityNickname.textContent = name;
+    identitySeparator.classList.remove("hidden");
+    identityRole.classList.remove("hidden");
+    identityRole.textContent = role;
+  }else{
+    currentUserText.textContent = `${name}｜${role}`;
+  }
+
   if(identityAuthText) identityAuthText.textContent = "登出";
 }
 
