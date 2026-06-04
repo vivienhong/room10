@@ -18,6 +18,13 @@
       --reward-text: #826046;
       --reward-line: rgba(216, 157, 106, 0.35);
       --reward-soft-line: rgba(196, 139, 86, 0.16);
+      --reward-modal-scale: 1;
+      --desktop-card-height: 650px;
+      --mode-accent-border: rgba(218, 169, 91, 0.18);
+      --mode-accent-bg: rgba(255, 247, 226, 0.48);
+      --mode-accent-bg-strong: rgba(255, 239, 201, 0.58);
+      --mode-accent-text: #a36f30;
+      --mode-accent-shadow: rgba(168, 105, 35, 0.06);
     }
 
     * { box-sizing: border-box; }
@@ -60,10 +67,13 @@
       justify-content: center;
     }
 
+    @media (min-width: 861px) and (max-height: 760px) {
+      .page { align-items: flex-start; }
+    }
+
     .game-shell {
       position: relative;
       width: 100%;
-      min-height: 590px;
       border: 1px solid rgba(255, 255, 255, 0.66);
       border-radius: 28px;
       background:
@@ -102,12 +112,13 @@
       z-index: 1;
       padding: 24px 22px 20px;
       display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
       gap: 16px;
     }
 
     .main-card,
     .side-card {
+      min-width: 0;
       border: 1px solid rgba(255,255,255,0.72);
       border-radius: var(--radius);
       background: rgba(255, 252, 248, 0.56);
@@ -116,17 +127,18 @@
     }
 
     .main-card {
-      min-height: 530px;
+      height: var(--desktop-card-height);
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
+      gap: 14px;
       text-align: center;
     }
 
     .side-card {
-      min-height: 530px;
+      height: var(--desktop-card-height);
       padding: 16px;
       display: flex;
       flex-direction: column;
@@ -187,7 +199,7 @@
     .target-zone {
       position: relative;
       width: min(480px, 100%);
-      margin: 14px 0;
+      margin: 0;
       padding: 16px;
       border-radius: 24px;
       background:
@@ -276,7 +288,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-top: 12px;
+      margin-top: 0;
     }
 
     .primary-btn,
@@ -322,24 +334,29 @@
 
     .result-box {
       width: min(480px, 100%);
-      margin-top: 12px;
-      padding: 13px;
+      margin-top: 0;
+      padding: 12px;
       border-radius: 18px;
       background: rgba(255, 252, 248, 0.62);
       border: 1px solid rgba(255, 255, 255, 0.72);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.82);
-      display: none;
+      display: block;
+      visibility: hidden;
+      pointer-events: none;
       text-align: left;
     }
 
-    .result-box.show { display: block; }
+    .result-box.show {
+      visibility: visible;
+      pointer-events: auto;
+    }
 
     .result-title {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 8px;
+      margin-bottom: 7px;
       color: #6f4726;
     }
 
@@ -357,11 +374,12 @@
     .result-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
+      gap: 7px;
     }
 
     .result-item {
-      padding: 9px;
+      min-width: 0;
+      padding: 8px;
       border-radius: 16px;
       background: rgba(255, 248, 239, 0.68);
       border: 1px solid rgba(181, 135, 92, 0.13);
@@ -369,15 +387,18 @@
 
     .result-name {
       color: var(--tea-light);
-      font-size: 12px;
-      margin-bottom: 6px;
+      font-size: 11px;
+      margin-bottom: 5px;
+      white-space: nowrap;
     }
 
     .result-value {
-      font-size: 14px;
+      min-width: 0;
+      font-size: 13px;
       font-weight: 900;
       font-variant-numeric: tabular-nums;
       color: #744a2a;
+      white-space: nowrap;
     }
 
     .section-title {
@@ -398,6 +419,7 @@
     }
 
     .identity-box {
+      flex: 0 0 auto;
       display: grid;
       gap: 8px;
       padding: 12px;
@@ -500,6 +522,7 @@
     }
 
     .rank-tabs {
+      flex: 0 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
@@ -521,11 +544,25 @@
       background: linear-gradient(180deg, rgba(249,232,203,.96) 0%, rgba(226,195,152,.92) 100%);
     }
 
+    .rank-note-line {
+      flex: 0 0 17px;
+      height: 17px;
+      margin: -2px 0 0;
+      color: var(--tea-light);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 17px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
     .leaderboard {
-      flex: 1;
-      min-height: 210px;
-      max-height: 350px;
-      overflow: auto;
+      width: 100%;
+      min-width: 0;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
       padding-right: 4px;
     }
 
@@ -538,9 +575,10 @@
 
     .rank-row {
       display: grid;
-      grid-template-columns: 32px 1fr auto;
+      grid-template-columns: 32px minmax(0, 1fr) minmax(78px, 92px);
       align-items: center;
       gap: 8px;
+      min-height: 58px;
       padding: 9px 8px;
       border-radius: 16px;
       background: rgba(255, 252, 248, 0.62);
@@ -548,6 +586,8 @@
       box-shadow: 0 3px 8px rgba(112,78,45,0.05), inset 0 1px 0 rgba(255,255,255,0.8);
       margin-bottom: 7px;
     }
+
+    .rank-row > div:nth-child(2) { min-width: 0; }
 
     .rank-no {
       width: 26px;
@@ -564,10 +604,13 @@
     }
 
     .rank-name {
+      min-width: 0;
       font-size: 12px;
       font-weight: 900;
       color: #6f4726;
-      word-break: break-word;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .rank-meta {
@@ -575,15 +618,20 @@
       color: var(--tea-soft);
       font-size: 12px;
       line-height: 1.45;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .rank-score {
+      min-width: 0;
       text-align: right;
       font-variant-numeric: tabular-nums;
       font-size: 12px;
       color: #8f5b2b;
       font-weight: 900;
-      white-space: nowrap;
+      line-height: 1.35;
+      word-break: keep-all;
     }
 
     .empty {
@@ -599,22 +647,41 @@
     }
 
     .history-box {
+      height: 128px;
+      flex: 0 0 128px;
+      min-width: 0;
       padding: 12px;
       border-radius: 20px;
       background: rgba(255, 252, 248, 0.58);
       border: 1px solid rgba(255, 255, 255, 0.72);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.82);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
     }
 
     .history-line {
-      margin-top: 7px;
+      flex: 1 1 auto;
+      min-height: 0;
+      margin: 0;
       color: var(--tea-soft);
       font-size: 12px;
-      line-height: 1.65;
+      line-height: 1.55;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 3px;
+    }
+
+    .history-line::-webkit-scrollbar { width: 6px; }
+
+    .history-line::-webkit-scrollbar-thumb {
+      background: rgba(181, 135, 92, 0.22);
+      border-radius: 999px;
     }
 
     .history-actions {
-      margin-top: 10px;
+      flex: 0 0 auto;
       display: grid;
       grid-template-columns: 1fr;
       gap: 8px;
@@ -785,7 +852,7 @@
       background: rgba(64, 45, 30, 0.30);
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
-      --reward-scale: 1;
+      --reward-scale: var(--reward-modal-scale, 1);
     }
 
     .reward-mask.show { display: flex; }
@@ -1087,6 +1154,51 @@
         0 calc(4px * var(--reward-scale)) calc(12px * var(--reward-scale)) rgba(112,80,42,.10);
     }
 
+    body.free-mode .target-zone {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.44), rgba(255,255,255,0.18)),
+        var(--mode-accent-bg);
+      border-color: var(--mode-accent-border);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.86), 0 8px 18px var(--mode-accent-shadow);
+    }
+
+    body.free-mode .timer-zone {
+      background: var(--mode-accent-bg);
+      border-color: var(--mode-accent-border);
+    }
+
+    body.free-mode .target-number {
+      color: var(--mode-accent-text);
+    }
+
+    body.free-mode .mode-tab.active,
+    body.free-mode .rank-tab.active,
+    body.free-mode .primary-btn {
+      color: #684622;
+      background: linear-gradient(180deg, rgba(255,244,218,.92), rgba(232,205,158,.82));
+    }
+
+    .rank-row.current-result {
+      border-color: var(--mode-accent-border);
+      background: linear-gradient(180deg, rgba(255,252,246,.86), var(--mode-accent-bg-strong));
+      box-shadow: 0 5px 12px var(--mode-accent-shadow), inset 0 1px 0 rgba(255,255,255,0.88);
+    }
+
+    .rank-current-tag {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 6px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      color: #7a5530;
+      background: var(--mode-accent-bg-strong);
+      border: 1px solid var(--mode-accent-border);
+      font-size: 11px;
+      font-weight: 950;
+      line-height: 1.2;
+      vertical-align: middle;
+    }
+
 
     @media (max-width: 860px) {
       .page {
@@ -1095,10 +1207,7 @@
         align-items: flex-start;
       }
 
-      .game-shell {
-        min-height: auto;
-        border-radius: 22px;
-      }
+      .game-shell { border-radius: 22px; }
 
       .game-shell::before {
         inset: 9px;
@@ -1113,12 +1222,27 @@
       }
 
       .main-card,
-      .side-card { min-height: auto; }
+      .side-card { height: auto; }
 
       .main-card { padding: 16px 12px; }
 
-      .result-grid,
       .action-row { grid-template-columns: 1fr; }
+
+      .result-box {
+        display: none;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .history-box {
+        height: auto;
+        flex-basis: auto;
+        max-height: none;
+      }
+
+      .history-line { overflow: visible; }
+
+      .result-box.show { display: block; }
     }
 
     @media (max-width: 560px) {
@@ -1130,7 +1254,6 @@
 
     @media (max-width: 540px) {
       .reward-mask {
-        --reward-scale: .82;
         padding: 14px;
       }
     }
@@ -1150,16 +1273,13 @@
       .timer-zone,
       .result-box { border-radius: 18px; }
 
-      .rank-row { grid-template-columns: 32px 1fr; }
+      .rank-row { grid-template-columns: 32px minmax(0, 1fr); }
 
       .rank-score {
         grid-column: 2;
+        width: auto;
         text-align: left;
       }
-    }
-
-    @media (max-width: 380px), (max-height: 590px) {
-      .reward-mask { --reward-scale: .74; }
     }
 
     @media (max-width: 340px) {
@@ -1261,19 +1381,14 @@
             <button class="rank-tab" type="button" data-rank="free">自由模式榜</button>
           </div>
 
-          <div>
-            <h2 class="section-title">
-              <span id="rankTitle">当前挑战榜</span>
-              <small id="rankNote">按绝对误差</small>
-            </h2>
-          </div>
+          <div class="rank-note-line" id="rankNote">前 5｜按绝对误差</div>
 
           <div class="leaderboard" id="leaderboard"></div>
 
           <div class="history-box">
             <h2 class="section-title">
-              <span>上一期冠军</span>
-              <small>00:00 生成</small>
+              <span id="featuredTitle">上一期冠军</span>
+              <small id="featuredNote">00:00 生成</small>
             </h2>
             <div class="history-line" id="lastWinnerText">暂无结算记录。</div>
             <div class="history-actions">
@@ -1353,9 +1468,10 @@
       resultError: document.getElementById("resultError"),
       resultRank: document.getElementById("resultRank"),
       leaderboard: document.getElementById("leaderboard"),
-      rankTitle: document.getElementById("rankTitle"),
       rankNote: document.getElementById("rankNote"),
       lastWinnerText: document.getElementById("lastWinnerText"),
+      featuredTitle: document.getElementById("featuredTitle"),
+      featuredNote: document.getElementById("featuredNote"),
       historyBoardBtn: document.getElementById("historyBoardBtn"),
       historyBoardMask: document.getElementById("historyBoardMask"),
       historyBoardClose: document.getElementById("historyBoardClose"),
@@ -1373,17 +1489,22 @@
     let currentMode = "daily";
     let currentRank = "daily";
     let currentIssue = null;
+    let featuredRecords = null;
     let freeTargetSeconds = makeRandomTarget(CONFIG.freeTargetMin, CONFIG.freeTargetMax);
     let running = false;
     let startedAt = 0;
     let rafId = null;
     let activeActor = null;
     let lastLoadedDateKey = "";
+    let lastSubmittedRecord = null;
     let pendingAwardModals = [];
 
     const rewardTypeMeta = {
       achievement: { label: "成就达成", icon: "🏆" },
       title: { label: "获得称号", icon: "🎖️" },
+      daily: { label: "每日奖励", icon: "☀️" },
+      gift: { label: "礼包奖励", icon: "🎁" },
+      item: { label: "获得道具", icon: "🌟" },
       gold: { label: "金币奖励", icon: "🪙" }
     };
 
@@ -1396,39 +1517,21 @@
     init();
 
     async function init() {
+      setRewardModalScaleForViewport();
       bindEvents();
       renderIdentityUI();
+      updateModeChrome();
       await loadGameData();
       startDateWatcher();
     }
 
     function bindEvents() {
       els.modeTabs.forEach(btn => {
-        btn.addEventListener("click", async () => {
-          if (running) return;
-          currentMode = btn.dataset.mode;
-          els.modeTabs.forEach(item => item.classList.toggle("active", item === btn));
-
-          if (currentMode === "free") {
-            freeTargetSeconds = makeRandomTarget(CONFIG.freeTargetMin, CONFIG.freeTargetMax);
-            currentRank = "free";
-          } else {
-            currentRank = "daily";
-          }
-
-          syncRankTab();
-          clearResult();
-          renderTarget();
-          await renderLeaderboard();
-        });
+        btn.addEventListener("click", () => switchMode(btn.dataset.mode));
       });
 
       els.rankTabs.forEach(btn => {
-        btn.addEventListener("click", async () => {
-          currentRank = btn.dataset.rank;
-          syncRankTab();
-          await renderLeaderboard();
-        });
+        btn.addEventListener("click", () => switchMode(btn.dataset.rank));
       });
 
       els.historyBoardBtn.addEventListener("click", openHistoryBoard);
@@ -1466,6 +1569,8 @@
         if (event.target === event.currentTarget) closeRewardModal();
       });
 
+      window.addEventListener("resize", setRewardModalScaleForViewport, { passive: true });
+
       document.addEventListener("keydown", event => {
         if (event.key === "Escape") {
           closeRewardModal();
@@ -1474,8 +1579,44 @@
       });
     }
 
+    async function switchMode(mode) {
+      if (running) return;
+
+      const nextMode = mode === "free" ? "free" : "daily";
+      const modeChanged = currentMode !== nextMode;
+      currentMode = nextMode;
+      currentRank = nextMode;
+
+      if (modeChanged && currentMode === "free") {
+        freeTargetSeconds = makeRandomTarget(CONFIG.freeTargetMin, CONFIG.freeTargetMax);
+      }
+
+      lastSubmittedRecord = null;
+      updateModeChrome();
+      renderFeaturedRecord();
+      clearResult();
+      renderTarget();
+      await renderLeaderboard();
+    }
+
+    function updateModeChrome() {
+      document.body.classList.toggle("free-mode", currentMode === "free");
+      els.modeTabs.forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.mode === currentMode);
+      });
+      syncRankTab();
+    }
+
+    function setModeControlsDisabled(disabled) {
+      [...els.modeTabs, ...els.rankTabs].forEach(btn => {
+        btn.disabled = disabled;
+      });
+    }
+
     async function loadGameData() {
       currentIssue = null;
+      lastSubmittedRecord = null;
+      updateModeChrome();
       els.startBtn.disabled = true;
       els.targetNumber.textContent = "--";
       els.leaderboard.innerHTML = `<div class="empty">正在读取当前挑战……</div>`;
@@ -1488,9 +1629,9 @@
         return;
       }
 
-      await settlePreviousIssueIfNeeded();
-      await loadLastWinner();
+      await loadFeaturedRecords();
       renderTarget();
+      renderFeaturedRecord();
       els.startBtn.disabled = false;
       await renderLeaderboard();
     }
@@ -1521,7 +1662,12 @@
           issueDate: issue.issue_date,
           targetSeconds: Number(issue.target_seconds),
           startsAt: issue.starts_at,
-          endsAt: issue.ends_at
+          endsAt: issue.ends_at,
+          previousIssueNo: issue.previous_issue_no == null ? null : Number(issue.previous_issue_no),
+          previousIssueDate: issue.previous_issue_date || null,
+          previousWinnerNickname: issue.previous_winner_nickname || "",
+          previousWinnerErrorSeconds: issue.previous_winner_error_seconds == null ? null : Number(issue.previous_winner_error_seconds),
+          previousWinnerActualSeconds: issue.previous_winner_actual_seconds == null ? null : Number(issue.previous_winner_actual_seconds)
         };
         lastLoadedDateKey = getLocalDateKey(new Date());
         return true;
@@ -1532,51 +1678,80 @@
       }
     }
 
-    async function settlePreviousIssueIfNeeded() {
-      if (!currentIssue || !currentIssue.issueNo || currentIssue.issueNo <= 1) return;
-
-      const previousIssueNo = currentIssue.issueNo - 1;
-      const { error } = await client.rpc("settle_time_answer_issue", {
-        p_issue_no: previousIssueNo
-      });
-
-      if (error) {
-        console.warn("上一期结算检查失败：", error);
-      }
-    }
-
-    async function loadLastWinner() {
-      if (!currentIssue || !currentIssue.issueNo || currentIssue.issueNo <= 1) {
-        els.lastWinnerText.textContent = "暂无结算记录。";
-        return;
-      }
-
-      const previousIssueNo = currentIssue.issueNo - 1;
+    async function loadFeaturedRecords() {
       try {
-        const { data, error } = await client
-          .from("game_time_answer_issues")
-          .select("issue_no,target_seconds,winner_nickname,winner_error_seconds,winner_actual_seconds,is_settled")
-          .eq("issue_no", previousIssueNo)
-          .maybeSingle();
+        const { data, error } = await withTimeout(
+          client.rpc("get_time_answer_featured_records", {}),
+          10000,
+          "读取冠军纪录超时"
+        );
 
         if (error) throw error;
 
-        if (!data || !data.is_settled) {
-          els.lastWinnerText.textContent = `第 ${previousIssueNo} 期尚未产生冠军。`;
-          return;
-        }
-
-        if (!data.winner_nickname) {
-          els.lastWinnerText.textContent = `第 ${previousIssueNo} 期无人完成挑战。`;
-          return;
-        }
-
-        els.lastWinnerText.textContent = `第 ${data.issue_no} 期冠军：${data.winner_nickname}，目标 ${formatSeconds(data.target_seconds)}，实际 ${formatSeconds(data.winner_actual_seconds)}，误差 ${formatSeconds(data.winner_error_seconds)}。`;
+        const record = Array.isArray(data) ? data[0] : data;
+        featuredRecords = record ? {
+          previousIssueNo: record.previous_issue_no == null ? null : Number(record.previous_issue_no),
+          previousIssueDate: record.previous_issue_date || null,
+          previousWinnerNickname: record.previous_winner_nickname || "",
+          previousWinnerErrorSeconds: record.previous_winner_error_seconds == null ? null : Number(record.previous_winner_error_seconds),
+          previousWinnerActualSeconds: record.previous_winner_actual_seconds == null ? null : Number(record.previous_winner_actual_seconds),
+          freeRecordNickname: record.free_record_nickname || "",
+          freeRecordTargetSeconds: record.free_record_target_seconds == null ? null : Number(record.free_record_target_seconds),
+          freeRecordActualSeconds: record.free_record_actual_seconds == null ? null : Number(record.free_record_actual_seconds),
+          freeRecordErrorSeconds: record.free_record_error_seconds == null ? null : Number(record.free_record_error_seconds),
+          freeRecordErrorRate: record.free_record_error_rate == null ? null : Number(record.free_record_error_rate),
+          freeRecordCreatedAt: record.free_record_created_at || null,
+          freeRecordKeepDays: record.free_record_keep_days == null ? null : Number(record.free_record_keep_days)
+        } : null;
       } catch (err) {
-        console.warn("读取上一期冠军失败：", err);
-        els.lastWinnerText.textContent = "上一期冠军暂时读取失败。";
+        console.warn("读取冠军纪录失败：", err);
+        featuredRecords = null;
       }
     }
+
+    function renderFeaturedRecord() {
+      const isDaily = currentRank === "daily";
+
+      if (isDaily) {
+        els.featuredTitle.textContent = "上一期冠军";
+        els.featuredNote.textContent = "00:00 生成";
+
+        const issueNo = featuredRecords?.previousIssueNo || currentIssue?.previousIssueNo;
+        const nickname = featuredRecords?.previousWinnerNickname || currentIssue?.previousWinnerNickname;
+        const actual = featuredRecords?.previousWinnerActualSeconds ?? currentIssue?.previousWinnerActualSeconds;
+        const error = featuredRecords?.previousWinnerErrorSeconds ?? currentIssue?.previousWinnerErrorSeconds;
+
+        if (!currentIssue || currentIssue.issueNo <= 1) {
+          els.lastWinnerText.textContent = "暂无结算记录。";
+          return;
+        }
+
+        if (issueNo && nickname) {
+          els.lastWinnerText.textContent =
+            `第 ${issueNo} 期冠军：${nickname}，实际 ${formatSeconds(actual)}，误差 ${formatSeconds(error)}。`;
+          return;
+        }
+
+        els.lastWinnerText.textContent = issueNo
+          ? `第 ${issueNo} 期尚未产生冠军。`
+          : "暂无结算记录。";
+        return;
+      }
+
+      els.featuredTitle.textContent = "自由纪录";
+      els.featuredNote.textContent = "长期保持";
+
+      if (!featuredRecords?.freeRecordNickname) {
+        els.lastWinnerText.textContent = "暂无自由模式纪录。";
+        return;
+      }
+
+      els.lastWinnerText.textContent =
+        `纪录保持者：${featuredRecords.freeRecordNickname}，已保持 ${formatKeepDays(featuredRecords.freeRecordKeepDays)}。` +
+        `目标 ${formatSeconds(featuredRecords.freeRecordTargetSeconds)}，实际 ${formatSeconds(featuredRecords.freeRecordActualSeconds)}，` +
+        `误差 ${formatSeconds(featuredRecords.freeRecordErrorSeconds)}，误差率 ${formatPercent(featuredRecords.freeRecordErrorRate)}。`;
+    }
+
 
     function startDateWatcher() {
       setInterval(async () => {
@@ -1764,11 +1939,12 @@
       activeActor = actor;
       running = true;
       startedAt = performance.now();
+      lastSubmittedRecord = null;
       clearResult();
 
       els.startBtn.disabled = true;
       els.stopBtn.disabled = false;
-      els.modeTabs.forEach(btn => btn.disabled = true);
+      setModeControlsDisabled(true);
       els.timerZone.classList.add("running");
       els.timerDisplay.classList.remove("hidden-time");
       els.timerHint.textContent = "正在计时中……看见前 1.5 秒，然后相信自己。";
@@ -1808,7 +1984,7 @@
 
       els.startBtn.disabled = false;
       els.stopBtn.disabled = true;
-      els.modeTabs.forEach(btn => btn.disabled = false);
+      setModeControlsDisabled(false);
       els.timerZone.classList.remove("running");
       els.timerDisplay.classList.remove("hidden-time");
       els.timerDisplay.textContent = formatMs(actualSeconds * 1000);
@@ -1838,15 +2014,33 @@
           errorSeconds: Number(saved?.error_seconds ?? Math.abs(actualSeconds - targetSeconds)),
           errorRate: Number(saved?.error_rate ?? ((Math.abs(actualSeconds - targetSeconds) / targetSeconds) * 100)),
           grade: saved?.result_grade || getGrade(Math.abs(actualSeconds - targetSeconds)),
-          rank: saved?.temp_rank ?? null,
           savedToBoard: saved?.saved === true,
+          fallbackRank: saved?.temp_rank ?? null,
+          boardRank: null,
+          enteredVisibleBoard: false,
           awards: saved?.awards || []
         };
 
+        let freshRows = [];
+        let boardRefreshFailed = false;
+
+        try {
+          freshRows = await fetchLeaderboardRows(record.mode);
+          if (record.savedToBoard) {
+            applyVisibleBoardRank(record, freshRows);
+          } else {
+            applyGuestVirtualRank(record, freshRows);
+          }
+        } catch (rankErr) {
+          boardRefreshFailed = true;
+          console.warn("成绩已保存，但排行榜刷新失败：", rankErr);
+        }
+
+        lastSubmittedRecord = record;
         showResult(record);
-        els.timerHint.textContent = record.savedToBoard
-          ? "答案出现了。你的成员成绩已记录，排行榜只保留最佳表现。"
-          : "答案出现了。游客成绩仅显示本次临时排名，不进入正式榜单。";
+        els.timerHint.textContent = boardRefreshFailed
+          ? "成绩已保存，排行榜刷新失败，请刷新页面查看。"
+          : getResultHint(record);
 
         if (currentMode === "free") {
           freeTargetSeconds = makeRandomTarget(CONFIG.freeTargetMin, CONFIG.freeTargetMax);
@@ -1854,7 +2048,13 @@
 
         activeActor = null;
         renderTarget();
-        await renderLeaderboard();
+
+        if (!boardRefreshFailed && record.mode === currentRank) {
+          renderLeaderboardRows(freshRows, currentRank === "daily", record);
+        } else {
+          await renderLeaderboard();
+        }
+
         playAwardModals(record.awards || []);
       } catch (err) {
         console.error("保存成绩失败：", err);
@@ -1880,6 +2080,7 @@
         els.targetLabel.textContent = "自由模式随机目标";
         els.issueText.textContent = "本局结束后会刷新新的随机秒数";
       }
+
     }
 
     function showResult(record) {
@@ -1888,13 +2089,17 @@
       els.resultTarget.textContent = formatSeconds(record.targetSeconds);
       els.resultActual.textContent = formatSeconds(record.actualSeconds);
       els.resultError.textContent = formatSeconds(record.errorSeconds);
-      if (record.rank) {
-        els.resultRank.textContent = record.savedToBoard
-          ? `第 ${record.rank} 名`
-          : `临时第 ${record.rank} 名`;
-      } else {
-        els.resultRank.textContent = "--";
+
+      if (record.savedToBoard) {
+        els.resultRank.textContent = record.enteredVisibleBoard && record.boardRank
+          ? `第 ${record.boardRank} 名`
+          : "未进榜";
+        return;
       }
+
+      els.resultRank.textContent = record.fallbackRank
+        ? `临时第 ${record.fallbackRank} 名`
+        : "未进榜";
     }
 
     function clearResult() {
@@ -1911,54 +2116,128 @@
 
     async function renderLeaderboard() {
       const isDaily = currentRank === "daily";
-      els.rankTitle.textContent = isDaily ? "当前挑战榜" : "自由模式榜";
-      els.rankNote.textContent = isDaily ? "按绝对误差" : "按误差率";
+      els.rankNote.textContent = isDaily ? "前 5｜按绝对误差" : "前 10｜按误差率";
+
+      renderFeaturedRecord();
 
       if (isDaily && !currentIssue) {
         els.leaderboard.innerHTML = `<div class="empty">正在读取当前挑战……</div>`;
-        return;
+        return [];
       }
 
       els.leaderboard.innerHTML = `<div class="empty">正在读取排行榜……</div>`;
 
       try {
-        const { data, error } = await client.rpc("get_time_answer_leaderboard", {
-          p_mode: currentRank,
-          p_issue_no: isDaily ? currentIssue.issueNo : null,
-          p_limit: 20
-        });
-
-        if (error) throw error;
-
-        const top = Array.isArray(data) ? data : [];
-        if (!top.length) {
-          els.leaderboard.innerHTML = `<div class="empty">暂无成绩<br>完成一次挑战后会出现在这里。</div>`;
-          return;
-        }
-
-        els.leaderboard.innerHTML = top.map(item => {
-          const scoreText = isDaily
-            ? `误差 ${formatSeconds(item.error_seconds)}`
-            : `误差率 ${formatPercent(item.error_rate)}`;
-          const metaText = isDaily
-            ? `目标 ${formatSeconds(item.target_seconds)} · 实际 ${formatSeconds(item.actual_seconds)}`
-            : `目标 ${formatSeconds(item.target_seconds)} · 误差 ${formatSeconds(item.error_seconds)}`;
-
-          return `
-            <div class="rank-row">
-              <div class="rank-no">${item.rank_no}</div>
-              <div>
-                <div class="rank-name">${escapeHtml(item.nickname)}</div>
-                <div class="rank-meta">${metaText}</div>
-              </div>
-              <div class="rank-score">${scoreText}</div>
-            </div>
-          `;
-        }).join("");
+        const rows = await fetchLeaderboardRows(currentRank);
+        const highlightRecord = lastSubmittedRecord?.mode === currentRank ? lastSubmittedRecord : null;
+        renderLeaderboardRows(rows, isDaily, highlightRecord);
+        return rows;
       } catch (err) {
         console.error("读取排行榜失败：", err);
         els.leaderboard.innerHTML = `<div class="empty">排行榜读取失败<br>请稍后再试。</div>`;
+        return [];
       }
+    }
+
+    async function fetchLeaderboardRows(mode) {
+      const isDaily = mode === "daily";
+      if (isDaily && !currentIssue) return [];
+
+      const { data, error } = await client.rpc("get_time_answer_leaderboard", {
+        p_mode: mode,
+        p_issue_no: isDaily ? currentIssue.issueNo : null,
+        p_limit: isDaily ? 5 : 10
+      });
+
+      if (error) throw error;
+      return Array.isArray(data) ? data : [];
+    }
+
+    function renderLeaderboardRows(rows, isDaily, highlightRecord = null) {
+      if (!rows.length) {
+        els.leaderboard.innerHTML = `<div class="empty">暂无成绩<br>完成一次挑战后会出现在这里。</div>`;
+        return;
+      }
+
+      els.leaderboard.innerHTML = rows.map(item => {
+        const scoreText = isDaily
+          ? `误差 ${formatSeconds(item.error_seconds)}`
+          : `误差率 ${formatPercent(item.error_rate)}`;
+        const metaText = isDaily
+          ? `目标 ${formatSeconds(item.target_seconds)} · 实际 ${formatSeconds(item.actual_seconds)}`
+          : `目标 ${formatSeconds(item.target_seconds)} · 误差 ${formatSeconds(item.error_seconds)}`;
+        const isCurrent = highlightRecord && isSameSubmittedRecord(highlightRecord, item);
+        const currentTag = isCurrent ? `<span class="rank-current-tag">本次</span>` : "";
+
+        return `
+          <div class="rank-row${isCurrent ? " current-result" : ""}">
+            <div class="rank-no">${item.rank_no}</div>
+            <div>
+              <div class="rank-name">${escapeHtml(item.nickname)}${currentTag}</div>
+              <div class="rank-meta">${metaText}</div>
+            </div>
+            <div class="rank-score">${scoreText}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function applyVisibleBoardRank(record, rows) {
+      const matched = rows.find(row => isSameSubmittedRecord(record, row));
+      record.enteredVisibleBoard = !!matched;
+      record.boardRank = matched ? Number(matched.rank_no) : null;
+    }
+
+    function applyGuestVirtualRank(record, rows) {
+      const maxRank = record.mode === "daily" ? 5 : 10;
+      const metricKey = record.mode === "daily" ? "error_seconds" : "error_rate";
+      const recordMetric = record.mode === "daily" ? record.errorSeconds : record.errorRate;
+      const safeMetric = Number(recordMetric);
+
+      if (!Number.isFinite(safeMetric)) {
+        record.fallbackRank = null;
+        record.enteredVisibleBoard = false;
+        return;
+      }
+
+      const betterCount = rows.filter(row => Number(row?.[metricKey]) < safeMetric).length;
+      const virtualRank = betterCount + 1;
+      const lastVisibleMetric = rows.length ? Number(rows[rows.length - 1]?.[metricKey]) : Infinity;
+      const hasRoom = rows.length < maxRank;
+      const reachesVisibleBoard = virtualRank <= maxRank && (hasRoom || safeMetric <= lastVisibleMetric || !Number.isFinite(lastVisibleMetric));
+
+      record.fallbackRank = reachesVisibleBoard ? virtualRank : null;
+      record.enteredVisibleBoard = reachesVisibleBoard;
+    }
+
+    function isSameSubmittedRecord(record, row) {
+      if (!row) return false;
+      const sameName = String(row.nickname || "").trim() === String(record.playerName || "").trim();
+      const sameTarget = numbersClose(row.target_seconds, record.targetSeconds);
+      const sameActual = numbersClose(row.actual_seconds, record.actualSeconds);
+      const sameError = numbersClose(row.error_seconds, record.errorSeconds);
+      const sameRate = record.mode === "free"
+        ? numbersClose(row.error_rate, record.errorRate, 0.00001)
+        : true;
+      return sameName && sameTarget && sameActual && sameError && sameRate;
+    }
+
+    function numbersClose(a, b, tolerance = 0.0005) {
+      const left = Number(a);
+      const right = Number(b);
+      return Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) <= tolerance;
+    }
+
+    function getResultHint(record) {
+      if (!record.savedToBoard) {
+        return record.fallbackRank
+          ? "答案出现了。游客不进入正式榜单，但本次成绩可参考临时排名。"
+          : "答案出现了。游客不进入正式榜单，本次成绩暂未达到当前榜单范围。";
+      }
+
+      return record.enteredVisibleBoard
+        ? "答案出现了。你的成员成绩已进入当前榜单。"
+        : "答案出现了。你的成员成绩已记录，但暂未进入当前榜单。";
     }
 
 
@@ -2055,6 +2334,29 @@
       return Number.isFinite(number) ? `${number.toFixed(3)}%` : "--";
     }
 
+    function formatKeepDays(value) {
+      const days = Number(value);
+      if (!Number.isFinite(days) || days <= 0) return "今天";
+      return `${Math.floor(days)} 天`;
+    }
+
+    function setRewardModalScaleForViewport() {
+      const root = document.documentElement;
+      const vw = window.innerWidth || document.documentElement.clientWidth || 1024;
+      const vh = window.innerHeight || document.documentElement.clientHeight || 768;
+      let scale = 1;
+
+      if (vw <= 340) {
+        scale = 0.72;
+      } else if (vw <= 380 || vh <= 590) {
+        scale = 0.76;
+      } else if (vw <= 540) {
+        scale = 0.82;
+      }
+
+      root.style.setProperty("--reward-modal-scale", String(scale));
+    }
+
     function formatMs(ms) {
       const safeMs = Math.max(0, ms);
       const minutes = Math.floor(safeMs / 60000);
@@ -2142,7 +2444,9 @@
       document.getElementById("rewardTitle").textContent = options.title || "奖励已领取";
       document.getElementById("rewardDesc").textContent = options.desc || "奖励已经记录完成。";
       renderRewards(rewards);
+      setRewardModalScaleForViewport();
       mask.classList.add("show");
+      mask.style.display = "flex";
       mask.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
     }
@@ -2150,6 +2454,7 @@
     function closeRewardModal() {
       const mask = document.getElementById("rewardMask");
       mask.classList.remove("show");
+      mask.style.display = "";
       mask.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
       playNextAwardModal();
