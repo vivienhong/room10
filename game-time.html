@@ -418,6 +418,22 @@
       font-weight: 700;
     }
 
+    .history-box .section-title {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .featured-name {
+      min-width: 0;
+      color: #744a2a;
+      font-size: 14px;
+      font-weight: 950;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .identity-box {
       flex: 0 0 auto;
       display: grid;
@@ -647,8 +663,8 @@
     }
 
     .history-box {
-      height: 128px;
-      flex: 0 0 128px;
+      height: 148px;
+      flex: 0 0 148px;
       min-width: 0;
       padding: 12px;
       border-radius: 20px;
@@ -1388,6 +1404,7 @@
           <div class="history-box">
             <h2 class="section-title">
               <span id="featuredTitle">上一期冠军</span>
+              <span id="featuredName" class="featured-name"></span>
               <small id="featuredNote">00:00 生成</small>
             </h2>
             <div class="history-line" id="lastWinnerText">暂无结算记录。</div>
@@ -1471,6 +1488,7 @@
       rankNote: document.getElementById("rankNote"),
       lastWinnerText: document.getElementById("lastWinnerText"),
       featuredTitle: document.getElementById("featuredTitle"),
+      featuredName: document.getElementById("featuredName"),
       featuredNote: document.getElementById("featuredNote"),
       historyBoardBtn: document.getElementById("historyBoardBtn"),
       historyBoardMask: document.getElementById("historyBoardMask"),
@@ -1712,6 +1730,8 @@
     function renderFeaturedRecord() {
       const isDaily = currentRank === "daily";
 
+      els.featuredName.textContent = "";
+
       if (isDaily) {
         els.featuredTitle.textContent = "上一期冠军";
         els.featuredNote.textContent = "00:00 生成";
@@ -1738,8 +1758,11 @@
         return;
       }
 
-      els.featuredTitle.textContent = "自由纪录";
-      els.featuredNote.textContent = "长期保持";
+      els.featuredTitle.textContent = "纪录保持者";
+      els.featuredName.textContent = featuredRecords?.freeRecordNickname || "";
+      els.featuredNote.textContent = featuredRecords?.freeRecordNickname
+        ? `已保持 ${formatKeepDays(featuredRecords.freeRecordKeepDays)}`
+        : "";
 
       if (!featuredRecords?.freeRecordNickname) {
         els.lastWinnerText.textContent = "暂无自由模式纪录。";
@@ -1747,9 +1770,8 @@
       }
 
       els.lastWinnerText.textContent =
-        `纪录保持者：${featuredRecords.freeRecordNickname}，已保持 ${formatKeepDays(featuredRecords.freeRecordKeepDays)}。` +
-        `目标 ${formatSeconds(featuredRecords.freeRecordTargetSeconds)}，实际 ${formatSeconds(featuredRecords.freeRecordActualSeconds)}，` +
-        `误差 ${formatSeconds(featuredRecords.freeRecordErrorSeconds)}，误差率 ${formatPercent(featuredRecords.freeRecordErrorRate)}。`;
+        `目标 ${formatSeconds(featuredRecords.freeRecordTargetSeconds)}｜实际 ${formatSeconds(featuredRecords.freeRecordActualSeconds)}｜` +
+        `误差 ${formatSeconds(featuredRecords.freeRecordErrorSeconds)}｜误差率 ${formatPercent(featuredRecords.freeRecordErrorRate)}`;
     }
 
 
