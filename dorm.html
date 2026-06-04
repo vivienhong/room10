@@ -2503,15 +2503,63 @@ button{
   .identityNoticePanel{
     position:fixed!important;
     top:var(--identity-notice-mobile-top,58px)!important;
-    left:12px!important;
-    right:12px!important;
-    width:calc(100vw - 24px)!important;
+    left:auto!important;
+    right:max(20px, env(safe-area-inset-right))!important;
+    width:min(320px, calc(100% - 40px))!important;
     min-width:0!important;
-    max-width:calc(100vw - 24px)!important;
+    max-width:320px!important;
     max-height:calc(100dvh - var(--identity-notice-mobile-top,58px) - 14px)!important;
     padding:14px;
     border-radius:18px;
     z-index:990;
+    box-sizing:border-box;
+    overflow-x:hidden;
+    overflow-y:auto;
+    background:
+      radial-gradient(circle at 14% 12%, rgba(255,255,255,.82), transparent 38%),
+      linear-gradient(180deg, rgba(255,250,242,.98), rgba(250,238,224,.98));
+    border:1px solid rgba(174,132,94,.30);
+    box-shadow:
+      0 14px 34px rgba(86,61,39,.18),
+      inset 0 1px 0 rgba(255,255,255,.92);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    transform-origin:top right;
+  }
+
+  .identityNoticePanel::before{
+    content:"";
+    position:absolute;
+    right:42px;
+    top:-7px;
+    width:14px;
+    height:14px;
+    transform:rotate(45deg);
+    background:rgba(255,250,242,.98);
+    border-left:1px solid rgba(174,132,94,.24);
+    border-top:1px solid rgba(174,132,94,.24);
+    box-shadow:-2px -2px 5px rgba(86,61,39,.03);
+  }
+
+  .identityNoticeTitle{
+    position:relative;
+    padding:0 0 9px;
+    margin-bottom:10px;
+    border-bottom:1px solid rgba(174,132,94,.16);
+  }
+
+  .identityNoticePanel *,
+  .identityNoticePanel *::before,
+  .identityNoticePanel *::after{
+    max-width:100%;
+    box-sizing:border-box;
+  }
+
+  .identityNoticePanel button,
+  .identityNoticePanel a{
+    max-width:100%;
+    white-space:normal;
+    overflow-wrap:anywhere;
   }
 
 
@@ -2688,6 +2736,169 @@ button{
   .taskCardMain .taskActionRow{
     width:100%;
     justify-content:flex-start;
+  }
+}
+
+
+/* =========================================================
+   宿舍手机版信息完整显示修复
+   - 我的任务：两行结构，第一行完整歌名，第二行信息 + 右侧操作按钮
+   - 钱包记录：标题/备注允许换行，金额固定在右侧，不再裁切关键信息
+========================================================= */
+@media(max-width:540px){
+  #view-tasks .taskList{
+    gap:10px;
+  }
+
+  #view-tasks .taskCardCompact{
+    padding:12px 12px;
+  }
+
+  #view-tasks .taskCompactLine{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) max-content;
+    grid-template-areas:
+      "task-title task-title"
+      "task-meta task-action";
+    align-items:center;
+    column-gap:10px;
+    row-gap:8px;
+    width:100%;
+    min-width:0;
+  }
+
+  #view-tasks .taskCompactLine .taskCardTitle{
+    grid-area:task-title;
+    margin:0;
+    min-width:0;
+    max-width:100%;
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+    line-height:1.45;
+  }
+
+  #view-tasks .taskMetaInline{
+    grid-area:task-meta;
+    min-width:0;
+    max-width:100%;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    column-gap:8px;
+    row-gap:3px;
+    white-space:normal;
+    overflow:visible;
+    line-height:1.45;
+  }
+
+  #view-tasks .taskMetaInline span{
+    min-width:0;
+    max-width:100%;
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+  }
+
+  #view-tasks .taskCompactLine .taskActionRow{
+    grid-area:task-action;
+    width:auto;
+    min-width:max-content;
+    margin:0;
+    justify-content:flex-end;
+    align-self:center;
+  }
+
+  #view-tasks .taskCompactLine .dormMiniBtn,
+  #view-tasks .taskCompactLine .dormSubBtn{
+    min-height:32px;
+    padding:0 12px;
+    flex:0 0 auto;
+    white-space:nowrap;
+  }
+
+  #view-tasks .taskDoneText{
+    display:inline-block;
+    max-width:118px;
+    white-space:normal;
+    text-align:right;
+    line-height:1.35;
+  }
+
+  #view-wallet .ledgerList{
+    gap:9px;
+  }
+
+  #view-wallet .ledgerItem{
+    grid-template-columns:24px minmax(0,1fr) max-content;
+    gap:9px;
+    align-items:start;
+    padding:11px 12px;
+  }
+
+  #view-wallet .ledgerArrow{
+    width:23px;
+    height:23px;
+    margin-top:1px;
+    flex:0 0 23px;
+  }
+
+  #view-wallet .ledgerItem > div:nth-child(2){
+    min-width:0;
+    max-width:100%;
+  }
+
+  #view-wallet .ledgerItem strong,
+  #view-wallet .ledgerMeta{
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+  }
+
+  #view-wallet .ledgerItem strong{
+    line-height:1.4;
+    margin-bottom:4px;
+  }
+
+  #view-wallet .ledgerMeta{
+    line-height:1.45;
+  }
+
+  #view-wallet .ledgerAmount{
+    align-self:start;
+    padding-top:2px;
+    white-space:nowrap;
+    flex:0 0 auto;
+    text-align:right;
+  }
+}
+
+@media(max-width:360px){
+  #view-tasks .taskCompactLine{
+    grid-template-columns:minmax(0,1fr) auto;
+    column-gap:8px;
+  }
+
+  #view-tasks .taskCompactLine .dormMiniBtn,
+  #view-tasks .taskCompactLine .dormSubBtn{
+    padding:0 10px;
+    font-size:11px;
+  }
+
+  #view-wallet .ledgerItem{
+    grid-template-columns:22px minmax(0,1fr) max-content;
+    gap:7px;
+    padding:10px 10px;
+  }
+
+  #view-wallet .ledgerAmount{
+    font-size:14px;
   }
 }
 
