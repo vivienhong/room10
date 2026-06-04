@@ -84,6 +84,12 @@
   --room-nav-wash:rgba(214,185,157,.20);
   --room-nav-current-bg:rgba(239,224,205,.86);
 
+
+  /* 宿舍主体坐标 */
+  --dorm-app-left:8.8%;
+  --dorm-app-top:22.2%;
+  --dorm-app-width:60.8%;
+  --dorm-app-height:58.5%;
 }
 
 html,body{
@@ -545,12 +551,7 @@ button{
    宿舍主体内容：参考花房最满意版本，适配钱包记录 / 系统通知
    不改房间按钮、身份组件、权限和数据库逻辑
 ========================================================= */
-:root{
-  --dorm-app-left:8.8%;
-  --dorm-app-top:22.2%;
-  --dorm-app-width:60.8%;
-  --dorm-app-height:58.5%;
-}
+
 
 #dormShell{
   position:absolute;
@@ -1304,7 +1305,6 @@ button{
 
 .emptyText{color:#947256;}
 .errorText{color:#9b4a35;}
-
 
 
 /* =========================================================
@@ -2304,11 +2304,8 @@ button{
     font-size:9.5px;
   }
 
-}
 
-
-/* 541px-760px：按钮略微收紧，避免压住档案内容 */
-@media(min-width:541px) and (max-width:760px){
+  /* 541px-760px：档案顶部按钮收紧，避免压住档案内容 */
   .profileTopAction .dormMiniBtn,
   .profileTopAction .dormSubBtn{
     min-height:calc(25px * var(--ui-scale));
@@ -2316,6 +2313,10 @@ button{
     font-size:calc(9.8px * var(--ui-scale));
   }
 }
+
+
+/* 541px-760px：按钮略微收紧，避免压住档案内容 */
+
 
 @media(max-height:620px) and (min-width:541px){
 #view-notice .sectionDesc,
@@ -2714,38 +2715,9 @@ button{
   .taskActionRow{
     justify-content:center;
   }
-}
-
-@media (max-width:540px){
-  .taskTabs{
-    gap:6px;
-  }
-
-  .taskTab{
-    min-height:32px;
-    padding:0 6px;
-    font-size:11px;
-  }
-
-  .taskCardMain{
-    align-items:flex-start;
-    flex-direction:column;
-    gap:10px;
-  }
-
-  .taskCardMain .taskActionRow{
-    width:100%;
-    justify-content:flex-start;
-  }
-}
 
 
-/* =========================================================
-   宿舍手机版信息完整显示修复
-   - 我的任务：两行结构，第一行完整歌名，第二行信息 + 右侧操作按钮
-   - 钱包记录：标题/备注允许换行，金额固定在右侧，不再裁切关键信息
-========================================================= */
-@media(max-width:540px){
+  /* 宿舍手机版信息完整显示修复：任务两行结构 + 钱包记录完整展示 */
   #view-tasks .taskList{
     gap:10px;
   }
