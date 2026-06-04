@@ -27,8 +27,18 @@
   --identity-text:#6f5746;
   --identity-shadow:rgba(106,78,55,0.08);
   --identity-name-y:0em;
+  --identity-separator-y:0em;
+  --identity-role-y:0em;
   --identity-notice-y:0em;
   --identity-button-y:0em;
+
+  /* 手机版身份文字独立校准 */
+  --identity-mobile-name-y:0em;
+  --identity-mobile-separator-y:0em;
+  --identity-mobile-role-y:0em;
+  --identity-mobile-notice-y:0em;
+  --identity-mobile-button-y:0em;
+  --identity-notice-mobile-top:58px;
 
   /* 房间按钮：使用全站通用模板，底图百分比绑定 */
   --room-nav-top:6.35%;
@@ -499,17 +509,36 @@ button,input{
   justify-content:center;
   max-width:100%;
   color:var(--identity-text);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
   font-size:calc(13px * var(--s));
   font-weight:850;
-  line-height:1.22;
+  line-height:1;
   letter-spacing:0;
   white-space:nowrap;
   overflow:visible;
   text-overflow:clip;
-  transform:translateY(var(--identity-name-y));
 }
 
 .identityNameText.isOverflowSafe{overflow:hidden;text-overflow:ellipsis;}
+
+.identityNamePart{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  line-height:1;
+  white-space:nowrap;
+  font:inherit;
+}
+
+.identityNickname{transform:translateY(var(--identity-name-y));}
+.identitySeparator{
+  margin:0 .08em;
+  color:rgba(111,87,70,.78);
+  font-weight:800;
+  transform:translateY(var(--identity-separator-y));
+}
+.identityRole{transform:translateY(var(--identity-role-y));}
 
 .identityNoticeWrap{
   position:relative;
@@ -2441,13 +2470,15 @@ button,input{
 
   #overlay{
     position:relative;
-    left:auto;
-    top:auto;
-    width:100%;
-    height:auto;
+    left:auto!important;
+    top:auto!important;
+    width:100%!important;
+    height:auto!important;
     display:flex;
     flex-direction:column;
     gap:10px;
+    margin:0!important;
+    padding:0!important;
     overflow:visible;
     --ui-scale:1;
     pointer-events:auto;
@@ -2457,30 +2488,57 @@ button,input{
     position:relative;
     inset:auto;
     width:100%;
+    height:106px;
+    min-height:106px;
+    max-height:106px;
     display:grid;
     grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:repeat(3,32px);
     gap:5px;
+    margin:0!important;
+    padding:0!important;
+    align-content:start;
     order:0;
     z-index:20;
     pointer-events:auto;
     --s:1;
   }
 
-  .navBtn{
+  .roomNavLayer .navBtn{
     position:relative;
     left:auto!important;
     top:auto!important;
+    display:flex!important;
+    align-items:center;
+    justify-content:center;
     width:100%;
     height:32px;
     min-width:0;
     min-height:32px;
+    max-height:32px;
+    margin:0!important;
+    padding:0!important;
     border-radius:10px;
     font-size:12px;
+    line-height:1;
+    white-space:nowrap;
     overflow:hidden;
   }
 
-  .navLabel{padding-top:.04em;}
-  .navEffect{display:none;}
+  .roomNavLayer .navBtn.is-current{
+    display:flex!important;
+    visibility:visible!important;
+  }
+
+  .roomNavLayer .navLabel{
+    height:100%;
+    padding-top:.04em;
+    line-height:1;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+
+  .roomNavLayer .navEffect{display:none;}
 
   .roomIdentity{
     --s:1;
@@ -2492,7 +2550,7 @@ button,input{
     height:40px;
     min-height:40px;
     order:1;
-    z-index:30;
+    z-index:90;
   }
 
   .roomIdentityBar{
@@ -2502,19 +2560,118 @@ button,input{
     border-radius:14px;
   }
 
-  .identityNameBox{padding:0 9px;border-radius:10px;}
-  .identityNameText{font-size:12px;line-height:1.22;}
-  .identityNoticeBtn{font-size:14px;border-radius:10px;}
-  .identityAuthBtn{font-size:11px;border-radius:10px;}
+  .identityNameBox{
+    padding:0 9px;
+    border-radius:10px;
+    overflow:visible;
+  }
+
+  .identityNameText{
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
+    font-size:12px;
+    font-weight:850;
+    line-height:1;
+    letter-spacing:0;
+    white-space:nowrap;
+    overflow:visible;
+  }
+
+  .identityNamePart{
+    line-height:1;
+    white-space:nowrap;
+  }
+
+  .identityNickname{transform:translateY(var(--identity-mobile-name-y));}
+  .identitySeparator{
+    margin:0 .08em;
+    color:rgba(111,87,70,.78);
+    font-size:12px;
+    font-weight:800;
+    transform:translateY(var(--identity-mobile-separator-y));
+  }
+  .identityRole{transform:translateY(var(--identity-mobile-role-y));}
+
+  .identityNoticeBtn{
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
+    font-size:14px;
+    border-radius:10px;
+  }
+
+  .identityNoticeIcon{transform:translateY(var(--identity-mobile-notice-y));}
+
+  .identityAuthBtn{
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
+    font-size:11px;
+    font-weight:850;
+    line-height:1;
+    border-radius:10px;
+  }
+
+  .identityAuthText{
+    line-height:1;
+    transform:translateY(var(--identity-mobile-button-y));
+  }
 
   .identityNoticePanel{
+    position:fixed!important;
+    top:var(--identity-notice-mobile-top,58px)!important;
+    left:auto!important;
+    right:max(20px, env(safe-area-inset-right))!important;
+    width:min(320px, calc(100% - 40px))!important;
+    min-width:0!important;
+    max-width:320px!important;
+    max-height:calc(100dvh - var(--identity-notice-mobile-top,58px) - 14px)!important;
+    padding:14px;
+    border-radius:18px;
+    z-index:990;
+    box-sizing:border-box;
+    overflow-x:hidden;
+    overflow-y:auto;
+    background:
+      radial-gradient(circle at 14% 12%, rgba(255,255,255,.82), transparent 38%),
+      linear-gradient(180deg, rgba(255,250,242,.98), rgba(250,238,224,.98));
+    border:1px solid rgba(174,132,94,.30);
+    box-shadow:
+      0 14px 34px rgba(86,61,39,.18),
+      inset 0 1px 0 rgba(255,255,255,.92);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    transform-origin:top right;
+  }
+
+  .identityNoticePanel::before{
+    content:"";
     position:absolute;
-    top:calc(100% + 8px);
-    right:0;
-    left:auto;
-    width:min(320px, calc(100vw - 24px));
-    max-height:60dvh;
-    z-index:999;
+    right:42px;
+    top:-7px;
+    width:14px;
+    height:14px;
+    transform:rotate(45deg);
+    background:rgba(255,250,242,.98);
+    border-left:1px solid rgba(174,132,94,.24);
+    border-top:1px solid rgba(174,132,94,.24);
+    box-shadow:-2px -2px 5px rgba(86,61,39,.03);
+  }
+
+  .identityNoticeTitle{
+    position:relative;
+    padding:0 0 9px;
+    margin-bottom:10px;
+    border-bottom:1px solid rgba(174,132,94,.16);
+  }
+
+  .identityNoticePanel *,
+  .identityNoticePanel *::before,
+  .identityNoticePanel *::after{
+    max-width:100%;
+    box-sizing:border-box;
+  }
+
+  .identityNoticePanel button,
+  .identityNoticePanel a{
+    max-width:100%;
+    white-space:normal;
+    overflow-wrap:anywhere;
   }
 
   #flowerApp{
@@ -2792,7 +2949,11 @@ button,input{
     <section class="roomIdentity" id="roomIdentity" aria-label="当前身份">
       <div class="roomIdentityBar">
         <div class="identityNameBox">
-          <span class="identityNameText" id="identityNameText">参观者</span>
+          <span class="identityNameText" id="identityNameText">
+            <span class="identityNamePart identityNickname" id="identityNicknameText">参观者</span>
+            <span class="identityNamePart identitySeparator" id="identitySeparatorText"></span>
+            <span class="identityNamePart identityRole" id="identityRoleText"></span>
+          </span>
         </div>
 
         <div class="identityNoticeWrap">
@@ -2887,7 +3048,7 @@ button,input{
               <span class="potActionContent">🧺 花房商人</span>
             </button>
 
-            <section class="flowerMerchantInlinePanel" id="flowerMerchantInlinePanel" aria-hidden="true">
+            <section class="flowerMerchantInlinePanel" id="flowerMerchantInlinePanel" aria-hidden="true" inert>
               <header class="flowerMerchantInlineHeader">
                 <div>
                   <div class="flowerMerchantInlineTitle">🧺 花房商人</div>
@@ -2909,7 +3070,7 @@ button,input{
 
       <div id="flowerToast" role="status" aria-live="polite"></div>
 
-      <div class="flowerMerchantModalMask" id="flowerMerchantModal" aria-hidden="true" onclick="handleFlowerMerchantMaskClick(event)">
+      <div class="flowerMerchantModalMask" id="flowerMerchantModal" aria-hidden="true" inert onclick="handleFlowerMerchantMaskClick(event)">
         <section class="flowerMerchantModal" role="dialog" aria-modal="true" aria-labelledby="flowerMerchantTitle">
           <header class="flowerMerchantModalHeader">
             <div class="flowerMerchantModalTitle">
@@ -3000,6 +3161,9 @@ const overlay = document.getElementById("overlay");
 const root = document.documentElement;
 
 const currentUserText = document.getElementById("identityNameText");
+const identityNicknameText = document.getElementById("identityNicknameText");
+const identitySeparatorText = document.getElementById("identitySeparatorText");
+const identityRoleText = document.getElementById("identityRoleText");
 const identityAuthBtn = document.getElementById("identityAuthBtn");
 const identityAuthText = identityAuthBtn?.querySelector(".identityAuthText");
 
@@ -3177,6 +3341,19 @@ function readLocalAuth(){
   return Boolean(authState.loggedIn && authState.nickname && authState.memberId);
 }
 
+function setIdentityNameParts(name, role){
+  if(identityNicknameText && identitySeparatorText && identityRoleText){
+    identityNicknameText.textContent = name || "参观者";
+    identitySeparatorText.textContent = role ? "｜" : "";
+    identityRoleText.textContent = role || "";
+    return;
+  }
+
+  if(currentUserText){
+    currentUserText.textContent = role ? `${name}｜${role}` : (name || "参观者");
+  }
+}
+
 function updateIdentity(member){
   readLocalAuth();
 
@@ -3186,12 +3363,12 @@ function updateIdentity(member){
   if(!currentUserText || !identityAuthText) return;
 
   if(!name || !authState.loggedIn){
-    currentUserText.textContent = "参观者";
+    setIdentityNameParts("参观者", "");
     identityAuthText.textContent = "登录";
     return;
   }
 
-  currentUserText.textContent = `${name}｜${role}`;
+  setIdentityNameParts(name, role);
   identityAuthText.textContent = "登出";
 }
 
@@ -4335,17 +4512,17 @@ async function loadFlowerMerchantRows(){
 
   if(!auth) return [];
 
-  const { data, error } = await supabaseClient
-    .from("flower_holdings")
-    .select("id,member_id,flower_key,quantity,source,status,quality,sell_multiplier,harvest_stage,is_sellable,acquired_at,fresh_until,wither_at,note")
-    .eq("member_id", auth.memberId)
-    .eq("source", "harvest")
-    .gt("quantity", 0)
-    .eq("is_sellable", true)
-    .in("status", ["fresh", "withering"])
-    .in("quality", ["planted_fresh", "low_quality", "wilting"])
-    .order("wither_at", { ascending:true });
+  const timezoneOffset = Number.isFinite(Number(auth.timezoneOffset))
+    ? Number(auth.timezoneOffset)
+    : new Date().getTimezoneOffset();
 
+  const args = {
+    p_member_id:auth.memberId,
+    p_member_code:auth.memberCode,
+    p_timezone_offset_minutes:timezoneOffset
+  };
+
+  const { data, error } = await supabaseClient.rpc("get_flower_merchant_inventory", args);
   if(error) throw error;
 
   const rows = (Array.isArray(data) ? data : []).filter(isMerchantEligibleHolding);
@@ -4356,6 +4533,74 @@ async function loadFlowerMerchantRows(){
 
 function getMerchantGroup(groupKey){
   return (flowerState.merchantGroups || []).find(group => group.key === groupKey) || null;
+}
+
+
+function getMerchantUnitPriceFromRow(row){
+  const value = Number(row?.current_unit_price);
+  if(Number.isFinite(value) && value > 0) return Math.floor(value);
+  return 0;
+}
+
+function getMerchantIncomeForQuantity(group, quantity){
+  if(!group || !Array.isArray(group.rows) || !group.rows.length) return 0;
+
+  let remaining = Math.max(0, Math.floor(Number(quantity) || 0));
+  let total = 0;
+
+  for(const row of group.rows){
+    if(remaining <= 0) break;
+    const rowQty = Math.max(0, Math.floor(Number(row.quantity) || 0));
+    const take = Math.min(remaining, rowQty);
+    const unitPrice = getMerchantUnitPriceFromRow(row);
+    if(take > 0 && unitPrice > 0){
+      total += take * unitPrice;
+    }
+    remaining -= take;
+  }
+
+  return total;
+}
+
+function getMerchantGroupUnitPrice(group){
+  if(!group || !Array.isArray(group.rows) || !group.rows.length) return 0;
+
+  const prices = group.rows
+    .map(row => getMerchantUnitPriceFromRow(row))
+    .filter(price => price > 0);
+
+  if(!prices.length) return 0;
+  const first = prices[0];
+  return prices.every(price => price === first) ? first : 0;
+}
+
+function getMerchantGroupPriceText(group){
+  const unitPrice = getMerchantGroupUnitPrice(group);
+  if(unitPrice > 0) return `当前价格 ${unitPrice} 金币/朵`;
+
+  const totalIncome = getMerchantIncomeForQuantity(group, group?.totalQuantity || 0);
+  if(totalIncome > 0) return `当前可得 ${totalIncome} 金币`;
+
+  return "当前价格待刷新";
+}
+
+function getMerchantQuantityInputs(groupKey){
+  return Array.from(document.querySelectorAll(`[data-merchant-qty="${CSS.escape(groupKey)}"]`));
+}
+
+function isElementUsableInCurrentMerchantPanel(el){
+  if(!el) return false;
+  if(el.closest('[inert]')) return false;
+  const panel = el.closest('#flowerMerchantModal, #flowerMerchantInlinePanel');
+  if(panel && panel.getAttribute('aria-hidden') === 'true') return false;
+  return true;
+}
+
+function getActiveMerchantQuantityInput(groupKey){
+  const inputs = getMerchantQuantityInputs(groupKey);
+  const focused = inputs.find(input => input === document.activeElement && isElementUsableInCurrentMerchantPanel(input));
+  if(focused) return focused;
+  return inputs.find(isElementUsableInCurrentMerchantPanel) || inputs[0] || null;
 }
 
 function getFlowerMerchantInventoryBoxes(){
@@ -4377,6 +4622,7 @@ function renderFlowerMerchantInventory(rows=flowerState.merchantRows){
 
   if(!groups.length){
     setFlowerMerchantInventoryHtml(`<div class="flowerMerchantEmpty">当前没有可交给商人的花束。</div>`);
+    bindFlowerMerchantDelegatedEvents();
     return;
   }
 
@@ -4390,17 +4636,18 @@ function renderFlowerMerchantInventory(rows=flowerState.merchantRows){
             <div>
               <div class="flowerMerchantItemName">${escapeHtml(group.displayName)}</div>
               <div class="flowerMerchantItemMeta">${escapeHtml(group.qualityText)}｜共 ${group.totalQuantity} 朵${escapeHtml(witherText)}</div>
+              <div class="flowerMerchantItemMeta">${escapeHtml(getMerchantGroupPriceText(group))}</div>
             </div>
             <div class="flowerMerchantItemAction">
               <span class="flowerMerchantQtyLabel">数量</span>
-              <input class="flowerMerchantQtyInput" type="number" min="1" max="${group.totalQuantity}" step="1" value="1" inputmode="numeric" data-merchant-qty="${escapeHtml(group.key)}" oninput="handleMerchantQuantityInput('${escapeHtml(group.key)}')" aria-label="${escapeHtml(group.displayName)}出售数量">
-              <button class="flowerMerchantMaxBtn" type="button" onclick="setMerchantGroupQuantity('${escapeHtml(group.key)}', ${group.totalQuantity})">最大</button>
-              <button class="flowerMerchantSellBtn" type="button" data-merchant-sell-btn onclick="prepareSellMerchantGroup('${escapeHtml(group.key)}')">交给商人</button>
+              <input class="flowerMerchantQtyInput" type="number" min="1" max="${group.totalQuantity}" step="1" value="1" inputmode="numeric" data-merchant-qty="${escapeHtml(group.key)}" data-merchant-action="qty" aria-label="${escapeHtml(group.displayName)}出售数量">
+              <button class="flowerMerchantMaxBtn" type="button" data-merchant-action="max" data-merchant-key="${escapeHtml(group.key)}">最大</button>
+              <button class="flowerMerchantSellBtn" type="button" data-merchant-sell-btn data-merchant-action="prepare" data-merchant-key="${escapeHtml(group.key)}">交给商人</button>
             </div>
             <div class="flowerMerchantConfirmRow">
               <span data-merchant-confirm-text="${escapeHtml(group.key)}">确认交给商人？</span>
-              <button class="flowerMerchantCancelBtn" type="button" onclick="cancelSellMerchantGroup('${escapeHtml(group.key)}')">取消</button>
-              <button class="flowerMerchantConfirmBtn" type="button" onclick="confirmSellMerchantGroup('${escapeHtml(group.key)}')">确认出售</button>
+              <button class="flowerMerchantCancelBtn" type="button" data-merchant-action="cancel" data-merchant-key="${escapeHtml(group.key)}">取消</button>
+              <button class="flowerMerchantConfirmBtn" type="button" data-merchant-action="confirm" data-merchant-key="${escapeHtml(group.key)}">确认出售</button>
             </div>
           </div>
         `;
@@ -4409,11 +4656,12 @@ function renderFlowerMerchantInventory(rows=flowerState.merchantRows){
   `;
 
   setFlowerMerchantInventoryHtml(html);
+  bindFlowerMerchantDelegatedEvents();
 }
 
 function getMerchantGroupQuantity(groupKey){
   const group = getMerchantGroup(groupKey);
-  const input = document.querySelector(`[data-merchant-qty="${CSS.escape(groupKey)}"]`);
+  const input = getActiveMerchantQuantityInput(groupKey);
   const max = Math.max(1, Math.floor(Number(group?.totalQuantity) || 1));
   const raw = Math.floor(Number(input?.value) || 1);
   return Math.max(1, Math.min(max, raw));
@@ -4421,11 +4669,14 @@ function getMerchantGroupQuantity(groupKey){
 
 function setMerchantGroupQuantity(groupKey, quantity){
   const group = getMerchantGroup(groupKey);
-  const input = document.querySelector(`[data-merchant-qty="${CSS.escape(groupKey)}"]`);
-  if(!group || !input) return;
+  const inputs = getMerchantQuantityInputs(groupKey);
+  if(!group || !inputs.length) return;
 
   const max = Math.max(1, Math.floor(Number(group.totalQuantity) || 1));
-  input.value = String(Math.max(1, Math.min(max, Math.floor(Number(quantity) || 1))));
+  const value = String(Math.max(1, Math.min(max, Math.floor(Number(quantity) || 1))));
+  inputs.forEach(input => {
+    input.value = value;
+  });
   updateMerchantConfirmText(groupKey);
 }
 
@@ -4435,24 +4686,30 @@ function handleMerchantQuantityInput(groupKey){
 
 function updateMerchantConfirmText(groupKey){
   const group = getMerchantGroup(groupKey);
-  const target = document.querySelector(`[data-merchant-confirm-text="${CSS.escape(groupKey)}"]`);
-  if(!group || !target) return;
+  if(!group) return;
 
   const quantity = getMerchantGroupQuantity(groupKey);
-  target.textContent = `确认把「${group.displayName}」×${quantity} 交给花房商人吗？`;
+  const income = getMerchantIncomeForQuantity(group, quantity);
+  const incomeText = income > 0 ? `当前可得 ${income} 金币。` : "当前价格待刷新。";
+  document.querySelectorAll(`[data-merchant-confirm-text="${CSS.escape(groupKey)}"]`).forEach(target => {
+    target.textContent = `确认把「${group.displayName}」×${quantity} 交给花房商人吗？${incomeText}`;
+  });
 }
 
 function prepareSellMerchantGroup(groupKey){
   document.querySelectorAll(".flowerMerchantItem.is-confirming").forEach(item => item.classList.remove("is-confirming"));
-  const card = document.querySelector(`[data-merchant-group="${CSS.escape(groupKey)}"]`);
-  if(!card) return;
+  const cards = Array.from(document.querySelectorAll(`[data-merchant-group="${CSS.escape(groupKey)}"]`));
+  if(!cards.length) return;
   updateMerchantConfirmText(groupKey);
-  card.classList.add("is-confirming");
+  cards.forEach(card => {
+    if(isElementUsableInCurrentMerchantPanel(card)) card.classList.add("is-confirming");
+  });
 }
 
 function cancelSellMerchantGroup(groupKey){
-  const card = document.querySelector(`[data-merchant-group="${CSS.escape(groupKey)}"]`);
-  if(card) card.classList.remove("is-confirming");
+  document.querySelectorAll(`[data-merchant-group="${CSS.escape(groupKey)}"]`).forEach(card => {
+    card.classList.remove("is-confirming");
+  });
 }
 
 function scrollFlowerMerchantIntoView(){
@@ -4489,20 +4746,27 @@ async function openFlowerMerchant(){
     if(modal){
       modal.classList.remove("show");
       modal.setAttribute("aria-hidden", "true");
+      modal.setAttribute("inert", "");
     }
     if(inlinePanel){
       inlinePanel.classList.add("show");
       inlinePanel.setAttribute("aria-hidden", "false");
+      inlinePanel.removeAttribute("inert");
       scrollFlowerMerchantIntoView();
     }
   }else{
     if(inlinePanel){
       inlinePanel.classList.remove("show");
       inlinePanel.setAttribute("aria-hidden", "true");
+      inlinePanel.setAttribute("inert", "");
     }
     if(modal){
       modal.classList.add("show");
       modal.setAttribute("aria-hidden", "false");
+      modal.removeAttribute("inert");
+      requestAnimationFrame(() => {
+        modal.querySelector(".flowerMerchantClose")?.focus?.();
+      });
     }
   }
 
@@ -4522,15 +4786,24 @@ async function openFlowerMerchant(){
 function closeFlowerMerchant(){
   const modal = document.getElementById("flowerMerchantModal");
   const inlinePanel = document.getElementById("flowerMerchantInlinePanel");
+  const entryBtn = document.getElementById("flowerMerchantBtn");
+  const active = document.activeElement;
+
+  if(active && active !== document.body && (modal?.contains(active) || inlinePanel?.contains(active))){
+    active.blur();
+    requestAnimationFrame(() => entryBtn?.focus?.());
+  }
 
   if(modal){
     modal.classList.remove("show");
     modal.setAttribute("aria-hidden", "true");
+    modal.setAttribute("inert", "");
   }
 
   if(inlinePanel){
     inlinePanel.classList.remove("show");
     inlinePanel.setAttribute("aria-hidden", "true");
+    inlinePanel.setAttribute("inert", "");
   }
 }
 
@@ -4540,20 +4813,96 @@ function handleFlowerMerchantMaskClick(event){
   }
 }
 
+function handleFlowerMerchantDelegatedClick(event){
+  if(event?.__merchantHandled) return;
+  const btn = event.target?.closest?.("[data-merchant-action]");
+  if(!btn || !isElementUsableInCurrentMerchantPanel(btn)) return;
+
+  event.__merchantHandled = true;
+  event.preventDefault?.();
+  event.stopPropagation?.();
+
+  const action = btn.dataset.merchantAction;
+  const groupKey = btn.dataset.merchantKey || btn.dataset.merchantQty;
+  if(!groupKey) return;
+
+  if(action === "max"){
+    const group = getMerchantGroup(groupKey);
+    if(group) setMerchantGroupQuantity(groupKey, group.totalQuantity);
+    return;
+  }
+
+  if(action === "prepare"){
+    prepareSellMerchantGroup(groupKey);
+    return;
+  }
+
+  if(action === "cancel"){
+    cancelSellMerchantGroup(groupKey);
+    return;
+  }
+
+  if(action === "confirm"){
+    if(btn.disabled) return;
+    void confirmSellMerchantGroup(groupKey);
+  }
+}
+
+function bindFlowerMerchantDelegatedEvents(){
+  [
+    document.getElementById("flowerMerchantInventory"),
+    document.getElementById("flowerMerchantInlineInventory")
+  ].filter(Boolean).forEach(box => {
+    if(box.dataset.merchantEventsBound === "true") return;
+    box.dataset.merchantEventsBound = "true";
+    box.addEventListener("click", handleFlowerMerchantDelegatedClick);
+    box.addEventListener("input", event => {
+      const input = event.target?.closest?.('[data-merchant-action="qty"]');
+      if(!input || !isElementUsableInCurrentMerchantPanel(input)) return;
+      handleMerchantQuantityInput(input.dataset.merchantQty);
+    });
+  });
+}
+
 async function sellMerchantHolding(holdingId, quantity){
   const auth = getFlowerAuth();
   if(!auth) throw new Error("请先登录");
+  if(!holdingId) throw new Error("缺少花束批次，无法出售");
+
+  const safeQuantity = Math.max(1, Math.floor(Number(quantity) || 1));
+  const timezoneOffset = Number.isFinite(Number(auth.timezoneOffset))
+    ? Number(auth.timezoneOffset)
+    : new Date().getTimezoneOffset();
 
   const { data, error } = await supabaseClient.rpc("sell_flower_to_merchant", {
     p_member_id:auth.memberId,
     p_member_code:auth.memberCode,
-    p_holding_id:String(holdingId),
-    p_quantity:Math.max(1, Math.floor(Number(quantity) || 1)),
-    p_timezone_offset_minutes:auth.timezoneOffset
+    p_holding_id:holdingId,
+    p_quantity:safeQuantity,
+    p_timezone_offset_minutes:timezoneOffset
   });
 
   if(error) throw error;
-  return Array.isArray(data) ? data[0] : data;
+  const row = Array.isArray(data) ? data[0] : data;
+  if(row && row.success === false){
+    throw new Error(row.message || "花房商人交易失败");
+  }
+  if(!row){
+    throw new Error("花房商人没有返回交易结果，请刷新后再试");
+  }
+  return row;
+}
+
+function setMerchantTradeBusy(isBusy){
+  document.querySelectorAll("[data-merchant-sell-btn], .flowerMerchantConfirmBtn, .flowerMerchantCancelBtn, .flowerMerchantMaxBtn, .flowerMerchantQtyInput").forEach(el => {
+    el.disabled = !!isBusy;
+  });
+}
+
+function setMerchantConfirmStatus(groupKey, text){
+  document.querySelectorAll(`[data-merchant-confirm-text="${CSS.escape(groupKey)}"]`).forEach(target => {
+    target.textContent = text;
+  });
 }
 
 async function confirmSellMerchantGroup(groupKey){
@@ -4575,9 +4924,11 @@ async function confirmSellMerchantGroup(groupKey){
     return;
   }
 
-  document.querySelectorAll("[data-merchant-sell-btn], .flowerMerchantConfirmBtn, .flowerMerchantCancelBtn").forEach(btn => {
-    btn.disabled = true;
-  });
+  const originalQuantity = remaining;
+  const runningText = `正在把「${group.displayName}」×${originalQuantity} 交给花房商人...`;
+  setMerchantConfirmStatus(groupKey, runningText);
+  setMerchantTradeBusy(true);
+  showFlowerToast("正在交给花房商人...");
 
   let soldQuantity = 0;
   let totalIncome = 0;
@@ -4585,13 +4936,18 @@ async function confirmSellMerchantGroup(groupKey){
   try{
     for(const holding of group.rows){
       if(remaining <= 0) break;
-      const take = Math.min(remaining, Math.max(0, Math.floor(Number(holding.quantity) || 0)));
+      const holdingQuantity = Math.max(0, Math.floor(Number(holding.quantity) || 0));
+      const take = Math.min(remaining, holdingQuantity);
       if(take <= 0) continue;
 
       const row = await sellMerchantHolding(holding.id, take);
       soldQuantity += Number(row?.sold_quantity) || take;
       totalIncome += Number(row?.total_income) || 0;
       remaining -= take;
+    }
+
+    if(soldQuantity <= 0){
+      throw new Error("没有成功出售任何花束，请刷新后再试");
     }
 
     await Promise.all([
@@ -4607,10 +4963,11 @@ async function confirmSellMerchantGroup(groupKey){
     showFlowerToast(`花房商人收购成功：${group.displayName} ×${soldQuantity}${incomeText}`);
   }catch(err){
     console.error("花房商人交易失败：", err);
-    showFlowerToast(err?.message || "花房商人交易失败", "error");
-    document.querySelectorAll("[data-merchant-sell-btn], .flowerMerchantConfirmBtn, .flowerMerchantCancelBtn").forEach(btn => {
-      btn.disabled = false;
-    });
+    const message = err?.message || err?.details || err?.hint || "花房商人交易失败";
+    showFlowerToast(message, "error");
+    setMerchantTradeBusy(false);
+    setMerchantGroupQuantity(groupKey, originalQuantity);
+    updateMerchantConfirmText(groupKey);
   }
 }
 
@@ -5670,8 +6027,7 @@ window.addEventListener("resize", () => {
   if(isTinyScreen()){
     const modal = document.getElementById("flowerMerchantModal");
     if(modal){
-      modal.classList.remove("show");
-      modal.setAttribute("aria-hidden", "true");
+      closeFlowerMerchant();
     }
   }
 });
