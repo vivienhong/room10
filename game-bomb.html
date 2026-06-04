@@ -1116,25 +1116,78 @@ button{cursor:pointer;}
 }
 
 @media (max-height:760px){
-  .page{padding:8px;}
-  .bomb-shell{padding:12px; gap:9px; border-radius:24px;}
+  html,body{
+    height:auto;
+    min-height:100%;
+    overflow:auto;
+  }
+
+  .page{
+    height:auto;
+    min-height:100dvh;
+    align-items:flex-start;
+    padding:8px;
+  }
+
+  .bomb-shell{
+    height:auto;
+    min-height:calc(100dvh - 16px);
+    overflow:visible;
+    padding:12px;
+    gap:9px;
+    border-radius:24px;
+  }
+
   .bomb-header{padding-right:64px;}
   .bomb-title{font-size:clamp(28px, 4vw, 44px);}
-  .game-stack{gap:9px; grid-template-rows:minmax(0, 1.18fr) minmax(128px, .72fr);}
-  .play-card{padding:12px; gap:8px;}
+
+  .game-stack{
+    gap:9px;
+    grid-template-rows:minmax(292px, auto) minmax(108px, auto);
+  }
+
+  .play-card{
+    overflow:visible;
+    padding:12px;
+    gap:8px;
+    grid-template-rows:auto auto minmax(188px, auto);
+  }
+
+  .core-stage{
+    min-height:188px;
+  }
+
   .notice{padding:8px 12px; font-size:13px; line-height:1.36;}
-  .bomb-art-wrap{width:min(210px, 82%);}
+  .bomb-art-wrap{width:min(180px, 76%);}
+  .bomb-zone{
+    min-height:178px;
+    grid-template-rows:minmax(92px, 1fr) auto;
+  }
   .bomb-zone,.control-zone{padding:12px;}
+  .control-zone{justify-content:flex-start;}
   .range-card{min-height:58px; padding:8px 10px;}
   .range-value{font-size:clamp(28px, 4.4vw, 46px);}
   .meta-pill{min-height:44px;}
   .action-panel{padding:10px;}
   .big-action{min-height:42px;}
+  .bottom-grid{min-height:108px;}
   .list-card{padding:12px;}
   .section-title{font-size:17px;}
+  .participants,.moves{max-height:104px;}
   .person-item,.move-item{padding:7px 9px; font-size:12px;}
   .modal-card{max-height:88dvh; padding:16px;}
   .history-list{max-height:54dvh;}
+}
+
+@media (max-height:560px) and (min-width:721px){
+  .bomb-title{font-size:clamp(24px, 3.4vw, 36px);}
+  .mode-panel{padding:8px 10px;}
+  .mode-tab,.soft-btn{min-height:30px; font-size:12px;}
+  .game-stack{grid-template-rows:minmax(270px, auto) minmax(96px, auto);}
+  .play-card{grid-template-rows:auto auto minmax(174px, auto);}
+  .core-stage{min-height:174px;}
+  .bomb-art-wrap{width:min(154px, 70%);}
+  .participants,.moves{max-height:88px;}
 }
 
 @media (max-width:900px){
@@ -1188,6 +1241,8 @@ button{cursor:pointer;}
   .header-actions{width:100%; display:grid; grid-template-columns:1fr 1fr;}
   .soft-btn{padding:0 10px;}
   .modal-title{font-size:28px;}
+  .award-name{font-size:18px;}
+  .award-row{gap:8px;}
 }
 </style>
 </head>
@@ -1200,7 +1255,7 @@ button{cursor:pointer;}
 
       <div class="header-actions">
         <button id="historyBtn" class="soft-btn" type="button">历史战局</button>
-        <button id="newGameBtn" class="soft-btn primary" type="button">开启新炸弹</button>
+        <button id="newGameBtn" class="soft-btn primary" type="button">开启新战局</button>
       </div>
     </header>
 
@@ -1221,14 +1276,14 @@ button{cursor:pointer;}
         <div id="gameNo" class="game-no">还没有进行中的战局</div>
 
         <div id="statusNotice" class="notice">
-          点击“开启新炸弹”开始。
+          点击“开启新战局”开始。
         </div>
 
         <div class="core-stage">
           <div class="bomb-zone">
             <div class="bomb-art-wrap">
               <div class="bomb-art-glow"></div>
-              <img id="bombArt" class="bomb-art" src="boom.png" alt="拆弹专家炸弹图案">
+              <img id="bombArt" class="bomb-art" src="boom.png" alt="拆弹专家图案">
             </div>
 
             <div class="range-card">
@@ -1344,7 +1399,7 @@ button{cursor:pointer;}
     <div class="ending-bomb">💥</div>
     <div class="modal-head">
       <div class="modal-kicker">结局播报</div>
-      <h2 id="endingTitle" class="modal-title">炸弹已引爆</h2>
+      <h2 id="endingTitle" class="modal-title">战局已结束</h2>
       <p id="endingSubtitle" class="modal-subtitle">本局结果已经记录。</p>
     </div>
 
@@ -1450,6 +1505,8 @@ let guestReady = false;
 let pendingAwardGameId = null;
 let pendingAwardItems = [];
 let awardClaimBusy = false;
+let endingReplayBusy = false;
+let lastActiveGameSnapshot = null;
 
 function isLoggedIn(){ return localStorage.getItem("room10LoggedIn") === "true"; }
 function getCurrentUser(){ return localStorage.getItem("room10User") || ""; }
@@ -1499,7 +1556,7 @@ function updateModeUI(){
     modeTip.textContent = "自由模式可自定义数字上限。";
   }
 
-  newGameBtn.textContent = currentMode === "free" ? "开启自由炸弹" : "开启快速炸弹";
+  newGameBtn.textContent = currentMode === "free" ? "开启自由战局" : "开启快速战局";
 }
 
 async function switchBombMode(mode){
@@ -1514,6 +1571,7 @@ async function switchBombMode(mode){
   updateModeUI();
   renderGame();
   await loadGame({ force:true });
+  await checkPendingEndedResult();
 }
 
 function escapeHtml(value){
@@ -1532,6 +1590,221 @@ function firstValue(source, keys, fallback = ""){
     }
   }
   return fallback;
+}
+
+const ENDING_SEEN_PREFIX = "room10BombEndingSeen:";
+
+function getEndingSeenKey(gameId){
+  return `${ENDING_SEEN_PREFIX}${gameId || ""}`;
+}
+
+function hasSeenEnding(gameId){
+  if(!gameId) return true;
+  return localStorage.getItem(getEndingSeenKey(gameId)) === "true";
+}
+
+function markEndingSeen(gameId){
+  if(gameId) localStorage.setItem(getEndingSeenKey(gameId), "true");
+}
+
+function getGameIdFromItem(item){
+  return firstValue(item, ["game_id", "id"], "");
+}
+
+function isCurrentActorParticipant(game){
+  if(!game || !Array.isArray(game.participants)) return false;
+  const actorKey = getCurrentActorKey();
+  const memberId = getCurrentMemberId();
+  const guestName = guestNameInput.value.trim().toLowerCase();
+
+  return game.participants.some(item => {
+    if(actorKey && item.actor_key === actorKey) return true;
+    if(memberId && item.member_id === memberId) return true;
+    if(guestName && item.actor_type === "guest" && String(item.actor_name || item.guest_name || "").trim().toLowerCase() === guestName) return true;
+    return false;
+  });
+}
+
+function buildEndingPayloadFromRecord(item, fallbackGame = {}){
+  const gameNoValue = firstValue(item, ["game_no", "game_number", "no"], fallbackGame.game_no || "--");
+  const loser = firstValue(item, ["exploded_actor_name", "loser_name", "actor_name", "final_actor_name", "exploded_guest_name"], "未知玩家");
+  const explodedNumber = firstValue(item, ["exploded_number", "bomb_number", "final_number", "claim_number"], "--");
+  const roundCount = firstValue(item, ["round_count", "total_rounds", "move_count"], fallbackGame.round_count || "--");
+  const participantCount = firstValue(item, ["participant_count", "players_count", "actor_count"], Array.isArray(fallbackGame.participants) ? fallbackGame.participants.length : "--");
+
+  return {
+    gameId:getGameIdFromItem(item) || fallbackGame.game_id || fallbackGame.id || "",
+    gameNo:gameNoValue,
+    loser,
+    explodedNumber,
+    roundCount,
+    participantCount,
+    message:item?.message || ""
+  };
+}
+
+function getBombHonorItems(items){
+  const list = Array.isArray(items) ? items : [];
+  return list.filter(item => {
+    const marker = [
+      item.requirement_key,
+      item.code,
+      item.source_group,
+      item.source_type,
+      item.item_type,
+      item.name,
+      item.description
+    ].map(value => String(value || "").toLowerCase()).join(" ");
+
+    return marker.includes("bomb")
+      || marker.includes("number_bomb")
+      || marker.includes("拆弹")
+      || marker.includes("炸弹")
+      || marker.includes("爆破")
+      || marker.includes("爆炸");
+  });
+}
+
+async function getHistoryResultForGame(game){
+  const gameId = game?.game_id || game?.id || "";
+  const gameNoValue = String(game?.game_no || "");
+
+  try{
+    const { data, error } = await client.rpc("get_bomb_game_history_by_mode", {
+      p_game_mode: game?.game_mode || currentMode
+    });
+
+    if(error) return null;
+
+    const list = Array.isArray(data) ? data : [];
+    return list.find(item => {
+      const itemGameId = String(getGameIdFromItem(item) || "");
+      const itemGameNo = String(firstValue(item, ["game_no", "game_number", "no"], ""));
+      return (gameId && itemGameId === gameId) || (gameNoValue && itemGameNo === gameNoValue);
+    }) || null;
+  }catch(err){
+    console.error(err);
+    return null;
+  }
+}
+
+async function getEndingPayloadForGame(game){
+  if(!game) return null;
+  const historyItem = await getHistoryResultForGame(game);
+  if(historyItem) return buildEndingPayloadFromRecord(historyItem, game);
+
+  const gameId = game.game_id || game.id || "";
+  if(!gameId) return null;
+
+  try{
+    const [{ data: gameRows }, { data: moveRows }] = await Promise.all([
+      client.from("bomb_games")
+        .select("id, game_no, game_mode, bomb_number, round_count, ended_at, exploded_guest_name")
+        .eq("id", gameId)
+        .limit(1),
+      client.from("bomb_moves")
+        .select("game_id, actor_name, claim_number, move_no, is_exploded")
+        .eq("game_id", gameId)
+        .eq("is_exploded", true)
+        .limit(1)
+    ]);
+
+    const gameRow = Array.isArray(gameRows) ? gameRows[0] : null;
+    const moveRow = Array.isArray(moveRows) ? moveRows[0] : null;
+
+    if(gameRow || moveRow){
+      return buildEndingPayloadFromRecord({
+        game_id:gameId,
+        game_no:gameRow?.game_no || game.game_no,
+        exploded_actor_name:moveRow?.actor_name || gameRow?.exploded_guest_name,
+        exploded_number:moveRow?.claim_number || gameRow?.bomb_number,
+        round_count:gameRow?.round_count || game.round_count,
+        participant_count:Array.isArray(game.participants) ? game.participants.length : ""
+      }, game);
+    }
+  }catch(err){
+    console.error(err);
+  }
+
+  return buildEndingPayloadFromRecord({
+    game_id:gameId,
+    game_no:game.game_no,
+    exploded_actor_name:"未知玩家",
+    exploded_number:"--",
+    round_count:game.round_count,
+    participant_count:Array.isArray(game.participants) ? game.participants.length : "--"
+  }, game);
+}
+
+function showEndingOnce(payload, options = {}){
+  const gameId = payload?.gameId || options.gameId || "";
+  if(!payload || hasSeenEnding(gameId)) return false;
+
+  if(options.withBoom) playBoom();
+  showEndingModal(payload);
+  markEndingSeen(gameId);
+  return true;
+}
+
+async function replayFinishedGameForParticipant(finishedGame, options = {}){
+  if(endingReplayBusy || !finishedGame) return false;
+
+  const gameId = finishedGame.game_id || finishedGame.id || "";
+  if(hasSeenEnding(gameId) || !isCurrentActorParticipant(finishedGame)) return false;
+
+  try{
+    endingReplayBusy = true;
+    const payload = await getEndingPayloadForGame(finishedGame);
+    return showEndingOnce(payload, { gameId, withBoom:!!options.withBoom });
+  }finally{
+    endingReplayBusy = false;
+  }
+}
+
+async function checkPendingEndedResult(){
+  const actorKey = getCurrentActorKey();
+  if(endingReplayBusy || !actorKey) return false;
+
+  try{
+    endingReplayBusy = true;
+
+    const { data: participantRows, error: participantError } = await client
+      .from("bomb_participants")
+      .select("game_id, actor_key, actor_name, first_joined_at")
+      .eq("actor_key", actorKey)
+      .order("first_joined_at", { ascending:false })
+      .limit(16);
+
+    if(participantError || !Array.isArray(participantRows) || !participantRows.length) return false;
+
+    const ids = participantRows
+      .map(item => item.game_id)
+      .filter(Boolean);
+
+    if(!ids.length) return false;
+
+    const { data: gameRows, error: gameError } = await client
+      .from("bomb_games")
+      .select("id, game_no, game_mode, bomb_number, round_count, ended_at, exploded_guest_name")
+      .in("id", ids)
+      .eq("game_mode", currentMode)
+      .not("ended_at", "is", null)
+      .order("ended_at", { ascending:false })
+      .limit(8);
+
+    if(gameError || !Array.isArray(gameRows) || !gameRows.length) return false;
+
+    const target = gameRows.find(item => !hasSeenEnding(item.id));
+    if(!target) return false;
+
+    const payload = await getEndingPayloadForGame(target);
+    return showEndingOnce(payload, { gameId:target.id, withBoom:false });
+  }catch(err){
+    console.error(err);
+    return false;
+  }finally{
+    endingReplayBusy = false;
+  }
 }
 
 function setBusy(value){
@@ -1555,6 +1828,18 @@ function showToast(message){
   resultToast.classList.remove("hidden");
   clearTimeout(showToast._timer);
   showToast._timer = setTimeout(() => resultToast.classList.add("hidden"), 3200);
+}
+
+function isRpcFailure(data){
+  return !!(data && (data.success === false || data.ok === false));
+}
+
+function getRpcMessage(data, fallback){
+  return data?.message || fallback;
+}
+
+function closeModal(layer){
+  layer.classList.add("hidden");
 }
 
 function playBoom(){
@@ -1666,6 +1951,7 @@ async function submitLogin(){
     renderGame();
     showToast(`登录成功：${member.nickname || nickname}`);
     checkBombAwards(null);
+    checkPendingEndedResult();
   }catch(err){
     console.error(err);
     loginMessage.textContent = "登录失败，请稍后再试。";
@@ -1763,6 +2049,7 @@ async function loadGame(options = {}){
   try{
     if(!force && !silent) setBusy(true);
 
+    const previousActiveGame = currentGame && currentGame.has_active_game ? currentGame : null;
     const oldSignature = getGameSignature(currentGame);
     const oldGameId = currentGame?.game_id || "";
 
@@ -1784,6 +2071,12 @@ async function loadGame(options = {}){
 
     if(force || changed){
       renderGame();
+    }
+
+    if(currentGame && currentGame.has_active_game){
+      lastActiveGameSnapshot = currentGame;
+    }else if(previousActiveGame && oldGameId){
+      replayFinishedGameForParticipant(previousActiveGame, { withBoom:true });
     }
 
     if(
@@ -1810,16 +2103,25 @@ async function createGame(){
     bombExplodedVisible = false;
     bombArt.src = "boom.png";
     setBusy(true);
+
     const { data, error } = await client.rpc("create_bomb_game_by_mode", {
       p_game_mode: currentMode,
       p_max_number: currentMode === "free" ? getFreeMaxNumber() : 100
     });
+
     if(error){
       console.error(error);
       showToast("开启失败：" + (error.message || "请稍后再试"));
       return;
     }
-    showToast(data?.message || "新的炸弹已经开启。");
+
+    if(isRpcFailure(data)){
+      showToast(getRpcMessage(data, "当前模式已有进行中的战局。"));
+      await loadGame({ force:true });
+      return;
+    }
+
+    showToast(getRpcMessage(data, "新的拆弹战局已经开启。"));
     closeEndingModal();
     await loadGame({ force:true });
   }catch(err){
@@ -1915,7 +2217,7 @@ function openHistoryModal(){
 }
 
 function closeHistoryModal(){
-  historyModal.classList.add("hidden");
+  closeModal(historyModal);
 }
 
 function buildEndingPayload(data, actor, claimNumberValue){
@@ -1928,6 +2230,7 @@ function buildEndingPayload(data, actor, claimNumberValue){
   const participantCount = firstValue(data, ["participant_count", "players_count"], Math.max(1, participantBase));
 
   return {
+    gameId:game.game_id || game.id || "",
     gameNo: gameNoValue,
     loser,
     explodedNumber,
@@ -1938,7 +2241,7 @@ function buildEndingPayload(data, actor, claimNumberValue){
 }
 
 function showEndingModal(payload){
-  endingTitle.textContent = `${getModeLabel()}｜第 ${payload.gameNo} 局炸弹已引爆`;
+  endingTitle.textContent = `${getModeLabel()}｜第 ${payload.gameNo} 局战局已结束`;
   endingSubtitle.textContent = "本局拆弹结果已经播报。";
   endingText.innerHTML = `
     <strong>${escapeHtml(payload.loser)}</strong> 认领到了最终爆炸数字。
@@ -1964,7 +2267,7 @@ function showEndingModal(payload){
 }
 
 function closeEndingModal(){
-  endingModal.classList.add("hidden");
+  closeModal(endingModal);
 }
 
 function getAwardRewardGold(item){
@@ -2003,11 +2306,11 @@ const achievementRouteMap = {
       { value:1, name:"羽加迪姆勒维奥萨失败现场" },
       { value:5, name:"爆破手" },
       { value:15, name:"资深爆破手" },
-      { value:30, name:"炸弹专家Ⅰ" },
-      { value:50, name:"炸弹专家Ⅱ" },
-      { value:80, name:"炸弹专家Ⅲ" },
-      { value:120, name:"炸弹专家Ⅳ" },
-      { value:200, name:"炸弹专家Ⅴ" }
+      { value:30, name:"拆弹专家Ⅰ" },
+      { value:50, name:"拆弹专家Ⅱ" },
+      { value:80, name:"拆弹专家Ⅲ" },
+      { value:120, name:"拆弹专家Ⅳ" },
+      { value:200, name:"拆弹专家Ⅴ" }
     ]
   },
   bomb_success_count: {
@@ -2177,7 +2480,7 @@ async function checkBombAwards(gameId = null){
       return [];
     }
 
-    const awards = Array.isArray(data) ? data : [];
+    const awards = getBombHonorItems(data);
     if(awards.length && awardModal.classList.contains("hidden")){
       showAwardModal(awards, gameId);
     }
@@ -2234,48 +2537,74 @@ async function claimVisibleBombAwards(){
   }
 }
 
-async function claimNumber(method){
-  if(!currentGame || !currentGame.has_active_game){ showToast("当前没有进行中的游戏。"); return; }
-  const actor = getActorPayload();
-  if(!actor.ok){ showToast(actor.message); return; }
-  if(isCurrentActorBlocked()){ showToast("不能连续认领数字，需要换一个人接手。"); return; }
+function getClaimRpcParams(actor, method, claimNumberValue = null){
+  return {
+    p_game_mode: currentMode,
+    p_actor_type: actor.actor_type,
+    p_nickname: actor.nickname,
+    p_member_code: actor.member_code,
+    p_guest_name: actor.guest_name,
+    p_claim_number: claimNumberValue,
+    p_claim_method: method,
+    p_expected_game_id: currentGame.game_id,
+    p_expected_round_count: currentGame.round_count
+  };
+}
 
-  const isRandom = method === "random";
-  const claimNumberValue = isRandom ? null : Number(numberSlider.value);
+function handleExplodedClaimResult(data, actor, fallbackNumber){
+  if(!data?.is_exploded) return;
+
+  const endedGameId = currentGame.game_id;
+  const payload = buildEndingPayload(data, actor, data?.claim_number ?? fallbackNumber);
+  payload.gameId = endedGameId;
+
+  showEndingOnce(payload, { gameId:endedGameId, withBoom:true });
+  loadHistory();
+
+  setTimeout(() => {
+    checkBombAwards(endedGameId);
+  }, 450);
+}
+
+async function submitBombClaim(method, claimNumberValue = null, fallbackNumber = claimNumberValue){
+  if(!currentGame || !currentGame.has_active_game){
+    showToast("当前没有进行中的游戏。");
+    return;
+  }
+
+  const actor = getActorPayload();
+  if(!actor.ok){
+    showToast(actor.message);
+    return;
+  }
+
+  if(isCurrentActorBlocked()){
+    showToast("不能连续认领数字，需要换一个人接手。");
+    return;
+  }
 
   try{
     setBusy(true);
-    const { data, error } = await client.rpc("claim_bomb_number_by_mode", {
-      p_game_mode: currentMode,
-      p_actor_type: actor.actor_type,
-      p_nickname: actor.nickname,
-      p_member_code: actor.member_code,
-      p_guest_name: actor.guest_name,
-      p_claim_number: claimNumberValue,
-      p_claim_method: isRandom ? "random" : "manual",
-      p_expected_game_id: currentGame.game_id,
-      p_expected_round_count: currentGame.round_count
-    });
+
+    const { data, error } = await client.rpc(
+      "claim_bomb_number_by_mode",
+      getClaimRpcParams(actor, method, claimNumberValue)
+    );
+
     if(error){
       console.error(error);
       showToast("认领失败：" + (error.message || "请稍后再试"));
       return;
     }
 
-    showToast(data?.message || "操作完成。");
-
-    if(data?.is_exploded){
-      const endedGameId = currentGame.game_id;
-
-      playBoom();
-      showEndingModal(buildEndingPayload(data, actor, data?.claim_number ?? claimNumberValue));
-      loadHistory();
-
-      setTimeout(() => {
-        checkBombAwards(endedGameId);
-      }, 450);
+    if(isRpcFailure(data)){
+      showToast(getRpcMessage(data, "认领失败，请刷新后重试。"));
+      await loadGame({ force:true });
+      return;
     }
 
+    showToast(getRpcMessage(data, "操作完成。"));
+    handleExplodedClaimResult(data, actor, fallbackNumber);
     await loadGame({ force:true });
   }catch(err){
     console.error(err);
@@ -2285,54 +2614,15 @@ async function claimNumber(method){
   }
 }
 
+async function claimNumber(method){
+  const isRandom = method === "random";
+  const claimNumberValue = isRandom ? null : Number(numberSlider.value);
+  await submitBombClaim(isRandom ? "random" : "manual", claimNumberValue, claimNumberValue);
+}
+
 async function claimFinalNumber(){
-  if(!currentGame || !currentGame.has_active_game){ showToast("当前没有进行中的游戏。"); return; }
-  const actor = getActorPayload();
-  if(!actor.ok){ showToast(actor.message); return; }
-  if(isCurrentActorBlocked()){ showToast("不能连续认领数字，需要换一个人接手。"); return; }
-
-  const finalClaimNumber = currentGame.final_remaining_number ?? currentGame.current_min ?? "--";
-
-  try{
-    setBusy(true);
-    const { data, error } = await client.rpc("claim_bomb_number_by_mode", {
-      p_game_mode: currentMode,
-      p_actor_type: actor.actor_type,
-      p_nickname: actor.nickname,
-      p_member_code: actor.member_code,
-      p_guest_name: actor.guest_name,
-      p_claim_number: null,
-      p_claim_method: "final_claim",
-      p_expected_game_id: currentGame.game_id,
-      p_expected_round_count: currentGame.round_count
-    });
-    if(error){
-      console.error(error);
-      showToast("认领失败：" + (error.message || "请稍后再试"));
-      return;
-    }
-
-    showToast(data?.message || "操作完成。");
-
-    if(data?.is_exploded){
-      const endedGameId = currentGame.game_id;
-
-      playBoom();
-      showEndingModal(buildEndingPayload(data, actor, data?.claim_number ?? finalClaimNumber));
-      loadHistory();
-
-      setTimeout(() => {
-        checkBombAwards(endedGameId);
-      }, 450);
-    }
-
-    await loadGame({ force:true });
-  }catch(err){
-    console.error(err);
-    showToast("认领失败：" + (err.message || "请稍后再试"));
-  }finally{
-    setBusy(false);
-  }
+  const finalClaimNumber = currentGame?.final_remaining_number ?? currentGame?.current_min ?? "--";
+  await submitBombClaim("final_claim", null, finalClaimNumber);
 }
 
 function renderGame(){
@@ -2365,7 +2655,7 @@ function renderGame(){
   const danger = getDangerLabel(min, max, phase);
   const blocked = isCurrentActorBlocked();
 
-  gameNo.textContent = `第 ${currentGame.game_no} 局炸弹`;
+  gameNo.textContent = `${getModeLabel(currentGame.game_mode || currentMode)}｜第 ${currentGame.game_no} 局`;
   rangeValue.textContent = `${min} - ${max}`;
   roundValue.textContent = String(currentGame.round_count || 0);
   dangerValue.textContent = danger;
@@ -2503,6 +2793,7 @@ useGuestBtn.addEventListener("click", () => {
   updateIdentityUI();
   renderGame();
   showToast(`已使用游客名字：${name}`);
+  checkPendingEndedResult();
 });
 
 numberSlider.addEventListener("input", () => {
@@ -2518,9 +2809,11 @@ async function initBombPage(){
   updateModeUI();
   await loadGame({ force:true });
   await checkBombAwards(null);
+  await checkPendingEndedResult();
 
   setTimeout(() => {
     checkBombAwards(null);
+    checkPendingEndedResult();
   }, 800);
 }
 
@@ -2528,10 +2821,13 @@ initBombPage();
 
 setInterval(() => {
   if(document.hidden || busy || refreshBusy) return;
-  if(!currentGame || !currentGame.has_active_game) return;
   if(!hasAnyPlayerInput()) return;
 
-  loadGame({ silent:true });
+  if(currentGame && currentGame.has_active_game){
+    loadGame({ silent:true });
+  }else{
+    checkPendingEndedResult();
+  }
 }, 8000);
 </script>
 </body>
