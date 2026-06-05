@@ -12,19 +12,11 @@
 
 :root{
   --bg-ui-scale:1;
-  /* =========================================================
-     全站底图 / 组件缩放
-     - 541px 及以上：#overlay 绑定到底图实际显示区域
-     - 540px 以下：手机流式布局
-  ========================================================= */
+
   --ui-scale:var(--bg-ui-scale);
   --room-nav-scale:var(--ui-scale);
   --identity-scale:var(--ui-scale);
 
-  /* =========================================================
-     身份组件坐标
-     位置参考最新身份组件测试版
-  ========================================================= */
   --identity-right:7.35%;
   --identity-top:6.46%;
   --identity-base-width:232;
@@ -40,7 +32,6 @@
   --identity-notice-y:0em;
   --identity-button-y:0em;
 
-  /* 手机版身份文字独立校准：昵称 / 分隔符 / 身份 / 铃铛 / 登录按钮 */
   --identity-mobile-name-y:0em;
   --identity-mobile-separator-y:0em;
   --identity-mobile-role-y:0em;
@@ -48,17 +39,6 @@
   --identity-mobile-button-y:0em;
   --identity-notice-mobile-top:58px;
 
-  /* =========================================================
-     房间按钮坐标
-     默认位置参考游戏房顶部安全区：
-     避开左上门牌，也避开右侧身份组件。
-     9 个按钮固定显示，等宽、等高、等间隔。
-  ========================================================= */
-  /*
-     外框位置改为底图百分比绑定，不再使用 px × scale。
-     原来的 px × scale 在 541px–650px 会被最小缩放值卡住，导致整排按钮相对底图向右漂移。
-     百分比只控制按钮外框位置和尺寸；--room-nav-scale 只控制内部文字、圆角、阴影和特效。
-  */
   --room-nav-top:6.35%;
   --room-nav-start-left:25.83%;
   --room-nav-btn-width:4.72%;
@@ -84,8 +64,6 @@
   --room-nav-wash:rgba(214,185,157,.20);
   --room-nav-current-bg:rgba(239,224,205,.86);
 
-
-  /* 宿舍主体坐标 */
   --dorm-app-left:8.8%;
   --dorm-app-top:22.2%;
   --dorm-app-width:60.8%;
@@ -160,7 +138,6 @@ button{
 
 #overlay *{pointer-events:auto;}
 
-/* 修复：#overlay * 的 pointer-events:auto 会把整层 roomNavLayer 变成透明遮罩，挡住主面板按钮 */
 #overlay .roomNavLayer{
   pointer-events:none!important;
 }
@@ -179,10 +156,6 @@ button{
   pointer-events:auto!important;
 }
 
-
-/* =========================================================
-   房间按钮组件
-========================================================= */
 .roomNavLayer{
   position:absolute;
   inset:0;
@@ -333,9 +306,6 @@ button{
 .navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82);}
 .navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82);}
 
-/* =========================================================
-   身份组件
-========================================================= */
 .roomIdentity{
   --s:var(--identity-scale,1);
   position:absolute;
@@ -546,12 +516,6 @@ button{
   line-height:1.6;
   padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s));
 }
-
-/* =========================================================
-   宿舍主体内容：参考花房最满意版本，适配钱包记录 / 系统通知
-   不改房间按钮、身份组件、权限和数据库逻辑
-========================================================= */
-
 
 #dormShell{
   position:absolute;
@@ -914,7 +878,6 @@ button{
   line-height:1.4;
   font-weight:800;
 }
-
 
 .collectionBookCard{
   appearance:none;
@@ -1296,7 +1259,6 @@ button{
   white-space:nowrap;
 }
 
-
 .emptyText,.errorText{
   font-size:13px;
   line-height:1.7;
@@ -1306,10 +1268,6 @@ button{
 .emptyText{color:#947256;}
 .errorText{color:#9b4a35;}
 
-
-/* =========================================================
-   我的任务 / 我的档案
-========================================================= */
 .taskList,
 .profileScroll{
   flex:1 1 auto;
@@ -1320,7 +1278,6 @@ button{
   flex-direction:column;
   gap:10px;
 }
-
 
 .taskTabs{
   display:flex;
@@ -1993,7 +1950,6 @@ button{
     font-size:calc(9.5px * var(--ui-scale));
   }
 
-
   #view-tasks .sectionTitle,
   #view-inventory .sectionTitle,
   #view-profile .sectionTitle{
@@ -2011,7 +1967,6 @@ button{
     line-height:1.35;
     flex:0 0 auto;
   }
-
 
   .collectionBookCard{
     min-height:calc(104px * var(--ui-scale));
@@ -2143,8 +2098,6 @@ button{
 
 }
 
-
-/* 541px-1122px：档案顶部按钮改到第二行右侧，避免被主面板裁切 */
 @media(min-width:541px) and (max-width:1122px){
   .profileTop{
     grid-template-columns:auto minmax(0,1fr);
@@ -2211,7 +2164,6 @@ button{
   #mainPanel{
     padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
   }
-
 
   .collectionBookCard{
     min-height:calc(92px * var(--ui-scale));
@@ -2304,8 +2256,6 @@ button{
     font-size:9.5px;
   }
 
-
-  /* 541px-760px：档案顶部按钮收紧，避免压住档案内容 */
   .profileTopAction .dormMiniBtn,
   .profileTopAction .dormSubBtn{
     min-height:calc(25px * var(--ui-scale));
@@ -2314,10 +2264,6 @@ button{
   }
 }
 
-
-/* 541px-760px：按钮略微收紧，避免压住档案内容 */
-
-
 @media(max-height:620px) and (min-width:541px){
 #view-notice .sectionDesc,
   .walletLedgerHead .sectionDesc{
@@ -2325,9 +2271,6 @@ button{
   }
 }
 
-/* =========================================================
-   540px 及以下手机版：顺序为房间切换 → 身份组件 → 主面板
-========================================================= */
 @media(max-width:540px){
   html,body{
     overflow-x:hidden;
@@ -2563,7 +2506,6 @@ button{
     overflow-wrap:anywhere;
   }
 
-
   #dormShell{
     position:relative;
     left:auto;
@@ -2667,7 +2609,6 @@ button{
     grid-template-columns:1fr;
   }
 
-
   .collectionBookCard{
     min-height:112px;
     padding:9px;
@@ -2716,8 +2657,6 @@ button{
     justify-content:center;
   }
 
-
-  /* 宿舍手机版信息完整显示修复：任务两行结构 + 钱包记录完整展示 */
   #view-tasks .taskList{
     gap:10px;
   }
@@ -2873,7 +2812,6 @@ button{
     font-size:14px;
   }
 }
-
 </style>
 </head>
 
