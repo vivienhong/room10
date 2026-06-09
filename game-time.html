@@ -166,13 +166,13 @@
     }
 
     .mode-tabs {
-      width: min(390px, 100%);
+      width: min(520px, 100%);
       margin: 12px auto 0;
       padding: 5px;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 5px;
-      border-radius: 999px;
+      border-radius: 18px;
       background: rgba(255, 252, 248, 0.62);
       border: 1px solid rgba(255, 255, 255, 0.74);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.80);
@@ -258,6 +258,19 @@
 
     .timer-zone.running { animation: softBreathe 1.6s ease-in-out infinite; }
 
+    .timer-zone.starter-layout {
+      min-height: 132px;
+      gap: 10px;
+    }
+
+    .timer-zone.starter-layout .timer-display {
+      display: none;
+    }
+
+    .timer-zone.starter-layout .timer-hint {
+      margin-top: 0;
+    }
+
     .timer-display {
       font-size: clamp(32px, 5.4vw, 58px);
       line-height: 1;
@@ -281,6 +294,54 @@
       color: var(--tea-soft);
       font-size: 13px;
       line-height: 1.55;
+    }
+
+
+
+    .signal-panel {
+      width: min(280px, 100%);
+      min-height: 58px;
+      margin-bottom: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .signal-panel.show { display: flex; }
+
+    .signal-light {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(159, 123, 91, 0.20);
+      border: 2px solid rgba(255,255,255,0.78);
+      box-shadow: inset 0 2px 8px rgba(91, 61, 35, 0.12), 0 5px 12px rgba(112,78,45,0.08);
+      transition: 0.18s ease;
+    }
+
+    .signal-panel.single .signal-light {
+      width: 58px;
+      height: 58px;
+    }
+
+    .signal-light.red {
+      background: radial-gradient(circle at 35% 28%, #ffd8d1 0%, #e05a4b 42%, #9e2f28 100%);
+      box-shadow: 0 0 18px rgba(224, 90, 75, 0.34), inset 0 2px 8px rgba(255,255,255,0.32);
+    }
+
+    .signal-light.green {
+      background: radial-gradient(circle at 35% 28%, #dcffd8 0%, #66bd59 42%, #357f35 100%);
+      box-shadow: 0 0 18px rgba(102, 189, 89, 0.36), inset 0 2px 8px rgba(255,255,255,0.32);
+    }
+
+    .signal-light.flash {
+      animation: signalFlash 0.42s ease both;
+    }
+
+    @keyframes signalFlash {
+      0%, 100% { transform: scale(1); }
+      45% { transform: scale(1.16); }
     }
 
     .action-row {
@@ -1242,7 +1303,55 @@
 
       .main-card { padding: 16px 12px; }
 
-      .action-row { grid-template-columns: 1fr; }
+  
+
+    .signal-panel {
+      width: min(280px, 100%);
+      min-height: 58px;
+      margin-bottom: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .signal-panel.show { display: flex; }
+
+    .signal-light {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(159, 123, 91, 0.20);
+      border: 2px solid rgba(255,255,255,0.78);
+      box-shadow: inset 0 2px 8px rgba(91, 61, 35, 0.12), 0 5px 12px rgba(112,78,45,0.08);
+      transition: 0.18s ease;
+    }
+
+    .signal-panel.single .signal-light {
+      width: 58px;
+      height: 58px;
+    }
+
+    .signal-light.red {
+      background: radial-gradient(circle at 35% 28%, #ffd8d1 0%, #e05a4b 42%, #9e2f28 100%);
+      box-shadow: 0 0 18px rgba(224, 90, 75, 0.34), inset 0 2px 8px rgba(255,255,255,0.32);
+    }
+
+    .signal-light.green {
+      background: radial-gradient(circle at 35% 28%, #dcffd8 0%, #66bd59 42%, #357f35 100%);
+      box-shadow: 0 0 18px rgba(102, 189, 89, 0.36), inset 0 2px 8px rgba(255,255,255,0.32);
+    }
+
+    .signal-light.flash {
+      animation: signalFlash 0.42s ease both;
+    }
+
+    @keyframes signalFlash {
+      0%, 100% { transform: scale(1); }
+      45% { transform: scale(1.16); }
+    }
+
+    .action-row { grid-template-columns: 1fr; }
 
       .result-box {
         display: none;
@@ -1262,6 +1371,9 @@
     }
 
     @media (max-width: 560px) {
+      .mode-tabs,
+      .rank-tabs { grid-template-columns: 1fr 1fr; border-radius: 18px; }
+
       .auth-row,
       .guest-row { grid-template-columns: 1fr; }
 
@@ -1313,11 +1425,13 @@
         <section class="main-card">
           <div class="title-wrap">
             <h1>时间的答案</h1>
-            <p class="subtitle">看准目标秒数，点击开始。前 1.5 秒会显示计时，之后凭感觉按下停止，误差越小排名越高。</p>
+            <p class="subtitle">看准目标秒数，在不同模式里完成你的时间挑战。</p>
 
             <div class="mode-tabs" role="tablist" aria-label="游戏模式">
               <button class="mode-tab active" type="button" data-mode="daily">当前挑战</button>
               <button class="mode-tab" type="button" data-mode="free">自由模式</button>
+              <button class="mode-tab" type="button" data-mode="reaction">发令枪</button>
+              <button class="mode-tab" type="button" data-mode="athlete">运动员</button>
             </div>
           </div>
 
@@ -1328,6 +1442,7 @@
           </div>
 
           <div class="timer-zone" id="timerZone">
+            <div class="signal-panel" id="signalPanel" aria-hidden="true"></div>
             <div class="timer-display" id="timerDisplay">00:00.000</div>
             <div class="timer-hint" id="timerHint">开始后前 1.5 秒显示毫秒计时，之后时间会消失。</div>
           </div>
@@ -1395,6 +1510,8 @@
           <div class="rank-tabs">
             <button class="rank-tab active" type="button" data-rank="daily">当前挑战榜</button>
             <button class="rank-tab" type="button" data-rank="free">自由模式榜</button>
+            <button class="rank-tab" type="button" data-rank="reaction">发令枪榜</button>
+            <button class="rank-tab" type="button" data-rank="athlete">运动员榜</button>
           </div>
 
           <div class="rank-note-line" id="rankNote">前 5｜按绝对误差</div>
@@ -1460,6 +1577,11 @@
       visibleMs: 1500,
       freeTargetMin: 5,
       freeTargetMax: 30,
+      reactionWaitMin: 2000,
+      reactionWaitMax: 6000,
+      athleteTargetMin: 10.001,
+      athleteTargetMax: 30,
+      signalStepMs: 520,
       guestStorageKey: "room10_time_answer_guest"
     };
 
@@ -1474,6 +1596,7 @@
       targetNumber: document.getElementById("targetNumber"),
       issueText: document.getElementById("issueText"),
       timerZone: document.getElementById("timerZone"),
+      signalPanel: document.getElementById("signalPanel"),
       timerDisplay: document.getElementById("timerDisplay"),
       timerHint: document.getElementById("timerHint"),
       startBtn: document.getElementById("startBtn"),
@@ -1484,6 +1607,7 @@
       resultActual: document.getElementById("resultActual"),
       resultError: document.getElementById("resultError"),
       resultRank: document.getElementById("resultRank"),
+      resultNames: document.querySelectorAll(".result-name"),
       leaderboard: document.getElementById("leaderboard"),
       rankNote: document.getElementById("rankNote"),
       lastWinnerText: document.getElementById("lastWinnerText"),
@@ -1508,8 +1632,14 @@
     let currentRank = "daily";
     let currentIssue = null;
     let featuredRecords = null;
+    const modeFeaturedSummaries = {};
     let freeTargetSeconds = makeRandomTarget(CONFIG.freeTargetMin, CONFIG.freeTargetMax);
+    let athleteTargetSeconds = makeRandomTarget(CONFIG.athleteTargetMin, CONFIG.athleteTargetMax);
     let running = false;
+    let starterState = "idle";
+    let reactionTimerId = null;
+    let reactionReadyAt = 0;
+    let athleteRunStartedAt = 0;
     let startedAt = 0;
     let rafId = null;
     let activeActor = null;
@@ -1600,7 +1730,8 @@
     async function switchMode(mode) {
       if (running) return;
 
-      const nextMode = mode === "free" ? "free" : "daily";
+      const allowedModes = ["daily", "free", "reaction", "athlete"];
+      const nextMode = allowedModes.includes(mode) ? mode : "daily";
       const modeChanged = currentMode !== nextMode;
       currentMode = nextMode;
       currentRank = nextMode;
@@ -1609,7 +1740,12 @@
         freeTargetSeconds = makeRandomTarget(CONFIG.freeTargetMin, CONFIG.freeTargetMax);
       }
 
+      if (modeChanged && currentMode === "athlete") {
+        athleteTargetSeconds = makeRandomTarget(CONFIG.athleteTargetMin, CONFIG.athleteTargetMax);
+      }
+
       lastSubmittedRecord = null;
+      resetStarterState();
       updateModeChrome();
       renderFeaturedRecord();
       clearResult();
@@ -1618,7 +1754,9 @@
     }
 
     function updateModeChrome() {
-      document.body.classList.toggle("free-mode", currentMode === "free");
+      const isStarterMode = currentMode === "reaction" || currentMode === "athlete";
+      document.body.classList.toggle("free-mode", currentMode === "free" || currentMode === "athlete");
+      els.timerZone.classList.toggle("starter-layout", isStarterMode);
       els.modeTabs.forEach(btn => {
         btn.classList.toggle("active", btn.dataset.mode === currentMode);
       });
@@ -1731,6 +1869,7 @@
       const isDaily = currentRank === "daily";
 
       els.featuredName.textContent = "";
+      els.featuredNote.textContent = "";
 
       if (isDaily) {
         els.featuredTitle.textContent = "上一期冠军";
@@ -1758,22 +1897,91 @@
         return;
       }
 
+      const summary = modeFeaturedSummaries[currentRank] || getDefaultModeFeaturedSummary(currentRank);
       els.featuredTitle.textContent = "纪录保持者";
-      els.featuredName.textContent = featuredRecords?.freeRecordNickname || "";
-      els.featuredNote.textContent = featuredRecords?.freeRecordNickname
-        ? `已保持 ${formatKeepDays(featuredRecords.freeRecordKeepDays)}`
-        : "";
 
-      if (!featuredRecords?.freeRecordNickname) {
-        els.lastWinnerText.textContent = "暂无自由模式纪录。";
+      if (!summary.nickname) {
+        els.lastWinnerText.textContent = getNoRecordText(currentRank);
         return;
       }
 
-      els.lastWinnerText.textContent =
-        `目标 ${formatSeconds(featuredRecords.freeRecordTargetSeconds)}｜实际 ${formatSeconds(featuredRecords.freeRecordActualSeconds)}｜` +
-        `误差 ${formatSeconds(featuredRecords.freeRecordErrorSeconds)}｜误差率 ${formatPercent(featuredRecords.freeRecordErrorRate)}`;
+      const averageText = summary.averageText || getAveragePlaceholder(currentRank);
+      els.lastWinnerText.innerHTML =
+        `${escapeHtml(summary.nickname)}｜已保持 ${escapeHtml(formatKeepDays(summary.keepDays))}。<br>${escapeHtml(averageText)}`;
     }
 
+    function getDefaultModeFeaturedSummary(mode) {
+      if (mode === "free" && featuredRecords?.freeRecordNickname) {
+        return {
+          nickname: featuredRecords.freeRecordNickname,
+          keepDays: featuredRecords.freeRecordKeepDays,
+          averageText: getAveragePlaceholder(mode)
+        };
+      }
+
+      return {
+        nickname: "",
+        keepDays: null,
+        averageText: getAveragePlaceholder(mode)
+      };
+    }
+
+    function getAveragePlaceholder(mode) {
+      if (mode === "free") return "平均误差率 --";
+      if (mode === "reaction") return "平均反应 --";
+      if (mode === "athlete") return "平均误差 --";
+      return "平均成绩 --";
+    }
+
+    function getNoRecordText(mode) {
+      if (mode === "free") return "暂无自由模式纪录。";
+      if (mode === "reaction") return "暂无发令枪纪录。";
+      if (mode === "athlete") return "暂无运动员纪录。";
+      return "暂无纪录。";
+    }
+
+    function updateModeFeaturedSummaryFromRows(mode, rows = []) {
+      if (mode === "daily") return;
+
+      const summary = getDefaultModeFeaturedSummary(mode);
+      const validRows = Array.isArray(rows) ? rows : [];
+
+      if ((mode === "reaction" || mode === "athlete") && validRows.length) {
+        const top = validRows[0];
+        summary.nickname = top?.nickname || "";
+        summary.keepDays = getKeepDaysFromDate(top?.created_at || top?.createdAt || null);
+      }
+
+      if (mode === "free") {
+        const avgRate = averageNumber(validRows.map(row => row.error_rate));
+        summary.averageText = Number.isFinite(avgRate) ? `平均误差率 ${formatPercent(avgRate)}` : "平均误差率 --";
+      } else if (mode === "reaction") {
+        const avgReaction = averageNumber(validRows.map(row => row.reaction_seconds));
+        summary.averageText = Number.isFinite(avgReaction) ? `平均反应 ${formatSeconds(avgReaction)}` : "平均反应 --";
+      } else if (mode === "athlete") {
+        const avgError = averageNumber(validRows.map(row => row.error_seconds));
+        summary.averageText = Number.isFinite(avgError) ? `平均误差 ${formatSeconds(avgError)}` : "平均误差 --";
+      }
+
+      modeFeaturedSummaries[mode] = summary;
+    }
+
+    function averageNumber(values) {
+      const nums = values
+        .map(value => Number(value))
+        .filter(value => Number.isFinite(value));
+      if (!nums.length) return null;
+      return nums.reduce((sum, value) => sum + value, 0) / nums.length;
+    }
+
+    function getKeepDaysFromDate(value) {
+      if (!value) return null;
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return null;
+      const diff = Date.now() - date.getTime();
+      if (diff < 0) return 0;
+      return Math.max(0, Math.floor(diff / 86400000));
+    }
 
     function startDateWatcher() {
       setInterval(async () => {
@@ -1959,6 +2167,17 @@
       }
 
       activeActor = actor;
+
+      if (currentMode === "reaction") {
+        startStarterRound("reaction");
+        return;
+      }
+
+      if (currentMode === "athlete") {
+        startStarterRound("athlete");
+        return;
+      }
+
       running = true;
       startedAt = performance.now();
       lastSubmittedRecord = null;
@@ -1991,6 +2210,11 @@
     }
 
     async function stopGame() {
+      if (currentMode === "reaction" || currentMode === "athlete") {
+        await handleStarterAction();
+        return;
+      }
+
       if (!running) return;
 
       const actor = activeActor || getActorPayload();
@@ -2072,7 +2296,7 @@
         renderTarget();
 
         if (!boardRefreshFailed && record.mode === currentRank) {
-          renderLeaderboardRows(freshRows, currentRank === "daily", record);
+          renderLeaderboardRows(freshRows, currentRank, record);
         } else {
           await renderLeaderboard();
         }
@@ -2085,27 +2309,464 @@
       }
     }
 
+
+
+    function startStarterRound(mode) {
+      running = true;
+      starterState = "waiting";
+      startedAt = 0;
+      reactionReadyAt = 0;
+      athleteRunStartedAt = 0;
+      lastSubmittedRecord = null;
+      clearResult();
+
+      els.startBtn.disabled = true;
+      els.stopBtn.disabled = false;
+      els.stopBtn.textContent = mode === "athlete" ? "等待发令" : "等待发令";
+      setModeControlsDisabled(true);
+      els.timerZone.classList.add("running");
+      els.timerDisplay.classList.remove("hidden-time");
+      els.timerDisplay.textContent = "";
+      els.timerHint.textContent = "红灯等待中。";
+
+      if (mode === "athlete") {
+        renderSignalPanel("athlete", 1, "red");
+        reactionTimerId = window.setTimeout(() => renderSignalPanel("athlete", 2, "red"), CONFIG.signalStepMs);
+        window.setTimeout(() => renderSignalPanel("athlete", 3, "red"), CONFIG.signalStepMs * 2);
+        window.setTimeout(() => armStarterSignal(mode), CONFIG.signalStepMs * 2 + makeRandomWaitMs());
+        return;
+      }
+
+      renderSignalPanel("reaction", 1, "red");
+      reactionTimerId = window.setTimeout(() => armStarterSignal(mode), makeRandomWaitMs());
+    }
+
+    function armStarterSignal(mode) {
+      if (!running || starterState !== "waiting") return;
+
+      starterState = "ready";
+      reactionReadyAt = performance.now();
+      startedAt = reactionReadyAt;
+      renderSignalPanel(mode, mode === "athlete" ? 3 : 1, "green");
+      playStarterBeep();
+      els.stopBtn.textContent = mode === "athlete" ? "起跑" : "冲！";
+      els.timerDisplay.textContent = "";
+      els.timerHint.textContent = mode === "athlete"
+        ? "绿灯！点击起跑。"
+        : "绿灯！现在点击。";
+    }
+
+    async function handleStarterAction() {
+      if (!running) return;
+
+      if (starterState === "waiting") {
+        await finishFalseStart();
+        return;
+      }
+
+      if (currentMode === "reaction") {
+        await finishReactionRound();
+        return;
+      }
+
+      if (currentMode === "athlete" && starterState === "ready") {
+        athleteRunStartedAt = performance.now();
+        starterState = "athlete-running";
+        els.stopBtn.textContent = "到终点";
+        els.timerDisplay.textContent = "……";
+        els.timerDisplay.classList.add("hidden-time");
+        els.timerHint.textContent = "已经起跑。到达目标时间时点击终点。";
+        return;
+      }
+
+      if (currentMode === "athlete" && starterState === "athlete-running") {
+        await finishAthleteRound();
+      }
+    }
+
+    async function finishFalseStart() {
+      const mode = currentMode;
+      const actor = activeActor || getActorPayload();
+      const targetSeconds = mode === "athlete" ? athleteTargetSeconds : 0;
+
+      cleanupStarterTimers();
+      running = false;
+      starterState = "idle";
+      els.startBtn.disabled = false;
+      els.stopBtn.disabled = true;
+      els.stopBtn.textContent = "停止";
+      setModeControlsDisabled(false);
+      els.timerZone.classList.remove("running");
+      renderSignalPanel(mode, mode === "athlete" ? 3 : 1, "red", true);
+      els.timerDisplay.classList.remove("hidden-time");
+      els.timerDisplay.textContent = "抢跑";
+      els.timerHint.textContent = "抢跑失败，正在记录本次结果……";
+
+      let record = {
+        mode,
+        playerName: actor.ok ? actor.playerName : "",
+        isGuest: actor.ok ? actor.isGuest : true,
+        targetSeconds,
+        actualSeconds: 0,
+        errorSeconds: 0,
+        errorRate: null,
+        reactionSeconds: null,
+        isFalseStart: true,
+        grade: "抢跑失败",
+        savedToBoard: false,
+        fallbackRank: null,
+        boardRank: null,
+        enteredVisibleBoard: false,
+        awards: []
+      };
+
+      try {
+        if (actor.ok) {
+          record = await submitStarterScore(record, actor);
+        }
+        lastSubmittedRecord = record;
+        showStarterResult(record);
+        els.timerHint.textContent = record.savedToBoard
+          ? "抢跑已记录，本局不进入排行榜。"
+          : "抢跑失败，本局不进入排行榜。";
+        await renderLeaderboard();
+      } catch (err) {
+        console.error("保存抢跑结果失败：", err);
+        lastSubmittedRecord = record;
+        showStarterResult(record);
+        els.timerHint.textContent = "抢跑失败。本次记录保存失败，请稍后再试。";
+      } finally {
+        activeActor = null;
+      }
+    }
+
+    async function finishReactionRound() {
+      const now = performance.now();
+      const reactionSeconds = round3((now - reactionReadyAt) / 1000);
+      const actor = activeActor || getActorPayload();
+
+      cleanupStarterTimers();
+      running = false;
+      starterState = "idle";
+      els.startBtn.disabled = false;
+      els.stopBtn.disabled = true;
+      els.stopBtn.textContent = "停止";
+      setModeControlsDisabled(false);
+      els.timerZone.classList.remove("running");
+      els.timerDisplay.classList.remove("hidden-time");
+      els.timerDisplay.textContent = formatMs(reactionSeconds * 1000);
+      els.timerHint.textContent = "正在保存发令枪成绩……";
+
+      let record = {
+        mode: "reaction",
+        playerName: actor.ok ? actor.playerName : "",
+        isGuest: actor.ok ? actor.isGuest : true,
+        targetSeconds: 0,
+        actualSeconds: 0,
+        errorSeconds: 0,
+        errorRate: null,
+        reactionSeconds,
+        isFalseStart: false,
+        grade: getReactionGrade(reactionSeconds),
+        savedToBoard: false,
+        fallbackRank: null,
+        boardRank: null,
+        enteredVisibleBoard: false,
+        awards: []
+      };
+
+      let freshRows = [];
+      let boardRefreshFailed = false;
+
+      try {
+        if (actor.ok) {
+          record = await submitStarterScore(record, actor);
+        }
+        freshRows = await fetchLeaderboardRows("reaction");
+        if (record.savedToBoard) {
+          applyVisibleBoardRank(record, freshRows);
+        } else {
+          applyGuestVirtualRank(record, freshRows);
+        }
+      } catch (err) {
+        boardRefreshFailed = true;
+        console.error("保存发令枪成绩失败：", err);
+      }
+
+      lastSubmittedRecord = record;
+      showStarterResult(record);
+      els.timerHint.textContent = boardRefreshFailed
+        ? "本次成绩已完成，但保存或排行榜刷新失败。"
+        : getResultHint(record);
+
+      activeActor = null;
+
+      if (!boardRefreshFailed && currentRank === "reaction") {
+        renderLeaderboardRows(freshRows, "reaction", record);
+      } else {
+        await renderLeaderboard();
+      }
+
+      playAwardModals(record.awards || []);
+    }
+
+    async function finishAthleteRound() {
+      const now = performance.now();
+      const reactionSeconds = round3((athleteRunStartedAt - reactionReadyAt) / 1000);
+      const actualSeconds = round3((now - athleteRunStartedAt) / 1000);
+      const targetSeconds = athleteTargetSeconds;
+      const errorSeconds = round3(Math.abs(actualSeconds - targetSeconds));
+      const actor = activeActor || getActorPayload();
+
+      cleanupStarterTimers();
+      running = false;
+      starterState = "idle";
+      els.startBtn.disabled = false;
+      els.stopBtn.disabled = true;
+      els.stopBtn.textContent = "停止";
+      setModeControlsDisabled(false);
+      els.timerZone.classList.remove("running");
+      els.timerDisplay.classList.remove("hidden-time");
+      els.timerDisplay.textContent = formatMs(actualSeconds * 1000);
+      els.timerHint.textContent = "正在保存运动员模式成绩……";
+
+      let record = {
+        mode: "athlete",
+        playerName: actor.ok ? actor.playerName : "",
+        isGuest: actor.ok ? actor.isGuest : true,
+        targetSeconds,
+        actualSeconds,
+        errorSeconds,
+        errorRate: targetSeconds > 0 ? (errorSeconds / targetSeconds) * 100 : null,
+        reactionSeconds,
+        isFalseStart: false,
+        grade: getGrade(errorSeconds),
+        savedToBoard: false,
+        fallbackRank: null,
+        boardRank: null,
+        enteredVisibleBoard: false,
+        awards: []
+      };
+
+      let freshRows = [];
+      let boardRefreshFailed = false;
+
+      try {
+        if (actor.ok) {
+          record = await submitStarterScore(record, actor);
+        }
+        freshRows = await fetchLeaderboardRows("athlete");
+        if (record.savedToBoard) {
+          applyVisibleBoardRank(record, freshRows);
+        } else {
+          applyGuestVirtualRank(record, freshRows);
+        }
+      } catch (err) {
+        boardRefreshFailed = true;
+        console.error("保存运动员模式成绩失败：", err);
+      }
+
+      lastSubmittedRecord = record;
+      showStarterResult(record);
+      els.timerHint.textContent = boardRefreshFailed
+        ? "本次成绩已完成，但保存或排行榜刷新失败。"
+        : getResultHint(record);
+
+      athleteTargetSeconds = makeRandomTarget(CONFIG.athleteTargetMin, CONFIG.athleteTargetMax);
+      activeActor = null;
+      renderTarget();
+
+      if (!boardRefreshFailed && currentRank === "athlete") {
+        renderLeaderboardRows(freshRows, "athlete", record);
+      } else {
+        await renderLeaderboard();
+      }
+
+      playAwardModals(record.awards || []);
+    }
+
+    async function submitStarterScore(record, actor) {
+      const { data, error } = await client.rpc("submit_time_answer_reaction_score", {
+        p_mode: record.mode,
+        p_member_id: actor.memberId,
+        p_member_code: actor.memberCode,
+        p_nickname: actor.playerName,
+        p_is_guest: actor.isGuest,
+        p_target_seconds: record.targetSeconds || 0,
+        p_actual_seconds: record.actualSeconds || 0,
+        p_reaction_seconds: record.reactionSeconds,
+        p_is_false_start: record.isFalseStart === true
+      });
+
+      if (error) throw error;
+
+      const saved = Array.isArray(data) ? data[0] : data;
+      return {
+        ...record,
+        errorSeconds: saved?.error_seconds == null ? record.errorSeconds : Number(saved.error_seconds),
+        errorRate: saved?.error_rate == null ? record.errorRate : Number(saved.error_rate),
+        reactionSeconds: saved?.reaction_seconds == null ? record.reactionSeconds : Number(saved.reaction_seconds),
+        grade: saved?.result_grade || record.grade,
+        savedToBoard: saved?.saved === true,
+        fallbackRank: saved?.temp_rank ?? record.fallbackRank,
+        awards: saved?.awards || []
+      };
+    }
+
+    function showStarterResult(record) {
+      if (record.mode === "reaction") {
+        showSpecialResult({
+          grade: record.grade,
+          target: record.isFalseStart ? "抢跑" : "绿灯发令",
+          actual: record.isFalseStart ? "无效" : formatSeconds(record.reactionSeconds),
+          error: "--",
+          rank: getRecordRankText(record)
+        }, ["信号", "反应时间", "误差", "排行榜"]);
+        return;
+      }
+
+      showSpecialResult({
+        grade: record.grade,
+        target: formatSeconds(record.targetSeconds),
+        actual: record.isFalseStart ? "无效" : formatSeconds(record.actualSeconds),
+        error: record.isFalseStart ? "抢跑" : formatSeconds(record.errorSeconds),
+        rank: record.isFalseStart ? "不进榜" : `反应 ${formatSeconds(record.reactionSeconds)}`
+      }, ["目标", "实际用时", "数秒误差", "起跑反应"]);
+    }
+
+    function getRecordRankText(record) {
+      if (record.isFalseStart) return "不进榜";
+      if (record.savedToBoard) {
+        return record.enteredVisibleBoard && record.boardRank
+          ? `第 ${record.boardRank} 名`
+          : "未进榜";
+      }
+      return record.fallbackRank ? `临时第 ${record.fallbackRank} 名` : "未进榜";
+    }
+
+    function renderSignalPanel(mode, activeCount = 0, color = "red", flash = false) {
+      const count = mode === "athlete" ? 3 : 1;
+      els.signalPanel.className = `signal-panel show ${mode === "athlete" ? "multi" : "single"}`;
+      els.signalPanel.innerHTML = Array.from({ length: count }, (_, index) => {
+        const active = index < activeCount;
+        const cls = ["signal-light"];
+        if (active) cls.push(color);
+        if (flash && active) cls.push("flash");
+        return `<span class="${cls.join(" ")}" aria-hidden="true"></span>`;
+      }).join("");
+    }
+
+    function hideSignalPanel() {
+      els.signalPanel.className = "signal-panel";
+      els.signalPanel.innerHTML = "";
+    }
+
+    function resetStarterState() {
+      cleanupStarterTimers();
+      starterState = "idle";
+      reactionReadyAt = 0;
+      athleteRunStartedAt = 0;
+      hideSignalPanel();
+      els.stopBtn.textContent = "停止";
+    }
+
+    function cleanupStarterTimers() {
+      if (reactionTimerId) {
+        window.clearTimeout(reactionTimerId);
+        reactionTimerId = null;
+      }
+    }
+
+    function makeRandomWaitMs() {
+      return Math.round(CONFIG.reactionWaitMin + Math.random() * (CONFIG.reactionWaitMax - CONFIG.reactionWaitMin));
+    }
+
+    function playStarterBeep() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.type = "sine";
+        oscillator.frequency.value = 880;
+        gain.gain.setValueAtTime(0.001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.16);
+        oscillator.connect(gain);
+        gain.connect(ctx.destination);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.18);
+      } catch (err) {
+        console.warn("提示音播放失败：", err);
+      }
+    }
+
+    function getReactionGrade(reactionSeconds) {
+      if (reactionSeconds <= 0.200) return "枪响即动";
+      if (reactionSeconds <= 0.250) return "起跑很快";
+      if (reactionSeconds <= 0.350) return "反应不错";
+      if (reactionSeconds <= 0.500) return "慢了半拍";
+      return "还在热身";
+    }
+
+    function showSpecialResult(values, labels = ["目标", "你的时间", "误差", "当前排名"]) {
+      els.resultNames.forEach((node, index) => {
+        node.textContent = labels[index] || node.textContent;
+      });
+      els.resultBox.classList.add("show");
+      els.resultGrade.textContent = values.grade || "--";
+      els.resultTarget.textContent = values.target || "--";
+      els.resultActual.textContent = values.actual || "--";
+      els.resultError.textContent = values.error || "--";
+      els.resultRank.textContent = values.rank || "--";
+    }
+
     function getCurrentTargetSeconds() {
-      return currentMode === "daily" ? Number(currentIssue?.targetSeconds || 0) : freeTargetSeconds;
+      if (currentMode === "daily") return Number(currentIssue?.targetSeconds || 0);
+      if (currentMode === "athlete") return athleteTargetSeconds;
+      if (currentMode === "reaction") return 0;
+      return freeTargetSeconds;
     }
 
     function renderTarget() {
       const target = getCurrentTargetSeconds();
-      els.targetNumber.textContent = target ? `${target.toFixed(3)}s` : "--";
+      if (currentMode === "reaction") {
+        els.targetNumber.textContent = "听令";
+      } else {
+        els.targetNumber.textContent = target ? `${target.toFixed(3)}s` : "--";
+      }
 
       if (currentMode === "daily") {
         els.targetLabel.textContent = "当前挑战目标";
         els.issueText.textContent = currentIssue
           ? `第 ${currentIssue.issueNo} 期 · 00:00 结算上一期冠军`
           : "正在读取当前挑战……";
-      } else {
+        els.startBtn.textContent = "开始挑战";
+      } else if (currentMode === "free") {
         els.targetLabel.textContent = "自由模式随机目标";
         els.issueText.textContent = "本局结束后会刷新新的随机秒数";
+        els.startBtn.textContent = "开始自由模式";
+      } else if (currentMode === "reaction") {
+        els.targetLabel.textContent = "当前模式";
+        els.issueText.textContent = "红灯等待，绿灯与提示音同步出现后立刻点击。";
+        els.startBtn.textContent = "准备发令";
+      } else {
+        els.targetLabel.textContent = "运动员模式目标";
+        els.issueText.textContent = "随机目标大于 10 秒。等绿灯与提示音出现后起跑，再数秒到终点。";
+        els.startBtn.textContent = "准备起跑";
       }
 
+      if (!running && (currentMode === "reaction" || currentMode === "athlete")) {
+        renderSignalPanel(currentMode, currentMode === "athlete" ? 3 : 1, "red");
+        els.timerHint.textContent = "点击下方按钮开始准备。";
+      }
     }
 
     function showResult(record) {
+      ["目标", "你的时间", "误差", "当前排名"].forEach((label, index) => {
+        if (els.resultNames[index]) els.resultNames[index].textContent = label;
+      });
       els.resultBox.classList.add("show");
       els.resultGrade.textContent = record.grade || getGrade(record.errorSeconds);
       els.resultTarget.textContent = formatSeconds(record.targetSeconds);
@@ -2125,20 +2786,36 @@
     }
 
     function clearResult() {
+      ["目标", "你的时间", "误差", "当前排名"].forEach((label, index) => {
+        if (els.resultNames[index]) els.resultNames[index].textContent = label;
+      });
+      if (!running && (currentMode === "reaction" || currentMode === "athlete")) {
+        renderSignalPanel(currentMode, currentMode === "athlete" ? 3 : 1, "red");
+      } else if (!running) {
+        hideSignalPanel();
+      }
       els.resultBox.classList.remove("show");
       els.resultGrade.textContent = "--";
       els.resultTarget.textContent = "--";
       els.resultActual.textContent = "--";
       els.resultError.textContent = "--";
       els.resultRank.textContent = "--";
-      els.timerDisplay.textContent = "00:00.000";
+      els.timerDisplay.textContent = currentMode === "reaction" || currentMode === "athlete" ? "" : "00:00.000";
       els.timerDisplay.classList.remove("hidden-time");
-      els.timerHint.textContent = "开始后前 1.5 秒显示毫秒计时，之后时间会消失。";
+      els.timerHint.textContent = currentMode === "reaction" || currentMode === "athlete"
+        ? "点击下方按钮开始准备。"
+        : "开始后前 1.5 秒显示毫秒计时，之后时间会消失。";
     }
 
     async function renderLeaderboard() {
       const isDaily = currentRank === "daily";
-      els.rankNote.textContent = isDaily ? "前 5｜按绝对误差" : "前 10｜按误差率";
+      const rankNotes = {
+        daily: "前 5｜按绝对误差",
+        free: "前 10｜按误差率",
+        reaction: "前 10｜按反应时间",
+        athlete: "前 10｜综合表现"
+      };
+      els.rankNote.textContent = rankNotes[currentRank] || "前 10";
 
       renderFeaturedRecord();
 
@@ -2151,8 +2828,10 @@
 
       try {
         const rows = await fetchLeaderboardRows(currentRank);
+        updateModeFeaturedSummaryFromRows(currentRank, rows);
+        renderFeaturedRecord();
         const highlightRecord = lastSubmittedRecord?.mode === currentRank ? lastSubmittedRecord : null;
-        renderLeaderboardRows(rows, isDaily, highlightRecord);
+        renderLeaderboardRows(rows, currentRank, highlightRecord);
         return rows;
       } catch (err) {
         console.error("读取排行榜失败：", err);
@@ -2165,7 +2844,11 @@
       const isDaily = mode === "daily";
       if (isDaily && !currentIssue) return [];
 
-      const { data, error } = await client.rpc("get_time_answer_leaderboard", {
+      const rpcName = (mode === "reaction" || mode === "athlete")
+        ? "get_time_answer_mode_leaderboard"
+        : "get_time_answer_leaderboard";
+
+      const { data, error } = await client.rpc(rpcName, {
         p_mode: mode,
         p_issue_no: isDaily ? currentIssue.issueNo : null,
         p_limit: isDaily ? 5 : 10
@@ -2175,19 +2858,31 @@
       return Array.isArray(data) ? data : [];
     }
 
-    function renderLeaderboardRows(rows, isDaily, highlightRecord = null) {
+    function renderLeaderboardRows(rows, rankMode, highlightRecord = null) {
+      const mode = typeof rankMode === "string" ? rankMode : (rankMode ? "daily" : "free");
       if (!rows.length) {
         els.leaderboard.innerHTML = `<div class="empty">暂无成绩<br>完成一次挑战后会出现在这里。</div>`;
         return;
       }
 
       els.leaderboard.innerHTML = rows.map(item => {
-        const scoreText = isDaily
-          ? `误差 ${formatSeconds(item.error_seconds)}`
-          : `误差率 ${formatPercent(item.error_rate)}`;
-        const metaText = isDaily
-          ? `目标 ${formatSeconds(item.target_seconds)} · 实际 ${formatSeconds(item.actual_seconds)}`
-          : `目标 ${formatSeconds(item.target_seconds)} · 误差 ${formatSeconds(item.error_seconds)}`;
+        let scoreText = "";
+        let metaText = "";
+
+        if (mode === "daily") {
+          scoreText = `误差 ${formatSeconds(item.error_seconds)}`;
+          metaText = `目标 ${formatSeconds(item.target_seconds)} · 实际 ${formatSeconds(item.actual_seconds)}`;
+        } else if (mode === "free") {
+          scoreText = `误差率 ${formatPercent(item.error_rate)}`;
+          metaText = `目标 ${formatSeconds(item.target_seconds)} · 误差 ${formatSeconds(item.error_seconds)}`;
+        } else if (mode === "reaction") {
+          scoreText = `反应 ${formatSeconds(item.reaction_seconds)}`;
+          metaText = item.result_grade || "发令枪成绩";
+        } else {
+          scoreText = `误差 ${formatSeconds(item.error_seconds)}`;
+          metaText = `目标 ${formatSeconds(item.target_seconds)} · 实际 ${formatSeconds(item.actual_seconds)} · 反应 ${formatSeconds(item.reaction_seconds)}`;
+        }
+
         const isCurrent = highlightRecord && isSameSubmittedRecord(highlightRecord, item);
         const currentTag = isCurrent ? `<span class="rank-current-tag">本次</span>` : "";
 
@@ -2212,17 +2907,37 @@
 
     function applyGuestVirtualRank(record, rows) {
       const maxRank = record.mode === "daily" ? 5 : 10;
-      const metricKey = record.mode === "daily" ? "error_seconds" : "error_rate";
-      const recordMetric = record.mode === "daily" ? record.errorSeconds : record.errorRate;
-      const safeMetric = Number(recordMetric);
 
+      if (record.mode === "athlete") {
+        record.enteredVisibleBoard = !!record.fallbackRank && Number(record.fallbackRank) <= maxRank;
+        return;
+      }
+
+      let metricKey = "error_rate";
+      let recordMetric = record.errorRate;
+      let lowerIsBetter = true;
+
+      if (record.mode === "daily") {
+        metricKey = "error_seconds";
+        recordMetric = record.errorSeconds;
+      } else if (record.mode === "reaction") {
+        metricKey = "reaction_seconds";
+        recordMetric = record.reactionSeconds;
+      }
+
+      const safeMetric = Number(recordMetric);
       if (!Number.isFinite(safeMetric)) {
         record.fallbackRank = null;
         record.enteredVisibleBoard = false;
         return;
       }
 
-      const betterCount = rows.filter(row => Number(row?.[metricKey]) < safeMetric).length;
+      const betterCount = rows.filter(row => {
+        const rowMetric = Number(row?.[metricKey]);
+        if (!Number.isFinite(rowMetric)) return false;
+        return lowerIsBetter ? rowMetric < safeMetric : rowMetric > safeMetric;
+      }).length;
+
       const virtualRank = betterCount + 1;
       const lastVisibleMetric = rows.length ? Number(rows[rows.length - 1]?.[metricKey]) : Infinity;
       const hasRoom = rows.length < maxRank;
@@ -2235,13 +2950,21 @@
     function isSameSubmittedRecord(record, row) {
       if (!row) return false;
       const sameName = String(row.nickname || "").trim() === String(record.playerName || "").trim();
+
+      if (record.mode === "reaction") {
+        return sameName && numbersClose(row.reaction_seconds, record.reactionSeconds);
+      }
+
       const sameTarget = numbersClose(row.target_seconds, record.targetSeconds);
       const sameActual = numbersClose(row.actual_seconds, record.actualSeconds);
       const sameError = numbersClose(row.error_seconds, record.errorSeconds);
+      const sameReaction = record.mode === "athlete"
+        ? numbersClose(row.reaction_seconds, record.reactionSeconds)
+        : true;
       const sameRate = record.mode === "free"
         ? numbersClose(row.error_rate, record.errorRate, 0.00001)
         : true;
-      return sameName && sameTarget && sameActual && sameError && sameRate;
+      return sameName && sameTarget && sameActual && sameError && sameReaction && sameRate;
     }
 
     function numbersClose(a, b, tolerance = 0.0005) {
@@ -2251,6 +2974,10 @@
     }
 
     function getResultHint(record) {
+      if (record.isFalseStart) {
+        return "抢跑成绩无效，不进入排行榜。";
+      }
+
       if (!record.savedToBoard) {
         return record.fallbackRank
           ? "答案出现了。游客不进入正式榜单，但本次成绩可参考临时排名。"
