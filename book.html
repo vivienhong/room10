@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜收集图鉴</title>
+<style>
+*{ box-sizing:border-box; }
+:root{
+  --ink:#704721;
+  --muted:#9b7656;
+  --paper:rgba(255,250,240,.78);
+  --paper-strong:rgba(255,248,235,.92);
+  --line:rgba(178,121,64,.18);
+  --shadow:rgba(92,62,32,.18);
+  --book-scale:1;
+}
+html,body{
+  margin:0;
+  width:100%;
+  min-height:100%;
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  color:var(--ink);
+  background:
+    linear-gradient(rgba(255,248,238,.14), rgba(255,248,238,.24)),
+    url("room-dorm.png") center center / cover no-repeat fixed;
+}
+body{
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  overflow:hidden;
+}
+button{ font-family:inherit; }
+
+/* =========================================================
+   图鉴弹窗：四角定位基准
+   所有内容、按钮、标签都只绑定 .bookOverlayLayer，也就是底图实际显示区域。
+========================================================= */
+.collectionBookModal{
+  position:fixed;
+  inset:0;
+  z-index:500;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  background:rgba(67,45,26,.10);
+  backdrop-filter:blur(1.5px);
+  -webkit-backdrop-filter:blur(1.5px);
+}
+.collectionBookModal.show{ display:flex; }
+
+.bookStage{
+  position:relative;
+  width:min(1180px,100vw,calc(100dvh * 1448 / 1086));
+  aspect-ratio:1448 / 1086;
+  max-height:100dvh;
+  filter:drop-shadow(0 22px 42px rgba(68,45,24,.22));
+}
+.bookBg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.bookOverlayLayer{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+}
+.bookOverlayLayer *{ pointer-events:auto; }
+
+.bookLeftPanel,
+.bookLeftGridPanel,
+.bookGridPanel,
+.bookTags,
+.bookControl{
+  position:absolute;
+}
+
+/* 左页信息区：按 book-open.png 四角定位 */
+.bookPageHeading{
+  position:absolute;
+  left:24.58%;
+  top:15.93%;
+  width:21.2%;
+  margin:0;
+  font-size:calc(29px * var(--book-scale));
+  line-height:1.08;
+  font-weight:900;
+  letter-spacing:.04em;
+  color:#6d431f;
+  text-align:left;
+  z-index:4;
+}
+
+.bookLeftPanel{
+  left:55.20%;
+  top:60.20%;
+  width:23.0%;
+  height:10.4%;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  overflow:hidden;
+}
+
+/* 左页收集格：按 book-open.png 四角定位 */
+.bookLeftGridPanel{
+  left:15.20%;
+  top:28.60%;
+  width:30.2%;
+  height:42.5%;
+  overflow:hidden;
+}
+
+.leftItemGrid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  column-gap:3.0%;
+  row-gap:6.2%;
+  justify-content:stretch;
+  align-content:start;
+  padding:0 1.0%;
+}
+
+.leftItemGrid .itemCard{
+  min-height:calc(86px * var(--book-scale));
+  padding:calc(7px * var(--book-scale)) calc(5px * var(--book-scale));
+}
+
+.leftItemGrid .itemIcon{
+  width:calc(36px * var(--book-scale));
+  height:calc(36px * var(--book-scale));
+  border-radius:calc(12px * var(--book-scale));
+  font-size:calc(23px * var(--book-scale));
+}
+
+.leftItemGrid .itemName{
+  font-size:calc(11px * var(--book-scale));
+}
+
+.gridSpacer{
+  min-width:0;
+  min-height:calc(86px * var(--book-scale));
+  visibility:hidden;
+  pointer-events:none;
+}
+
+/* 右页物品区：按 book-open.png 四角定位 */
+.bookGridPanel{
+  left:51.50%;
+  top:26.70%;
+  width:33.7%;
+  height:25.1%;
+  overflow:hidden;
+}
+
+.progressCard{
+  border:1px solid rgba(171,116,64,.16);
+  background:rgba(255,251,242,.50);
+  border-radius:calc(14px * var(--book-scale));
+  padding:calc(6px * var(--book-scale)) calc(12px * var(--book-scale)) calc(7px * var(--book-scale));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65);
+  text-align:left;
+}
+.progressLabel{ font-size:calc(13px * var(--book-scale)); font-weight:900; color:#8a613e; margin-bottom:6px; }
+.progressText{ font-size:calc(22px * var(--book-scale)); font-weight:900; color:#6c4220; }
+.progressBar{ margin-top:calc(8px * var(--book-scale)); height:calc(8px * var(--book-scale)); border-radius:99px; background:rgba(202,151,91,.18); overflow:hidden; }
+.progressFill{ height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,#c98c4f,#e7bd7b); }
+.bookNote{
+  position:absolute;
+  left:15.40%;
+  top:22.30%;
+  width:29.7%;
+  min-height:4.2%;
+  margin:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 .8%;
+  font-size:calc(12px * var(--book-scale));
+  line-height:1.45;
+  color:#8d6748;
+  font-weight:800;
+  text-align:center;
+  z-index:4;
+  pointer-events:none;
+}
+.bookTotalProgress{
+  position:absolute;
+  left:54.30%;
+  top:74.90%;
+  width:17.8%;
+  min-height:4.1%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 .5%;
+  font-size:calc(13px * var(--book-scale));
+  line-height:1.1;
+  color:#805633;
+  font-weight:900;
+  text-align:center;
+  z-index:4;
+  pointer-events:none;
+}
+.mobileTabs{ display:none; }
+
+.itemGrid{
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  column-gap:2.8%;
+  row-gap:8.0%;
+  align-content:start;
+  overflow:hidden;
+  padding:0 1.0%;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(166,109,55,.28) transparent;
+}
+.itemCard{
+  min-width:0;
+  min-height:calc(92px * var(--book-scale));
+  border-radius:calc(16px * var(--book-scale));
+  padding:calc(8px * var(--book-scale)) calc(6px * var(--book-scale));
+  background:rgba(255,251,244,.62);
+  border:1px solid rgba(178,121,64,.14);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65), 0 6px 12px rgba(106,68,34,.06);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:calc(5px * var(--book-scale));
+  text-align:center;
+}
+.itemIcon{
+  width:calc(42px * var(--book-scale));
+  height:calc(42px * var(--book-scale));
+  border-radius:calc(14px * var(--book-scale));
+  display:grid;
+  place-items:center;
+  font-size:calc(26px * var(--book-scale));
+  background:rgba(255,246,228,.75);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+}
+.itemIcon img{
+  width:72%;
+  height:72%;
+  object-fit:contain;
+  display:block;
+}
+.itemName{
+  max-width:100%;
+  color:#6f4726;
+  font-size:calc(12px * var(--book-scale));
+  line-height:1.25;
+  font-weight:900;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+}
+.itemCard.locked{ opacity:.68; filter:saturate(.55); }
+.itemCard.locked .itemIcon{ color:#a9896b; background:rgba(230,214,195,.52); font-size:calc(30px * var(--book-scale)); }
+.emptySpecial{
+  grid-column:1 / -1;
+  min-height:calc(220px * var(--book-scale));
+  border-radius:calc(20px * var(--book-scale));
+  background:rgba(255,251,244,.52);
+  border:1px dashed rgba(178,121,64,.22);
+  display:grid;
+  place-items:center;
+  text-align:center;
+  color:#8f6848;
+  font-size:calc(16px * var(--book-scale));
+  font-weight:900;
+  line-height:1.8;
+}
+
+/* 电脑版右侧标签：文字位置与点击范围分离 */
+.bookTags{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  z-index:5;
+  pointer-events:none;
+}
+.tagText{
+  position:absolute;
+  width:5.6%;
+  height:9.2%;
+  color:rgba(111,71,38,.82);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:3px 2px 3px 8px;
+  letter-spacing:.03em;
+  font-size:calc(13px * var(--book-scale));
+  font-weight:900;
+  line-height:1.05;
+  text-align:center;
+  white-space:nowrap;
+  pointer-events:none;
+  text-shadow:0 1px 0 rgba(255,255,255,.42);
+}
+.tagFestival{ left:90.72%; top:20.89%; }
+.tagMaterial{ left:91.02%; top:33.37%; }
+.tagPet{ left:91.50%; top:45.17%; }
+
+.tagHit{
+  appearance:none;
+  border:0;
+  cursor:pointer;
+  position:absolute;
+  background:rgba(255,90,70,0);
+  border-radius:calc(18px * var(--book-scale)) 999px 999px calc(18px * var(--book-scale));
+  pointer-events:auto;
+}
+.tagFestivalRange{ left:91.50%; top:23.46%; width:7.77%; height:11.20%; }
+.tagMaterialRange{ left:92.40%; top:35.79%; width:7.77%; height:11.20%; }
+.tagPetRange{ left:92.47%; top:47.81%; width:7.77%; height:11.20%; }
+
+.tagHit:hover ~ .tagText,
+.tagHit.active ~ .tagText{ text-shadow:0 1px 0 rgba(255,255,255,.72); }
+.tagFestivalRange:hover ~ .tagFestival,
+.tagFestivalRange.active ~ .tagFestival,
+.tagMaterialRange:hover ~ .tagMaterial,
+.tagMaterialRange.active ~ .tagMaterial,
+.tagPetRange:hover ~ .tagPet,
+.tagPetRange.active ~ .tagPet{
+  color:rgba(111,71,38,1);
+}
+
+.bookControl{
+  appearance:none;
+  border:0;
+  background:transparent;
+  z-index:8;
+  cursor:pointer;
+  padding:0;
+  display:grid;
+  place-items:center;
+  transition:transform .16s ease, filter .16s ease;
+}
+.bookControl:hover{ transform:translateY(calc(-2px * var(--book-scale))); filter:brightness(1.04); }
+.bookControl img{ width:100%; height:100%; object-fit:contain; display:block; pointer-events:none; }
+
+.otherCategoryBtn{
+  position:absolute;
+  left:20.19%;
+  top:82.90%;
+  width:6.42%;
+  height:4.89%;
+  z-index:7;
+  appearance:none;
+  border:0;
+  background:transparent;
+  color:rgba(111,71,38,.92);
+  font-size:calc(13.5px * var(--book-scale));
+  font-weight:900;
+  letter-spacing:.04em;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  text-shadow:0 1px 0 rgba(255,255,255,.62);
+}
+.otherCategoryBtn:hover,
+.otherCategoryBtn.active{
+  color:#6d431f;
+  text-shadow:0 1px 0 rgba(255,255,255,.85);
+}
+
+/* 控制按钮全部按底图百分比定位，不用 fixed/bottom/right */
+.closeBtn{ left:81.82%; top:12.53%; width:8.57%; 
+  height:11.43%;}
+.prevBtn{ left:13.75%; top:72.30%; width:10.60%; 
+  height:10.60%;}
+.nextBtn{ left:78.92%; top:73.09%; width:10.60%; 
+  height:10.60%;}
+.gachaBtn{
+  left:66.13%;
+  top:14.11%;
+  width:8.80%;
+  border-radius:999px;
+  background:rgba(255,246,221,.42);
+  box-shadow:0 0 0 2px rgba(255,255,255,.55), 0 0 14px rgba(199,139,75,.42);
+
+  height:11.73%;}
+.gachaBtn img{ filter:drop-shadow(0 4px 8px rgba(110,70,34,.28)); }
+.gachaBtn.is-hidden{ display:none; }
+
+.rewardModal{
+  position:fixed;
+  inset:0;
+  z-index:800;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(58,38,22,.28);
+  padding:22px;
+}
+.rewardModal.show{ display:flex; }
+.rewardCard{
+  width:min(420px,92vw);
+  border-radius:26px;
+  padding:26px 24px;
+  text-align:center;
+  background:rgba(255,249,239,.96);
+  border:1px solid rgba(198,140,75,.25);
+  box-shadow:0 18px 42px rgba(81,52,27,.22), inset 0 1px 0 rgba(255,255,255,.8);
+}
+.rewardCard h3{ margin:0 0 8px; font-size:24px; color:#704721; }
+.rewardCard p{ margin:0 0 18px; color:#8a633f; font-weight:800; line-height:1.6; }
+.rewardCard button{ appearance:none; border:0; cursor:pointer; border-radius:999px; padding:10px 28px; background:#c98c4f; color:#fff9f2; font-weight:900; }
+
+.itemCard.is-previewable{ cursor:zoom-in; }
+.imagePreviewModal{
+  position:fixed;
+  inset:0;
+  z-index:900;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:rgba(58,38,22,.34);
+}
+.imagePreviewModal.show{ display:flex; }
+.imagePreviewCard{
+  width:min(360px,88vw);
+  border-radius:26px;
+  padding:24px 22px 20px;
+  text-align:center;
+  background:rgba(255,249,239,.97);
+  border:1px solid rgba(198,140,75,.25);
+  box-shadow:0 18px 42px rgba(81,52,27,.22), inset 0 1px 0 rgba(255,255,255,.8);
+}
+.imagePreviewCard img{
+  width:min(220px,58vw);
+  height:min(220px,58vw);
+  object-fit:contain;
+  display:block;
+  margin:0 auto 12px;
+  filter:drop-shadow(0 8px 16px rgba(110,70,34,.18));
+}
+.imagePreviewTitle{
+  color:#704721;
+  font-size:18px;
+  font-weight:900;
+  line-height:1.25;
+  margin-bottom:14px;
+}
+.imagePreviewClose{
+  appearance:none;
+  border:0;
+  cursor:pointer;
+  border-radius:999px;
+  padding:9px 24px;
+  background:#c98c4f;
+  color:#fff9f2;
+  font-weight:900;
+}
+
+@media (max-width:540px){
+  body{ padding:0; align-items:center; overflow:hidden; }
+  .collectionBookModal{ padding:8px; align-items:center; }
+  .bookStage{
+    width:min(96vw,500px,calc(95vh * 941 / 1672));
+    aspect-ratio:941 / 1672;
+    max-height:95vh;
+  }
+  .bookBg{ content:url("book-open2.png"); }
+  .bookPageHeading{
+    left:25.15%;
+    top:13.84%;
+    width:44.00%;
+    height:3.28%;
+    font-size:22px;
+  }
+  .bookLeftPanel{
+    left:20.49%;
+    top:18.40%;
+    width:62.0%;
+    height:18.2%;
+    padding:0;
+    gap:7px;
+  }
+  .bookLeftGridPanel{ display:none; }
+  .bookGridPanel{
+    left:19.47%;
+    top:41.36%;
+    width:64.00%;
+    height:39.20%;
+  }
+  .progressCard{ padding:8px 10px; border-radius:14px; }
+  .progressLabel{ display:none; }
+  .progressText{ font-size:16px; }
+  .progressBar{ height:7px; margin-top:6px; }
+  .bookNote{ display:none; }
+  .bookTotalProgress{
+    display:flex;
+    left:30.00%;
+    top:85.18%;
+    width:42.00%;
+    min-height:3.20%;
+    height:3.20%;
+    padding:0 .5%;
+    font-size:clamp(8px,2.1vw,10px);
+    line-height:1.05;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    z-index:6;
+    white-space:nowrap;
+  }
+  .mobileTabs{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+    margin-top:2px;
+  }
+  .mobileTab{
+    appearance:none;
+    border:1px solid rgba(178,121,64,.15);
+    border-radius:999px;
+    padding:6px 4px;
+    background:rgba(255,250,238,.66);
+    color:#7b512b;
+    font-size:clamp(12px,3.35vw,15px);
+    font-weight:900;
+    cursor:pointer;
+  }
+  .mobileTab.active{ background:rgba(232,194,135,.72); }
+  .itemGrid{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; padding:0 1px 18px 0; }
+  .itemCard{ min-height:78px; border-radius:13px; padding:6px 4px; }
+  .itemIcon{ width:34px; height:34px; border-radius:11px; font-size:22px; }
+  .itemName{ font-size:10.5px; }
+  .emptySpecial{ min-height:250px; font-size:14px; }
+  .bookTags{ display:none; }
+  .otherCategoryBtn{ display:none; }
+
+  body.position-editing .tagHit,
+  body.position-editing .tagText,
+  body.position-editing .otherCategoryBtn{
+    display:none;
+  }
+
+  .closeBtn{
+    left:66.77%;
+    top:10.09%;
+    width:14.80%;
+    height:8.33%;
+    aspect-ratio:auto;
+  }
+  .prevBtn,
+  .nextBtn{
+    top:35.2%;
+    width:20.0%;
+    height:4.6%;
+    min-height:26px;
+    aspect-ratio:auto;
+    padding:0;
+    border-radius:999px;
+    background:rgba(255,246,225,.78);
+    border:1px solid rgba(186,125,69,.18);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.72), 0 4px 10px rgba(108,70,34,.08);
+    color:#805633;
+    font-size:clamp(10px,2.8vw,13px);
+    line-height:1;
+    font-weight:900;
+    letter-spacing:.04em;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    white-space:nowrap;
+  }
+  .prevBtn img,
+  .nextBtn img{ display:none; }
+  .prevBtn::before,
+  .nextBtn::before{
+    display:block;
+    width:100%;
+  }
+  .prevBtn::before{ content:"上一页"; }
+  .nextBtn::before{ content:"下一页"; }
+
+  .prevBtn{ left:20.40%; top:35.20%; }
+  .nextBtn{ left:62.97%; top:35.20%; }
+  .gachaBtn{
+    left:45.21%;
+    top:32.29%;
+    width:14.6%;
+    height:auto;
+    aspect-ratio:1;
+  }
+}
+</style>
+</head>
+<body>
+<div class="collectionBookModal show" id="collectionBookModal" aria-hidden="false">
+  <div class="bookStage" role="dialog" aria-modal="true" aria-label="收集图鉴">
+    <img class="bookBg" src="book-open.png" alt="" aria-hidden="true">
+    <div class="bookOverlayLayer">
+      <h2 class="bookPageHeading" id="bookTitle">日常礼包</h2>
+
+      <section class="bookLeftPanel">
+        <div class="progressCard">
+          <div class="progressLabel">收集进度</div>
+          <div class="progressText" id="categoryProgress">0 / 12</div>
+          <div class="progressBar"><div class="progressFill" id="categoryProgressFill"></div></div>
+        </div>
+        <div class="mobileTabs" id="mobileTabs"></div>
+      </section>
+
+      <p class="bookNote" id="bookNote">日常或节日期间领取过的礼包物品会在这里点亮。</p>
+
+      <section class="bookLeftGridPanel">
+        <div class="itemGrid leftItemGrid" id="leftItemGrid"></div>
+      </section>
+
+      <div class="bookTotalProgress" id="totalProgress">总收集：0 / 31</div>
+
+      <section class="bookGridPanel">
+        <div class="itemGrid rightItemGrid" id="itemGrid"></div>
+      </section>
+
+      <div class="bookTags" aria-label="分类快捷标签">
+        <button class="tagHit tagFestivalRange" type="button" data-page="0" title="日常礼包" aria-label="日常礼包"></button>
+        <button class="tagHit tagMaterialRange" type="button" data-page="1" title="道具资源" aria-label="道具资源"></button>
+        <button class="tagHit tagPetRange" type="button" data-page="2" title="宠物收集" aria-label="宠物收集"></button>
+        <span class="tagText tagFestival" aria-hidden="true">礼包</span>
+        <span class="tagText tagMaterial" aria-hidden="true">资源</span>
+        <span class="tagText tagPet" aria-hidden="true">宠物</span>
+      </div>
+
+      <button class="otherCategoryBtn" type="button" data-page="3" title="其他分类">其他</button>
+
+      <button class="bookControl closeBtn" id="closeBookBtn" type="button" aria-label="关闭图鉴"><img src="book-close.png" alt=""></button>
+      <button class="bookControl prevBtn" id="prevBookBtn" type="button" aria-label="上一页"><img src="book-prev.png" alt=""></button>
+      <button class="bookControl nextBtn" id="nextBookBtn" type="button" aria-label="下一页"><img src="book-next.png" alt=""></button>
+      <button class="bookControl gachaBtn" id="bookGachaBtn" type="button" aria-label="前往扭蛋机"><img src="book-gacha.png" alt=""></button>
+    </div>
+  </div>
+</div>
+
+<div class="rewardModal" id="rewardModal" aria-hidden="true">
+  <div class="rewardCard">
+    <h3 id="rewardTitle">成就达成</h3>
+    <p id="rewardText">这里预留接入全站统一奖励弹窗。</p>
+    <button type="button" id="rewardCloseBtn">确认</button>
+  </div>
+</div>
+
+<div class="imagePreviewModal" id="imagePreviewModal" aria-hidden="true">
+  <div class="imagePreviewCard">
+    <img id="imagePreviewImg" src="" alt="">
+    <div class="imagePreviewTitle" id="imagePreviewTitle"></div>
+    <button class="imagePreviewClose" type="button" id="imagePreviewCloseBtn">关闭</button>
+  </div>
+</div>
+
+<script>
+const categories = [
+  { key:"festival", title:"日常礼包", shortTitle:"礼包", note:"成员领取过的礼包奖励和特殊成就纪念会在这里点亮。", items:[
+    ["holiday_new_year_wish","新年许愿签","🎋",false],
+    ["holiday_spring_red_packet","新春红包","🧧",false],
+    ["holiday_lantern","团圆花灯","🏮",false],
+    ["holiday_valentine_letter","玫瑰信笺","💌",false],
+    ["holiday_duanwu_sachet","平安香囊","🎐",false],
+    ["holiday_qixi_bottle","星河许愿瓶","🌌",false],
+    ["holiday_moon_rabbit_lantern","月兔灯笼","🐇",false],
+    ["holiday_national_firework_badge","烟花纪念章","🎆",false],
+    ["holiday_independence_firework","星条礼花","🎇",false],
+    ["holiday_halloween_candy_bag","南瓜糖袋","🎃",false],
+    ["holiday_thanksgiving_turkey","节日火鸡大餐","🦃",false],
+    ["holiday_christmas_stocking","圣诞袜","🎄",false],
+    ["badge_join_anniversary_0","初来乍到徽章","0.png",true],
+    ["badge_join_anniversary_1","一周年徽章","1.png",true],
+    ["badge_join_anniversary_2","两周年徽章","2.png",false],
+    ["badge_join_anniversary_3","三周年徽章","3.png",false],
+    ["badge_join_anniversary_4","四周年徽章","4.png",false],
+    ["badge_join_anniversary_5","五周年徽章","5.png",false]
+  ]},
+  { key:"materials", title:"道具资源", shortTitle:"资源", note:"成员获得过的可使用道具会在这里点亮，只记录是否获得过。", items:[
+    ["flower_seed","花种子","seed.png",true],
+    ["flower_water","水","water.png",true],
+    ["flower_fertilizer","肥料","fert.png",true],
+    ["pet_snack","宠物零食","🥣",false],
+    ["pet_medical_card","医疗卡","💳",false]
+  ]},
+  { key:"pet", title:"宠物收集", shortTitle:"宠物", note:"宠物房玩法中获得过的掉落纪念物会在这里点亮。", items:[
+    ["panda_tail","小熊猫尾绒","🦊",false],
+    ["lynx_ear","猞猁耳绒","🐾",false],
+    ["arctic_fox","北极狐雪绒","❄️",false],
+    ["sloth_fluff","树懒软绒","🦥",false],
+    ["shiba_fur","柴犬短绒","🐕",false],
+    ["wolf_silver","大灰狼银绒","🐺",false],
+    ["blue_bird","小蓝鸟羽毛","🪶",false],
+    ["red_fox","红狐狸尾绒","🦊",false],
+    ["orange_cat","橘猫软毛","🐈",false],
+    ["maine_coon","缅因猫长绒","🐱",false],
+    ["rabbit_fur","小白兔软毛","🐰",false],
+    ["samoyed_fluff","萨摩耶蓬蓬毛","🐶",false]
+  ]},
+  { key:"other", title:"其他", shortTitle:"其他", note:"不属于礼包、道具资源或宠物收集的物品会统一放在这里。", items:[
+    ["flower_tip_white_mature_window","花房小纸条·成熟期","note.png",false],
+    ["flower_tip_white_price_down","花房小纸条·开始掉价","note.png",false],
+    ["flower_tip_white_dead_clean","花房小纸条·彻底枯萎","note.png",false],
+    ["flower_tip_white_clean_bonus","花房小纸条·枯盆惊喜","note.png",false],
+    ["flower_tip_white_planted_value","花房小纸条·自己种的更香","note.png",false],
+    ["flower_tip_white_low_quality","花房小纸条·低品质也有用","note.png",false],
+    ["flower_tip_white_value_order","花房小纸条·值钱顺序","note.png",false],
+    ["flower_tip_white_market_wither","花房小纸条·市场花过期","note.png",false],
+    ["flower_tip_white_need_both","花房小纸条·水肥都要给","note.png",false],
+    ["flower_tip_white_harvest_five","花房小纸条·一收就是5朵","note.png",false],
+    ["flower_tip_white_daisy_hint","花房小纸条·雏菊线索","note.png",false],
+    ["flower_tip_white_lavender_hint","花房小纸条·薰衣草线索","note.png",false],
+    ["flower_tip_white_tulip_hint","花房小纸条·郁金香线索","note.png",false],
+    ["flower_tip_white_rose_hint","花房小纸条·黄玫瑰线索","note.png",false],
+    ["flower_tip_white_peony_hint","花房小纸条·牡丹线索","note.png",false],
+    ["flower_tip_purple_daisy_hint","花房小纸条·雏菊提示","note.png",false],
+    ["flower_tip_purple_lavender_hint","花房小纸条·薰衣草提示","note.png",false],
+    ["flower_tip_purple_tulip_hint","花房小纸条·郁金香提示","note.png",false],
+    ["flower_tip_purple_rose_hint","花房小纸条·黄玫瑰提示","note.png",false],
+    ["flower_tip_purple_peony_hint","花房小纸条·牡丹提示","note.png",false],
+    ["flower_tip_purple_low_quality_hint","花房小纸条·低品质提示","note.png",false],
+    ["flower_tip_gold_daisy_recipe","花房小纸条·雏菊配方","note.png",false],
+    ["flower_tip_gold_lavender_recipe","花房小纸条·薰衣草配方","note.png",false],
+    ["flower_tip_gold_tulip_recipe","花房小纸条·郁金香配方","note.png",false],
+    ["flower_tip_gold_rose_recipe","花房小纸条·黄玫瑰配方","note.png",false],
+    ["flower_tip_gold_peony_recipe","花房小纸条·牡丹配方","note.png",false]
+  ]}
+];
+let currentCategory = 0;
+let currentBookPage = 0;
+
+const root = document.documentElement;
+const bookStageEl = document.querySelector(".bookStage");
+
+function syncBookScale(){
+  if(isMobileLayout()){
+    root.style.setProperty("--book-scale", "1");
+    return;
+  }
+  const width = bookStageEl?.getBoundingClientRect().width || 1180;
+  const scale = Math.max(0.36, Math.min(1, width / 1180));
+  root.style.setProperty("--book-scale", String(scale));
+}
+
+const modal = document.getElementById("collectionBookModal");
+const bookTitle = document.getElementById("bookTitle");
+const categoryProgress = document.getElementById("categoryProgress");
+const categoryProgressFill = document.getElementById("categoryProgressFill");
+const bookNote = document.getElementById("bookNote");
+const totalProgress = document.getElementById("totalProgress");
+const itemGrid = document.getElementById("itemGrid");
+const leftItemGrid = document.getElementById("leftItemGrid");
+const mobileTabs = document.getElementById("mobileTabs");
+
+function unlockedCount(items){ return items.filter(item => item[3]).length; }
+function totalUnlocked(){ return categories.reduce((sum,category) => sum + unlockedCount(category.items), 0); }
+function totalItems(){ return categories.reduce((sum,category) => sum + category.items.length, 0); }
+function isMobileLayout(){ return window.matchMedia("(max-width:540px)").matches; }
+function perBookPage(){ return isMobileLayout() ? 12 : 19; }
+function categoryPageCount(category){
+  return Math.max(1, Math.ceil(category.items.length / perBookPage()));
+}
+function currentCategoryData(){
+  return categories[currentCategory] || categories[0];
+}
+function currentPageItems(category){
+  const size = perBookPage();
+  const start = currentBookPage * size;
+  return category.items.slice(start, start + size);
+}
+function normalizeBookPage(){
+  const count = categoryPageCount(currentCategoryData());
+  currentBookPage = ((currentBookPage % count) + count) % count;
+}
+function escapeHtml(value){
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    "\"":"&quot;",
+    "'":"&#39;"
+  }[char]));
+}
+function isImageIcon(icon){
+  return /\.(png|jpe?g|webp|gif|svg)$/i.test(String(icon || ""));
+}
+function renderIcon(icon){
+  if(!icon) return "?";
+  if(isImageIcon(icon)){
+    const safeIcon = escapeHtml(icon);
+    return `<img src="${safeIcon}" alt="" loading="lazy">`;
+  }
+  return escapeHtml(icon);
+}
+function displayItemName(name){
+  return String(name ?? "").replace(/徽章/g, "").trim();
+}
+function renderMobileTabs(){
+  mobileTabs.innerHTML = categories.map((category,index) =>
+    `<button class="mobileTab ${index === currentCategory ? "active" : ""}" type="button" data-category="${index}">${escapeHtml(category.shortTitle || category.title)}</button>`
+  ).join("");
+}
+function renderBook(){
+  syncBookScale();
+  const category = currentCategoryData();
+  normalizeBookPage();
+
+  const unlocked = unlockedCount(category.items);
+  const total = category.items.length;
+  const visibleItems = currentPageItems(category);
+
+  bookTitle.textContent = category.title;
+  categoryProgress.textContent = total ? `${unlocked} / ${total}` : "暂未开放";
+  categoryProgressFill.style.width = total ? `${Math.round(unlocked / total * 100)}%` : "0%";
+  bookNote.textContent = category.note;
+  totalProgress.textContent = `总收集：${totalUnlocked()} / ${totalItems()}`;
+
+  const cardHtml = ([key,name,icon,isUnlocked]) => {
+    const previewable = isUnlocked && isImageIcon(icon);
+    const safeKey = escapeHtml(key);
+    const safeName = escapeHtml(displayItemName(name));
+    const safeIcon = escapeHtml(icon);
+    return `
+    <div class="itemCard ${isUnlocked ? "" : "locked"} ${previewable ? "is-previewable" : ""}" data-key="${safeKey}" data-preview-icon="${previewable ? safeIcon : ""}" data-preview-name="${previewable ? safeName : ""}">
+      <div class="itemIcon">${isUnlocked ? renderIcon(icon) : "?"}</div>
+      <div class="itemName">${isUnlocked ? safeName : "？？？"}</div>
+    </div>`;
+  };
+
+  if(visibleItems.length){
+    if(isMobileLayout()){
+      leftItemGrid.innerHTML = "";
+      itemGrid.innerHTML = visibleItems.map(cardHtml).join("");
+    }else{
+      const leftItems = visibleItems.slice(0, 11);
+      const rightItems = visibleItems.slice(11);
+      const firstTwoRows = leftItems.slice(0, 8).map(cardHtml).join("");
+      const thirdRow = leftItems.slice(8).map(cardHtml).join("");
+      leftItemGrid.innerHTML = firstTwoRows + (thirdRow ? '<div class="gridSpacer" aria-hidden="true"></div>' + thirdRow : "");
+      itemGrid.innerHTML = rightItems.map(cardHtml).join("");
+    }
+  }else{
+    leftItemGrid.innerHTML = "";
+    itemGrid.innerHTML = `<div class="emptySpecial">更多收藏内容准备中<br>扭蛋机、生日礼包、小事件道具后续会加入这里</div>`;
+  }
+
+  document.querySelectorAll(".tagHit").forEach(btn => {
+    btn.classList.toggle("active", Number(btn.dataset.page) === currentCategory);
+  });
+  const otherBtn = document.querySelector(".otherCategoryBtn");
+  if(otherBtn){
+    otherBtn.classList.toggle("active", Number(otherBtn.dataset.page) === currentCategory);
+  }
+
+  const gachaBtn = document.getElementById("bookGachaBtn");
+  if(gachaBtn){
+    gachaBtn.classList.toggle("is-hidden", category.key !== "materials");
+  }
+
+  renderMobileTabs();
+}
+function openBook(){ modal.classList.add("show"); modal.setAttribute("aria-hidden","false"); renderBook(); }
+function closeBook(){
+  try{
+    localStorage.setItem("room10DormActiveView","inventory");
+  }catch(error){
+    console.warn("无法写入宿舍当前版块。", error);
+  }
+  window.location.href = "dorm.html";
+}
+function goCategory(index){
+  currentCategory = ((index % categories.length) + categories.length) % categories.length;
+  currentBookPage = 0;
+  renderBook();
+}
+function turnBookPage(delta){
+  const count = categoryPageCount(currentCategoryData());
+  currentBookPage = (currentBookPage + delta + count) % count;
+  renderBook();
+}
+function showUnifiedRewardModal(payload){
+  document.getElementById("rewardTitle").textContent = payload?.title || "成就达成";
+  document.getElementById("rewardText").textContent = payload?.text || "这里预留接入全站统一奖励弹窗。";
+  document.getElementById("rewardModal").classList.add("show");
+  document.getElementById("rewardModal").setAttribute("aria-hidden","false");
+}
+function closeRewardModal(){ document.getElementById("rewardModal").classList.remove("show"); document.getElementById("rewardModal").setAttribute("aria-hidden","true"); }
+function openImagePreview(icon,name){
+  if(!icon) return;
+  document.getElementById("imagePreviewImg").src = icon;
+  document.getElementById("imagePreviewImg").alt = name || "图鉴图案";
+  document.getElementById("imagePreviewTitle").textContent = name || "图鉴图案";
+  document.getElementById("imagePreviewModal").classList.add("show");
+  document.getElementById("imagePreviewModal").setAttribute("aria-hidden","false");
+}
+function closeImagePreview(){
+  const previewModal = document.getElementById("imagePreviewModal");
+  previewModal.classList.remove("show");
+  previewModal.setAttribute("aria-hidden","true");
+  document.getElementById("imagePreviewImg").removeAttribute("src");
+}
+
+document.getElementById("closeBookBtn").addEventListener("click", closeBook);
+document.getElementById("prevBookBtn").addEventListener("click", () => turnBookPage(-1));
+document.getElementById("nextBookBtn").addEventListener("click", () => turnBookPage(1));
+document.getElementById("bookGachaBtn").addEventListener("click", () => { window.location.href = "game-gacha.html"; });
+document.getElementById("rewardCloseBtn").addEventListener("click", closeRewardModal);
+document.getElementById("imagePreviewCloseBtn").addEventListener("click", closeImagePreview);
+document.getElementById("imagePreviewModal").addEventListener("click", event => {
+  if(event.target.id === "imagePreviewModal") closeImagePreview();
+});
+[itemGrid,leftItemGrid].forEach(grid => {
+  grid.addEventListener("click", event => {
+    const card = event.target.closest(".itemCard.is-previewable");
+    if(!card) return;
+    openImagePreview(card.dataset.previewIcon, card.dataset.previewName);
+  });
+});
+document.querySelectorAll(".tagHit").forEach(btn => btn.addEventListener("click", () => goCategory(Number(btn.dataset.page))));
+const otherCategoryBtn = document.querySelector(".otherCategoryBtn");
+if(otherCategoryBtn){
+  otherCategoryBtn.addEventListener("click", () => goCategory(Number(otherCategoryBtn.dataset.page)));
+}
+mobileTabs.addEventListener("click", event => {
+  const btn = event.target.closest(".mobileTab");
+  if(btn) goCategory(Number(btn.dataset.category));
+});
+document.addEventListener("keydown", event => {
+  if(event.key === "Escape"){ closeImagePreview(); closeRewardModal(); closeBook(); }
+  if(modal.classList.contains("show")){
+    if(event.key === "ArrowLeft") turnBookPage(-1);
+    if(event.key === "ArrowRight") turnBookPage(1);
+  }
+});
+window.addEventListener("resize", renderBook);
+
+renderBook();
+</script>
+</body>
+</html>
