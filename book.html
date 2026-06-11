@@ -404,29 +404,6 @@ button{ font-family:inherit; }
 .gachaBtn img{ filter:drop-shadow(0 4px 8px rgba(110,70,34,.28)); }
 .gachaBtn.is-hidden{ display:none; }
 
-.rewardModal{
-  position:fixed;
-  inset:0;
-  z-index:800;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(58,38,22,.28);
-  padding:22px;
-}
-.rewardModal.show{ display:flex; }
-.rewardCard{
-  width:min(420px,92vw);
-  border-radius:26px;
-  padding:26px 24px;
-  text-align:center;
-  background:rgba(255,249,239,.96);
-  border:1px solid rgba(198,140,75,.25);
-  box-shadow:0 18px 42px rgba(81,52,27,.22), inset 0 1px 0 rgba(255,255,255,.8);
-}
-.rewardCard h3{ margin:0 0 8px; font-size:24px; color:#704721; }
-.rewardCard p{ margin:0 0 18px; color:#8a633f; font-weight:800; line-height:1.6; }
-.rewardCard button{ appearance:none; border:0; cursor:pointer; border-radius:999px; padding:10px 28px; background:#c98c4f; color:#fff9f2; font-weight:900; }
 
 .itemCard.is-previewable{ cursor:zoom-in; }
 .imagePreviewModal{
@@ -477,7 +454,7 @@ button{ font-family:inherit; }
 
 @media (max-width:540px){
   body{ padding:0; align-items:center; overflow:hidden; }
-  .collectionBookModal{ padding:8px; align-items:center; }
+  .collectionBookModal{ padding:calc(8px * var(--book-scale)); align-items:center; }
   .bookStage{
     width:min(96vw,500px,calc(95vh * 941 / 1672));
     aspect-ratio:941 / 1672;
@@ -489,7 +466,7 @@ button{ font-family:inherit; }
     top:13.84%;
     width:44.00%;
     height:3.28%;
-    font-size:22px;
+    font-size:calc(22px * var(--book-scale));
   }
   .bookLeftPanel{
     left:20.49%;
@@ -497,7 +474,7 @@ button{ font-family:inherit; }
     width:62.0%;
     height:18.2%;
     padding:0;
-    gap:7px;
+    gap:calc(7px * var(--book-scale));
   }
   .bookLeftGridPanel{ display:none; }
   .bookGridPanel{
@@ -506,10 +483,10 @@ button{ font-family:inherit; }
     width:64.00%;
     height:39.20%;
   }
-  .progressCard{ padding:8px 10px; border-radius:14px; }
+  .progressCard{ padding:calc(8px * var(--book-scale)) calc(10px * var(--book-scale)); border-radius:calc(14px * var(--book-scale)); }
   .progressLabel{ display:none; }
-  .progressText{ font-size:16px; }
-  .progressBar{ height:7px; margin-top:6px; }
+  .progressText{ font-size:calc(16px * var(--book-scale)); }
+  .progressBar{ height:calc(7px * var(--book-scale)); margin-top:calc(6px * var(--book-scale)); }
   .bookNote{ display:none; }
   .bookTotalProgress{
     display:flex;
@@ -519,7 +496,7 @@ button{ font-family:inherit; }
     min-height:3.20%;
     height:3.20%;
     padding:0 .5%;
-    font-size:clamp(8px,2.1vw,10px);
+    font-size:calc(10px * var(--book-scale));
     line-height:1.05;
     align-items:center;
     justify-content:center;
@@ -530,34 +507,28 @@ button{ font-family:inherit; }
   .mobileTabs{
     display:grid;
     grid-template-columns:repeat(4,minmax(0,1fr));
-    gap:5px;
-    margin-top:2px;
+    gap:calc(5px * var(--book-scale));
+    margin-top:calc(2px * var(--book-scale));
   }
   .mobileTab{
     appearance:none;
     border:1px solid rgba(178,121,64,.15);
     border-radius:999px;
-    padding:6px 4px;
+    padding:calc(6px * var(--book-scale)) calc(4px * var(--book-scale));
     background:rgba(255,250,238,.66);
     color:#7b512b;
-    font-size:clamp(12px,3.35vw,15px);
+    font-size:calc(15px * var(--book-scale));
     font-weight:900;
     cursor:pointer;
   }
   .mobileTab.active{ background:rgba(232,194,135,.72); }
-  .itemGrid{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; padding:0 1px 18px 0; }
-  .itemCard{ min-height:78px; border-radius:13px; padding:6px 4px; }
-  .itemIcon{ width:34px; height:34px; border-radius:11px; font-size:22px; }
-  .itemName{ font-size:10.5px; }
-  .emptySpecial{ min-height:250px; font-size:14px; }
+  .itemGrid{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:calc(7px * var(--book-scale)); padding:0 calc(1px * var(--book-scale)) calc(18px * var(--book-scale)) 0; }
+  .itemCard{ min-height:calc(78px * var(--book-scale)); border-radius:calc(13px * var(--book-scale)); padding:calc(6px * var(--book-scale)) calc(4px * var(--book-scale)); }
+  .itemIcon{ width:calc(34px * var(--book-scale)); height:calc(34px * var(--book-scale)); border-radius:calc(11px * var(--book-scale)); font-size:calc(22px * var(--book-scale)); }
+  .itemName{ font-size:calc(10.5px * var(--book-scale)); }
+  .emptySpecial{ min-height:calc(250px * var(--book-scale)); font-size:calc(14px * var(--book-scale)); }
   .bookTags{ display:none; }
   .otherCategoryBtn{ display:none; }
-
-  body.position-editing .tagHit,
-  body.position-editing .tagText,
-  body.position-editing .otherCategoryBtn{
-    display:none;
-  }
 
   .closeBtn{
     left:66.77%;
@@ -571,7 +542,7 @@ button{ font-family:inherit; }
     top:35.2%;
     width:20.0%;
     height:4.6%;
-    min-height:26px;
+    min-height:calc(26px * var(--book-scale));
     aspect-ratio:auto;
     padding:0;
     border-radius:999px;
@@ -579,7 +550,7 @@ button{ font-family:inherit; }
     border:1px solid rgba(186,125,69,.18);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.72), 0 4px 10px rgba(108,70,34,.08);
     color:#805633;
-    font-size:clamp(10px,2.8vw,13px);
+    font-size:calc(13px * var(--book-scale));
     line-height:1;
     font-weight:900;
     letter-spacing:.04em;
@@ -655,14 +626,6 @@ button{ font-family:inherit; }
       <button class="bookControl nextBtn" id="nextBookBtn" type="button" aria-label="下一页"><img src="book-next.png" alt=""></button>
       <button class="bookControl gachaBtn" id="bookGachaBtn" type="button" aria-label="前往扭蛋机"><img src="book-gacha.png" alt=""></button>
     </div>
-  </div>
-</div>
-
-<div class="rewardModal" id="rewardModal" aria-hidden="true">
-  <div class="rewardCard">
-    <h3 id="rewardTitle">成就达成</h3>
-    <p id="rewardText">这里预留接入全站统一奖励弹窗。</p>
-    <button type="button" id="rewardCloseBtn">确认</button>
   </div>
 </div>
 
@@ -753,12 +716,18 @@ const root = document.documentElement;
 const bookStageEl = document.querySelector(".bookStage");
 
 function syncBookScale(){
-  if(isMobileLayout()){
-    root.style.setProperty("--book-scale", "1");
-    return;
-  }
-  const width = bookStageEl?.getBoundingClientRect().width || 1180;
-  const scale = Math.max(0.36, Math.min(1, width / 1180));
+  const stageWidth = bookStageEl?.getBoundingClientRect().width || 0;
+
+  /*
+    图鉴有电脑 / 手机两套不同底图与定位：
+    - 电脑：book-open.png，当前设计最大宽度 1180
+    - 手机：book-open2.png，当前设计最大宽度 500
+    两套都按同一规则缩放：当前书本实际宽度 / 当前版本设计宽度。
+  */
+  const baseWidth = isMobileLayout() ? 500 : 1180;
+  const safeWidth = stageWidth || baseWidth;
+  const scale = Math.max(0.36, Math.min(1, safeWidth / baseWidth));
+
   root.style.setProperty("--book-scale", String(scale));
 }
 
@@ -879,7 +848,6 @@ function renderBook(){
 
   renderMobileTabs();
 }
-function openBook(){ modal.classList.add("show"); modal.setAttribute("aria-hidden","false"); renderBook(); }
 function closeBook(){
   try{
     localStorage.setItem("room10DormActiveView","inventory");
@@ -898,13 +866,6 @@ function turnBookPage(delta){
   currentBookPage = (currentBookPage + delta + count) % count;
   renderBook();
 }
-function showUnifiedRewardModal(payload){
-  document.getElementById("rewardTitle").textContent = payload?.title || "成就达成";
-  document.getElementById("rewardText").textContent = payload?.text || "这里预留接入全站统一奖励弹窗。";
-  document.getElementById("rewardModal").classList.add("show");
-  document.getElementById("rewardModal").setAttribute("aria-hidden","false");
-}
-function closeRewardModal(){ document.getElementById("rewardModal").classList.remove("show"); document.getElementById("rewardModal").setAttribute("aria-hidden","true"); }
 function openImagePreview(icon,name){
   if(!icon) return;
   document.getElementById("imagePreviewImg").src = icon;
@@ -924,7 +885,6 @@ document.getElementById("closeBookBtn").addEventListener("click", closeBook);
 document.getElementById("prevBookBtn").addEventListener("click", () => turnBookPage(-1));
 document.getElementById("nextBookBtn").addEventListener("click", () => turnBookPage(1));
 document.getElementById("bookGachaBtn").addEventListener("click", () => { window.location.href = "game-gacha.html"; });
-document.getElementById("rewardCloseBtn").addEventListener("click", closeRewardModal);
 document.getElementById("imagePreviewCloseBtn").addEventListener("click", closeImagePreview);
 document.getElementById("imagePreviewModal").addEventListener("click", event => {
   if(event.target.id === "imagePreviewModal") closeImagePreview();
@@ -946,13 +906,21 @@ mobileTabs.addEventListener("click", event => {
   if(btn) goCategory(Number(btn.dataset.category));
 });
 document.addEventListener("keydown", event => {
-  if(event.key === "Escape"){ closeImagePreview(); closeRewardModal(); closeBook(); }
+  if(event.key === "Escape"){ closeImagePreview(); closeBook(); }
   if(modal.classList.contains("show")){
     if(event.key === "ArrowLeft") turnBookPage(-1);
     if(event.key === "ArrowRight") turnBookPage(1);
   }
 });
-window.addEventListener("resize", renderBook);
+let bookResizeTimer = null;
+function requestBookRender(){
+  window.clearTimeout(bookResizeTimer);
+  bookResizeTimer = window.setTimeout(renderBook, 40);
+}
+
+window.addEventListener("resize", requestBookRender);
+window.addEventListener("orientationchange", requestBookRender);
+window.addEventListener("load", renderBook);
 
 renderBook();
 </script>
