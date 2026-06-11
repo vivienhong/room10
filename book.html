@@ -4,15 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜收集图鉴</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{ box-sizing:border-box; }
 :root{
   --ink:#704721;
-  --muted:#9b7656;
-  --paper:rgba(255,250,240,.78);
-  --paper-strong:rgba(255,248,235,.92);
-  --line:rgba(178,121,64,.18);
-  --shadow:rgba(92,62,32,.18);
   --book-scale:1;
 }
 html,body{
@@ -404,7 +400,6 @@ button{ font-family:inherit; }
 .gachaBtn img{ filter:drop-shadow(0 4px 8px rgba(110,70,34,.28)); }
 .gachaBtn.is-hidden{ display:none; }
 
-
 .itemCard.is-previewable{ cursor:zoom-in; }
 .imagePreviewModal{
   position:fixed;
@@ -638,79 +633,31 @@ button{ font-family:inherit; }
 </div>
 
 <script>
-const categories = [
-  { key:"festival", title:"日常礼包", shortTitle:"礼包", note:"成员领取过的礼包奖励和特殊成就纪念会在这里点亮。", items:[
-    ["holiday_new_year_wish","新年许愿签","🎋",false],
-    ["holiday_spring_red_packet","新春红包","🧧",false],
-    ["holiday_lantern","团圆花灯","🏮",false],
-    ["holiday_valentine_letter","玫瑰信笺","💌",false],
-    ["holiday_duanwu_sachet","平安香囊","🎐",false],
-    ["holiday_qixi_bottle","星河许愿瓶","🌌",false],
-    ["holiday_moon_rabbit_lantern","月兔灯笼","🐇",false],
-    ["holiday_national_firework_badge","烟花纪念章","🎆",false],
-    ["holiday_independence_firework","星条礼花","🎇",false],
-    ["holiday_halloween_candy_bag","南瓜糖袋","🎃",false],
-    ["holiday_thanksgiving_turkey","节日火鸡大餐","🦃",false],
-    ["holiday_christmas_stocking","圣诞袜","🎄",false],
-    ["badge_join_anniversary_0","初来乍到徽章","0.png",true],
-    ["badge_join_anniversary_1","一周年徽章","1.png",true],
-    ["badge_join_anniversary_2","两周年徽章","2.png",false],
-    ["badge_join_anniversary_3","三周年徽章","3.png",false],
-    ["badge_join_anniversary_4","四周年徽章","4.png",false],
-    ["badge_join_anniversary_5","五周年徽章","5.png",false]
-  ]},
-  { key:"materials", title:"道具资源", shortTitle:"资源", note:"成员获得过的可使用道具会在这里点亮，只记录是否获得过。", items:[
-    ["flower_seed","花种子","seed.png",true],
-    ["flower_water","水","water.png",true],
-    ["flower_fertilizer","肥料","fert.png",true],
-    ["pet_snack","宠物零食","🥣",false],
-    ["pet_medical_card","医疗卡","💳",false]
-  ]},
-  { key:"pet", title:"宠物收集", shortTitle:"宠物", note:"宠物房玩法中获得过的掉落纪念物会在这里点亮。", items:[
-    ["panda_tail","小熊猫尾绒","🦊",false],
-    ["lynx_ear","猞猁耳绒","🐾",false],
-    ["arctic_fox","北极狐雪绒","❄️",false],
-    ["sloth_fluff","树懒软绒","🦥",false],
-    ["shiba_fur","柴犬短绒","🐕",false],
-    ["wolf_silver","大灰狼银绒","🐺",false],
-    ["blue_bird","小蓝鸟羽毛","🪶",false],
-    ["red_fox","红狐狸尾绒","🦊",false],
-    ["orange_cat","橘猫软毛","🐈",false],
-    ["maine_coon","缅因猫长绒","🐱",false],
-    ["rabbit_fur","小白兔软毛","🐰",false],
-    ["samoyed_fluff","萨摩耶蓬蓬毛","🐶",false]
-  ]},
-  { key:"other", title:"其他", shortTitle:"其他", note:"不属于礼包、道具资源或宠物收集的物品会统一放在这里。", items:[
-    ["flower_tip_white_mature_window","花房小纸条·成熟期","note.png",false],
-    ["flower_tip_white_price_down","花房小纸条·开始掉价","note.png",false],
-    ["flower_tip_white_dead_clean","花房小纸条·彻底枯萎","note.png",false],
-    ["flower_tip_white_clean_bonus","花房小纸条·枯盆惊喜","note.png",false],
-    ["flower_tip_white_planted_value","花房小纸条·自己种的更香","note.png",false],
-    ["flower_tip_white_low_quality","花房小纸条·低品质也有用","note.png",false],
-    ["flower_tip_white_value_order","花房小纸条·值钱顺序","note.png",false],
-    ["flower_tip_white_market_wither","花房小纸条·市场花过期","note.png",false],
-    ["flower_tip_white_need_both","花房小纸条·水肥都要给","note.png",false],
-    ["flower_tip_white_harvest_five","花房小纸条·一收就是5朵","note.png",false],
-    ["flower_tip_white_daisy_hint","花房小纸条·雏菊线索","note.png",false],
-    ["flower_tip_white_lavender_hint","花房小纸条·薰衣草线索","note.png",false],
-    ["flower_tip_white_tulip_hint","花房小纸条·郁金香线索","note.png",false],
-    ["flower_tip_white_rose_hint","花房小纸条·黄玫瑰线索","note.png",false],
-    ["flower_tip_white_peony_hint","花房小纸条·牡丹线索","note.png",false],
-    ["flower_tip_purple_daisy_hint","花房小纸条·雏菊提示","note.png",false],
-    ["flower_tip_purple_lavender_hint","花房小纸条·薰衣草提示","note.png",false],
-    ["flower_tip_purple_tulip_hint","花房小纸条·郁金香提示","note.png",false],
-    ["flower_tip_purple_rose_hint","花房小纸条·黄玫瑰提示","note.png",false],
-    ["flower_tip_purple_peony_hint","花房小纸条·牡丹提示","note.png",false],
-    ["flower_tip_purple_low_quality_hint","花房小纸条·低品质提示","note.png",false],
-    ["flower_tip_gold_daisy_recipe","花房小纸条·雏菊配方","note.png",false],
-    ["flower_tip_gold_lavender_recipe","花房小纸条·薰衣草配方","note.png",false],
-    ["flower_tip_gold_tulip_recipe","花房小纸条·郁金香配方","note.png",false],
-    ["flower_tip_gold_rose_recipe","花房小纸条·黄玫瑰配方","note.png",false],
-    ["flower_tip_gold_peony_recipe","花房小纸条·牡丹配方","note.png",false]
-  ]}
+const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+window.room10Supabase = supabaseClient;
+
+const STORAGE_KEYS = {
+  loggedIn:"room10LoggedIn",
+  user:"room10User",
+  role:"room10Role",
+  memberId:"room10MemberId",
+  memberCode:"room10MemberCode"
+};
+
+const CATEGORY_META = [
+  { key:"festival", title:"日常礼包", shortTitle:"礼包", note:"成员领取过的礼包奖励和特殊成就纪念会在这里点亮。" },
+  { key:"materials", title:"道具资源", shortTitle:"资源", note:"成员获得过的可使用道具会在这里点亮，只记录是否获得过。" },
+  { key:"pet", title:"宠物收集", shortTitle:"宠物", note:"宠物房玩法中获得过的掉落纪念物会在这里点亮。" },
+  { key:"other", title:"其他", shortTitle:"其他", note:"不属于礼包、道具资源或宠物收集的物品会统一放在这里。" }
 ];
+
+let categories = CATEGORY_META.map(category => ({ ...category, items:[] }));
 let currentCategory = 0;
 let currentBookPage = 0;
+let isLoadingBookData = false;
+let bookLoadError = "";
 
 const root = document.documentElement;
 const bookStageEl = document.querySelector(".bookStage");
@@ -741,7 +688,7 @@ const itemGrid = document.getElementById("itemGrid");
 const leftItemGrid = document.getElementById("leftItemGrid");
 const mobileTabs = document.getElementById("mobileTabs");
 
-function unlockedCount(items){ return items.filter(item => item[3]).length; }
+function unlockedCount(items){ return items.filter(item => item.isUnlocked).length; }
 function totalUnlocked(){ return categories.reduce((sum,category) => sum + unlockedCount(category.items), 0); }
 function totalItems(){ return categories.reduce((sum,category) => sum + category.items.length, 0); }
 function isMobileLayout(){ return window.matchMedia("(max-width:540px)").matches; }
@@ -789,6 +736,91 @@ function renderMobileTabs(){
     `<button class="mobileTab ${index === currentCategory ? "active" : ""}" type="button" data-category="${index}">${escapeHtml(category.shortTitle || category.title)}</button>`
   ).join("");
 }
+
+
+function isUuid(value){
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || "").trim());
+}
+
+function getCurrentMemberId(){
+  const directMemberId = localStorage.getItem(STORAGE_KEYS.memberId) ||
+    localStorage.getItem("room10_member_id") ||
+    localStorage.getItem("memberId");
+
+  if(isUuid(directMemberId)) return String(directMemberId).trim();
+
+  const jsonKeys = ["room10Auth", "room10_user", "room10_current_user", "currentUser"];
+  for(const key of jsonKeys){
+    const raw = localStorage.getItem(key);
+    if(!raw) continue;
+
+    try{
+      const parsed = JSON.parse(raw);
+      const possibleId = parsed?.memberId || parsed?.member_id || parsed?.id || parsed?.member?.id;
+      if(isUuid(possibleId)) return String(possibleId).trim();
+    }catch(error){
+      // 旧缓存可能不是 JSON，跳过即可。
+    }
+  }
+
+  return null;
+}
+
+function normalizeBookItem(row){
+  return {
+    key: row.item_key,
+    name: row.item_name,
+    category: row.item_category,
+    bookCategory: row.book_category || "other",
+    desc: row.item_desc || "",
+    icon: row.item_icon || "",
+    sortOrder: Number(row.sort_order || 0),
+    isUnlocked: row.is_unlocked === true
+  };
+}
+
+function buildCategoriesFromRows(rows){
+  const grouped = new Map(CATEGORY_META.map(category => [category.key, []]));
+
+  (rows || []).forEach(row => {
+    const item = normalizeBookItem(row);
+    const key = grouped.has(item.bookCategory) ? item.bookCategory : "other";
+    grouped.get(key).push(item);
+  });
+
+  categories = CATEGORY_META.map(category => ({
+    ...category,
+    items:(grouped.get(category.key) || []).sort((a,b) =>
+      (a.sortOrder - b.sortOrder) || String(a.key).localeCompare(String(b.key), "zh-Hans-CN")
+    )
+  }));
+}
+
+async function loadCollectionBookItems(){
+  if(isLoadingBookData) return;
+  isLoadingBookData = true;
+  bookLoadError = "";
+  renderBook();
+
+  try{
+    const memberId = getCurrentMemberId();
+    const { data, error } = await supabaseClient.rpc("get_collection_book_items", {
+      p_member_id:memberId
+    });
+    if(error) throw error;
+
+    buildCategoriesFromRows(data || []);
+    currentBookPage = 0;
+  }catch(error){
+    console.error("读取图鉴数据失败：", error);
+    bookLoadError = "图鉴读取失败，请稍后重试。";
+    buildCategoriesFromRows([]);
+  }finally{
+    isLoadingBookData = false;
+    renderBook();
+  }
+}
+
 function renderBook(){
   syncBookScale();
   const category = currentCategoryData();
@@ -799,24 +831,30 @@ function renderBook(){
   const visibleItems = currentPageItems(category);
 
   bookTitle.textContent = category.title;
-  categoryProgress.textContent = total ? `${unlocked} / ${total}` : "暂未开放";
+  categoryProgress.textContent = total ? `${unlocked} / ${total}` : (isLoadingBookData ? "读取中" : "暂未开放");
   categoryProgressFill.style.width = total ? `${Math.round(unlocked / total * 100)}%` : "0%";
-  bookNote.textContent = category.note;
-  totalProgress.textContent = `总收集：${totalUnlocked()} / ${totalItems()}`;
+  bookNote.textContent = bookLoadError || category.note;
+  totalProgress.textContent = totalItems() ? `总收集：${totalUnlocked()} / ${totalItems()}` : (isLoadingBookData ? "图鉴读取中" : "总收集：0 / 0");
 
-  const cardHtml = ([key,name,icon,isUnlocked]) => {
-    const previewable = isUnlocked && isImageIcon(icon);
-    const safeKey = escapeHtml(key);
-    const safeName = escapeHtml(displayItemName(name));
-    const safeIcon = escapeHtml(icon);
+  const cardHtml = item => {
+    const previewable = item.isUnlocked && isImageIcon(item.icon);
+    const safeKey = escapeHtml(item.key);
+    const safeName = escapeHtml(displayItemName(item.name));
+    const safeIcon = escapeHtml(item.icon);
     return `
-    <div class="itemCard ${isUnlocked ? "" : "locked"} ${previewable ? "is-previewable" : ""}" data-key="${safeKey}" data-preview-icon="${previewable ? safeIcon : ""}" data-preview-name="${previewable ? safeName : ""}">
-      <div class="itemIcon">${isUnlocked ? renderIcon(icon) : "?"}</div>
-      <div class="itemName">${isUnlocked ? safeName : "？？？"}</div>
+    <div class="itemCard ${item.isUnlocked ? "" : "locked"} ${previewable ? "is-previewable" : ""}" data-key="${safeKey}" data-preview-icon="${previewable ? safeIcon : ""}" data-preview-name="${previewable ? safeName : ""}">
+      <div class="itemIcon">${item.isUnlocked ? renderIcon(item.icon) : "?"}</div>
+      <div class="itemName">${item.isUnlocked ? safeName : "？？？"}</div>
     </div>`;
   };
 
-  if(visibleItems.length){
+  if(isLoadingBookData){
+    leftItemGrid.innerHTML = "";
+    itemGrid.innerHTML = `<div class="emptySpecial">图鉴读取中...</div>`;
+  }else if(bookLoadError){
+    leftItemGrid.innerHTML = "";
+    itemGrid.innerHTML = `<div class="emptySpecial">${escapeHtml(bookLoadError)}</div>`;
+  }else if(visibleItems.length){
     if(isMobileLayout()){
       leftItemGrid.innerHTML = "";
       itemGrid.innerHTML = visibleItems.map(cardHtml).join("");
@@ -830,7 +868,7 @@ function renderBook(){
     }
   }else{
     leftItemGrid.innerHTML = "";
-    itemGrid.innerHTML = `<div class="emptySpecial">更多收藏内容准备中<br>扭蛋机、生日礼包、小事件道具后续会加入这里</div>`;
+    itemGrid.innerHTML = `<div class="emptySpecial">更多收藏内容准备中<br>后续可直接在数据库里新增图鉴条目</div>`;
   }
 
   document.querySelectorAll(".tagHit").forEach(btn => {
@@ -906,7 +944,11 @@ mobileTabs.addEventListener("click", event => {
   if(btn) goCategory(Number(btn.dataset.category));
 });
 document.addEventListener("keydown", event => {
-  if(event.key === "Escape"){ closeImagePreview(); closeBook(); }
+  if(event.key === "Escape"){
+    const previewModal = document.getElementById("imagePreviewModal");
+    if(previewModal.classList.contains("show")) closeImagePreview();
+    else closeBook();
+  }
   if(modal.classList.contains("show")){
     if(event.key === "ArrowLeft") turnBookPage(-1);
     if(event.key === "ArrowRight") turnBookPage(1);
@@ -920,9 +962,8 @@ function requestBookRender(){
 
 window.addEventListener("resize", requestBookRender);
 window.addEventListener("orientationchange", requestBookRender);
-window.addEventListener("load", renderBook);
-
-renderBook();
+loadCollectionBookItems();
 </script>
+
 </body>
 </html>
