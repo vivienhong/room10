@@ -585,6 +585,14 @@ button{
   font-size:18px;
 }
 
+.sideIcon img{
+  width:20px;
+  height:20px;
+  object-fit:contain;
+  display:block;
+  margin:0 auto;
+}
+
 #mascotBox{
   margin-top:12px;
   flex:1 1 auto;
@@ -736,28 +744,14 @@ button{
   overflow:hidden;
 }
 
-.walletIcon::before,
-.walletIcon::after{
-  content:"";
-  position:absolute;
-  border-radius:999px;
-  background:linear-gradient(180deg,#fff4c7,#d99a36);
-  border:2px solid rgba(127,83,32,.26);
-}
-
-.walletIcon::before{
-  width:31px;
-  height:31px;
-  left:12px;
-  top:16px;
-}
-
-.walletIcon::after{
-  width:24px;
-  height:24px;
-  right:10px;
-  top:20px;
-  opacity:.88;
+.walletIcon img{
+  width:78%;
+  height:78%;
+  object-fit:contain;
+  display:block;
+  position:relative;
+  z-index:1;
+  filter:drop-shadow(0 4px 7px rgba(130,82,28,.16));
 }
 
 .walletTitle{
@@ -799,12 +793,15 @@ button{
 }
 
 .balanceCard::after{
-  content:"🪙";
+  content:"";
   position:absolute;
   right:38px;
   top:22px;
-  font-size:70px;
+  width:70px;
+  height:70px;
+  background:url("coin.png") center center / contain no-repeat;
   opacity:.34;
+  pointer-events:none;
 }
 
 .goldLabel{
@@ -1726,6 +1723,11 @@ button{
     font-size:calc(16px * var(--ui-scale));
   }
 
+  .sideIcon img{
+    width:calc(18px * var(--ui-scale));
+    height:calc(18px * var(--ui-scale));
+  }
+
   #mascotBox{
     margin-top:calc(12px * var(--ui-scale));
     padding:calc(8px * var(--ui-scale));
@@ -1762,20 +1764,9 @@ button{
     border-radius:calc(13px * var(--ui-scale));
   }
 
-  .walletIcon::before{
-    width:calc(22px * var(--ui-scale));
-    height:calc(22px * var(--ui-scale));
-    left:calc(8px * var(--ui-scale));
-    top:calc(11px * var(--ui-scale));
-    border-width:calc(2px * var(--ui-scale));
-  }
-
-  .walletIcon::after{
-    width:calc(18px * var(--ui-scale));
-    height:calc(18px * var(--ui-scale));
-    right:calc(7px * var(--ui-scale));
-    top:calc(14px * var(--ui-scale));
-    border-width:calc(2px * var(--ui-scale));
+  .walletIcon img{
+    width:78%;
+    height:78%;
   }
 
   .walletTitle{
@@ -1796,7 +1787,8 @@ button{
   .balanceCard::after{
     right:calc(17px * var(--ui-scale));
     top:calc(14px * var(--ui-scale));
-    font-size:calc(40px * var(--ui-scale));
+    width:calc(40px * var(--ui-scale));
+    height:calc(40px * var(--ui-scale));
   }
 
   .goldLabel{
@@ -2582,7 +2574,8 @@ button{
   .balanceCard::after{
     right:22px;
     top:22px;
-    font-size:52px;
+    width:52px;
+    height:52px;
   }
 
   .goldNumber{
@@ -2898,7 +2891,7 @@ button{
       <aside id="sidePanel" class="glassPanel">
         <button class="sideBtn active" data-view="tasks"><span class="sideIcon">📮</span>我的任务</button>
         <button class="sideBtn" data-view="notice"><span class="sideIcon">💌</span>系统通知</button>
-        <button class="sideBtn" data-view="wallet"><span class="sideIcon">🪙</span>钱包记录</button>
+        <button class="sideBtn" data-view="wallet"><span class="sideIcon"><img src="coin.png" alt=""></span>钱包记录</button>
         <button class="sideBtn" data-view="inventory"><span class="sideIcon">🎒</span>我的背包</button>
         <button class="sideBtn" data-view="profile"><span class="sideIcon">📇</span>我的档案</button>
 
@@ -2911,7 +2904,7 @@ button{
       <section id="mainPanel" class="glassPanel">
         <div class="view" id="view-wallet">
           <div class="walletHeader">
-            <div class="walletIcon" aria-hidden="true"></div>
+            <div class="walletIcon" aria-hidden="true"><img src="coin.png" alt=""></div>
             <div>
               <h1 class="walletTitle" id="walletTitle">钱包</h1>
               <p class="walletSub" id="goldSub">正在读取金币与收支记录……</p>
@@ -4102,14 +4095,19 @@ function inventoryFallbackEmoji(item){
   if(key.includes("pet") || key.includes("宠")) return "🐾";
   if(key.includes("card") || key.includes("ticket") || key.includes("券") || key.includes("卡")) return "🎫";
   if(key.includes("gift") || key.includes("box") || key.includes("礼包")) return "🎁";
+  if(key.includes("gold") || key.includes("coin") || key.includes("金币")) return "🪙";
   return "🎒";
 }
 
 function itemIconHtml(item){
   const rawIcon = String(itemValue(item,["item_icon","icon","emoji"])).trim();
   const fallback = inventoryFallbackEmoji(item);
+  const keyText = String(`${item?.item_key || ""} ${item?.item_name || ""} ${item?.name || ""}`).toLowerCase();
 
   if(!rawIcon){
+    if(keyText.includes("gold") || keyText.includes("coin") || keyText.includes("金币")){
+      return `<img src="coin.png" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'inventoryEmoji',textContent:'${escapeHtml(fallback)}'}))">`;
+    }
     return `<span class="inventoryEmoji">${escapeHtml(fallback)}</span>`;
   }
 
