@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>暴打芒果｜十号房游戏房</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;color:#684224;background:radial-gradient(circle at 16% 8%,rgba(255,255,255,.82),rgba(255,255,255,0) 32%),radial-gradient(circle at 85% 14%,rgba(255,224,136,.32),rgba(255,224,136,0) 34%),linear-gradient(135deg,#fff5df 0%,#f5e0b6 52%,#e9c690 100%);}
+button,input,select{font-family:inherit;}button{cursor:pointer;}.hidden{display:none!important;}
+.page{width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:14px;}
+.mango-shell{position:relative;width:min(1080px,100%);height:min(690px,100%);border-radius:30px;padding:18px;overflow:hidden;display:flex;flex-direction:column;gap:14px;background:linear-gradient(180deg,rgba(255,253,247,.94),rgba(255,246,226,.84));border:1px solid rgba(255,255,255,.82);box-shadow:0 22px 60px rgba(95,64,31,.18),inset 0 1px 0 rgba(255,255,255,.94);}
+.mango-shell::before{content:"";position:absolute;inset:-12%;background:radial-gradient(circle at 12% 26%,rgba(255,210,92,.22) 0 7%,transparent 17%),radial-gradient(circle at 88% 86%,rgba(232,145,70,.14) 0 8%,transparent 18%);pointer-events:none;}
+.mango-shell::after{content:"✦  ✧     ✦     ✧";position:absolute;left:23%;top:12px;color:rgba(202,140,55,.20);font-size:24px;letter-spacing:1.28em;white-space:nowrap;pointer-events:none;}
+.header{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+.title-wrap{min-width:0;}.kicker{display:inline-flex;align-items:center;min-height:26px;padding:0 11px;border-radius:999px;background:rgba(235,183,82,.22);border:1px solid rgba(175,125,62,.16);color:#916230;font-size:12px;font-weight:950;}
+h1{margin:0;color:#673c1d;font-size:clamp(34px,5.2vw,58px);line-height:1;font-weight:950;letter-spacing:.05em;text-shadow:0 1px 0 rgba(255,255,255,.74);}.header-actions{flex:0 0 auto;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+.soft-btn{border:none;min-height:36px;padding:0 15px;border-radius:999px;color:#704729;background:rgba(255,252,247,.88);border:1px solid rgba(171,126,84,.18);font-size:13px;font-weight:950;box-shadow:0 6px 16px rgba(117,80,43,.10),inset 0 1px 0 rgba(255,255,255,.94);}.soft-btn.primary{background:linear-gradient(180deg,#f8d875,#e8ad42);color:#653d1b;}.soft-btn:disabled{opacity:.55;cursor:not-allowed;}
+.stage-card{position:relative;z-index:1;flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(390px,1.26fr) minmax(286px,.74fr);gap:12px;padding:12px;border-radius:28px;background:rgba(255,248,232,.36);border:1px solid rgba(255,255,255,.54);box-shadow:inset 0 1px 0 rgba(255,255,255,.62);}.card,.control-box{min-height:0;border-radius:24px;padding:14px;background:rgba(255,252,245,.46);border:1px solid rgba(255,255,255,.52);box-shadow:inset 0 1px 0 rgba(255,255,255,.56);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}.play-area{display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px;overflow:hidden;background:rgba(255,250,239,.34);}
+.mango-stage{position:relative;min-height:0;display:flex;align-items:center;justify-content:center;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 42%,rgba(255,231,115,.46),rgba(255,176,77,.17) 42%,transparent 68%),rgba(255,255,255,.20);}
+.mango-glow{position:absolute;width:min(330px,74%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,236,127,.46),rgba(255,183,79,.18) 56%,transparent 74%);animation:glowPulse 2.4s ease-in-out infinite;}.mango-btn{position:relative;z-index:2;width:min(330px,74%);aspect-ratio:1;border:none;background:transparent;padding:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}.mango-btn:disabled{opacity:.70;cursor:not-allowed;}.mango-img{width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none;filter:drop-shadow(0 14px 18px rgba(88,55,32,.18));animation:floatMango 2.8s ease-in-out infinite;}.mango-btn.hit .mango-img{animation:hitPop .22s ease-out both;}
+.hammer-img{position:absolute;z-index:4;width:min(138px,27%);right:20%;top:12%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 12px 15px rgba(88,55,32,.20));transform-origin:30% 80%;opacity:0;transform:translate(16px,-14px) rotate(22deg) scale(1);transition:opacity .16s ease, transform .16s ease;}.mango-stage.playing .hammer-img{opacity:.94;}.hammer-img.hit{animation:hammerHit .18s ease-out both;}
+.juice-fly{position:absolute;z-index:5;width:48px;height:48px;object-fit:contain;pointer-events:none;filter:drop-shadow(0 8px 10px rgba(88,55,32,.14));animation:juiceFly .82s ease-out forwards;}.hit-number{position:absolute;z-index:6;left:50%;top:50%;transform:translate(-50%,-50%);color:#744014;font-size:28px;font-weight:950;text-shadow:0 2px 0 rgba(255,247,214,.92);pointer-events:none;animation:numberRise .56s ease-out forwards;}
+@keyframes glowPulse{0%,100%{transform:scale(.92);opacity:.48;}50%{transform:scale(1.06);opacity:.92;}}@keyframes floatMango{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-7px) rotate(1deg);}}@keyframes hitPop{0%{transform:translate(0,0) scale(1) rotate(0);}38%{transform:translate(-2px,4px) scaleX(1.03) scaleY(.98) rotate(-3deg);}72%{transform:translate(2px,2px) scaleX(1.01) scaleY(.995) rotate(2deg);}100%{transform:translate(0,0) scale(1) rotate(0);}}@keyframes hammerHit{0%{transform:translate(18px,-18px) rotate(28deg) scale(1.02);}55%{transform:translate(-18px,24px) rotate(-28deg) scale(1.06);}100%{transform:translate(-6px,8px) rotate(-8deg) scale(1.02);}}@keyframes juiceFly{0%{opacity:1;transform:translate(0,0) scale(.55) rotate(-12deg);}100%{opacity:0;transform:translate(var(--jx,80px),var(--jy,-120px)) scale(1.08) rotate(16deg);}}@keyframes numberRise{0%{opacity:0;transform:translate(-50%,-30%) scale(.78);}18%{opacity:1;}100%{opacity:0;transform:translate(-50%,-130%) scale(1.18);}}
+.status-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}.stat-pill{min-height:70px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:rgba(255,255,255,.50);border:1px solid rgba(255,255,255,.62);}.stat-value{color:#633916;font-size:clamp(28px,4.6vw,46px);line-height:1;font-weight:950;}.stat-label{color:#9c704d;font-size:12px;font-weight:950;}
+.side-panel{display:flex;flex-direction:column;gap:12px;overflow:hidden;}.identity-chip{min-height:34px;padding:0 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.56);border:1px solid rgba(173,128,82,.16);color:#775132;font-size:13px;font-weight:950;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.control-box{background:rgba(255,255,255,.40);display:flex;flex-direction:column;}.section-title{margin:0 0 10px;color:#704525;font-size:18px;font-weight:950;display:flex;align-items:center;justify-content:space-between;gap:8px;}.mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}.mode-tab{min-height:42px;border:none;border-radius:16px;background:rgba(255,255,255,.55);border:1px solid rgba(173,128,82,.16);color:#7f5637;font-size:14px;font-weight:950;}.mode-tab.active{background:linear-gradient(180deg,#f8d875,#e8ad42);color:#633916;}
+.setting-card,.goal-card{margin-top:12px;border-radius:18px;padding:12px;background:rgba(255,248,232,.58);border:1px solid rgba(255,255,255,.60);box-shadow:inset 0 1px 0 rgba(255,255,255,.58);}.setting-title,.goal-label,.progress-title{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#704525;font-size:13px;font-weight:950;margin-bottom:8px;}.setting-title span,.goal-label span,.progress-title span{color:#9a704d;font-size:12px;font-weight:950;}.goal-main{color:#6f4525;font-size:18px;line-height:1.35;font-weight:950;}.play-tip{margin:8px 0 0;color:#8b6240;font-size:12px;line-height:1.45;font-weight:850;}.field.hidden-mode{display:none!important;}.big-action.danger{background:linear-gradient(180deg,#efb891,#dd8d62);color:#5d2d1b;}.leaderboard-tabs{display:flex;flex-direction:column;gap:8px;margin:0 0 12px;}.board-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}.board-group-title{flex:0 0 auto;color:#8b6240;font-size:12px;font-weight:950;}.board-tab{min-height:30px;padding:0 11px;border:none;border-radius:999px;background:rgba(255,252,247,.86);border:1px solid rgba(171,126,84,.18);color:#704729;font-size:12px;font-weight:950;box-shadow:0 5px 12px rgba(117,80,43,.08),inset 0 1px 0 rgba(255,255,255,.9);}.board-tab.active{background:linear-gradient(180deg,#f8d875,#e8ad42);color:#603718;}.leaderboard-modal-card{width:min(760px,100%);}.form-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px;}.field{display:flex;flex-direction:column;gap:6px;min-width:0;}.field label{color:#8b6240;font-size:13px;font-weight:950;}.field select{width:100%;height:40px;border:none;outline:none;border-radius:14px;padding:0 13px;color:#644021;background:rgba(255,255,255,.72);border:1px solid rgba(177,130,82,.18);font-size:15px;font-weight:850;box-shadow:inset 0 1px 0 rgba(255,255,255,.9);}
+.action-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px;}.big-action{min-height:48px;border:none;border-radius:17px;padding:0 14px;color:#603718;background:linear-gradient(180deg,#f8d875,#e8ad42);font-size:15px;font-weight:950;box-shadow:0 9px 20px rgba(121,79,39,.14),inset 0 1px 0 rgba(255,248,230,.96);}.big-action.secondary{background:linear-gradient(180deg,#f7ede0,#ecd5bb);}.big-action:disabled{opacity:.55;cursor:not-allowed;}.progress-wrap{margin-top:14px;}.progress-track{height:12px;border-radius:999px;overflow:hidden;background:rgba(160,113,65,.16);box-shadow:inset 0 1px 2px rgba(99,65,34,.08);}.progress-fill{width:0%;height:100%;border-radius:inherit;background:linear-gradient(90deg,rgba(246,202,81,.72),rgba(229,137,66,.82));transition:width .12s linear;}
+.leaderboard{max-height:56dvh;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px;}.rank-item{display:grid;grid-template-columns:32px 1fr auto;gap:10px;align-items:center;border-radius:16px;padding:10px 12px;background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.58);color:#795234;font-size:13px;line-height:1.45;font-weight:850;}.rank-no{height:28px;border-radius:999px;background:rgba(235,183,82,.25);display:flex;align-items:center;justify-content:center;color:#744014;font-weight:950;}.rank-name strong{display:block;color:#633916;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.rank-name span{display:block;color:#9a704d;font-size:12px;}.rank-score{text-align:right;color:#633916;font-size:15px;font-weight:950;white-space:nowrap;}.empty-state{padding:16px 10px;color:#997050;font-size:14px;font-weight:850;line-height:1.6;text-align:center;}
+.modal-layer{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(73,45,24,.34);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);animation:modalLayerFadeIn .22s ease-out both;}.modal-card{position:relative;width:min(700px,100%);max-height:min(84dvh,720px);overflow:hidden;border-radius:28px;padding:20px;background:radial-gradient(circle at 16% 0%,rgba(255,238,177,.66),transparent 36%),linear-gradient(180deg,rgba(255,253,248,.98),rgba(255,245,226,.94));border:1px solid rgba(255,255,255,.88);box-shadow:0 24px 70px rgba(74,48,26,.26),inset 0 1px 0 rgba(255,255,255,.96);animation:modalCardSoftIn .32s cubic-bezier(.18,.92,.22,1.08) both;}.modal-close{position:absolute;right:14px;top:14px;z-index:2;width:34px;height:34px;border:none;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid rgba(173,128,82,.18);color:#744727;font-size:22px;line-height:1;font-weight:900;box-shadow:0 6px 16px rgba(96,62,32,.12);}.modal-head{padding-right:42px;margin-bottom:14px;}.modal-title{margin:8px 0 0;color:#673b1a;font-size:clamp(28px,4.4vw,44px);line-height:1.05;font-weight:950;letter-spacing:.04em;}.modal-subtitle{margin:8px 0 0;color:#8a6344;font-size:14px;line-height:1.55;font-weight:850;}
+.result-hero{display:grid;grid-template-columns:354px minmax(250px,1fr);gap:14px;align-items:stretch;border-radius:22px;padding:14px;background:rgba(255,255,255,.52);border:1px solid rgba(255,255,255,.74);}
+.result-juice-box{position:relative;min-height:340px;border-radius:18px;background:radial-gradient(circle at 50% 74%,rgba(255,224,137,.34),transparent 56%),rgba(255,248,232,.58);border:1px solid rgba(255,255,255,.72);overflow:hidden;isolation:isolate;}
+.juice-display{position:absolute;left:50%;top:50%;width:354px;height:340px;transform:translate(-50%,-50%) scale(var(--juice-layout-scale,1));transform-origin:center center;}
+.juice-visual{position:absolute;object-fit:contain;transform:translate(-50%,-50%);filter:drop-shadow(0 10px 13px rgba(88,55,32,.16));animation:resultPop .42s ease-out both;}
+.result-text{color:#7b5233;font-size:14px;line-height:1.6;font-weight:900;display:flex;flex-direction:column;justify-content:center;}
+.result-summary{margin:0;color:#7b5233;}.juice-info-list{display:grid;gap:7px;margin-top:12px;}.juice-info-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:34px;padding:7px 11px;border-radius:13px;background:rgba(255,248,232,.72);border:1px solid rgba(255,255,255,.76);}.juice-info-name{color:#714727;font-weight:950;}.juice-info-count{color:#633916;font-size:16px;font-weight:950;white-space:nowrap;}.result-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px;}.result-stat{min-width:0;border-radius:18px;padding:12px 8px;background:rgba(255,248,237,.66);border:1px solid rgba(255,255,255,.74);text-align:center;}.result-stat strong{display:block;color:#623917;font-size:26px;line-height:1.1;font-weight:950;}.result-stat span{display:block;margin-top:5px;color:#9d7453;font-size:12px;font-weight:950;}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}.toast{position:fixed;left:50%;bottom:16px;z-index:110;transform:translateX(-50%);width:min(520px,calc(100vw - 28px));border-radius:18px;padding:13px 16px;background:rgba(255,250,242,.98);border:1px solid rgba(202,157,112,.24);color:#704525;box-shadow:0 16px 36px rgba(78,52,28,.18);font-size:14px;font-weight:900;text-align:center;}
+@keyframes modalLayerFadeIn{from{opacity:0;background:rgba(73,45,24,0);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);}to{opacity:1;background:rgba(73,45,24,.34);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);}}@keyframes modalCardSoftIn{from{opacity:0;transform:translateY(18px) scale(.965);filter:blur(1px);}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}}@keyframes resultPop{from{transform:translate(-50%,-50%) scale(.72) rotate(-7deg);opacity:0;}to{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1;}}
+@media (max-width:760px){
+html,body{height:auto;min-height:100%;overflow:auto;}
+.page{height:auto;min-height:100dvh;padding:10px;align-items:flex-start;}
+.mango-shell{height:auto;min-height:calc(100dvh - 20px);border-radius:24px;padding:12px;}
+.header{flex-direction:column;}
+.header-actions{width:100%;display:grid;grid-template-columns:1fr 1fr;}
+.stage-card{grid-template-columns:1fr;}
+.side-panel{order:1;overflow:visible;}
+.play-area{order:2;min-height:0;grid-template-rows:minmax(300px,52vh) auto;}
+.mango-btn{width:min(260px,68vw);}
+.hammer-img{width:min(110px,30%);right:14%;top:13%;}
+.status-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+.stat-pill{min-height:58px;border-radius:14px;padding:7px 4px;gap:2px;}
+.stat-value{font-size:clamp(22px,7vw,30px);}
+.stat-label{font-size:11px;line-height:1.15;text-align:center;}
+.result-stats{grid-template-columns:repeat(3,minmax(0,1fr));}
+.form-grid,.action-grid,.modal-actions{grid-template-columns:1fr;}
+.result-hero{grid-template-columns:1fr;text-align:left;}
+.modal-card{overflow:auto;overscroll-behavior:contain;}
+.result-juice-box{min-height:300px;}
+.result-text{text-align:left;}
+h1{font-size:36px;}
+}
+@media (max-width:430px){
+.status-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;}
+.stat-pill{min-height:54px;padding:6px 2px;}
+.stat-value{font-size:22px;}
+.stat-label{font-size:10px;}
+.result-stats{grid-template-columns:1fr;}
+.rank-item{grid-template-columns:28px 1fr;}
+.rank-score{grid-column:2;text-align:left;}
+.mode-tabs{grid-template-columns:1fr;}
+}
+
+</style>
+</head>
+<body>
+<div class="page">
+  <main class="mango-shell">
+    <header class="header">
+      <div class="title-wrap">
+        <h1>暴打芒果</h1>
+      </div>
+      <div class="header-actions">
+        <button id="refreshBoardBtn" class="soft-btn primary" type="button">风云榜</button>
+        <button id="resetBtn" class="soft-btn" type="button">重置本轮</button>
+      </div>
+    </header>
+
+    <section class="stage-card">
+      <section class="card play-area">
+        <div id="mangoStage" class="mango-stage">
+          <div class="mango-glow"></div>
+          <button id="mangoBtn" class="mango-btn" type="button" aria-label="点击芒果开打">
+            <img id="mangoImg" class="mango-img" src="game-mango.png" alt="暴打芒果">
+          </button>
+          <img id="hammerImg" class="hammer-img" src="game-hammer.png" alt="锤子">
+        </div>
+        <div class="status-row">
+          <div class="stat-pill"><div id="clickValue" class="stat-value">0</div><div class="stat-label">暴打次数</div></div>
+          <div class="stat-pill"><div id="timerValue" class="stat-value">30.0</div><div id="timerLabel" class="stat-label">剩余时间</div></div>
+          <div class="stat-pill"><div id="avgValue" class="stat-value">0.00</div><div class="stat-label">平均点击</div></div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <div id="identityChip" class="identity-chip">当前玩家：参观者</div>
+
+        <section class="control-box">
+          <h2 class="section-title">选择玩法</h2>
+          <div class="mode-tabs">
+            <button id="timeModeBtn" class="mode-tab active" type="button">限时挑战</button>
+            <button id="countModeBtn" class="mode-tab" type="button">竞速挑战</button>
+          </div>
+
+          <div class="setting-card">
+            <div class="setting-title">玩法设置 <span id="settingHint">选择挑战时长</span></div>
+            <div class="form-grid">
+              <div id="timeField" class="field">
+                <label for="timeLimitSelect">挑战时长</label>
+                <select id="timeLimitSelect">
+                  <option value="10">10 秒</option>
+                  <option value="15">15 秒</option>
+                  <option value="20">20 秒</option>
+                  <option value="30" selected>30 秒</option>
+                </select>
+              </div>
+              <div id="countField" class="field hidden-mode">
+                <label for="targetSelect">目标次数</label>
+                <select id="targetSelect">
+                  <option value="30">30 次</option>
+                  <option value="50" selected>50 次</option>
+                  <option value="100">100 次</option>
+                  <option value="200">200 次</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="goal-card">
+            <div class="goal-label">本轮目标 <span id="goalMiniTitle">限时挑战</span></div>
+            <div id="goalMiniText" class="goal-main">30 秒内尽量多打芒果</div>
+            <p id="playTip" class="play-tip">倒计时结束前尽量多打，次数越多排名越靠前。第一下点击芒果自动开始。</p>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-title">本轮进度 <span id="progressText">未开始</span></div>
+            <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+          </div>
+          <div class="action-grid">
+            <button id="stopBtn" class="big-action secondary" type="button" disabled>提前结算</button>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </main>
+</div>
+
+<div id="resultModal" class="modal-layer hidden">
+  <section class="modal-card">
+    <button id="closeResultBtn" class="modal-close" type="button">×</button>
+    <div class="modal-head">
+      <div class="kicker">挑战结算</div>
+      <h2 id="resultTitle" class="modal-title">本轮完成</h2>
+      <p id="resultSubtitle" class="modal-subtitle">成绩正在保存。</p>
+    </div>
+    <div class="result-hero">
+      <div id="resultJuiceBox" class="result-juice-box" aria-label="本局获得的芒果汁"></div>
+      <div id="resultText" class="result-text">芒果汁打包中。</div>
+    </div>
+    <div id="resultStats" class="result-stats"></div>
+    <div class="modal-actions">
+      <button id="playAgainBtn" class="big-action" type="button">再来一局</button>
+      <button id="resultBoardBtn" class="big-action secondary" type="button">查看风云榜</button>
+    </div>
+  </section>
+</div>
+
+<div id="leaderboardModal" class="modal-layer hidden">
+  <section class="modal-card leaderboard-modal-card">
+    <button id="closeLeaderboardBtn" class="modal-close" type="button">×</button>
+    <div class="modal-head">
+      <div class="kicker">风云榜</div>
+      <h2 class="modal-title">暴打芒果</h2>
+      <p id="leaderboardSubtitle" class="modal-subtitle">选择一个榜单查看排行。</p>
+    </div>
+    <div id="leaderboardTabs" class="leaderboard-tabs"></div>
+    <div id="leaderboard" class="leaderboard"><div class="empty-state">请选择榜单。</div></div>
+  </section>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+const LOCAL_BOARD_KEY = "room10MangoLocalBoard";
+
+const mangoStage = document.getElementById("mangoStage");
+const mangoBtn = document.getElementById("mangoBtn");
+const mangoImg = document.getElementById("mangoImg");
+const hammerImg = document.getElementById("hammerImg");
+const clickValue = document.getElementById("clickValue");
+const timerValue = document.getElementById("timerValue");
+const timerLabel = document.getElementById("timerLabel");
+const avgValue = document.getElementById("avgValue");
+const identityChip = document.getElementById("identityChip");
+const timeModeBtn = document.getElementById("timeModeBtn");
+const countModeBtn = document.getElementById("countModeBtn");
+const timeLimitSelect = document.getElementById("timeLimitSelect");
+const targetSelect = document.getElementById("targetSelect");
+const timeField = document.getElementById("timeField");
+const countField = document.getElementById("countField");
+const settingHint = document.getElementById("settingHint");
+const goalMiniTitle = document.getElementById("goalMiniTitle");
+const goalMiniText = document.getElementById("goalMiniText");
+const playTip = document.getElementById("playTip");
+const progressText = document.getElementById("progressText");
+const progressFill = document.getElementById("progressFill");
+const stopBtn = document.getElementById("stopBtn");
+const resetBtn = document.getElementById("resetBtn");
+const refreshBoardBtn = document.getElementById("refreshBoardBtn");
+const leaderboardTabs = document.getElementById("leaderboardTabs");
+const leaderboard = document.getElementById("leaderboard");
+const leaderboardModal = document.getElementById("leaderboardModal");
+const closeLeaderboardBtn = document.getElementById("closeLeaderboardBtn");
+const leaderboardSubtitle = document.getElementById("leaderboardSubtitle");
+const resultModal = document.getElementById("resultModal");
+const closeResultBtn = document.getElementById("closeResultBtn");
+const resultTitle = document.getElementById("resultTitle");
+const resultSubtitle = document.getElementById("resultSubtitle");
+const resultText = document.getElementById("resultText");
+const resultJuiceBox = document.getElementById("resultJuiceBox");
+const resultStats = document.getElementById("resultStats");
+const playAgainBtn = document.getElementById("playAgainBtn");
+const resultBoardBtn = document.getElementById("resultBoardBtn");
+const toast = document.getElementById("toast");
+
+const JUICE_LEVELS = [
+  {key:"mango_juice_tasting", level:"tasting", name:"试饮杯", unit:1, image:"game-mango7.png"},
+  {key:"mango_juice_small", level:"small", name:"小杯", unit:10, image:"game-mango3.png"},
+  {key:"mango_juice_medium", level:"medium", name:"中杯", unit:30, image:"game-mango4.png"},
+  {key:"mango_juice_large", level:"large", name:"大杯", unit:60, image:"game-mango5.png"},
+  {key:"mango_juice_pitcher", level:"pitcher", name:"一扎", unit:120, image:"game-mango6.png"}
+];
+const JUICE_LAYOUT_WIDTH = 354;
+const JUICE_LAYOUT_HEIGHT = 340;
+const JUICE_LAYOUTS = {"tasting":[["tasting",177,179,159,159,3]],"small":[["small",179,175,148,183,2]],"medium":[["medium",177,157,181,234,2]],"large":[["large",179,171,175,228,2]],"pitcher":[["pitcher",177,187,259,319,1]],"tasting+small":[["tasting",196,175,134,134,3],["small",137,162,118,146,2]],"tasting+medium":[["tasting",208,188,159,159,3],["medium",132,151,181,234,2]],"tasting+large":[["tasting",133,196,159,159,3],["large",210,148,175,228,2]],"tasting+pitcher":[["tasting",140,232,159,159,3],["pitcher",217,173,206,254,1]],"small+medium":[["small",119,201,148,183,2],["medium",239,174,181,234,2]],"small+large":[["small",119,201,148,183,2],["large",209,159,195,254,2]],"small+pitcher":[["small",119,213,148,183,2],["pitcher",218,169,214,264,1]],"medium+large":[["medium",207,184,135,174,3],["large",123,172,146,190,2]],"medium+pitcher":[["medium",104,198,181,234,2],["pitcher",218,169,214,264,1]],"large+pitcher":[["large",112,189,183,238,2],["pitcher",226,167,214,264,1]],"tasting+small+medium":[["tasting",170,197,134,134,3],["small",123,165,118,146,2],["medium",220,157,135,174,2]],"tasting+small+large":[["tasting",180,231,159,159,3],["small",111,202,148,183,2],["large",253,169,183,238,2]],"tasting+small+pitcher":[["tasting",167,226,159,159,3],["small",111,202,148,183,2],["pitcher",238,153,214,264,1]],"tasting+medium+large":[["tasting",168,233,164,164,3],["medium",98,183,181,234,2],["large",235,166,183,238,2]],"tasting+medium+pitcher":[["tasting",165,230,164,164,3],["medium",104,180,181,234,2],["pitcher",242,154,214,264,1]],"tasting+large+pitcher":[["tasting",166,243,164,164,3],["large",109,179,183,238,2],["pitcher",243,168,214,264,1]],"small+medium+large":[["small",89,203,118,146,4],["medium",165,189,135,174,3],["large",253,179,146,190,2]],"small+medium+pitcher":[["small",163,207,118,146,4],["medium",107,183,135,174,3],["pitcher",234,154,180,222,1]],"small+large+pitcher":[["small",175,213,118,146,3],["large",127,172,146,190,2],["pitcher",249,148,180,222,1]],"medium+large+pitcher":[["medium",158,208,135,174,3],["large",90,184,146,190,2],["pitcher",245,159,180,222,1]],"tasting+small+medium+large":[["tasting",176,200,134,134,3],["small",111,183,118,146,2],["medium",220,158,135,174,2],["large",159,145,146,190,1]],"tasting+small+medium+pitcher":[["tasting",159,249,164,164,3],["small",83,224,148,183,3],["medium",134,176,181,234,1],["pitcher",235,165,214,264,1]],"tasting+small+large+pitcher":[["tasting",159,249,164,164,3],["small",83,224,148,183,3],["large",136,176,183,238,2],["pitcher",235,165,214,264,1]],"tasting+medium+large+pitcher":[["tasting",208,265,164,164,3],["medium",155,222,168,217,2],["large",105,192,174,226,1],["pitcher",217,174,214,264,1]],"small+medium+large+pitcher":[["small",83,218,118,146,3],["medium",175,203,135,174,3],["large",126,166,146,190,2],["pitcher",249,148,180,222,1]],"tasting+small+medium+large+pitcher":[["tasting",140,235,134,134,4],["small",84,212,118,146,3],["medium",177,196,135,174,3],["large",126,166,146,190,2],["pitcher",249,148,180,222,1]]};
+
+
+const BOARD_OPTIONS = [
+  {group:"限时", key:"time_10s", label:"10秒", mode:"time", time_limit_seconds:10, title:"限时 10 秒"},
+  {group:"限时", key:"time_15s", label:"15秒", mode:"time", time_limit_seconds:15, title:"限时 15 秒"},
+  {group:"限时", key:"time_20s", label:"20秒", mode:"time", time_limit_seconds:20, title:"限时 20 秒"},
+  {group:"限时", key:"time_30s", label:"30秒", mode:"time", time_limit_seconds:30, title:"限时 30 秒"},
+  {group:"竞速", key:"count_30", label:"30次", mode:"count", target_clicks:30, title:"竞速 30 次"},
+  {group:"竞速", key:"count_50", label:"50次", mode:"count", target_clicks:50, title:"竞速 50 次"},
+  {group:"竞速", key:"count_100", label:"100次", mode:"count", target_clicks:100, title:"竞速 100 次"},
+  {group:"竞速", key:"count_200", label:"200次", mode:"count", target_clicks:200, title:"竞速 200 次"}
+];
+
+let mode = localStorage.getItem("room10MangoMode") || "time";
+let playing = false;
+let startedAt = 0;
+let endedAt = 0;
+let clickCount = 0;
+let timer = null;
+let boardBusy = false;
+let boardRankKey = "";
+let mangoRecoverTimer = null;
+let pendingRewardRecord = null;
+let rewardExitBusy = false;
+
+function escapeHtml(value){return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function isLoggedIn(){return localStorage.getItem("room10LoggedIn") === "true";}
+function getCurrentUser(){return localStorage.getItem("room10User") || "";}
+function getCurrentMemberId(){return localStorage.getItem("room10MemberId") || "";}
+function getCurrentMemberCode(){return localStorage.getItem("room10MemberCode") || "";}
+function getRole(){return localStorage.getItem("room10Role") || "";}
+function getRoleLabel(){const role=String(getRole()||"").toLowerCase();if(role==="owner")return"维修工";if(role==="admin")return"宿管";if(role==="member")return"房客";if(role==="applying")return"申请中";return isLoggedIn()?"房客":"参观者";}
+function isMemberReady(){return isLoggedIn() && !!getCurrentUser().trim() && !!getCurrentMemberId().trim();}
+function getTimeLimitSeconds(){return Math.min(30,Math.max(1,Number(timeLimitSelect.value || 30)));}
+function getTargetClicks(){return Math.max(1,Number(targetSelect.value || 50));}
+function getRankKey(){return mode==="time"?`time_${getTimeLimitSeconds()}s`:`count_${getTargetClicks()}`;}
+function getBoardMeta(key){return BOARD_OPTIONS.find(item=>item.key===key) || BOARD_OPTIONS[3];}
+function calculateJuiceRewards(clicks){
+  let remaining=Math.max(0,Math.floor(Number(clicks||0)));
+  const rewards=[];
+  [...JUICE_LEVELS].reverse().forEach(level=>{
+    const quantity=Math.floor(remaining/level.unit);
+    if(quantity>0){rewards.push({...level,quantity});remaining-=quantity*level.unit;}
+  });
+  return rewards.sort((a,b)=>a.unit-b.unit);
+}
+function getRecordId(data){const row=Array.isArray(data)?data[0]:data;return row?.record_id||row?.challenge_record_id||row?.id||null;}
+function formatSeconds(ms){return (Math.max(0,Number(ms || 0))/1000).toFixed(2);}
+function getElapsedMs(){return playing ? performance.now()-startedAt : Math.max(0,endedAt-startedAt);}
+function showToast(message){toast.textContent=message||"";toast.classList.remove("hidden");clearTimeout(showToast._timer);showToast._timer=setTimeout(()=>toast.classList.add("hidden"),3000);}
+function updateIdentity(){identityChip.textContent=isMemberReady()?`当前玩家：${getCurrentUser()}｜${getRoleLabel()}`:"当前玩家：参观者｜试玩不入榜";}
+function updateAverage(){const elapsedSec=playing?Math.max(.01,getElapsedMs()/1000):(mode==="time"?getTimeLimitSeconds():Math.max(.01,getElapsedMs()/1000));const avg=clickCount/elapsedSec;avgValue.textContent=Number.isFinite(avg)?avg.toFixed(2):"0.00";}
+function updateModeControls(){
+  const isTime = mode === "time";
+  timeModeBtn.classList.toggle("active",isTime);
+  countModeBtn.classList.toggle("active",!isTime);
+  timeField.classList.toggle("hidden-mode",!isTime);
+  countField.classList.toggle("hidden-mode",isTime);
+  timeLimitSelect.disabled=playing || !isTime;
+  targetSelect.disabled=playing || isTime;
+  timerLabel.textContent=isTime?"剩余时间":"已用时间";
+  stopBtn.textContent=isTime?"提前结算":"放弃本轮";
+  stopBtn.classList.toggle("danger",!isTime);
+  settingHint.textContent=isTime?"选择挑战时长":"选择目标次数";
+  goalMiniTitle.textContent=isTime?"限时挑战":"竞速挑战";
+  goalMiniText.textContent=isTime?`${getTimeLimitSeconds()} 秒内尽量多打芒果`:`尽快打满 ${getTargetClicks()} 次芒果`;
+  playTip.textContent=isTime?"倒计时结束前尽量多打，次数越多排名越靠前。第一下点击芒果自动开始。":"完成目标才会进入竞速榜，用时越短排名越靠前。第一下点击芒果自动开始。";
+}
+function setMode(nextMode){if(playing)return;mode=nextMode==="count"?"count":"time";localStorage.setItem("room10MangoMode",mode);updateModeControls();resetRound();}
+function resetRound(){
+  if(timer)clearInterval(timer);
+  timer=null;clearTimeout(mangoRecoverTimer);playing=false;startedAt=0;endedAt=0;clickCount=0;
+  mangoBtn.disabled=false;
+  mangoStage.classList.remove("playing");
+  mangoImg.src="game-mango.png";
+  mangoBtn.classList.remove("hit");
+  hammerImg.classList.remove("hit");
+  clickValue.textContent="0";
+  timerValue.textContent=mode==="time"?getTimeLimitSeconds().toFixed(1):"0.00";
+  avgValue.textContent="0.00";
+  progressFill.style.width="0%";
+  progressText.textContent="未开始";
+  stopBtn.disabled=true;
+  updateModeControls();
+  if(resultModal.classList.contains("hidden"))pendingRewardRecord=null;
+}
+function startGame(){if(playing)return;resultModal.classList.add("hidden");playing=true;startedAt=performance.now();endedAt=0;clickCount=0;mangoBtn.disabled=false;mangoStage.classList.add("playing");stopBtn.disabled=false;updateModeControls();progressText.textContent="进行中";tick();timer=setInterval(tick,80);}
+function tick(){if(!playing)return;const elapsed=performance.now()-startedAt;if(mode==="time"){const limit=getTimeLimitSeconds()*1000;const remaining=Math.max(0,limit-elapsed);timerValue.textContent=(remaining/1000).toFixed(1);progressFill.style.width=`${Math.min(100,elapsed/limit*100)}%`;progressText.textContent=`剩余 ${(remaining/1000).toFixed(1)} 秒`;if(remaining<=0)finishGame(false);}else{timerValue.textContent=formatSeconds(elapsed);progressFill.style.width=`${Math.min(100,clickCount/getTargetClicks()*100)}%`;progressText.textContent=`${clickCount}/${getTargetClicks()} 次`;}updateAverage();}
+function hitMango(ev){if(!playing)startGame();if(!playing)return;clickCount+=1;clickValue.textContent=String(clickCount);mangoImg.src="game-mango2.png";mangoBtn.classList.remove("hit");void mangoBtn.offsetWidth;mangoBtn.classList.add("hit");hammerImg.classList.remove("hit");void hammerImg.offsetWidth;hammerImg.classList.add("hit");clearTimeout(mangoRecoverTimer);mangoRecoverTimer=setTimeout(()=>{if(playing)mangoImg.src="game-mango.png";},240);spawnJuice(ev);spawnNumber();updateAverage();if(mode==="count"&&clickCount>=getTargetClicks())finishGame(false);}
+function spawnJuice(ev){const img=document.createElement("img");img.src="game-mango3.png";img.className="juice-fly";const rect=mangoStage.getBoundingClientRect();const x=ev&&ev.clientX?ev.clientX-rect.left:rect.width/2;const y=ev&&ev.clientY?ev.clientY-rect.top:rect.height/2;img.style.left=`${x-24}px`;img.style.top=`${y-24}px`;img.style.setProperty("--jx",`${Math.round(Math.random()*160-80)}px`);img.style.setProperty("--jy",`${Math.round(-90-Math.random()*80)}px`);mangoStage.appendChild(img);setTimeout(()=>img.remove(),880);}
+function spawnNumber(){const num=document.createElement("div");num.className="hit-number";num.textContent="+1";mangoStage.appendChild(num);setTimeout(()=>num.remove(),620);}
+function stopCurrentRound(){
+  if(!playing)return;
+  if(mode==="time"){
+    finishGame(true);
+    return;
+  }
+  if(timer)clearInterval(timer);
+  timer=null;clearTimeout(mangoRecoverTimer);playing=false;endedAt=performance.now();mangoStage.classList.remove("playing");mangoImg.src="game-mango.png";mangoBtn.classList.remove("hit");hammerImg.classList.remove("hit");stopBtn.disabled=true;updateModeControls();showToast("本轮已放弃，未提交成绩。");resetRound();
+}
+async function finishGame(manual){
+  if(!playing)return;
+  playing=false;endedAt=performance.now();
+  if(timer)clearInterval(timer);
+  timer=null;clearTimeout(mangoRecoverTimer);
+  mangoBtn.disabled=true;mangoStage.classList.remove("playing");mangoImg.src="game-mango.png";mangoBtn.classList.remove("hit");hammerImg.classList.remove("hit");
+  progressText.textContent="已结束";progressFill.style.width="100%";stopBtn.disabled=true;updateModeControls();
+  const durationMs=Math.max(1,mode==="time"?(manual?Math.round(endedAt-startedAt):getTimeLimitSeconds()*1000):Math.round(endedAt-startedAt));
+  const targetClicks=mode==="count"?getTargetClicks():null;
+  const rewards=calculateJuiceRewards(clickCount);
+  const record={game_mode:mode,player_name:getCurrentUser()||"参观者",click_count:clickCount,duration_ms:durationMs,time_limit_seconds:mode==="time"?getTimeLimitSeconds():null,target_clicks:targetClicks,juice_rewards:rewards,avg_clicks_per_second:clickCount/Math.max(durationMs/1000,.001),completed_at:new Date().toISOString(),record_id:null,reward_claimed:false};
+  await saveRecord(record);
+  showResult(record);
+}
+async function saveRecord(record){
+  if(!isMemberReady()){
+    saveLocalRecord(record);
+    resultSubtitle.textContent="游客试玩完成，不会获得背包道具。";
+    return;
+  }
+  try{
+    const {data,error}=await client.rpc("submit_mango_challenge_record",{p_member_id:getCurrentMemberId(),p_member_code:getCurrentMemberCode(),p_game_mode:record.game_mode,p_click_count:record.click_count,p_duration_ms:record.duration_ms,p_time_limit_seconds:record.time_limit_seconds,p_target_clicks:record.target_clicks});
+    const payload=Array.isArray(data)?data[0]:data;
+    if(error||(payload&&payload.success===false)){
+      console.error(error||payload);saveLocalRecord(record);resultSubtitle.textContent="成绩保存失败，本局奖励暂时不能发放。";return;
+    }
+    record.record_id=getRecordId(data);
+    if(payload&&typeof payload.avg_click_per_second!=="undefined")record.avg_clicks_per_second=Number(payload.avg_click_per_second)||record.avg_clicks_per_second;
+    resultSubtitle.textContent="成绩已进入风云榜，离开结算框时自动放入背包。";
+  }catch(err){console.error(err);saveLocalRecord(record);resultSubtitle.textContent="成绩保存失败，本局奖励暂时不能发放。";}
+}
+function saveLocalRecord(record){const list=getLocalRecords();list.push(record);localStorage.setItem(LOCAL_BOARD_KEY,JSON.stringify(list));}
+function getLocalRecords(){try{return JSON.parse(localStorage.getItem(LOCAL_BOARD_KEY)||"[]");}catch(_){return[];}}
+function showResult(record){
+  pendingRewardRecord=record;
+  resultTitle.textContent=record.game_mode==="time"?"限时挑战完成":"竞速挑战完成";
+  const modeSummary=record.game_mode==="time"?`你在 <strong>${formatSeconds(record.duration_ms)} 秒</strong> 内暴打了 <strong>${record.click_count}</strong> 次。`:`你完成 <strong>${record.target_clicks}</strong> 次暴打，用时 <strong>${formatSeconds(record.duration_ms)} 秒</strong>。`;
+  resultText.innerHTML=`<p class="result-summary">${modeSummary}<br>平均每秒 <strong>${record.avg_clicks_per_second.toFixed(2)}</strong> 次。本局可获得：</p>${renderRewardInfo(record.juice_rewards)}`;
+  resultStats.innerHTML=`<div class="result-stat"><strong>${record.click_count}</strong><span>暴打次数</span></div><div class="result-stat"><strong>${formatSeconds(record.duration_ms)}</strong><span>挑战用时</span></div><div class="result-stat"><strong>${record.avg_clicks_per_second.toFixed(2)}</strong><span>平均点击</span></div>`;
+  renderResultJuice(record.juice_rewards);
+  resultModal.classList.remove("hidden");
+}
+function renderRewardInfo(rewards){
+  if(!rewards?.length)return `<div class="empty-state">本局没有可发放的奖励。</div>`;
+  return `<div class="juice-info-list">${rewards.map(item=>`<div class="juice-info-row"><span class="juice-info-name">${escapeHtml(item.name)}</span><span class="juice-info-count">×${Number(item.quantity||0)}</span></div>`).join("")}</div>`;
+}
+function getJuiceLayoutKey(rewards){
+  const order=JUICE_LEVELS.map(item=>item.level);
+  return (rewards||[]).filter(item=>Number(item.quantity)>0).map(item=>item.level).sort((a,b)=>order.indexOf(a)-order.indexOf(b)).join("+");
+}
+function updateJuiceLayoutScale(){
+  const display=resultJuiceBox.querySelector(".juice-display");
+  if(!display)return;
+  const scale=Math.min(1,resultJuiceBox.clientWidth/JUICE_LAYOUT_WIDTH,resultJuiceBox.clientHeight/JUICE_LAYOUT_HEIGHT);
+  display.style.setProperty("--juice-layout-scale",String(Math.max(.1,scale)));
+}
+function renderResultJuice(rewards){
+  const visible=(rewards||[]).filter(item=>Number(item.quantity)>0);
+  if(!visible.length){resultJuiceBox.innerHTML=`<div class="empty-state">这次没有获得可展示的杯型。</div>`;return;}
+  const key=getJuiceLayoutKey(visible);
+  const layout=JUICE_LAYOUTS[key];
+  if(!layout){
+    console.error("缺少芒果汁结算布局：",key);
+    resultJuiceBox.innerHTML=`<div class="empty-state">当前组合暂缺布局。</div>`;
+    return;
+  }
+  const rewardMap=new Map(visible.map(item=>[item.level,item]));
+  resultJuiceBox.innerHTML=`<div class="juice-display">${layout.map(([level,x,y,width,height,z])=>{
+    const item=rewardMap.get(level);
+    if(!item)return "";
+    return `<img class="juice-visual" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" style="left:${x}px;top:${y}px;width:${width}px;height:${height}px;z-index:${z};">`;
+  }).join("")}</div>`;
+  requestAnimationFrame(updateJuiceLayoutScale);
+}
+function parseClaimResponse(data,fallbackRewards){
+  const payload=Array.isArray(data)?data[0]:data||{};
+  const rewards=Array.isArray(payload.rewards)?payload.rewards:fallbackRewards;
+  const unlocked=Array.isArray(payload.newly_unlocked)?payload.newly_unlocked:(rewards||[]).filter(item=>item.newly_unlocked);
+  return {payload,rewards,unlocked};
+}
+async function claimPendingJuiceReward(){
+  const record=pendingRewardRecord;
+  if(!record||record.reward_claimed)return true;
+  if(!isMemberReady()){
+    record.reward_claimed=true;
+    showToast("游客试玩不会获得背包道具。 ");
+    return true;
+  }
+  if(!record.record_id){showToast("成绩记录缺少领取编号，芒果汁暂未发放。 ");return false;}
+  try{
+    const {data,error}=await client.rpc("claim_mango_challenge_juice",{p_member_id:getCurrentMemberId(),p_member_code:getCurrentMemberCode(),p_record_id:record.record_id});
+    const parsed=parseClaimResponse(data,record.juice_rewards);
+    if(error||parsed.payload?.success===false)throw error||new Error(parsed.payload?.message||"领取失败");
+    record.reward_claimed=true;
+    const rewardText=(parsed.rewards||[]).filter(item=>Number(item.quantity)>0).map(item=>`${item.name||JUICE_LEVELS.find(level=>level.key===item.item_key)?.name||"芒果汁"} ×${item.quantity}`).join("、");
+    const unlockText=(parsed.unlocked||[]).map(item=>item.name||item.item_name||JUICE_LEVELS.find(level=>level.key===item.item_key)?.name).filter(Boolean).join("、");
+    showToast(`已放入背包：${rewardText||"本局奖励"}${unlockText?`；已解锁图鉴：${unlockText}`:""}`);
+    return true;
+  }catch(err){console.error(err);showToast("芒果汁发放失败，请稍后再试。 ");return false;}
+}
+async function leaveResultModal(action){
+  if(rewardExitBusy)return;
+  rewardExitBusy=true;
+  closeResultBtn.disabled=true;playAgainBtn.disabled=true;resultBoardBtn.disabled=true;
+
+  let canLeave=true;
+  if(pendingRewardRecord?.record_id){
+    canLeave=await claimPendingJuiceReward();
+  }else if(isMemberReady()){
+    showToast("本局成绩未成功保存，因此无法发放奖励。");
+  }else{
+    await claimPendingJuiceReward();
+  }
+
+  closeResultBtn.disabled=false;playAgainBtn.disabled=false;resultBoardBtn.disabled=false;rewardExitBusy=false;
+  if(!canLeave)return;
+
+  resultModal.classList.add("hidden");
+  if(action==="again")resetRound();
+  if(action==="board")openLeaderboardModal();
+}
+function renderBoardTabs(){
+  const groups=["限时","竞速"];
+  leaderboardTabs.innerHTML=groups.map(group=>{
+    const buttons=BOARD_OPTIONS.filter(item=>item.group===group).map(item=>`<button class="board-tab${item.key===boardRankKey?" active":""}" type="button" data-rank-key="${item.key}">${item.label}</button>`).join("");
+    return `<div class="board-group"><span class="board-group-title">${group}</span>${buttons}</div>`;
+  }).join("");
+  leaderboardTabs.querySelectorAll(".board-tab").forEach(btn=>btn.addEventListener("click",()=>setBoardRank(btn.dataset.rankKey)));
+}
+async function openLeaderboardModal(){boardRankKey=getRankKey();leaderboardModal.classList.remove("hidden");renderBoardTabs();await loadLeaderboard();}
+async function setBoardRank(rankKey){boardRankKey=rankKey;renderBoardTabs();await loadLeaderboard();}
+async function loadLeaderboard(){if(boardBusy)return;boardBusy=true;const meta=getBoardMeta(boardRankKey||getRankKey());leaderboardSubtitle.textContent=meta.mode==="time"?`${meta.title}：点击次数越多排名越前。`:`${meta.title}：用时越短排名越前。`;leaderboard.innerHTML=`<div class="empty-state">正在读取风云榜……</div>`;try{const {data,error}=await client.rpc("get_mango_leaderboard",{p_rank_key:meta.key,p_limit:100});if(error)throw error;renderLeaderboard(Array.isArray(data)?data:[],meta);}catch(err){console.error(err);const local=getLocalRecords().filter(item=>item.game_mode===meta.mode&&(meta.mode!=="time"||Number(item.time_limit_seconds||30)===meta.time_limit_seconds)&&(meta.mode!=="count"||Number(item.target_clicks)===meta.target_clicks));renderLeaderboard(sortRecords(local,meta).slice(0,100),meta,true);}finally{boardBusy=false;}}
+function sortRecords(list,meta=getBoardMeta(boardRankKey||getRankKey())){const arr=[...(Array.isArray(list)?list:[])];if(meta.mode==="time"){arr.sort((a,b)=>Number(b.click_count||0)-Number(a.click_count||0)||Number(b.avg_click_per_second||b.avg_clicks_per_second||0)-Number(a.avg_click_per_second||a.avg_clicks_per_second||0)||new Date(a.completed_at||0)-new Date(b.completed_at||0));}else{arr.sort((a,b)=>Number(a.duration_ms||999999999)-Number(b.duration_ms||999999999)||Number(b.click_count||0)-Number(a.click_count||0)||new Date(a.completed_at||0)-new Date(b.completed_at||0));}return arr;}
+function renderLeaderboard(list,meta=getBoardMeta(boardRankKey||getRankKey()),localOnly=false){const records=sortRecords(list,meta);if(!records.length){leaderboard.innerHTML=`<div class="empty-state">暂无${meta.title}挑战记录。</div>`;return;}leaderboard.innerHTML=records.map((item,index)=>{const name=item.player_name||item.nickname||item.member_nickname||"神秘房客";const timeText=formatSeconds(item.duration_ms);const date=item.completed_at?new Date(item.completed_at):null;const dateText=date&&!Number.isNaN(date.getTime())?`${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")} ${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`:"--";const scoreText=meta.mode==="time"?`${item.click_count||0} 次`:`${timeText} 秒`;const avg=Number(item.avg_click_per_second || item.avg_clicks_per_second || (Number(item.click_count||0)/(Number(item.duration_ms||1)/1000))).toFixed(2);const subText=meta.mode==="time"?`${item.time_limit_seconds||meta.time_limit_seconds} 秒限时｜平均 ${avg} 次/秒`:`${item.target_clicks||meta.target_clicks} 次竞速｜平均 ${avg} 次/秒`;return `<div class="rank-item"><div class="rank-no">${item.rank_no || index+1}</div><div class="rank-name"><strong>${escapeHtml(name)}</strong><span>${escapeHtml(subText)}｜${dateText}${localOnly?"｜本地":""}</span></div><div class="rank-score">${escapeHtml(scoreText)}</div></div>`;}).join("");}
+
+timeModeBtn.addEventListener("click",()=>setMode("time"));
+countModeBtn.addEventListener("click",()=>setMode("count"));
+timeLimitSelect.addEventListener("change",()=>{if(!playing){resetRound();}});
+targetSelect.addEventListener("change",()=>{if(!playing){resetRound();}});
+stopBtn.addEventListener("click",stopCurrentRound);
+resetBtn.addEventListener("click",resetRound);
+refreshBoardBtn.addEventListener("click",openLeaderboardModal);
+mangoBtn.addEventListener("click",hitMango);
+closeResultBtn.addEventListener("click",()=>leaveResultModal("close"));
+playAgainBtn.addEventListener("click",()=>leaveResultModal("again"));
+resultBoardBtn.addEventListener("click",()=>leaveResultModal("board"));
+closeLeaderboardBtn.addEventListener("click",()=>leaderboardModal.classList.add("hidden"));
+window.addEventListener("resize",updateJuiceLayoutScale);
+
+updateIdentity();
+setMode(mode);
+</script>
+
+</body>
+</html>
