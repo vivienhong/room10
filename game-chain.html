@@ -1,0 +1,2811 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜接大小龙</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#fff8ed;
+  --card:rgba(255,255,255,.84);
+  --card2:rgba(255,251,244,.78);
+  --line:rgba(128,83,49,.18);
+  --text:#72482b;
+  --soft:#936b4d;
+  --accent:#ffd28f;
+  --accent2:#fff0b8;
+  --pink:#ffd7dd;
+  --green:#dff0d1;
+  --blue:#dcecff;
+  --shadow:0 14px 34px rgba(86,57,34,.16);
+  --radius:24px;
+  --font:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:var(--font);color:var(--text);background:
+  radial-gradient(circle at 12% 8%,rgba(255,219,224,.72),transparent 28%),
+  radial-gradient(circle at 92% 10%,rgba(222,240,255,.82),transparent 28%),
+  linear-gradient(145deg,#fff7e8,#fbe6dc 58%,#eef7ff);}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+.app{
+  width:min(980px,100%);
+  min-height:100vh;
+  margin:0 auto;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.header{
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:12px 16px;
+  background:rgba(255,255,255,.72);
+  box-shadow:var(--shadow);
+}
+.headerTop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+h1{margin:0;font-size:24px;line-height:1.15;font-weight:950;letter-spacing:.03em}
+.subtitle{margin:6px 0 0;color:rgba(114,72,43,.72);font-size:12px;line-height:1.45}
+.authPanel{
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:10px 12px;
+  background:rgba(255,255,255,.58);
+  box-shadow:0 8px 18px rgba(108,70,39,.08);
+}
+.authLogged{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  color:rgba(114,72,43,.82);
+  font-size:13px;
+  font-weight:950;
+}
+.authGuest{display:grid;gap:7px}
+.authGrid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) auto;
+  gap:8px;
+  align-items:end;
+}
+.authGrid.guestOnly{grid-template-columns:minmax(0,1fr) auto}
+.authField{display:flex;flex-direction:column;gap:4px;min-width:0}
+.authField label{font-size:12px;font-weight:950;color:rgba(114,72,43,.78)}
+.authInline{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}
+.authSubmit{height:36px;align-self:end}
+.authMessage{min-height:16px;font-size:12px;font-weight:850;color:rgba(114,72,43,.72)}
+@media(max-width:640px){
+  .authGrid,.authGrid.guestOnly{grid-template-columns:1fr}
+  .authSubmit{width:100%}
+}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:0 2px 4px;
+  scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:0 0 auto;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:8px 13px;
+  background:rgba(255,255,255,.72);
+  color:var(--text);
+  font-size:14px;
+  font-weight:900;
+}
+.tab.active{background:linear-gradient(180deg,#fff5bf,#ffd196);box-shadow:0 7px 15px rgba(108,70,39,.12)}
+.panel{
+  flex:1;
+  min-height:0;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:rgba(255,250,242,.74);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.panelBody{padding:12px;min-height:360px}
+.toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+.note{font-size:13px;line-height:1.65;color:rgba(114,72,43,.72)}
+.btn{
+  border:0;
+  border-radius:999px;
+  padding:8px 12px;
+  background:rgba(255,255,255,.82);
+  color:var(--text);
+  font-size:12px;
+  font-weight:950;
+  box-shadow:0 7px 15px rgba(108,70,39,.10);
+}
+.btn.primary{background:linear-gradient(180deg,#fff0ad,#ffc17d)}
+.btn.green{background:linear-gradient(180deg,#eaf8d9,#cfeab8)}
+.btn.pink{background:linear-gradient(180deg,#ffe0e6,#ffc6d1)}
+.btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.createBox{
+  margin-bottom:16px;
+  border:1px solid var(--line);
+  border-radius:26px;
+  background:rgba(255,255,255,.62);
+  padding:14px;
+}
+.createTitle{font-size:16px;font-weight:950;margin-bottom:10px}
+.modeGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.modeCard{
+  border:1px solid rgba(128,83,49,.16);
+  border-radius:16px;
+  background:#fffdf8;
+  padding:9px 10px;
+  min-height:76px;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+.modeName{font-weight:950;font-size:14px}
+.modeDesc{font-size:11px;line-height:1.35;color:rgba(114,72,43,.68);min-height:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.input{
+  width:100%;
+  min-width:0;
+  border:1px solid rgba(128,83,49,.22);
+  border-radius:14px;
+  padding:8px 10px;
+  background:#fffdfa;
+  color:var(--text);
+  font-size:13px;
+  outline:none;
+}
+.card{
+  border:1px solid rgba(128,83,49,.16);
+  border-radius:18px;
+  background:var(--card);
+  box-shadow:0 6px 15px rgba(108,70,39,.07);
+  padding:11px;
+  min-width:0;
+}
+.cardHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.cardTitle{font-size:15px;line-height:1.25;font-weight:950}
+.pill{
+  flex:0 0 auto;
+  border-radius:999px;
+  padding:3px 7px;
+  background:var(--accent2);
+  color:#7a4a26;
+  font-size:11px;
+  font-weight:950;
+  white-space:nowrap;
+}
+.meta{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0 8px;font-size:11px;color:rgba(114,72,43,.72)}
+.meta span{border-radius:999px;background:rgba(255,255,255,.72);padding:3px 7px}
+.segments{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  padding:7px;
+  border-radius:14px;
+  background:rgba(255,247,228,.72);
+  min-height:38px;
+}
+.segment{
+  position:relative;
+  border-radius:11px;
+  padding:6px 8px;
+  background:#fff;
+  border:1px dashed rgba(128,83,49,.20);
+  font-weight:950;
+  color:var(--text);
+  min-width:42px;
+  text-align:center;
+}
+.segment.hiddenSeg{color:rgba(114,72,43,.45);background:rgba(255,255,255,.58)}
+.segmentAuthor{display:block;margin-top:5px;font-size:11px;font-weight:800;color:rgba(114,72,43,.66)}
+.formLine{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.formLine .input{flex:1 1 170px}
+.modeHint{
+  margin-top:6px;
+  padding:6px 8px;
+  border-radius:12px;
+  background:rgba(255,249,232,.78);
+  font-size:11px;
+  line-height:1.4;
+  color:rgba(114,72,43,.74);
+}
+.empty{
+  border:1px dashed rgba(128,83,49,.24);
+  border-radius:26px;
+  padding:28px 18px;
+  text-align:center;
+  color:rgba(114,72,43,.68);
+  background:rgba(255,255,255,.5);
+  line-height:1.7;
+  grid-column:1/-1;
+}
+.voteActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.smallTitle{font-weight:950;margin:0 0 8px}
+.countBadge{display:inline-flex;align-items:center;gap:4px;margin:3px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.75);font-size:12px;font-weight:900}
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:22px;
+  transform:translateX(-50%);
+  z-index:50;
+  display:none;
+  max-width:min(560px,92vw);
+  padding:11px 16px;
+  border-radius:999px;
+  background:rgba(74,47,29,.9);
+  color:#fff7e8;
+  font-size:14px;
+  font-weight:900;
+  text-align:center;
+}
+.toast.show{display:block}
+.hidden{display:none!important}
+
+.modeSelectIntro{
+  margin-bottom:10px;
+  padding:7px 10px;
+  border-radius:14px;
+  background:rgba(255,255,255,.52);
+  border:1px solid rgba(128,83,49,.12);
+  color:rgba(114,72,43,.75);
+  font-size:12px;
+  line-height:1.35;
+}
+.modeCard.isSelected{
+  background:linear-gradient(180deg,rgba(255,246,200,.96),rgba(255,255,255,.82));
+  border-color:rgba(170,108,52,.35);
+  box-shadow:0 10px 24px rgba(108,70,39,.12);
+}
+.modeAction{
+  margin-top:auto;
+}
+.backLine{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.gameHint{
+  padding:10px 12px;
+  border-radius:16px;
+  background:rgba(255,249,232,.78);
+  color:rgba(114,72,43,.74);
+  font-size:13px;
+  line-height:1.65;
+  margin:10px 0;
+}
+.createFocus{
+  border:1px solid rgba(128,83,49,.16);
+  border-radius:18px;
+  background:rgba(255,255,255,.66);
+  padding:10px;
+  margin-bottom:10px;
+}
+
+.voteHelp{font-size:12px;line-height:1.45;color:rgba(114,72,43,.72);margin:4px 0 8px}
+.voteSentence{display:flex;flex-wrap:wrap;gap:6px;padding:7px;border-radius:14px;background:rgba(255,247,228,.72)}
+.voteToken{border:1px dashed rgba(128,83,49,.20);border-radius:11px;background:#fff;padding:6px 8px;font-size:13px;font-weight:950;color:var(--text);min-width:42px;text-align:center;position:relative}
+.voteToken.own{opacity:.55}
+.voteToken.selected{outline:2px solid rgba(255,193,125,.75);background:#fff8e8}
+.voteToken .tokenTags{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+.tokenTag{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:18px;border-radius:999px;background:rgba(255,210,143,.45);font-size:11px}
+.voteDock{margin-top:8px;padding:7px;border-radius:14px;background:rgba(255,255,255,.56);display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.voteDockTitle{font-size:12px;font-weight:950;color:rgba(114,72,43,.75);margin-right:2px}
+.voteLabel{border:1px solid rgba(128,83,49,.16);border-radius:999px;background:rgba(255,255,255,.82);padding:6px 9px;color:var(--text);font-size:12px;font-weight:950}
+.voteLabel.active{background:linear-gradient(180deg,#fff0ad,#ffc17d)}
+.voteLabel.used{background:rgba(223,240,209,.8)}
+.voteLabel.disabled{opacity:.45}
+.voteSummary{font-size:11px;color:rgba(114,72,43,.66);line-height:1.35;width:100%;margin-top:2px}
+.voteRuleBox{
+  margin-bottom:10px;
+  padding:10px 12px;
+  border:1px solid rgba(128,83,49,.14);
+  border-radius:16px;
+  background:rgba(255,255,255,.60);
+  color:rgba(114,72,43,.76);
+  font-size:12px;
+  line-height:1.55;
+}
+.voteRuleBox strong{color:#72482b}
+.sentenceRating{
+  margin-top:8px;
+  padding:8px;
+  border-radius:14px;
+  background:rgba(255,255,255,.56);
+}
+.ratingTitle{
+  margin-bottom:6px;
+  font-size:12px;
+  font-weight:950;
+  color:rgba(114,72,43,.75);
+}
+.ratingButtons{display:flex;flex-wrap:wrap;gap:6px}
+.ratingBtn{
+  border:1px solid rgba(128,83,49,.16);
+  border-radius:999px;
+  background:rgba(255,255,255,.82);
+  padding:6px 10px;
+  color:var(--text);
+  font-size:12px;
+  font-weight:950;
+}
+.ratingBtn.active{background:linear-gradient(180deg,#fff0ad,#ffc17d)}
+.ratingBtn.disabled{opacity:.45}
+.voteActions.compactActions{margin-top:8px}
+.boardSectionTitle{
+  margin:12px 0 8px;
+  font-size:14px;
+  font-weight:950;
+  color:#72482b;
+}
+.boardGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.boardCard{border:1px solid rgba(128,83,49,.16);border-radius:16px;background:rgba(255,255,255,.7);padding:10px}
+.boardTop{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:950;font-size:13px;margin-bottom:7px}
+.boardScore{border-radius:999px;background:var(--accent2);padding:3px 8px;font-size:11px}
+.boardTags{display:flex;flex-wrap:wrap;gap:4px}.boardTags .countBadge{margin:0;font-size:11px;padding:3px 6px}
+.sentenceBoardList{display:grid;gap:8px;margin-bottom:12px}
+.sentenceBoardCard{
+  border:1px solid rgba(128,83,49,.16);
+  border-radius:16px;
+  background:rgba(255,255,255,.70);
+  padding:10px;
+}
+.sentenceBoardSentence{
+  font-size:14px;
+  line-height:1.55;
+  font-weight:950;
+  color:#72482b;
+  word-break:break-word;
+}
+.sentenceBoardMeta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-top:7px;
+  font-size:11px;
+  color:rgba(114,72,43,.72);
+}
+.sentenceBoardMeta span{
+  border-radius:999px;
+  background:rgba(255,247,228,.8);
+  padding:3px 7px;
+}
+
+.flameBtn{
+  border:1px solid rgba(214,120,48,.22);
+  border-radius:999px;
+  background:linear-gradient(180deg,#fff1bd,#ffc486);
+  color:#7a3f18;
+  padding:5px 9px;
+  font-size:11px;
+  font-weight:950;
+  box-shadow:0 5px 12px rgba(108,70,39,.10);
+}
+.flameBtn:disabled{opacity:.55;cursor:not-allowed}
+.flamePower{
+  background:rgba(255,230,187,.9)!important;
+  color:#7a3f18;
+  font-weight:950;
+}
+@media(max-width:640px){
+  .boardGrid{grid-template-columns:1fr}
+}
+
+
+.modeGrid{margin-bottom:18px}
+.runningTitle{
+  margin:14px 0 8px;
+  padding:0 2px;
+  font-size:13px;
+  font-weight:950;
+  color:rgba(114,72,43,.74);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.runningTitle::after{
+  content:"";
+  height:1px;
+  flex:1;
+  background:linear-gradient(90deg,rgba(128,83,49,.18),transparent);
+}
+.voteLabel[draggable="true"]{user-select:none}
+.voteLabel.dragging{opacity:.55;transform:scale(.96)}
+.voteToken.dropReady{
+  outline:2px dashed rgba(255,180,96,.9);
+  background:#fff4d9;
+}
+.revealedSentence{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  padding:8px;
+  border-radius:14px;
+  background:rgba(255,247,228,.78);
+}
+.revealedBlock{
+  flex:0 1 auto;
+  min-width:64px;
+  max-width:100%;
+  padding:6px 7px;
+  border-radius:12px;
+  background:rgba(255,255,255,.82);
+  border:1px dashed rgba(128,83,49,.18);
+}
+.revealedWord{
+  display:block;
+  font-size:14px;
+  line-height:1.3;
+  font-weight:950;
+  color:#72482b;
+  word-break:break-word;
+}
+.revealedAuthor{
+  display:block;
+  margin-top:3px;
+  font-size:10.5px;
+  line-height:1.2;
+  font-weight:850;
+  color:rgba(114,72,43,.62);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.revealedBlockScore{
+  display:flex;
+  flex-wrap:wrap;
+  gap:3px;
+  margin-top:4px;
+}
+.revealedBlockScore .countBadge{
+  margin:0;
+  padding:2px 5px;
+  font-size:10.5px;
+}
+.revealedScores{
+  margin-top:7px;
+  font-size:11px;
+  line-height:1.55;
+  color:rgba(114,72,43,.72);
+}
+.revealedScores strong{
+  color:#72482b;
+}
+.revealedScores .countBadge{
+  margin:2px 3px 2px 0;
+}
+
+@media(max-width:900px){
+  .modeGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:640px){
+  .app{padding:10px}
+  .header{border-radius:24px;padding:15px}
+  .headerTop{flex-direction:column}
+  h1{font-size:23px}
+  .panelBody{padding:12px}
+  .grid,.modeGrid{grid-template-columns:1fr}
+  .formLine{display:grid;grid-template-columns:1fr 1fr;gap:7px;align-items:center}
+  .formLine .input{grid-column:1/-1;width:100%;height:38px;min-height:38px;flex:0 0 auto;padding:8px 10px}
+  .formLine .btn{width:100%;min-height:34px;padding:8px 10px}
+  .formLine .btn.primary:only-child{grid-column:1/-1}
+  .segments{overflow-x:visible;flex-wrap:wrap}
+  .segment{flex:0 1 auto}
+  .leaderTable{min-width:0}
+  .tableWrap{overflow:visible}
+}
+
+
+/* ===== 统一奖励弹窗接入 ===== */
+/* =========================
+   统一奖励弹窗
+========================= */
+
+.reward-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(64, 45, 30, 0.30);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  --reward-scale: 1;
+}
+
+.reward-mask.show {
+  display: flex;
+}
+
+.reward-card {
+  position: relative;
+  width: min(calc(430px * var(--reward-scale)), calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  padding:
+    calc(28px * var(--reward-scale))
+    calc(24px * var(--reward-scale))
+    calc(22px * var(--reward-scale));
+  border-radius: calc(26px * var(--reward-scale));
+  overflow: hidden auto;
+  text-align: center;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,226,235,.68), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,240,181,.62), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,244,226,.96));
+  border: calc(2px * var(--reward-scale)) solid var(--line);
+  box-shadow:
+    0 calc(22px * var(--reward-scale)) calc(54px * var(--reward-scale)) rgba(86,57,34,.16),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  animation: rewardPop .42s cubic-bezier(.2, 1.12, .34, 1) both;
+}
+
+.reward-card::before,
+.reward-card::after {
+  position: absolute;
+  left: calc(12px * var(--reward-scale));
+  right: calc(12px * var(--reward-scale));
+  font-size: calc(15px * var(--reward-scale));
+  letter-spacing: calc(8px * var(--reward-scale));
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.reward-card::before {
+  content: "✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  top: calc(9px * var(--reward-scale));
+  color: rgba(209, 120, 148, 0.52);
+}
+
+.reward-card::after {
+  content: "✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  bottom: calc(8px * var(--reward-scale));
+  color: rgba(199, 145, 75, 0.44);
+}
+
+@keyframes rewardPop {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(12px * var(--reward-scale))) scale(.9);
+  }
+  64% {
+    opacity: 1;
+    transform: translateY(0) scale(1.025);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reward-close {
+  position: absolute;
+  z-index: 6;
+  top: calc(12px * var(--reward-scale));
+  right: calc(12px * var(--reward-scale));
+  width: calc(30px * var(--reward-scale));
+  height: calc(30px * var(--reward-scale));
+  border: none;
+  border-radius: 999px;
+  background: rgba(255,250,242,.88);
+  color: #7b5636;
+  font-size: calc(18px * var(--reward-scale));
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    0 calc(2px * var(--reward-scale)) calc(8px * var(--reward-scale)) rgba(105,75,43,.10),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.reward-close:hover {
+  filter: brightness(1.02);
+}
+
+.reward-petals {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.reward-petals span {
+  position: absolute;
+  top: calc(-18px * var(--reward-scale));
+  color: rgba(220,132,154,.56);
+  font-size: calc(16px * var(--reward-scale));
+  opacity: 0;
+  text-shadow:
+    0 calc(2px * var(--reward-scale)) calc(4px * var(--reward-scale)) rgba(255,255,255,.76);
+  animation: rewardPetalFall 1.35s ease-in-out both;
+}
+
+.reward-petals span:nth-child(1) { left: 12%; animation-delay: .05s; }
+.reward-petals span:nth-child(2) { left: 28%; animation-delay: .18s; }
+.reward-petals span:nth-child(3) { left: 48%; animation-delay: .02s; }
+.reward-petals span:nth-child(4) { left: 66%; animation-delay: .22s; }
+.reward-petals span:nth-child(5) { left: 82%; animation-delay: .10s; }
+
+@keyframes rewardPetalFall {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(-14px * var(--reward-scale))) rotate(0deg) scale(.78);
+  }
+  20% {
+    opacity: .85;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(145px * var(--reward-scale))) rotate(160deg) scale(1);
+  }
+}
+
+.reward-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.reward-icon {
+  width: calc(62px * var(--reward-scale));
+  height: calc(62px * var(--reward-scale));
+  margin:
+    calc(4px * var(--reward-scale))
+    auto
+    calc(12px * var(--reward-scale));
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,246,226,.78);
+  border: 1px solid rgba(220,164,102,.25);
+  box-shadow:
+    0 calc(8px * var(--reward-scale)) calc(20px * var(--reward-scale)) rgba(126,92,51,.10),
+    inset 0 1px 0 rgba(255,255,255,.85);
+  font-size: calc(34px * var(--reward-scale));
+}
+
+.reward-label {
+  min-height: calc(25px * var(--reward-scale));
+  padding: 0 calc(13px * var(--reward-scale));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255,249,232,.66);
+  border: 1px solid rgba(218,166,87,.20);
+  color: #b26a3a;
+  font-size: calc(13px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .06em;
+  animation: rewardStamp .42s ease both;
+}
+
+.reward-title {
+  position: relative;
+  max-width: 100%;
+  margin:
+    calc(10px * var(--reward-scale))
+    auto
+    calc(8px * var(--reward-scale));
+  padding:
+    calc(8px * var(--reward-scale))
+    calc(18px * var(--reward-scale));
+  border-radius: 999px;
+  color: var(--text);
+  font-size: calc(22px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1.15;
+  background: rgba(255,249,232,.72);
+  border: 1px solid rgba(218,166,87,.24);
+  box-shadow:
+    0 calc(5px * var(--reward-scale)) calc(14px * var(--reward-scale)) rgba(126,92,51,.08),
+    inset 0 1px 0 rgba(255,255,255,.82);
+  overflow: hidden;
+}
+
+.reward-title::after {
+  content: "";
+  position: absolute;
+  inset: -30% auto -30% -42%;
+  width: 36%;
+  background: linear-gradient(90deg, transparent, rgba(255,234,160,.80), transparent);
+  transform: skewX(-18deg);
+  animation: rewardSweep 1.25s ease .22s both;
+}
+
+@keyframes rewardStamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(.97);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rewardSweep {
+  0% { left: -42%; }
+  100% { left: 118%; }
+}
+
+.reward-desc {
+  width: 100%;
+  max-width: calc(330px * var(--reward-scale));
+  margin: 0 auto calc(14px * var(--reward-scale));
+  color: var(--text);
+  font-size: calc(13px * var(--reward-scale));
+  line-height: 1.65;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.reward-section-title {
+  margin: 0 0 calc(10px * var(--reward-scale));
+  color: #8a5c33;
+  font-size: calc(12px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .08em;
+}
+
+.reward-list {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-content: center;
+  gap: calc(8px * var(--reward-scale));
+  margin: 0 0 calc(16px * var(--reward-scale));
+}
+
+.reward-list.count-1 {
+  grid-template-columns: minmax(0, calc(120px * var(--reward-scale)));
+}
+
+.reward-list.count-2 {
+  grid-template-columns: repeat(2, minmax(0, calc(120px * var(--reward-scale))));
+}
+
+.reward-list.empty {
+  display: none;
+}
+
+.reward-section-title.empty {
+  display: none;
+}
+
+.reward-item {
+  min-width: 0;
+  min-height: calc(84px * var(--reward-scale));
+  padding:
+    calc(10px * var(--reward-scale))
+    calc(7px * var(--reward-scale))
+    calc(9px * var(--reward-scale));
+  border-radius: calc(16px * var(--reward-scale));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,252,247,.72);
+  border: 1px solid var(--line);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.82),
+    0 calc(3px * var(--reward-scale)) calc(10px * var(--reward-scale)) rgba(116,86,54,.06);
+  animation: rewardItemIn .38s ease both;
+}
+
+.reward-item:nth-child(1) { animation-delay: .14s; }
+.reward-item:nth-child(2) { animation-delay: .24s; }
+.reward-item:nth-child(3) { animation-delay: .34s; }
+.reward-item:nth-child(4) { animation-delay: .44s; }
+
+@keyframes rewardItemIn {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(8px * var(--reward-scale))) scale(.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reward-item-icon {
+  font-size: calc(28px * var(--reward-scale));
+  line-height: 1;
+  margin-bottom: calc(7px * var(--reward-scale));
+  filter: drop-shadow(
+    0 calc(2px * var(--reward-scale))
+    calc(3px * var(--reward-scale))
+    rgba(96,65,35,.12)
+  );
+}
+
+.reward-item-name {
+  width: 100%;
+  color: #7b593b;
+  font-size: calc(11px * var(--reward-scale));
+  font-weight: 900;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reward-item-amount {
+  margin-top: calc(3px * var(--reward-scale));
+  color: var(--text);
+  font-size: calc(13px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.reward-confirm {
+  min-width: calc(132px * var(--reward-scale));
+  height: calc(36px * var(--reward-scale));
+  border: 1px solid rgba(153,104,62,.22);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,238,200,.96), rgba(227,187,132,.90));
+  color: #67401f;
+  font-size: calc(13px * var(--reward-scale));
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.72),
+    0 calc(4px * var(--reward-scale)) calc(12px * var(--reward-scale)) rgba(112,80,42,.10);
+}
+
+.reward-confirm:hover {
+  filter: brightness(1.02);
+}
+.reward-confirm:disabled {
+  opacity: .62;
+  cursor: wait;
+  filter: none;
+}
+
+/* 不同类型轻微换色 */
+
+.reward-mask[data-type="title"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,235,204,.72), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,229,154,.58), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,242,219,.96));
+}
+
+.reward-mask[data-type="daily"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(224,244,216,.70), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,239,181,.50), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(241,248,229,.96));
+}
+
+.reward-mask[data-type="gift"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,226,235,.74), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(223,235,255,.58), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,240,231,.96));
+}
+
+.reward-mask[data-type="item"] .reward-card,
+.reward-mask[data-type="gold"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(223,239,255,.66), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,240,181,.52), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(235,246,252,.94));
+}
+
+
+@media (max-width: 540px) {
+  .reward-mask {
+    --reward-scale: .82;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 380px), (max-height: 590px) {
+  .reward-mask {
+    --reward-scale: .74;
+  }
+}
+
+@media (max-width: 340px) {
+  .reward-list,
+  .reward-list.count-1,
+  .reward-list.count-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="headerTop">
+      <div>
+        <h1>十号房｜接大小龙</h1>
+        <p class="subtitle">每人接一段，拼出一句完整的话。</p>
+      </div>
+    </div>
+  </header>
+
+  <section id="authPanel" class="authPanel" aria-label="玩家身份">
+    <div id="authLogged" class="authLogged hidden">
+      <span id="authLoggedText">当前玩家：参观者</span>
+      <button id="logoutBtn" class="btn" type="button">退出登录</button>
+    </div>
+
+    <div id="authGuest" class="authGuest">
+      <div class="authGrid">
+        <div class="authField">
+          <label>成员昵称</label>
+          <input id="loginNicknameInput" class="input" type="text" maxlength="20" placeholder="昵称" />
+        </div>
+        <div class="authField">
+          <label>成员钥匙</label>
+          <div class="authInline">
+            <input id="loginCodeInput" class="input" type="password" maxlength="32" placeholder="钥匙" />
+            <button id="toggleLoginCodeBtn" class="btn" type="button">显示</button>
+          </div>
+        </div>
+        <button id="submitLoginBtn" class="btn primary authSubmit" type="button">登录</button>
+      </div>
+      <div id="loginMessage" class="authMessage"></div>
+      <div class="authGrid guestOnly">
+        <div class="authField">
+          <label>游客名字</label>
+          <input id="guestNameInput" class="input" type="text" maxlength="12" placeholder="1-12字" />
+        </div>
+        <button id="useGuestBtn" class="btn authSubmit" type="button">游客参与</button>
+      </div>
+    </div>
+  </section>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="writing" onclick="switchTab('writing')">正在接龙</button>
+    <button class="tab" data-tab="voting" onclick="switchTab('voting')">投票中</button>
+    <button class="tab" data-tab="revealed" onclick="switchTab('revealed')">已公开</button>
+    <button class="tab" data-tab="board" onclick="switchTab('board')">风云榜</button>
+  </nav>
+
+  <main class="panel">
+    <section id="tabWriting" class="panelBody"></section>
+    <section id="tabVoting" class="panelBody hidden"></section>
+    <section id="tabRevealed" class="panelBody hidden"></section>
+    <section id="tabBoard" class="panelBody hidden"></section>
+  </main>
+</div>
+<div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
+    <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
+      <div class="reward-petals" aria-hidden="true">
+        <span>✿</span>
+        <span>❀</span>
+        <span>✽</span>
+        <span>✿</span>
+        <span>❀</span>
+      </div>
+
+      <button class="reward-close" type="button" aria-label="关闭" onclick="closeRewardModalAndContinue()">×</button>
+
+      <div class="reward-content">
+        <div class="reward-icon" id="rewardIcon" aria-hidden="true">🏆</div>
+
+        <div class="reward-label" id="rewardLabel">成就达成</div>
+
+        <h2 class="reward-title" id="rewardTitle">新手照顾员</h2>
+
+        <p class="reward-desc" id="rewardDesc">
+          成就达成：累计照顾宠物 1 次
+        </p>
+
+        <div class="reward-section-title" id="rewardSectionTitle">奖励内容</div>
+
+        <div class="reward-list" id="rewardList"></div>
+
+        <button class="reward-confirm" id="rewardConfirmBtn" type="button" onclick="confirmRewardModalAndContinue()">收下奖励</button>
+      </div>
+    </section>
+  </div>
+
+
+<div id="toast" class="toast"></div>
+
+<script>
+const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+
+let client = null;
+let connectionHealthy = true;
+
+if(window.supabase?.createClient){
+  client = window.supabase.createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    },
+    global: {
+      headers: {
+        "x-room10-page": "game-chain"
+      }
+    }
+  });
+}else{
+  connectionHealthy = false;
+  console.error("Supabase SDK 未加载。");
+}
+
+const LABELS = [
+  { key:"funny", icon:"😂", text:"好笑" },
+  { key:"genius", icon:"⚡", text:"神接" },
+  { key:"crazy", icon:"🌀", text:"发疯" },
+  { key:"literary", icon:"📖", text:"意外文学" },
+  { key:"dead_laugh", icon:"💀", text:"笑死" },
+  { key:"cold_pun", icon:"❄️", text:"谐音梗不好笑" }
+];
+
+const SENTENCE_RATINGS = [
+  { key:"like", icon:"❤️", text:"喜欢" },
+  { key:"normal", icon:"😐", text:"一般" },
+  { key:"dislike", icon:"💔", text:"不喜欢" }
+];
+
+const MODES = {
+  midnight_madness:{
+    rpcMode:"midnight_3",
+    icon:"🌀",
+    name:"深夜发疯模式",
+    len:3,
+    target:18,
+    desc:"每次 3 个字。系统会藏起其中一段，大家要在看不全的情况下继续接，投票时公开完整句子。",
+    playerTip:"写 3 个字接下去。中间有一段会被藏起来，保留一点发散空间。"
+  },
+  inspiration:{
+    rpcMode:"lyrics_6",
+    icon:"📖",
+    name:"灵感接龙模式",
+    len:6,
+    target:30,
+    desc:"每次 1–6 个字。系统给主题和指定字，最后整句话包含指定字即可。",
+    playerTip:"围绕主题写 1–6 个字；指定字只需要整句话最终出现一次。"
+  },
+  blind_box:{
+    rpcMode:"blind_box",
+    icon:"🎭",
+    name:"盲盒模式",
+    len:20,
+    target:5,
+    desc:"每次选择一个未填写提示位，不能连续填写。5 个位置填满后公开完整句子。",
+    playerTip:"根据你看到的提示填写，不能看到别人写了什么。"
+  }
+};
+
+
+
+let currentTab = "writing";
+let selectedMode = null;
+let selectedVotes = {};
+let selectedSentenceRatings = {};
+let activeVoteLabel = {};
+let createNewChainOpen = false;
+let blindParticipation = {};
+
+function resetLocalInteractionState(){
+  selectedVotes = {};
+  selectedSentenceRatings = {};
+  activeVoteLabel = {};
+  blindParticipation = {};
+}
+
+async function refreshAfterIdentityChange(){
+  resetLocalInteractionState();
+  updateIdentityPanel();
+  await loadCurrentTab();
+}
+
+function $(id){ return document.getElementById(id); }
+
+function showToast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(()=>t.classList.remove("show"),2600);
+}
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+
+function getUser(){
+  const memberId = localStorage.getItem("room10MemberId") || "";
+  const nickname = localStorage.getItem("room10User") || "";
+  const logged = localStorage.getItem("room10LoggedIn") === "true" && memberId;
+  if(logged){
+    return { isGuest:false, memberId, guestName:null, name:nickname || "房客" };
+  }
+  const guestName = localStorage.getItem("sentence_chain_guest_name") || "";
+  return { isGuest:true, memberId:null, guestName, name:guestName || "游客" };
+}
+
+function updateIdentityPanel(){
+  const user = getUser();
+  const role = localStorage.getItem("room10Role") || "member";
+  const roleLabel = role === "owner" ? "维修工" : role === "admin" ? "宿管" : role === "applying" ? "申请中" : "房客";
+
+  const authLogged = $("authLogged");
+  const authGuest = $("authGuest");
+  const authLoggedText = $("authLoggedText");
+  const guestInput = $("guestNameInput");
+  if(authLogged && authGuest && authLoggedText){
+    if(!user.isGuest){
+      authLogged.classList.remove("hidden");
+      authGuest.classList.add("hidden");
+      authLoggedText.textContent = `当前玩家：${user.name}｜${roleLabel}`;
+    }else{
+      authLogged.classList.add("hidden");
+      authGuest.classList.remove("hidden");
+      if(guestInput && !guestInput.value) guestInput.value = user.guestName || "";
+    }
+  }
+}
+
+function requireIdentity(){
+  const user = getUser();
+  if(!user.isGuest) return user;
+  const name = (user.guestName || "").trim();
+  if(!name){
+    showToast("请先登录，或在上方填写游客名字后参与。");
+    return null;
+  }
+  if(name.length > 12){
+    showToast("游客名字最多 12 个字。");
+    return null;
+  }
+  return user;
+}
+
+function rpcIdentity(user){
+  return {
+    p_member_id: user.isGuest ? null : user.memberId,
+    p_guest_name: user.isGuest ? user.guestName : null
+  };
+}
+
+function normalizeLoginResult(data){
+  if(Array.isArray(data)) return data[0] || null;
+  if(data && Array.isArray(data.data)) return data.data[0] || null;
+  return data || null;
+}
+
+async function submitMemberLogin(){
+  const nicknameInput = $("loginNicknameInput");
+  const codeInput = $("loginCodeInput");
+  const message = $("loginMessage");
+  const nickname = (nicknameInput?.value || "").trim();
+  const code = (codeInput?.value || "").trim();
+  if(!nickname){ if(message) message.textContent = "请填写昵称。"; nicknameInput?.focus(); return; }
+  if(!code){ if(message) message.textContent = "请填写钥匙。"; codeInput?.focus(); return; }
+  if(message) message.textContent = "验证中……";
+  const data = await safe(
+    () => client.rpc("verify_member_login", {
+      input_nickname: nickname,
+      input_code: code
+    }),
+    {
+      fallback: "登录失败，请检查昵称、钥匙或网络连接。"
+    }
+  );
+  if(data === null){
+    if(message) message.textContent = connectionHealthy
+      ? "登录失败，请检查昵称和钥匙。"
+      : "暂时无法连接数据库，请稍后重试。";
+    return;
+  }
+  const member = normalizeLoginResult(data);
+  if(!member || !member.member_id){ if(message) message.textContent = "昵称或钥匙不正确。"; return; }
+  localStorage.setItem("room10LoggedIn", "true");
+  localStorage.setItem("room10User", member.nickname || nickname);
+  localStorage.setItem("room10MemberId", member.member_id);
+  localStorage.setItem("room10MemberCode", code);
+  localStorage.setItem("room10Role", member.role || "member");
+  localStorage.removeItem("sentence_chain_guest_name");
+  if(codeInput) codeInput.value = "";
+  if(message) message.textContent = "";
+  await refreshAfterIdentityChange();
+  showToast(`登录成功：${member.nickname || nickname}`);
+}
+
+async function useGuestName(){
+  const input = $("guestNameInput");
+  const name = (input?.value || "").trim();
+  if(!name || name.length > 12){ showToast("游客名字需要 1-12 个字。"); input?.focus(); return; }
+  localStorage.removeItem("room10LoggedIn");
+  localStorage.removeItem("room10User");
+  localStorage.removeItem("room10MemberId");
+  localStorage.removeItem("room10MemberCode");
+  localStorage.removeItem("room10Role");
+  localStorage.setItem("sentence_chain_guest_name", name);
+  await refreshAfterIdentityChange();
+  showToast(`已使用游客名字：${name}`);
+}
+
+async function logoutMember(){
+  localStorage.removeItem("room10LoggedIn");
+  localStorage.removeItem("room10User");
+  localStorage.removeItem("room10MemberId");
+  localStorage.removeItem("room10MemberCode");
+  localStorage.removeItem("room10Role");
+  await refreshAfterIdentityChange();
+  showToast("已退出登录，可以使用游客身份参与。");
+}
+
+function initAuthPanel(){
+  $("submitLoginBtn")?.addEventListener("click", submitMemberLogin);
+  $("useGuestBtn")?.addEventListener("click", useGuestName);
+  $("logoutBtn")?.addEventListener("click", logoutMember);
+  $("toggleLoginCodeBtn")?.addEventListener("click", () => {
+    const input = $("loginCodeInput");
+    const btn = $("toggleLoginCodeBtn");
+    if(!input || !btn) return;
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    btn.textContent = show ? "隐藏" : "显示";
+  });
+  $("loginNicknameInput")?.addEventListener("keydown", e => { if(e.key === "Enter") $("loginCodeInput")?.focus(); });
+  $("loginCodeInput")?.addEventListener("keydown", e => { if(e.key === "Enter") submitMemberLogin(); });
+  $("guestNameInput")?.addEventListener("keydown", e => { if(e.key === "Enter") useGuestName(); });
+}
+
+function currentVoterKey(){
+  const user = getUser();
+  return user.isGuest ? `guest:${user.guestName}` : user.memberId;
+}
+
+function isLikelyConnectionError(error){
+  const message = String(error?.message || error || "").toLowerCase();
+  return (
+    message.includes("failed to fetch") ||
+    message.includes("network") ||
+    message.includes("load failed") ||
+    message.includes("fetch") ||
+    message.includes("timeout") ||
+    message.includes("connection")
+  );
+}
+
+function friendlySupabaseError(error, fallback = "操作失败，请稍后再试。"){
+  const message = String(error?.message || "").trim();
+  if(isLikelyConnectionError(error)){
+    return "暂时无法连接数据库，请检查网络后重试。";
+  }
+  if(message.includes("Could not find the table") || message.includes("schema cache")){
+    return "页面连接的数据库对象尚未准备好，请刷新后重试。";
+  }
+  if(message.includes("permission denied") || message.includes("row-level security")){
+    return "当前身份没有执行此操作的权限，请重新登录。";
+  }
+  return message || fallback;
+}
+
+async function safe(requestOrFactory, options = {}){
+  const {
+    silent = false,
+    retry = true,
+    fallback = "操作失败，请稍后再试。"
+  } = options;
+
+  if(!client){
+    connectionHealthy = false;
+    if(!silent) showToast("数据库组件没有加载成功，请刷新页面。");
+    return null;
+  }
+
+  const run = async () => {
+    const request = typeof requestOrFactory === "function"
+      ? requestOrFactory()
+      : requestOrFactory;
+    const { data, error } = await request;
+    if(error) throw error;
+    return data;
+  };
+
+  try{
+    const data = await run();
+    connectionHealthy = true;
+    return data;
+  }catch(firstError){
+    console.error(firstError);
+
+    if(retry && isLikelyConnectionError(firstError) && typeof requestOrFactory === "function"){
+      await new Promise(resolve => setTimeout(resolve, 700));
+      try{
+        const data = await run();
+        connectionHealthy = true;
+        return data;
+      }catch(secondError){
+        console.error(secondError);
+        connectionHealthy = false;
+        if(!silent) showToast(friendlySupabaseError(secondError, fallback));
+        return null;
+      }
+    }
+
+    if(isLikelyConnectionError(firstError)) connectionHealthy = false;
+    if(!silent) showToast(friendlySupabaseError(firstError, fallback));
+    return null;
+  }
+}
+
+function switchTab(tab){
+  currentTab = tab;
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
+  ["writing","voting","revealed","board"].forEach(k=>$("tab"+cap(k)).classList.toggle("hidden",k!==tab));
+  loadCurrentTab();
+}
+
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+function displayModeKey(mode){
+  if(mode === "midnight_3") return "midnight_madness";
+  if(mode === "lyrics_6" || mode === "literary") return "inspiration";
+  return mode;
+}
+
+function modeLabel(mode){
+  const key = displayModeKey(mode);
+  return MODES[key] || { icon:"✏️", name:mode };
+}
+
+
+async function loadCurrentTab(){
+  updateIdentityPanel();
+  if(currentTab==="writing") return loadWriting();
+  if(currentTab==="voting") return loadVoting();
+  if(currentTab==="revealed") return loadRevealed();
+  if(currentTab==="board") return loadBoard();
+}
+
+function modeSelectionHtml(){
+  const cards = Object.entries(MODES).map(([key,m])=>`
+    <button class="modeCard ${selectedMode===key ? "isSelected" : ""}" onclick="selectMode('${key}')">
+      <div class="modeName">${m.icon} ${m.name}</div>
+      <div class="modeDesc">${m.desc}</div>
+      <div class="modeAction"><span class="pill">选择这个玩法</span></div>
+    </button>
+  `).join("");
+
+  return `
+    <div class="modeSelectIntro">
+      <strong>选择一种玩法开始。</strong>
+    </div>
+    <div class="modeGrid">${cards}</div>
+  `;
+}
+
+function selectMode(mode){
+  selectedMode = mode;
+  createNewChainOpen = false;
+  loadWriting();
+}
+
+
+function openNewChainCreate(){
+  createNewChainOpen = true;
+  loadWriting();
+}
+
+function closeNewChainCreate(){
+  createNewChainOpen = false;
+  loadWriting();
+}
+
+function selectedModeCreateHtml(activeCount = 0, totalActiveCount = 0){
+  if(!selectedMode) return modeSelectionHtml();
+  const m = MODES[selectedMode];
+  const modeActiveCount = Number(activeCount || 0);
+  const totalActive = Number(totalActiveCount || 0);
+  const hasActiveInMode = modeActiveCount > 0;
+  const modeFull = modeActiveCount >= 3;
+  const siteFull = totalActive >= 10;
+  const canCreateNew = !modeFull && !siteFull;
+
+  function createFormHtml(){
+    if(selectedMode === "blind_box"){
+      return `
+        <div class="gameHint">${m.playerTip}</div>
+        <button class="btn primary" onclick="createBlindBox()">开启盲盒</button>
+      `;
+    }
+    if(selectedMode === "inspiration"){
+      return `
+        <div class="gameHint">
+          点击开启后，系统会先抽取主题和指定字。创建完成后，这句接龙会出现在下方，
+          届时才会显示主题、指定字和第一段输入框。
+        </div>
+        <div class="formLine">
+          <button class="btn primary" onclick="createInspirationGame()">开启灵感接龙</button>
+          ${hasActiveInMode ? `<button class="btn" onclick="closeNewChainCreate()">取消</button>` : ""}
+        </div>
+      `;
+    }
+    return `
+      <div class="gameHint">${m.playerTip}</div>
+      <div class="formLine">
+        <input id="createInput-${selectedMode}" class="input" maxlength="${m.len}" placeholder="写 ${m.len} 个字作为第一段" onkeydown="handleCreateEnter(event,'${selectedMode}')" />
+        <button class="btn primary" onclick="createNormalWithFirst('${selectedMode}')">开启这一句</button>
+        ${hasActiveInMode ? `<button class="btn" onclick="closeNewChainCreate()">取消</button>` : ""}
+      </div>
+    `;
+  }
+
+  let createHtml = "";
+  if(hasActiveInMode && !createNewChainOpen){
+    createHtml = `
+      <div class="gameHint">
+        这个玩法现在有 ${modeActiveCount} 句正在接龙。你可以在下方继续接龙，也可以点击按钮另开一句。
+        全站最多同时进行 10 句，同一种玩法最多 3 句。
+      </div>
+      <button class="btn primary" ${canCreateNew ? "" : "disabled"} onclick="openNewChainCreate()">
+        ${canCreateNew ? "开启新的接龙" : (modeFull ? "同玩法已满 3 句" : "全站已满 10 句")}
+      </button>
+    `;
+  }else if(!canCreateNew){
+    createHtml = `
+      <div class="gameHint">
+        ${modeFull ? "这个玩法已经有 3 句正在接龙，暂时不能再开新句。" : "全站已经有 10 句正在接龙，暂时不能再开新句。"}
+        可以先参与下方已有句子。
+      </div>
+    `;
+  }else{
+    createHtml = createFormHtml();
+  }
+
+  return `
+    <div class="backLine">
+      <button class="btn" onclick="clearSelectedMode()">← 重新选择玩法</button>
+      <div class="note">当前选择：${m.icon} <strong>${m.name}</strong></div>
+    </div>
+    <div class="createFocus">
+      <div class="createTitle">${m.icon} ${m.name}</div>
+      <div class="modeDesc">${m.desc}</div>
+      ${createHtml}
+    </div>
+  `;
+}
+
+function clearSelectedMode(){
+  selectedMode = null;
+  createNewChainOpen = false;
+  loadWriting();
+}
+
+function isValidSegmentLength(modeKey, length, len){
+  if(modeKey === "inspiration") return length >= 1 && length <= len;
+  return length === len;
+}
+
+function segmentLengthMessage(modeKey, len){
+  if(modeKey === "inspiration") return `灵感接龙每次可以输入 1–${len} 个字。`;
+  return `这个玩法需要输入 ${len} 个字。`;
+}
+
+async function createInspirationGame(){
+  const user = requireIdentity();
+  if(!user) return;
+
+  const gameId = await safe(() => client.rpc("create_sentence_chain_game", {
+    p_mode: MODES.inspiration.rpcMode,
+    ...rpcIdentity(user)
+  }));
+  if(!gameId) return;
+
+  showToast("灵感接龙已开启，主题和指定字已抽取，请在下方填写第一段。");
+  createNewChainOpen = false;
+  await loadWriting();
+}
+
+async function createNormalWithFirst(modeKey){
+  const m = MODES[modeKey];
+  const user = requireIdentity();
+  if(!user) return;
+  const input = $(`createInput-${modeKey}`);
+  const content = (input?.value || "").trim();
+
+  if(!isValidSegmentLength(modeKey, content.length, m.len)){
+    showToast(segmentLengthMessage(modeKey, m.len));
+    return;
+  }
+  const gameId = await safe(() => client.rpc("create_sentence_chain_game", {
+    p_mode: m.rpcMode,
+    ...rpcIdentity(user)
+  }));
+  if(!gameId) return;
+
+  const res = await safe(() => client.rpc("add_sentence_chain_segment", {
+    p_game_id: gameId,
+    p_content: content,
+    ...rpcIdentity(user),
+    p_finish_now: false
+  }));
+  if(!res) return;
+  showToast("已开启一句新的大小龙。");
+  createNewChainOpen = false;
+  await loadWriting();
+}
+
+async function createBlindBox(){
+  const user = requireIdentity();
+  if(!user) return;
+  const gameId = await safe(() => client.rpc("create_sentence_chain_game", {
+    p_mode:"blind_box",
+    ...rpcIdentity(user)
+  }));
+  if(!gameId) return;
+  showToast("盲盒已开启，请在下方点击“参与这一格”。");
+  createNewChainOpen = false;
+  await loadWriting();
+}
+
+async function loadWriting(){
+  const el = $("tabWriting");
+  el.innerHTML = selectedModeCreateHtml(0, 0) + `<div class="empty">正在读取接龙中句子……</div>`;
+
+  const rows = await safe(() => client.from("sentence_chain_game_summary").select("*").eq("status","writing").order("created_at",{ascending:false}));
+  if(!rows) return;
+  const normalizedRows = rows.map(normalizeRealGame);
+  const games = normalizedRows.filter(g => !selectedMode || g.mode === selectedMode);
+  const activeSelectedCount = selectedMode ? games.length : 0;
+  const totalActiveCount = normalizedRows.length;
+
+  let listHtml = "";
+  if(!games.length){
+    listHtml = `<div class="grid"><div class="empty">${selectedMode ? "这个玩法当前没有接龙中的句子，可以从上面开启。" : "请选择一种玩法后查看对应句子。"}</div></div>`;
+  }else{
+    const cards = [];
+    for(const g of games){
+      cards.push(g.mode === "blind_box" ? await renderBlindWriting(g) : await renderNormalWriting(g));
+    }
+    listHtml = `<div class="runningTitle">正在进行</div><div class="grid">${cards.join("")}</div>`;
+  }
+  el.innerHTML = selectedModeCreateHtml(activeSelectedCount, totalActiveCount) + listHtml;
+}
+
+function normalizeRealGame(g){
+  if(g.mode === "midnight_3") return {...g, mode:"midnight_madness", originalMode:g.mode};
+  if(g.mode === "lyrics_6" || g.mode === "literary") return {...g, mode:"inspiration", originalMode:g.mode};
+  return g;
+}
+
+function hiddenOrdersForGame(game){
+  if(Array.isArray(game.hidden_orders) && game.hidden_orders.length) return game.hidden_orders;
+  const seed = String(game.id || "").split("").reduce((n,ch)=>n+ch.charCodeAt(0),0);
+  const pool = [2,3,4,5,6];
+  const firstIndex = seed % pool.length;
+  const secondIndex = (seed + 2) % pool.length;
+  const first = pool[firstIndex];
+  let second = pool[secondIndex];
+  if(second === first) second = pool[(secondIndex + 1) % pool.length];
+  return [first, second].sort((a,b)=>a-b);
+}
+
+async function renderNormalWriting(game){
+  const m = modeLabel(game.mode);
+  const segs = await safe(() => client.from("sentence_chain_segment_summary").select("segment_id,segment_order,content").eq("game_id",game.id).order("segment_order",{ascending:true})) || [];
+  const hiddenOrders = game.mode === "midnight_madness" ? hiddenOrdersForGame(game) : [];
+  const segHtml = segs.length ? segs.map(s=>{
+    const hide = hiddenOrders.includes(Number(s.segment_order));
+    return `<span class="segment ${hide ? "hiddenSeg" : ""}">${hide ? "？？？" : escapeHtml(s.content)}</span>`;
+  }).join("") : `<span class="segment hiddenSeg">等待第一段</span>`;
+
+  const promptTheme = game.prompt_theme || game.theme || "";
+  const requiredChar = game.required_char || game.required_character || "";
+  const extra = game.mode === "inspiration"
+    ? `<span>主题：${escapeHtml(promptTheme || "未设置")}</span><span>指定字：${escapeHtml(requiredChar || "未设置")}</span>`
+    : "";
+
+  return `
+    <article class="card">
+      <div class="cardHead">
+        <div class="cardTitle">${m.icon} ${m.name}</div>
+        <span class="pill">接龙中</span>
+      </div>
+      <div class="segments">${segHtml}</div>
+      <div class="meta">
+        <span>已参与：${game.participant_count || 0}人</span>
+        <span>长度：${game.current_length || 0}/${game.target_length || m.target}</span>
+        <span>${game.mode === "inspiration" ? `本次最多：${game.segment_length || m.len}字` : `本次需要：${game.segment_length || m.len}字`}</span>
+        ${extra}
+      </div>
+      <div class="modeHint">${m.playerTip}</div>
+      <div class="formLine">
+        <input id="seg-${game.id}" class="input" maxlength="${m.len}" data-required-char="${escapeHtml(requiredChar || "")}" placeholder="${game.mode === "inspiration" ? `输入 1–${m.len} 个字，围绕「${promptTheme || "主题"}」` : `输入 ${m.len} 个字`}" onkeydown="handleSegmentEnter(event,'${game.id}','${game.mode}',${m.len})" />
+        <button class="btn green" onclick="submitNormal('${game.id}','${game.mode}',${m.len},false)">提交并继续</button>
+        <button class="btn pink" onclick="submitNormal('${game.id}','${game.mode}',${m.len},true)">提交并结束句子</button>
+      </div>
+    </article>
+  `;
+}
+
+async function renderBlindWriting(game){
+  const prompts = await safe(
+    () => client
+      .from("sentence_chain_blind_prompt_status")
+      .select("prompt_key,prompt_order,is_filled")
+      .eq("game_id", game.id)
+      .order("prompt_order", {ascending:true})
+  ) || [];
+
+  const filled = prompts.filter(p => p.is_filled).length;
+  const available = prompts.filter(p => !p.is_filled);
+  const hidden = prompts
+    .map(p => `<span class="segment hiddenSeg">${p.is_filled ? "已填" : "待填"}</span>`)
+    .join("");
+
+  const participation = blindParticipation[game.id] || null;
+  const assignedStillAvailable = participation
+    && available.some(p => p.prompt_key === participation.promptKey);
+
+  if(participation && !assignedStillAvailable){
+    delete blindParticipation[game.id];
+  }
+
+  let form = "";
+  const activeParticipation = assignedStillAvailable
+    ? blindParticipation[game.id]
+    : null;
+
+  if(!available.length){
+    form = `<div class="modeHint">所有提示位已经填满，马上进入投票。</div>`;
+  }else if(activeParticipation){
+    form = `
+      <div class="modeHint">
+        你的提示：<strong>${escapeHtml(activeParticipation.promptLabel)}</strong>
+      </div>
+      <div class="formLine">
+        <input
+          id="blind-${game.id}"
+          class="input"
+          maxlength="20"
+          placeholder="根据提示填写，最多 20 个字"
+          onkeydown="handleBlindEnter(event,'${game.id}','${escapeHtml(activeParticipation.promptKey)}')"
+        />
+        <button
+          class="btn primary"
+          onclick="submitBlind('${game.id}','${escapeHtml(activeParticipation.promptKey)}')"
+        >提交盲盒内容</button>
+        <button
+          class="btn"
+          onclick="cancelBlindParticipation('${game.id}')"
+        >暂不参与</button>
+      </div>
+    `;
+  }else{
+    form = `
+      <div class="modeHint">
+        点击参与并通过资格检查后，才会显示本格提示词和填写框。
+      </div>
+      <button
+        class="btn primary"
+        onclick="participateBlind('${game.id}')"
+      >参与这一格</button>
+    `;
+  }
+
+  return `
+    <article class="card">
+      <div class="cardHead">
+        <div class="cardTitle">🎭 盲盒模式｜${escapeHtml(game.template_name || "随机模板")}</div>
+        <span class="pill">${filled}/5</span>
+      </div>
+      <div class="segments">${hidden}</div>
+      <div class="meta">
+        <span>已填写：${filled}/5</span>
+        <span>内容隐藏中</span>
+        <span>不能连续填写</span>
+      </div>
+      ${form}
+    </article>
+  `;
+}
+
+function isSameBlindParticipant(row, user){
+  if(!row || !user) return false;
+  if(user.isGuest){
+    return Boolean(row.author_is_guest)
+      && String(row.author_guest_name || "").trim() === String(user.guestName || "").trim();
+  }
+  return !row.author_is_guest
+    && String(row.author_member_id || "") === String(user.memberId || "");
+}
+
+async function participateBlind(gameId){
+  const user = requireIdentity();
+  if(!user) return;
+
+  const latestRows = await safe(
+    () => client
+      .from("sentence_chain_segment_summary")
+      .select("segment_order,author_member_id,author_guest_name,author_is_guest")
+      .eq("game_id", gameId)
+      .order("segment_order", {ascending:false})
+      .limit(1)
+  );
+
+  if(latestRows === null) return;
+  const latest = Array.isArray(latestRows) ? latestRows[0] : null;
+
+  if(isSameBlindParticipant(latest, user)){
+    delete blindParticipation[gameId];
+    showToast("你刚填写过上一格，不能连续填写，请等待其他人参与。");
+    return;
+  }
+
+  const promptRows = await safe(
+    () => client
+      .from("sentence_chain_blind_prompt_status")
+      .select("prompt_key,prompt_label,prompt_order,is_filled")
+      .eq("game_id", gameId)
+      .eq("is_filled", false)
+      .order("prompt_order", {ascending:true})
+      .limit(1)
+  );
+
+  if(promptRows === null) return;
+  const prompt = Array.isArray(promptRows) ? promptRows[0] : null;
+
+  if(!prompt){
+    delete blindParticipation[gameId];
+    showToast("这一局已经没有可填写的提示位。");
+    await loadWriting();
+    return;
+  }
+
+  blindParticipation[gameId] = {
+    promptKey: prompt.prompt_key,
+    promptLabel: prompt.prompt_label
+  };
+
+  await loadWriting();
+  requestAnimationFrame(() => $(`blind-${gameId}`)?.focus());
+}
+
+function cancelBlindParticipation(gameId){
+  delete blindParticipation[gameId];
+  loadWriting();
+}
+
+
+function getGameRequiredChar(gameId){
+  const input = $(`seg-${gameId}`);
+  return input?.dataset?.requiredChar || "";
+}
+
+async function submitNormal(gameId,modeKey,len,finishNow){
+  const user = requireIdentity();
+  if(!user) return;
+  const input = $(`seg-${gameId}`);
+  const content = (input?.value || "").trim();
+  if(!content){ showToast("填写内容不能为空。"); return; }
+  if(!isValidSegmentLength(modeKey, content.length, len)){
+    showToast(segmentLengthMessage(modeKey, len));
+    return;
+  }
+  if(modeKey === "inspiration" && finishNow){
+    const requiredChar = getGameRequiredChar(gameId);
+    if(requiredChar){
+      const segs = await safe(() => client.from("sentence_chain_segment_summary").select("content").eq("game_id",gameId).order("segment_order",{ascending:true})) || [];
+      const sentenceText = segs.map(s=>s.content || "").join("") + content;
+      if(!sentenceText.includes(requiredChar)){
+        showToast(`整句话需要包含「${requiredChar}」后才能结束。`);
+        return;
+      }
+    }
+  }
+
+  const res = await safe(() => client.rpc("add_sentence_chain_segment",{
+    p_game_id:gameId,
+    p_content:content,
+    ...rpcIdentity(user),
+    p_finish_now:finishNow
+  }));
+  if(!res) return;
+  showToast(res.status === "voting" ? "句子已完成，进入投票。" : "接龙成功。");
+  handleGameRewardResult(res);
+  await loadWriting();
+}
+
+async function submitBlind(gameId,promptKey){
+  const user = requireIdentity();
+  if(!user) return;
+  const content = ($(`blind-${gameId}`)?.value || "").trim();
+  if(!content){ showToast("填写内容不能为空。"); return; }
+  if(content.length > 20){ showToast("盲盒每格最多 20 个字。"); return; }
+  const res = await safe(() => client.rpc("add_sentence_chain_blind_segment",{
+    p_game_id:gameId,
+    p_prompt_key:promptKey,
+    p_content:content,
+    ...rpcIdentity(user)
+  }));
+  if(!res) return;
+  delete blindParticipation[gameId];
+  showToast(res.status === "voting" ? "盲盒已填满，进入投票。" : "填写成功，请等待其他人参与下一格。");
+  await loadWriting();
+}
+
+async function loadVoting(){
+  const el = $("tabVoting");
+  el.innerHTML = `<div class="empty">正在读取投票中的句子……</div>`;
+  let games = await safe(() => client.from("sentence_chain_game_summary").select("*").eq("status","voting").order("completed_at",{ascending:false}));
+  if(!games) return;
+  if(!games.length){ el.innerHTML = `<div class="empty">当前没有投票中的句子。</div>`; return; }
+  const cards = [];
+  for(const g of games){ cards.push(await renderVotingCard(g)); }
+  el.innerHTML = `
+    <div class="voteRuleBox">
+      <strong>投票规则：</strong>
+      标签没有高低之分，只代表不同风格的评价；看到特别有感觉的词块时再贴，不需要全部分完。
+      先选标签，再点词块；再次点击已贴标签可取消。整句评价为三选一，可不选。提交后不能修改。
+    </div>
+    <div class="grid">${cards.join("")}</div>
+  `;
+}
+
+async function hasVoted(gameId){
+  const key = currentVoterKey();
+  if(!key || key==="guest:") return false;
+  const voteRows = await safe(() => client.from("sentence_chain_votes").select("id").eq("game_id",gameId).or(getVoterOr(key)).limit(1));
+  if(voteRows && voteRows.length) return true;
+  const skipRows = await safe(() => client.from("sentence_chain_skip_votes").select("id").eq("game_id",gameId).or(getVoterOr(key)).limit(1));
+  if(skipRows && skipRows.length) return true;
+  const ratingRows = await safe(() => client.from("sentence_chain_sentence_ratings").select("id").eq("game_id",gameId).or(getVoterOr(key)).limit(1));
+  return !!(ratingRows && ratingRows.length);
+}
+
+function getVoterOr(key){
+  if(key.startsWith("guest:")) return `voter_guest_name.eq.${key.slice(6)}`;
+  return `voter_member_id.eq.${key}`;
+}
+
+async function renderVotingCard(game){
+  const voted = await hasVoted(game.id);
+  const segs = await safe(() => client.from("sentence_chain_segment_summary").select("*").eq("game_id",game.id).order("segment_order",{ascending:true})) || [];
+  const secs = game.voting_seconds_left ?? 0;
+  const days = Math.floor(secs/86400);
+  const hours = Math.floor((secs%86400)/3600);
+  const info = `${game.effective_voter_count || 0}/${game.needed_to_reveal || 0} 人投票｜${days}天${hours}小时后公开`;
+  const segHtml = segs.map(s=>renderVoteToken(game.id,s,voted)).join("");
+  const labelDock = renderVoteLabelDock(game.id, voted);
+  const ratingDock = renderSentenceRatingDock(game.id, voted);
+  return `
+    <article class="card">
+      <div class="cardHead">
+        <div class="cardTitle">${modeLabel(game.mode).icon} ${modeLabel(game.mode).name}${game.template_name ? "｜"+escapeHtml(game.template_name) : ""}</div>
+        <span class="pill">投票中</span>
+      </div>
+      <div class="voteSentence">${segHtml}</div>
+      ${labelDock}
+      ${ratingDock}
+      <div class="meta"><span>参与：${game.participant_count || 0}人</span><span>${info}</span></div>
+      ${voted ? `<div class="modeHint">你已经完成本句投票。</div>` : `
+        <div class="voteActions compactActions">
+          <button class="btn primary" onclick="submitVote('${game.id}')">提交投票</button>
+          <button id="skip-${game.id}" class="btn" onclick="skipVote('${game.id}')">没有评价，跳过</button>
+        </div>
+      `}
+    </article>
+  `;
+}
+
+function isOwnSegment(seg){
+  const user = getUser();
+  if(user.isGuest) return seg.author_is_guest && seg.author_guest_name === user.guestName;
+  return !seg.author_is_guest && seg.author_member_id === user.memberId;
+}
+
+function getSegmentId(seg){
+  return seg.segment_id || seg.id;
+}
+
+function renderVoteToken(gameId,seg,voted){
+  const own = isOwnSegment(seg);
+  const segmentId = getSegmentId(seg);
+  const assigned = selectedVotes[gameId] || {};
+  const tags = Object.entries(assigned)
+    .filter(([,sid]) => sid === segmentId)
+    .map(([label]) => {
+      const l = LABELS.find(x=>x.key===label);
+      return `<span class="tokenTag" title="${escapeHtml(l?.text || label)}">${l ? l.icon : label}</span>`;
+    }).join("");
+  const active = activeVoteLabel[gameId];
+  const canClick = !voted && !own && active;
+  return `
+    <button class="voteToken ${own ? "own" : ""} ${tags ? "selected" : ""}" ${canClick ? "" : (voted || own ? "disabled" : "")}
+      onclick="assignVoteLabel('${gameId}','${segmentId}')"
+      ondragover="allowVoteDrop(event)"
+      ondragenter="markVoteDrop(event)"
+      ondragleave="unmarkVoteDrop(event)"
+      ondrop="dropVoteLabel(event,'${gameId}','${segmentId}')">
+      ${escapeHtml(seg.content)}
+      ${own ? `<span class="segmentAuthor">自己的</span>` : ""}
+      ${tags ? `<span class="tokenTags">${tags}</span>` : ""}
+    </button>
+  `;
+}
+
+function renderVoteLabelDock(gameId, voted){
+  const assigned = selectedVotes[gameId] || {};
+  const usedCount = Object.keys(assigned).length;
+  const labels = LABELS.map(l=>{
+    const used = !!assigned[l.key];
+    const active = activeVoteLabel[gameId] === l.key;
+    let cls = "voteLabel";
+    if(active) cls += " active";
+    if(used) cls += " used";
+    if(voted) cls += " disabled";
+    const text = used ? `${l.icon} ${l.text} ✓` : `${l.icon} ${l.text}`;
+    return `<button class="${cls}" ${voted ? "disabled" : ""} draggable="${!voted}" onclick="selectVoteLabel('${gameId}','${l.key}')" ondragstart="startVoteDrag(event,'${gameId}','${l.key}')" ondragend="endVoteDrag(event)">${text}</button>`;
+  }).join("");
+  return `
+    <div class="voteDock">
+      <span class="voteDockTitle">词块标签</span>
+      ${labels}
+    </div>
+  `;
+}
+
+function renderSentenceRatingDock(gameId, voted){
+  const current = selectedSentenceRatings[gameId] || "";
+  const buttons = SENTENCE_RATINGS.map(r=>{
+    let cls = "ratingBtn";
+    if(current === r.key) cls += " active";
+    if(voted) cls += " disabled";
+    return `<button class="${cls}" ${voted ? "disabled" : ""} onclick="selectSentenceRating('${gameId}','${r.key}')">${r.icon} ${r.text}</button>`;
+  }).join("");
+  return `
+    <div class="sentenceRating">
+      <div class="ratingTitle">整句评价</div>
+      <div class="ratingButtons">${buttons}</div>
+    </div>
+  `;
+}
+
+function selectSentenceRating(gameId, rating){
+  selectedSentenceRatings[gameId] = selectedSentenceRatings[gameId] === rating ? "" : rating;
+  loadVoting();
+}
+
+function selectVoteLabel(gameId,label){
+  selectedVotes[gameId] ||= {};
+  if(selectedVotes[gameId][label]){
+    delete selectedVotes[gameId][label];
+    if(activeVoteLabel[gameId] === label) activeVoteLabel[gameId] = null;
+  }else{
+    activeVoteLabel[gameId] = activeVoteLabel[gameId] === label ? null : label;
+  }
+  loadVoting();
+}
+
+function assignVoteLabel(gameId,segmentId){
+  selectedVotes[gameId] ||= {};
+  const label = activeVoteLabel[gameId];
+
+  if(label){
+    if(selectedVotes[gameId][label] === segmentId){
+      delete selectedVotes[gameId][label];
+      activeVoteLabel[gameId] = null;
+      showToast("已取消这个标签。");
+      loadVoting();
+      return;
+    }
+    selectedVotes[gameId][label] = segmentId;
+    activeVoteLabel[gameId] = null;
+    loadVoting();
+    return;
+  }
+
+  const labelsOnThisToken = Object.entries(selectedVotes[gameId])
+    .filter(([,sid]) => sid === segmentId)
+    .map(([labelKey]) => labelKey);
+
+  if(labelsOnThisToken.length){
+    const lastLabel = labelsOnThisToken[labelsOnThisToken.length - 1];
+    delete selectedVotes[gameId][lastLabel];
+    showToast("已取消这个词块上的标签。");
+    loadVoting();
+    return;
+  }
+
+  showToast("请先选择一个标签。");
+}
+
+function selectedVotePayload(gameId){
+  const obj = selectedVotes[gameId] || {};
+  return Object.entries(obj).filter(([,segment_id])=>segment_id).map(([label, segment_id])=>({ segment_id, label }));
+}
+
+
+function handleCreateEnter(event, modeKey){
+  if(event.key !== "Enter") return;
+  event.preventDefault();
+  createNormalWithFirst(modeKey);
+}
+
+function handleSegmentEnter(event, gameId, modeKey, len){
+  if(event.key !== "Enter") return;
+  event.preventDefault();
+  submitNormal(gameId, modeKey, len, false);
+}
+
+function handleBlindEnter(event, gameId, promptKey){
+  if(event.key !== "Enter") return;
+  event.preventDefault();
+  submitBlind(gameId, promptKey);
+}
+
+function startVoteDrag(event, gameId, label){
+  if(event.currentTarget?.classList.contains("disabled")) return;
+  activeVoteLabel[gameId] = label;
+  event.dataTransfer.setData("text/plain", JSON.stringify({gameId, label}));
+  event.dataTransfer.effectAllowed = "copy";
+  event.currentTarget.classList.add("dragging");
+}
+
+function endVoteDrag(event){
+  event.currentTarget?.classList.remove("dragging");
+  document.querySelectorAll(".voteToken.dropReady").forEach(el=>el.classList.remove("dropReady"));
+}
+
+function allowVoteDrop(event){
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "copy";
+}
+
+function markVoteDrop(event){
+  event.preventDefault();
+  event.currentTarget?.classList.add("dropReady");
+}
+
+function unmarkVoteDrop(event){
+  event.currentTarget?.classList.remove("dropReady");
+}
+
+function dropVoteLabel(event, gameId, segmentId){
+  event.preventDefault();
+  event.currentTarget?.classList.remove("dropReady");
+  let payload = null;
+  try{ payload = JSON.parse(event.dataTransfer.getData("text/plain") || "{}"); }catch(e){}
+  if(payload?.gameId && payload.gameId !== gameId){
+    showToast("这个标签不属于这一句。");
+    return;
+  }
+  const label = payload?.label || activeVoteLabel[gameId];
+  if(!label){
+    showToast("请先选择或拖动一个标签。");
+    return;
+  }
+  activeVoteLabel[gameId] = label;
+  assignVoteLabel(gameId, segmentId);
+}
+
+async function submitVote(gameId){
+  const user = requireIdentity();
+  if(!user) return;
+  const votes = selectedVotePayload(gameId);
+  const sentenceRating = selectedSentenceRatings[gameId] || null;
+  if(!votes.length && !sentenceRating){ showToast("请选择词块标签、整句评价，或点击跳过这句。"); return; }
+  const res = await safe(() => client.rpc("submit_sentence_chain_vote",{
+    p_game_id:gameId,
+    p_votes:votes,
+    p_skip:false,
+    p_sentence_rating: sentenceRating,
+    ...rpcIdentity(user)
+  }));
+  if(!res) return;
+  selectedVotes[gameId] = {};
+  selectedSentenceRatings[gameId] = "";
+  activeVoteLabel[gameId] = null;
+  showToast(res.status === "revealed" ? "投票完成，本句已公开。" : "投票完成。");
+  await handleSentenceChainSettlement(res);
+  await loadVoting();
+}
+
+async function skipVote(gameId){
+  const user = requireIdentity();
+  if(!user) return;
+  const votes = selectedVotePayload(gameId);
+  const sentenceRating = selectedSentenceRatings[gameId] || null;
+  if(votes.length || sentenceRating){ showToast("已经选择内容，不能跳过。请先清空标签和整句评价。"); return; }
+  const res = await safe(() => client.rpc("submit_sentence_chain_vote",{
+    p_game_id:gameId,
+    p_votes:[],
+    p_skip:true,
+    ...rpcIdentity(user)
+  }));
+  if(!res) return;
+  showToast(res.status === "revealed" ? "已跳过，本句已公开。" : "已跳过这句。");
+  await handleSentenceChainSettlement(res);
+  await loadVoting();
+}
+
+async function loadRevealed(){
+  const el = $("tabRevealed");
+  el.innerHTML = `<div class="empty">正在读取已公开句子……</div>`;
+  let games = await safe(() => client.from("sentence_chain_game_summary").select("*").eq("status","revealed").order("revealed_at",{ascending:false}).limit(20));
+  if(!games) return;
+  if(!games.length){ el.innerHTML = `<div class="empty">当前还没有已公开的句子。</div>`; return; }
+  const cards = [];
+  for(const g of games){ cards.push(await renderRevealedCard(g)); }
+  el.innerHTML = `<div class="grid">${cards.join("")}</div>`;
+}
+
+
+function normalizeSentenceText(value){
+  return String(value || "").replace(/[｜|]/g, "").replace(/\s+/g, "");
+}
+
+function sentenceFromSegments(segs){
+  return normalizeSentenceText((segs || []).map(s=>s.content || "").join(""));
+}
+
+function calcFirePower(data = {}){
+  const like = Number(data.like_count ?? data.rating_counts?.like ?? 0);
+  const dislike = Number(data.dislike_count ?? data.rating_counts?.dislike ?? 0);
+  const flame = Number(data.flame_count ?? data.flames ?? 0);
+  return Number(data.fire_power ?? (like - dislike + flame * 10));
+}
+
+async function useSentenceFlame(gameId){
+  const user = requireIdentity();
+  if(!user) return;
+  if(user.isGuest){
+    showToast("小火苗是背包道具，游客不能使用。");
+    return;
+  }
+  if(!gameId){
+    showToast("没有找到这句话，暂时不能点火。");
+    return;
+  }
+  const res = await safe(() => client.rpc("use_sentence_chain_flame", {
+    p_game_id: gameId,
+    p_member_id: user.memberId
+  }));
+  if(!res) return;
+  showToast("已使用 1 个小火苗，火力值 +10。");
+  if(currentTab === "revealed") await loadRevealed();
+  if(currentTab === "board") await loadBoard();
+}
+
+async function renderRevealedCard(game){
+  const segs = await safe(() => client.from("sentence_chain_segment_summary").select("*").eq("game_id",game.id).order("segment_order",{ascending:true})) || [];
+
+  const totalCounts = {};
+  segs.forEach(s=>{
+    Object.entries(s.label_counts || {}).forEach(([k,v])=>{
+      totalCounts[k] = (totalCounts[k] || 0) + Number(v || 0);
+    });
+  });
+
+  const scoreBadges = Object.entries(totalCounts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{
+    const l = LABELS.find(x=>x.key===k);
+    return `<span class="countBadge">${l ? `${l.icon} ${l.text}` : k} ×${v}</span>`;
+  }).join("") || '<span class="countBadge">暂无标签</span>';
+
+  const ratingCounts = game.rating_counts || {};
+  const flameCount = Number(game.flame_count || game.flames || 0);
+  const firePower = calcFirePower({
+    rating_counts: ratingCounts,
+    flame_count: flameCount,
+    fire_power: game.fire_power
+  });
+  const ratingBadges = SENTENCE_RATINGS.map(r=>`<span class="countBadge">${r.icon} ${r.text} ×${Number(ratingCounts[r.key] || 0)}</span>`).join("")
+    + `<span class="countBadge flamePower">🔥 火力值 ${firePower}</span>`
+    + `<span class="countBadge">小火苗 ×${flameCount}</span>`;
+
+  const blockHtml = segs.map(s=>{
+    const counts = s.label_counts || {};
+    const blockBadges = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{
+      const l = LABELS.find(x=>x.key===k);
+      return `<span class="countBadge">${l ? l.icon : k}×${v}</span>`;
+    }).join("");
+    return `
+      <span class="revealedBlock">
+        <span class="revealedWord">${escapeHtml(s.content)}</span>
+        <span class="revealedAuthor">${escapeHtml(s.author_display_name || "未知")}</span>
+        ${blockBadges ? `<span class="revealedBlockScore">${blockBadges}</span>` : ""}
+      </span>
+    `;
+  }).join("");
+
+  const promptInfo = game.prompt_theme ? `<span>主题：${escapeHtml(game.prompt_theme)}</span><span>指定字：${escapeHtml(game.required_char)}</span>` : "";
+  return `
+    <article class="card">
+      <div class="cardHead">
+        <div class="cardTitle">${modeLabel(game.mode).icon} ${modeLabel(game.mode).name}</div>
+        <span class="pill">已公开</span>
+      </div>
+      <div class="revealedSentence">${blockHtml}</div>
+      <div class="revealedScores"><strong>词块标签：</strong>${scoreBadges}</div>
+      <div class="revealedScores"><strong>整句评价：</strong>${ratingBadges}</div>
+      <div class="meta"><span>总标签：${game.total_label_count || 0}</span><span>参与：${game.participant_count || 0}人</span>${promptInfo}<button class="flameBtn" onclick="useSentenceFlame('${escapeHtml(game.id || "")}')">🔥 用小火苗点火</button></div>
+    </article>
+  `;
+}
+
+async function loadSentenceBoardRows(){
+  const games = await safe(
+    () => client
+      .from("sentence_chain_game_summary")
+      .select("id,mode,full_sentence,participant_count,total_label_count,revealed_at")
+      .eq("status", "revealed")
+      .order("revealed_at", { ascending:false })
+      .limit(30),
+    {
+      fallback: "无法读取已公开接龙。",
+      retry: true
+    }
+  );
+
+  if(!games) return [];
+
+  const enriched = [];
+  for(const game of games){
+    const ratings = await safe(
+      () => client
+        .from("sentence_chain_sentence_ratings")
+        .select("rating")
+        .eq("game_id", game.id),
+      { silent:true, retry:true }
+    ) || [];
+
+    const counts = { like:0, normal:0, dislike:0 };
+    ratings.forEach(row => {
+      if(Object.prototype.hasOwnProperty.call(counts, row.rating)){
+        counts[row.rating] += 1;
+      }
+    });
+
+    const flameRows = await safe(
+      () => client
+        .from("sentence_chain_flame_logs")
+        .select("id")
+        .eq("game_id", game.id),
+      { silent:true, retry:false }
+    );
+
+    const flameCount = Array.isArray(flameRows) ? flameRows.length : 0;
+    enriched.push({
+      game_id: game.id,
+      mode: game.mode,
+      full_sentence: game.full_sentence,
+      participant_count: game.participant_count || 0,
+      total_label_count: game.total_label_count || 0,
+      like_count: counts.like,
+      normal_count: counts.normal,
+      dislike_count: counts.dislike,
+      flame_count: flameCount,
+      fire_power: counts.like - counts.dislike + flameCount * 10,
+      revealed_at: game.revealed_at
+    });
+  }
+
+  return enriched
+    .sort((a,b) =>
+      calcFirePower(b) - calcFirePower(a) ||
+      Number(b.like_count || 0) - Number(a.like_count || 0) ||
+      String(b.revealed_at || "").localeCompare(String(a.revealed_at || ""))
+    )
+    .slice(0, 10);
+}
+
+async function loadBoard(){
+  const el = $("tabBoard");
+  el.innerHTML = `<div class="empty">正在读取风云榜……</div>`;
+
+  const rows = await safe(
+    () => client
+      .from("sentence_chain_leaderboard")
+      .select("*")
+      .order("total_label_count", { ascending:false })
+      .limit(30),
+    {
+      fallback: "无法读取成员风云榜。",
+      retry: true
+    }
+  );
+  if(!rows) return;
+
+  const sentenceRows = await loadSentenceBoardRows();
+
+  const sentenceCards = sentenceRows.map((s,i)=>{
+    const gameId = s.game_id || s.id || "";
+    const flameCount = Number(s.flame_count || 0);
+    const firePower = calcFirePower(s);
+    const sentenceText = normalizeSentenceText(s.sentence || s.full_sentence || "");
+    return `
+      <div class="sentenceBoardCard">
+        <div class="boardTop"><span>${i+1}. ${modeLabel(s.mode).icon} 火力句子</span><span class="boardScore">🔥 ${firePower}</span></div>
+        <div class="sentenceBoardSentence">${escapeHtml(sentenceText)}</div>
+        <div class="sentenceBoardMeta">
+          <span>参与：${Number(s.participant_count || 0)} 人</span>
+          <span>❤️ ${s.like_count || 0}</span>
+          <span>😐 ${s.normal_count || 0}</span>
+          <span>💔 ${s.dislike_count || 0}</span>
+          <span>小火苗 ${flameCount}</span>
+          <span>标签 ${s.total_label_count || 0}</span>
+          <button class="flameBtn" onclick="useSentenceFlame('${escapeHtml(gameId)}')">🔥 用小火苗点火</button>
+        </div>
+      </div>
+    `;
+  }).join("") || `<div class="empty">还没有高火力句子。</div>`;
+
+  const memberCards = rows.length ? rows.map((r,i)=>`
+    <div class="boardCard">
+      <div class="boardTop"><span>${i+1}. ${escapeHtml(r.nickname || "未命名")}</span><span class="boardScore">总数 ${r.total_label_count || 0}</span></div>
+      <div class="boardTags">
+        <span class="countBadge">😂 ${r.funny_count || 0}</span>
+        <span class="countBadge">⚡ ${r.genius_count || 0}</span>
+        <span class="countBadge">🌀 ${r.crazy_count || 0}</span>
+        <span class="countBadge">📖 ${r.literary_count || 0}</span>
+        <span class="countBadge">💀 ${r.dead_laugh_count || 0}</span>
+        <span class="countBadge">❄️ ${r.cold_pun_count || 0}</span>
+      </div>
+    </div>
+  `).join("") : `<div class="empty">成员风云榜还没有数据。游客参与不进入成员榜。</div>`;
+
+  el.innerHTML = `
+    <div class="toolbar"><div class="note">风云榜分为火力句子和成员标签榜。火力值 = 喜欢 - 不喜欢 + 小火苗×10。</div></div>
+    <div class="boardSectionTitle">火力句子 Top 10</div>
+    <div class="sentenceBoardList">${sentenceCards}</div>
+    <div class="boardSectionTitle">成员标签榜</div>
+    <div class="boardGrid">${memberCards}</div>
+  `;
+}
+
+const rewardTypeMeta = {
+  achievement: { label: "成就达成", icon: "🏆" },
+  title: { label: "获得称号", icon: "🎖️" },
+  daily: { label: "日常奖励", icon: "☀️" },
+  gift: { label: "礼包领取", icon: "🎁" },
+  item: { label: "道具获得", icon: "🧺" },
+  gold: { label: "金币奖励", icon: "🪙" }
+};
+
+const rewardIconMap = {
+  金币: "🪙",
+  种子: "🌱",
+  宠物粮: "🥣",
+  医疗卡: "💊",
+  亲密度: "💗",
+  道具: "🧺",
+  小火苗: "🔥",
+  成就: "🏆",
+  称号: "🎖️"
+};
+
+function normalizeRewardItem(item) {
+  if (typeof item === "string") {
+    return { name: item, amount: "", unit: "", icon: rewardIconMap[item] || "✨" };
+  }
+  return {
+    name: item.name || "奖励",
+    amount: item.amount ?? "",
+    unit: item.unit || "",
+    icon: item.icon || rewardIconMap[item.name] || "✨",
+    prefix: item.prefix || ""
+  };
+}
+
+function formatRewardAmount(item) {
+  if (item.amount === "" || item.amount === null || item.amount === undefined) return "";
+  if (typeof item.amount === "number") {
+    const sign = item.amount > 0 ? "+" : "";
+    return `${sign}${item.amount}${item.unit || ""}`;
+  }
+  return `${item.prefix || ""}${item.amount}${item.unit || ""}`;
+}
+
+function renderRewards(rewards) {
+  const list = document.getElementById("rewardList");
+  const sectionTitle = document.getElementById("rewardSectionTitle");
+  if(!list || !sectionTitle) return;
+  list.innerHTML = "";
+  list.className = "reward-list";
+  sectionTitle.className = "reward-section-title";
+  if (!rewards.length) {
+    list.classList.add("empty");
+    sectionTitle.classList.add("empty");
+    return;
+  }
+  list.classList.add(`count-${Math.min(rewards.length, 3)}`);
+  rewards.forEach((reward) => {
+    const item = document.createElement("div");
+    item.className = "reward-item";
+    item.innerHTML = `
+      <div class="reward-item-icon">${escapeHtml(reward.icon)}</div>
+      <div class="reward-item-name">${escapeHtml(reward.name)}</div>
+      <div class="reward-item-amount">${escapeHtml(formatRewardAmount(reward))}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function showRewardModal(options = {}) {
+  const mask = document.getElementById("rewardMask");
+  if(!mask) return;
+  const type = options.type || "achievement";
+  const meta = rewardTypeMeta[type] || rewardTypeMeta.achievement;
+  const rewards = Array.isArray(options.rewards) ? options.rewards.map(normalizeRewardItem) : [];
+  mask.dataset.type = type;
+  document.getElementById("rewardIcon").textContent = options.icon || meta.icon;
+  document.getElementById("rewardLabel").textContent = options.label || meta.label;
+  document.getElementById("rewardTitle").textContent = options.title || "奖励已领取";
+  document.getElementById("rewardDesc").textContent = options.desc || "奖励已经记录完成。";
+  renderRewards(rewards);
+  mask.classList.add("show");
+  mask.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeRewardModal() {
+  const mask = document.getElementById("rewardMask");
+  if(!mask) return;
+  mask.classList.remove("show");
+  mask.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+let activeRewardQueueItem = null;
+let rewardConfirmBusy = false;
+
+function showRewardQueue(items = []){
+  if(!Array.isArray(items) || !items.length) return;
+  let index = 0;
+
+  const openNext = () => {
+    const item = items[index];
+    if(!item){
+      activeRewardQueueItem = null;
+      window.__rewardQueueNext = null;
+      return;
+    }
+    activeRewardQueueItem = item;
+    rewardConfirmBusy = false;
+    const confirmBtn = $("rewardConfirmBtn");
+    if(confirmBtn){
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = item.confirmText || "收下奖励";
+    }
+    showRewardModal(item);
+    index += 1;
+  };
+
+  window.__rewardQueueNext = function(){
+    closeRewardModal();
+    activeRewardQueueItem = null;
+    if(index < items.length){
+      setTimeout(openNext, 160);
+    }else{
+      window.__rewardQueueNext = null;
+    }
+  };
+
+  openNext();
+}
+
+function closeRewardModalAndContinue(){
+  if(typeof window.__rewardQueueNext === "function") {
+    window.__rewardQueueNext();
+  } else {
+    activeRewardQueueItem = null;
+    closeRewardModal();
+  }
+}
+
+async function confirmRewardModalAndContinue(){
+  if(rewardConfirmBusy) return;
+  rewardConfirmBusy = true;
+
+  const btn = $("rewardConfirmBtn");
+  if(btn){
+    btn.disabled = true;
+    btn.textContent = "领取中……";
+  }
+
+  try{
+    if(typeof activeRewardQueueItem?.onConfirm === "function"){
+      const ok = await activeRewardQueueItem.onConfirm();
+      if(ok === false){
+        rewardConfirmBusy = false;
+        if(btn){
+          btn.disabled = false;
+          btn.textContent = activeRewardQueueItem.confirmText || "收下奖励";
+        }
+        return;
+      }
+    }
+    closeRewardModalAndContinue();
+  }catch(error){
+    console.error(error);
+    showToast(friendlySupabaseError(error, "奖励领取失败，请稍后重试。"));
+    rewardConfirmBusy = false;
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = activeRewardQueueItem?.confirmText || "收下奖励";
+    }
+  }
+}
+
+function normalizeHonorRewards(result){
+  const rewards = [];
+  const raw = result?.rewards || result?.reward_items || result?.honor_rewards || result?.game_rewards || result?.awards || [];
+  if(Array.isArray(raw)) return raw;
+  return rewards;
+}
+
+function handleGameRewardResult(result){
+  const rewards = normalizeHonorRewards(result);
+  if(rewards.length) showRewardQueue(rewards);
+}
+
+async function loadHonorRewardItems(honorType, honorId, rewardGold){
+  const rewardRows = await safe(
+    () => client
+      .from("honor_reward_items")
+      .select("item_key,quantity,sort_order")
+      .eq("honor_type", honorType)
+      .eq("honor_id", honorId)
+      .eq("is_active", true)
+      .order("sort_order", { ascending:true }),
+    { silent:true, retry:true }
+  ) || [];
+
+  const itemKeys = [...new Set(rewardRows.map(row => row.item_key).filter(Boolean))];
+  let itemMap = {};
+
+  if(itemKeys.length){
+    const itemRows = await safe(
+      () => client
+        .from("item_types")
+        .select("item_key,item_name,item_icon")
+        .in("item_key", itemKeys),
+      { silent:true, retry:true }
+    ) || [];
+    itemMap = Object.fromEntries(itemRows.map(row => [row.item_key, row]));
+  }
+
+  const rewards = [];
+  if(Number(rewardGold || 0) > 0){
+    rewards.push({
+      name: "金币",
+      amount: Number(rewardGold),
+      icon: "🪙"
+    });
+  }
+
+  rewardRows.forEach(row => {
+    const item = itemMap[row.item_key] || {};
+    rewards.push({
+      name: item.item_name || row.item_key || "道具",
+      amount: Number(row.quantity || 0),
+      icon: item.item_icon || (
+        row.item_key === "gacha_token_white" ? "⚪" :
+        row.item_key === "gacha_token_purple" ? "🟣" :
+        row.item_key === "gacha_token_gold" ? "🟡" : "✨"
+      )
+    });
+  });
+
+  return rewards;
+}
+
+async function fetchRecentChainHonors(memberId, seconds = 20){
+  if(!memberId) return [];
+  const since = new Date(Date.now() - seconds * 1000).toISOString();
+
+  const [memberAchievements, memberTitles] = await Promise.all([
+    safe(
+      () => client
+        .from("member_achievements")
+        .select("id,achievement_id,obtained_at")
+        .eq("member_id", memberId)
+        .eq("source_type", "chain")
+        .gte("obtained_at", since)
+        .order("obtained_at", { ascending:true }),
+      { silent:true, retry:true }
+    ),
+    safe(
+      () => client
+        .from("member_titles")
+        .select("id,title_id,obtained_at")
+        .eq("member_id", memberId)
+        .eq("source_type", "chain")
+        .gte("obtained_at", since)
+        .order("obtained_at", { ascending:true }),
+      { silent:true, retry:true }
+    )
+  ]);
+
+  const achievementRows = Array.isArray(memberAchievements) ? memberAchievements : [];
+  const titleRows = Array.isArray(memberTitles) ? memberTitles : [];
+  const achievementIds = [...new Set(achievementRows.map(row => row.achievement_id))];
+  const titleIds = [...new Set(titleRows.map(row => row.title_id))];
+
+  const [achievements, titles] = await Promise.all([
+    achievementIds.length
+      ? safe(
+          () => client
+            .from("achievements")
+            .select("id,code,name,description,unlock_message,icon,reward_gold,source_group")
+            .in("id", achievementIds)
+            .eq("source_group", "chain"),
+          { silent:true, retry:true }
+        )
+      : [],
+    titleIds.length
+      ? safe(
+          () => client
+            .from("titles")
+            .select("id,code,name,description,unlock_message,icon,reward_gold,source_group")
+            .in("id", titleIds)
+            .eq("source_group", "chain"),
+          { silent:true, retry:true }
+        )
+      : []
+  ]);
+
+  const achMap = Object.fromEntries((achievements || []).map(row => [String(row.id), row]));
+  const titleMap = Object.fromEntries((titles || []).map(row => [String(row.id), row]));
+  const queue = [];
+
+  for(const row of achievementRows){
+    const honor = achMap[String(row.achievement_id)];
+    if(!honor) continue;
+    const rewards = await loadHonorRewardItems("achievement", honor.id, honor.reward_gold);
+    queue.push(makeChainHonorQueueItem("achievement", honor, rewards));
+  }
+
+  for(const row of titleRows){
+    const honor = titleMap[String(row.title_id)];
+    if(!honor) continue;
+    const rewards = await loadHonorRewardItems("title", honor.id, honor.reward_gold);
+    queue.push(makeChainHonorQueueItem("title", honor, rewards));
+  }
+
+  return queue;
+}
+
+function makeChainHonorQueueItem(type, honor, rewards){
+  return {
+    type,
+    icon: honor.icon || (type === "title" ? "🎖️" : "🏆"),
+    label: type === "title" ? "获得称号" : "成就达成",
+    title: honor.name || "接龙荣誉",
+    desc: honor.unlock_message || honor.description || "接龙荣誉已解锁。",
+    rewards,
+    confirmText: "领取奖励",
+    onConfirm: async () => {
+      const memberId = localStorage.getItem("room10MemberId") || "";
+      const memberCode = localStorage.getItem("room10MemberCode") || "";
+      if(!memberId || !memberCode){
+        showToast("请先重新登录，再领取奖励。");
+        return false;
+      }
+
+      const claimResult = await safe(
+        () => client.rpc("claim_honor_reward", {
+          p_member_id: memberId,
+          p_member_code: memberCode,
+          p_item_type: type,
+          p_item_id: String(honor.id)
+        }),
+        {
+          fallback: "奖励领取失败，请稍后重试。",
+          retry: true
+        }
+      );
+
+      if(!claimResult) return false;
+      if(claimResult.ok === false){
+        showToast(claimResult.message || "这个奖励当前无法领取。");
+        return false;
+      }
+
+      showToast(claimResult.message || "奖励已领取。");
+      return true;
+    }
+  };
+}
+
+async function handleSentenceChainSettlement(result){
+  if(!result || result.status !== "revealed") return;
+
+  const user = getUser();
+  if(user.isGuest || !user.memberId) return;
+
+  const directAwards = normalizeHonorRewards(result?.sync_result);
+  if(directAwards.length){
+    const directQueue = [];
+    for(const award of directAwards){
+      const type = award.type || award.item_type || "achievement";
+      const honorId = award.id || award.item_id;
+      if(!honorId) continue;
+      const rewards = await loadHonorRewardItems(type, honorId, award.reward_gold);
+      directQueue.push(
+        makeChainHonorQueueItem(type, {
+          id: honorId,
+          name: award.title || award.name,
+          description: award.desc || award.description,
+          unlock_message: award.unlock_message,
+          icon: award.icon,
+          reward_gold: award.reward_gold
+        }, rewards)
+      );
+    }
+    if(directQueue.length){
+      showRewardQueue(directQueue);
+      return;
+    }
+  }
+
+  if(result.newly_revealed){
+    const queue = await fetchRecentChainHonors(user.memberId, 30);
+    if(queue.length) showRewardQueue(queue);
+  }
+}
+
+document.addEventListener("click", function(event) {
+  const mask = document.getElementById("rewardMask");
+  if(mask && event.target === mask) closeRewardModalAndContinue();
+});
+
+document.addEventListener("keydown", function(event) {
+  if (event.key === "Escape") closeRewardModalAndContinue();
+});
+
+window.addEventListener("storage", () => { refreshAfterIdentityChange(); });
+initAuthPanel();
+updateIdentityPanel();
+if(client){
+  loadCurrentTab();
+}else{
+  ["tabWriting","tabVoting","tabRevealed","tabBoard"].forEach(id => {
+    const el = $(id);
+    if(el) el.innerHTML = `<div class="empty">数据库连接组件加载失败，请刷新页面后重试。</div>`;
+  });
+  showToast("数据库连接组件加载失败，请刷新页面。");
+}
+</script>
+</body>
+</html>
