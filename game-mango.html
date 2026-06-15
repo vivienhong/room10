@@ -7,6 +7,18 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;}
+:root{
+  --reward-modal-scale:1;
+  --reward-ink:#6b5141;
+  --reward-text:#7d6557;
+  --reward-line:rgba(190,143,112,0.24);
+  --reward-soft-line:rgba(174,132,103,0.14);
+  --ink:var(--reward-ink);
+  --text:var(--reward-text);
+  --line:var(--reward-line);
+  --soft-line:var(--reward-soft-line);
+  --card-shadow:rgba(106,78,55,0.20);
+}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;color:#684224;background:radial-gradient(circle at 16% 8%,rgba(255,255,255,.82),rgba(255,255,255,0) 32%),radial-gradient(circle at 85% 14%,rgba(255,224,136,.32),rgba(255,224,136,0) 34%),linear-gradient(135deg,#fff5df 0%,#f5e0b6 52%,#e9c690 100%);}
 button,input,select{font-family:inherit;}button{cursor:pointer;}.hidden{display:none!important;}
 .page{width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:14px;}
@@ -20,9 +32,9 @@ h1{margin:0;color:#673c1d;font-size:clamp(34px,5.2vw,58px);line-height:1;font-we
 .stage-card{position:relative;z-index:1;flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(390px,1.26fr) minmax(286px,.74fr);gap:12px;padding:12px;border-radius:28px;background:rgba(255,248,232,.36);border:1px solid rgba(255,255,255,.54);box-shadow:inset 0 1px 0 rgba(255,255,255,.62);}.card,.control-box{min-height:0;border-radius:24px;padding:14px;background:rgba(255,252,245,.46);border:1px solid rgba(255,255,255,.52);box-shadow:inset 0 1px 0 rgba(255,255,255,.56);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}.play-area{display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px;overflow:hidden;background:rgba(255,250,239,.34);}
 .mango-stage{position:relative;min-height:0;display:flex;align-items:center;justify-content:center;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 42%,rgba(255,231,115,.46),rgba(255,176,77,.17) 42%,transparent 68%),rgba(255,255,255,.20);}
 .mango-glow{position:absolute;width:min(330px,74%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,236,127,.46),rgba(255,183,79,.18) 56%,transparent 74%);animation:glowPulse 2.4s ease-in-out infinite;}.mango-btn{position:relative;z-index:2;width:min(330px,74%);aspect-ratio:1;border:none;background:transparent;padding:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}.mango-btn:disabled{opacity:.70;cursor:not-allowed;}.mango-img{width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none;filter:drop-shadow(0 14px 18px rgba(88,55,32,.18));animation:floatMango 2.8s ease-in-out infinite;}.mango-btn.hit .mango-img{animation:hitPop .22s ease-out both;}
-.hammer-img{position:absolute;z-index:4;width:min(138px,27%);right:20%;top:12%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 12px 15px rgba(88,55,32,.20));transform-origin:30% 80%;opacity:0;transform:translate(16px,-14px) rotate(22deg) scale(1);transition:opacity .16s ease, transform .16s ease;}.mango-stage.playing .hammer-img{opacity:.94;}.hammer-img.hit{animation:hammerHit .18s ease-out both;}
+.hammer-img{position:absolute;z-index:4;width:min(138px,27%);right:20%;top:16.5%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 12px 15px rgba(88,55,32,.20));transform-origin:30% 80%;opacity:0;transform:translate(16px,-14px) rotate(22deg) scale(1);transition:opacity .16s ease, transform .16s ease;}.mango-stage.playing .hammer-img{opacity:.94;}.hammer-img.hit{animation:hammerHitContinuous .18s ease-out both;}
 .juice-fly{position:absolute;z-index:5;width:48px;height:48px;object-fit:contain;pointer-events:none;filter:drop-shadow(0 8px 10px rgba(88,55,32,.14));animation:juiceFly .82s ease-out forwards;}.hit-number{position:absolute;z-index:6;left:50%;top:50%;transform:translate(-50%,-50%);color:#744014;font-size:28px;font-weight:950;text-shadow:0 2px 0 rgba(255,247,214,.92);pointer-events:none;animation:numberRise .56s ease-out forwards;}
-@keyframes glowPulse{0%,100%{transform:scale(.92);opacity:.48;}50%{transform:scale(1.06);opacity:.92;}}@keyframes floatMango{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-7px) rotate(1deg);}}@keyframes hitPop{0%{transform:translate(0,0) scale(1) rotate(0);}38%{transform:translate(-2px,4px) scaleX(1.03) scaleY(.98) rotate(-3deg);}72%{transform:translate(2px,2px) scaleX(1.01) scaleY(.995) rotate(2deg);}100%{transform:translate(0,0) scale(1) rotate(0);}}@keyframes hammerHit{0%{transform:translate(18px,-18px) rotate(28deg) scale(1.02);}55%{transform:translate(-18px,24px) rotate(-28deg) scale(1.06);}100%{transform:translate(-6px,8px) rotate(-8deg) scale(1.02);}}@keyframes juiceFly{0%{opacity:1;transform:translate(0,0) scale(.55) rotate(-12deg);}100%{opacity:0;transform:translate(var(--jx,80px),var(--jy,-120px)) scale(1.08) rotate(16deg);}}@keyframes numberRise{0%{opacity:0;transform:translate(-50%,-30%) scale(.78);}18%{opacity:1;}100%{opacity:0;transform:translate(-50%,-130%) scale(1.18);}}
+@keyframes glowPulse{0%,100%{transform:scale(.92);opacity:.48;}50%{transform:scale(1.06);opacity:.92;}}@keyframes floatMango{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-7px) rotate(1deg);}}@keyframes hitPop{0%{transform:translate(0,0) scale(1) rotate(0);}38%{transform:translate(-2px,4px) scaleX(1.03) scaleY(.98) rotate(-3deg);}72%{transform:translate(2px,2px) scaleX(1.01) scaleY(.995) rotate(2deg);}100%{transform:translate(0,0) scale(1) rotate(0);}}@keyframes hammerHit{0%{width:min(138px,27%);right:20%;top:16.5%;transform:translate(16px,-14px) rotate(22deg) scale(1);}55%{width:min(138px,24.5%);right:14.5%;top:29.5%;transform:translate(16px,-14px) rotate(-54deg) scale(1);}100%{width:min(138px,27%);right:20%;top:16.5%;transform:translate(16px,-14px) rotate(22deg) scale(1);}}@keyframes hammerHitContinuous{0%{width:min(138px,18.5%);right:20.5%;top:34%;transform:translate(16px,-14px) rotate(-28deg) scale(1);}55%{width:min(138px,18.5%);right:23.5%;top:40%;transform:translate(16px,-14px) rotate(-54deg) scale(1);}100%{width:min(138px,18.5%);right:22%;top:36.5%;transform:translate(16px,-14px) rotate(-42deg) scale(1);}}@keyframes juiceFly{0%{opacity:1;transform:translate(0,0) scale(.55) rotate(-12deg);}100%{opacity:0;transform:translate(var(--jx,80px),var(--jy,-120px)) scale(1.08) rotate(16deg);}}@keyframes numberRise{0%{opacity:0;transform:translate(-50%,-30%) scale(.78);}18%{opacity:1;}100%{opacity:0;transform:translate(-50%,-130%) scale(1.18);}}
 .status-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}.stat-pill{min-height:70px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:rgba(255,255,255,.50);border:1px solid rgba(255,255,255,.62);}.stat-value{color:#633916;font-size:clamp(28px,4.6vw,46px);line-height:1;font-weight:950;}.stat-label{color:#9c704d;font-size:12px;font-weight:950;}
 .side-panel{display:flex;flex-direction:column;gap:12px;overflow:hidden;}.identity-chip{min-height:34px;padding:0 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.56);border:1px solid rgba(173,128,82,.16);color:#775132;font-size:13px;font-weight:950;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.control-box{background:rgba(255,255,255,.40);display:flex;flex-direction:column;}.section-title{margin:0 0 10px;color:#704525;font-size:18px;font-weight:950;display:flex;align-items:center;justify-content:space-between;gap:8px;}.mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}.mode-tab{min-height:42px;border:none;border-radius:16px;background:rgba(255,255,255,.55);border:1px solid rgba(173,128,82,.16);color:#7f5637;font-size:14px;font-weight:950;}.mode-tab.active{background:linear-gradient(180deg,#f8d875,#e8ad42);color:#633916;}
 .setting-card,.goal-card{margin-top:12px;border-radius:18px;padding:12px;background:rgba(255,248,232,.58);border:1px solid rgba(255,255,255,.60);box-shadow:inset 0 1px 0 rgba(255,255,255,.58);}.setting-title,.goal-label,.progress-title{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#704525;font-size:13px;font-weight:950;margin-bottom:8px;}.setting-title span,.goal-label span,.progress-title span{color:#9a704d;font-size:12px;font-weight:950;}.goal-main{color:#6f4525;font-size:18px;line-height:1.35;font-weight:950;}.play-tip{margin:8px 0 0;color:#8b6240;font-size:12px;line-height:1.45;font-weight:850;}.field.hidden-mode{display:none!important;}.big-action.danger{background:linear-gradient(180deg,#efb891,#dd8d62);color:#5d2d1b;}.leaderboard-tabs{display:flex;flex-direction:column;gap:8px;margin:0 0 12px;}.board-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}.board-group-title{flex:0 0 auto;color:#8b6240;font-size:12px;font-weight:950;}.board-tab{min-height:30px;padding:0 11px;border:none;border-radius:999px;background:rgba(255,252,247,.86);border:1px solid rgba(171,126,84,.18);color:#704729;font-size:12px;font-weight:950;box-shadow:0 5px 12px rgba(117,80,43,.08),inset 0 1px 0 rgba(255,255,255,.9);}.board-tab.active{background:linear-gradient(180deg,#f8d875,#e8ad42);color:#603718;}.leaderboard-modal-card{width:min(760px,100%);}.form-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px;}.field{display:flex;flex-direction:column;gap:6px;min-width:0;}.field label{color:#8b6240;font-size:13px;font-weight:950;}.field select{width:100%;height:40px;border:none;outline:none;border-radius:14px;padding:0 13px;color:#644021;background:rgba(255,255,255,.72);border:1px solid rgba(177,130,82,.18);font-size:15px;font-weight:850;box-shadow:inset 0 1px 0 rgba(255,255,255,.9);}
@@ -46,7 +58,9 @@ html,body{height:auto;min-height:100%;overflow:auto;}
 .side-panel{order:1;overflow:visible;}
 .play-area{order:2;min-height:0;grid-template-rows:minmax(300px,52vh) auto;}
 .mango-btn{width:min(260px,68vw);}
-.hammer-img{width:min(110px,30%);right:14%;top:13%;}
+.hammer-img{width:min(110px,30%);right:14%;top:17.5%;}
+.hammer-img.hit{animation:hammerHitContinuous .18s ease-out both;}
+@keyframes hammerHit{0%{width:min(110px,30%);right:14%;top:17.5%;transform:translate(16px,-14px) rotate(22deg) scale(1);}55%{width:min(110px,26%);right:13.5%;top:39%;transform:translate(16px,-14px) rotate(-42deg) scale(1);}100%{width:min(110px,30%);right:14%;top:17.5%;transform:translate(16px,-14px) rotate(22deg) scale(1);}}@keyframes hammerHitContinuous{0%{width:min(110px,26%);right:23.5%;top:37%;transform:translate(16px,-14px) rotate(-26deg) scale(1);}55%{width:min(110px,26%);right:26.5%;top:42.5%;transform:translate(16px,-14px) rotate(-46deg) scale(1);}100%{width:min(110px,26%);right:25%;top:40%;transform:translate(16px,-14px) rotate(-38deg) scale(1);}}
 .status-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
 .stat-pill{min-height:58px;border-radius:14px;padding:7px 4px;gap:2px;}
 .stat-value{font-size:clamp(22px,7vw,30px);}
@@ -68,6 +82,448 @@ h1{font-size:36px;}
 .rank-item{grid-template-columns:28px 1fr;}
 .rank-score{grid-column:2;text-align:left;}
 .mode-tabs{grid-template-columns:1fr;}
+}
+
+
+/* =========================
+   统一奖励弹窗（来自独立测试页）
+========================= */
+
+.reward-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(64, 45, 30, 0.30);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  --reward-scale: var(--reward-modal-scale, 1);
+}
+
+.reward-mask.show {
+  display: flex!important;
+}
+
+.reward-card {
+  position: relative;
+  width: min(calc(430px * var(--reward-scale)), calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  padding:
+    calc(28px * var(--reward-scale))
+    calc(24px * var(--reward-scale))
+    calc(22px * var(--reward-scale));
+  border-radius: calc(26px * var(--reward-scale));
+  overflow: hidden auto;
+  text-align: center;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,226,235,.68), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,240,181,.62), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,244,226,.96));
+  border: calc(2px * var(--reward-scale)) solid var(--line);
+  box-shadow:
+    0 calc(22px * var(--reward-scale)) calc(54px * var(--reward-scale)) var(--card-shadow),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  animation: rewardPop .42s cubic-bezier(.2, 1.12, .34, 1) both;
+}
+
+.reward-card::before,
+.reward-card::after {
+  position: absolute;
+  left: calc(12px * var(--reward-scale));
+  right: calc(12px * var(--reward-scale));
+  font-size: calc(15px * var(--reward-scale));
+  letter-spacing: calc(8px * var(--reward-scale));
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.reward-card::before {
+  content: "✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  top: calc(9px * var(--reward-scale));
+  color: rgba(209, 120, 148, 0.52);
+}
+
+.reward-card::after {
+  content: "✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  bottom: calc(8px * var(--reward-scale));
+  color: rgba(199, 145, 75, 0.44);
+}
+
+@keyframes rewardPop {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(12px * var(--reward-scale))) scale(.9);
+  }
+  64% {
+    opacity: 1;
+    transform: translateY(0) scale(1.025);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reward-close {
+  position: absolute;
+  z-index: 6;
+  top: calc(12px * var(--reward-scale));
+  right: calc(12px * var(--reward-scale));
+  width: calc(30px * var(--reward-scale));
+  height: calc(30px * var(--reward-scale));
+  border: none;
+  border-radius: 999px;
+  background: rgba(255,250,242,.88);
+  color: #7b5636;
+  font-size: calc(18px * var(--reward-scale));
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    0 calc(2px * var(--reward-scale)) calc(8px * var(--reward-scale)) rgba(105,75,43,.10),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.reward-close:hover {
+  filter: brightness(1.02);
+}
+
+.reward-petals {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.reward-petals span {
+  position: absolute;
+  top: calc(-18px * var(--reward-scale));
+  color: rgba(220,132,154,.56);
+  font-size: calc(16px * var(--reward-scale));
+  opacity: 0;
+  text-shadow:
+    0 calc(2px * var(--reward-scale)) calc(4px * var(--reward-scale)) rgba(255,255,255,.76);
+  animation: rewardPetalFall 1.35s ease-in-out both;
+}
+
+.reward-petals span:nth-child(1) { left: 12%; animation-delay: .05s; }
+.reward-petals span:nth-child(2) { left: 28%; animation-delay: .18s; }
+.reward-petals span:nth-child(3) { left: 48%; animation-delay: .02s; }
+.reward-petals span:nth-child(4) { left: 66%; animation-delay: .22s; }
+.reward-petals span:nth-child(5) { left: 82%; animation-delay: .10s; }
+
+@keyframes rewardPetalFall {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(-14px * var(--reward-scale))) rotate(0deg) scale(.78);
+  }
+  20% {
+    opacity: .85;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(145px * var(--reward-scale))) rotate(160deg) scale(1);
+  }
+}
+
+.reward-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.reward-icon {
+  width: calc(62px * var(--reward-scale));
+  height: calc(62px * var(--reward-scale));
+  margin:
+    calc(4px * var(--reward-scale))
+    auto
+    calc(12px * var(--reward-scale));
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,246,226,.78);
+  border: 1px solid rgba(220,164,102,.25);
+  box-shadow:
+    0 calc(8px * var(--reward-scale)) calc(20px * var(--reward-scale)) rgba(126,92,51,.10),
+    inset 0 1px 0 rgba(255,255,255,.85);
+  font-size: calc(34px * var(--reward-scale));
+}
+
+.reward-label {
+  min-height: calc(25px * var(--reward-scale));
+  padding: 0 calc(13px * var(--reward-scale));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255,249,232,.66);
+  border: 1px solid rgba(218,166,87,.20);
+  color: #b26a3a;
+  font-size: calc(13px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .06em;
+  animation: rewardStamp .42s ease both;
+}
+
+.reward-title {
+  position: relative;
+  max-width: 100%;
+  margin:
+    calc(10px * var(--reward-scale))
+    auto
+    calc(8px * var(--reward-scale));
+  padding:
+    calc(8px * var(--reward-scale))
+    calc(18px * var(--reward-scale));
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: calc(22px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1.15;
+  background: rgba(255,249,232,.72);
+  border: 1px solid rgba(218,166,87,.24);
+  box-shadow:
+    0 calc(5px * var(--reward-scale)) calc(14px * var(--reward-scale)) rgba(126,92,51,.08),
+    inset 0 1px 0 rgba(255,255,255,.82);
+  overflow: hidden;
+}
+
+.reward-title::after {
+  content: "";
+  position: absolute;
+  inset: -30% auto -30% -42%;
+  width: 36%;
+  background: linear-gradient(90deg, transparent, rgba(255,234,160,.80), transparent);
+  transform: skewX(-18deg);
+  animation: rewardSweep 1.25s ease .22s both;
+}
+
+@keyframes rewardStamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(.97);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rewardSweep {
+  0% { left: -42%; }
+  100% { left: 118%; }
+}
+
+.reward-desc {
+  width: 100%;
+  max-width: calc(330px * var(--reward-scale));
+  margin: 0 auto calc(14px * var(--reward-scale));
+  color: var(--text);
+  font-size: calc(13px * var(--reward-scale));
+  line-height: 1.65;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.reward-section-title {
+  margin: 0 0 calc(10px * var(--reward-scale));
+  color: #8a5c33;
+  font-size: calc(12px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .08em;
+}
+
+.reward-list {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-content: center;
+  gap: calc(8px * var(--reward-scale));
+  margin: 0 0 calc(16px * var(--reward-scale));
+}
+
+.reward-list.count-1 {
+  grid-template-columns: minmax(0, calc(120px * var(--reward-scale)));
+}
+
+.reward-list.count-2 {
+  grid-template-columns: repeat(2, minmax(0, calc(120px * var(--reward-scale))));
+}
+
+.reward-list.empty {
+  display: none;
+}
+
+.reward-section-title.empty {
+  display: none;
+}
+
+.reward-item {
+  min-width: 0;
+  min-height: calc(84px * var(--reward-scale));
+  padding:
+    calc(10px * var(--reward-scale))
+    calc(7px * var(--reward-scale))
+    calc(9px * var(--reward-scale));
+  border-radius: calc(16px * var(--reward-scale));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,252,247,.72);
+  border: 1px solid var(--soft-line);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.82),
+    0 calc(3px * var(--reward-scale)) calc(10px * var(--reward-scale)) rgba(116,86,54,.06);
+  animation: rewardItemIn .38s ease both;
+}
+
+.reward-item:nth-child(1) { animation-delay: .14s; }
+.reward-item:nth-child(2) { animation-delay: .24s; }
+.reward-item:nth-child(3) { animation-delay: .34s; }
+.reward-item:nth-child(4) { animation-delay: .44s; }
+
+@keyframes rewardItemIn {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(8px * var(--reward-scale))) scale(.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reward-item-icon {
+  width: calc(46px * var(--reward-scale));
+  height: calc(46px * var(--reward-scale));
+  margin: 0 auto calc(7px * var(--reward-scale));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: calc(28px * var(--reward-scale));
+  line-height: 1;
+  filter: drop-shadow(
+    0 calc(2px * var(--reward-scale))
+    calc(3px * var(--reward-scale))
+    rgba(96,65,35,.12)
+  );
+}
+
+.reward-item-icon-img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.reward-item-icon-text{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+}
+
+.reward-item-name {
+  width: 100%;
+  color: #7b593b;
+  font-size: calc(11px * var(--reward-scale));
+  font-weight: 900;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reward-item-amount {
+  margin-top: calc(3px * var(--reward-scale));
+  color: var(--ink);
+  font-size: calc(13px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.reward-confirm {
+  min-width: calc(132px * var(--reward-scale));
+  height: calc(36px * var(--reward-scale));
+  border: 1px solid rgba(153,104,62,.22);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,238,200,.96), rgba(227,187,132,.90));
+  color: #67401f;
+  font-size: calc(13px * var(--reward-scale));
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.72),
+    0 calc(4px * var(--reward-scale)) calc(12px * var(--reward-scale)) rgba(112,80,42,.10);
+}
+
+.reward-confirm:hover {
+  filter: brightness(1.02);
+}
+
+/* 不同类型轻微换色 */
+
+.reward-mask[data-type="title"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,235,204,.72), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,229,154,.58), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,242,219,.96));
+}
+
+.reward-mask[data-type="daily"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(224,244,216,.70), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,239,181,.50), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(241,248,229,.96));
+}
+
+.reward-mask[data-type="gift"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,226,235,.74), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(223,235,255,.58), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,240,231,.96));
+}
+
+.reward-mask[data-type="item"] .reward-card,
+.reward-mask[data-type="gold"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(223,239,255,.66), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,240,181,.52), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(235,246,252,.94));
+}
+
+
+@media (max-width: 540px) {
+  .reward-mask {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 340px) {
+  .reward-list,
+  .reward-list.count-1,
+  .reward-list.count-2 {
+    grid-template-columns: 1fr;
+  }
 }
 
 </style>
@@ -187,6 +643,39 @@ h1{font-size:36px;}
   </section>
 </div>
 
+<!-- 统一奖励弹窗：原样来自 reward-modal-test.html -->
+<div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
+    <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
+      <div class="reward-petals" aria-hidden="true">
+        <span>✿</span>
+        <span>❀</span>
+        <span>✽</span>
+        <span>✿</span>
+        <span>❀</span>
+      </div>
+
+      <button class="reward-close" type="button" aria-label="关闭" onclick="closeRewardModal()">×</button>
+
+      <div class="reward-content">
+        <div class="reward-icon" id="rewardIcon" aria-hidden="true">🏆</div>
+
+        <div class="reward-label" id="rewardLabel">成就达成</div>
+
+        <h2 class="reward-title" id="rewardTitle">新手照顾员</h2>
+
+        <p class="reward-desc" id="rewardDesc">
+          成就达成：累计照顾宠物 1 次
+        </p>
+
+        <div class="reward-section-title" id="rewardSectionTitle">奖励内容</div>
+
+        <div class="reward-list" id="rewardList"></div>
+
+        <button class="reward-confirm" type="button" onclick="closeRewardModal()">收下奖励</button>
+      </div>
+    </section>
+  </div>
+
 <div id="toast" class="toast hidden"></div>
 
 <script>
@@ -235,6 +724,153 @@ const playAgainBtn = document.getElementById("playAgainBtn");
 const resultBoardBtn = document.getElementById("resultBoardBtn");
 const toast = document.getElementById("toast");
 
+const rewardTypeMeta = {
+  achievement: { label: "成就达成", icon: "🏆" },
+  title: { label: "获得称号", icon: "🎖️" },
+  daily: { label: "日常奖励", icon: "☀️" },
+  gift: { label: "礼包领取", icon: "🎁" },
+  item: { label: "道具获得", icon: "🧺" },
+  gold: { label: "金币奖励", icon: "🪙" }
+};
+
+const rewardIconMap = {
+  金币: "coin.png",
+  白金游戏币: "gacha-token-white.png",
+  紫金游戏币: "gacha-token-purple.png",
+  金色游戏币: "gacha-token-gold.png",
+  种子: "🌱",
+  宠物粮: "🥣",
+  医疗卡: "💊",
+  亲密度: "💗",
+  道具: "🧺",
+  成就: "🏆",
+  称号: "🎖️"
+};
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function isImageIcon(value){
+  return typeof value === "string" && /\.(png|jpe?g|gif|webp|svg)$/i.test(value.trim());
+}
+
+function renderRewardIcon(icon, name){
+  if(isImageIcon(icon)){
+    return `<img src="${escapeHtml(icon)}" alt="${escapeHtml(name || '奖励图标')}" class="reward-item-icon-img">`;
+  }
+  return `<span class="reward-item-icon-text">${escapeHtml(icon || "✨")}</span>`;
+}
+
+function normalizeRewardItem(item) {
+  if (typeof item === "string") {
+    return {
+      name: item,
+      amount: "",
+      unit: "",
+      icon: rewardIconMap[item] || "✨"
+    };
+  }
+
+  return {
+    name: item.name || "奖励",
+    amount: item.amount ?? "",
+    unit: item.unit || "",
+    icon: item.icon || rewardIconMap[item.name] || "✨",
+    prefix: item.prefix || ""
+  };
+}
+
+function formatRewardAmount(item) {
+  if (item.amount === "" || item.amount === null || item.amount === undefined) {
+    return "";
+  }
+
+  if (typeof item.amount === "number") {
+    const sign = item.amount > 0 ? "+" : "";
+    return `${sign}${item.amount}${item.unit || ""}`;
+  }
+
+  return `${item.prefix || ""}${item.amount}${item.unit || ""}`;
+}
+
+function renderRewards(rewards) {
+  const list = document.getElementById("rewardList");
+  const sectionTitle = document.getElementById("rewardSectionTitle");
+
+  list.innerHTML = "";
+  list.className = "reward-list";
+  sectionTitle.className = "reward-section-title";
+
+  if (!rewards.length) {
+    list.classList.add("empty");
+    sectionTitle.classList.add("empty");
+    return;
+  }
+
+  list.classList.add(`count-${Math.min(rewards.length, 3)}`);
+
+  rewards.forEach((reward) => {
+    const item = document.createElement("div");
+    item.className = "reward-item";
+
+    item.innerHTML = `
+      <div class="reward-item-icon">${renderRewardIcon(reward.icon, reward.name)}</div>
+      <div class="reward-item-name">${escapeHtml(reward.name)}</div>
+      <div class="reward-item-amount">${escapeHtml(formatRewardAmount(reward))}</div>
+    `;
+
+    list.appendChild(item);
+  });
+}
+
+function showRewardModal(options = {}) {
+  const mask = document.getElementById("rewardMask");
+  const type = options.type || "achievement";
+  const meta = rewardTypeMeta[type] || rewardTypeMeta.achievement;
+  const rewards = Array.isArray(options.rewards)
+    ? options.rewards.map(normalizeRewardItem)
+    : [];
+
+  mask.dataset.type = type;
+
+  document.getElementById("rewardIcon").textContent = options.icon || meta.icon;
+  document.getElementById("rewardLabel").textContent = options.label || meta.label;
+  document.getElementById("rewardTitle").textContent = options.title || "奖励已领取";
+  document.getElementById("rewardDesc").textContent = options.desc || "奖励已经记录完成。";
+
+  renderRewards(rewards);
+
+  mask.classList.add("show");
+  mask.style.display = "flex";
+  mask.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeRewardModal() {
+  const mask = document.getElementById("rewardMask");
+  mask.classList.remove("show");
+  mask.style.display = "";
+  mask.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+
+/*
+  统一奖励弹窗调用示例：
+  showRewardModal({
+    type: "achievement", // achievement / title / daily / gift / item / gold
+    title: "成就名称",
+    desc: "成就或奖励说明",
+    rewards: [{ name: "金币", amount: 50 }]
+  });
+*/
+
 const JUICE_LEVELS = [
   {key:"mango_juice_tasting", level:"tasting", name:"试饮杯", unit:1, image:"game-mango7.png"},
   {key:"mango_juice_small", level:"small", name:"小杯", unit:10, image:"game-mango3.png"},
@@ -269,8 +905,10 @@ let boardRankKey = "";
 let mangoRecoverTimer = null;
 let pendingRewardRecord = null;
 let rewardExitBusy = false;
+let pendingMangoAchievements = [];
+let rewardModalQueueBusy = false;
 
-function escapeHtml(value){return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+
 function isLoggedIn(){return localStorage.getItem("room10LoggedIn") === "true";}
 function getCurrentUser(){return localStorage.getItem("room10User") || "";}
 function getCurrentMemberId(){return localStorage.getItem("room10MemberId") || "";}
@@ -359,6 +997,71 @@ async function finishGame(manual){
   await saveRecord(record);
   showResult(record);
 }
+
+async function checkMangoClickAchievements(){
+  if(!isMemberReady())return [];
+  try{
+    const {data,error}=await client.rpc("check_mango_click_achievements",{
+      p_member_id:getCurrentMemberId(),
+      p_member_code:getCurrentMemberCode()
+    });
+    const payload=Array.isArray(data)?data[0]:data;
+    if(error||payload?.success===false){
+      console.error(error||payload);
+      return [];
+    }
+    return Array.isArray(payload?.new_achievements)?payload.new_achievements:[];
+  }catch(err){
+    console.error(err);
+    return [];
+  }
+}
+
+function buildAchievementRewardItems(achievement){
+  const rewards=[];
+  const itemRewards=Array.isArray(achievement?.rewards)
+    ? achievement.rewards
+    : Array.isArray(achievement?.item_rewards)
+      ? achievement.item_rewards
+      : [];
+
+  itemRewards.forEach(item=>{
+    const name=item.item_name||item.name||item.item_key||"奖励";
+    rewards.push({
+      name,
+      amount:Number(item.quantity||item.amount||0),
+      icon:item.item_icon||item.icon||rewardIconMap[name]||"✨"
+    });
+  });
+
+  const gold=Number(achievement?.reward_gold||0);
+  if(gold>0){
+    rewards.push({name:"金币",amount:gold,icon:"coin.png"});
+  }
+
+  return rewards;
+}
+
+function showNextMangoAchievement(){
+  if(rewardModalQueueBusy||!pendingMangoAchievements.length)return;
+  const achievement=pendingMangoAchievements.shift();
+  rewardModalQueueBusy=true;
+
+  showRewardModal({
+    type:"achievement",
+    title:achievement.name||"成就达成",
+    desc:achievement.description||achievement.unlock_message||"已达成新的成就。",
+    rewards:buildAchievementRewardItems(achievement)
+  });
+}
+
+function continueMangoAchievementQueue(){
+  rewardModalQueueBusy=false;
+  if(pendingMangoAchievements.length){
+    setTimeout(showNextMangoAchievement,120);
+  }
+}
+
 async function saveRecord(record){
   if(!isMemberReady()){
     saveLocalRecord(record);
@@ -374,6 +1077,7 @@ async function saveRecord(record){
     record.record_id=getRecordId(data);
     if(payload&&typeof payload.avg_click_per_second!=="undefined")record.avg_clicks_per_second=Number(payload.avg_click_per_second)||record.avg_clicks_per_second;
     resultSubtitle.textContent="成绩已进入风云榜，离开结算框时自动放入背包。";
+    pendingMangoAchievements=await checkMangoClickAchievements();
   }catch(err){console.error(err);saveLocalRecord(record);resultSubtitle.textContent="成绩保存失败，本局奖励暂时不能发放。";}
 }
 function saveLocalRecord(record){const list=getLocalRecords();list.push(record);localStorage.setItem(LOCAL_BOARD_KEY,JSON.stringify(list));}
@@ -465,6 +1169,7 @@ async function leaveResultModal(action){
   resultModal.classList.add("hidden");
   if(action==="again")resetRound();
   if(action==="board")openLeaderboardModal();
+  showNextMangoAchievement();
 }
 function renderBoardTabs(){
   const groups=["限时","竞速"];
@@ -479,6 +1184,38 @@ async function setBoardRank(rankKey){boardRankKey=rankKey;renderBoardTabs();awai
 async function loadLeaderboard(){if(boardBusy)return;boardBusy=true;const meta=getBoardMeta(boardRankKey||getRankKey());leaderboardSubtitle.textContent=meta.mode==="time"?`${meta.title}：点击次数越多排名越前。`:`${meta.title}：用时越短排名越前。`;leaderboard.innerHTML=`<div class="empty-state">正在读取风云榜……</div>`;try{const {data,error}=await client.rpc("get_mango_leaderboard",{p_rank_key:meta.key,p_limit:100});if(error)throw error;renderLeaderboard(Array.isArray(data)?data:[],meta);}catch(err){console.error(err);const local=getLocalRecords().filter(item=>item.game_mode===meta.mode&&(meta.mode!=="time"||Number(item.time_limit_seconds||30)===meta.time_limit_seconds)&&(meta.mode!=="count"||Number(item.target_clicks)===meta.target_clicks));renderLeaderboard(sortRecords(local,meta).slice(0,100),meta,true);}finally{boardBusy=false;}}
 function sortRecords(list,meta=getBoardMeta(boardRankKey||getRankKey())){const arr=[...(Array.isArray(list)?list:[])];if(meta.mode==="time"){arr.sort((a,b)=>Number(b.click_count||0)-Number(a.click_count||0)||Number(b.avg_click_per_second||b.avg_clicks_per_second||0)-Number(a.avg_click_per_second||a.avg_clicks_per_second||0)||new Date(a.completed_at||0)-new Date(b.completed_at||0));}else{arr.sort((a,b)=>Number(a.duration_ms||999999999)-Number(b.duration_ms||999999999)||Number(b.click_count||0)-Number(a.click_count||0)||new Date(a.completed_at||0)-new Date(b.completed_at||0));}return arr;}
 function renderLeaderboard(list,meta=getBoardMeta(boardRankKey||getRankKey()),localOnly=false){const records=sortRecords(list,meta);if(!records.length){leaderboard.innerHTML=`<div class="empty-state">暂无${meta.title}挑战记录。</div>`;return;}leaderboard.innerHTML=records.map((item,index)=>{const name=item.player_name||item.nickname||item.member_nickname||"神秘房客";const timeText=formatSeconds(item.duration_ms);const date=item.completed_at?new Date(item.completed_at):null;const dateText=date&&!Number.isNaN(date.getTime())?`${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")} ${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`:"--";const scoreText=meta.mode==="time"?`${item.click_count||0} 次`:`${timeText} 秒`;const avg=Number(item.avg_click_per_second || item.avg_clicks_per_second || (Number(item.click_count||0)/(Number(item.duration_ms||1)/1000))).toFixed(2);const subText=meta.mode==="time"?`${item.time_limit_seconds||meta.time_limit_seconds} 秒限时｜平均 ${avg} 次/秒`:`${item.target_clicks||meta.target_clicks} 次竞速｜平均 ${avg} 次/秒`;return `<div class="rank-item"><div class="rank-no">${item.rank_no || index+1}</div><div class="rank-name"><strong>${escapeHtml(name)}</strong><span>${escapeHtml(subText)}｜${dateText}${localOnly?"｜本地":""}</span></div><div class="rank-score">${escapeHtml(scoreText)}</div></div>`;}).join("");}
+
+document.getElementById("rewardMask").addEventListener("click", function(event) {
+  if (event.target === this) {
+    closeRewardModal();
+  }
+});
+
+document.addEventListener("keydown", function(event) {
+  if (event.key === "Escape") {
+    closeRewardModal();
+  }
+});
+
+
+document.getElementById("rewardMask").addEventListener("click", function(event) {
+  if (
+    event.target === this ||
+    event.target.closest(".reward-close") ||
+    event.target.closest(".reward-confirm")
+  ) {
+    setTimeout(continueMangoAchievementQueue, 0);
+  }
+});
+
+document.addEventListener("keydown", function(event) {
+  if (
+    event.key === "Escape" &&
+    document.getElementById("rewardMask").classList.contains("show")
+  ) {
+    setTimeout(continueMangoAchievementQueue, 0);
+  }
+});
 
 timeModeBtn.addEventListener("click",()=>setMode("time"));
 countModeBtn.addEventListener("click",()=>setMode("count"));
