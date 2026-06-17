@@ -996,6 +996,114 @@ button{
   }
 }
 
+
+
+/* =========================================================
+   全站通用模板导航覆盖：游戏房页使用统一 9 宫房间按钮
+========================================================= */
+:root{
+  --ui-scale:var(--bg-ui-scale,1);
+  --room-nav-scale:var(--bg-ui-scale,1);
+  --room-nav-top:6.35%;
+  --room-nav-start-left:25.83%;
+  --room-nav-btn-width:4.72%;
+  --room-nav-btn-height:5.10%;
+  --room-nav-gap:0.486%;
+  --room-nav-hall-left:var(--room-nav-start-left);
+  --room-nav-living-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 1);
+  --room-nav-manager-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 2);
+  --room-nav-honor-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 3);
+  --room-nav-studio-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 4);
+  --room-nav-game-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 5);
+  --room-nav-dorm-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 6);
+  --room-nav-flower-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 7);
+  --room-nav-pets-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 8);
+  --room-nav-text:#6f5746;
+  --room-nav-border:rgba(158,122,93,.26);
+  --room-nav-current-text:#5d4738;
+  --room-nav-current-border:rgba(151,111,82,.42);
+  --room-nav-paper:rgba(255,250,242,.78);
+  --room-nav-paper-2:rgba(246,235,219,.74);
+  --room-nav-wash:rgba(214,185,157,.20);
+  --room-nav-current-bg:rgba(239,224,205,.86);
+}
+
+#overlay .roomNavLayer{pointer-events:none!important;}
+#overlay .roomNavLayer .navBtn{pointer-events:auto!important;}
+
+.roomNavLayer{
+  position:absolute;
+  inset:0;
+  z-index:55;
+  pointer-events:none;
+  --s:var(--room-nav-scale,1);
+  --nav-btn-radius:calc(15px * var(--s));
+  --nav-btn-font:calc(15px * var(--s));
+  --nav-btn-border:calc(1px * var(--s));
+}
+
+.roomNavLayer .navBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  position:absolute;
+  top:var(--room-nav-top);
+  width:var(--room-nav-btn-width);
+  height:var(--room-nav-btn-height);
+  min-width:0;
+  min-height:0;
+  padding:0;
+  border-radius:var(--nav-btn-radius);
+  color:var(--room-nav-text);
+  font-size:var(--nav-btn-font);
+  font-weight:900;
+  white-space:nowrap;
+  overflow:visible;
+  isolation:isolate;
+  background:radial-gradient(circle at 18% 22%, rgba(255,255,255,.56), transparent 40%),radial-gradient(circle at 78% 74%, var(--room-nav-wash), transparent 48%),linear-gradient(180deg, var(--room-nav-paper) 0%, var(--room-nav-paper-2) 100%);
+  border:var(--nav-btn-border) solid var(--room-nav-border);
+  box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.64),0 calc(2px * var(--s)) calc(7px * var(--s)) rgba(96,70,48,.10);
+  text-shadow:0 calc(1px * var(--s)) 0 rgba(255,255,255,.38);
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  pointer-events:auto;
+  transform:none;
+}
+.roomNavLayer .navBtn[data-room="hall"]{left:var(--room-nav-hall-left);}
+.roomNavLayer .navBtn[data-room="living"]{left:var(--room-nav-living-left);}
+.roomNavLayer .navBtn[data-room="manager"]{left:var(--room-nav-manager-left);}
+.roomNavLayer .navBtn[data-room="honor"]{left:var(--room-nav-honor-left);}
+.roomNavLayer .navBtn[data-room="studio"]{left:var(--room-nav-studio-left);}
+.roomNavLayer .navBtn[data-room="game"]{left:var(--room-nav-game-left);}
+.roomNavLayer .navBtn[data-room="dorm"]{left:var(--room-nav-dorm-left);}
+.roomNavLayer .navBtn[data-room="flower"]{left:var(--room-nav-flower-left);}
+.roomNavLayer .navBtn[data-room="pets"]{left:var(--room-nav-pets-left);}
+.roomNavLayer .navBtn:not(.is-current):hover,
+.roomNavLayer .navBtn:not(.is-current):focus-visible{
+  color:#5f3d22;
+  background:radial-gradient(circle at 20% 24%, rgba(255,255,255,.66), transparent 42%),radial-gradient(circle at 80% 78%, rgba(207,170,143,.24), transparent 50%),linear-gradient(180deg, rgba(255,252,246,.88) 0%, rgba(239,226,210,.82) 100%);
+  border-color:rgba(151,112,84,.36);
+  box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.70),0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.12);
+  filter:saturate(1.02);
+  transform:none;
+}
+.roomNavLayer .navBtn.is-current{
+  cursor:default;
+  color:var(--room-nav-current-text);
+  background:radial-gradient(circle at 22% 22%, rgba(255,255,255,.62), transparent 42%),radial-gradient(circle at 80% 80%, rgba(190,151,126,.26), transparent 50%),linear-gradient(180deg, rgba(246,235,222,.94) 0%, var(--room-nav-current-bg) 100%);
+  border-color:var(--room-nav-current-border);
+  box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.68),0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.13),0 0 0 calc(2px * var(--s)) rgba(255,253,248,.46);
+  filter:none;
+}
+.roomNavLayer .navLabel{position:relative;z-index:5;width:100%;height:100%;display:inline-flex;align-items:center;justify-content:center;overflow:visible;white-space:nowrap;line-height:normal;padding-top:.06em;}
+.roomNavLayer .navBtn.is-current .navEffect{display:none;}
+.roomNavLayer .navBtn:not(.is-current):hover .navEffectA,
+.roomNavLayer .navBtn:not(.is-current):focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite;}
+.roomNavLayer .navBtn:not(.is-current):hover .navEffectB,
+.roomNavLayer .navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite;}
+.roomNavLayer .navBtn:not(.is-current):hover .navEffectC,
+.roomNavLayer .navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite;}
+
 @media (max-width:540px){
   html,body{
     overflow-x:hidden;
@@ -1045,6 +1153,58 @@ button{
     pointer-events:auto;
   }
 
+
+
+  .roomNavLayer{
+    position:relative;
+    inset:auto;
+    width:100%;
+    height:106px;
+    min-height:106px;
+    max-height:106px;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:repeat(3,32px);
+    gap:5px;
+    margin:0!important;
+    padding:0!important;
+    align-content:start;
+    order:0;
+    z-index:20;
+    pointer-events:auto;
+    --s:1;
+  }
+
+  .roomNavLayer .navBtn{
+    position:relative;
+    left:auto!important;
+    top:auto!important;
+    display:flex!important;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:32px;
+    min-width:0;
+    min-height:32px;
+    max-height:32px;
+    margin:0!important;
+    padding:0!important;
+    border-radius:10px;
+    font-size:12px;
+    line-height:1;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+
+  .roomNavLayer .navLabel{
+    height:100%;
+    padding-top:.04em;
+    line-height:1;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+
+  .roomNavLayer .navEffect{display:none;}
   #topActions{
     position:sticky;
     top:10px;
@@ -1691,84 +1851,67 @@ button{
       </div>
     </div>
 
-    <!-- 房间切换按钮：游戏房页不显示“游戏房”按钮 -->
-    <div id="topBar" aria-label="房间切换">
-      <div id="navOuter">
-        <div id="navScroll">
-          <nav id="roomNav">
-            <button class="navBtn" data-room="hall" type="button" onclick="enterRoom('index.html', false)">
-              <span class="navLabel">大堂</span>
-              <span class="navEffect navEffectA">✦</span>
-              <span class="navEffect navEffectB">✧</span>
-              <span class="navEffect navEffectC">★</span>
-            </button>
+    <!-- 房间切换按钮：使用全站通用模板结构，游戏房按钮保留并标记当前页 -->
+    <nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换">
+      <button class="navBtn" data-room="hall" type="button" data-url="../index/index.html" data-login="false">
+        <span class="navLabel">大堂</span>
+        <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
+      </button>
 
-            <button class="navBtn" data-room="living" type="button" onclick="enterRoom('living.html', false)">
-              <span class="navLabel">客厅</span>
-              <span class="navEffect navEffectA">☕</span>
-              <span class="navEffect navEffectB">✦</span>
-              <span class="navEffect navEffectC">💬</span>
-            </button>
+      <button class="navBtn" data-room="living" type="button" data-url="../living/living.html" data-login="false">
+        <span class="navLabel">客厅</span>
+        <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
+      </button>
 
-            <button class="navBtn" data-room="manager" type="button" onclick="enterManagerRoom()">
-              <span class="navLabel">宿管室</span>
-              <span class="navEffect navEffectA">✎</span>
-              <span class="navEffect navEffectB">▱</span>
-              <span class="navEffect navEffectC">✐</span>
-            </button>
+      <button class="navBtn" data-room="manager" type="button" data-manager="true">
+        <span class="navLabel">宿管室</span>
+        <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
+      </button>
 
-            <button class="navBtn" data-room="honor" type="button" onclick="enterRoom('honor.html', false)">
-              <span class="navLabel">荣誉墙</span>
-              <span class="navEffect navEffectA">🏆</span>
-              <span class="navEffect navEffectB">🏅</span>
-              <span class="navEffect navEffectC">✦</span>
-            </button>
+      <button class="navBtn" data-room="honor" type="button" data-url="../honor/honor.html" data-login="false">
+        <span class="navLabel">荣誉墙</span>
+        <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
+      </button>
 
-            <button class="navBtn" data-room="studio" type="button" onclick="enterRoom('studio-todo.html', true)">
-              <span class="navLabel">工作间</span>
-              <span class="navEffect navEffectA">🎙</span>
-              <span class="navEffect navEffectB">🎧</span>
-              <span class="navEffect navEffectC">◇</span>
-            </button>
+      <button class="navBtn" data-room="studio" type="button" data-url="../studio/studio-todo.html" data-login="true">
+        <span class="navLabel">工作间</span>
+        <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
+      </button>
 
-            <button class="navBtn" data-room="dorm" type="button" onclick="enterRoom('dorm.html', true)">
-              <span class="navLabel">宿舍</span>
-              <span class="navEffect navEffectA">☁</span>
-              <span class="navEffect navEffectB">☾</span>
-              <span class="navEffect navEffectC">💤</span>
-            </button>
+      <button class="navBtn is-current" data-room="game" type="button" data-url="game.html" data-login="false" aria-current="page" tabindex="-1">
+        <span class="navLabel">游戏房</span>
+        <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🕹</span>
+      </button>
 
-            <button class="navBtn" data-room="flower" type="button" onclick="enterRoom('flower.html', false)">
-              <span class="navLabel">花房区</span>
-              <span class="navEffect navEffectA">✿</span>
-              <span class="navEffect navEffectB">❀</span>
-              <span class="navEffect navEffectC">🌸</span>
-            </button>
+      <button class="navBtn" data-room="dorm" type="button" data-url="../dorm/dorm.html" data-login="true">
+        <span class="navLabel">宿舍</span>
+        <span class="navEffect navEffectA">☁</span><span class="navEffect navEffectB">☾</span><span class="navEffect navEffectC">💤</span>
+      </button>
 
-            <button class="navBtn" data-room="pets" type="button" onclick="enterRoom('pets.html', false)">
-              <span class="navLabel">宠物区</span>
-              <span class="navEffect navEffectA">🐾</span>
-              <span class="navEffect navEffectB">♡</span>
-              <span class="navEffect navEffectC">🐱</span>
-            </button>
-          </nav>
-        </div>
-      </div>
-    </div>
+      <button class="navBtn" data-room="flower" type="button" data-url="../flower/flower.html" data-login="false">
+        <span class="navLabel">花房区</span>
+        <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
+      </button>
+
+      <button class="navBtn" data-room="pets" type="button" data-url="../pets/pets.html" data-login="false">
+        <span class="navLabel">宠物区</span>
+        <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
+      </button>
+    </nav>
 
     <div class="panel">
       <div class="menu">
-        <button class="game-btn" type="button" onclick="openGameModal('game-name.html', '脸萌挑战')">
+        <button class="game-btn" type="button" onclick="openGameModal('name/name.html', '脸萌挑战')">
           <div class="game-name">脸萌挑战</div>
           <div class="game-status ready">可进入</div>
         </button>
 
-        <button class="game-btn" type="button" onclick="openGameModal('game-bomb.html', '拆弹专家')">
+        <button class="game-btn" type="button" onclick="openGameModal('bomb/bomb.html', '拆弹专家')">
           <div class="game-name">拆弹专家</div>
           <div class="game-status ready">可进入</div>
         </button>
 
-        <button class="game-btn" type="button" onclick="openGameModal('game-time.html', '时间的答案')">
+        <button class="game-btn" type="button" onclick="openGameModal('time.html', '时间的答案')">
           <div class="game-name">时间的答案</div>
           <div class="game-status ready">可进入</div>
         </button>
@@ -1778,19 +1921,19 @@ button{
           <div class="game-status ready">可进入</div>
         </button>
 
-        <button class="game-btn is-coming-soon" type="button" onclick="openReservedGame('dragon-size')">
+        <button class="game-btn" type="button" onclick="openReservedGame('dragon-size')">
           <div class="game-name">接大小龙</div>
-          <div class="game-status">待更新</div>
+          <div class="game-status ready">可进入</div>
         </button>
 
-        <button class="game-btn" type="button" onclick="openGameModal('game-number.html', '密码大师')">
+        <button class="game-btn" type="button" onclick="openGameModal('pwmaster.html', '密码大师')">
           <div class="game-name">密码大师</div>
           <div class="game-status ready">可进入</div>
         </button>
 
-        <button class="game-btn is-coming-soon is-wide" type="button" onclick="openReservedGame('gacha')">
+        <button class="game-btn is-wide" type="button" onclick="openReservedGame('gacha')">
           <div class="game-name">扭蛋机</div>
-          <div class="game-status">待更新</div>
+          <div class="game-status ready">可进入</div>
         </button>
       </div>
     </div>
@@ -1865,7 +2008,7 @@ const siteNoticeBtn = document.getElementById("siteNoticeBtn");
 const siteNoticePanel = document.getElementById("siteNoticePanel");
 const siteNoticeCount = document.getElementById("siteNoticeCount");
 const siteNoticeContent = document.getElementById("siteNoticeContent");
-const roomNav = document.getElementById("roomNav");
+const roomNav = document.getElementById("roomNavLayer") || document.getElementById("roomNav");
 const topBar = document.getElementById("topBar");
 const loginMask = document.getElementById("loginMask");
 const loginNicknameInput = document.getElementById("loginNickname");
@@ -2016,26 +2159,26 @@ window.addEventListener("message", handleGameAwardMessage);
 const RESERVED_GAMES = {
   "time-answer": {
     title:"时间的答案",
-    url:"game-time.html",
+    url:"time.html",
     enabled:true,
     message:"《时间的答案》还在施工中，待更新。"
   },
   "mango-hit": {
     title:"暴打芒果",
-    url:"game-mango.html",
+    url:"mango/mango.html",
     enabled:true,
     message:"《暴打芒果》暂时无法打开。"
   },
   "dragon-size": {
     title:"接大小龙",
-    url:"game-chain.html",
-    enabled:false,
+    url:"chain.html",
+    enabled:true,
     message:"《接大小龙》还在施工中，待更新。"
   },
   "gacha": {
     title:"扭蛋机",
-    url:"game-gacha.html",
-    enabled:false,
+    url:"gacha/gacha.html",
+    enabled:true,
     message:"《扭蛋机》还在施工中，待更新。"
   }
 };
@@ -2219,8 +2362,8 @@ function clearPendingRedirect(){
 }
 
 function goRegisterFromGame(){
-  sessionStorage.setItem("room10RegisterReturn", "game.html");
-  window.location.href = "register.html?from=game.html";
+  sessionStorage.setItem("room10RegisterReturn", "../game/game.html");
+  window.location.href = "../index/register.html?from=../game/game.html";
 }
 
 function toggleLoginCode(){
@@ -2229,10 +2372,10 @@ function toggleLoginCode(){
 
 function getManagerPageByRole(roleValue = getRole()){
   const role = String(roleValue || "").toLowerCase();
-  if(role === "owner") return "manager-owner.html";
-  if(role === "admin") return "manager-admin.html";
-  if(role === "member") return "manager-member.html";
-  return "manager-visitor.html";
+  if(role === "owner") return "../manager/manager-owner.html";
+  if(role === "admin") return "../manager/manager-admin.html";
+  if(role === "member") return "../manager/manager-member.html";
+  return "../manager/manager-visitor.html";
 }
 
 function enterManagerRoom(){
@@ -2249,7 +2392,7 @@ function enterRoom(page, needLogin){
     return;
   }
 
-  if((targetPage === "flower.html" || targetPage === "pets.html") && !isLoggedIn()){
+  if((targetPage === "../flower/flower.html" || targetPage === "../pets/pets.html" || targetPage === "flower.html" || targetPage === "pets.html") && !isLoggedIn()){
     clearPendingRedirect();
     window.location.href = targetPage + "?mode=guest";
     return;
@@ -2258,6 +2401,39 @@ function enterRoom(page, needLogin){
   clearPendingRedirect();
   window.location.href = targetPage;
 }
+function setupRoomNav(currentRoom = "game"){
+  document.querySelectorAll(".roomNavLayer .navBtn").forEach(btn => {
+    const room = btn.dataset.room || "";
+    const isCurrent = room === currentRoom;
+    btn.classList.toggle("is-current", isCurrent);
+
+    if(isCurrent){
+      btn.setAttribute("aria-current", "page");
+      btn.setAttribute("tabindex", "-1");
+    }else{
+      btn.removeAttribute("aria-current");
+      btn.removeAttribute("tabindex");
+    }
+
+    if(btn.dataset.boundRoomNav === "true") return;
+    btn.dataset.boundRoomNav = "true";
+
+    btn.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if(btn.classList.contains("is-current")) return;
+
+      if(btn.dataset.manager === "true"){
+        enterManagerRoom();
+        return;
+      }
+
+      enterRoom(btn.dataset.url, btn.dataset.login === "true");
+    });
+  });
+}
+
 
 function openLogin(targetPage = ""){
   if(isLoggedIn()){
@@ -2732,6 +2908,7 @@ if(img && img.complete && img.naturalWidth){
 }
 
 setTimeout(syncOverlayToImage, 120);
+setupRoomNav("game");
 updateIdentityUI();
 refreshGameNotice();
 </script>
