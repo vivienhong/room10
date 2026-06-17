@@ -1046,23 +1046,23 @@ button{
     </div>
 
     <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <a href="#" onclick="enterRoom('dorm/dorm.html', true);return false;">
+      <a href="#" onclick="enterRoom('../dorm/dorm.html', true);return false;">
         <rect x="16.7" y="25.9" width="27.7" height="22.5"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('studio/studio-todo.html', true);return false;">
+      <a href="#" onclick="enterRoom('../studio/studio-todo.html', true);return false;">
         <rect x="57" y="25.9" width="27.5" height="22.5"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('living/living.html', true);return false;">
+      <a href="#" onclick="enterRoom('../living/living.html', true);return false;">
         <rect x="16.6" y="49.4" width="27" height="21.5"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('game/game.html', false);return false;">
+      <a href="#" onclick="enterRoom('../game/game.html', false);return false;">
         <rect x="57" y="49.4" width="27.5" height="21.5"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('honor/honor.html', false);return false;">
+      <a href="#" onclick="enterRoom('../honor/honor.html', false);return false;">
         <rect x="16.7" y="72" width="27" height="22"></rect>
       </a>
 
@@ -1070,11 +1070,11 @@ button{
         <rect x="57" y="72" width="27.5" height="22"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('flower/flower.html', false);return false;">
+      <a href="#" onclick="enterRoom('../flower/flower.html', false);return false;">
         <rect x="5.3" y="50.2" width="11" height="42.6"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('pet/pets.html', false);return false;">
+      <a href="#" onclick="enterRoom('../pet/pets.html', false);return false;">
         <rect x="84.8" y="47" width="11" height="45"></rect>
       </a>
 
@@ -1087,7 +1087,7 @@ button{
 
 <div id="loginUI">
   <div class="login-panel">
-    <img src="login.png" alt="登录框">
+    <img src="../login.png" alt="登录框">
 
     <input id="username" type="text" autocomplete="username">
     <input id="password" type="password" autocomplete="current-password">
@@ -1184,8 +1184,8 @@ function clearPendingRedirect(){
 }
 
 function goRegisterFromIndex(){
-  sessionStorage.setItem("room10RegisterReturn", "index.html");
-  window.location.href = "manager/register.html?from=index.html";
+  sessionStorage.setItem("room10RegisterReturn", "../index/index.html");
+  window.location.href = "../manager/register.html?from=../index/index.html";
 }
 
 function updateHomeImageByTime(){
@@ -2149,13 +2149,13 @@ function closeLogin(keepRedirect = true){
 }
 
 function getManagerPageByRole(){
-  if(!isLoggedIn()) return "manager/manager-visitor.html";
+  if(!isLoggedIn()) return "../manager/manager-visitor.html";
 
   const role = String(getCurrentUser().role || "").toLowerCase();
-  if(role === "owner") return "manager/manager-owner.html";
-  if(role === "admin") return "manager/manager-admin.html";
-  if(role === "member" || role === "applying") return "manager/manager-member.html";
-  return "manager/manager-visitor.html";
+  if(role === "owner") return "../manager/manager-owner.html";
+  if(role === "admin") return "../manager/manager-admin.html";
+  if(role === "member" || role === "applying") return "../manager/manager-member.html";
+  return "../manager/manager-visitor.html";
 }
 
 function enterManagerRoom(){
@@ -2169,7 +2169,7 @@ function enterRoom(page, needLogin){
     return;
   }
 
-  if(page === "flower/flower.html" || page === "pet/pets.html"){
+  if(page === "../flower/flower.html" || page === "../pet/pets.html"){
     if(!isLoggedIn()){
       window.location.href = page + "?mode=guest";
       return;
