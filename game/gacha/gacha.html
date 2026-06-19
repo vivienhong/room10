@@ -1,0 +1,3266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜扭蛋机</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  color:#6b4326;
+  background:
+    radial-gradient(circle at 16% 8%, rgba(255,255,255,.78), rgba(255,255,255,0) 30%),
+    radial-gradient(circle at 84% 10%, rgba(255,222,160,.28), rgba(255,222,160,0) 32%),
+    linear-gradient(135deg, #fff3e5 0%, #f6dfc3 50%, #ead0b0 100%);
+}
+
+:root{
+  --gacha-scale:clamp(.78, calc(100vw / 1180), 1.08);
+  /* 扭蛋机素材层：机器主体、旋钮、投币口、掉落球共用同一坐标系 */
+  --coin-slot-x:32.22%;
+  --coin-slot-y:65.93%;
+  --handle-x:49.80%;
+  --handle-y:69.73%;
+  --handle-size:16.50%;
+  --ball-x:51.5%;
+  --ball-y:76.5%;
+  --ball-size:17%;
+  --ball-open-rotate:18deg;
+  --identity-bg:rgba(255,250,244,0.88);
+  --identity-inner-bg:rgba(255,253,249,0.92);
+  --identity-border:rgba(170,132,101,0.20);
+  --identity-text:#6f5746;
+  --identity-shadow:rgba(106,78,55,0.08);
+
+  --identity-scale:1;
+  --identity-base-width:232;
+  --identity-base-height:38;
+  --identity-name-y:0em;
+  --identity-separator-y:0em;
+  --identity-role-y:0em;
+  --identity-notice-y:0em;
+  --identity-button-y:0em;
+  --identity-mobile-name-y:0em;
+  --identity-mobile-separator-y:0em;
+  --identity-mobile-role-y:0em;
+  --identity-mobile-notice-y:0em;
+  --identity-mobile-button-y:0em;
+  --identity-notice-mobile-top:58px;
+  --reward-modal-scale:1;
+  --reward-ink:#6b5141;
+  --reward-text:#7d6557;
+  --reward-line:rgba(190,143,112,0.24);
+  --reward-soft-line:rgba(174,132,103,0.14);
+  --ink:var(--reward-ink);
+  --text:var(--reward-text);
+  --line:var(--reward-line);
+  --soft-line:var(--reward-soft-line);
+  --card-shadow:rgba(106,78,55,0.20);
+}
+
+button{font-family:inherit; cursor:pointer;}
+img{display:block; max-width:100%; user-select:none; -webkit-user-drag:none;}
+.hidden{display:none !important;}
+
+/* 弹窗遮罩：参考游戏房其他弹窗写法 */
+.modal-layer{
+  position:fixed;
+  inset:0;
+  z-index:120;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(73,45,24,.22);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  animation:modalLayerFadeIn .22s ease-out both;
+}
+
+@keyframes modalLayerFadeIn{
+  from{
+    opacity:0;
+    background:rgba(73,45,24,0);
+    backdrop-filter:blur(0);
+    -webkit-backdrop-filter:blur(0);
+  }
+  to{
+    opacity:1;
+    background:rgba(73,45,24,.22);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+  }
+}
+
+/* 弹窗主体 */
+.gacha-card{
+  position:relative;
+  width:min(calc(760px * var(--gacha-scale)), 100%);
+  max-height:min(92dvh, calc(760px * var(--gacha-scale)));
+  min-height:min(calc(610px * var(--gacha-scale)), calc(100dvh - 36px));
+  border-radius:calc(28px * var(--gacha-scale));
+  padding:calc(18px * var(--gacha-scale)) calc(18px * var(--gacha-scale)) calc(16px * var(--gacha-scale));
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255,239,194,.40), transparent 34%),
+    linear-gradient(180deg, rgba(255,253,248,.78), rgba(255,245,232,.66));
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.88);
+  box-shadow:
+    0 24px 70px rgba(74,48,26,.26),
+    inset 0 1px 0 rgba(255,255,255,.96);
+  overflow:hidden;
+  animation:modalCardSoftIn .32s cubic-bezier(.18,.92,.22,1.08) both;
+}
+
+@keyframes modalCardSoftIn{
+  from{opacity:0; transform:translateY(18px) scale(.965); filter:blur(1px);}
+  to{opacity:1; transform:translateY(0) scale(1); filter:blur(0);}
+}
+
+.gacha-card::before{
+  content:"";
+  position:absolute;
+  inset:-18% -10% auto auto;
+  width:260px;
+  height:260px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(255,218,130,.24), rgba(255,218,130,0) 68%);
+  pointer-events:none;
+}
+
+.gacha-card::after{
+  content:"✦  ✧    ✦    ✧";
+  position:absolute;
+  left:18px;
+  right:18px;
+  top:10px;
+  color:rgba(205,145,73,.20);
+  font-size:18px;
+  letter-spacing:1.1em;
+  white-space:nowrap;
+  pointer-events:none;
+}
+
+.modal-close{
+  position:absolute;
+  right:14px;
+  top:14px;
+  z-index:20;
+  width:34px;
+  height:34px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(173,128,82,.18);
+  color:#744727;
+  font-size:22px;
+  line-height:1;
+  font-weight:900;
+  box-shadow:0 6px 16px rgba(96,62,32,.12);
+}
+
+.modal-close.is-game-back{
+  width:auto;
+  min-width:92px;
+  padding:0 14px;
+  border-radius:999px;
+  font-size:13px;
+  line-height:1;
+  white-space:nowrap;
+}
+
+/* =========================================================
+   身份组件
+========================================================= */
+.roomIdentity{
+  --s:var(--identity-scale,1);
+  position:absolute;
+  right:var(--identity-right);
+  top:var(--identity-top);
+  width:calc(var(--identity-base-width) * 1px * var(--s));
+  height:calc(var(--identity-base-height) * 1px * var(--s));
+  min-width:calc(var(--identity-base-width) * 1px * var(--s));
+  min-height:calc(var(--identity-base-height) * 1px * var(--s));
+  z-index:70;
+  pointer-events:none;
+  overflow:visible;
+}
+
+.roomIdentityBar{
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-template-columns:minmax(calc(130px * var(--s)),1fr) calc(30px * var(--s)) calc(42px * var(--s));
+  gap:calc(5px * var(--s));
+  padding:calc(4px * var(--s)) calc(5px * var(--s));
+  border-radius:calc(13px * var(--s));
+  background:var(--identity-bg);
+  border:calc(1px * var(--s)) solid var(--identity-border);
+  box-shadow:
+    0 calc(10px * var(--s)) calc(24px * var(--s)) var(--identity-shadow),
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.9);
+  backdrop-filter:blur(calc(8px * var(--s)));
+  -webkit-backdrop-filter:blur(calc(8px * var(--s)));
+  pointer-events:auto;
+  overflow:visible;
+  white-space:nowrap;
+}
+
+.identityNameBox,
+.identityNoticeBtn,
+.identityAuthBtn{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  border-radius:calc(9px * var(--s));
+  background:var(--identity-inner-bg);
+  color:var(--identity-text);
+  border:calc(1px * var(--s)) solid rgba(160,116,78,0.12);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.95),
+    0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,0.05);
+}
+
+.identityNameBox{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 calc(8px * var(--s));
+  overflow:visible;
+}
+
+.identityNameText{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  max-width:100%;
+  color:var(--identity-text);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  font-size:calc(13px * var(--s));
+  font-weight:850;
+  line-height:1;
+  letter-spacing:0;
+  white-space:nowrap;
+  overflow:visible;
+  text-overflow:clip;
+}
+
+.identityNameText.isOverflowSafe{overflow:hidden;text-overflow:ellipsis;}
+
+.identityNamePart{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  line-height:1;
+  white-space:nowrap;
+  font:inherit;
+}
+
+.identityNickname{transform:translateY(var(--identity-name-y));}
+.identitySeparator{
+  margin:0 .08em;
+  color:rgba(111,87,70,.78);
+  font-weight:800;
+  transform:translateY(var(--identity-separator-y));
+}
+.identityRole{transform:translateY(var(--identity-role-y));}
+
+.identityNoticeWrap{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+
+.identityNoticeBtn,
+.identityAuthBtn{
+  appearance:none;
+  cursor:pointer;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
+}
+
+.identityNoticeBtn{
+  width:100%;
+  height:100%;
+  font-size:calc(14px * var(--s));
+}
+
+.identityNoticeIcon{
+  display:flex;
+  width:100%;
+  height:100%;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  transform:translateY(var(--identity-notice-y));
+  filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,0.55));
+}
+
+.identityNoticeCount{
+  position:absolute;
+  right:calc(-6px * var(--s));
+  top:calc(-6px * var(--s));
+  min-width:calc(18px * var(--s));
+  height:calc(18px * var(--s));
+  padding:0 calc(5px * var(--s));
+  border-radius:999px;
+  background:#b98f72;
+  color:#fffaf6;
+  font-size:calc(9px * var(--s));
+  font-weight:900;
+  line-height:1;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:calc(2px * var(--s)) solid rgba(255,248,239,0.98);
+  box-shadow:0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(116,86,54,0.16);
+  z-index:3;
+}
+
+.identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex;}
+
+.identityAuthBtn{
+  width:100%;
+  height:100%;
+  color:#6f5746;
+  font-size:calc(12px * var(--s));
+  font-weight:850;
+  line-height:1.18;
+  white-space:nowrap;
+  overflow:visible;
+}
+
+.identityAuthText{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1.18;
+  transform:translateY(var(--identity-button-y));
+}
+
+.identityNoticeBtn:hover,
+.identityAuthBtn:hover{
+  transform:translateY(calc(-1px * var(--s)));
+  background:rgba(255,255,255,0.94);
+}
+
+.identityNoticePanel{
+  position:absolute;
+  top:calc(100% + 10px * var(--s));
+  right:0;
+  width:min(calc(360px * var(--s)),72vw);
+  max-height:min(calc(540px * var(--s)),70vh);
+  overflow:auto;
+  padding:calc(12px * var(--s));
+  border-radius:calc(16px * var(--s));
+  background:rgba(255,249,241,0.98);
+  border:calc(1px * var(--s)) solid rgba(203,167,123,0.28);
+  box-shadow:0 calc(16px * var(--s)) calc(36px * var(--s)) rgba(85,58,34,0.16);
+  display:none;
+  z-index:950;
+  text-align:left;
+}
+
+.identityNoticePanel.show{display:block;}
+
+.identityNoticeTitle{
+  color:#6f4726;
+  font-size:calc(13px * var(--s));
+  font-weight:900;
+  margin-bottom:calc(10px * var(--s));
+}
+
+.identityNoticeEmpty{
+  color:#8a6644;
+  font-size:calc(12px * var(--s));
+  line-height:1.6;
+  padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s));
+}
+
+
+/* 扭蛋机弹窗中的身份组件位置：保留通用模板原始尺寸，不再跟随扭蛋机缩放 */
+.roomIdentity{
+  right:56px;
+  top:14px;
+  z-index:70;
+}
+
+.gacha-head{
+  position:relative;
+  z-index:2;
+  flex:0 0 auto;
+  padding:38px 42px 0;
+  text-align:center;
+}
+
+.gacha-title{
+  margin:0;
+  color:#673b1a;
+  font-size:clamp(26px, 4vw, 40px);
+  line-height:1.05;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+
+.gacha-subtitle{
+  margin:7px 0 0;
+  color:#8a6344;
+  font-size:13px;
+  line-height:1.45;
+  font-weight:850;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+
+
+/* 当前玩家：参考拆弹专家的内容区身份与登录方式 */
+.player-panel{
+  position:relative;
+  z-index:3;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  width:min(430px,100%);
+  margin:0 auto;
+}
+.player-chip{
+  min-width:0;
+  min-height:32px;
+  padding:0 12px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  color:#775132;
+  background:rgba(255,255,255,.58);
+  border:1px solid rgba(173,128,82,.16);
+  font-size:12px;
+  font-weight:950;
+}
+.player-auth-btn,.player-login-btn{
+  min-height:32px;
+  padding:0 14px;
+  border:none;
+  border-radius:999px;
+  color:#603718;
+  background:linear-gradient(180deg,#f5d59b,#e6b86f);
+  border:1px solid rgba(171,126,84,.18);
+  font-size:12px;
+  font-weight:950;
+  box-shadow:0 5px 12px rgba(121,79,39,.10),inset 0 1px 0 rgba(255,248,230,.96);
+}
+.player-login-box{
+  position:relative;
+  z-index:3;
+  width:min(540px,100%);
+  margin:0 auto;
+  padding:9px;
+  border-radius:16px;
+  background:rgba(255,255,255,.34);
+  border:1px solid rgba(255,255,255,.48);
+}
+.player-login-box.hidden{display:none!important;}
+.player-login-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) 72px;
+  gap:8px;
+  align-items:end;
+}
+.player-field{display:flex;flex-direction:column;gap:4px;min-width:0;text-align:left;}
+.player-field span{color:#8b6240;font-size:11px;font-weight:950;}
+.player-field input{
+  width:100%;height:34px;border:none;outline:none;border-radius:11px;padding:0 10px;
+  color:#644021;background:rgba(255,255,255,.76);border:1px solid rgba(177,130,82,.18);
+  font-size:13px;font-weight:850;box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+}
+.player-login-btn{height:34px;border-radius:11px;}
+.player-login-message{min-height:16px;margin-top:6px;color:#986744;font-size:11px;line-height:1.35;font-weight:850;text-align:center;}
+@media(max-width:540px){
+  .player-panel{width:100%;}
+  .player-login-row{grid-template-columns:1fr 1fr;}
+  .player-login-btn{grid-column:1/-1;width:100%;}
+}
+
+/* 中间主体：第一视觉必须是扭蛋机 */
+.gacha-stage-wrap{
+  position:relative;
+  z-index:2;
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:24px;
+  background:rgba(255,255,255,.22);
+  border:1px solid rgba(255,255,255,.46);
+  overflow:hidden;
+}
+
+.gacha-stage{
+  position:relative;
+  width:min(500px, 78vw, 58dvh);
+  height:auto;
+  max-width:500px;
+  aspect-ratio:1/1;
+  flex:0 0 auto;
+}
+
+.machine-wrap{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.machine-wrap.shaking{
+  animation:machineShake .42s ease-in-out 3;
+}
+
+.machine-img{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  filter:drop-shadow(0 14px 18px rgba(143,86,72,.18));
+  pointer-events:none;
+}
+
+/*
+  扭蛋机素材坐标层：
+  JS 会把这一层校准到 machine-img 的实际显示区域。
+  旋钮、投币口、掉落球都只跟随这张机器图缩放，不跟随外层舞台空白漂移。
+*/
+.machine-asset-layer{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  z-index:6;
+  pointer-events:none;
+  overflow:visible;
+}
+
+.flying-token{
+  position:absolute;
+  left:var(--coin-slot-x);
+  top:var(--coin-slot-y);
+  width:7.2%;
+  height:auto;
+  z-index:30;
+  opacity:0;
+  pointer-events:none;
+  transform:translate(-50%, -50%) scale(.95) rotate(0deg);
+  filter:drop-shadow(0 6px 8px rgba(120,74,65,.22));
+}
+
+.flying-token.playing{
+  animation:tokenInsert .58s cubic-bezier(.18,.86,.22,1) both;
+}
+
+.handle-img{
+  position:absolute;
+  left:var(--handle-x);
+  top:var(--handle-y);
+  width:var(--handle-size);
+  height:auto;
+  z-index:8;
+  object-fit:contain;
+  pointer-events:none;
+  transform:translate(-50%, -50%) rotate(0deg);
+  transform-origin:50% 50%;
+  will-change:transform;
+  filter:drop-shadow(0 5px 7px rgba(120,74,65,.18));
+}
+
+.handle-img.spinning{
+  transform-origin:50% 50%;
+}
+
+.ball-drop{
+  position:absolute;
+  left:var(--ball-x);
+  top:var(--ball-y);
+  width:var(--ball-size);
+  height:auto;
+  z-index:12;
+  opacity:0;
+  transform:translate(-50%, -70%) scale(.2) rotate(-18deg);
+  pointer-events:none;
+  cursor:pointer;
+  filter:drop-shadow(0 7px 8px rgba(120,74,65,.20));
+}
+
+.ball-drop.show{
+  pointer-events:auto;
+  animation:ballDrop .9s cubic-bezier(.18,.9,.22,1.15) forwards;
+}
+
+.ball-drop.opening{
+  opacity:1;
+  pointer-events:none;
+  animation:ballLeanRight .36s ease-out forwards;
+}
+
+.ball-drop.opened{
+  opacity:1;
+  pointer-events:none;
+  transform:translate(-50%, 12%) scale(1.10) rotate(var(--ball-open-rotate));
+  animation:ballOpen .38s ease-out forwards;
+}
+
+.status-line{
+  position:relative;
+  z-index:2;
+  flex:0 0 18px;
+  height:18px;
+  min-height:18px;
+  text-align:center;
+  color:#8b6240;
+  font-size:12px;
+  line-height:18px;
+  font-weight:850;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* 底部道具区 */
+.bottom-bar{
+  position:relative;
+  z-index:2;
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:10px;
+  padding:10px;
+  border-radius:22px;
+  background:rgba(255,255,255,.42);
+  border:1px solid rgba(255,255,255,.58);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+.pay-btn,
+.coin-balance{
+  position:relative;
+  min-width:0;
+  height:82px;
+  border:none;
+  border-radius:18px;
+  padding:8px 6px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  background:rgba(255,252,247,.76);
+  color:#785235;
+  border:1px solid rgba(171,126,84,.18);
+  box-shadow:0 5px 14px rgba(117,80,43,.08), inset 0 1px 0 rgba(255,255,255,.86);
+  overflow:hidden;
+}
+
+.pay-btn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.94);
+}
+
+.pay-btn:disabled{
+  cursor:not-allowed;
+  opacity:.58;
+  transform:none;
+}
+
+.pay-icon{
+  width:38px !important;
+  height:38px !important;
+  max-width:38px !important;
+  max-height:38px !important;
+  object-fit:contain;
+  flex:0 0 auto;
+}
+
+
+.img-load-error{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:38px;
+  min-height:38px;
+  padding:3px 5px;
+  border-radius:10px;
+  background:rgba(255,236,228,.88);
+  border:1px solid rgba(190,92,72,.28);
+  color:#9c3e2c;
+  font-size:10px;
+  line-height:1.15;
+  font-weight:950;
+  text-align:center;
+  white-space:normal;
+}
+
+.coin-icon{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  background:linear-gradient(180deg, #ffe59c, #e7a93f);
+  color:#8d5a10;
+  font-size:17px;
+  font-weight:950;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.5);
+}
+
+.pay-name{
+  display:block;
+  width:100%;
+  color:#7a4a25;
+  font-size:12px;
+  line-height:1.15;
+  font-weight:950;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.pay-count{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:20px;
+  max-width:100%;
+  padding:0 7px;
+  border-radius:999px;
+  background:rgba(255,239,213,.82);
+  color:#8a5a2a;
+  font-size:12px;
+  line-height:1;
+  font-weight:950;
+  white-space:nowrap;
+}
+
+/* 掉球后的两个选择：独立区域，不遮挡机器和底部图标 */
+.result-actions{
+  position:relative;
+  z-index:3;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  width:min(268px, 100%);
+  min-height:34px;
+  margin:-2px auto 0;
+  padding:4px;
+  border-radius:18px;
+  background:rgba(255,252,244,.50);
+  border:1px solid rgba(255,255,255,.56);
+  box-shadow:0 6px 14px rgba(110,68,60,.08);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .18s ease, visibility .18s ease;
+}
+
+.result-actions.show{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+
+.action-btn{
+  min-height:28px;
+  border:none;
+  border-radius:999px;
+  color:#603718;
+  background:linear-gradient(180deg, #f5d59b, #e6b86f);
+  font-size:12px;
+  font-weight:950;
+  box-shadow:0 5px 12px rgba(121,79,39,.10), inset 0 1px 0 rgba(255,248,230,.96);
+}
+
+.action-btn.secondary{
+  background:linear-gradient(180deg, #f7ede0, #ecd5bb);
+}
+
+
+/* 页面内调试入口：投币口定位工具 */
+.debug-slot-toggle,
+.debug-handle-toggle{
+  position:absolute;
+  left:14px;
+  top:14px;
+  z-index:24;
+  min-height:34px;
+  padding:0 12px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,252,247,.76);
+  color:#704729;
+  font-size:12px;
+  font-weight:950;
+  border:1px solid rgba(171,126,84,.18);
+  box-shadow:0 5px 14px rgba(117,80,43,.10), inset 0 1px 0 rgba(255,255,255,.94);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.debug-handle-toggle{left:112px;}
+.debug-slot-toggle.is-active,
+.debug-handle-toggle.is-active{
+  background:linear-gradient(180deg, rgba(250,210,137,.96), rgba(230,184,111,.94));
+  color:#603718;
+}
+.coin-slot-marker{
+  position:absolute;
+  left:var(--coin-slot-x);
+  top:var(--coin-slot-y);
+  z-index:40;
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  transform:translate(-50%, -50%);
+  background:rgba(255,62,62,.92);
+  border:3px solid rgba(255,255,255,.96);
+  box-shadow:0 0 0 2px rgba(255,62,62,.34), 0 6px 14px rgba(80,30,20,.22);
+  cursor:grab;
+  display:none;
+  pointer-events:auto;
+  touch-action:none;
+}
+.coin-slot-marker::before,.coin-slot-marker::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  background:#fff;
+  transform:translate(-50%, -50%);
+  pointer-events:none;
+}
+.coin-slot-marker::before{width:26px;height:2px;}
+.coin-slot-marker::after{width:2px;height:26px;}
+.coin-slot-marker.dragging{cursor:grabbing;transform:translate(-50%, -50%) scale(1.08);}
+.debug-slot-mode .machine-asset-layer,
+.debug-handle-mode .machine-asset-layer{pointer-events:auto;}
+.debug-slot-mode .coin-slot-marker{display:block;}
+.handle-center-marker{
+  position:absolute;
+  left:var(--handle-x);
+  top:var(--handle-y);
+  z-index:90;
+  width:30px;
+  height:30px;
+  border-radius:999px;
+  transform:translate(-50%, -50%);
+  background:rgba(77,132,255,.92);
+  border:3px solid rgba(255,255,255,.96);
+  box-shadow:0 0 0 3px rgba(77,132,255,.34), 0 0 18px rgba(77,132,255,.42), 0 6px 14px rgba(30,50,90,.22);
+  cursor:grab;
+  display:none;
+  pointer-events:auto;
+  touch-action:none;
+}
+.handle-center-marker::before,
+.handle-center-marker::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  background:#fff;
+  transform:translate(-50%, -50%);
+  pointer-events:none;
+}
+.handle-center-marker::before{width:36px;height:2px;}
+.handle-center-marker::after{width:2px;height:36px;}
+.handle-center-marker.dragging{cursor:grabbing;transform:translate(-50%, -50%) scale(1.08);}
+.debug-handle-mode .handle-center-marker{display:block;}
+.debug-slot-panel,
+.debug-handle-panel{
+  position:relative;
+  z-index:3;
+  display:none;
+  width:min(360px, 100%);
+  margin:0 auto;
+  padding:9px 12px;
+  border-radius:18px;
+  background:rgba(255,252,244,.68);
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:0 10px 22px rgba(110,68,60,.10);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  color:#724824;
+}
+.debug-slot-mode .debug-slot-panel{display:block;}
+.debug-handle-mode .debug-handle-panel{display:block;}
+.debug-slot-title{
+  margin:0 0 5px;
+  font-size:12px;
+  font-weight:950;
+  color:#673b1a;
+  text-align:center;
+}
+.debug-slot-text{
+  margin:0;
+  font-size:12px;
+  line-height:1.55;
+  font-weight:850;
+  color:#8a6344;
+  text-align:center;
+  white-space:pre-line;
+}
+.debug-slot-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:8px;
+}
+.debug-slot-btn{
+  min-height:32px;
+  padding:0 10px;
+  border:none;
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(250,210,137,.96), rgba(230,184,111,.94));
+  color:#603718;
+  font-size:12px;
+  font-weight:950;
+  box-shadow:0 5px 12px rgba(121,79,39,.12), inset 0 1px 0 rgba(255,248,230,.96);
+}
+.debug-slot-btn.secondary{
+  background:linear-gradient(180deg, rgba(252,243,232,.92), rgba(237,213,187,.88));
+}
+
+/* 提示 */
+.tip-layer{
+  position:fixed;
+  z-index:200;
+  display:none;
+  max-width:260px;
+  padding:8px 11px;
+  border-radius:12px;
+  background:rgba(88,55,49,.94);
+  color:#fffaf2;
+  font-size:13px;
+  line-height:1.45;
+  box-shadow:0 8px 18px rgba(70,42,38,.22);
+  pointer-events:none;
+  white-space:pre-line;
+}
+
+/* 小确认弹窗 / 奖励弹窗 */
+.sub-layer{
+  position:fixed;
+  inset:0;
+  z-index:180;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(73,45,24,.24);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+}
+
+.sub-layer.show{display:flex;}
+
+.sub-card{
+  position:relative;
+  width:min(390px, 100%);
+  border-radius:26px;
+  padding:22px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255,239,194,.55), transparent 34%),
+    linear-gradient(180deg, rgba(255,253,248,.98), rgba(255,245,232,.94));
+  border:1px solid rgba(255,255,255,.88);
+  box-shadow:0 20px 54px rgba(74,48,26,.24), inset 0 1px 0 rgba(255,255,255,.96);
+  text-align:center;
+  animation:modalCardSoftIn .24s ease-out both;
+}
+
+.sub-title{
+  margin:0;
+  color:#673b1a;
+  font-size:24px;
+  line-height:1.12;
+  font-weight:950;
+}
+
+.sub-text{
+  margin:10px 0 18px;
+  color:#8a6344;
+  font-size:15px;
+  line-height:1.65;
+  font-weight:850;
+}
+
+.sub-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.sub-btn{
+  height:42px;
+  border:none;
+  border-radius:999px;
+  font-size:15px;
+  font-weight:950;
+  color:#603718;
+  background:linear-gradient(180deg, #f5d59b, #e6b86f);
+}
+
+.sub-btn.secondary{
+  background:linear-gradient(180deg, #f7ede0, #ecd5bb);
+}
+
+.reward-img{
+  width:78px;
+  height:78px;
+  object-fit:contain;
+  margin:0 auto 10px;
+}
+
+.reward-kicker{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:24px;
+  padding:0 10px;
+  border-radius:999px;
+  background:rgba(232,181,107,.20);
+  color:#956434;
+  font-size:12px;
+  font-weight:950;
+  margin-bottom:8px;
+}
+
+/* 动画 */
+@keyframes tokenInsert{
+  0%{opacity:0; transform:translate(-50%, -50%) scale(1.18) rotate(0deg);}
+  18%{opacity:1; transform:translate(-50%, -50%) scale(1.02) rotate(0deg);}
+  68%{opacity:1; transform:translate(-50%, -50%) scale(.48) rotate(0deg);}
+  100%{opacity:0; transform:translate(-50%, -50%) scale(.18) rotate(0deg);}
+}
+
+@keyframes machineShake{
+  0%,100%{transform:translateX(0) rotate(0);}
+  25%{transform:translateX(-1.2%) rotate(-.8deg);}
+  50%{transform:translateX(1.1%) rotate(.8deg);}
+  75%{transform:translateX(-.7%) rotate(-.45deg);}
+}
+
+@keyframes ballDrop{
+  0%{opacity:0; transform:translate(-50%, -70%) scale(.2) rotate(-18deg);}
+  36%{opacity:1; transform:translate(-50%, -28%) scale(.88) rotate(14deg);}
+  70%{opacity:1; transform:translate(-50%, 6%) scale(1.08) rotate(-8deg);}
+  100%{opacity:1; transform:translate(-50%, 15%) scale(1) rotate(0deg);}
+}
+
+@keyframes ballLeanRight{
+  0%{opacity:1; transform:translate(-50%, 15%) scale(1) rotate(0deg);}
+  100%{opacity:1; transform:translate(-36%, 28%) scale(1.03) rotate(34deg);}
+}
+
+@keyframes ballOpen{
+  0%{opacity:1; transform:translate(-36%, 28%) scale(.98) rotate(34deg);}
+  100%{opacity:1; transform:translate(-50%, 12%) scale(1.10) rotate(var(--ball-open-rotate));}
+}
+
+
+/* =========================
+   全站统一奖励弹窗
+========================= */
+.reward-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(64, 45, 30, 0.30);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  --reward-scale: var(--reward-modal-scale, 1);
+}
+
+.reward-mask.show {
+  display: flex!important;
+}
+
+.reward-card {
+  position: relative;
+  width: min(calc(430px * var(--reward-scale)), calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  padding:
+    calc(28px * var(--reward-scale))
+    calc(24px * var(--reward-scale))
+    calc(22px * var(--reward-scale));
+  border-radius: calc(26px * var(--reward-scale));
+  overflow: hidden auto;
+  text-align: center;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,226,235,.68), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,240,181,.62), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,244,226,.96));
+  border: calc(2px * var(--reward-scale)) solid var(--line);
+  box-shadow:
+    0 calc(22px * var(--reward-scale)) calc(54px * var(--reward-scale)) var(--card-shadow),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  animation: rewardPop .42s cubic-bezier(.2, 1.12, .34, 1) both;
+}
+
+.reward-card::before,
+.reward-card::after {
+  position: absolute;
+  left: calc(12px * var(--reward-scale));
+  right: calc(12px * var(--reward-scale));
+  font-size: calc(15px * var(--reward-scale));
+  letter-spacing: calc(8px * var(--reward-scale));
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.reward-card::before {
+  content: "✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  top: calc(9px * var(--reward-scale));
+  color: rgba(209, 120, 148, 0.52);
+}
+
+.reward-card::after {
+  content: "✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  bottom: calc(8px * var(--reward-scale));
+  color: rgba(199, 145, 75, 0.44);
+}
+
+@keyframes rewardPop {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(12px * var(--reward-scale))) scale(.9);
+  }
+  64% {
+    opacity: 1;
+    transform: translateY(0) scale(1.025);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reward-close {
+  position: absolute;
+  z-index: 6;
+  top: calc(12px * var(--reward-scale));
+  right: calc(12px * var(--reward-scale));
+  width: calc(30px * var(--reward-scale));
+  height: calc(30px * var(--reward-scale));
+  border: none;
+  border-radius: 999px;
+  background: rgba(255,250,242,.88);
+  color: #7b5636;
+  font-size: calc(18px * var(--reward-scale));
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    0 calc(2px * var(--reward-scale)) calc(8px * var(--reward-scale)) rgba(105,75,43,.10),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.reward-close:hover {
+  filter: brightness(1.02);
+}
+
+.reward-petals {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.reward-petals span {
+  position: absolute;
+  top: calc(-18px * var(--reward-scale));
+  color: rgba(220,132,154,.56);
+  font-size: calc(16px * var(--reward-scale));
+  opacity: 0;
+  text-shadow:
+    0 calc(2px * var(--reward-scale)) calc(4px * var(--reward-scale)) rgba(255,255,255,.76);
+  animation: rewardPetalFall 1.35s ease-in-out both;
+}
+
+.reward-petals span:nth-child(1) { left: 12%; animation-delay: .05s; }
+.reward-petals span:nth-child(2) { left: 28%; animation-delay: .18s; }
+.reward-petals span:nth-child(3) { left: 48%; animation-delay: .02s; }
+.reward-petals span:nth-child(4) { left: 66%; animation-delay: .22s; }
+.reward-petals span:nth-child(5) { left: 82%; animation-delay: .10s; }
+
+@keyframes rewardPetalFall {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(-14px * var(--reward-scale))) rotate(0deg) scale(.78);
+  }
+  20% {
+    opacity: .85;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(145px * var(--reward-scale))) rotate(160deg) scale(1);
+  }
+}
+
+.reward-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.reward-icon {
+  width: calc(62px * var(--reward-scale));
+  height: calc(62px * var(--reward-scale));
+  margin:
+    calc(4px * var(--reward-scale))
+    auto
+    calc(12px * var(--reward-scale));
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,246,226,.78);
+  border: 1px solid rgba(220,164,102,.25);
+  box-shadow:
+    0 calc(8px * var(--reward-scale)) calc(20px * var(--reward-scale)) rgba(126,92,51,.10),
+    inset 0 1px 0 rgba(255,255,255,.85);
+  font-size: calc(34px * var(--reward-scale));
+}
+
+.reward-label {
+  min-height: calc(25px * var(--reward-scale));
+  padding: 0 calc(13px * var(--reward-scale));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255,249,232,.66);
+  border: 1px solid rgba(218,166,87,.20);
+  color: #b26a3a;
+  font-size: calc(13px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .06em;
+  animation: rewardStamp .42s ease both;
+}
+
+.reward-title {
+  position: relative;
+  max-width: 100%;
+  margin:
+    calc(10px * var(--reward-scale))
+    auto
+    calc(8px * var(--reward-scale));
+  padding:
+    calc(8px * var(--reward-scale))
+    calc(18px * var(--reward-scale));
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: calc(22px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1.15;
+  background: rgba(255,249,232,.72);
+  border: 1px solid rgba(218,166,87,.24);
+  box-shadow:
+    0 calc(5px * var(--reward-scale)) calc(14px * var(--reward-scale)) rgba(126,92,51,.08),
+    inset 0 1px 0 rgba(255,255,255,.82);
+  overflow: hidden;
+}
+
+.reward-title::after {
+  content: "";
+  position: absolute;
+  inset: -30% auto -30% -42%;
+  width: 36%;
+  background: linear-gradient(90deg, transparent, rgba(255,234,160,.80), transparent);
+  transform: skewX(-18deg);
+  animation: rewardSweep 1.25s ease .22s both;
+}
+
+@keyframes rewardStamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(.97);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rewardSweep {
+  0% { left: -42%; }
+  100% { left: 118%; }
+}
+
+.reward-desc {
+  width: 100%;
+  max-width: calc(330px * var(--reward-scale));
+  margin: 0 auto calc(14px * var(--reward-scale));
+  color: var(--text);
+  font-size: calc(13px * var(--reward-scale));
+  line-height: 1.65;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.reward-section-title {
+  margin: 0 0 calc(10px * var(--reward-scale));
+  color: #8a5c33;
+  font-size: calc(12px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .08em;
+}
+
+.reward-list {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-content: center;
+  gap: calc(8px * var(--reward-scale));
+  margin: 0 0 calc(16px * var(--reward-scale));
+}
+
+.reward-list.count-1 {
+  grid-template-columns: minmax(0, calc(120px * var(--reward-scale)));
+}
+
+.reward-list.count-2 {
+  grid-template-columns: repeat(2, minmax(0, calc(120px * var(--reward-scale))));
+}
+
+.reward-list.empty {
+  display: none;
+}
+
+.reward-section-title.empty {
+  display: none;
+}
+
+.reward-item {
+  min-width: 0;
+  min-height: calc(84px * var(--reward-scale));
+  padding:
+    calc(10px * var(--reward-scale))
+    calc(7px * var(--reward-scale))
+    calc(9px * var(--reward-scale));
+  border-radius: calc(16px * var(--reward-scale));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,252,247,.72);
+  border: 1px solid var(--soft-line);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.82),
+    0 calc(3px * var(--reward-scale)) calc(10px * var(--reward-scale)) rgba(116,86,54,.06);
+  animation: rewardItemIn .38s ease both;
+}
+
+.reward-item:nth-child(1) { animation-delay: .14s; }
+.reward-item:nth-child(2) { animation-delay: .24s; }
+.reward-item:nth-child(3) { animation-delay: .34s; }
+.reward-item:nth-child(4) { animation-delay: .44s; }
+
+@keyframes rewardItemIn {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(8px * var(--reward-scale))) scale(.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reward-item-icon {
+  font-size: calc(28px * var(--reward-scale));
+  line-height: 1;
+  margin-bottom: calc(7px * var(--reward-scale));
+  filter: drop-shadow(
+    0 calc(2px * var(--reward-scale))
+    calc(3px * var(--reward-scale))
+    rgba(96,65,35,.12)
+  );
+}
+
+.reward-item-name {
+  width: 100%;
+  color: #7b593b;
+  font-size: calc(11px * var(--reward-scale));
+  font-weight: 900;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reward-item-amount {
+  margin-top: calc(3px * var(--reward-scale));
+  color: var(--ink);
+  font-size: calc(13px * var(--reward-scale));
+  font-weight: 950;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.reward-confirm {
+  min-width: calc(132px * var(--reward-scale));
+  height: calc(36px * var(--reward-scale));
+  border: 1px solid rgba(153,104,62,.22);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,238,200,.96), rgba(227,187,132,.90));
+  color: #67401f;
+  font-size: calc(13px * var(--reward-scale));
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.72),
+    0 calc(4px * var(--reward-scale)) calc(12px * var(--reward-scale)) rgba(112,80,42,.10);
+}
+
+.reward-confirm:hover {
+  filter: brightness(1.02);
+}
+
+/* 不同类型轻微换色 */
+
+.reward-mask[data-type="title"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,235,204,.72), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,229,154,.58), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,242,219,.96));
+}
+
+.reward-mask[data-type="daily"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(224,244,216,.70), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,239,181,.50), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(241,248,229,.96));
+}
+
+.reward-mask[data-type="gift"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,226,235,.74), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(223,235,255,.58), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,240,231,.96));
+}
+
+.reward-mask[data-type="item"] .reward-card,
+.reward-mask[data-type="gold"] .reward-card {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(223,239,255,.66), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,240,181,.52), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(235,246,252,.94));
+}
+
+
+@media (max-width: 540px) {
+  .reward-mask {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 340px) {
+  .reward-list,
+  .reward-list.count-1,
+  .reward-list.count-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+/* 扭蛋结果弹窗：只显示本次抽到的物品，避免与奖励列表重复 */
+.reward-mask[data-type="gacha-result"] .reward-petals,
+.reward-mask[data-type="gacha-result"] .reward-section-title,
+.reward-mask[data-type="gacha-result"] .reward-list{
+  display:none!important;
+}
+.reward-mask[data-type="gacha-result"] .reward-desc{
+  margin-bottom:calc(16px * var(--reward-scale));
+}
+
+@media (max-width:540px){
+  html,body{
+    height:auto;
+    min-height:100%;
+    overflow:auto;
+  }
+
+  .modal-layer{
+    position:fixed;
+    align-items:flex-start;
+    padding:10px;
+    overflow-y:auto;
+  }
+
+  :root{
+    --gacha-scale:1;
+  }
+
+  .gacha-card{
+    width:100%;
+    min-height:calc(100dvh - 20px);
+    max-height:none;
+    padding:54px 12px 14px;
+    border-radius:24px;
+  }
+
+  .modal-close{
+    top:12px;
+    right:12px;
+  }
+
+  .debug-slot-toggle,
+  .debug-handle-toggle{
+    left:12px;
+    top:12px;
+    min-height:34px;
+    padding:0 10px;
+    font-size:11px;
+  }
+
+  .debug-handle-toggle{
+    left:96px;
+  }
+
+
+  .roomIdentity{
+    --s:1;position:relative;right:auto;top:auto;width:calc(100% - 50px);min-width:0;height:40px;min-height:40px;margin:-44px 50px 8px 0;z-index:90;
+  }
+  .roomIdentityBar{grid-template-columns:minmax(0,1fr) 34px 42px;gap:6px;padding:5px 7px;border-radius:14px;}
+  .identityNameBox{padding:0 9px;border-radius:10px;overflow:visible;}
+  .identityNameText{font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;font-size:12px;font-weight:850;line-height:1;letter-spacing:0;white-space:nowrap;overflow:visible;}
+  .identityNickname{transform:translateY(var(--identity-mobile-name-y));}
+  .identitySeparator{transform:translateY(var(--identity-mobile-separator-y));}
+  .identityRole{transform:translateY(var(--identity-mobile-role-y));}
+  .identityNoticeIcon{transform:translateY(var(--identity-mobile-notice-y));}
+  .identityAuthText{transform:translateY(var(--identity-mobile-button-y));}
+  .identityNoticePanel{position:fixed!important;top:var(--identity-notice-mobile-top,58px)!important;left:auto!important;right:max(20px, env(safe-area-inset-right))!important;width:min(320px, calc(100% - 40px))!important;min-width:0!important;max-width:320px!important;max-height:calc(100dvh - var(--identity-notice-mobile-top,58px) - 14px)!important;padding:14px;border-radius:18px;z-index:990;box-sizing:border-box;overflow-x:hidden;overflow-y:auto;background:radial-gradient(circle at 14% 12%, rgba(255,255,255,.82), transparent 38%),linear-gradient(180deg, rgba(255,250,242,.98), rgba(250,238,224,.98));border:1px solid rgba(174,132,94,.30);box-shadow:0 14px 34px rgba(86,61,39,.18),inset 0 1px 0 rgba(255,255,255,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transform-origin:top right;}
+  .identityNoticePanel::before{content:"";position:absolute;right:42px;top:-7px;width:14px;height:14px;transform:rotate(45deg);background:rgba(255,250,242,.98);border-left:1px solid rgba(174,132,94,.24);border-top:1px solid rgba(174,132,94,.24);}
+
+  .gacha-head{
+    padding:0 42px 0;
+  }
+
+  .gacha-title{
+    font-size:24px;
+  }
+
+  .gacha-subtitle{
+    font-size:12px;
+    line-height:1.55;
+  }
+
+  .gacha-stage{
+    width:min(390px, 100%, 56dvh);
+    height:auto;
+  }
+
+  .bottom-bar{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:8px;
+    padding:9px;
+    border-radius:18px;
+  }
+
+  .pay-btn,
+  .coin-balance{
+    min-height:76px;
+    height:auto;
+    padding:8px 6px;
+    border-radius:16px;
+    gap:4px;
+  }
+
+  .pay-icon{
+    width:32px !important;
+    height:32px !important;
+    max-width:32px !important;
+    max-height:32px !important;
+  }
+
+  .coin-icon{
+    width:32px;
+    height:32px;
+    font-size:14px;
+  }
+
+  .pay-name{
+    font-size:12px;
+    line-height:1.2;
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+  }
+
+  .pay-count{
+    min-height:19px;
+    padding:0 7px;
+    font-size:12px;
+  }
+
+  .result-actions{
+    position:relative;
+    left:auto;
+    bottom:auto;
+    transform:none;
+    width:min(292px, 100%);
+    margin:-2px auto 0;
+  }
+
+  .coin-slot-marker{
+    width:20px;
+    height:20px;
+  }
+
+  .debug-slot-panel,
+  .debug-handle-panel{
+    width:100%;
+    margin:4px auto 0;
+  }
+  .identityNoticeIcon{
+    transform:translateY(0);
+  }
+
+  .identityAuthText{
+    transform:translateY(0);
+  }
+
+  .identityNoticePanel{
+    top:calc(100% + 8px);
+    right:0;
+    width:min(320px, calc(100vw - 24px));
+  }
+
+}
+
+
+/* =========================================================
+   正式弹窗版修正：只作为弹窗显示，不做单独页面式返回
+========================================================= */
+html,body{
+  height:100%;
+  overflow:hidden;
+}
+
+.modal-layer{
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+
+.gacha-card{
+  min-height:0;
+  max-height:none;
+  height:auto;
+}
+
+@media (min-height:760px) and (min-width:541px){
+  .modal-layer{align-items:center;}
+  .gacha-card{min-height:min(calc(610px * var(--gacha-scale)), calc(100dvh - 36px));}
+}
+
+@media (max-height:759px), (max-width:540px){
+  .modal-layer{
+    align-items:flex-start;
+    padding:10px;
+  }
+  .gacha-card{
+    width:min(calc(760px * var(--gacha-scale)), 100%);
+    margin:0 auto;
+    padding:44px 14px 14px;
+  }
+  .gacha-head{padding:0 42px 0;}
+  .gacha-title{font-size:24px;}
+  .gacha-subtitle{font-size:12px;line-height:1.45;}
+  .gacha-stage-wrap{flex:0 0 auto;min-height:220px;}
+  .gacha-stage{width:min(390px, 100%, 52dvh);}
+}
+
+@media (max-width:540px){
+  html,body{height:100%;overflow:hidden;}
+  .modal-layer{position:fixed;overflow-y:auto;}
+  .gacha-card{width:100%;min-height:0;max-height:none;padding:46px 12px 14px;border-radius:24px;}
+  .gacha-stage-wrap{min-height:210px;}
+  .gacha-stage{width:min(380px, 100%, 50dvh);}
+}
+
+/* 游戏房入口不显示关闭/返回按钮；图鉴入口才显示关闭按钮 */
+.modal-close.hidden{display:none!important;}
+.modal-close.is-game-back{display:none!important;}
+
+/* 已废弃的通用身份组件和调试定位工具不在正式扭蛋弹窗中显示 */
+.roomIdentity,
+.debug-slot-toggle,
+.debug-handle-toggle,
+.coin-slot-marker,
+.handle-center-marker,
+.debug-slot-panel,
+.debug-handle-panel{display:none!important;}
+
+.free-draw-panel{
+  position:relative;
+  z-index:3;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  width:min(430px,100%);
+  margin:0 auto;
+  padding:7px 9px;
+  border-radius:16px;
+  background:rgba(255,255,255,.32);
+  border:1px solid rgba(255,255,255,.50);
+}
+.free-draw-text{
+  min-width:0;
+  color:#8b6240;
+  font-size:12px;
+  line-height:1.35;
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  text-align:center;
+}
+.free-draw-btn{
+  min-height:30px;
+  padding:0 13px;
+  border:none;
+  border-radius:999px;
+  color:#603718;
+  background:linear-gradient(180deg,#f5d59b,#e6b86f);
+  border:1px solid rgba(171,126,84,.18);
+  font-size:12px;
+  font-weight:950;
+  box-shadow:0 5px 12px rgba(121,79,39,.10),inset 0 1px 0 rgba(255,248,230,.96);
+}
+.free-draw-btn:disabled{opacity:.55;cursor:not-allowed;}
+
+@media(max-width:540px){
+  .free-draw-panel{grid-template-columns:1fr;gap:6px;padding:8px;}
+  .free-draw-btn{width:100%;}
+}
+
+</style>
+</head>
+
+<body>
+<div class="modal-layer">
+  <section class="gacha-card" aria-label="十号房扭蛋机">
+    <button class="modal-close" id="pageBackBtn" type="button" onclick="goBack()" aria-label="关闭">×</button>
+
+    <header class="gacha-head">
+      <h1 class="gacha-title">扭蛋机</h1>
+      <p class="gacha-subtitle">点击底部游戏币图案开始扭蛋。</p>
+    </header>
+
+    <section class="player-panel" aria-label="当前玩家">
+      <div class="player-chip" id="playerChip">当前玩家：参观者模式</div>
+      <button class="player-auth-btn" id="playerAuthBtn" type="button">登录</button>
+    </section>
+
+    <section class="player-login-box" id="playerLoginBox">
+      <div class="player-login-row">
+        <label class="player-field">
+          <span>成员昵称</span>
+          <input id="loginNicknameInput" type="text" maxlength="20" placeholder="昵称">
+        </label>
+        <label class="player-field">
+          <span>成员钥匙</span>
+          <input id="loginCodeInput" type="password" maxlength="32" placeholder="钥匙">
+        </label>
+        <button class="player-login-btn" id="submitLoginBtn" type="button">登录</button>
+      </div>
+      <div class="player-login-message" id="loginMessage">游客可以观看，但不能使用扭蛋机。</div>
+    </section>
+
+    <section class="free-draw-panel" aria-label="每日免费普通扭蛋">
+      <div class="free-draw-text" id="freeDrawText">登录后可查看今日免费机会。</div>
+      <button class="free-draw-btn" id="freeDrawBtn" type="button">免费普通扭蛋</button>
+    </section>
+
+    <div class="gacha-stage-wrap">
+      <div class="gacha-stage">
+        <div class="machine-wrap" id="machineWrap">
+          <img class="machine-img" id="machineImg" src="gacha-machine.png" alt="扭蛋机">
+          <div class="machine-asset-layer" id="machineAssetLayer">
+            <img class="flying-token" id="flyingToken" src="gacha-token-white2.png" alt="投入的游戏币">
+            <img class="handle-img" id="handleImg" src="gacha-handle-spin.png" alt="扭蛋机旋钮">
+            <img class="ball-drop" id="ballDrop" src="gacha-ball-pink.png" alt="掉落的扭蛋" onclick="openCurrentBall()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-actions" id="resultActions">
+      <button class="action-btn" type="button" onclick="openCurrentBall()">打开看看</button>
+      <button class="action-btn secondary" type="button" onclick="storeCurrentBall()">放入背包</button>
+    </div>
+
+    <div class="status-line" id="statusText">准备好了。</div>
+
+    <div class="bottom-bar">
+      <button class="pay-btn" type="button" data-tier="white" onclick="handleTierClick('white')">
+        <img class="pay-icon" src="gacha-token-white.png" width="38" height="38" alt="白金游戏币">
+        <span class="pay-name">普通</span>
+        <span class="pay-count" id="whiteCount">× 0</span>
+      </button>
+
+      <button class="pay-btn" type="button" data-tier="purple" onclick="handleTierClick('purple')">
+        <img class="pay-icon" src="gacha-token-purple.png" width="38" height="38" alt="紫金游戏币">
+        <span class="pay-name">高级</span>
+        <span class="pay-count" id="purpleCount">× 0</span>
+      </button>
+
+      <button class="pay-btn" type="button" data-tier="gold" onclick="handleTierClick('gold')">
+        <img class="pay-icon" src="gacha-token-gold.png" width="38" height="38" alt="金色游戏币">
+        <span class="pay-name">稀有</span>
+        <span class="pay-count" id="goldTokenCount">× 0</span>
+      </button>
+
+      <div class="coin-balance">
+        <img class="pay-icon" id="coinIconImg" src="../../coin.png" width="38" height="38" alt="金币" data-img-name="金币" data-img-path="../../coin.png">
+        <span class="pay-name">金币</span>
+        <span class="pay-count" id="coinCount">× 0</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="tip-layer" id="tipLayer"></div>
+
+<div class="sub-layer" id="confirmLayer">
+  <div class="sub-card">
+    <h2 class="sub-title">游戏币不足</h2>
+    <p class="sub-text" id="confirmText">是否确认使用金币抵扣？</p>
+    <div class="sub-actions">
+      <button class="sub-btn secondary" type="button" onclick="closeConfirm(false)">取消</button>
+      <button class="sub-btn" type="button" onclick="closeConfirm(true)">确认</button>
+    </div>
+  </div>
+</div>
+
+<div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
+    <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
+      <div class="reward-petals" aria-hidden="true">
+        <span>✿</span>
+        <span>❀</span>
+        <span>✽</span>
+        <span>✿</span>
+        <span>❀</span>
+      </div>
+
+      <button class="reward-close" type="button" aria-label="关闭" onclick="closeRewardModal()">×</button>
+
+      <div class="reward-content">
+        <div class="reward-icon" id="rewardIcon" aria-hidden="true">🏆</div>
+
+        <div class="reward-label" id="rewardLabel">扭蛋结果</div>
+
+        <h2 class="reward-title" id="rewardTitle">本次获得</h2>
+
+        <p class="reward-desc" id="rewardDesc">已放入背包。</p>
+
+        <div class="reward-section-title" id="rewardSectionTitle">奖励内容</div>
+
+        <div class="reward-list" id="rewardList"></div>
+
+        <button class="reward-confirm" type="button" onclick="closeRewardModal()">收下</button>
+      </div>
+    </section>
+  </div>
+
+
+
+<script>
+const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
+const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
+const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+const ASSETS = {
+  machineFrames: ["gacha-machine.png"],
+  handleIdle: "gacha-handle-spin.png"
+};
+
+const TIERS = {
+  white: {
+    name: "普通扭蛋",
+    tokenName: "白金游戏币",
+    tokenCost: 20,
+    coinCost: 5,
+    countKey: "white",
+    countEl: "whiteCount"
+  },
+  purple: {
+    name: "高级扭蛋",
+    tokenName: "紫金游戏币",
+    tokenCost: 20,
+    coinCost: 10,
+    countKey: "purple",
+    countEl: "purpleCount"
+  },
+  gold: {
+    name: "稀有扭蛋",
+    tokenName: "金色游戏币",
+    tokenCost: 20,
+    coinCost: 20,
+    countKey: "gold",
+    countEl: "goldTokenCount"
+  }
+};
+
+
+const state = {
+  source: "game",
+  busy: false,
+  currentDraw: null,
+  confirmResolver: null,
+  timers: [],
+  handleRaf: null,
+  inventory: {
+    white: 0,
+    purple: 0,
+    gold: 0,
+    coins: 0
+  },
+  freeDraw: {
+    available: false,
+    usedToday: false,
+    date: ""
+  },
+  identity: {
+    loggedIn: false,
+    nickname: "",
+    role: "visitor",
+    noticeCount: 0
+  },
+  debugSlot: {
+    enabled: false,
+    dragging: false,
+    x: 32.22,
+    y: 65.93
+  },
+  debugHandle: {
+    enabled: false,
+    dragging: false,
+    x: 49.80,
+    y: 69.73,
+    size: 16.50
+  },
+  machineAssetRatio: null,
+  machineAssetResizeObserver: null
+};
+
+
+const rewardTypeMeta={achievement:{label:"成就达成",icon:"🏆"},title:{label:"获得称号",icon:"👑"},daily:{label:"日常奖励",icon:"🎁"},gift:{label:"礼包领取",icon:"🎀"},item:{label:"获得道具",icon:"✨"},gold:{label:"获得金币",icon:"🪙"}};
+const rewardIconMap={"金币":"🪙","普通游戏币":"⚪","高级游戏币":"🟣","稀有游戏币":"🟡"};
+function escapeHtml(value){return String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
+
+function normalizeIconPath(value){
+  const src = String(value || '').trim();
+  if(!src) return '';
+
+  // 当前扭蛋机文件按完整分类结构放在 room10/game/gacha/。
+  // 数据库里仍可保存从 game/ 页面角度写的 ../coin.png、../flower/xxx.png，
+  // 前端在这里统一换算成从 game/gacha/ 出发的真实路径。
+  if(src === '../coin.png' || src === './coin.png' || src === 'coin.png') return '../../coin.png';
+  if(src.startsWith('../flower/')) return '../' + src;
+  return src;
+}
+
+function markImageLoadError(img, path){
+  if(!img || img.dataset.errorMarked === '1') return;
+  img.dataset.errorMarked = '1';
+  const finalPath = path || img.getAttribute('src') || '';
+  const label = img.dataset.imgName || img.getAttribute('alt') || '图片';
+  console.error(`图片读取错误：${label}，路径：${finalPath}`);
+
+  const error = document.createElement('span');
+  error.className = 'img-load-error';
+  error.textContent = '图片读取错误';
+  error.title = `${label}：${finalPath}`;
+  img.style.display = 'none';
+  img.insertAdjacentElement('afterend', error);
+
+  const status = document.getElementById('statusText');
+  if(status){
+    status.textContent = `图片读取错误：${label}（${finalPath}）`;
+  }
+}
+
+function setupImageErrorReports(root=document){
+  root.querySelectorAll('img[data-img-path], img.pay-icon, img.reward-result-image').forEach(img=>{
+    if(img.dataset.errorReportReady === '1') return;
+    img.dataset.errorReportReady = '1';
+    if(!img.dataset.imgPath) img.dataset.imgPath = img.getAttribute('src') || '';
+    img.addEventListener('error', ()=>{
+      markImageLoadError(img, img.dataset.imgPath || img.getAttribute('src') || '');
+    });
+  });
+}
+function normalizeRewardItem(item){if(typeof item==="string")return{name:item,amount:"",unit:"",icon:rewardIconMap[item]||"✨"};return{name:item.name||"奖励",amount:item.amount??"",unit:item.unit||"",icon:item.icon||rewardIconMap[item.name]||"✨",prefix:item.prefix||""};}
+function formatRewardAmount(item){if(item.amount===""||item.amount===null||item.amount===undefined)return"";if(typeof item.amount==="number")return`${item.amount>0?"+":""}${item.amount}${item.unit||""}`;return`${item.prefix||""}${item.amount}${item.unit||""}`;}
+function renderRewards(rewards){const list=document.getElementById("rewardList");const sectionTitle=document.getElementById("rewardSectionTitle");list.innerHTML="";list.className="reward-list";sectionTitle.className="reward-section-title";if(!rewards.length){list.classList.add("empty");sectionTitle.classList.add("empty");return;}list.classList.add(`count-${Math.min(rewards.length,3)}`);rewards.forEach(reward=>{const item=document.createElement("div");item.className="reward-item";item.innerHTML=`<div class="reward-item-icon">${escapeHtml(reward.icon)}</div><div class="reward-item-name">${escapeHtml(reward.name)}</div><div class="reward-item-amount">${escapeHtml(formatRewardAmount(reward))}</div>`;list.appendChild(item);});}
+function showRewardModal(options={}){const mask=document.getElementById("rewardMask");const type=options.type||"item";const meta=rewardTypeMeta[type]||rewardTypeMeta.item;const rewards=Array.isArray(options.rewards)?options.rewards.map(normalizeRewardItem):[];mask.dataset.type=type;const iconEl=document.getElementById("rewardIcon");if(options.image){const imgPath=normalizeIconPath(options.image);iconEl.innerHTML=`<img class="reward-result-image" src="${escapeHtml(imgPath)}" alt="${escapeHtml(options.title||options.label||'扭蛋结果')}" style="width:100%;height:100%;object-fit:contain;border-radius:50%;" data-img-name="${escapeHtml(options.title||options.label||'扭蛋结果')}" data-img-path="${escapeHtml(imgPath)}">`;setTimeout(setupImageErrorReports,0);}else{iconEl.textContent=options.icon||meta.icon;}document.getElementById("rewardLabel").textContent=options.label||meta.label;document.getElementById("rewardTitle").textContent=options.title||"奖励已领取";document.getElementById("rewardDesc").textContent=options.desc||"奖励已经记录完成。";renderRewards(rewards);mask.classList.add("show");mask.style.display="flex";mask.setAttribute("aria-hidden","false");}
+function closeRewardModal(){const mask=document.getElementById("rewardMask");mask.classList.remove("show");mask.style.display="";mask.setAttribute("aria-hidden","true");}
+
+function getPageSource(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get("from") === "book" ? "book" : "game";
+}
+
+function safeReturnTarget(value){
+  const target = String(value || "").trim();
+  if(!target) return "";
+
+  try{
+    const url = new URL(target, window.location.href);
+    if(url.origin !== window.location.origin) return "";
+    return url.href;
+  }catch(err){
+    return "";
+  }
+}
+
+function configureBackButton(){
+  const button = document.getElementById("pageBackBtn");
+  if(!button) return;
+  const isBook = state.source === "book";
+  button.classList.toggle("hidden", !isBook);
+  button.classList.remove("is-game-back");
+  button.textContent = "×";
+  button.setAttribute("aria-label", "关闭并返回图鉴");
+}
+
+function goBack(){
+  if(state.source !== "book") return;
+
+  const params = new URLSearchParams(window.location.search);
+  const returnTarget = safeReturnTarget(params.get("return") || params.get("returnTo"));
+
+  if(returnTarget){
+    window.location.href = returnTarget;
+    return;
+  }
+
+  window.location.href = "../dorm/dorm.html?open=book";
+}
+
+function roleLabel(role){
+  const map = {
+    owner:"维修工",
+    admin:"宿管",
+    member:"房客",
+    applying:"申请人",
+    visitor:"参观者"
+  };
+  return map[String(role || "visitor").toLowerCase()] || "房客";
+}
+
+function getRoleLabel(roleValue = state.identity.role){
+  const role = String(roleValue || "").toLowerCase();
+  if(role === "owner") return "维修工";
+  if(role === "admin") return "宿管";
+  if(role === "member") return "房客";
+  if(role === "applying") return "申请中";
+  return state.identity.loggedIn ? "房客" : "参观者";
+}
+
+function readLoggedIn(){
+  return localStorage.getItem("room10LoggedIn") === "true";
+}
+
+function readIdentity(){
+  const loggedIn = readLoggedIn();
+  state.identity.loggedIn = loggedIn;
+  state.identity.nickname = loggedIn ? (localStorage.getItem("room10User") || "") : "";
+  state.identity.role = loggedIn ? (localStorage.getItem("room10Role") || "member") : "visitor";
+}
+
+function renderIdentity(){
+  const chip = document.getElementById("playerChip");
+  const authBtn = document.getElementById("playerAuthBtn");
+  const loginBox = document.getElementById("playerLoginBox");
+  if(state.identity.loggedIn){
+    chip.textContent = `当前玩家：${state.identity.nickname || "成员"}｜${getRoleLabel()}`;
+    authBtn.textContent = "登出";
+    loginBox.classList.add("hidden");
+  }else{
+    chip.textContent = "当前玩家：参观者模式";
+    authBtn.textContent = "登录";
+    loginBox.classList.remove("hidden");
+  }
+  updateGuestAccess();
+}
+
+function updateGuestAccess(){
+  const locked = !state.identity.loggedIn || state.busy;
+  document.querySelectorAll(".pay-btn").forEach(btn=>{
+    btn.disabled = locked;
+    btn.title = state.identity.loggedIn ? "" : "游客只能观看，登录后才能扭蛋";
+  });
+  const freeBtn = document.getElementById("freeDrawBtn");
+  if(freeBtn){
+    freeBtn.disabled = locked || !state.freeDraw.available || !!state.currentDraw;
+    freeBtn.title = state.identity.loggedIn ? "" : "游客只能观看，登录后才能使用每日免费机会";
+  }
+  if(!state.identity.loggedIn && !state.currentDraw){
+    setStatus("游客可以观看，登录后才能使用扭蛋机。");
+  }
+}
+
+function normalizeLoginResult(data){
+  if(Array.isArray(data)) return data[0] || null;
+  if(data && Array.isArray(data.data)) return data.data[0] || null;
+  return data || null;
+}
+
+async function submitLogin(){
+  const nicknameInput = document.getElementById("loginNicknameInput");
+  const codeInput = document.getElementById("loginCodeInput");
+  const message = document.getElementById("loginMessage");
+  const submitBtn = document.getElementById("submitLoginBtn");
+  const nickname = nicknameInput.value.trim();
+  const code = codeInput.value.trim();
+  if(!nickname){ message.textContent="请填写昵称。"; nicknameInput.focus(); return; }
+  if(!code){ message.textContent="请填写钥匙。"; codeInput.focus(); return; }
+  try{
+    submitBtn.disabled = true;
+    message.textContent = "验证中……";
+    const {data,error} = await client.rpc("verify_member_login",{input_nickname:nickname,input_code:code});
+    if(error){ console.error(error); message.textContent="登录失败，请检查昵称和钥匙。"; return; }
+    const member = normalizeLoginResult(data);
+    if(!member || !member.member_id){ message.textContent="昵称或钥匙不正确。"; return; }
+    localStorage.setItem("room10LoggedIn","true");
+    localStorage.setItem("room10User",member.nickname || nickname);
+    localStorage.setItem("room10MemberId",member.member_id);
+    localStorage.setItem("room10MemberCode",code);
+    localStorage.setItem("room10Role",member.role || "member");
+    codeInput.value="";
+    message.textContent="";
+    readIdentity();
+    renderIdentity();
+    await loadGachaState();
+    setStatus("登录成功，可以使用扭蛋机了。 ");
+  }catch(err){
+    console.error(err);
+    message.textContent="登录失败，请稍后再试。";
+  }finally{ submitBtn.disabled=false; }
+}
+
+function setupIdentityActions(){
+  const authBtn = document.getElementById("playerAuthBtn");
+  const submitBtn = document.getElementById("submitLoginBtn");
+  authBtn?.addEventListener("click",()=>{
+    if(state.identity.loggedIn){
+      ["room10LoggedIn","room10User","room10MemberId","room10MemberCode","room10Role"].forEach(key=>localStorage.removeItem(key));
+      readIdentity();
+      renderIdentity();
+      loadGachaState().catch(console.error);
+      setStatus("已登出，当前只能参观扭蛋机。 ");
+    }else{
+      document.getElementById("loginNicknameInput")?.focus();
+    }
+  });
+  submitBtn?.addEventListener("click",submitLogin);
+  document.getElementById("loginCodeInput")?.addEventListener("keydown",event=>{
+    if(event.key === "Enter") submitLogin();
+  });
+}
+
+function setStatus(text){
+  document.getElementById("statusText").textContent = text;
+}
+
+function setBusy(busy){
+  state.busy = busy;
+  document.querySelectorAll(".pay-btn").forEach(btn => btn.disabled = busy || !state.identity.loggedIn);
+  const freeBtn = document.getElementById("freeDrawBtn");
+  if(freeBtn){
+    freeBtn.disabled = busy || !state.identity.loggedIn || !state.freeDraw.available || !!state.currentDraw;
+  }
+}
+
+function clearTimers(){
+  state.timers.forEach(timer => window.clearInterval(timer));
+  state.timers = [];
+  if(state.handleRaf){
+    cancelAnimationFrame(state.handleRaf);
+    state.handleRaf = null;
+  }
+}
+
+function getCurrentMemberId(){
+  return localStorage.getItem("room10MemberId") || "";
+}
+
+function unwrapRpcData(data){
+  if(Array.isArray(data)) return data[0] || null;
+  if(data && Array.isArray(data.data)) return data.data[0] || null;
+  return data || null;
+}
+
+function rpcFailed(data){
+  return !!(data && (data.ok === false || data.success === false));
+}
+
+function rpcMessage(data, fallback){
+  return String(data?.message || data?.error || fallback || "操作失败");
+}
+
+function numberFrom(source, keys, fallback = 0){
+  for(const key of keys){
+    const value = source?.[key];
+    if(value !== undefined && value !== null && value !== ""){
+      const num = Number(value);
+      if(Number.isFinite(num)) return num;
+    }
+  }
+  return fallback;
+}
+
+function textFrom(source, keys, fallback = ""){
+  for(const key of keys){
+    const value = source?.[key];
+    if(value !== undefined && value !== null && String(value) !== "") return String(value);
+  }
+  return fallback;
+}
+
+function applyGachaState(raw){
+  const data = unwrapRpcData(raw) || {};
+  const tokens = data.tokens || data.token_counts || {};
+
+  state.inventory.white = numberFrom(tokens,["white","white_count","white_token_count"],
+    numberFrom(data,["white","white_count","white_token_count","normal_token_count"],0));
+  state.inventory.purple = numberFrom(tokens,["purple","purple_count","purple_token_count"],
+    numberFrom(data,["purple","purple_count","purple_token_count","advanced_token_count"],0));
+  state.inventory.gold = numberFrom(tokens,["gold","gold_count","gold_token_count"],
+    numberFrom(data,["gold","gold_count","gold_token_count","rare_token_count"],0));
+  state.inventory.coins = numberFrom(data,["coins","coin_count","gold_balance","member_gold"],0);
+
+  const free = data.free_draw || data.freeDraw || {};
+  state.freeDraw.available = !!(free.available ?? data.free_draw_available ?? false);
+  state.freeDraw.usedToday = !!(free.used_today ?? data.free_draw_used_today ?? !state.freeDraw.available);
+  state.freeDraw.date = String(free.date || data.free_draw_date || "");
+
+  const costs = data.costs || data.tier_costs || {};
+  for(const key of Object.keys(TIERS)){
+    const config = costs[key] || data[key] || {};
+    TIERS[key].tokenCost = numberFrom(config,["token_cost","tokenCost"],TIERS[key].tokenCost);
+    TIERS[key].coinCost = numberFrom(config,["coin_cost","coinCost","gold_cost"],TIERS[key].coinCost);
+  }
+  renderBalances();
+  updateGuestAccess();
+}
+
+async function loadGachaState(){
+  if(!state.identity.loggedIn){
+    state.inventory = {white:0,purple:0,gold:0,coins:0};
+    state.freeDraw = {available:false, usedToday:false, date:""};
+    renderBalances();
+    updateGuestAccess();
+    return false;
+  }
+
+  const memberId = getCurrentMemberId();
+  if(!memberId) throw new Error("缺少成员 ID，请重新登录。");
+
+  const {data,error} = await client.rpc("get_gacha_state",{p_member_id:memberId});
+  if(error) throw error;
+  const result = unwrapRpcData(data);
+  if(rpcFailed(result)) throw new Error(rpcMessage(result,"读取扭蛋机状态失败。"));
+  applyGachaState(result);
+  return true;
+}
+
+function normalizeBall(source = {}){
+  const ballSource = source.ball || source.gacha_ball || source;
+  const closedImg = textFrom(ballSource,["closed_img","closed_image","ball_closed_img","ball_image"],"");
+  const openImg = textFrom(ballSource,["open_img","open_image","ball_open_img"],"");
+  if(!closedImg || !openImg) throw new Error("数据库没有返回完整的扭蛋图片。");
+  return {
+    key:textFrom(ballSource,["key","ball_key","color_key"],""),
+    name:textFrom(ballSource,["name","ball_name","display_name"],"扭蛋"),
+    closedImg,
+    openImg
+  };
+}
+
+function normalizeDrawResult(raw,tierKey,payType){
+  const data = unwrapRpcData(raw) || {};
+  if(rpcFailed(data)) throw new Error(rpcMessage(data,"扭蛋失败。"));
+  return {
+    id:textFrom(data,["draw_id","id","gacha_draw_id"],""),
+    tierKey,
+    payType,
+    isEmpty: !!(data.is_empty || data.reward_type === "empty"),
+    message: textFrom(data,["message","reward_desc","description"],""),
+    freeEmptyCount: numberFrom(data,["free_empty_count"],0),
+    achievementUnlocked: !!data.achievement_unlocked,
+    achievementName: textFrom(data,["achievement_name"],""),
+    ball:normalizeBall(data),
+    raw:data
+  };
+}
+
+function normalizeResultItem(raw, fallbackImage = ""){
+  const data = unwrapRpcData(raw) || {};
+  if(rpcFailed(data)) throw new Error(rpcMessage(data,"操作失败。"));
+  const item = data.item || data.reward || data.result || data;
+  const quantity = numberFrom(item,["quantity","amount","reward_quantity"],1);
+  return {
+    name:textFrom(item,["display_name","name","item_name","reward_name"],"本次获得"),
+    quantity,
+    image:textFrom(item,["image","image_path","icon","item_img","reward_img"],fallbackImage),
+    description:textFrom(item,["description","message","text"],textFrom(data,["message"],"已放入背包。"))
+  };
+}
+
+async function requestDraw(tierKey,payType){
+  const {data,error} = await client.rpc("draw_gacha_once",{
+    p_member_id:getCurrentMemberId(),
+    p_tier_key:tierKey,
+    p_pay_type:payType
+  });
+  if(error) throw error;
+  return normalizeDrawResult(data,tierKey,payType);
+}
+
+async function requestOpenBall(draw){
+  const {data,error} = await client.rpc("open_gacha_ball",{
+    p_member_id:getCurrentMemberId(),
+    p_draw_id:draw.id
+  });
+  if(error) throw error;
+  return normalizeResultItem(data,draw.ball.openImg);
+}
+
+async function requestStoreBall(draw){
+  const {data,error} = await client.rpc("store_gacha_ball",{
+    p_member_id:getCurrentMemberId(),
+    p_draw_id:draw.id
+  });
+  if(error) throw error;
+  return normalizeResultItem(data,draw.ball.closedImg);
+}
+
+function renderBalances(){
+  document.getElementById("whiteCount").textContent = `× ${state.inventory.white}`;
+  document.getElementById("purpleCount").textContent = `× ${state.inventory.purple}`;
+  document.getElementById("goldTokenCount").textContent = `× ${state.inventory.gold}`;
+  document.getElementById("coinCount").textContent = `× ${state.inventory.coins}`;
+  renderFreeDraw();
+}
+
+function renderFreeDraw(){
+  const text = document.getElementById("freeDrawText");
+  const btn = document.getElementById("freeDrawBtn");
+  if(!text || !btn) return;
+
+  if(!state.identity.loggedIn){
+    text.textContent = "登录后可查看今日免费机会。";
+    btn.disabled = true;
+    return;
+  }
+
+  if(state.freeDraw.available){
+    text.textContent = "今日免费普通扭蛋：可使用。";
+    btn.disabled = state.busy || !!state.currentDraw;
+  }else{
+    text.textContent = "今日免费普通扭蛋：已使用。";
+    btn.disabled = true;
+  }
+}
+
+function resetBallView(){
+  const ball = document.getElementById("ballDrop");
+  ball.classList.remove("show", "opening", "opened");
+  ball.style.opacity = "0";
+  ball.style.pointerEvents = "none";
+}
+
+function hideResultActions(){
+  document.getElementById("resultActions").classList.remove("show");
+}
+
+function showResultActions(){
+  document.getElementById("resultActions").classList.add("show");
+}
+
+/*
+  后续接数据库时：
+  1. get_gacha_state：读取当前三种游戏币数量、金币数量。
+  2. draw_gacha_once：校验并扣除 token 或 gold，只允许扣一种，返回球和奖励。
+  3. open_gacha_ball：打开球并发放奖励。
+  4. store_gacha_ball：关闭球放入背包，并暗中点亮图鉴道具资源。
+*/
+
+async function handleFreeDraw(){
+  if(state.busy || state.currentDraw) return;
+  if(!state.identity.loggedIn){
+    setStatus("登录后才可以使用每日免费扭蛋机会。");
+    return;
+  }
+  if(!state.freeDraw.available){
+    setStatus("今天的免费普通扭蛋机会已经使用过了。");
+    return;
+  }
+  await startDraw("white", "free");
+}
+
+async function handleTierClick(tierKey){
+  if(state.busy || state.currentDraw) return;
+
+  if(!state.identity.loggedIn){
+    setStatus("登录后才可以使用扭蛋机哦。");
+    return;
+  }
+
+  const tier = TIERS[tierKey];
+  const tokenCount = state.inventory[tier.countKey];
+
+  if(tokenCount >= tier.tokenCost){
+    await startDraw(tierKey, "token");
+    return;
+  }
+
+  if(state.inventory.coins < tier.coinCost){
+    setStatus(`${tier.tokenName}和金币都不足，无法扭蛋。`);
+    return;
+  }
+
+  const ok = await showConfirm(`${tier.tokenName}不足，是否确认使用 ${tier.coinCost} 金币抵扣？`);
+  if(!ok){
+    setStatus("已取消，没有消耗任何道具。");
+    return;
+  }
+
+  await startDraw(tierKey, "gold");
+}
+
+async function startDraw(tierKey, payType){
+  try{
+    const tier = TIERS[tierKey];
+    setBusy(true);
+    hideResultActions();
+    resetBallView();
+    clearTimers();
+
+    if(payType === "free"){
+      setStatus("正在使用今日免费普通扭蛋机会……");
+    }else if(payType === "token"){
+      setStatus(`正在投入 ${tier.tokenCost} 个${tier.tokenName}……`);
+    }else{
+      setStatus(`正在使用 ${tier.coinCost} 金币抵扣……`);
+    }
+
+    const draw = await requestDraw(tierKey,payType);
+    if(!draw.id) throw new Error("数据库没有返回 draw_id。");
+    state.currentDraw = draw;
+
+    await loadGachaState();
+    await playTokenInsertAnimation(tierKey,payType);
+    await playAnimation(draw);
+
+    if(draw.isEmpty){
+      setStatus(draw.message || "扭蛋是空的，这次没有获得物品。");
+      leanClosedBall();
+      window.setTimeout(() => showOpenedBall(draw), 380);
+      window.setTimeout(() => {
+        showReward({
+          title:"空",
+          text:draw.message || "扭蛋是空的，这次没有获得物品。",
+          icon:draw.ball.openImg || draw.ball.closedImg,
+          label:draw.achievementUnlocked ? "非酋成就" : "扭蛋结果"
+        });
+        if(draw.achievementUnlocked && draw.achievementName){
+          window.setTimeout(() => {
+            showReward({
+              title:draw.achievementName,
+              text:`累计免费抽到空 ${draw.freeEmptyCount} 次，解锁成就「${draw.achievementName}」。`,
+              icon:"🏆",
+              label:"成就达成"
+            });
+          }, 420);
+        }
+        state.currentDraw = null;
+        resetBallView();
+        setStatus("请选择下一次扭蛋。");
+        updateGuestAccess();
+      }, 1150);
+      return;
+    }
+
+    setStatus("掉出了一枚扭蛋。你要怎么处理？");
+    showResultActions();
+  }catch(err){
+    console.error(err);
+    state.currentDraw = null;
+    resetBallView();
+    hideResultActions();
+    setStatus(err?.message || "扭蛋失败，请稍后再试。");
+    try{ await loadGachaState(); }catch(_error){}
+  }finally{
+    setBusy(false);
+    updateGuestAccess();
+  }
+}
+
+function getRandomHandlePauseAngle(){
+  return Math.round(100 + Math.random() * 110);
+}
+function handleTurnTransform(angle){
+  return `translate(-50%, -50%) rotate(${angle}deg)`;
+}
+
+function getMachineAssetRatio(){
+  const machineImg = document.getElementById("machineImg");
+
+  /*
+    固定使用第一张机器图的素材比例。
+    这样 gacha-machine2 / gacha-machine3 切帧时，即使图片透明边界或原始尺寸不同，
+    旋钮、投币口和掉落球也不会跟着跳位。
+  */
+  if(state.machineAssetRatio){
+    return state.machineAssetRatio;
+  }
+
+  if(machineImg && machineImg.naturalWidth > 0 && machineImg.naturalHeight > 0){
+    state.machineAssetRatio = machineImg.naturalWidth / machineImg.naturalHeight;
+    return state.machineAssetRatio;
+  }
+
+  return 1;
+}
+
+function updateMachineAssetLayer(){
+  const stage = document.querySelector(".gacha-stage");
+  const machineImg = document.getElementById("machineImg");
+  const layer = document.getElementById("machineAssetLayer");
+  if(!stage || !machineImg || !layer) return;
+
+  const rect = stage.getBoundingClientRect();
+  if(!rect.width || !rect.height) return;
+
+  const imageRatio = getMachineAssetRatio();
+  const stageRatio = rect.width / rect.height;
+
+  let width;
+  let height;
+  let left;
+  let top;
+
+  if(stageRatio > imageRatio){
+    height = rect.height;
+    width = height * imageRatio;
+    left = (rect.width - width) / 2;
+    top = 0;
+  }else{
+    width = rect.width;
+    height = width / imageRatio;
+    left = 0;
+    top = (rect.height - height) / 2;
+  }
+
+  const leftPx = `${left}px`;
+  const topPx = `${top}px`;
+  const widthPx = `${width}px`;
+  const heightPx = `${height}px`;
+
+  /* 机器图和素材层使用同一个盒子，避免大小屏切换时旋钮漂移 */
+  machineImg.style.left = leftPx;
+  machineImg.style.top = topPx;
+  machineImg.style.width = widthPx;
+  machineImg.style.height = heightPx;
+
+  layer.style.left = leftPx;
+  layer.style.top = topPx;
+  layer.style.width = widthPx;
+  layer.style.height = heightPx;
+}
+
+function setupMachineAssetLayer(){
+  const stage = document.querySelector(".gacha-stage");
+  const machineImg = document.getElementById("machineImg");
+
+  if(machineImg){
+    machineImg.addEventListener("load", () => {
+      if(!state.machineAssetRatio && machineImg.naturalWidth > 0 && machineImg.naturalHeight > 0){
+        state.machineAssetRatio = machineImg.naturalWidth / machineImg.naturalHeight;
+      }
+      updateMachineAssetLayer();
+    });
+  }
+
+  window.addEventListener("resize", updateMachineAssetLayer);
+
+  if(window.ResizeObserver && stage && !state.machineAssetResizeObserver){
+    state.machineAssetResizeObserver = new ResizeObserver(() => updateMachineAssetLayer());
+    state.machineAssetResizeObserver.observe(stage);
+  }
+
+  requestAnimationFrame(updateMachineAssetLayer);
+  window.setTimeout(updateMachineAssetLayer, 80);
+}
+
+function animateHandleTurn(){
+  const handleImg = document.getElementById("handleImg");
+  if(!handleImg) return Promise.resolve();
+
+  const pauseAngle = getRandomHandlePauseAngle();
+  const firstDuration = 400;
+  const pauseDuration = 150;
+  const secondDuration = 470;
+  const totalDuration = firstDuration + pauseDuration + secondDuration;
+
+  if(state.handleRaf){
+    cancelAnimationFrame(state.handleRaf);
+    state.handleRaf = null;
+  }
+
+  handleImg.src = ASSETS.handleIdle;
+  handleImg.classList.remove("spinning");
+  handleImg.style.transition = "none";
+  handleImg.style.transform = handleTurnTransform(0);
+  void handleImg.offsetWidth;
+  handleImg.classList.add("spinning");
+
+  function easeOutCubic(t){
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function easeInOutCubic(t){
+    return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  return new Promise(resolve => {
+    const startedAt = performance.now();
+
+    function frame(now){
+      const elapsed = Math.min(now - startedAt, totalDuration);
+      let angle;
+
+      if(elapsed <= firstDuration){
+        const t = elapsed / firstDuration;
+        angle = pauseAngle * easeOutCubic(t);
+      }else if(elapsed <= firstDuration + pauseDuration){
+        angle = pauseAngle;
+      }else{
+        const t = (elapsed - firstDuration - pauseDuration) / secondDuration;
+        angle = pauseAngle + (360 - pauseAngle) * easeInOutCubic(t);
+      }
+
+      /* 手动逐帧设置角度，确保总角度只有 0 → 360，不会叠加成两圈 */
+      handleImg.style.transform = handleTurnTransform(angle);
+
+      if(elapsed < totalDuration){
+        state.handleRaf = requestAnimationFrame(frame);
+      }else{
+        state.handleRaf = null;
+        handleImg.style.transition = "none";
+        handleImg.style.transform = handleTurnTransform(0);
+        handleImg.classList.remove("spinning");
+        resolve();
+      }
+    }
+
+    state.handleRaf = requestAnimationFrame(frame);
+  });
+}
+
+function getRootPercent(name, fallback){
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const num = Number(raw.replace("%", ""));
+  return Number.isFinite(num) ? num : fallback;
+}
+
+function playTokenInsertAnimation(tierKey, payType){
+  const token = document.getElementById("flyingToken");
+  if(!token) return Promise.resolve();
+
+  const srcMap = {
+    white:"gacha-token-white2.png",
+    purple:"gacha-token-purple2.png",
+    gold:"gacha-token-gold2.png"
+  };
+
+  token.src = srcMap[tierKey] || "gacha-token-white2.png";
+  token.classList.remove("playing");
+  token.style.position = "absolute";
+  token.style.left = "var(--coin-slot-x)";
+  token.style.top = "var(--coin-slot-y)";
+  token.style.width = "7.2%";
+  token.style.opacity = "0";
+  token.style.zIndex = "30";
+  token.style.transform = "translate(-50%, -50%) scale(.95) rotate(0deg)";
+  token.style.pointerEvents = "none";
+
+  if(payType === "free") setStatus("免费机会启动中……");
+  else setStatus(payType === "gold" ? "金币投入中……" : "游戏币投入中……");
+
+  void token.offsetWidth;
+  token.classList.add("playing");
+
+  return new Promise(resolve => {
+    window.setTimeout(() => {
+      token.classList.remove("playing");
+      token.style.opacity = "0";
+      token.style.transform = "translate(-50%, -50%) scale(.95) rotate(0deg)";
+      resolve();
+    }, 620);
+  });
+}
+
+function playAnimation(drawResult){
+  return new Promise(resolve => {
+    const machineWrap = document.getElementById("machineWrap");
+    const machineImg = document.getElementById("machineImg");
+    const handleImg = document.getElementById("handleImg");
+
+    handleImg.src = ASSETS.handleIdle;
+
+    setStatus("旋钮正在转动中……");
+    animateHandleTurn().then(() => {
+      setStatus("扭蛋机正在转动中……");
+      machineWrap.classList.add("shaking");
+
+      /* 机器主体不再重新赋值图片，也不做旋转，只进行轻微位移震动。 */
+    });
+
+    window.setTimeout(() => {
+      clearTimers();
+
+      machineWrap.classList.remove("shaking");
+      handleImg.src = ASSETS.handleIdle;
+      handleImg.style.transform = handleTurnTransform(0);
+
+      showClosedBall(drawResult);
+      resolve();
+    }, 1850);
+  });
+}
+
+function showClosedBall(drawResult){
+  const ball = document.getElementById("ballDrop");
+  ball.src = drawResult.ball.closedImg;
+  ball.alt = drawResult.ball.name;
+  ball.classList.remove("show", "opening", "opened");
+  void ball.offsetWidth;
+  ball.classList.add("show");
+}
+
+function leanClosedBall(){
+  const ball = document.getElementById("ballDrop");
+  ball.classList.remove("show", "opened");
+  ball.style.opacity = "1";
+  ball.style.pointerEvents = "none";
+  void ball.offsetWidth;
+  ball.classList.add("opening");
+}
+
+function showOpenedBall(drawResult){
+  const ball = document.getElementById("ballDrop");
+  ball.src = drawResult.ball.openImg;
+  ball.alt = `${drawResult.ball.name}已打开`;
+  ball.style.opacity = "1";
+  ball.style.pointerEvents = "none";
+  ball.classList.remove("show", "opening");
+  void ball.offsetWidth;
+  ball.classList.add("opened");
+}
+
+async function openCurrentBall(){
+  if(!state.currentDraw || state.busy) return;
+
+  const draw = state.currentDraw;
+  try{
+    setBusy(true);
+    hideResultActions();
+    leanClosedBall();
+
+    const resultPromise = requestOpenBall(draw);
+
+    window.setTimeout(() => {
+      if(state.currentDraw === draw) showOpenedBall(draw);
+    }, 380);
+
+    const result = await resultPromise;
+    window.setTimeout(() => {
+      showReward({
+        title:`${result.name} × ${result.quantity || 1}`,
+        text:result.description,
+        icon:result.image
+      });
+      state.currentDraw = null;
+      resetBallView();
+      setStatus("请选择下一次扭蛋。");
+    }, 1150);
+
+    await loadGachaState();
+  }catch(err){
+    console.error(err);
+    showResultActions();
+    setStatus(err?.message || "打开失败，请稍后再试。");
+  }finally{
+    window.setTimeout(() => setBusy(false), 1180);
+  }
+}
+
+async function storeCurrentBall(){
+  if(!state.currentDraw || state.busy) return;
+
+  const draw = state.currentDraw;
+  try{
+    setBusy(true);
+    hideResultActions();
+    const result = await requestStoreBall(draw);
+
+    showReward({
+      title:`${result.name} × ${result.quantity || 1}`,
+      text:result.description,
+      icon:result.image
+    });
+
+    state.currentDraw = null;
+    resetBallView();
+    setStatus("请选择下一次扭蛋。");
+    await loadGachaState();
+  }catch(err){
+    console.error(err);
+    showResultActions();
+    setStatus(err?.message || "放入背包失败，请稍后再试。");
+  }finally{
+    setBusy(false);
+  }
+}
+
+function showConfirm(text){
+  document.getElementById("confirmText").textContent = text;
+  document.getElementById("confirmLayer").classList.add("show");
+
+  return new Promise(resolve => {
+    state.confirmResolver = resolve;
+  });
+}
+
+function closeConfirm(result){
+  document.getElementById("confirmLayer").classList.remove("show");
+  if(state.confirmResolver){
+    state.confirmResolver(result);
+    state.confirmResolver = null;
+  }
+}
+
+function showReward(info){
+  const title = info.title || "本次获得";
+  const icon = info.icon || "";
+  showRewardModal({
+    type:"gacha-result",
+    label:info.label || "扭蛋结果",
+    title,
+    desc:info.text || "已放入背包。",
+    image: icon && /\.(png|jpg|jpeg|webp|gif|svg)(\?|#|$)/i.test(icon) ? icon : "",
+    icon: icon && !/\.(png|jpg|jpeg|webp|gif|svg)(\?|#|$)/i.test(icon) ? icon : "✨",
+    rewards:[]
+  });
+}
+function closeReward(){closeRewardModal();}
+
+function setupTooltips(){
+  const tip = document.getElementById("tipLayer");
+
+  document.querySelectorAll(".pay-btn").forEach(btn => {
+    const tier = TIERS[btn.dataset.tier];
+
+    btn.addEventListener("mouseenter", () => {
+      tip.textContent = `消耗 ${tier.tokenCost} 个${tier.tokenName}扭一次；\n不足时可确认使用 ${tier.coinCost} 金币抵扣。`;
+      tip.style.display = "block";
+    });
+
+    btn.addEventListener("mousemove", event => {
+      tip.style.left = `${event.clientX + 14}px`;
+      tip.style.top = `${event.clientY + 14}px`;
+    });
+
+    btn.addEventListener("mouseleave", () => {
+      tip.style.display = "none";
+    });
+  });
+
+  const freeBtn = document.getElementById("freeDrawBtn");
+  freeBtn?.addEventListener("mouseenter", () => {
+    tip.textContent = "每日 1 次免费普通扭蛋；\n只有免费抽可能低概率抽到空。";
+    tip.style.display = "block";
+  });
+  freeBtn?.addEventListener("mousemove", event => {
+    tip.style.left = `${event.clientX + 14}px`;
+    tip.style.top = `${event.clientY + 14}px`;
+  });
+  freeBtn?.addEventListener("mouseleave", () => {
+    tip.style.display = "none";
+  });
+}
+
+
+function isDebugSlotMode(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get("debugSlot") === "1" || params.get("debugSlot") === "true";
+}
+
+function isDebugHandleMode(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get("debugHandle") === "1" || params.get("debugHandle") === "true";
+}
+
+function clampPercent(value){
+  const num = Number(value);
+  if(!Number.isFinite(num)) return 0;
+  return Math.max(0, Math.min(100, num));
+}
+
+function updateCoinSlotMarker(x, y){
+  state.debugSlot.x = clampPercent(x);
+  state.debugSlot.y = clampPercent(y);
+  const xText = state.debugSlot.x.toFixed(2);
+  const yText = state.debugSlot.y.toFixed(2);
+
+  document.documentElement.style.setProperty("--coin-slot-x", `${xText}%`);
+  document.documentElement.style.setProperty("--coin-slot-y", `${yText}%`);
+
+  const text = document.getElementById("debugSlotText");
+  if(text){
+    text.textContent =
+      `X: ${xText}%\nY: ${yText}%\n\nCSS：--coin-slot-x:${xText}%; --coin-slot-y:${yText}%;`;
+  }
+
+  localStorage.setItem("room10GachaCoinSlotX", xText);
+  localStorage.setItem("room10GachaCoinSlotY", yText);
+}
+
+function getPercentFromPointer(event){
+  updateMachineAssetLayer();
+
+  const layer = document.getElementById("machineAssetLayer");
+  if(!layer) return null;
+
+  const rect = layer.getBoundingClientRect();
+  if(!rect.width || !rect.height) return null;
+
+  const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+  const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+  return {
+    x: ((clientX - rect.left) / rect.width) * 100,
+    y: ((clientY - rect.top) / rect.height) * 100
+  };
+}
+
+function moveCoinSlotByEvent(event){
+  const point = getPercentFromPointer(event);
+  if(!point) return;
+  updateCoinSlotMarker(point.x, point.y);
+}
+
+function updateHandleMarker(x, y, size){
+  state.debugHandle.x = clampPercent(x);
+  state.debugHandle.y = clampPercent(y);
+  const nextSize = Number(size);
+  if(Number.isFinite(nextSize)){
+    state.debugHandle.size = Math.max(8, Math.min(32, nextSize));
+  }
+
+  const xText = state.debugHandle.x.toFixed(2);
+  const yText = state.debugHandle.y.toFixed(2);
+  const sizeText = state.debugHandle.size.toFixed(2);
+
+  document.documentElement.style.setProperty("--handle-x", `${xText}%`);
+  document.documentElement.style.setProperty("--handle-y", `${yText}%`);
+  document.documentElement.style.setProperty("--handle-size", `${sizeText}%`);
+
+  const text = document.getElementById("debugHandleText");
+  if(text){
+    text.textContent =
+      `X: ${xText}%\nY: ${yText}%\n大小: ${sizeText}%\n\nCSS：--handle-x:${xText}%; --handle-y:${yText}%; --handle-size:${sizeText}%;`;
+  }
+
+  localStorage.setItem("room10GachaHandleX", xText);
+  localStorage.setItem("room10GachaHandleY", yText);
+  localStorage.setItem("room10GachaHandleSize", sizeText);
+}
+
+function moveHandleByEvent(event){
+  const point = getPercentFromPointer(event);
+  if(!point) return;
+  updateHandleMarker(point.x, point.y, state.debugHandle.size);
+}
+
+function isUsableHandleDebugValue(x, y, size){
+  return Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(size)
+    && x >= 8 && x <= 92
+    && y >= 8 && y <= 92
+    && size >= 8 && size <= 32;
+}
+
+function setHandleDebugVisible(enabled){
+  state.debugHandle.enabled = !!enabled;
+  document.body.classList.toggle("debug-handle-mode", state.debugHandle.enabled);
+
+  const toggle = document.getElementById("debugHandleToggle");
+  if(toggle){
+    toggle.classList.toggle("is-active", state.debugHandle.enabled);
+    toggle.textContent = state.debugHandle.enabled ? "关闭旋钮" : "定位旋钮";
+  }
+
+  if(state.debugHandle.enabled){
+    updateMachineAssetLayer();
+
+    /* 打开调试时先使用当前确认参数，避免旧 localStorage 缓存把旋钮带到旧位置 */
+    updateHandleMarker(state.debugHandle.x, state.debugHandle.y, state.debugHandle.size);
+
+    setStatus("拖动蓝点确认旋钮中心；点击机器区域也可以移动中心。可用下方按钮调整大小。");
+  }else if(!state.debugSlot.enabled){
+    setStatus("准备好了。");
+  }
+}
+
+function toggleHandleDebugTool(){
+  setHandleDebugVisible(!state.debugHandle.enabled);
+}
+
+function adjustHandleSize(delta){
+  const step = Number(delta) || 0;
+  updateHandleMarker(state.debugHandle.x, state.debugHandle.y, state.debugHandle.size + step);
+  setStatus(`旋钮大小已调整为 ${state.debugHandle.size.toFixed(2)}%。`);
+}
+
+async function copyHandleCoords(){
+  const xText = state.debugHandle.x.toFixed(2);
+  const yText = state.debugHandle.y.toFixed(2);
+  const sizeText = state.debugHandle.size.toFixed(2);
+  const text = `--handle-x:${xText}%; --handle-y:${yText}%; --handle-size:${sizeText}%;`;
+
+  try{
+    await navigator.clipboard.writeText(text);
+    setStatus("旋钮参数已复制。");
+  }catch(err){
+    console.log(text);
+    setStatus(`复制失败，请手动记录：${text}`);
+  }
+}
+
+function resetHandleCoords(){
+  updateMachineAssetLayer();
+  updateHandleMarker(49.80, 69.73, 16.50);
+  setStatus("旋钮参数已重置，请拖动蓝点确认中心。");
+}
+
+function setupHandleDebugTool(){
+  const marker = document.getElementById("handleCenterMarker");
+  const layer = document.getElementById("machineAssetLayer");
+  if(!marker || !layer) return;
+
+  marker.addEventListener("pointerdown", event => {
+    event.preventDefault();
+    state.debugHandle.dragging = true;
+    marker.classList.add("dragging");
+    marker.setPointerCapture(event.pointerId);
+    moveHandleByEvent(event);
+  });
+
+  marker.addEventListener("pointermove", event => {
+    if(!state.debugHandle.dragging) return;
+    event.preventDefault();
+    moveHandleByEvent(event);
+  });
+
+  marker.addEventListener("pointerup", event => {
+    state.debugHandle.dragging = false;
+    marker.classList.remove("dragging");
+    try{ marker.releasePointerCapture(event.pointerId); }catch(err){}
+  });
+
+  marker.addEventListener("pointercancel", event => {
+    state.debugHandle.dragging = false;
+    marker.classList.remove("dragging");
+    try{ marker.releasePointerCapture(event.pointerId); }catch(err){}
+  });
+
+  layer.addEventListener("click", event => {
+    if(!state.debugHandle.enabled) return;
+    if(event.target === marker || event.target === document.getElementById("coinSlotMarker")) return;
+    moveHandleByEvent(event);
+  });
+
+  setHandleDebugVisible(isDebugHandleMode());
+}
+
+function setCoinSlotDebugVisible(enabled){
+  state.debugSlot.enabled = !!enabled;
+  document.body.classList.toggle("debug-slot-mode", state.debugSlot.enabled);
+
+  const toggle = document.getElementById("debugSlotToggle");
+  if(toggle){
+    toggle.classList.toggle("is-active", state.debugSlot.enabled);
+    toggle.textContent = state.debugSlot.enabled ? "关闭定位" : "定位投币口";
+  }
+
+  if(state.debugSlot.enabled){
+    const savedX = Number(localStorage.getItem("room10GachaCoinSlotX"));
+    const savedY = Number(localStorage.getItem("room10GachaCoinSlotY"));
+    updateCoinSlotMarker(Number.isFinite(savedX) ? savedX : 32.22, Number.isFinite(savedY) ? savedY : 65.93);
+    setStatus("拖动红点定位投币口。");
+  }else if(!state.debugHandle.enabled){
+    setStatus("准备好了。");
+  }
+}
+
+function toggleCoinSlotDebugTool(){
+  setCoinSlotDebugVisible(!state.debugSlot.enabled);
+}
+
+function setupCoinSlotDebugTool(){
+  const marker = document.getElementById("coinSlotMarker");
+  const stage = document.getElementById("machineAssetLayer");
+  if(!marker || !stage) return;
+
+  marker.addEventListener("pointerdown", event => {
+    event.preventDefault();
+    state.debugSlot.dragging = true;
+    marker.classList.add("dragging");
+    marker.setPointerCapture(event.pointerId);
+    moveCoinSlotByEvent(event);
+  });
+
+  marker.addEventListener("pointermove", event => {
+    if(!state.debugSlot.dragging) return;
+    event.preventDefault();
+    moveCoinSlotByEvent(event);
+  });
+
+  marker.addEventListener("pointerup", event => {
+    state.debugSlot.dragging = false;
+    marker.classList.remove("dragging");
+    try{ marker.releasePointerCapture(event.pointerId); }catch(err){}
+  });
+
+  marker.addEventListener("pointercancel", event => {
+    state.debugSlot.dragging = false;
+    marker.classList.remove("dragging");
+    try{ marker.releasePointerCapture(event.pointerId); }catch(err){}
+  });
+
+  stage.addEventListener("click", event => {
+    if(!state.debugSlot.enabled) return;
+    if(event.target === marker) return;
+    moveCoinSlotByEvent(event);
+  });
+
+  setCoinSlotDebugVisible(isDebugSlotMode());
+}
+
+async function copyCoinSlotCoords(){
+  const xText = state.debugSlot.x.toFixed(2);
+  const yText = state.debugSlot.y.toFixed(2);
+  const text = `--coin-slot-x:${xText}%; --coin-slot-y:${yText}%;`;
+
+  try{
+    await navigator.clipboard.writeText(text);
+    setStatus("投币口坐标已复制。");
+  }catch(err){
+    console.log(text);
+    setStatus(`复制失败，请手动记录：${text}`);
+  }
+}
+
+function resetCoinSlotCoords(){
+  updateCoinSlotMarker(32.22, 65.93);
+  setStatus("投币口坐标已重置。");
+}
+
+
+async function init(){
+  state.source = getPageSource();
+  configureBackButton();
+  readIdentity();
+  renderIdentity();
+  setupIdentityActions();
+
+  document.getElementById("freeDrawBtn")?.addEventListener("click", handleFreeDraw);
+
+  renderBalances();
+  if(state.identity.loggedIn){
+    try{ await loadGachaState(); }
+    catch(err){ console.error(err); setStatus(err?.message || "读取扭蛋机数据失败。"); }
+  }
+  setupTooltips();
+  setupMachineAssetLayer();
+  resetBallView();
+  hideResultActions();
+
+  document.getElementById("machineImg").src = ASSETS.machineFrames[0];
+  document.getElementById("handleImg").src = ASSETS.handleIdle;
+  updateMachineAssetLayer();
+
+  if(state.identity.loggedIn){
+    setStatus("准备好了。");
+  }else{
+    setStatus("游客可以观看，登录后才能使用扭蛋机。");
+  }
+  updateGuestAccess();
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{setupImageErrorReports();init();});
+document.getElementById("rewardMask")?.addEventListener("click",function(event){if(event.target===this)closeRewardModal();});
+document.addEventListener("keydown",function(event){if(event.key==="Escape")closeRewardModal();});
+
+</script>
+</body>
+</html>
