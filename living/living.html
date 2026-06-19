@@ -7,75 +7,107 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{
-  box-sizing:border-box;
-}
+
+*{box-sizing:border-box;}
 
 :root{
-  --bg-ui-scale:1;
-  --nav-scale:1;
-  --identity-scale:1;
-  --board-scale:1;
+  /* =========================================================
+     全站底图 / 组件缩放
+     - 541px 及以上：#overlay 绑定到底图实际显示区域
+     - 540px 以下：手机流式布局
+  ========================================================= */
+  --ui-scale:1;
+  --room-nav-scale:var(--ui-scale);
+  --identity-scale:var(--ui-scale);
 
-  /* 当前页面坐标：客厅页只改这里 */
+  /* =========================================================
+     身份组件坐标
+     位置参考最新身份组件测试版
+  ========================================================= */
   --identity-right:7.35%;
   --identity-top:6.46%;
-  --identity-width:calc(232px * var(--identity-scale));
-  --identity-height:calc(38px * var(--identity-scale));
+  --identity-base-width:232;
+  --identity-base-height:38;
+  --identity-bg:rgba(255,250,244,0.88);
+  --identity-inner-bg:rgba(255,253,249,0.92);
+  --identity-border:rgba(170,132,101,0.20);
+  --identity-text:#6f5746;
+  --identity-shadow:rgba(106,78,55,0.08);
+  --identity-name-y:0em;
+  --identity-separator-y:0em;
+  --identity-role-y:0em;
+  --identity-notice-y:0em;
+  --identity-button-y:0em;
 
-  --room-nav-left:27.2%;
+  /* 手机版身份文字独立校准：昵称 / 分隔符 / 身份 / 铃铛 / 登录按钮 */
+  --identity-mobile-name-y:0em;
+  --identity-mobile-separator-y:0em;
+  --identity-mobile-role-y:0em;
+  --identity-mobile-notice-y:0em;
+  --identity-mobile-button-y:0em;
+  --identity-notice-mobile-top:58px;
+
+  /* =========================================================
+     房间按钮坐标
+     默认位置参考游戏房顶部安全区：
+     避开左上门牌，也避开右侧身份组件。
+     9 个按钮固定显示，等宽、等高、等间隔。
+  ========================================================= */
+  /*
+     外框位置改为底图百分比绑定，不再使用 px × scale。
+     原来的 px × scale 在 541px–650px 会被最小缩放值卡住，导致整排按钮相对底图向右漂移。
+     百分比只控制按钮外框位置和尺寸；--room-nav-scale 只控制内部文字、圆角、阴影和特效。
+  */
   --room-nav-top:6.35%;
-  --room-nav-width:45.5%;
+  --room-nav-start-left:25.83%;
+  --room-nav-btn-width:4.72%;
+  --room-nav-btn-height:5.10%;
+  --room-nav-gap:0.486%;
 
-  /* 页面可改颜色，不改结构尺寸 */
-  --identity-bg:rgba(255,248,239,0.92);
-  --identity-inner-bg:rgba(255,252,247,0.96);
-  --identity-border:rgba(186,146,103,0.24);
-  --identity-text:#6c4523;
-  --identity-shadow:rgba(116,86,54,0.12);
+  --room-nav-hall-left:var(--room-nav-start-left);
+  --room-nav-living-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 1);
+  --room-nav-manager-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 2);
+  --room-nav-honor-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 3);
+  --room-nav-studio-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 4);
+  --room-nav-game-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 5);
+  --room-nav-dorm-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 6);
+  --room-nav-flower-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 7);
+  --room-nav-pets-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 8);
 
-  --nav-text:#6e4827;
-  --nav-border:rgba(145,98,56,.34);
+  --room-nav-text:#6f5746;
+  --room-nav-border:rgba(158,122,93,.26);
+  --room-nav-current-text:#5d4738;
+  --room-nav-current-border:rgba(151,111,82,.42);
+  --room-nav-paper:rgba(255,250,242,.78);
+  --room-nav-paper-2:rgba(246,235,219,.74);
+  --room-nav-wash:rgba(214,185,157,.20);
+  --room-nav-current-bg:rgba(239,224,205,.86);
+
 }
 
-html,
-body{
+html,body{
   margin:0;
   width:100%;
   height:100%;
   overflow:hidden;
   font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
-  background:#e9dfd1;
+  color:#5b4632;
+  background:#e7dfd4;
 }
 
-body{
-  position:relative;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  color:#6c4523;
-  background:
-    radial-gradient(circle at top left, rgba(246,238,226,.9) 0%, transparent 36%),
-    radial-gradient(circle at top right, rgba(230,217,199,.82) 0%, transparent 38%),
-    linear-gradient(180deg,#e9dfd1 0%, #ded1bf 100%);
-}
-
-button{
-  font-family:inherit;
-}
-
-.hidden{
-  display:none !important;
-}
+button{font-family:inherit;}
+.hidden{display:none!important;}
 
 #room{
   position:relative;
-  z-index:3;
   width:100vw;
   height:100vh;
   height:100dvh;
   overflow:hidden;
-  background:transparent;
+  background:
+    radial-gradient(circle at 16% 12%,rgba(255,246,238,.72),transparent 34%),
+    radial-gradient(circle at 86% 18%,rgba(226,215,201,.42),transparent 38%),
+    linear-gradient(180deg,#efe7dc 0%,#e5d8c8 100%);
 }
 
 #bgFrame{
@@ -83,7 +115,6 @@ button{
   inset:0;
   z-index:0;
   overflow:hidden;
-  background:#e9dfd1;
 }
 
 #bg{
@@ -101,350 +132,136 @@ button{
 
 #overlay{
   position:absolute;
-  z-index:1;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  z-index:2;
   overflow:visible;
-  pointer-events:none;
-  --ui-scale:var(--bg-ui-scale, 1);
-}
-
-#overlay *{
-  pointer-events:auto;
-}
-
-/* =========================================================
-   身份组件：全站统一结构
-========================================================= */
-#topActions{
-  --ui-scale:var(--identity-scale, 1);
-  position:absolute;
-  right:var(--identity-right);
-  top:var(--identity-top);
-  width:var(--identity-width);
-  height:var(--identity-height);
-  min-width:0;
-  min-height:0;
-  z-index:65;
   pointer-events:none;
 }
 
-#topIdentityBar{
-  width:100%;
-  height:100%;
-  display:flex;
-  align-items:stretch;
-  justify-content:flex-start;
-  gap:calc(5px * var(--ui-scale));
-  padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
-  border-radius:calc(13px * var(--ui-scale));
-  background:var(--identity-bg);
-  border:1px solid var(--identity-border);
-  box-shadow:
-    0 calc(10px * var(--ui-scale)) calc(24px * var(--ui-scale)) var(--identity-shadow),
-    inset 0 1px 0 rgba(255,255,255,0.9);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  pointer-events:auto;
-  overflow:visible;
-  white-space:nowrap;
+#overlay *{pointer-events:auto;}
+
+/* 修复：#overlay * 的 pointer-events:auto 会把整层 roomNavLayer 变成透明遮罩，挡住主面板按钮 */
+#overlay .roomNavLayer{
+  pointer-events:none!important;
 }
 
-#topIdentityBadge,
-#loginOpenBtn,
-#logoutBtn,
-#siteNoticeBtn{
-  border-radius:calc(9px * var(--ui-scale));
-  background:var(--identity-inner-bg);
-  color:var(--identity-text);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    0 1px 4px rgba(112,83,52,0.05);
-  border:1px solid rgba(160,116,78,0.12);
+#overlay .roomNavLayer .navBtn{
+  pointer-events:auto!important;
 }
 
-#topIdentityBadge{
-  flex:1 1 auto;
-  min-width:0;
-  padding:0 calc(7px * var(--ui-scale));
-  font-size:calc(12.5px * var(--ui-scale));
-  font-weight:800;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:visible;
-  white-space:nowrap;
+#overlay .roomIdentity{
+  pointer-events:none!important;
 }
 
-#topIdentityBadge .identityText{
-  flex:0 1 auto;
-  min-width:0;
-  max-width:none;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  overflow:visible;
-  text-overflow:clip;
-  white-space:nowrap;
-  line-height:1.18;
-  transform:translateY(0.01em);
+#overlay .roomIdentity .roomIdentityBar,
+#overlay .roomIdentity button,
+#overlay .roomIdentity .identityNoticePanel{
+  pointer-events:auto!important;
 }
 
-#loginOpenBtn,
-#logoutBtn{
-  appearance:none;
-  cursor:pointer;
-  width:calc(42px * var(--ui-scale));
-  min-width:calc(42px * var(--ui-scale));
-  flex:0 0 calc(42px * var(--ui-scale));
-  padding:0;
-  color:#67401f;
-  font-size:calc(12px * var(--ui-scale));
-  font-weight:800;
-  line-height:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
-  overflow:hidden;
-  white-space:nowrap;
-}
-
-#loginOpenBtn:hover,
-#logoutBtn:hover,
-#siteNoticeBtn:hover{
-  transform:translateY(-1px);
-  background:rgba(255,255,255,0.94);
-}
-
-#siteNoticeWrap{
-  position:relative;
-  width:calc(30px * var(--ui-scale));
-  min-width:calc(30px * var(--ui-scale));
-  flex:0 0 calc(30px * var(--ui-scale));
-  display:flex;
-  align-items:stretch;
-  justify-content:center;
-  overflow:visible;
-}
-
-#siteNoticeBtn{
-  appearance:none;
-  border:none;
-  cursor:pointer;
-  position:relative;
-  width:100%;
-  height:100%;
-  padding:0;
-  font-size:calc(14px * var(--ui-scale));
-  font-weight:800;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
-}
-
-#siteNoticeIcon{
-  display:block;
-  line-height:1;
-  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
-}
-
-#siteNoticeCount{
-  position:absolute;
-  right:calc(-6px * var(--ui-scale));
-  top:calc(-6px * var(--ui-scale));
-  min-width:calc(18px * var(--ui-scale));
-  height:calc(18px * var(--ui-scale));
-  padding:0 calc(5px * var(--ui-scale));
-  border-radius:999px;
-  background:#c98c4f;
-  color:#fff9f1;
-  font-size:calc(9px * var(--ui-scale));
-  font-weight:900;
-  line-height:1;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  border:calc(2px * var(--ui-scale)) solid rgba(255,248,239,0.98);
-  box-shadow:0 2px 8px rgba(116,86,54,0.16);
-  z-index:3;
-}
-
-#siteNoticeBtn.hasNotice #siteNoticeCount{
-  display:flex;
-}
-
-#siteNoticePanel{
-  position:absolute;
-  top:calc(100% + 10px);
-  right:0;
-  width:min(calc(360px * var(--ui-scale)), 72vw);
-  max-height:min(calc(540px * var(--ui-scale)), 70vh);
-  overflow:auto;
-  padding:calc(12px * var(--ui-scale));
-  border-radius:calc(16px * var(--ui-scale));
-  background:rgba(255,249,241,0.98);
-  border:1px solid rgba(203,167,123,0.28);
-  box-shadow:0 16px 36px rgba(85,58,34,0.16);
-  display:none;
-  z-index:80;
-  text-align:left;
-}
-
-#siteNoticePanel.show{
-  display:block;
-}
-
-.siteNoticeTitle{
-  color:#6f4726;
-  font-size:calc(13px * var(--ui-scale));
-  font-weight:900;
-  margin-bottom:calc(10px * var(--ui-scale));
-}
-
-.siteNoticeEmpty{
-  color:#8a6644;
-  font-size:calc(12px * var(--ui-scale));
-  line-height:1.6;
-  padding:6px 2px 2px;
-}
-
-.siteNoticeList{
-  display:flex;
-  flex-direction:column;
-  gap:calc(8px * var(--ui-scale));
-}
-
-.siteNoticeItem{
-  padding:calc(10px * var(--ui-scale));
-  border-radius:calc(12px * var(--ui-scale));
-  background:rgba(255,252,247,0.82);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.92),
-    0 2px 8px rgba(120,92,63,0.05);
-}
-
-.siteNoticeItemTitle{
-  color:#6f4726;
-  font-size:calc(12px * var(--ui-scale));
-  font-weight:800;
-  line-height:1.5;
-  margin-bottom:4px;
-}
-
-.siteNoticeItemDesc{
-  color:#8a6644;
-  font-size:calc(11px * var(--ui-scale));
-  line-height:1.55;
-}
 
 /* =========================================================
-   房间切换按钮：客厅页不显示“客厅”按钮
-   特效已按房间主题重写
+   房间按钮组件
 ========================================================= */
-#topBar{
-  --ui-scale:var(--nav-scale, 1);
+.roomNavLayer{
   position:absolute;
-  left:var(--room-nav-left);
-  top:var(--room-nav-top);
-  width:var(--room-nav-width);
-  display:flex;
-  align-items:flex-start;
-  justify-content:flex-start;
+  inset:0;
   z-index:55;
-  overflow:visible;
   pointer-events:none;
-
-  --nav-btn-height:calc(40px * var(--ui-scale));
-  --nav-btn-px:calc(16px * var(--ui-scale));
-  --nav-btn-radius:calc(13px * var(--ui-scale));
-  --nav-btn-font:calc(14px * var(--ui-scale));
-  --nav-gap:calc(8px * var(--ui-scale));
-}
-
-#navOuter,
-#navScroll{
-  overflow:visible;
-}
-
-#navOuter{
-  flex:0 0 auto;
-  min-width:0;
-  width:100%;
-  pointer-events:auto;
-}
-
-#navScroll{
-  width:100%;
-  white-space:nowrap;
-  padding:0;
-  margin:0;
-}
-
-#roomNav{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:var(--nav-gap);
+  --s:var(--room-nav-scale,1);
+  --nav-btn-radius:calc(15px * var(--s));
+  --nav-btn-font:calc(15px * var(--s));
+  --nav-btn-border:calc(1px * var(--s));
+  --nav-btn-shadow-y:calc(3px * var(--s));
+  --nav-btn-shadow-blur:calc(8px * var(--s));
 }
 
 .navBtn{
   appearance:none;
   border:none;
   cursor:pointer;
-  position:relative;
-  flex:0 0 auto;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height:var(--nav-btn-height);
-  padding:0 var(--nav-btn-px);
+  position:absolute;
+  top:var(--room-nav-top);
+  width:var(--room-nav-btn-width);
+  height:var(--room-nav-btn-height);
+  min-width:0;
+  min-height:0;
+  padding:0;
   border-radius:var(--nav-btn-radius);
-  color:var(--nav-text);
+  color:var(--room-nav-text);
   font-size:var(--nav-btn-font);
   font-weight:900;
-  line-height:1;
   white-space:nowrap;
   overflow:visible;
   isolation:isolate;
   background:
-    linear-gradient(180deg, rgba(249,232,203,.90) 0%, rgba(226,195,152,.86) 100%);
-  border:1px solid var(--nav-border);
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,.56), transparent 40%),
+    radial-gradient(circle at 78% 74%, var(--room-nav-wash), transparent 48%),
+    linear-gradient(180deg, var(--room-nav-paper) 0%, var(--room-nav-paper-2) 100%);
+  border:var(--nav-btn-border) solid var(--room-nav-border);
   box-shadow:
-    0 1px 1px rgba(255,255,255,.48) inset,
-    0 2px 5px rgba(91,68,45,.13);
-  text-shadow:0 1px 0 rgba(255,255,255,.42);
-  transition:
-    background .18s ease,
-    border-color .18s ease,
-    box-shadow .18s ease,
-    color .18s ease,
-    filter .18s ease;
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.64),
+    0 calc(2px * var(--s)) calc(7px * var(--s)) rgba(96,70,48,.10);
+  text-shadow:0 calc(1px * var(--s)) 0 rgba(255,255,255,.38);
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;
   font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  pointer-events:auto;
 }
 
-.navBtn:hover,
-.navBtn:focus-visible{
+.navBtn[data-room="hall"]{left:var(--room-nav-hall-left);}
+.navBtn[data-room="living"]{left:var(--room-nav-living-left);}
+.navBtn[data-room="manager"]{left:var(--room-nav-manager-left);}
+.navBtn[data-room="honor"]{left:var(--room-nav-honor-left);}
+.navBtn[data-room="studio"]{left:var(--room-nav-studio-left);}
+.navBtn[data-room="game"]{left:var(--room-nav-game-left);}
+.navBtn[data-room="dorm"]{left:var(--room-nav-dorm-left);}
+.navBtn[data-room="flower"]{left:var(--room-nav-flower-left);}
+.navBtn[data-room="pets"]{left:var(--room-nav-pets-left);}
+
+.navBtn:not(.is-current):hover,
+.navBtn:not(.is-current):focus-visible{
   color:#5f3d22;
   background:
-    linear-gradient(180deg, rgba(252,238,215,.95) 0%, rgba(232,205,166,.90) 100%);
-  border-color:rgba(153,102,55,.48);
+    radial-gradient(circle at 20% 24%, rgba(255,255,255,.66), transparent 42%),
+    radial-gradient(circle at 80% 78%, rgba(207,170,143,.24), transparent 50%),
+    linear-gradient(180deg, rgba(255,252,246,.88) 0%, rgba(239,226,210,.82) 100%);
+  border-color:rgba(151,112,84,.36);
   box-shadow:
-    0 1px 1px rgba(255,255,255,.55) inset,
-    0 3px 7px rgba(91,68,45,.15);
-  filter:brightness(1.015);
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.70),
+    0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.12);
+  filter:saturate(1.02);
+}
+
+.navBtn.is-current{
+  cursor:default;
+  color:var(--room-nav-current-text);
+  background:
+    radial-gradient(circle at 22% 22%, rgba(255,255,255,.62), transparent 42%),
+    radial-gradient(circle at 80% 80%, rgba(190,151,126,.26), transparent 50%),
+    linear-gradient(180deg, rgba(246,235,222,.94) 0%, var(--room-nav-current-bg) 100%);
+  border-color:var(--room-nav-current-border);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.68),
+    0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.13),
+    0 0 0 calc(2px * var(--s)) rgba(255,253,248,.46);
+  filter:none;
 }
 
 .navLabel{
   position:relative;
   z-index:5;
-  display:block;
-  max-width:100%;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  width:100%;
+  height:100%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  overflow:visible;
   white-space:nowrap;
+  line-height:normal;
+  padding-top:.06em;
 }
 
 .navEffect{
@@ -456,101 +273,595 @@ button{
   font-weight:900;
   line-height:1;
   text-shadow:
-    0 1px 2px rgba(255,250,232,.82),
-    0 0 8px rgba(255,246,210,.52);
+    0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.82),
+    0 0 calc(8px * var(--s)) rgba(255,246,210,.52);
   filter:saturate(.95);
 }
 
-.navEffectA{
-  left:8%;
-  top:-54%;
-  font-size:calc(var(--nav-btn-font) * .92);
-}
-
-.navEffectB{
-  right:8%;
-  top:-62%;
-  font-size:calc(var(--nav-btn-font) * .86);
-}
-
-.navEffectC{
-  left:50%;
-  top:-72%;
-  transform:translateX(-50%);
-  font-size:calc(var(--nav-btn-font) * 1.02);
-}
+.navEffectA{left:8%;top:-54%;font-size:calc(var(--nav-btn-font) * .92);}
+.navEffectB{right:8%;top:-62%;font-size:calc(var(--nav-btn-font) * .86);}
+.navEffectC{left:50%;top:-72%;transform:translateX(-50%);font-size:calc(var(--nav-btn-font) * 1.02);}
 
 @keyframes navFloatA{
-  0%,100%{ transform:translateY(4px) rotate(-8deg) scale(.82); opacity:0; }
+  0%,100%{ transform:translateY(calc(4px * var(--s))) rotate(-8deg) scale(.82); opacity:0; }
   20%,72%{ opacity:.86; }
-  50%{ transform:translateY(-5px) rotate(6deg) scale(1); opacity:.76; }
+  50%{ transform:translateY(calc(-5px * var(--s))) rotate(6deg) scale(1); opacity:.76; }
 }
-
 @keyframes navFloatB{
-  0%,100%{ transform:translateY(5px) rotate(9deg) scale(.78); opacity:0; }
+  0%,100%{ transform:translateY(calc(5px * var(--s))) rotate(9deg) scale(.78); opacity:0; }
   24%,70%{ opacity:.78; }
-  52%{ transform:translateY(-6px) rotate(-7deg) scale(1); opacity:.68; }
+  52%{ transform:translateY(calc(-6px * var(--s))) rotate(-7deg) scale(1); opacity:.68; }
 }
-
 @keyframes navFloatC{
-  0%,100%{ transform:translateX(-50%) translateY(6px) rotate(0deg) scale(.76); opacity:0; }
+  0%,100%{ transform:translateX(-50%) translateY(calc(6px * var(--s))) rotate(0deg) scale(.76); opacity:0; }
   24%,70%{ opacity:.88; }
-  50%{ transform:translateX(-50%) translateY(-6px) rotate(2deg) scale(1); opacity:.78; }
+  50%{ transform:translateX(-50%) translateY(calc(-6px * var(--s))) rotate(2deg) scale(1); opacity:.78; }
 }
 
-.navBtn:hover .navEffectA,
-.navBtn:focus-visible .navEffectA{
-  animation:navFloatA 2.2s ease-in-out infinite;
+.navBtn:not(.is-current):hover .navEffectA,
+.navBtn:not(.is-current):focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite;}
+.navBtn:not(.is-current):hover .navEffectB,
+.navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite;}
+.navBtn:not(.is-current):hover .navEffectC,
+.navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite;}
+.navBtn.is-current .navEffect{display:none;}
+
+.navBtn[data-room="hall"] .navEffect{color:rgba(255,205,96,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.95),0 0 calc(10px * var(--s)) rgba(255,215,105,.62);}
+.navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82);}
+.navBtn[data-room="honor"] .navEffect{color:rgba(205,143,45,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.92),0 0 calc(8px * var(--s)) rgba(255,220,130,.52);}
+.navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82);}
+.navBtn[data-room="studio"] .navEffect{color:rgba(96,112,145,.84);}
+.navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82);}
+.navBtn[data-room="dorm"] .navEffect{color:rgba(148,112,171,.78);}
+.navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82);}
+.navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82);}
+
+/* =========================================================
+   身份组件
+========================================================= */
+.roomIdentity{
+  --s:var(--identity-scale,1);
+  position:absolute;
+  right:var(--identity-right);
+  top:var(--identity-top);
+  width:calc(var(--identity-base-width) * 1px * var(--s));
+  height:calc(var(--identity-base-height) * 1px * var(--s));
+  min-width:calc(var(--identity-base-width) * 1px * var(--s));
+  min-height:calc(var(--identity-base-height) * 1px * var(--s));
+  z-index:70;
+  pointer-events:none;
+  overflow:visible;
 }
 
-.navBtn:hover .navEffectB,
-.navBtn:focus-visible .navEffectB{
-  animation:navFloatB 2.5s ease-in-out infinite;
+.roomIdentityBar{
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-template-columns:minmax(calc(130px * var(--s)),1fr) calc(30px * var(--s)) calc(42px * var(--s));
+  gap:calc(5px * var(--s));
+  padding:calc(4px * var(--s)) calc(5px * var(--s));
+  border-radius:calc(13px * var(--s));
+  background:var(--identity-bg);
+  border:calc(1px * var(--s)) solid var(--identity-border);
+  box-shadow:
+    0 calc(10px * var(--s)) calc(24px * var(--s)) var(--identity-shadow),
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.9);
+  backdrop-filter:blur(calc(8px * var(--s)));
+  -webkit-backdrop-filter:blur(calc(8px * var(--s)));
+  pointer-events:auto;
+  overflow:visible;
+  white-space:nowrap;
 }
 
-.navBtn:hover .navEffectC,
-.navBtn:focus-visible .navEffectC{
-  animation:navFloatC 2.35s ease-in-out infinite;
+.identityNameBox,
+.identityNoticeBtn,
+.identityAuthBtn{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  border-radius:calc(9px * var(--s));
+  background:var(--identity-inner-bg);
+  color:var(--identity-text);
+  border:calc(1px * var(--s)) solid rgba(160,116,78,0.12);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.95),
+    0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,0.05);
 }
 
-/* 各房间特效颜色 */
-.navBtn[data-room="hall"] .navEffect{
-  color:rgba(255,205,96,.86);
-  text-shadow:
-    0 1px 2px rgba(255,250,232,.95),
-    0 0 10px rgba(255,215,105,.62);
+.identityNameBox{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 calc(8px * var(--s));
+  overflow:visible;
 }
 
-.navBtn[data-room="manager"] .navEffect{
-  color:rgba(128,91,58,.82);
+.identityNameText{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  max-width:100%;
+  color:var(--identity-text);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  font-size:calc(13px * var(--s));
+  font-weight:850;
+  line-height:1;
+  letter-spacing:0;
+  white-space:nowrap;
+  overflow:visible;
+  text-overflow:clip;
 }
 
-.navBtn[data-room="honor"] .navEffect{
-  color:rgba(205,143,45,.86);
-  text-shadow:
-    0 1px 2px rgba(255,250,232,.92),
-    0 0 8px rgba(255,220,130,.52);
+.identityNameText.isOverflowSafe{overflow:hidden;text-overflow:ellipsis;}
+
+.identityNamePart{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  line-height:1;
+  white-space:nowrap;
+  font:inherit;
 }
 
-.navBtn[data-room="game"] .navEffect{
-  color:rgba(117,91,150,.82);
+.identityNickname{transform:translateY(var(--identity-name-y));}
+.identitySeparator{
+  margin:0 .08em;
+  color:rgba(111,87,70,.78);
+  font-weight:800;
+  transform:translateY(var(--identity-separator-y));
+}
+.identityRole{transform:translateY(var(--identity-role-y));}
+
+.identityNoticeWrap{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:visible;
 }
 
-.navBtn[data-room="studio"] .navEffect{
-  color:rgba(96,112,145,.84);
+.identityNoticeBtn,
+.identityAuthBtn{
+  appearance:none;
+  cursor:pointer;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
 }
 
-.navBtn[data-room="dorm"] .navEffect{
-  color:rgba(143,111,168,.76);
+.identityNoticeBtn{
+  width:100%;
+  height:100%;
+  font-size:calc(14px * var(--s));
 }
 
-.navBtn[data-room="pets"] .navEffect{
-  color:rgba(131,111,78,.82);
+.identityNoticeIcon{
+  display:flex;
+  width:100%;
+  height:100%;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  transform:translateY(var(--identity-notice-y));
+  filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,0.55));
 }
 
-.navBtn[data-room="flower"] .navEffect{
-  color:rgba(198,119,145,.82);
+.identityNoticeCount{
+  position:absolute;
+  right:calc(-6px * var(--s));
+  top:calc(-6px * var(--s));
+  min-width:calc(18px * var(--s));
+  height:calc(18px * var(--s));
+  padding:0 calc(5px * var(--s));
+  border-radius:999px;
+  background:#b98f72;
+  color:#fffaf6;
+  font-size:calc(9px * var(--s));
+  font-weight:900;
+  line-height:1;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:calc(2px * var(--s)) solid rgba(255,248,239,0.98);
+  box-shadow:0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(116,86,54,0.16);
+  z-index:3;
 }
+
+.identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex;}
+
+.identityAuthBtn{
+  width:100%;
+  height:100%;
+  color:#6f5746;
+  font-size:calc(12px * var(--s));
+  font-weight:850;
+  line-height:1.18;
+  white-space:nowrap;
+  overflow:visible;
+}
+
+.identityAuthText{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1.18;
+  transform:translateY(var(--identity-button-y));
+}
+
+.identityNoticeBtn:hover,
+.identityAuthBtn:hover{
+  transform:translateY(calc(-1px * var(--s)));
+  background:rgba(255,255,255,0.94);
+}
+
+.identityNoticePanel{
+  position:absolute;
+  top:calc(100% + 10px * var(--s));
+  right:0;
+  width:min(calc(360px * var(--s)),72vw);
+  max-height:min(calc(540px * var(--s)),70vh);
+  overflow:auto;
+  padding:calc(12px * var(--s));
+  border-radius:calc(16px * var(--s));
+  background:rgba(255,249,241,0.98);
+  border:calc(1px * var(--s)) solid rgba(203,167,123,0.28);
+  box-shadow:0 calc(16px * var(--s)) calc(36px * var(--s)) rgba(85,58,34,0.16);
+  display:none;
+  z-index:950;
+  text-align:left;
+}
+
+.identityNoticePanel.show{display:block;}
+
+.identityNoticeTitle{
+  color:#6f4726;
+  font-size:calc(13px * var(--s));
+  font-weight:900;
+  margin-bottom:calc(10px * var(--s));
+}
+
+.identityNoticeEmpty{
+  color:#8a6644;
+  font-size:calc(12px * var(--s));
+  line-height:1.6;
+  padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s));
+}
+
+/* =========================================================
+   页面主内容占位：正式页面替换这里即可
+========================================================= */
+.templateMainPanel{
+  position:absolute;
+  left:8.8%;
+  top:22.2%;
+  width:60.8%;
+  height:58.5%;
+  z-index:20;
+  border-radius:calc(24px * var(--ui-scale));
+  background:rgba(255,250,240,.58);
+  border:calc(1px * var(--ui-scale)) dashed rgba(170,122,82,.24);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:calc(12px * var(--ui-scale));
+  color:#8a6544;
+  font-weight:900;
+  font-size:calc(18px * var(--ui-scale));
+  text-align:center;
+  padding:calc(20px * var(--ui-scale));
+}
+
+.templateMainPanel p{
+  margin:0;
+  max-width:calc(620px * var(--ui-scale));
+  font-size:calc(13px * var(--ui-scale));
+  line-height:1.7;
+  font-weight:800;
+  color:#9a7656;
+}
+
+
+.templatePreviewNote{
+  margin:0;
+  max-width:calc(650px * var(--ui-scale));
+  font-size:calc(12px * var(--ui-scale));
+  line-height:1.65;
+  font-weight:800;
+  color:#9a7656;
+}
+
+.templatePreviewBtns{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  gap:calc(8px * var(--ui-scale));
+  max-width:calc(720px * var(--ui-scale));
+}
+
+.templatePreviewBtn{
+  min-height:calc(34px * var(--ui-scale));
+  padding:0 calc(14px * var(--ui-scale));
+  border:1px solid rgba(153,104,62,.22);
+  border-radius:999px;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(255,255,255,.58), transparent 42%),
+    linear-gradient(180deg, rgba(255,252,247,.88), rgba(238,226,214,.82));
+  color:#6f5746;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:950;
+  cursor:pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.70),
+    0 calc(3px * var(--ui-scale)) calc(9px * var(--ui-scale)) rgba(96,70,48,.08);
+}
+
+.templatePreviewBtn:hover{
+  filter:brightness(1.02);
+}
+
+
+
+
+/* =========================================================
+   手机布局
+========================================================= */
+@media(max-width:540px){
+  html,body{
+    overflow-x:hidden;
+    overflow-y:auto;
+    height:auto;
+    min-height:100%;
+  }
+
+  #room{
+    width:100%;
+    min-height:100vh;
+    min-height:100dvh;
+    height:auto;
+    display:block;
+    overflow:visible;
+    padding:10px 12px 14px;
+    background:
+      linear-gradient(rgba(242,236,229,.74), rgba(238,231,222,.92)),
+      #e7dfd4;
+  }
+
+  #bgFrame{display:none;}
+
+  #overlay{
+    position:relative;
+    left:auto!important;
+    top:auto!important;
+    width:100%!important;
+    height:auto!important;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible;
+    pointer-events:auto;
+  }
+
+  .roomNavLayer{
+    position:relative;
+    inset:auto;
+    width:100%;
+    height:106px;
+    min-height:106px;
+    max-height:106px;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:repeat(3,32px);
+    gap:5px;
+    margin:0!important;
+    padding:0!important;
+    align-content:start;
+    order:0;
+    z-index:20;
+    pointer-events:auto;
+    --s:1;
+  }
+
+  .roomNavLayer .navBtn{
+    position:relative;
+    left:auto!important;
+    top:auto!important;
+    display:flex!important;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:32px;
+    min-width:0;
+    min-height:32px;
+    max-height:32px;
+    margin:0!important;
+    padding:0!important;
+    border-radius:10px;
+    font-size:12px;
+    line-height:1;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+
+  .roomNavLayer .navBtn.is-current{
+    display:flex!important;
+    visibility:visible!important;
+  }
+
+  .roomNavLayer .navLabel{
+    height:100%;
+    padding-top:.04em;
+    line-height:1;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+
+  .roomNavLayer .navEffect{display:none;}
+
+  .roomIdentity{
+    --s:1;
+    position:relative;
+    right:auto;
+    top:auto;
+    width:100%;
+    min-width:0;
+    height:40px;
+    min-height:40px;
+    order:1;
+    z-index:90;
+  }
+
+  .roomIdentityBar{
+    grid-template-columns:minmax(0,1fr) 34px 42px;
+    gap:6px;
+    padding:5px 7px;
+    border-radius:14px;
+  }
+
+  .identityNameBox{
+    padding:0 9px;
+    border-radius:10px;
+    overflow:visible;
+  }
+
+  .identityNameText{
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
+    font-size:12px;
+    font-weight:850;
+    line-height:1;
+    letter-spacing:0;
+    white-space:nowrap;
+    overflow:visible;
+  }
+
+  .identityNamePart{
+    line-height:1;
+    white-space:nowrap;
+  }
+
+  .identityNickname{transform:translateY(var(--identity-mobile-name-y));}
+  .identitySeparator{
+    margin:0 .08em;
+    color:rgba(111,87,70,.78);
+    font-size:12px;
+    font-weight:800;
+    transform:translateY(var(--identity-mobile-separator-y));
+  }
+  .identityRole{transform:translateY(var(--identity-mobile-role-y));}
+
+  .identityNoticeBtn{
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
+    font-size:14px;
+    border-radius:10px;
+  }
+
+  .identityNoticeIcon{transform:translateY(var(--identity-mobile-notice-y));}
+
+  .identityAuthBtn{
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
+    font-size:11px;
+    font-weight:850;
+    line-height:1;
+    border-radius:10px;
+  }
+
+  .identityAuthText{
+    line-height:1;
+    transform:translateY(var(--identity-mobile-button-y));
+  }
+
+  .identityNoticePanel{
+    position:fixed!important;
+    top:var(--identity-notice-mobile-top,58px)!important;
+    left:auto!important;
+    right:max(20px, env(safe-area-inset-right))!important;
+    width:min(320px, calc(100% - 40px))!important;
+    min-width:0!important;
+    max-width:320px!important;
+    max-height:calc(100dvh - var(--identity-notice-mobile-top,58px) - 14px)!important;
+    padding:14px;
+    border-radius:18px;
+    z-index:990;
+    box-sizing:border-box;
+    overflow-x:hidden;
+    overflow-y:auto;
+    background:
+      radial-gradient(circle at 14% 12%, rgba(255,255,255,.82), transparent 38%),
+      linear-gradient(180deg, rgba(255,250,242,.98), rgba(250,238,224,.98));
+    border:1px solid rgba(174,132,94,.30);
+    box-shadow:
+      0 14px 34px rgba(86,61,39,.18),
+      inset 0 1px 0 rgba(255,255,255,.92);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    transform-origin:top right;
+  }
+
+  .identityNoticePanel::before{
+    content:"";
+    position:absolute;
+    right:42px;
+    top:-7px;
+    width:14px;
+    height:14px;
+    transform:rotate(45deg);
+    background:rgba(255,250,242,.98);
+    border-left:1px solid rgba(174,132,94,.24);
+    border-top:1px solid rgba(174,132,94,.24);
+    box-shadow:-2px -2px 5px rgba(86,61,39,.03);
+  }
+
+  .identityNoticeTitle{
+    position:relative;
+    padding:0 0 9px;
+    margin-bottom:10px;
+    border-bottom:1px solid rgba(174,132,94,.16);
+  }
+
+  .identityNoticePanel *,
+  .identityNoticePanel *::before,
+  .identityNoticePanel *::after{
+    max-width:100%;
+    box-sizing:border-box;
+  }
+
+  .identityNoticePanel button,
+  .identityNoticePanel a{
+    max-width:100%;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+
+  .templateMainPanel{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    height:360px;
+    order:2;
+    border-radius:22px;
+    font-size:16px;
+    padding:18px 14px;
+  }
+
+
+  .templatePreviewBtns{
+    gap:7px;
+  }
+
+  .templatePreviewBtn{
+    min-height:32px;
+    font-size:12px;
+    padding:0 12px;
+  }
+}
+
 
 /* =========================================================
    客厅公告栏主面板：白板分区版
@@ -863,6 +1174,11 @@ button{
   color:#5f351f;
 }
 
+.boardGoBtnInline{
+  margin-left:calc(8px * var(--ui-scale));
+  vertical-align:baseline;
+}
+
 .boardSection.release{
   order:2;
   width:auto;
@@ -964,18 +1280,38 @@ button{
   box-shadow:0 calc(8px * var(--ui-scale)) calc(18px * var(--ui-scale)) rgba(104,78,50,.07);
 }
 
-/* =========================================================
-   540px 及以下手机版
-========================================================= */
-@media (max-width:540px){
-  html,
-  body{
-    overflow-x:hidden;
-    overflow-y:auto;
-    height:auto;
-    min-height:100%;
-  }
 
+
+
+/* =========================================================
+   客厅页接入通用模板后的页面专属修正
+   - 删除旧 topBar/topActions 体系后，仅保留公告栏作为主内容
+   - 不接入成就 / 奖励弹窗
+========================================================= */
+:root{
+  --identity-bg:rgba(255,248,239,0.92);
+  --identity-inner-bg:rgba(255,252,247,0.96);
+  --identity-border:rgba(186,146,103,0.24);
+  --identity-text:#6c4523;
+  --identity-shadow:rgba(116,86,54,0.12);
+}
+
+#bgFrame{
+  background:#e9dfd1;
+}
+
+#room{
+  background:
+    radial-gradient(circle at top left, rgba(246,238,226,.9) 0%, transparent 36%),
+    radial-gradient(circle at top right, rgba(230,217,199,.82) 0%, transparent 38%),
+    linear-gradient(180deg,#e9dfd1 0%, #ded1bf 100%);
+}
+
+#livingPanel{
+  z-index:20;
+}
+
+@media(max-width:540px){
   body{
     display:block;
     background:
@@ -984,145 +1320,19 @@ button{
   }
 
   #room{
-    width:100%;
-    max-width:100%;
-    height:auto;
-    min-height:100vh;
-    min-height:100dvh;
-    display:block;
-    overflow:visible;
-    padding:10px 12px 14px;
-  }
-
-  #bgFrame{
-    display:none;
-  }
-
-  #overlay{
-    position:relative;
-    left:auto;
-    top:auto;
-    width:100%;
-    max-width:100%;
-    height:auto;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    overflow:visible;
-    --ui-scale:1;
-  }
-
-  #room,
-  #overlay,
-  #topBar,
-  #topActions,
-  #livingPanel,
-  #livingBoard,
-  .boardLayout,
-  .boardSection{
-    max-width:100%;
-  }
-
-  #topActions{
-    position:relative;
-    top:auto;
-    right:auto;
-    left:auto;
-    width:100%;
-    max-width:100%;
-    height:40px;
-    z-index:30;
-    order:1;
-  }
-
-  #topIdentityBar{
-    gap:6px;
-    padding:5px 7px;
-    border-radius:14px;
-  }
-
-  #topIdentityBadge{
-    padding:0 9px;
-    font-size:12px;
-    border-radius:10px;
-  }
-
-  #loginOpenBtn,
-  #logoutBtn{
-    width:42px;
-    min-width:42px;
-    flex-basis:42px;
-    font-size:11px;
-    border-radius:10px;
-  }
-
-  #siteNoticeWrap{
-    width:34px;
-    min-width:34px;
-    flex-basis:34px;
-  }
-
-  #siteNoticeBtn{
-    font-size:14px;
-    border-radius:10px;
-  }
-
-  #siteNoticePanel{
-    position:fixed;
-    top:58px;
-    left:12px;
-    right:12px;
-    width:auto;
-    max-height:60dvh;
-    z-index:999;
-  }
-
-  #topBar{
-    position:relative;
-    left:auto;
-    top:auto;
-    width:100%;
-    order:0;
-    z-index:20;
-
-    --nav-btn-height:34px;
-    --nav-btn-px:8px;
-    --nav-btn-radius:10px;
-    --nav-btn-font:12px;
-    --nav-gap:7px;
-  }
-
-  #roomNav{
-    width:100%;
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-    gap:7px;
-    transform:none;
-  }
-
-  .navBtn{
-    width:100%;
-    min-width:0;
-    height:34px;
-    padding:0 8px;
-    font-size:12px;
-    border-radius:10px;
-    overflow:hidden;
-  }
-
-  .navEffect{
-    display:none;
+    background:transparent;
   }
 
   #livingPanel{
-    position:relative;
-    left:auto;
-    top:auto;
-    width:100%;
-    max-width:none;
-    height:auto;
-    min-height:520px;
     order:2;
+    position:relative!important;
+    left:auto!important;
+    top:auto!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:520px;
+    z-index:20;
+    --ui-scale:1;
     padding:18px 16px;
     border-radius:22px;
     overflow:visible;
@@ -1163,109 +1373,100 @@ button{
     transform:none;
   }
 }
+
 </style>
 </head>
 
 <body>
+
 <div id="room">
   <div id="bgFrame">
     <img id="bg" src="room-living.png" alt="十号房客厅背景" />
   </div>
 
   <div id="overlay">
-    <!-- 身份组件 -->
-    <div id="topActions">
-      <div id="topIdentityBar">
-        <div id="topIdentityBadge">
-          <span class="identityText" id="currentUserText">参观者</span>
+
+    <!-- 房间按钮：使用全站通用模板，9 个按钮固定显示，当前客厅高亮 -->
+    <nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换">
+      <button class="navBtn" data-room="hall" type="button" data-url="../index/index.html" data-login="false">
+        <span class="navLabel">大堂</span>
+        <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
+      </button>
+
+      <button class="navBtn" data-room="living" type="button" data-url="../living/living.html" data-login="true">
+        <span class="navLabel">客厅</span>
+        <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
+      </button>
+
+      <button class="navBtn" data-room="manager" type="button" data-manager="true">
+        <span class="navLabel">宿管室</span>
+        <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
+      </button>
+
+      <button class="navBtn" data-room="honor" type="button" data-url="../honor/honor.html" data-login="false">
+        <span class="navLabel">荣誉墙</span>
+        <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
+      </button>
+
+      <button class="navBtn" data-room="studio" type="button" data-url="../studio/studio-todo.html" data-login="true">
+        <span class="navLabel">工作间</span>
+        <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
+      </button>
+
+      <button class="navBtn" data-room="game" type="button" data-url="../game/game.html" data-login="false">
+        <span class="navLabel">游戏房</span>
+        <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span>
+      </button>
+
+      <button class="navBtn" data-room="dorm" type="button" data-url="../dorm/dorm.html" data-login="true">
+        <span class="navLabel">宿舍</span>
+        <span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span>
+      </button>
+
+      <button class="navBtn" data-room="flower" type="button" data-url="../flower/flower.html" data-login="false">
+        <span class="navLabel">花房区</span>
+        <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
+      </button>
+
+      <button class="navBtn" data-room="pets" type="button" data-url="../pet/pets.html" data-login="false">
+        <span class="navLabel">宠物区</span>
+        <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
+      </button>
+    </nav>
+
+
+    <!-- 身份组件：使用全站通用模板结构 -->
+    <section class="roomIdentity" id="roomIdentity" aria-label="当前身份">
+      <div class="roomIdentityBar">
+        <div class="identityNameBox">
+          <span class="identityNameText" id="identityNameText">
+            <span class="identityNamePart identityNickname" id="identityNickname">参观者</span>
+            <span class="identityNamePart identitySeparator hidden" id="identitySeparator">｜</span>
+            <span class="identityNamePart identityRole hidden" id="identityRole">参观者</span>
+          </span>
         </div>
 
-        <div id="siteNoticeWrap">
-          <button id="siteNoticeBtn" type="button" aria-label="查看提醒">
-            <span id="siteNoticeIcon">🔔</span>
-            <span id="siteNoticeCount">0</span>
+        <div class="identityNoticeWrap">
+          <button class="identityNoticeBtn" id="identityNoticeBtn" type="button" aria-label="打开通知">
+            <span class="identityNoticeIcon">🔔</span>
           </button>
+          <span class="identityNoticeCount" id="identityNoticeCount">0</span>
 
-          <div id="siteNoticePanel" aria-live="polite">
-            <div class="siteNoticeTitle">客厅提醒</div>
-            <div id="siteNoticeContent">
-              <div class="siteNoticeEmpty">暂无提醒。</div>
+          <div class="identityNoticePanel" id="identityNoticePanel" aria-live="polite">
+            <div class="identityNoticeTitle">读取中</div>
+            <div id="identityNoticeContent">
+              <div class="identityNoticeEmpty">读取中</div>
             </div>
           </div>
         </div>
 
-        <button id="loginOpenBtn" type="button">登录</button>
-        <button id="logoutBtn" class="hidden" type="button">登出</button>
+        <button class="identityAuthBtn" id="identityAuthBtn" type="button">
+          <span class="identityAuthText">登录</span>
+        </button>
       </div>
-    </div>
+    </section>
 
-    <!-- 房间切换按钮：客厅页不显示“客厅”按钮 -->
-    <div id="topBar" aria-label="房间切换">
-      <div id="navOuter">
-        <div id="navScroll">
-          <nav id="roomNav">
-            <button class="navBtn" data-room="hall" type="button" onclick="enterRoom('index.html', false)">
-              <span class="navLabel">大堂</span>
-              <span class="navEffect navEffectA">✦</span>
-              <span class="navEffect navEffectB">✧</span>
-              <span class="navEffect navEffectC">★</span>
-            </button>
-
-            <button class="navBtn" data-room="manager" type="button" onclick="enterManagerRoom()">
-              <span class="navLabel">宿管室</span>
-              <span class="navEffect navEffectA">✎</span>
-              <span class="navEffect navEffectB">▱</span>
-              <span class="navEffect navEffectC">✐</span>
-            </button>
-
-            <button class="navBtn" data-room="honor" type="button" onclick="enterRoom('honor.html', false)">
-              <span class="navLabel">荣誉墙</span>
-              <span class="navEffect navEffectA">🏆</span>
-              <span class="navEffect navEffectB">🏅</span>
-              <span class="navEffect navEffectC">✦</span>
-            </button>
-
-            <button class="navBtn" data-room="game" type="button" onclick="enterRoom('game.html', false)">
-              <span class="navLabel">游戏房</span>
-              <span class="navEffect navEffectA">🎮</span>
-              <span class="navEffect navEffectB">🎲</span>
-              <span class="navEffect navEffectC">👾</span>
-            </button>
-
-            <button class="navBtn" data-room="studio" type="button" onclick="enterRoom('studio-todo.html', true)">
-              <span class="navLabel">工作间</span>
-              <span class="navEffect navEffectA">🎙</span>
-              <span class="navEffect navEffectB">🎧</span>
-              <span class="navEffect navEffectC">◇</span>
-            </button>
-
-            <button class="navBtn" data-room="dorm" type="button" onclick="enterRoom('dorm.html', true)">
-              <span class="navLabel">宿舍</span>
-              <span class="navEffect navEffectA">☁</span>
-              <span class="navEffect navEffectB">☾</span>
-              <span class="navEffect navEffectC">🛏</span>
-            </button>
-
-            <button class="navBtn" data-room="pets" type="button" onclick="enterRoom('pets.html', false)">
-              <span class="navLabel">宠物区</span>
-              <span class="navEffect navEffectA">🐾</span>
-              <span class="navEffect navEffectB">♡</span>
-              <span class="navEffect navEffectC">🐱</span>
-            </button>
-
-            <button class="navBtn" data-room="flower" type="button" onclick="enterRoom('flower.html', false)">
-              <span class="navLabel">花房区</span>
-              <span class="navEffect navEffectA">✿</span>
-              <span class="navEffect navEffectB">❀</span>
-              <span class="navEffect navEffectC">🌸</span>
-            </button>
-          </nav>
-        </div>
-      </div>
-    </div>
-
-    <!-- 客厅公告栏 -->
-    <section id="livingPanel" aria-label="客厅公告栏">
+<section id="livingPanel" aria-label="living">
       <div class="boardFloatLayer" aria-hidden="true">
         <span class="boardFloat">✦</span>
         <span class="boardFloat">♡</span>
@@ -1285,33 +1486,54 @@ button{
       </div>
 
       <div class="boardHeader">
-        <h1 id="livingPanelTitle">公告栏</h1>
-        <div class="boardHeaderNote" id="boardTodayDate">今天</div>
+        <h1 id="livingPanelTitle">读取中</h1>
+        <div class="boardHeaderNote" id="boardTodayDate">读取中</div>
       </div>
 
       <div id="livingBoard">
         <div class="boardLayout" id="livingBoardLayout">
-          <div class="boardLoading">正在读取客厅公告……</div>
+          <div class="boardLoading">读取中</div>
         </div>
       </div>
     </section>
   </div>
 </div>
 
+
 <script>
+
+/* =========================================================
+   页面配置
+========================================================= */
+const CURRENT_ROOM = "living";
+
+const STORAGE_KEYS = {
+  loggedIn:"room10LoggedIn",
+  user:"room10User",
+  role:"room10Role"
+};
+
 const img = document.getElementById("bg");
 const bgFrame = document.getElementById("bgFrame");
 const overlay = document.getElementById("overlay");
 const root = document.documentElement;
 
-const currentUserText = document.getElementById("currentUserText");
-const loginOpenBtn = document.getElementById("loginOpenBtn");
-const logoutBtn = document.getElementById("logoutBtn");
+const identityNameText = document.getElementById("identityNameText");
+const identityNickname = document.getElementById("identityNickname");
+const identitySeparator = document.getElementById("identitySeparator");
+const identityRole = document.getElementById("identityRole");
+const identityNoticeBtn = document.getElementById("identityNoticeBtn");
+const identityNoticeWrap = document.querySelector(".identityNoticeWrap");
+const identityNoticePanel = document.getElementById("identityNoticePanel");
+const identityAuthBtn = document.getElementById("identityAuthBtn");
+const identityNoticeCount = document.getElementById("identityNoticeCount");
+const identityNoticeContent = document.getElementById("identityNoticeContent");
 
-const siteNoticeBtn = document.getElementById("siteNoticeBtn");
-const siteNoticePanel = document.getElementById("siteNoticePanel");
-const siteNoticeCount = document.getElementById("siteNoticeCount");
-const siteNoticeContent = document.getElementById("siteNoticeContent");
+const siteNoticeBtn = identityNoticeBtn;
+const siteNoticePanel = identityNoticePanel;
+const siteNoticeCount = identityNoticeCount;
+const siteNoticeContent = identityNoticeContent;
+
 const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const client = window.supabase?.createClient
@@ -1319,78 +1541,33 @@ const client = window.supabase?.createClient
   : null;
 const livingBoardLayout = document.getElementById("livingBoardLayout");
 
-const BOARD_CATEGORIES = [
-  { key:"birthday", label:"生日祝福", icon:"🎂", meta:"今日", cls:"quick", limit:2 },
-  { key:"release", label:"发歌提醒", icon:"🎵", meta:"工作间", cls:"release", limit:2 },
-  { key:"holiday", label:"节日活动", icon:"🎁", meta:"活动中", cls:"focus", limit:2 },
-  { key:"game", label:"游戏通知", icon:"🎮", meta:"", cls:"game", limit:5 },
-  { key:"member", label:"成员动态", icon:"👋", meta:"十号房", cls:"member", limit:3 },
-  { key:"pet", label:"宠物动态", icon:"🐾", meta:"宠物区", cls:"pet", limit:2 }
-];
-const HOLIDAY_SHOW_BEFORE_DAYS = 7;
-const ANNOUNCEMENT_DAY = 24 * 60 * 60 * 1000;
-
-function formatTodayDate(){
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  const day = now.getDate();
-  const weekdays = ["周日","周一","周二","周三","周四","周五","周六"];
-  return `${month}月${day}日 ${weekdays[now.getDay()]}`;
-}
-
-function updateBoardTodayDate(){
-  const target = document.getElementById("boardTodayDate");
-  if(!target) return;
-  target.textContent = formatTodayDate();
-}
-
-function isTinyScreen(){
+/* =========================================================
+   底图 overlay 同步：使用全站通用模板规则
+========================================================= */
+function isMobileLayout(){
   return window.innerWidth <= 540;
 }
 
 function clearDesktopOverlayStyles(){
   if(!overlay) return;
+
   overlay.style.left = "";
   overlay.style.top = "";
   overlay.style.width = "";
   overlay.style.height = "";
+
+  root.style.setProperty("--ui-scale","1");
+  root.style.setProperty("--room-nav-scale","1");
+  root.style.setProperty("--identity-scale","1");
+  root.style.setProperty("--board-scale","1");
 }
 
-/* =========================================================
-   组件独立缩放
-========================================================= */
-function getNavScale(baseScale){
-  /*
-    房间按钮独立缩放：不再使用整组 transform。
-    541px–760px 仍属于桌面版，只轻微压缩按钮自身尺寸、间距和字号，避免按钮被窄桌面挤出或裁切。
-  */
-  const width = window.innerWidth || 0;
-  if(width >= 541 && width <= 760){
-    return Math.max(0.30, baseScale * 0.86);
-  }
-  return baseScale;
-}
-
-function getBoardScale(baseScale){
-  /*
-    公告栏内部独立缩放：只补可读性，不影响房间按钮和身份组件。
-    不再叠加 CSS 过渡区放大规则，避免字号被重复放大。
-  */
-  const width = window.innerWidth || 0;
-  if(width >= 541 && width <= 760){
-    return Math.max(baseScale, 0.50);
-  }
-  return baseScale;
-}
-
-/* =========================================================
-   底图贴合坐标系统
-========================================================= */
 function syncOverlayToImage(){
-  if(isTinyScreen()){
+  if(isMobileLayout()){
     clearDesktopOverlayStyles();
     return;
   }
+
   if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
 
   const frame = bgFrame.getBoundingClientRect();
@@ -1419,21 +1596,37 @@ function syncOverlayToImage(){
   overlay.style.width = `${displayWidth}px`;
   overlay.style.height = `${displayHeight}px`;
 
-  // 底图坐标统一用 baseScale；各组件独立缩放，避免相互连带影响。
-  const baseScale = Math.max(0.34, displayWidth / 1440);
-  const navScale = getNavScale(baseScale);
-  const boardScale = getBoardScale(baseScale);
+  const scale = Math.max(0.45, Math.min(3.2, displayWidth / 1440));
+  const navScale = Math.max(0.38, Math.min(3.2, displayWidth / 1440));
 
-  root.style.setProperty("--bg-ui-scale", String(baseScale));
-  root.style.setProperty("--nav-scale", String(navScale));
-  root.style.setProperty("--identity-scale", String(baseScale));
-  root.style.setProperty("--board-scale", String(boardScale));
+  root.style.setProperty("--ui-scale", String(scale));
+  root.style.setProperty("--room-nav-scale", String(navScale));
+  root.style.setProperty("--identity-scale", String(scale));
+  root.style.setProperty("--board-scale", String(scale));
+}
 
+function refreshTemplateLayout(){
+  syncOverlayToImage();
+
+  if(identityNoticePanel && (identityNoticePanel.classList.contains("show") || !isMobileLayout())){
+    positionIdentityNoticePanel();
+  }
 }
 
 /* =========================================================
-   登录身份读取：兼容旧页面和新页面存储
+   身份组件
 ========================================================= */
+function roleLabel(role){
+  const map = {
+    owner:"维修工",
+    admin:"宿管",
+    member:"房客",
+    applying:"申请人",
+    visitor:"参观者"
+  };
+  return map[String(role || "visitor").toLowerCase()] || "房客";
+}
+
 function getStoredUser(){
   const oldLoggedIn = localStorage.getItem("room10LoggedIn") === "true";
   const oldUser = localStorage.getItem("room10User") || "";
@@ -1469,17 +1662,6 @@ function getStoredUser(){
   }
 }
 
-function getRoleLabel(role){
-  const value = String(role || "").toLowerCase();
-
-  if(value === "owner") return "维修工";
-  if(value === "admin") return "宿管";
-  if(value === "member") return "房客";
-  if(value === "applying") return "申请中";
-
-  return "房客";
-}
-
 function isLoggedIn(){
   const user = getStoredUser();
   return !!(user && user.nickname);
@@ -1488,18 +1670,22 @@ function isLoggedIn(){
 function updateIdentityUI(){
   const user = getStoredUser();
 
-  if(!currentUserText || !loginOpenBtn || !logoutBtn) return;
+  if(!identityNickname || !identitySeparator || !identityRole || !identityAuthBtn) return;
 
   if(!user || !user.nickname){
-    currentUserText.textContent = "参观者";
-    loginOpenBtn.classList.remove("hidden");
-    logoutBtn.classList.add("hidden");
+    identityNickname.textContent = "参观者";
+    identitySeparator.classList.add("hidden");
+    identityRole.classList.add("hidden");
+    identityRole.textContent = "参观者";
+    identityAuthBtn.querySelector(".identityAuthText").textContent = "登录";
     return;
   }
 
-  currentUserText.textContent = `${user.nickname} | ${getRoleLabel(user.role)}`;
-  loginOpenBtn.classList.add("hidden");
-  logoutBtn.classList.remove("hidden");
+  identityNickname.textContent = user.nickname;
+  identitySeparator.classList.remove("hidden");
+  identityRole.classList.remove("hidden");
+  identityRole.textContent = roleLabel(user.role);
+  identityAuthBtn.querySelector(".identityAuthText").textContent = "登出";
 }
 
 function logout(){
@@ -1518,7 +1704,7 @@ function logout(){
   updateIdentityUI();
   renderNoticeList([]);
   loadLivingBoard();
-  handleResponsiveLayout();
+  refreshTemplateLayout();
   window.dispatchEvent(new CustomEvent("room10:logout"));
 }
 
@@ -1537,8 +1723,8 @@ function openLogin(targetPage = ""){
   }
 
   window.location.href = targetPage
-    ? `index.html?login=1&target=${encodeURIComponent(targetPage)}`
-    : "index.html?login=1";
+    ? `../index/index.html?login=1&target=${encodeURIComponent(targetPage)}`
+    : "../index/index.html?login=1";
 }
 
 /* =========================================================
@@ -1552,19 +1738,66 @@ function getCurrentRole(){
 function getManagerPageByRole(){
   const role = getCurrentRole();
 
-  if(role === "owner") return "manager-owner.html";
-  if(role === "admin") return "manager-admin.html";
-  if(role === "member") return "manager-member.html";
+  if(role === "owner") return "../manager/manager-owner.html";
+  if(role === "admin") return "../manager/manager-admin.html";
+  if(role === "member" || role === "applying") return "../manager/manager-member.html";
 
-  return "manager-visitor.html";
+  return "../manager/manager-visitor.html";
 }
 
 function enterManagerRoom(){
   window.location.href = getManagerPageByRole();
 }
 
+function normalizeInternalLink(url){
+  const raw = String(url || "").trim();
+  if(!raw) return "";
+
+  if(/^https?:\/\//i.test(raw) || raw.startsWith("#") || raw.startsWith("mailto:")){
+    return raw;
+  }
+
+  // 已经是跨文件夹相对路径时，保持数据库配置原样，避免前端二次改写。
+  if(raw.startsWith("../")){
+    return raw;
+  }
+
+  const clean = raw.replace(/^\.\//, "").replace(/^\//, "");
+
+  const exactMap = {
+    "index.html":"../index/index.html",
+    "living.html":"../living/living.html",
+
+    "honor.html":"../honor/honor.html",
+    "honor-gallery.html":"../honor/honor-gallery.html",
+    "honor-titles.html":"../honor/honor-titles.html",
+
+    "game.html":"../game/game.html",
+    "game-chain.html":"../game/game-chain.html",
+    "game-time.html":"../game/game-time.html",
+    "game-bomb.html":"../game/bomb/game-bomb.html",
+    "bomb/game-bomb.html":"../game/bomb/game-bomb.html",
+
+    "studio-todo.html":"../studio/studio-todo.html",
+    "studio-project.html":"../studio/studio-project.html",
+    "studio-submit.html":"../studio/studio-submit.html",
+
+    "dorm.html":"../dorm/dorm.html",
+    "flower.html":"../flower/flower.html",
+    "pets.html":"../pet/pets.html",
+    "pet.html":"../pet/pets.html",
+
+    "manager-owner.html":"../manager/manager-owner.html",
+    "manager-admin.html":"../manager/manager-admin.html",
+    "manager-member.html":"../manager/manager-member.html",
+    "manager-visitor.html":"../manager/manager-visitor.html"
+  };
+
+  return exactMap[clean] || raw;
+}
+
 function enterRoom(page, needLogin){
-  const targetPage = String(page || "").trim();
+  const targetPage = normalizeInternalLink(page);
   if(!targetPage) return;
 
   if(needLogin && !isLoggedIn()){
@@ -1572,7 +1805,7 @@ function enterRoom(page, needLogin){
     return;
   }
 
-  if((targetPage === "flower.html" || targetPage === "pets.html") && !isLoggedIn()){
+  if((targetPage.includes("/flower.html") || targetPage.includes("/pets.html")) && !isLoggedIn()){
     window.location.href = `${targetPage}?mode=guest`;
     return;
   }
@@ -1580,9 +1813,275 @@ function enterRoom(page, needLogin){
   window.location.href = targetPage;
 }
 
+function setupRoomNav(currentRoom){
+  const buttons = document.querySelectorAll(".navBtn");
+  const current = String(currentRoom || "").trim();
+
+  buttons.forEach(btn => {
+    const room = btn.dataset.room || "";
+    const isCurrent = room === current;
+
+    btn.classList.toggle("is-current", isCurrent);
+
+    if(isCurrent){
+      btn.setAttribute("aria-current","page");
+      btn.setAttribute("tabindex","-1");
+    }else{
+      btn.removeAttribute("aria-current");
+      btn.removeAttribute("tabindex");
+    }
+
+    btn.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if(btn.classList.contains("is-current")) return;
+
+      if(btn.dataset.manager === "true"){
+        enterManagerRoom();
+        return;
+      }
+
+      enterRoom(btn.dataset.url, btn.dataset.login === "true");
+    });
+  });
+}
+
 /* =========================================================
-   客厅公告栏：数据库读取 + 有内容才显示
+   手机通知框定位：使用全站通用模板规则
 ========================================================= */
+function resetIdentityNoticePanelPosition(){
+  if(!identityNoticePanel) return;
+
+  [
+    "position",
+    "top",
+    "left",
+    "right",
+    "width",
+    "minWidth",
+    "maxWidth",
+    "maxHeight",
+    "padding",
+    "borderRadius",
+    "zIndex",
+    "boxSizing",
+    "overflowX",
+    "overflowY",
+    "transformOrigin"
+  ].forEach(prop => {
+    identityNoticePanel.style[prop] = "";
+  });
+
+  root.style.setProperty("--identity-notice-mobile-top", "58px");
+}
+
+function positionIdentityNoticePanel(){
+  if(!identityNoticePanel) return;
+
+  if(!isMobileLayout()){
+    if(identityNoticeWrap && identityNoticePanel.parentNode !== identityNoticeWrap){
+      identityNoticeWrap.appendChild(identityNoticePanel);
+    }
+    resetIdentityNoticePanelPosition();
+    return;
+  }
+
+  if(identityNoticePanel.parentNode !== document.body){
+    document.body.appendChild(identityNoticePanel);
+  }
+
+  const bar = document.querySelector(".roomIdentityBar") || document.getElementById("roomIdentity") || identityNoticeBtn;
+  const rect = bar ? bar.getBoundingClientRect() : { bottom: 50 };
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 640;
+  const gap = 8;
+  const safeTop = Math.max(8, Math.round(rect.bottom + gap));
+  const top = Math.min(safeTop, Math.max(58, viewportHeight - 120));
+
+  root.style.setProperty("--identity-notice-mobile-top", `${top}px`);
+}
+
+const REQUIRED_PAGE_TEXT_KEYS = [
+  "panel_title",
+  "panel_aria_label",
+  "today_prefix",
+  "loading_text",
+  "empty_text",
+  "error_text",
+  "notice_title",
+  "notice_empty",
+  "notice_default_title",
+  "go_button",
+  "database_error_hint"
+];
+
+let boardCategories = [];
+let boardCategoryMap = new Map();
+let pageTexts = {};
+
+const ANNOUNCEMENT_DAY = 24 * 60 * 60 * 1000;
+
+function toInt(value, fallback){
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.trunc(n) : fallback;
+}
+
+function toBool(value, fallback = false){
+  if(value === true || value === false) return value;
+  if(value === 1 || value === "1") return true;
+  if(value === 0 || value === "0") return false;
+  if(typeof value === "string"){
+    const v = value.trim().toLowerCase();
+    if(["true", "t", "yes", "y", "on"].includes(v)) return true;
+    if(["false", "f", "no", "n", "off"].includes(v)) return false;
+  }
+  return fallback;
+}
+
+function textValue(key){
+  return Object.prototype.hasOwnProperty.call(pageTexts, key) ? String(pageTexts[key] ?? "") : "";
+}
+
+function requirePageText(key){
+  const value = textValue(key);
+  if(!value){
+    throw new Error(`缺少 page_text_settings 配置：living.${key}`);
+  }
+  return value;
+}
+
+function normalizeCategoryRow(row = {}){
+  const key = String(row.category_key || row.key || row.category || "").trim();
+  if(!key) return null;
+
+  return {
+    key,
+    label:String(row.label || row.category_label || key).trim(),
+    icon:String(row.icon || "").trim(),
+    meta:String(row.meta_text || row.meta || "").trim(),
+    cls:String(row.style_class || row.cls || "quick").trim(),
+    limit:Math.max(1, toInt(row.item_limit ?? row.limit, 3)),
+    display_order:toInt(row.display_order, 999),
+    // 分区时间和“去看看”都以 living_board_categories 为准。
+    // 不再按 category=game 做前端特殊兜底。
+    show_time:toBool(row.show_time, true),
+    show_go_button:toBool(row.show_go_button, false),
+    default_link_url:String(row.default_link_url || "").trim(),
+    display_before_days:row.display_before_days === null || row.display_before_days === undefined
+      ? null
+      : Math.max(0, toInt(row.display_before_days, 0))
+  };
+}
+
+function setBoardCategories(categories){
+  const normalized = (Array.isArray(categories) ? categories : [])
+    .map(normalizeCategoryRow)
+    .filter(Boolean)
+    .sort((a, b) => {
+      const orderDiff = Number(a.display_order || 999) - Number(b.display_order || 999);
+      if(orderDiff !== 0) return orderDiff;
+      return String(a.key).localeCompare(String(b.key));
+    });
+
+  if(!normalized.length){
+    throw new Error("living_board_categories 没有可用配置");
+  }
+
+  boardCategories = normalized;
+  boardCategoryMap = new Map(boardCategories.map(item => [item.key, item]));
+}
+
+async function fetchPageTexts(){
+  if(!client) throw new Error("Supabase 客户端没有加载成功");
+
+  const { data, error } = await client
+    .from("page_text_settings")
+    .select("text_key, text_value")
+    .eq("page_key", "living")
+    .eq("is_active", true);
+
+  if(error) throw error;
+
+  const loaded = {};
+  (data || []).forEach(row => {
+    const key = String(row.text_key || "").trim();
+    if(!key) return;
+    loaded[key] = String(row.text_value ?? "");
+  });
+
+  const missing = REQUIRED_PAGE_TEXT_KEYS.filter(key => !String(loaded[key] ?? "").trim());
+  if(missing.length){
+    throw new Error(`page_text_settings 缺少配置：${missing.join(", ")}`);
+  }
+
+  return loaded;
+}
+
+async function fetchBoardCategories(){
+  if(!client) throw new Error("Supabase 客户端没有加载成功");
+
+  const { data, error } = await client
+    .from("living_board_categories")
+    .select("category_key, label, icon, meta_text, style_class, display_order, item_limit, show_time, show_go_button, default_link_url, display_before_days, is_active")
+    .eq("is_active", true)
+    .order("display_order", { ascending:true });
+
+  if(error) throw error;
+  return data || [];
+}
+
+async function loadLivingPageConfig(){
+  const [loadedTexts, loadedCategories] = await Promise.all([
+    fetchPageTexts(),
+    fetchBoardCategories()
+  ]);
+
+  pageTexts = loadedTexts;
+  setBoardCategories(loadedCategories);
+  applyLivingTextSettings();
+}
+
+function renderLivingConfigError(error){
+  console.error("客厅页面配置读取失败：", error);
+
+  const title = document.getElementById("livingPanelTitle");
+  const panel = document.getElementById("livingPanel");
+  const noticeTitle = document.querySelector(".identityNoticeTitle");
+  const noticeContent = document.getElementById("identityNoticeContent");
+
+  if(title) title.textContent = "读取错误";
+  if(panel) panel.setAttribute("aria-label", "读取错误");
+  if(noticeTitle) noticeTitle.textContent = "读取错误";
+  if(noticeContent) noticeContent.innerHTML = '<div class="identityNoticeEmpty">读取错误</div>';
+  if(livingBoardLayout) livingBoardLayout.innerHTML = '<div class="boardError">读取错误</div>';
+}
+
+function applyLivingTextSettings(){
+  const title = document.getElementById("livingPanelTitle");
+  const panel = document.getElementById("livingPanel");
+  const noticeTitle = document.querySelector(".identityNoticeTitle");
+  const noticeEmpty = document.querySelector(".identityNoticeEmpty");
+
+  if(title) title.textContent = requirePageText("panel_title");
+  if(panel) panel.setAttribute("aria-label", requirePageText("panel_aria_label"));
+  if(noticeTitle) noticeTitle.textContent = requirePageText("notice_title");
+  if(noticeEmpty) noticeEmpty.textContent = requirePageText("notice_empty");
+}
+
+function formatTodayDate(){
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  const weekdays = ["周日","周一","周二","周三","周四","周五","周六"];
+  return `${month}月${day}日 ${weekdays[now.getDay()]}`;
+}
+
+function updateBoardTodayDate(){
+  const target = document.getElementById("boardTodayDate");
+  if(!target) return;
+  target.textContent = formatTodayDate();
+}
+
 function parseBoardTimeValue(value){
   if(!value) return 0;
   const time = new Date(value).getTime();
@@ -1618,8 +2117,10 @@ function isAnnouncementActiveByTime(row){
   return true;
 }
 
-function isHolidayCloseEnough(row){
-  if(String(row?.category || "") !== "holiday") return true;
+function isCategoryCloseEnough(row){
+  const category = boardCategoryMap.get(String(row?.category || ""));
+  const beforeDays = category?.display_before_days;
+  if(beforeDays === null || beforeDays === undefined) return true;
 
   const now = Date.now();
   const start = parseBoardTimeValue(row?.start_at || row?.event_at || row?.created_at);
@@ -1629,7 +2130,7 @@ function isHolidayCloseEnough(row){
   if(!start) return false;
   if(start <= now) return true;
 
-  return start - now <= HOLIDAY_SHOW_BEFORE_DAYS * ANNOUNCEMENT_DAY;
+  return start - now <= Number(beforeDays) * ANNOUNCEMENT_DAY;
 }
 
 function getEventSortTime(row){
@@ -1637,70 +2138,19 @@ function getEventSortTime(row){
 }
 
 function getCategoryOrder(category){
-  const index = BOARD_CATEGORIES.findIndex(item => item.key === category);
-  return index >= 0 ? index : 99;
+  const item = boardCategoryMap.get(String(category || ""));
+  return item ? Number(item.display_order || 999) : 999;
 }
 
-function isPlaceholderAnnouncement(row){
-  const category = String(row?.category || "");
-  const content = String(row?.content || row?.title || "").trim();
-  if(category === "honor") return true;
-  if(!content) return true;
-  if(content.includes("暂无")) return true;
-  if(content.includes("暂时没有")) return true;
-  if(content.includes("敬请期待")) return true;
-  if(content.includes("即将开放")) return true;
-  if(content === "荣誉图鉴有新动态。") return true;
-  if(content === "有新成员加入十号房。") return true;
-  return false;
-}
-
-function limitGameRows(rows){
-  const resultByScope = new Map();
-  const output = [];
-
-  rows.forEach(row => {
-    if(row.category !== "game" || row.event_kind !== "game_result"){
-      output.push(row);
-      return;
-    }
-
-    const scope = String(row.event_scope || "game_result");
-    const current = resultByScope.get(scope);
-    if(!current || getEventSortTime(row) > getEventSortTime(current)){
-      resultByScope.set(scope, row);
-    }
-  });
-
-  return output.concat([...resultByScope.values()]);
-}
-
-function isAllowedGameAnnouncement(row){
-  if(String(row?.category || "") !== "game") return true;
-
-  const kind = String(row?.event_kind || "").trim();
-  const scope = String(row?.event_scope || "").trim();
-
-  if(["game_result", "game_rank", "game_start"].includes(kind) && !scope){
-    return false;
-  }
-
-  if(kind === "game_rank" && ["bomb_quick", "bomb_free", "bomb"].includes(scope)){
-    return false;
-  }
-
-  return true;
-}
 
 function normalizeBoardRows(rows){
   const safeRows = Array.isArray(rows) ? rows : [];
-  return limitGameRows(safeRows)
+  return safeRows
     .filter(row => row && row.category)
-    .filter(row => BOARD_CATEGORIES.some(category => category.key === row.category))
-    .filter(row => isAllowedGameAnnouncement(row))
-    .filter(row => !isPlaceholderAnnouncement(row))
+    .filter(row => boardCategoryMap.has(String(row.category || "")))
+    .filter(row => String(row.content || row.title || "").trim())
     .filter(row => isAnnouncementActiveByTime(row))
-    .filter(row => isHolidayCloseEnough(row))
+    .filter(row => isCategoryCloseEnough(row))
     .sort((a, b) => {
       const catDiff = getCategoryOrder(a.category) - getCategoryOrder(b.category);
       if(catDiff !== 0) return catDiff;
@@ -1711,67 +2161,61 @@ function normalizeBoardRows(rows){
     });
 }
 
-function getScopeLabel(row){
-  const scope = String(row?.event_scope || "").trim();
-  const kind = String(row?.event_kind || "").trim();
-  const map = {
-    bomb_quick:"拆弹专家快速模式",
-    bomb_free:"拆弹专家自由模式",
-    bomb:"拆弹专家",
-    face_match:"脸萌挑战",
-    link_game:"连连看",
-    mango_cut:"切芒果"
-  };
-
-  if(map[scope]) return map[scope];
-  if(kind === "game_start") return "游戏开局";
-  if(kind === "game_rank") return "排行榜动态";
-  if(kind === "game_result") return "最新战局";
-  return "";
-}
-
 function groupBoardRows(rows){
   const groups = new Map();
-  BOARD_CATEGORIES.forEach(category => groups.set(category.key, []));
-  normalizeBoardRows(rows).forEach(row => groups.get(row.category)?.push(row));
+  boardCategories.forEach(category => groups.set(category.key, []));
+  normalizeBoardRows(rows).forEach(row => groups.get(String(row.category || ""))?.push(row));
   return groups;
 }
 
-function renderBoardLine(row){
-  const content = escapeHtml(row.content || row.title || "有新动态。");
-  const meta = row.category === "game" ? "" : formatBoardTime(row.event_at || row.created_at);
-  const scopeLabel = row.category === "game" ? getScopeLabel(row) : "";
-  const prefix = scopeLabel ? `<strong>${escapeHtml(scopeLabel)}</strong>：` : "";
+function renderBoardLine(row, options = {}){
+  const category = boardCategoryMap.get(String(row.category || ""));
+  const content = escapeHtml(row.content || row.title || "");
+
+  // 公告正文必须来自数据库的 title/content/link_url。
+  // 前端不再为“游戏通知”“发歌提醒”等事件拼接文案或补游戏名。
+  const shouldShowTime = category ? category.show_time !== false : true;
+  const meta = shouldShowTime ? formatBoardTime(row.event_at || row.created_at) : "";
   const time = meta ? `<em>${escapeHtml(meta)}</em>` : "";
-  return `<li>${prefix}${content}${time}</li>`;
+
+  const target = String(row.link_url || "").trim();
+  const itemLink = options.showItemLink && target
+    ? `<a class="boardGoBtn boardGoBtnInline" href="${escapeHtml(normalizeInternalLink(target))}">${escapeHtml(requirePageText("go_button"))}</a>`
+    : "";
+
+  return `<li>${content}${time}${itemLink}</li>`;
 }
 
-function getBoardLink(category, items){
-  if(category.key !== "game") return "";
-  const target = (items || []).map(item => String(item.link_url || "").trim()).find(Boolean) || "game.html";
-  return `<a class="boardGoBtn" href="${escapeHtml(target)}">去看看</a>`;
+function getBoardLink(category){
+  if(!category?.show_go_button) return "";
+  const target = String(category.default_link_url || "").trim();
+  if(!target) return "";
+  return `<a class="boardGoBtn" href="${escapeHtml(normalizeInternalLink(target))}">${escapeHtml(requirePageText("go_button"))}</a>`;
 }
 
 function renderLivingBoard(rows){
   if(!livingBoardLayout) return;
 
   const groups = groupBoardRows(rows);
-  const sections = BOARD_CATEGORIES.map(category => {
+  const sections = boardCategories.map(category => {
     const items = groups.get(category.key) || [];
     if(!items.length) return "";
 
     const visibleItems = items.slice(0, category.limit || 3);
     const meta = category.meta ? `<small>${escapeHtml(category.meta)}</small>` : "";
-    const link = getBoardLink(category, visibleItems);
+    const link = getBoardLink(category);
+    const headerAside = link || meta;
+    const showItemLink = Boolean(category.show_go_button && !link);
+    const titleText = `${category.icon ? `${category.icon} ` : ""}${category.label}`;
 
     return `
       <article class="boardSection ${escapeHtml(category.cls)}" data-category="${escapeHtml(category.key)}">
         <h2 class="boardSectionTitle">
-          <span>${escapeHtml(category.icon)} ${escapeHtml(category.label)}</span>
-          ${link || meta}
+          <span>${escapeHtml(titleText)}</span>
+          ${headerAside}
         </h2>
         <ul class="boardList">
-          ${visibleItems.map(renderBoardLine).join("")}
+          ${visibleItems.map(item => renderBoardLine(item, { showItemLink })).join("")}
         </ul>
       </article>
     `;
@@ -1780,11 +2224,10 @@ function renderLivingBoard(rows){
   livingBoardLayout.classList.toggle("is-compact", sections.length > 0 && sections.length <= 3);
 
   if(!sections.length){
-    livingBoardLayout.innerHTML = '<div class="boardEmpty">今天白板很干净，暂时没有需要贴出来的新动态。</div>';
+    livingBoardLayout.innerHTML = `<div class="boardEmpty">${escapeHtml(requirePageText("empty_text"))}</div>`;
   }else{
     livingBoardLayout.innerHTML = sections.join("");
   }
-
 }
 
 async function fetchLivingAnnouncements(){
@@ -1793,34 +2236,62 @@ async function fetchLivingAnnouncements(){
   }
 
   const fields = "id, category, event_kind, event_scope, title, content, priority, is_pinned, link_url, event_at, start_at, end_at, created_at";
-  let result = await client
+  const result = await client
     .from("living_announcements_feed")
     .select(fields)
     .order("created_at", { ascending:false });
-
-  if(result.error){
-    result = await client
-      .from("living_announcements")
-      .select(fields)
-      .eq("is_active", true)
-      .order("created_at", { ascending:false });
-  }
 
   if(result.error) throw result.error;
   return result.data || [];
 }
 
+async function syncDailyMemberAnnouncements(){
+  if(!client){
+    throw new Error("Supabase 客户端没有加载成功");
+  }
+
+  const result = await client.rpc("sync_living_daily_member_announcements");
+
+  if(result.error){
+    throw result.error;
+  }
+
+  return result.data;
+}
+
+async function syncReleaseAnnouncements(){
+  if(!client){
+    throw new Error("Supabase 客户端没有加载成功");
+  }
+
+  const result = await client.rpc("sync_living_release_announcements");
+
+  if(result.error){
+    throw result.error;
+  }
+
+  return result.data;
+}
+
+async function syncLivingBeforeRead(){
+  await syncDailyMemberAnnouncements();
+  await syncReleaseAnnouncements();
+}
+
 async function loadLivingBoard(){
   if(!livingBoardLayout) return;
-  livingBoardLayout.innerHTML = '<div class="boardLoading">正在读取客厅公告……</div>';
+  livingBoardLayout.innerHTML = `<div class="boardLoading">${escapeHtml(requirePageText("loading_text"))}</div>`;
   try{
+    await syncLivingBeforeRead();
+
     const rows = await fetchLivingAnnouncements();
     renderLivingBoard(rows);
   }catch(err){
     console.error("读取客厅公告栏失败：", err);
-    livingBoardLayout.innerHTML = '<div class="boardError">公告栏还没有连上数据库。请先检查 living_announcements / living_announcements_feed 设置。</div>';
+    livingBoardLayout.innerHTML = `<div class="boardError">${escapeHtml(requirePageText("error_text"))}<br>${escapeHtml(requirePageText("database_error_hint"))}</div>`;
   }
 }
+
 
 /* =========================================================
    提醒面板
@@ -1844,7 +2315,7 @@ function renderNoticeList(items){
   const list = Array.isArray(items) ? items : [];
 
   if(!list.length){
-    siteNoticeContent.innerHTML = '<div class="siteNoticeEmpty">暂无提醒。</div>';
+    siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">${escapeHtml(requirePageText("notice_empty"))}</div>`;
     setNoticeCount(0);
     return;
   }
@@ -1853,7 +2324,7 @@ function renderNoticeList(items){
     <div class="siteNoticeList">
       ${list.map(item => `
         <div class="siteNoticeItem">
-          <div class="siteNoticeItemTitle">${escapeHtml(item.title || "提醒")}</div>
+          <div class="siteNoticeItemTitle">${escapeHtml(item.title || requirePageText("notice_default_title"))}</div>
           <div class="siteNoticeItemDesc">${escapeHtml(item.desc || "")}</div>
         </div>
       `).join("")}
@@ -1879,45 +2350,63 @@ function handleResponsiveLayout(){
   syncOverlayToImage();
 }
 
+
 /* =========================================================
    初始化
 ========================================================= */
-document.addEventListener("DOMContentLoaded", () => {
+function initLivingPage(){
+  setupRoomNav(CURRENT_ROOM);
   updateBoardTodayDate();
   updateIdentityUI();
-  renderNoticeList([]);
-  loadLivingBoard();
+  loadLivingPageConfig()
+    .then(() => {
+      renderNoticeList([]);
+      loadLivingBoard();
+    })
+    .catch(renderLivingConfigError);
+  refreshTemplateLayout();
 
-  if(siteNoticeBtn){
-    siteNoticeBtn.addEventListener("click", event => {
+  if(identityNoticeBtn){
+    identityNoticeBtn.addEventListener("click", event => {
       event.stopPropagation();
-      toggleNoticePanel();
+      const willShow = !identityNoticePanel.classList.contains("show");
+
+      if(willShow){
+        positionIdentityNoticePanel();
+        identityNoticePanel.classList.add("show");
+      }else{
+        identityNoticePanel.classList.remove("show");
+      }
     });
   }
 
-  if(loginOpenBtn){
-    loginOpenBtn.addEventListener("click", event => {
+  if(identityAuthBtn){
+    identityAuthBtn.addEventListener("click", event => {
       event.stopPropagation();
+
+      if(isLoggedIn()){
+        logout();
+        return;
+      }
+
       openLogin();
     });
   }
 
-  if(logoutBtn){
-    logoutBtn.addEventListener("click", event => {
-      event.stopPropagation();
-      logout();
-    });
-  }
-
   document.addEventListener("click", event => {
-    if(siteNoticePanel && siteNoticeBtn){
-      if(siteNoticePanel.contains(event.target) || siteNoticeBtn.contains(event.target)) return;
-      closeNoticePanel();
+    if(identityNoticePanel && identityNoticeBtn){
+      if(identityNoticePanel.contains(event.target) || identityNoticeBtn.contains(event.target)) return;
+      identityNoticePanel.classList.remove("show");
     }
   });
-});
+}
 
-window.addEventListener("resize", handleResponsiveLayout);
+document.addEventListener("DOMContentLoaded", initLivingPage);
+
+window.addEventListener("resize", refreshTemplateLayout);
+window.addEventListener("orientationchange", () => {
+  setTimeout(refreshTemplateLayout, 80);
+});
 
 window.addEventListener("storage", event => {
   if(
@@ -1934,12 +2423,13 @@ window.addEventListener("storage", event => {
 });
 
 if(img && img.complete && img.naturalWidth){
-  handleResponsiveLayout();
+  refreshTemplateLayout();
 }else if(img){
-  img.addEventListener("load", handleResponsiveLayout, { once:true });
+  img.addEventListener("load", refreshTemplateLayout, { once:true });
 }
 
-setTimeout(handleResponsiveLayout, 80);
+setTimeout(refreshTemplateLayout, 80);
+
 </script>
 </body>
 </html>
