@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜扭蛋机</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../room10-paths.js"></script>
 
 <style>
 *{box-sizing:border-box;}
@@ -813,150 +814,6 @@ img{display:block; max-width:100%; user-select:none; -webkit-user-drag:none;}
 }
 
 
-/* 页面内调试入口：投币口定位工具 */
-.debug-slot-toggle,
-.debug-handle-toggle{
-  position:absolute;
-  left:14px;
-  top:14px;
-  z-index:24;
-  min-height:34px;
-  padding:0 12px;
-  border:none;
-  border-radius:999px;
-  background:rgba(255,252,247,.76);
-  color:#704729;
-  font-size:12px;
-  font-weight:950;
-  border:1px solid rgba(171,126,84,.18);
-  box-shadow:0 5px 14px rgba(117,80,43,.10), inset 0 1px 0 rgba(255,255,255,.94);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-}
-.debug-handle-toggle{left:112px;}
-.debug-slot-toggle.is-active,
-.debug-handle-toggle.is-active{
-  background:linear-gradient(180deg, rgba(250,210,137,.96), rgba(230,184,111,.94));
-  color:#603718;
-}
-.coin-slot-marker{
-  position:absolute;
-  left:var(--coin-slot-x);
-  top:var(--coin-slot-y);
-  z-index:40;
-  width:22px;
-  height:22px;
-  border-radius:999px;
-  transform:translate(-50%, -50%);
-  background:rgba(255,62,62,.92);
-  border:3px solid rgba(255,255,255,.96);
-  box-shadow:0 0 0 2px rgba(255,62,62,.34), 0 6px 14px rgba(80,30,20,.22);
-  cursor:grab;
-  display:none;
-  pointer-events:auto;
-  touch-action:none;
-}
-.coin-slot-marker::before,.coin-slot-marker::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:50%;
-  background:#fff;
-  transform:translate(-50%, -50%);
-  pointer-events:none;
-}
-.coin-slot-marker::before{width:26px;height:2px;}
-.coin-slot-marker::after{width:2px;height:26px;}
-.coin-slot-marker.dragging{cursor:grabbing;transform:translate(-50%, -50%) scale(1.08);}
-.debug-slot-mode .machine-asset-layer,
-.debug-handle-mode .machine-asset-layer{pointer-events:auto;}
-.debug-slot-mode .coin-slot-marker{display:block;}
-.handle-center-marker{
-  position:absolute;
-  left:var(--handle-x);
-  top:var(--handle-y);
-  z-index:90;
-  width:30px;
-  height:30px;
-  border-radius:999px;
-  transform:translate(-50%, -50%);
-  background:rgba(77,132,255,.92);
-  border:3px solid rgba(255,255,255,.96);
-  box-shadow:0 0 0 3px rgba(77,132,255,.34), 0 0 18px rgba(77,132,255,.42), 0 6px 14px rgba(30,50,90,.22);
-  cursor:grab;
-  display:none;
-  pointer-events:auto;
-  touch-action:none;
-}
-.handle-center-marker::before,
-.handle-center-marker::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:50%;
-  background:#fff;
-  transform:translate(-50%, -50%);
-  pointer-events:none;
-}
-.handle-center-marker::before{width:36px;height:2px;}
-.handle-center-marker::after{width:2px;height:36px;}
-.handle-center-marker.dragging{cursor:grabbing;transform:translate(-50%, -50%) scale(1.08);}
-.debug-handle-mode .handle-center-marker{display:block;}
-.debug-slot-panel,
-.debug-handle-panel{
-  position:relative;
-  z-index:3;
-  display:none;
-  width:min(360px, 100%);
-  margin:0 auto;
-  padding:9px 12px;
-  border-radius:18px;
-  background:rgba(255,252,244,.68);
-  border:1px solid rgba(255,255,255,.72);
-  box-shadow:0 10px 22px rgba(110,68,60,.10);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  color:#724824;
-}
-.debug-slot-mode .debug-slot-panel{display:block;}
-.debug-handle-mode .debug-handle-panel{display:block;}
-.debug-slot-title{
-  margin:0 0 5px;
-  font-size:12px;
-  font-weight:950;
-  color:#673b1a;
-  text-align:center;
-}
-.debug-slot-text{
-  margin:0;
-  font-size:12px;
-  line-height:1.55;
-  font-weight:850;
-  color:#8a6344;
-  text-align:center;
-  white-space:pre-line;
-}
-.debug-slot-actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:8px;
-}
-.debug-slot-btn{
-  min-height:32px;
-  padding:0 10px;
-  border:none;
-  border-radius:999px;
-  background:linear-gradient(180deg, rgba(250,210,137,.96), rgba(230,184,111,.94));
-  color:#603718;
-  font-size:12px;
-  font-weight:950;
-  box-shadow:0 5px 12px rgba(121,79,39,.12), inset 0 1px 0 rgba(255,248,230,.96);
-}
-.debug-slot-btn.secondary{
-  background:linear-gradient(180deg, rgba(252,243,232,.92), rgba(237,213,187,.88));
-}
-
 /* 提示 */
 .tip-layer{
   position:fixed;
@@ -1557,19 +1414,6 @@ img{display:block; max-width:100%; user-select:none; -webkit-user-drag:none;}
     right:12px;
   }
 
-  .debug-slot-toggle,
-  .debug-handle-toggle{
-    left:12px;
-    top:12px;
-    min-height:34px;
-    padding:0 10px;
-    font-size:11px;
-  }
-
-  .debug-handle-toggle{
-    left:96px;
-  }
-
 
   .roomIdentity{
     --s:1;position:relative;right:auto;top:auto;width:calc(100% - 50px);min-width:0;height:40px;min-height:40px;margin:-44px 50px 8px 0;z-index:90;
@@ -1655,16 +1499,6 @@ img{display:block; max-width:100%; user-select:none; -webkit-user-drag:none;}
     margin:-2px auto 0;
   }
 
-  .coin-slot-marker{
-    width:20px;
-    height:20px;
-  }
-
-  .debug-slot-panel,
-  .debug-handle-panel{
-    width:100%;
-    margin:4px auto 0;
-  }
   .identityNoticeIcon{
     transform:translateY(0);
   }
@@ -1735,14 +1569,8 @@ html,body{
 .modal-close.hidden{display:none!important;}
 .modal-close.is-game-back{display:none!important;}
 
-/* 已废弃的通用身份组件和调试定位工具不在正式扭蛋弹窗中显示 */
-.roomIdentity,
-.debug-slot-toggle,
-.debug-handle-toggle,
-.coin-slot-marker,
-.handle-center-marker,
-.debug-slot-panel,
-.debug-handle-panel{display:none!important;}
+/* 扭蛋机正式弹窗中不显示通用身份组件。 */
+.roomIdentity{display:none!important;}
 
 .free-draw-panel{
   position:relative;
@@ -1794,7 +1622,7 @@ html,body{
 <body>
 <div class="modal-layer">
   <section class="gacha-card" aria-label="十号房扭蛋机">
-    <button class="modal-close" id="pageBackBtn" type="button" onclick="goBack()" aria-label="关闭">×</button>
+    <button class="modal-close hidden" id="pageBackBtn" type="button" onclick="goBack()" aria-label="关闭">×</button>
 
     <header class="gacha-head">
       <h1 class="gacha-title">扭蛋机</h1>
@@ -1829,11 +1657,11 @@ html,body{
     <div class="gacha-stage-wrap">
       <div class="gacha-stage">
         <div class="machine-wrap" id="machineWrap">
-          <img class="machine-img" id="machineImg" src="gacha-machine.png" alt="扭蛋机">
+          <img class="machine-img" id="machineImg" src="gacha-machine.png" data-room10-asset="gacha.gachaMachine" data-img-name="扭蛋机" data-img-path="gacha-machine.png" alt="扭蛋机">
           <div class="machine-asset-layer" id="machineAssetLayer">
-            <img class="flying-token" id="flyingToken" src="gacha-token-white2.png" alt="投入的游戏币">
-            <img class="handle-img" id="handleImg" src="gacha-handle-spin.png" alt="扭蛋机旋钮">
-            <img class="ball-drop" id="ballDrop" src="gacha-ball-pink.png" alt="掉落的扭蛋" onclick="openCurrentBall()">
+            <img class="flying-token" id="flyingToken" src="gacha-token-white2.png" data-room10-asset="gacha.gachaTokenWhite2" data-img-name="投入的游戏币" data-img-path="gacha-token-white2.png" alt="投入的游戏币">
+            <img class="handle-img" id="handleImg" src="gacha-handle-spin.png" data-room10-asset="gacha.gachaHandleSpin" data-img-name="扭蛋机旋钮" data-img-path="gacha-handle-spin.png" alt="扭蛋机旋钮">
+            <img class="ball-drop" id="ballDrop" src="gacha-ball-pink.png" data-room10-asset="gacha.gachaBallPink" data-img-name="掉落的扭蛋" data-img-path="gacha-ball-pink.png" alt="掉落的扭蛋" onclick="openCurrentBall()">
           </div>
         </div>
       </div>
@@ -1848,25 +1676,25 @@ html,body{
 
     <div class="bottom-bar">
       <button class="pay-btn" type="button" data-tier="white" onclick="handleTierClick('white')">
-        <img class="pay-icon" src="gacha-token-white.png" width="38" height="38" alt="白金游戏币">
+        <img class="pay-icon" src="gacha-token-white.png" data-room10-asset="gacha.gachaTokenWhite" data-img-name="白金游戏币" data-img-path="gacha-token-white.png" width="38" height="38" alt="白金游戏币">
         <span class="pay-name">普通</span>
         <span class="pay-count" id="whiteCount">× 0</span>
       </button>
 
       <button class="pay-btn" type="button" data-tier="purple" onclick="handleTierClick('purple')">
-        <img class="pay-icon" src="gacha-token-purple.png" width="38" height="38" alt="紫金游戏币">
+        <img class="pay-icon" src="gacha-token-purple.png" data-room10-asset="gacha.gachaTokenPurple" data-img-name="紫金游戏币" data-img-path="gacha-token-purple.png" width="38" height="38" alt="紫金游戏币">
         <span class="pay-name">高级</span>
         <span class="pay-count" id="purpleCount">× 0</span>
       </button>
 
       <button class="pay-btn" type="button" data-tier="gold" onclick="handleTierClick('gold')">
-        <img class="pay-icon" src="gacha-token-gold.png" width="38" height="38" alt="金色游戏币">
+        <img class="pay-icon" src="gacha-token-gold.png" data-room10-asset="gacha.gachaTokenGold" data-img-name="金色游戏币" data-img-path="gacha-token-gold.png" width="38" height="38" alt="金色游戏币">
         <span class="pay-name">稀有</span>
         <span class="pay-count" id="goldTokenCount">× 0</span>
       </button>
 
       <div class="coin-balance">
-        <img class="pay-icon" id="coinIconImg" src="../../coin.png" width="38" height="38" alt="金币" data-img-name="金币" data-img-path="../../coin.png">
+        <img class="pay-icon" id="coinIconImg" src="../../coin.png" data-room10-asset="root.coin" width="38" height="38" alt="金币" data-img-name="金币" data-img-path="../../coin.png">
         <span class="pay-name">金币</span>
         <span class="pay-count" id="coinCount">× 0</span>
       </div>
@@ -1924,9 +1752,43 @@ const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+function room10AssetUrl(keyPath, fallbackPath = ""){
+  if(keyPath && typeof window.room10Asset === "function"){
+    const url = window.room10Asset(keyPath);
+    if(url) return url;
+  }
+
+  if(fallbackPath && typeof window.room10Path === "function" && !/^(https?:|data:|blob:|\/|\.\.?\/)/i.test(fallbackPath)){
+    return window.room10Path(fallbackPath);
+  }
+
+  return fallbackPath || "";
+}
+
+function room10PageUrl(key, fallbackPath = ""){
+  if(key && typeof window.room10Page === "function"){
+    const url = window.room10Page(key);
+    if(url) return url;
+  }
+
+  if(fallbackPath && typeof window.room10Path === "function" && !/^(https?:|data:|blob:|\/|\.\.?\/)/i.test(fallbackPath)){
+    return window.room10Path(fallbackPath);
+  }
+
+  return fallbackPath || "";
+}
+
 const ASSETS = {
-  machineFrames: ["gacha-machine.png"],
-  handleIdle: "gacha-handle-spin.png"
+  machineFrames: [room10AssetUrl("gacha.gachaMachine", "gacha-machine.png")],
+  handleIdle: room10AssetUrl("gacha.gachaHandleSpin", "gacha-handle-spin.png"),
+  ballPink: room10AssetUrl("gacha.gachaBallPink", "gacha-ball-pink.png"),
+  tokenWhite: room10AssetUrl("gacha.gachaTokenWhite", "gacha-token-white.png"),
+  tokenWhite2: room10AssetUrl("gacha.gachaTokenWhite2", "gacha-token-white2.png"),
+  tokenPurple: room10AssetUrl("gacha.gachaTokenPurple", "gacha-token-purple.png"),
+  tokenPurple2: room10AssetUrl("gacha.gachaTokenPurple2", "gacha-token-purple2.png"),
+  tokenGold: room10AssetUrl("gacha.gachaTokenGold", "gacha-token-gold.png"),
+  tokenGold2: room10AssetUrl("gacha.gachaTokenGold2", "gacha-token-gold2.png"),
+  coin: room10AssetUrl("root.coin", "../../coin.png")
 };
 
 const TIERS = {
@@ -1981,19 +1843,6 @@ const state = {
     role: "visitor",
     noticeCount: 0
   },
-  debugSlot: {
-    enabled: false,
-    dragging: false,
-    x: 32.22,
-    y: 65.93
-  },
-  debugHandle: {
-    enabled: false,
-    dragging: false,
-    x: 49.80,
-    y: 69.73,
-    size: 16.50
-  },
   machineAssetRatio: null,
   machineAssetResizeObserver: null
 };
@@ -2004,14 +1853,33 @@ const rewardIconMap={"金币":"🪙","普通游戏币":"⚪","高级游戏币":"
 function escapeHtml(value){return String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
 
 function normalizeIconPath(value){
-  const src = String(value || '').trim();
-  if(!src) return '';
+  const src = String(value || "").trim();
+  if(!src) return "";
+  if(/^(https?:|data:|blob:|\/)/i.test(src)) return src;
 
-  // 当前扭蛋机文件按完整分类结构放在 room10/game/gacha/。
-  // 数据库里仍可保存从 game/ 页面角度写的 ../coin.png、../flower/xxx.png，
-  // 前端在这里统一换算成从 game/gacha/ 出发的真实路径。
-  if(src === '../coin.png' || src === './coin.png' || src === 'coin.png') return '../../coin.png';
-  if(src.startsWith('../flower/')) return '../' + src;
+  const clean = src.replace(/^\.\//, "");
+
+  if(clean === "coin.png" || clean === "../coin.png" || clean === "../../coin.png"){
+    return ASSETS.coin;
+  }
+
+  if(/^(\.\.\/|\.\.\/\.\.\/)(badges|dorm|flower|game|honor|living|manager|pet|studio)\//.test(clean)){
+    const path = clean.replace(/^(\.\.\/)+/, "");
+    return typeof window.room10Path === "function" ? window.room10Path(path) : "../../" + path;
+  }
+
+  if(clean.startsWith("game/gacha/")){
+    return typeof window.room10Path === "function" ? window.room10Path(clean) : "../../" + clean;
+  }
+
+  if(clean.startsWith("gacha-")){
+    return typeof window.room10Path === "function" ? window.room10Path("game/gacha/" + clean) : clean;
+  }
+
+  if(/^(badges|dorm|flower|game|honor|living|manager|pet|studio)\//.test(clean)){
+    return typeof window.room10Path === "function" ? window.room10Path(clean) : "../../" + clean;
+  }
+
   return src;
 }
 
@@ -2044,6 +1912,24 @@ function setupImageErrorReports(root=document){
       markImageLoadError(img, img.dataset.imgPath || img.getAttribute('src') || '');
     });
   });
+}
+
+function setAssetImage(selector, src){
+  const img = document.querySelector(selector);
+  if(!img || !src) return;
+  img.src = src;
+  img.dataset.imgPath = src;
+}
+
+function applyConfiguredAssetPaths(){
+  setAssetImage('#machineImg', ASSETS.machineFrames[0]);
+  setAssetImage('#flyingToken', ASSETS.tokenWhite2);
+  setAssetImage('#handleImg', ASSETS.handleIdle);
+  setAssetImage('#ballDrop', ASSETS.ballPink);
+  setAssetImage('.pay-btn[data-tier="white"] .pay-icon', ASSETS.tokenWhite);
+  setAssetImage('.pay-btn[data-tier="purple"] .pay-icon', ASSETS.tokenPurple);
+  setAssetImage('.pay-btn[data-tier="gold"] .pay-icon', ASSETS.tokenGold);
+  setAssetImage('#coinIconImg', ASSETS.coin);
 }
 function normalizeRewardItem(item){if(typeof item==="string")return{name:item,amount:"",unit:"",icon:rewardIconMap[item]||"✨"};return{name:item.name||"奖励",amount:item.amount??"",unit:item.unit||"",icon:item.icon||rewardIconMap[item.name]||"✨",prefix:item.prefix||""};}
 function formatRewardAmount(item){if(item.amount===""||item.amount===null||item.amount===undefined)return"";if(typeof item.amount==="number")return`${item.amount>0?"+":""}${item.amount}${item.unit||""}`;return`${item.prefix||""}${item.amount}${item.unit||""}`;}
@@ -2090,7 +1976,8 @@ function goBack(){
     return;
   }
 
-  window.location.href = "../dorm/dorm.html?open=book";
+  const dormUrl = room10PageUrl("dorm", "../../dorm/dorm.html");
+  window.location.href = dormUrl + (dormUrl.includes("?") ? "&" : "?") + "open=book";
 }
 
 function roleLabel(role){
@@ -2323,8 +2210,8 @@ async function loadGachaState(){
 
 function normalizeBall(source = {}){
   const ballSource = source.ball || source.gacha_ball || source;
-  const closedImg = textFrom(ballSource,["closed_img","closed_image","ball_closed_img","ball_image"],"");
-  const openImg = textFrom(ballSource,["open_img","open_image","ball_open_img"],"");
+  const closedImg = normalizeIconPath(textFrom(ballSource,["closed_img","closed_image","ball_closed_img","ball_image"],""));
+  const openImg = normalizeIconPath(textFrom(ballSource,["open_img","open_image","ball_open_img"],""));
   if(!closedImg || !openImg) throw new Error("数据库没有返回完整的扭蛋图片。");
   return {
     key:textFrom(ballSource,["key","ball_key","color_key"],""),
@@ -2359,7 +2246,7 @@ function normalizeResultItem(raw, fallbackImage = ""){
   return {
     name:textFrom(item,["display_name","name","item_name","reward_name"],"本次获得"),
     quantity,
-    image:textFrom(item,["image","image_path","icon","item_img","reward_img"],fallbackImage),
+    image:normalizeIconPath(textFrom(item,["image","image_path","icon","item_img","reward_img"],fallbackImage)),
     description:textFrom(item,["description","message","text"],textFrom(data,["message"],"已放入背包。"))
   };
 }
@@ -2727,12 +2614,13 @@ function playTokenInsertAnimation(tierKey, payType){
   if(!token) return Promise.resolve();
 
   const srcMap = {
-    white:"gacha-token-white2.png",
-    purple:"gacha-token-purple2.png",
-    gold:"gacha-token-gold2.png"
+    white:ASSETS.tokenWhite2,
+    purple:ASSETS.tokenPurple2,
+    gold:ASSETS.tokenGold2
   };
 
-  token.src = srcMap[tierKey] || "gacha-token-white2.png";
+  token.src = srcMap[tierKey] || ASSETS.tokenWhite2;
+  token.dataset.imgPath = token.src;
   token.classList.remove("playing");
   token.style.position = "absolute";
   token.style.left = "var(--coin-slot-x)";
@@ -2950,282 +2838,6 @@ function setupTooltips(){
 }
 
 
-function isDebugSlotMode(){
-  const params = new URLSearchParams(window.location.search);
-  return params.get("debugSlot") === "1" || params.get("debugSlot") === "true";
-}
-
-function isDebugHandleMode(){
-  const params = new URLSearchParams(window.location.search);
-  return params.get("debugHandle") === "1" || params.get("debugHandle") === "true";
-}
-
-function clampPercent(value){
-  const num = Number(value);
-  if(!Number.isFinite(num)) return 0;
-  return Math.max(0, Math.min(100, num));
-}
-
-function updateCoinSlotMarker(x, y){
-  state.debugSlot.x = clampPercent(x);
-  state.debugSlot.y = clampPercent(y);
-  const xText = state.debugSlot.x.toFixed(2);
-  const yText = state.debugSlot.y.toFixed(2);
-
-  document.documentElement.style.setProperty("--coin-slot-x", `${xText}%`);
-  document.documentElement.style.setProperty("--coin-slot-y", `${yText}%`);
-
-  const text = document.getElementById("debugSlotText");
-  if(text){
-    text.textContent =
-      `X: ${xText}%\nY: ${yText}%\n\nCSS：--coin-slot-x:${xText}%; --coin-slot-y:${yText}%;`;
-  }
-
-  localStorage.setItem("room10GachaCoinSlotX", xText);
-  localStorage.setItem("room10GachaCoinSlotY", yText);
-}
-
-function getPercentFromPointer(event){
-  updateMachineAssetLayer();
-
-  const layer = document.getElementById("machineAssetLayer");
-  if(!layer) return null;
-
-  const rect = layer.getBoundingClientRect();
-  if(!rect.width || !rect.height) return null;
-
-  const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-  const clientY = event.touches ? event.touches[0].clientY : event.clientY;
-
-  return {
-    x: ((clientX - rect.left) / rect.width) * 100,
-    y: ((clientY - rect.top) / rect.height) * 100
-  };
-}
-
-function moveCoinSlotByEvent(event){
-  const point = getPercentFromPointer(event);
-  if(!point) return;
-  updateCoinSlotMarker(point.x, point.y);
-}
-
-function updateHandleMarker(x, y, size){
-  state.debugHandle.x = clampPercent(x);
-  state.debugHandle.y = clampPercent(y);
-  const nextSize = Number(size);
-  if(Number.isFinite(nextSize)){
-    state.debugHandle.size = Math.max(8, Math.min(32, nextSize));
-  }
-
-  const xText = state.debugHandle.x.toFixed(2);
-  const yText = state.debugHandle.y.toFixed(2);
-  const sizeText = state.debugHandle.size.toFixed(2);
-
-  document.documentElement.style.setProperty("--handle-x", `${xText}%`);
-  document.documentElement.style.setProperty("--handle-y", `${yText}%`);
-  document.documentElement.style.setProperty("--handle-size", `${sizeText}%`);
-
-  const text = document.getElementById("debugHandleText");
-  if(text){
-    text.textContent =
-      `X: ${xText}%\nY: ${yText}%\n大小: ${sizeText}%\n\nCSS：--handle-x:${xText}%; --handle-y:${yText}%; --handle-size:${sizeText}%;`;
-  }
-
-  localStorage.setItem("room10GachaHandleX", xText);
-  localStorage.setItem("room10GachaHandleY", yText);
-  localStorage.setItem("room10GachaHandleSize", sizeText);
-}
-
-function moveHandleByEvent(event){
-  const point = getPercentFromPointer(event);
-  if(!point) return;
-  updateHandleMarker(point.x, point.y, state.debugHandle.size);
-}
-
-function isUsableHandleDebugValue(x, y, size){
-  return Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(size)
-    && x >= 8 && x <= 92
-    && y >= 8 && y <= 92
-    && size >= 8 && size <= 32;
-}
-
-function setHandleDebugVisible(enabled){
-  state.debugHandle.enabled = !!enabled;
-  document.body.classList.toggle("debug-handle-mode", state.debugHandle.enabled);
-
-  const toggle = document.getElementById("debugHandleToggle");
-  if(toggle){
-    toggle.classList.toggle("is-active", state.debugHandle.enabled);
-    toggle.textContent = state.debugHandle.enabled ? "关闭旋钮" : "定位旋钮";
-  }
-
-  if(state.debugHandle.enabled){
-    updateMachineAssetLayer();
-
-    /* 打开调试时先使用当前确认参数，避免旧 localStorage 缓存把旋钮带到旧位置 */
-    updateHandleMarker(state.debugHandle.x, state.debugHandle.y, state.debugHandle.size);
-
-    setStatus("拖动蓝点确认旋钮中心；点击机器区域也可以移动中心。可用下方按钮调整大小。");
-  }else if(!state.debugSlot.enabled){
-    setStatus("准备好了。");
-  }
-}
-
-function toggleHandleDebugTool(){
-  setHandleDebugVisible(!state.debugHandle.enabled);
-}
-
-function adjustHandleSize(delta){
-  const step = Number(delta) || 0;
-  updateHandleMarker(state.debugHandle.x, state.debugHandle.y, state.debugHandle.size + step);
-  setStatus(`旋钮大小已调整为 ${state.debugHandle.size.toFixed(2)}%。`);
-}
-
-async function copyHandleCoords(){
-  const xText = state.debugHandle.x.toFixed(2);
-  const yText = state.debugHandle.y.toFixed(2);
-  const sizeText = state.debugHandle.size.toFixed(2);
-  const text = `--handle-x:${xText}%; --handle-y:${yText}%; --handle-size:${sizeText}%;`;
-
-  try{
-    await navigator.clipboard.writeText(text);
-    setStatus("旋钮参数已复制。");
-  }catch(err){
-    console.log(text);
-    setStatus(`复制失败，请手动记录：${text}`);
-  }
-}
-
-function resetHandleCoords(){
-  updateMachineAssetLayer();
-  updateHandleMarker(49.80, 69.73, 16.50);
-  setStatus("旋钮参数已重置，请拖动蓝点确认中心。");
-}
-
-function setupHandleDebugTool(){
-  const marker = document.getElementById("handleCenterMarker");
-  const layer = document.getElementById("machineAssetLayer");
-  if(!marker || !layer) return;
-
-  marker.addEventListener("pointerdown", event => {
-    event.preventDefault();
-    state.debugHandle.dragging = true;
-    marker.classList.add("dragging");
-    marker.setPointerCapture(event.pointerId);
-    moveHandleByEvent(event);
-  });
-
-  marker.addEventListener("pointermove", event => {
-    if(!state.debugHandle.dragging) return;
-    event.preventDefault();
-    moveHandleByEvent(event);
-  });
-
-  marker.addEventListener("pointerup", event => {
-    state.debugHandle.dragging = false;
-    marker.classList.remove("dragging");
-    try{ marker.releasePointerCapture(event.pointerId); }catch(err){}
-  });
-
-  marker.addEventListener("pointercancel", event => {
-    state.debugHandle.dragging = false;
-    marker.classList.remove("dragging");
-    try{ marker.releasePointerCapture(event.pointerId); }catch(err){}
-  });
-
-  layer.addEventListener("click", event => {
-    if(!state.debugHandle.enabled) return;
-    if(event.target === marker || event.target === document.getElementById("coinSlotMarker")) return;
-    moveHandleByEvent(event);
-  });
-
-  setHandleDebugVisible(isDebugHandleMode());
-}
-
-function setCoinSlotDebugVisible(enabled){
-  state.debugSlot.enabled = !!enabled;
-  document.body.classList.toggle("debug-slot-mode", state.debugSlot.enabled);
-
-  const toggle = document.getElementById("debugSlotToggle");
-  if(toggle){
-    toggle.classList.toggle("is-active", state.debugSlot.enabled);
-    toggle.textContent = state.debugSlot.enabled ? "关闭定位" : "定位投币口";
-  }
-
-  if(state.debugSlot.enabled){
-    const savedX = Number(localStorage.getItem("room10GachaCoinSlotX"));
-    const savedY = Number(localStorage.getItem("room10GachaCoinSlotY"));
-    updateCoinSlotMarker(Number.isFinite(savedX) ? savedX : 32.22, Number.isFinite(savedY) ? savedY : 65.93);
-    setStatus("拖动红点定位投币口。");
-  }else if(!state.debugHandle.enabled){
-    setStatus("准备好了。");
-  }
-}
-
-function toggleCoinSlotDebugTool(){
-  setCoinSlotDebugVisible(!state.debugSlot.enabled);
-}
-
-function setupCoinSlotDebugTool(){
-  const marker = document.getElementById("coinSlotMarker");
-  const stage = document.getElementById("machineAssetLayer");
-  if(!marker || !stage) return;
-
-  marker.addEventListener("pointerdown", event => {
-    event.preventDefault();
-    state.debugSlot.dragging = true;
-    marker.classList.add("dragging");
-    marker.setPointerCapture(event.pointerId);
-    moveCoinSlotByEvent(event);
-  });
-
-  marker.addEventListener("pointermove", event => {
-    if(!state.debugSlot.dragging) return;
-    event.preventDefault();
-    moveCoinSlotByEvent(event);
-  });
-
-  marker.addEventListener("pointerup", event => {
-    state.debugSlot.dragging = false;
-    marker.classList.remove("dragging");
-    try{ marker.releasePointerCapture(event.pointerId); }catch(err){}
-  });
-
-  marker.addEventListener("pointercancel", event => {
-    state.debugSlot.dragging = false;
-    marker.classList.remove("dragging");
-    try{ marker.releasePointerCapture(event.pointerId); }catch(err){}
-  });
-
-  stage.addEventListener("click", event => {
-    if(!state.debugSlot.enabled) return;
-    if(event.target === marker) return;
-    moveCoinSlotByEvent(event);
-  });
-
-  setCoinSlotDebugVisible(isDebugSlotMode());
-}
-
-async function copyCoinSlotCoords(){
-  const xText = state.debugSlot.x.toFixed(2);
-  const yText = state.debugSlot.y.toFixed(2);
-  const text = `--coin-slot-x:${xText}%; --coin-slot-y:${yText}%;`;
-
-  try{
-    await navigator.clipboard.writeText(text);
-    setStatus("投币口坐标已复制。");
-  }catch(err){
-    console.log(text);
-    setStatus(`复制失败，请手动记录：${text}`);
-  }
-}
-
-function resetCoinSlotCoords(){
-  updateCoinSlotMarker(32.22, 65.93);
-  setStatus("投币口坐标已重置。");
-}
-
-
 async function init(){
   state.source = getPageSource();
   configureBackButton();
@@ -3246,7 +2858,9 @@ async function init(){
   hideResultActions();
 
   document.getElementById("machineImg").src = ASSETS.machineFrames[0];
+  document.getElementById("machineImg").dataset.imgPath = ASSETS.machineFrames[0];
   document.getElementById("handleImg").src = ASSETS.handleIdle;
+  document.getElementById("handleImg").dataset.imgPath = ASSETS.handleIdle;
   updateMachineAssetLayer();
 
   if(state.identity.loggedIn){
@@ -3257,7 +2871,7 @@ async function init(){
   updateGuestAccess();
 }
 
-document.addEventListener("DOMContentLoaded", ()=>{setupImageErrorReports();init();});
+document.addEventListener("DOMContentLoaded", ()=>{applyConfiguredAssetPaths();setupImageErrorReports();init();});
 document.getElementById("rewardMask")?.addEventListener("click",function(event){if(event.target===this)closeRewardModal();});
 document.addEventListener("keydown",function(event){if(event.key==="Escape")closeRewardModal();});
 
