@@ -4,12 +4,27 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜收集图鉴</title>
+<script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{ box-sizing:border-box; }
 :root{
   --ink:#704721;
   --book-scale:1;
+  --book-left-grid-left:16.89%;
+  --book-left-grid-top:28.89%;
+  --book-left-grid-width:30.2%;
+  --book-left-grid-height:54.0%;
+  --book-left-grid-row-gap:3.85%;
+  --book-left-grid-column-gap:3.0%;
+  --book-left-card-base-height:86px;
+  --book-right-grid-left:52.62%;
+  --book-right-grid-top:28.89%;
+  --book-right-grid-width:33.7%;
+  --book-right-grid-height:25.1%;
+  --book-right-grid-row-gap:8.0%;
+  --book-right-grid-column-gap:3.0%;
+  --book-right-card-base-height:86px;
 }
 html,body{
   margin:0;
@@ -113,24 +128,25 @@ button{ font-family:inherit; }
 
 /* 左页收集格：按 book-open.png 四角定位 */
 .bookLeftGridPanel{
-  left:15.20%;
-  top:28.60%;
-  width:30.2%;
-  height:42.5%;
+  left:var(--book-left-grid-left)!important;
+  top:var(--book-left-grid-top)!important;
+  width:var(--book-left-grid-width)!important;
+  height:var(--book-left-grid-height)!important;
   overflow:hidden;
 }
 
 .leftItemGrid{
   grid-template-columns:repeat(4,minmax(0,1fr));
-  column-gap:3.0%;
-  row-gap:6.2%;
+  column-gap:var(--book-left-grid-column-gap)!important;
+  row-gap:var(--book-left-grid-row-gap)!important;
   justify-content:stretch;
   align-content:start;
   padding:0 1.0%;
 }
 
 .leftItemGrid .itemCard{
-  min-height:calc(86px * var(--book-scale));
+  height:calc(var(--book-left-card-base-height) * var(--book-scale));
+  min-height:calc(var(--book-left-card-base-height) * var(--book-scale));
   padding:calc(7px * var(--book-scale)) calc(5px * var(--book-scale));
 }
 
@@ -147,18 +163,29 @@ button{ font-family:inherit; }
 
 .gridSpacer{
   min-width:0;
-  min-height:calc(86px * var(--book-scale));
+  height:calc(var(--book-left-card-base-height) * var(--book-scale));
+  min-height:calc(var(--book-left-card-base-height) * var(--book-scale));
   visibility:hidden;
   pointer-events:none;
 }
 
 /* 右页物品区：按 book-open.png 四角定位 */
 .bookGridPanel{
-  left:51.50%;
-  top:26.70%;
-  width:33.7%;
-  height:25.1%;
+  left:var(--book-right-grid-left)!important;
+  top:var(--book-right-grid-top)!important;
+  width:var(--book-right-grid-width)!important;
+  height:var(--book-right-grid-height)!important;
   overflow:hidden;
+}
+
+.rightItemGrid{
+  column-gap:var(--book-right-grid-column-gap)!important;
+  row-gap:var(--book-right-grid-row-gap)!important;
+}
+
+.rightItemGrid .itemCard{
+  height:calc(var(--book-right-card-base-height) * var(--book-scale));
+  min-height:calc(var(--book-right-card-base-height) * var(--book-scale));
 }
 
 .progressCard{
@@ -447,6 +474,138 @@ button{ font-family:inherit; }
   font-weight:900;
 }
 
+
+
+body.gachaPopupOpen{
+  overflow:hidden;
+}
+
+.gachaPopupModal{
+  position:fixed;
+  inset:0;
+  z-index:860;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255,246,230,.20), transparent 34%),
+    rgba(67,45,26,.26);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+}
+.gachaPopupModal.show{
+  display:flex;
+}
+.gachaPopupStage{
+  position:relative;
+  width:min(520px, 92vw);
+  height:min(730px, 88vh);
+  border-radius:30px;
+  padding:10px;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255,255,255,.70), transparent 34%),
+    linear-gradient(180deg, rgba(255,251,244,.96), rgba(247,232,211,.92));
+  border:1px solid rgba(184,127,69,.24);
+  box-shadow:
+    0 26px 58px rgba(74,49,26,.28),
+    inset 0 1px 0 rgba(255,255,255,.86);
+  overflow:hidden;
+}
+.gachaPopupStage::before,
+.gachaPopupStage::after{
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  border-radius:999px;
+}
+.gachaPopupStage::before{
+  left:18px;
+  top:16px;
+  width:138px;
+  height:72px;
+  background:rgba(255,240,210,.42);
+  filter:blur(18px);
+}
+.gachaPopupStage::after{
+  right:18px;
+  bottom:16px;
+  width:160px;
+  height:86px;
+  background:rgba(222,188,145,.24);
+  filter:blur(20px);
+}
+.gachaPopupInner{
+  position:relative;
+  z-index:2;
+  width:100%;
+  height:100%;
+  border-radius:22px;
+  overflow:hidden;
+  background:rgba(255,250,242,.62);
+  border:1px solid rgba(180,126,73,.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.76),
+    0 8px 18px rgba(108,70,34,.07);
+}
+.gachaPopupInner iframe{
+  width:100%;
+  height:100%;
+  border:0;
+  display:block;
+  background:transparent;
+}
+.gachaPopupClose{
+  position:absolute;
+  z-index:5;
+  top:8px;
+  right:8px;
+  width:40px;
+  height:40px;
+  border:0;
+  border-radius:999px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  background:rgba(255,249,239,.94);
+  color:#76502f;
+  font-size:24px;
+  line-height:1;
+  font-weight:900;
+  box-shadow:
+    0 8px 18px rgba(86,57,31,.16),
+    inset 0 1px 0 rgba(255,255,255,.92);
+  border:1px solid rgba(184,127,69,.20);
+}
+.gachaPopupClose:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.02);
+}
+
+@media (max-width:540px){
+  .gachaPopupModal{
+    padding:8px;
+  }
+  .gachaPopupStage{
+    width:min(430px, 96vw);
+    height:min(92vh, 92dvh);
+    border-radius:22px;
+    padding:7px;
+  }
+  .gachaPopupInner{
+    border-radius:17px;
+  }
+  .gachaPopupClose{
+    top:6px;
+    right:6px;
+    width:36px;
+    height:36px;
+    font-size:22px;
+  }
+}
+
 @media (max-width:540px){
   body{ padding:0; align-items:center; overflow:hidden; }
   .collectionBookModal{ padding:calc(8px * var(--book-scale)); align-items:center; }
@@ -471,12 +630,20 @@ button{ font-family:inherit; }
     padding:0;
     gap:calc(7px * var(--book-scale));
   }
-  .bookLeftGridPanel{ display:none; }
+  .bookLeftGridPanel{ display:none!important; }
   .bookGridPanel{
-    left:19.47%;
-    top:41.36%;
-    width:64.00%;
-    height:39.20%;
+    left:19.47%!important;
+    top:41.36%!important;
+    width:64.00%!important;
+    height:39.20%!important;
+  }
+  .rightItemGrid{
+    column-gap:calc(7px * var(--book-scale))!important;
+    row-gap:calc(7px * var(--book-scale))!important;
+  }
+  .rightItemGrid .itemCard{
+    height:auto!important;
+    min-height:calc(78px * var(--book-scale))!important;
   }
   .progressCard{ padding:calc(8px * var(--book-scale)) calc(10px * var(--book-scale)); border-radius:calc(14px * var(--book-scale)); }
   .progressLabel{ display:none; }
@@ -575,6 +742,7 @@ button{ font-family:inherit; }
     aspect-ratio:1;
   }
 }
+
 </style>
 </head>
 <body>
@@ -624,6 +792,16 @@ button{ font-family:inherit; }
   </div>
 </div>
 
+
+<div class="gachaPopupModal" id="gachaPopupModal" aria-hidden="true">
+  <div class="gachaPopupStage" role="dialog" aria-modal="true" aria-label="扭蛋机">
+    <button class="gachaPopupClose" type="button" id="gachaPopupCloseBtn" aria-label="关闭扭蛋机">×</button>
+    <div class="gachaPopupInner">
+      <iframe id="gachaPopupFrame" src="about:blank" title="十号房扭蛋机" loading="lazy"></iframe>
+    </div>
+  </div>
+</div>
+
 <div class="imagePreviewModal" id="imagePreviewModal" aria-hidden="true">
   <div class="imagePreviewCard">
     <img id="imagePreviewImg" src="" alt="">
@@ -632,11 +810,41 @@ button{ font-family:inherit; }
   </div>
 </div>
 
+
 <script>
 const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 window.room10Supabase = supabaseClient;
+
+const ROOM10_ROOT_PREFIX = window.ROOM10_ROOT || "../";
+
+function room10Url(path){
+  const raw = String(path || "").trim();
+  if(!raw) return "";
+  if(/^(https?:|data:|blob:|mailto:|tel:|#|\/)/i.test(raw)) return raw;
+  if(raw.startsWith("./") || raw.startsWith("../")) return raw;
+  if(typeof window.room10Path === "function") return window.room10Path(raw);
+  return `${ROOM10_ROOT_PREFIX}${raw}`;
+}
+
+function room10PageUrl(key, fallbackPath){
+  const pageKey = String(key || "").trim();
+  if(pageKey && typeof window.room10Page === "function"){
+    const url = window.room10Page(pageKey);
+    if(url) return url;
+  }
+  return room10Url(fallbackPath || "");
+}
+
+function room10AssetUrl(keyPath, fallbackPath){
+  const assetKey = String(keyPath || "").trim();
+  if(assetKey && typeof window.room10Asset === "function"){
+    const url = window.room10Asset(assetKey);
+    if(url) return url;
+  }
+  return room10Url(fallbackPath || "");
+}
 
 const STORAGE_KEYS = {
   loggedIn:"room10LoggedIn",
@@ -679,6 +887,8 @@ function syncBookScale(){
 }
 
 const modal = document.getElementById("collectionBookModal");
+const gachaPopupModal = document.getElementById("gachaPopupModal");
+const gachaPopupFrame = document.getElementById("gachaPopupFrame");
 const bookTitle = document.getElementById("bookTitle");
 const categoryProgress = document.getElementById("categoryProgress");
 const categoryProgressFill = document.getElementById("categoryProgressFill");
@@ -692,7 +902,7 @@ function unlockedCount(items){ return items.filter(item => item.isUnlocked).leng
 function totalUnlocked(){ return categories.reduce((sum,category) => sum + unlockedCount(category.items), 0); }
 function totalItems(){ return categories.reduce((sum,category) => sum + category.items.length, 0); }
 function isMobileLayout(){ return window.matchMedia("(max-width:540px)").matches; }
-function perBookPage(){ return isMobileLayout() ? 12 : 19; }
+function perBookPage(){ return isMobileLayout() ? 12 : 22; }
 function categoryPageCount(category){
   return Math.max(1, Math.ceil(category.items.length / perBookPage()));
 }
@@ -720,11 +930,138 @@ function escapeHtml(value){
 function isImageIcon(icon){
   return /\.(png|jpe?g|webp|gif|svg)$/i.test(String(icon || ""));
 }
-function renderIcon(icon){
+function getGachaColorAssetKey(itemKey){
+  const map = {
+    gacha_color_blue:"gacha.gachaBallBlue",
+    gacha_color_green:"gacha.gachaBallGreen",
+    gacha_color_pink:"gacha.gachaBallPink",
+    gacha_color_yellow:"gacha.gachaBallYellow",
+    gacha_color_purple:"gacha.gachaBallPurple"
+  };
+  return map[String(itemKey || "").trim()] || "";
+}
+
+function getGachaColorFileName(itemKey, icon){
+  const key = String(itemKey || "").trim();
+  const iconName = String(icon || "").trim().replace(/^\.\//, "").split("/").pop();
+  const map = {
+    gacha_color_blue:"gacha-ball-blue.png",
+    gacha_color_green:"gacha-ball-green.png",
+    gacha_color_pink:"gacha-ball-pink.png",
+    gacha_color_yellow:"gacha-ball-yellow.png",
+    gacha_color_purple:"gacha-ball-purple.png"
+  };
+  return map[key] || iconName || "";
+}
+
+function uniquePaths(paths){
+  const seen = new Set();
+  return paths.filter(path => {
+    const value = String(path || "").trim();
+    if(!value || seen.has(value)) return false;
+    seen.add(value);
+    return true;
+  });
+}
+
+function resolveBookIconPath(item){
+  const icon = String(item?.icon || "").trim();
+  if(!icon || !isImageIcon(icon)) return icon;
+
+  if(/^https?:\/\//i.test(icon) || icon.startsWith("data:") || icon.startsWith("blob:") || icon.startsWith("/")){
+    return icon;
+  }
+
+  const key = String(item?.key || "").trim();
+  const category = String(item?.category || "").trim();
+  const bookCategory = String(item?.bookCategory || "").trim();
+  const gachaAssetKey = getGachaColorAssetKey(key);
+
+  if(gachaAssetKey){
+    const fileName = getGachaColorFileName(key, icon);
+    return room10AssetUrl(gachaAssetKey, `game/gacha/${fileName}`);
+  }
+
+  if(icon.startsWith("../") || icon.startsWith("./")){
+    return icon;
+  }
+
+  if(category === "collection" || bookCategory === "collection" || key.startsWith("badge_")){
+    return room10Url(`badges/${icon}`);
+  }
+
+  if(category === "flower" || category === "paper" || bookCategory === "flower" || bookCategory === "paper" || key.startsWith("flower_")){
+    return room10Url(icon.includes("/") ? icon : `flower/${icon}`);
+  }
+
+  if(category === "gacha" || key.startsWith("gacha_")){
+    return room10Url(icon.includes("/") ? icon : `game/gacha/${icon}`);
+  }
+
+  if(key.includes("mango") || icon.startsWith("game-mango")){
+    return room10Url(icon.includes("/") ? icon : `game/mango/${icon}`);
+  }
+
+  if(icon.includes("/")){
+    return room10Url(icon);
+  }
+
+  return room10Url(icon);
+}
+
+function getBookIconFallbackPaths(item){
+  const icon = String(item?.icon || "").trim();
+  if(!icon || !isImageIcon(icon)) return [];
+
+  const key = String(item?.key || "").trim();
+  const fileName = getGachaColorFileName(key, icon);
+
+  if(getGachaColorAssetKey(key)){
+    return uniquePaths([
+      room10Url(`game/gacha/${fileName}`),
+      room10Url(`dorm/${fileName}`),
+      `./${fileName}`,
+      icon
+    ]);
+  }
+
+  return uniquePaths([
+    icon,
+    icon.replace(/^\.\//, ""),
+    room10Url(icon.replace(/^\.\//, ""))
+  ]);
+}
+
+function handleBookIconError(img){
+  if(!img) return;
+
+  const fallbacks = String(img.dataset.fallbacks || "")
+    .split("|")
+    .map(value => value.trim())
+    .filter(Boolean);
+  const currentIndex = Number(img.dataset.fallbackIndex || 0);
+
+  if(currentIndex < fallbacks.length){
+    img.dataset.fallbackIndex = String(currentIndex + 1);
+    img.src = fallbacks[currentIndex];
+    return;
+  }
+
+  const box = img.closest(".itemIcon");
+  if(box){
+    box.textContent = "?";
+  }
+}
+
+function renderIcon(item){
+  const icon = item?.icon || "";
   if(!icon) return "?";
   if(isImageIcon(icon)){
-    const safeIcon = escapeHtml(icon);
-    return `<img src="${safeIcon}" alt="" loading="lazy">`;
+    const resolvedIcon = resolveBookIconPath(item);
+    const fallbacks = getBookIconFallbackPaths(item).filter(path => path !== resolvedIcon);
+    const safeIcon = escapeHtml(resolvedIcon);
+    const safeFallbacks = escapeHtml(fallbacks.join("|"));
+    return `<img src="${safeIcon}" alt="" loading="lazy" data-fallbacks="${safeFallbacks}" data-fallback-index="0" onerror="handleBookIconError(this)">`;
   }
   return escapeHtml(icon);
 }
@@ -796,8 +1133,13 @@ function buildCategoriesFromRows(rows){
   }));
 }
 
-async function loadCollectionBookItems(){
+async function loadCollectionBookItems(options = {}){
   if(isLoadingBookData) return;
+
+  const shouldKeepPosition = options.keepPosition === true;
+  const oldCategory = currentCategory;
+  const oldPage = currentBookPage;
+
   isLoadingBookData = true;
   bookLoadError = "";
   renderBook();
@@ -810,7 +1152,14 @@ async function loadCollectionBookItems(){
     if(error) throw error;
 
     buildCategoriesFromRows(data || []);
-    currentBookPage = 0;
+
+    if(shouldKeepPosition){
+      currentCategory = Math.min(oldCategory, Math.max(0, categories.length - 1));
+      currentBookPage = oldPage;
+      normalizeBookPage();
+    }else{
+      currentBookPage = 0;
+    }
   }catch(error){
     console.error("读取图鉴数据失败：", error);
     bookLoadError = "图鉴读取失败，请稍后重试。";
@@ -840,10 +1189,10 @@ function renderBook(){
     const previewable = item.isUnlocked && isImageIcon(item.icon);
     const safeKey = escapeHtml(item.key);
     const safeName = escapeHtml(displayItemName(item.name));
-    const safeIcon = escapeHtml(item.icon);
+    const safeIcon = escapeHtml(resolveBookIconPath(item));
     return `
     <div class="itemCard ${item.isUnlocked ? "" : "locked"} ${previewable ? "is-previewable" : ""}" data-key="${safeKey}" data-preview-icon="${previewable ? safeIcon : ""}" data-preview-name="${previewable ? safeName : ""}">
-      <div class="itemIcon">${item.isUnlocked ? renderIcon(item.icon) : "?"}</div>
+      <div class="itemIcon">${item.isUnlocked ? renderIcon(item) : "?"}</div>
       <div class="itemName">${item.isUnlocked ? safeName : "？？？"}</div>
     </div>`;
   };
@@ -859,11 +1208,15 @@ function renderBook(){
       leftItemGrid.innerHTML = "";
       itemGrid.innerHTML = visibleItems.map(cardHtml).join("");
     }else{
-      const leftItems = visibleItems.slice(0, 11);
-      const rightItems = visibleItems.slice(11);
+      const leftItems = visibleItems.slice(0, 14);
+      const rightItems = visibleItems.slice(14);
       const firstTwoRows = leftItems.slice(0, 8).map(cardHtml).join("");
-      const thirdRow = leftItems.slice(8).map(cardHtml).join("");
-      leftItemGrid.innerHTML = firstTwoRows + (thirdRow ? '<div class="gridSpacer" aria-hidden="true"></div>' + thirdRow : "");
+      const thirdRow = leftItems.slice(8, 11).map(cardHtml).join("");
+      const fourthRow = leftItems.slice(11, 14).map(cardHtml).join("");
+      leftItemGrid.innerHTML =
+        firstTwoRows +
+        (thirdRow ? '<div class="gridSpacer" aria-hidden="true"></div>' + thirdRow : "") +
+        (fourthRow ? '<div class="gridSpacer" aria-hidden="true"></div>' + fourthRow : "");
       itemGrid.innerHTML = rightItems.map(cardHtml).join("");
     }
   }else{
@@ -886,13 +1239,35 @@ function renderBook(){
 
   renderMobileTabs();
 }
+
+function openGachaPopup(){
+  if(!gachaPopupModal || !gachaPopupFrame) return;
+  gachaPopupFrame.src = `${room10PageUrl("gameGacha", "game/gacha/gacha.html")}?from=popup&modal=1`;
+  gachaPopupModal.classList.add("show");
+  gachaPopupModal.setAttribute("aria-hidden","false");
+  document.body.classList.add("gachaPopupOpen");
+}
+
+function closeGachaPopup(){
+  if(!gachaPopupModal || !gachaPopupFrame) return;
+  gachaPopupModal.classList.remove("show");
+  gachaPopupModal.setAttribute("aria-hidden","true");
+  document.body.classList.remove("gachaPopupOpen");
+  window.setTimeout(() => {
+    if(!gachaPopupModal.classList.contains("show")){
+      gachaPopupFrame.src = "about:blank";
+    }
+  }, 120);
+  loadCollectionBookItems({ keepPosition:true });
+}
+
 function closeBook(){
   try{
     localStorage.setItem("room10DormActiveView","inventory");
   }catch(error){
     console.warn("无法写入宿舍当前版块。", error);
   }
-  window.location.href = "dorm.html";
+  window.location.href = room10PageUrl("dorm", "dorm/dorm.html");
 }
 function goCategory(index){
   currentCategory = ((index % categories.length) + categories.length) % categories.length;
@@ -922,8 +1297,12 @@ function closeImagePreview(){
 document.getElementById("closeBookBtn").addEventListener("click", closeBook);
 document.getElementById("prevBookBtn").addEventListener("click", () => turnBookPage(-1));
 document.getElementById("nextBookBtn").addEventListener("click", () => turnBookPage(1));
-document.getElementById("bookGachaBtn").addEventListener("click", () => { window.location.href = "game-gacha.html"; });
+document.getElementById("bookGachaBtn").addEventListener("click", openGachaPopup);
 document.getElementById("imagePreviewCloseBtn").addEventListener("click", closeImagePreview);
+document.getElementById("gachaPopupCloseBtn").addEventListener("click", closeGachaPopup);
+gachaPopupModal.addEventListener("click", event => {
+  if(event.target === gachaPopupModal) closeGachaPopup();
+});
 document.getElementById("imagePreviewModal").addEventListener("click", event => {
   if(event.target.id === "imagePreviewModal") closeImagePreview();
 });
@@ -947,9 +1326,10 @@ document.addEventListener("keydown", event => {
   if(event.key === "Escape"){
     const previewModal = document.getElementById("imagePreviewModal");
     if(previewModal.classList.contains("show")) closeImagePreview();
+    else if(gachaPopupModal.classList.contains("show")) closeGachaPopup();
     else closeBook();
   }
-  if(modal.classList.contains("show")){
+  if(modal.classList.contains("show") && !gachaPopupModal.classList.contains("show")){
     if(event.key === "ArrowLeft") turnBookPage(-1);
     if(event.key === "ArrowRight") turnBookPage(1);
   }
@@ -962,6 +1342,7 @@ function requestBookRender(){
 
 window.addEventListener("resize", requestBookRender);
 window.addEventListener("orientationchange", requestBookRender);
+
 loadCollectionBookItems();
 </script>
 
