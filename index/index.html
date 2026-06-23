@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Room10</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../room10-paths.js"></script>
 
 <style>
 *{box-sizing:border-box;}
@@ -1012,7 +1013,7 @@ button{
 
 <div id="home">
   <div id="homeStage">
-    <img id="homeImage" src="home-day.png" alt="Room10 首页">
+    <img id="homeImage" src="" alt="Room10 首页">
     <canvas id="seasonLayer" aria-hidden="true"></canvas>
 
     <!-- 首页只保留身份组件，不加房间切换组件 -->
@@ -1046,23 +1047,23 @@ button{
     </div>
 
     <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <a href="#" onclick="enterRoom('../dorm/dorm.html', true);return false;">
+      <a href="#" onclick="enterRoom(room10Page('dorm'), true);return false;">
         <rect x="16.7" y="25.9" width="27.7" height="22.5"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('../studio/studio-todo.html', true);return false;">
+      <a href="#" onclick="enterRoom(room10Page('studioTodo'), true);return false;">
         <rect x="57" y="25.9" width="27.5" height="22.5"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('../living/living.html', true);return false;">
+      <a href="#" onclick="enterRoom(room10Page('living'), true);return false;">
         <rect x="16.6" y="49.4" width="27" height="21.5"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('../game/game.html', false);return false;">
+      <a href="#" onclick="enterRoom(room10Page('game'), false);return false;">
         <rect x="57" y="49.4" width="27.5" height="21.5"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('../honor/honor.html', false);return false;">
+      <a href="#" onclick="enterRoom(room10Page('honor'), false);return false;">
         <rect x="16.7" y="72" width="27" height="22"></rect>
       </a>
 
@@ -1070,11 +1071,11 @@ button{
         <rect x="57" y="72" width="27.5" height="22"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('../flower/flower.html', false);return false;">
+      <a href="#" onclick="enterRoom(room10Page('flower'), false);return false;">
         <rect x="5.3" y="50.2" width="11" height="42.6"></rect>
       </a>
 
-      <a href="#" onclick="enterRoom('../pet/pets.html', false);return false;">
+      <a href="#" onclick="enterRoom(room10Page('pet'), false);return false;">
         <rect x="84.8" y="47" width="11" height="45"></rect>
       </a>
 
@@ -1087,7 +1088,7 @@ button{
 
 <div id="loginUI">
   <div class="login-panel">
-    <img src="../login.png" alt="登录框">
+    <img id="loginFrameImage" src="" alt="登录框">
 
     <input id="username" type="text" autocomplete="username">
     <input id="password" type="password" autocomplete="current-password">
@@ -1134,6 +1135,7 @@ const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 const root = document.documentElement;
 const homeImg = document.getElementById("homeImage");
+const loginFrameImage = document.getElementById("loginFrameImage");
 const homeStage = document.getElementById("homeStage");
 const topActions = document.getElementById("topActions");
 const currentUserText = document.getElementById("currentUserText");
@@ -1184,13 +1186,19 @@ function clearPendingRedirect(){
 }
 
 function goRegisterFromIndex(){
-  sessionStorage.setItem("room10RegisterReturn", "../index/index.html");
-  window.location.href = "../manager/register.html?from=../index/index.html";
+  const returnPath = room10Page("index");
+  const registerPath = room10Page("managerRegister");
+
+  sessionStorage.setItem("room10RegisterReturn", returnPath);
+  window.location.href = `${registerPath}?from=${encodeURIComponent(returnPath)}`;
 }
 
 function updateHomeImageByTime(){
   const hour = new Date().getHours();
-  const nextSrc = (hour >= 18 || hour < 6) ? "home-night.png" : "home-day.png";
+  const nextSrc = (hour >= 18 || hour < 6)
+    ? room10Asset("index.homeNight")
+    : room10Asset("index.homeDay");
+
   if(homeImg.getAttribute("src") !== nextSrc){
     homeImg.src = nextSrc;
   }
@@ -2013,7 +2021,7 @@ function handleLogout(){
   noticeCache.at = 0;
   safeSyncHomeUI();
   closeLogin(false);
-  window.location.href = "index.html";
+  window.location.href = room10Page("index");
 }
 
 function handleDoorClick(){
@@ -2149,13 +2157,13 @@ function closeLogin(keepRedirect = true){
 }
 
 function getManagerPageByRole(){
-  if(!isLoggedIn()) return "../manager/manager-visitor.html";
+  if(!isLoggedIn()) return room10Page("managerVisitor");
 
   const role = String(getCurrentUser().role || "").toLowerCase();
-  if(role === "owner") return "../manager/manager-owner.html";
-  if(role === "admin") return "../manager/manager-admin.html";
-  if(role === "member" || role === "applying") return "../manager/manager-member.html";
-  return "../manager/manager-visitor.html";
+  if(role === "owner") return room10Page("managerOwner");
+  if(role === "admin") return room10Page("managerAdmin");
+  if(role === "member" || role === "applying") return room10Page("managerMember");
+  return room10Page("managerVisitor");
 }
 
 function enterManagerRoom(){
@@ -2169,7 +2177,7 @@ function enterRoom(page, needLogin){
     return;
   }
 
-  if(page === "../flower/flower.html" || page === "../pet/pets.html"){
+  if(page === room10Page("flower") || page === room10Page("pet")){
     if(!isLoggedIn()){
       window.location.href = page + "?mode=guest";
       return;
@@ -2498,6 +2506,10 @@ document.addEventListener("keydown", (event) => {
     closeRewardModal();
   }
 });
+
+if(loginFrameImage){
+  loginFrameImage.src = room10Asset("root.login");
+}
 
 bindHomeImageLoadOnce();
 updateHomeImageByTime();
