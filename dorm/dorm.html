@@ -4,8 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜宿舍</title>
-<!-- dorm inventory db-driven fixed v11: 背包上下布局 + 图鉴入口放大 + 分类中文读取修正 + 小屏牛马文字修正 -->
+<!-- dorm inventory db-driven fixed v18: 最近获得位置上移 + 通用路径配置同步 + 代码清减 -->
 
+<script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -3414,6 +3415,372 @@ button{
   }
 }
 
+
+
+/* dorm v17: 最近获得，电脑端移出主框，手机端嵌入背包底部 */
+#view-inventory .inventoryContentGrid,
+#view-inventory .inventoryMainCol{
+  flex:1 1 auto;
+  min-width:0;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+}
+
+#view-inventory .inventoryList{
+  flex:1 1 auto;
+  min-height:0;
+}
+
+.recentObtainedPanel{
+  position:fixed;
+  left:calc(var(--dorm-app-left) + var(--dorm-app-width) + 3.4%);
+  top:calc(var(--dorm-app-top) + 5.8%);
+  width:min(calc(236px * var(--ui-scale)), 16.8vw);
+  min-width:calc(190px * var(--ui-scale));
+  max-width:260px;
+  padding:calc(13px * var(--ui-scale)) calc(13px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border-radius:calc(20px * var(--ui-scale));
+  background:linear-gradient(180deg, rgba(255,251,243,.64), rgba(255,244,225,.44));
+  border:1px solid rgba(184,127,69,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72), 0 12px 26px rgba(116,76,38,.075);
+  color:#704721;
+  z-index:34;
+  pointer-events:auto;
+  display:none;
+}
+
+body.recent-obtained-visible .recentObtainedPanel{
+  display:block;
+}
+
+.recentObtainedHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:calc(9px * var(--ui-scale));
+}
+
+.recentObtainedTitle{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:#704721;
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:900;
+  line-height:1.1;
+  letter-spacing:.03em;
+  white-space:nowrap;
+}
+
+.recentObtainedTitle::before{
+  content:"✦";
+  color:#c98c4f;
+  font-size:calc(12px * var(--ui-scale));
+}
+
+.recentObtainedHint{
+  color:#b08355;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.recentObtainedList{
+  display:flex;
+  flex-direction:column;
+  gap:calc(7px * var(--ui-scale));
+  min-height:calc(134px * var(--ui-scale));
+}
+
+.recentObtainedItem{
+  display:grid;
+  grid-template-columns:calc(30px * var(--ui-scale)) minmax(0,1fr);
+  gap:calc(8px * var(--ui-scale));
+  align-items:center;
+  min-height:calc(42px * var(--ui-scale));
+  padding:calc(7px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  border-radius:calc(14px * var(--ui-scale));
+  background:rgba(255,252,246,.60);
+  border:1px solid rgba(190,132,72,.11);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.62);
+}
+
+.recentObtainedIcon{
+  width:calc(30px * var(--ui-scale));
+  height:calc(30px * var(--ui-scale));
+  border-radius:calc(10px * var(--ui-scale));
+  display:grid;
+  place-items:center;
+  background:rgba(255,246,231,.72);
+  overflow:hidden;
+}
+
+.recentObtainedIcon img{
+  width:calc(23px * var(--ui-scale));
+  height:calc(23px * var(--ui-scale));
+  object-fit:contain;
+  display:block;
+}
+
+.recentObtainedIcon .inventoryEmoji{
+  font-size:calc(15px * var(--ui-scale));
+  line-height:1;
+}
+
+.recentObtainedBody{
+  min-width:0;
+}
+
+.recentObtainedName{
+  color:#6f4726;
+  font-size:calc(11.5px * var(--ui-scale));
+  line-height:1.15;
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.recentObtainedMeta{
+  margin-top:calc(3px * var(--ui-scale));
+  color:#9a704b;
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.2;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.recentObtainedEmpty{
+  min-height:calc(126px * var(--ui-scale));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:calc(14px * var(--ui-scale));
+  border-radius:calc(16px * var(--ui-scale));
+  border:1px dashed rgba(184,127,69,.20);
+  background:rgba(255,251,244,.36);
+  color:#9a704b;
+  text-align:center;
+  font-size:calc(11px * var(--ui-scale));
+  line-height:1.55;
+  font-weight:850;
+}
+
+@media(max-width:540px){
+  .recentObtainedPanel{
+    position:static!important;
+    left:auto!important;
+    top:auto!important;
+    width:100%;
+    min-width:0;
+    max-width:none;
+    margin-top:12px;
+    padding:12px;
+    border-radius:18px;
+    z-index:auto;
+  }
+
+  body:not(.recent-obtained-visible) .recentObtainedPanel{
+    display:none;
+  }
+
+  .recentObtainedList{
+    min-height:0;
+    gap:7px;
+  }
+
+  .recentObtainedItem:nth-child(n+4){
+    display:none;
+  }
+
+  .recentObtainedEmpty{
+    min-height:86px;
+  }
+}
+
+/* dorm v12: 未打开扭蛋背包打开弹窗 */
+.gachaStoredBallItem{
+  cursor:pointer!important;
+  position:relative;
+  transition:transform .16s ease, box-shadow .16s ease, background .16s ease;
+}
+
+.gachaStoredBallItem:hover{
+  transform:translateY(-2px);
+  background:rgba(255,248,238,.86)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.76),
+    0 6px 14px rgba(135,86,40,.12);
+}
+
+.gachaStoredBallItem::after{
+  content:"可打开";
+  position:absolute;
+  right:6px;
+  top:6px;
+  padding:2px 5px;
+  border-radius:999px;
+  background:rgba(201,140,79,.18);
+  color:#9b6422;
+  font-size:9px;
+  font-weight:900;
+  line-height:1;
+  pointer-events:none;
+}
+
+.gachaStoredBallModalMask{
+  position:fixed;
+  inset:0;
+  z-index:3000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(75,48,27,.28);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+}
+
+.gachaStoredBallModalMask.show{
+  display:flex;
+}
+
+.gachaStoredBallModal{
+  width:min(380px, calc(100vw - 36px));
+  border-radius:24px;
+  padding:20px;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255,255,255,.92), transparent 40%),
+    linear-gradient(180deg, rgba(255,250,242,.98), rgba(250,236,218,.98));
+  border:1px solid rgba(174,132,94,.28);
+  box-shadow:
+    0 18px 42px rgba(70,45,26,.22),
+    inset 0 1px 0 rgba(255,255,255,.90);
+  color:#6f4726;
+  text-align:center;
+}
+
+.gachaStoredBallIcon{
+  width:76px;
+  height:76px;
+  margin:0 auto 10px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,246,231,.88);
+  border:1px solid rgba(201,140,79,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+}
+
+.gachaStoredBallIcon img{
+  width:58px;
+  height:58px;
+  object-fit:contain;
+  display:block;
+}
+
+.gachaStoredBallTitle{
+  margin:0;
+  font-size:20px;
+  line-height:1.25;
+  font-weight:900;
+  color:#6f4726;
+}
+
+.gachaStoredBallDesc{
+  margin:8px 0 16px;
+  color:#8a6644;
+  font-size:13px;
+  line-height:1.55;
+  font-weight:800;
+}
+
+.gachaStoredBallActions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.gachaStoredBallBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  min-height:40px;
+  border-radius:14px;
+  padding:0 12px;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.gachaStoredBallBtn.primary{
+  background:#c98c4f;
+  color:#fffaf3;
+  box-shadow:0 5px 12px rgba(139,89,36,.14);
+}
+
+.gachaStoredBallBtn.primary:hover{
+  background:#b9793f;
+}
+
+.gachaStoredBallBtn.secondary{
+  background:rgba(239,219,190,.92);
+  color:#6f4726;
+}
+
+.gachaStoredBallBtn.secondary:hover{
+  background:rgba(229,204,169,.98);
+}
+
+.gachaStoredBallBtn:disabled{
+  cursor:not-allowed;
+  opacity:.58;
+  transform:none!important;
+}
+
+.gachaStoredBallResult{
+  margin-top:13px;
+  padding:10px 11px;
+  border-radius:14px;
+  background:rgba(255,255,255,.56);
+  border:1px solid rgba(201,140,79,.12);
+  color:#744b25;
+  font-size:12px;
+  font-weight:850;
+  line-height:1.55;
+  text-align:left;
+  display:none;
+}
+
+.gachaStoredBallResult.show{
+  display:block;
+}
+
+.gachaStoredBallResult strong{
+  color:#c27932;
+}
+
+.gachaStoredBallCloseRow{
+  margin-top:12px;
+}
+
+.gachaStoredBallCloseBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  background:transparent;
+  color:#9b7656;
+  font-size:12px;
+  font-weight:900;
+  font-family:inherit;
+}
+
 </style>
 </head>
 
@@ -3426,12 +3793,12 @@ button{
   <div id="overlay">
     <!-- 房间按钮：全站通用模板样式 -->
     <nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换">
-      <button class="navBtn" data-room="hall" type="button" data-url="../index/index.html" data-login="false">
+      <button class="navBtn" data-room="hall" type="button" data-page="index" data-url="../index/index.html" data-login="false">
         <span class="navLabel">大堂</span>
         <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
       </button>
 
-      <button class="navBtn" data-room="living" type="button" data-url="../living/living.html" data-login="true">
+      <button class="navBtn" data-room="living" type="button" data-page="living" data-url="../living/living.html" data-login="true">
         <span class="navLabel">客厅</span>
         <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
       </button>
@@ -3441,32 +3808,32 @@ button{
         <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
       </button>
 
-      <button class="navBtn" data-room="honor" type="button" data-url="../honor/honor.html" data-login="false">
+      <button class="navBtn" data-room="honor" type="button" data-page="honor" data-url="../honor/honor.html" data-login="false">
         <span class="navLabel">荣誉墙</span>
         <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
       </button>
 
-      <button class="navBtn" data-room="studio" type="button" data-url="../studio/studio-todo.html" data-login="true">
+      <button class="navBtn" data-room="studio" type="button" data-page="studioTodo" data-url="../studio/studio-todo.html" data-login="true">
         <span class="navLabel">工作间</span>
         <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
       </button>
 
-      <button class="navBtn" data-room="game" type="button" data-url="../game/game.html" data-login="false">
+      <button class="navBtn" data-room="game" type="button" data-page="game" data-url="../game/game.html" data-login="false">
         <span class="navLabel">游戏房</span>
         <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span>
       </button>
 
-      <button class="navBtn" data-room="dorm" type="button" data-url="../dorm/dorm.html" data-login="true">
+      <button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-url="../dorm/dorm.html" data-login="true">
         <span class="navLabel">宿舍</span>
         <span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span>
       </button>
 
-      <button class="navBtn" data-room="flower" type="button" data-url="../flower/flower.html" data-login="false">
+      <button class="navBtn" data-room="flower" type="button" data-page="flower" data-url="../flower/flower.html" data-login="false">
         <span class="navLabel">花房区</span>
         <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
       </button>
 
-      <button class="navBtn" data-room="pets" type="button" data-url="../pets/pets.html" data-login="false">
+      <button class="navBtn" data-room="pets" type="button" data-page="pet" data-url="../pet/pets.html" data-login="false">
         <span class="navLabel">宠物区</span>
         <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
       </button>
@@ -3561,8 +3928,12 @@ button{
 
         <div class="view" id="view-inventory">
           <h2 class="sectionTitle">我的背包</h2>
-          <div class="inventoryList" id="inventoryList">
-            <div class="emptyText">正在读取我的道具……</div>
+          <div class="inventoryContentGrid">
+            <div class="inventoryMainCol">
+              <div class="inventoryList" id="inventoryList">
+                <div class="emptyText">正在读取我的道具……</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -3586,8 +3957,39 @@ button{
         </div>
       </section>
     </main>
+
+    <aside class="recentObtainedPanel" id="recentObtainedPanel" aria-label="最近获得的道具">
+      <div class="recentObtainedHead">
+        <div class="recentObtainedTitle">最近获得</div>
+        <div class="recentObtainedHint">最近 3 条</div>
+      </div>
+      <div class="recentObtainedList" id="recentObtainedList">
+        <div class="recentObtainedEmpty">正在整理最近获得的道具……</div>
+      </div>
+    </aside>
+
+
   </div>
 </div>
+
+<div class="gachaStoredBallModalMask" id="gachaStoredBallModalMask" aria-hidden="true">
+  <div class="gachaStoredBallModal" role="dialog" aria-modal="true" aria-labelledby="gachaStoredBallTitle">
+    <div class="gachaStoredBallIcon">
+      <img id="gachaStoredBallIconImg" src="./gacha-ball.png" alt="">
+    </div>
+    <h3 class="gachaStoredBallTitle" id="gachaStoredBallTitle">未打开扭蛋</h3>
+    <div class="gachaStoredBallDesc" id="gachaStoredBallDesc">打开后奖励会自动入账。</div>
+    <div class="gachaStoredBallActions">
+      <button class="gachaStoredBallBtn primary" id="gachaOpenOneBtn" type="button">打开一个</button>
+      <button class="gachaStoredBallBtn secondary" id="gachaOpenAllBtn" type="button">全部打开</button>
+    </div>
+    <div class="gachaStoredBallResult" id="gachaStoredBallResult"></div>
+    <div class="gachaStoredBallCloseRow">
+      <button class="gachaStoredBallCloseBtn" id="gachaStoredBallCloseBtn" type="button">关闭</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
@@ -3595,6 +3997,33 @@ const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const CURRENT_ROOM = "dorm";
+
+/* 路径配置：与全站通用模板保持一致，优先读取 room10-paths.js。 */
+const ROOM10_ROOT_PREFIX = window.ROOM10_ROOT || "../";
+
+function room10Url(path){
+  const raw = String(path || "").trim();
+  if(!raw) return "";
+  if(/^(https?:|data:|mailto:|tel:|#|\/)/i.test(raw)) return raw;
+  if(raw.startsWith("./") || raw.startsWith("../")) return raw;
+
+  if(typeof window.room10Path === "function"){
+    return window.room10Path(raw);
+  }
+
+  return `${ROOM10_ROOT_PREFIX}${raw}`;
+}
+
+function room10PageUrl(key, fallbackPath){
+  const pageKey = String(key || "").trim();
+
+  if(pageKey && typeof window.room10Page === "function"){
+    const url = window.room10Page(pageKey);
+    if(url) return url;
+  }
+
+  return room10Url(fallbackPath || "");
+}
 
 const STORAGE_KEYS = {
   loggedIn:"room10LoggedIn",
@@ -3633,6 +4062,14 @@ let activeDormTaskTab = "vocal_submit";
 const recentDormTaskActions = new Map();
 const DORM_ACTIVE_VIEW_KEY = "room10DormActiveView";
 const DORM_VIEW_KEYS = new Set(["tasks","notice","wallet","inventory","profile"]);
+
+const STORED_GACHA_BALL_KEYS = {
+  gacha_ball_white:"white",
+  gacha_ball_purple:"purple",
+  gacha_ball_gold:"gold"
+};
+
+let currentStoredGachaBall = null;
 
 const mascotLines = [
   { text:"在做了在做了", style:"work" },
@@ -3818,7 +4255,7 @@ function readLocalAuth(){
   authState.memberCode = localStorage.getItem(STORAGE_KEYS.memberCode) || "";
 
   if(!authState.loggedIn || !authState.nickname || !authState.memberId){
-    window.location.href = "../index/index.html";
+    window.location.href = room10PageUrl("index", "../index/index.html");
     return false;
   }
 
@@ -3866,35 +4303,41 @@ function handleLogout(){
   localStorage.removeItem("room10_current_user");
   localStorage.removeItem("currentUser");
 
-  window.location.href = "../index/index.html";
+  window.location.href = room10PageUrl("index", "../index/index.html");
 }
 
 /* =========================================================
    房间跳转
 ========================================================= */
 function getManagerPageByRole(){
-  const role = String(authState.role || localStorage.getItem(STORAGE_KEYS.role) || "").toLowerCase();
+  const role = String(authState.role || localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
 
-  if(role === "owner") return "../manager/manager-owner.html";
-  if(role === "admin") return "../manager/manager-admin.html";
-  if(role === "member") return "../manager/manager-member.html";
+  if(role === "owner") return room10PageUrl("managerOwner", "../manager/manager-owner.html");
+  if(role === "admin") return room10PageUrl("managerAdmin", "../manager/manager-admin.html");
+  if(role === "member" || role === "applying") return room10PageUrl("managerMember", "../manager/manager-member.html");
 
-  return "../manager/manager-visitor.html";
+  return room10PageUrl("managerVisitor", "../manager/manager-visitor.html");
 }
 
 function enterManagerRoom(){
   window.location.href = getManagerPageByRole();
 }
 
-function enterRoom(page, needLogin){
+function enterRoom(page, needLogin, room){
   const targetPage = String(page || "").trim();
+  const targetRoom = String(room || "").trim();
   if(!targetPage) return;
 
   if(needLogin && !readLocalAuth()){
     return;
   }
 
-  if((targetPage === "../flower/flower.html" || targetPage === "../pets/pets.html" || targetPage === "flower.html" || targetPage === "pets.html") && !authState.loggedIn){
+  if(targetRoom === "dorm" && authState.role === "applying"){
+    window.location.href = getManagerPageByRole();
+    return;
+  }
+
+  if((targetRoom === "flower" || targetRoom === "pets") && !authState.loggedIn){
     window.location.href = `${targetPage}?mode=guest`;
     return;
   }
@@ -3931,7 +4374,8 @@ function setupRoomNav(currentRoom){
         return;
       }
 
-      enterRoom(btn.dataset.url, btn.dataset.login === "true");
+      const targetUrl = room10PageUrl(btn.dataset.page, btn.dataset.url);
+      enterRoom(targetUrl, btn.dataset.login === "true", btn.dataset.room);
     });
   });
 }
@@ -4139,6 +4583,42 @@ async function loadSystemNotices(){
   }
 }
 
+
+function isDormMobileLayout(){
+  return window.matchMedia("(max-width:540px)").matches;
+}
+
+function syncRecentObtainedPanelPlacement(){
+  const panel = document.getElementById("recentObtainedPanel");
+  const inventoryView = document.getElementById("view-inventory");
+  const overlayEl = document.getElementById("overlay");
+  const shell = document.getElementById("dormShell");
+  if(!panel || !inventoryView || !overlayEl) return;
+
+  if(isDormMobileLayout()){
+    if(panel.parentElement !== inventoryView){
+      inventoryView.appendChild(panel);
+    }
+    panel.style.left = "";
+    panel.style.top = "";
+    panel.style.width = "";
+    return;
+  }
+
+  if(panel.parentElement !== overlayEl){
+    overlayEl.appendChild(panel);
+  }
+
+  if(shell){
+    const rect = shell.getBoundingClientRect();
+    const gap = Math.max(12, Math.round(window.innerWidth * 0.014));
+    const topOffset = Math.max(18, Math.round(rect.height * 0.095));
+    panel.style.left = `${Math.round(rect.right + gap)}px`;
+    panel.style.top = `${Math.round(rect.top + topOffset)}px`;
+    panel.style.width = "";
+  }
+}
+
 function activateDormView(target, saveState=true){
   const nextView = DORM_VIEW_KEYS.has(target) ? target : "tasks";
   const buttons = document.querySelectorAll(".sideBtn");
@@ -4146,6 +4626,11 @@ function activateDormView(target, saveState=true){
 
   buttons.forEach(item => item.classList.toggle("active", item.dataset.view === nextView));
   views.forEach(view => view.classList.toggle("active", view.id === `view-${nextView}`));
+  document.body.classList.toggle("recent-obtained-visible", nextView === "inventory");
+  syncRecentObtainedPanelPlacement();
+  if(nextView === "inventory"){
+    loadRecentObtained(currentMemberProfile?.id || authState.memberId || null);
+  }
 
   if(saveState){
     localStorage.setItem(DORM_ACTIVE_VIEW_KEY,nextView);
@@ -4911,6 +5396,246 @@ function inventoryCategoryLabel(item){
   return String(item?.category_name || item?.item_category || "其他").trim() || "其他";
 }
 
+
+function isStoredGachaBallKey(itemKey){
+  return Object.prototype.hasOwnProperty.call(STORED_GACHA_BALL_KEYS, String(itemKey || "").trim());
+}
+
+function storedGachaTierFromKey(itemKey){
+  return STORED_GACHA_BALL_KEYS[String(itemKey || "").trim()] || "";
+}
+
+function storedGachaBallLabel(itemKey){
+  return "未打开扭蛋";
+}
+
+function isStoredGachaBallItem(item){
+  return isStoredGachaBallKey(item?.item_key);
+}
+
+function storedGachaBallItemAttrs(item,qty){
+  if(!isStoredGachaBallItem(item)) return "";
+  const itemKey = String(item.item_key || "").trim();
+  const tierKey = storedGachaTierFromKey(itemKey);
+  const name = storedGachaBallLabel(itemKey);
+  return [
+    'role="button"',
+    'tabindex="0"',
+    'aria-label="' + escapeHtml(name + "，点击打开") + '"',
+    'data-gacha-ball="true"',
+    'data-item-key="' + escapeHtml(itemKey) + '"',
+    'data-tier-key="' + escapeHtml(tierKey) + '"',
+    'data-item-name="' + escapeHtml(name) + '"',
+    'data-quantity="' + escapeHtml(qty) + '"'
+  ].join(" ");
+}
+
+function renderStoredGachaRewards(rewards){
+  const list = Array.isArray(rewards) ? rewards : [];
+  if(!list.length) return "没有读取到奖励内容。";
+
+  return list.map(reward => {
+    const name = reward.display_name || reward.item_name || reward.name || "奖励";
+    const amount = Number(reward.quantity ?? reward.amount ?? 0);
+    return `获得 <strong>${escapeHtml(name)}</strong>${amount > 0 ? ` ×${amount}` : ""}`;
+  }).join("<br>");
+}
+
+function setStoredGachaButtonsDisabled(disabled){
+  const openOneBtn = document.getElementById("gachaOpenOneBtn");
+  const openAllBtn = document.getElementById("gachaOpenAllBtn");
+  if(openOneBtn) openOneBtn.disabled = !!disabled;
+  if(openAllBtn) openAllBtn.disabled = !!disabled;
+}
+
+function showStoredGachaResult(message,isHtml=false){
+  const result = document.getElementById("gachaStoredBallResult");
+  if(!result) return;
+
+  if(isHtml){
+    result.innerHTML = message || "";
+  }else{
+    result.textContent = message || "";
+  }
+
+  result.classList.toggle("show", !!message);
+}
+
+function openStoredGachaBallModalFromElement(el){
+  if(!el) return;
+
+  const itemKey = String(el.dataset.itemKey || "").trim();
+  const tierKey = String(el.dataset.tierKey || storedGachaTierFromKey(itemKey)).trim();
+  const quantity = Math.max(0, Number(el.dataset.quantity || 0));
+  const itemName = String(el.dataset.itemName || storedGachaBallLabel(itemKey)).trim();
+
+  if(!itemKey || !tierKey || quantity <= 0) return;
+
+  currentStoredGachaBall = {
+    itemKey,
+    tierKey,
+    quantity,
+    itemName
+  };
+
+  const mask = document.getElementById("gachaStoredBallModalMask");
+  const title = document.getElementById("gachaStoredBallTitle");
+  const desc = document.getElementById("gachaStoredBallDesc");
+  const icon = document.getElementById("gachaStoredBallIconImg");
+  const openAllBtn = document.getElementById("gachaOpenAllBtn");
+
+  if(title) title.textContent = "未打开扭蛋";
+  if(desc) desc.textContent = `当前数量：${quantity} 个 · 打开后奖励会自动入账。`;
+  if(icon) icon.src = "./gacha-ball.png";
+  if(openAllBtn) openAllBtn.textContent = `全部打开${quantity > 1 ? `（${quantity}个）` : ""}`;
+
+  showStoredGachaResult("");
+  setStoredGachaButtonsDisabled(false);
+
+  if(mask){
+    mask.classList.add("show");
+    mask.setAttribute("aria-hidden","false");
+  }
+}
+
+function closeStoredGachaBallModal(){
+  const mask = document.getElementById("gachaStoredBallModalMask");
+  if(mask){
+    mask.classList.remove("show");
+    mask.setAttribute("aria-hidden","true");
+  }
+  currentStoredGachaBall = null;
+  showStoredGachaResult("");
+  setStoredGachaButtonsDisabled(false);
+}
+
+async function refreshDormWalletAfterStoredGacha(){
+  try{
+    const member = await fetchCurrentMember();
+    if(member){
+      currentMemberProfile = member;
+      setText("goldBalance",member.gold_balance ?? 0);
+      setText("goldEarned",member.gold_total_earned ?? 0);
+      setText("goldSpent",member.gold_total_spent ?? 0);
+      updateIdentity(member);
+      if(!profileEditMode) renderProfileView(member);
+      await loadGoldLedger(member.id);
+    }
+  }catch(error){
+    console.warn("打开扭蛋后刷新钱包失败。", error);
+  }
+}
+
+async function openStoredGachaBall(mode){
+  if(!currentStoredGachaBall || !authState.memberId) return;
+
+  const openMode = mode === "all" ? "all" : "one";
+  setStoredGachaButtonsDisabled(true);
+  showStoredGachaResult(openMode === "all" ? "正在打开全部扭蛋……" : "正在打开一个扭蛋……");
+
+  try{
+    const { data,error } = await supabaseClient.rpc("open_stored_gacha_balls",{
+      p_member_id:authState.memberId,
+      p_tier_key:currentStoredGachaBall.tierKey,
+      p_open_mode:openMode
+    });
+
+    if(error) throw error;
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if(!result || result.success !== true){
+      showStoredGachaResult(result?.message || "打开失败，可能背包数量已经变化。");
+      setStoredGachaButtonsDisabled(false);
+      await loadInventory();
+      return;
+    }
+
+    const rewardHtml = renderStoredGachaRewards(result.rewards);
+    showStoredGachaResult(`打开成功，共打开 <strong>${Number(result.opened_count || 0)}</strong> 个。<br>${rewardHtml}`, true);
+
+    await loadInventory();
+    await refreshDormWalletAfterStoredGacha();
+
+    const nextQuantity = Math.max(0, Number(currentStoredGachaBall.quantity || 0) - Number(result.opened_count || 0));
+    currentStoredGachaBall.quantity = nextQuantity;
+
+    const desc = document.getElementById("gachaStoredBallDesc");
+    const openAllBtn = document.getElementById("gachaOpenAllBtn");
+    if(desc){
+      desc.textContent = nextQuantity > 0
+        ? `背包里还剩 ${nextQuantity} 个，可以继续打开。`
+        : "这类未打开扭蛋已经全部打开。";
+    }
+    if(openAllBtn){
+      openAllBtn.textContent = `全部打开${nextQuantity > 1 ? `（${nextQuantity}个）` : ""}`;
+    }
+
+    setStoredGachaButtonsDisabled(nextQuantity <= 0);
+  }catch(error){
+    console.error(error);
+    showStoredGachaResult(`打开失败：${error.message || "请检查 open_stored_gacha_balls RPC。"}`);
+    setStoredGachaButtonsDisabled(false);
+  }
+}
+
+function bindStoredGachaBallModal(){
+  const mask = document.getElementById("gachaStoredBallModalMask");
+  const closeBtn = document.getElementById("gachaStoredBallCloseBtn");
+  const openOneBtn = document.getElementById("gachaOpenOneBtn");
+  const openAllBtn = document.getElementById("gachaOpenAllBtn");
+  const inventoryList = document.getElementById("inventoryList");
+
+  if(closeBtn){
+    closeBtn.addEventListener("click", event => {
+      event.preventDefault();
+      closeStoredGachaBallModal();
+    });
+  }
+
+  if(mask){
+    mask.addEventListener("click", event => {
+      if(event.target === mask){
+        closeStoredGachaBallModal();
+      }
+    });
+  }
+
+  if(openOneBtn){
+    openOneBtn.addEventListener("click", event => {
+      event.preventDefault();
+      openStoredGachaBall("one");
+    });
+  }
+
+  if(openAllBtn){
+    openAllBtn.addEventListener("click", event => {
+      event.preventDefault();
+      openStoredGachaBall("all");
+    });
+  }
+
+  if(inventoryList){
+    inventoryList.addEventListener("click", event => {
+      const item = event.target.closest(".gachaStoredBallItem");
+      if(!item) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      openStoredGachaBallModalFromElement(item);
+    });
+
+    inventoryList.addEventListener("keydown", event => {
+      if(event.key !== "Enter" && event.key !== " ") return;
+      const item = event.target.closest(".gachaStoredBallItem");
+      if(!item) return;
+
+      event.preventDefault();
+      openStoredGachaBallModalFromElement(item);
+    });
+  }
+}
+
+
 function renderInventoryGroup(key, rows){
   const label = inventoryCategoryLabel(rows[0]?.item || {});
   return `
@@ -4920,13 +5645,17 @@ function renderInventoryGroup(key, rows){
         <span class="inventoryGroupCount">${rows.length} 件</span>
       </div>
       <div class="inventoryGroupGrid">
-        ${rows.map(({ item, qty }) => `
-          <div class="inventoryItem">
-            <div class="inventoryIcon">${itemIconHtml(item)}</div>
-            <div class="inventoryName"><span class="inventoryNameText ${isKeyFallbackName(item) ? "isKeyFallback" : ""}">${escapeHtml(itemDisplayName(item))}</span></div>
-            <div class="inventoryQty">×${qty}</div>
-          </div>
-        `).join("")}
+        ${rows.map(({ item, qty }) => {
+          const isStoredBall = isStoredGachaBallItem(item);
+          const attrs = storedGachaBallItemAttrs(item,qty);
+          return `
+            <div class="inventoryItem${isStoredBall ? " gachaStoredBallItem" : ""}" ${attrs}>
+              <div class="inventoryIcon">${itemIconHtml(item)}</div>
+              <div class="inventoryName"><span class="inventoryNameText ${isKeyFallbackName(item) && !isStoredBall ? "isKeyFallback" : ""}">${escapeHtml(isStoredBall ? storedGachaBallLabel(item.item_key) : itemDisplayName(item))}</span></div>
+              <div class="inventoryQty">×${qty}</div>
+            </div>
+          `;
+        }).join("")}
       </div>
     </section>
   `;
@@ -4968,6 +5697,114 @@ function renderInventory(items){
   wrap.innerHTML = bookCard + groupHtml;
 }
 
+
+function recentSourceLabel(row){
+  const sourceType = String(row?.source_type || "").trim();
+  const sourceDetail = String(row?.source_detail || "").trim();
+  const note = String(row?.note || "").trim();
+  const combined = `${sourceType} ${sourceDetail} ${note}`;
+
+  if(/gacha/i.test(combined)) return "扭蛋机";
+  if(/flower|花房/.test(combined)) return "花房";
+  if(/daily|礼包|签到|领取/.test(combined)) return "领取";
+  if(/pet|宠物/.test(combined)) return "宠物区";
+  if(/achievement|成就/.test(combined)) return "成就";
+  if(sourceType) return sourceType;
+  return "道具";
+}
+
+function formatRecentTime(value){
+  const time = new Date(value);
+  if(Number.isNaN(time.getTime())) return "刚刚";
+
+  const diffMs = Date.now() - time.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if(diffMin < 1) return "刚刚";
+  if(diffMin < 60) return `${diffMin}分钟前`;
+
+  const diffHour = Math.floor(diffMin / 60);
+  if(diffHour < 24) return `${diffHour}小时前`;
+
+  const diffDay = Math.floor(diffHour / 24);
+  if(diffDay < 7) return `${diffDay}天前`;
+
+  const month = time.getMonth() + 1;
+  const day = time.getDate();
+  return `${month}/${day}`;
+}
+
+function shouldHideRecentItemKey(itemKey){
+  const key = String(itemKey || "").trim();
+  if(!key) return true;
+  if(key.startsWith("gacha_color_")) return true;
+  return false;
+}
+
+function renderRecentObtained(rows){
+  const wrap = document.getElementById("recentObtainedList");
+  if(!wrap) return;
+
+  const list = Array.isArray(rows) ? rows : [];
+  if(!list.length){
+    wrap.innerHTML = `<div class="recentObtainedEmpty">最近还没有新的道具入账。</div>`;
+    return;
+  }
+
+  wrap.innerHTML = list.map(item => {
+    const name = isStoredGachaBallItem(item) ? storedGachaBallLabel(item.item_key) : itemDisplayName(item);
+    const qty = Number(item.quantity || 0);
+    return `
+      <div class="recentObtainedItem">
+        <div class="recentObtainedIcon">${itemIconHtml(item)}</div>
+        <div class="recentObtainedBody">
+          <div class="recentObtainedName">${escapeHtml(name)}${qty > 0 ? ` ×${qty}` : ""}</div>
+          <div class="recentObtainedMeta">${escapeHtml(item.recent_source_label)} · ${escapeHtml(item.recent_time_label)}</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function loadRecentObtained(memberId){
+  const wrap = document.getElementById("recentObtainedList");
+  if(!wrap) return;
+
+  if(!memberId){
+    wrap.innerHTML = `<div class="recentObtainedEmpty">登录后可查看最近获得。</div>`;
+    return;
+  }
+
+  wrap.innerHTML = `<div class="recentObtainedEmpty">正在整理最近获得的道具……</div>`;
+
+  try{
+    const { data,error } = await supabaseClient.rpc("get_recent_obtained_items", {
+      p_member_id:memberId,
+      p_limit:3
+    });
+
+    if(error) throw error;
+
+    const rows = (Array.isArray(data) ? data : [])
+      .filter(row => !shouldHideRecentItemKey(row.item_key))
+      .map(row => ({
+        ...row,
+        quantity:Number(row.quantity || 0),
+        item_name:row.item_name || row.item_key,
+        item_icon:row.item_icon || "",
+        item_category:row.item_category || "general",
+        recent_source_label:recentSourceLabel(row),
+        recent_time_label:formatRecentTime(row.created_at)
+      }))
+      .filter(row => row.item_key && row.quantity > 0)
+      .slice(0,3);
+
+    renderRecentObtained(rows);
+  }catch(error){
+    console.error(error);
+    wrap.innerHTML = `<div class="recentObtainedEmpty">最近获得读取失败。</div>`;
+  }
+}
+
 async function loadInventory(){
   const wrap = document.getElementById("inventoryList");
   if(!wrap) return;
@@ -4975,10 +5812,12 @@ async function loadInventory(){
   const memberId = currentMemberProfile?.id || authState.memberId;
   if(!memberId){
     wrap.innerHTML = '<div class="errorText">请先登录后查看我的背包。</div>';
+    await loadRecentObtained(null);
     return;
   }
 
   wrap.innerHTML = '<div class="emptyText">正在读取我的道具……</div>';
+  await loadRecentObtained(memberId);
 
   try{
     const { data:memberItems,error:itemError } = await supabaseClient
@@ -5533,6 +6372,7 @@ async function initDormPage(){
   bindSideTabs();
   restoreDormView();
   bindDormTaskActions();
+  bindStoredGachaBallModal();
   setMascotBubbleOnce();
 
   if(siteNoticeBtn){
@@ -5548,7 +6388,7 @@ async function initDormPage(){
       if(authState.loggedIn){
         handleLogout();
       }else{
-        window.location.href = "../index/index.html";
+        window.location.href = room10PageUrl("index", "../index/index.html");
       }
     });
   }
