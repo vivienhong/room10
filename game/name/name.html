@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>十号房｜脸萌挑战</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../room10-paths.js"></script>
 
 <style>
 *{box-sizing:border-box;}
@@ -987,6 +988,298 @@ body.stack-layout .ctrlBtn{
 
   body.stack-layout #viewport{width:min(100%, calc(45vh * 965 / 936));}
 }
+/* =========================================================
+   全站统一奖励 / 成就称号弹窗（脸萌清减版）
+========================================================= */
+.reward-mask{
+  position:fixed;
+  inset:0;
+  z-index:70;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(64,45,30,.30);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  --reward-scale:1;
+}
+.reward-mask.show{display:flex;}
+.reward-mask.hidden{display:none!important;}
+
+.reward-card{
+  position:relative;
+  width:min(calc(430px * var(--reward-scale)), calc(100vw - 28px));
+  max-height:calc(100dvh - 28px);
+  padding:calc(28px * var(--reward-scale)) calc(24px * var(--reward-scale)) calc(22px * var(--reward-scale));
+  border-radius:calc(26px * var(--reward-scale));
+  overflow:hidden auto;
+  text-align:center;
+  color:#6a4223;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,226,235,.68), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,240,181,.62), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,244,226,.96));
+  border:calc(2px * var(--reward-scale)) solid rgba(216,157,106,.35);
+  box-shadow:
+    0 calc(22px * var(--reward-scale)) calc(54px * var(--reward-scale)) rgba(69,47,28,.24),
+    inset 0 1px 0 rgba(255,255,255,.90);
+  animation:rewardPop .42s cubic-bezier(.2,1.12,.34,1) both;
+}
+.reward-card::before,
+.reward-card::after{
+  position:absolute;
+  left:calc(12px * var(--reward-scale));
+  right:calc(12px * var(--reward-scale));
+  font-size:calc(15px * var(--reward-scale));
+  letter-spacing:calc(8px * var(--reward-scale));
+  white-space:nowrap;
+  overflow:hidden;
+  pointer-events:none;
+}
+.reward-card::before{
+  content:"✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  top:calc(9px * var(--reward-scale));
+  color:rgba(209,120,148,.52);
+}
+.reward-card::after{
+  content:"✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  bottom:calc(8px * var(--reward-scale));
+  color:rgba(199,145,75,.44);
+}
+@keyframes rewardPop{
+  0%{opacity:0; transform:translateY(calc(12px * var(--reward-scale))) scale(.9);}
+  64%{opacity:1; transform:translateY(0) scale(1.025);}
+  100%{opacity:1; transform:translateY(0) scale(1);}
+}
+
+.reward-close{
+  position:absolute;
+  z-index:6;
+  top:calc(12px * var(--reward-scale));
+  right:calc(12px * var(--reward-scale));
+  width:calc(30px * var(--reward-scale));
+  height:calc(30px * var(--reward-scale));
+  border:none;
+  border-radius:999px;
+  background:rgba(255,250,242,.88);
+  color:#7b5636;
+  font-size:calc(18px * var(--reward-scale));
+  font-weight:900;
+  line-height:1;
+  cursor:pointer;
+  box-shadow:0 calc(2px * var(--reward-scale)) calc(8px * var(--reward-scale)) rgba(105,75,43,.10), inset 0 1px 0 rgba(255,255,255,.90);
+}
+
+.reward-petals{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  overflow:hidden;
+}
+.reward-petals span{
+  position:absolute;
+  top:calc(-18px * var(--reward-scale));
+  color:rgba(220,132,154,.56);
+  font-size:calc(16px * var(--reward-scale));
+  opacity:0;
+  text-shadow:0 calc(2px * var(--reward-scale)) calc(4px * var(--reward-scale)) rgba(255,255,255,.76);
+  animation:rewardPetalFall 1.35s ease-in-out both;
+}
+.reward-petals span:nth-child(1){left:12%; animation-delay:.05s;}
+.reward-petals span:nth-child(2){left:28%; animation-delay:.18s;}
+.reward-petals span:nth-child(3){left:48%; animation-delay:.02s;}
+.reward-petals span:nth-child(4){left:66%; animation-delay:.22s;}
+.reward-petals span:nth-child(5){left:82%; animation-delay:.10s;}
+@keyframes rewardPetalFall{
+  0%{opacity:0; transform:translateY(calc(-14px * var(--reward-scale))) rotate(0deg) scale(.78);}
+  20%{opacity:.85;}
+  100%{opacity:0; transform:translateY(calc(145px * var(--reward-scale))) rotate(160deg) scale(1);}
+}
+
+.reward-content{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.reward-icon{
+  width:calc(62px * var(--reward-scale));
+  height:calc(62px * var(--reward-scale));
+  margin:calc(4px * var(--reward-scale)) auto calc(12px * var(--reward-scale));
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,246,226,.78);
+  border:1px solid rgba(220,164,102,.25);
+  box-shadow:0 calc(8px * var(--reward-scale)) calc(20px * var(--reward-scale)) rgba(126,92,51,.10), inset 0 1px 0 rgba(255,255,255,.85);
+  font-size:calc(34px * var(--reward-scale));
+}
+.reward-label{
+  min-height:calc(25px * var(--reward-scale));
+  padding:0 calc(13px * var(--reward-scale));
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:rgba(255,249,232,.66);
+  border:1px solid rgba(218,166,87,.20);
+  color:#b26a3a;
+  font-size:calc(13px * var(--reward-scale));
+  font-weight:950;
+  line-height:1;
+  letter-spacing:.06em;
+}
+.reward-title{
+  position:relative;
+  max-width:100%;
+  margin:calc(10px * var(--reward-scale)) auto calc(8px * var(--reward-scale));
+  padding:calc(8px * var(--reward-scale)) calc(18px * var(--reward-scale));
+  border-radius:999px;
+  color:#6a4223;
+  font-size:calc(22px * var(--reward-scale));
+  font-weight:950;
+  line-height:1.15;
+  background:rgba(255,249,232,.72);
+  border:1px solid rgba(218,166,87,.24);
+  box-shadow:0 calc(5px * var(--reward-scale)) calc(14px * var(--reward-scale)) rgba(126,92,51,.08), inset 0 1px 0 rgba(255,255,255,.82);
+}
+.reward-desc{
+  width:100%;
+  max-width:calc(330px * var(--reward-scale));
+  margin:0 auto calc(14px * var(--reward-scale));
+  color:#7d6557;
+  font-size:calc(13px * var(--reward-scale));
+  line-height:1.65;
+  text-align:center;
+  white-space:normal;
+}
+.reward-section-title{
+  margin:0 0 calc(10px * var(--reward-scale));
+  color:#8a5c33;
+  font-size:calc(12px * var(--reward-scale));
+  font-weight:950;
+  line-height:1;
+  letter-spacing:.08em;
+}
+.reward-total-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  margin-top:6px;
+  padding:4px 10px;
+  border-radius:999px;
+  background:rgba(255,246,232,.84);
+  border:1px solid rgba(218,166,87,.22);
+  color:#8a5c28;
+  font-weight:950;
+  white-space:nowrap;
+}
+.reward-list{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  justify-content:center;
+  gap:calc(8px * var(--reward-scale));
+  margin:0 0 calc(16px * var(--reward-scale));
+}
+.reward-list.count-1{grid-template-columns:minmax(0, calc(160px * var(--reward-scale)));}
+.reward-list.empty,
+.reward-section-title.empty{display:none;}
+.reward-item{
+  min-width:0;
+  min-height:calc(106px * var(--reward-scale));
+  padding:calc(10px * var(--reward-scale)) calc(8px * var(--reward-scale)) calc(9px * var(--reward-scale));
+  border-radius:calc(16px * var(--reward-scale));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,252,247,.72);
+  border:1px solid rgba(174,132,103,.14);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.82), 0 calc(3px * var(--reward-scale)) calc(10px * var(--reward-scale)) rgba(116,86,54,.06);
+  animation:rewardItemIn .38s ease both;
+}
+.reward-item.title-award{background:rgba(255,248,229,.78);}
+.reward-item:nth-child(1){animation-delay:.14s;}
+.reward-item:nth-child(2){animation-delay:.22s;}
+.reward-item:nth-child(3){animation-delay:.30s;}
+.reward-item:nth-child(4){animation-delay:.38s;}
+@keyframes rewardItemIn{
+  0%{opacity:0; transform:translateY(calc(8px * var(--reward-scale))) scale(.96);}
+  100%{opacity:1; transform:translateY(0) scale(1);}
+}
+.reward-item-icon{
+  font-size:calc(28px * var(--reward-scale));
+  line-height:1;
+  margin-bottom:calc(7px * var(--reward-scale));
+  filter:drop-shadow(0 calc(2px * var(--reward-scale)) calc(3px * var(--reward-scale)) rgba(96,65,35,.12));
+}
+.reward-item-name{
+  width:100%;
+  color:#7b593b;
+  font-size:calc(12px * var(--reward-scale));
+  font-weight:950;
+  line-height:1.2;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.reward-item-amount{
+  margin-top:calc(4px * var(--reward-scale));
+  color:#6a4223;
+  font-size:calc(12px * var(--reward-scale));
+  font-weight:950;
+  line-height:1.2;
+  white-space:nowrap;
+}
+.reward-item-note{
+  width:100%;
+  margin-top:calc(5px * var(--reward-scale));
+  color:#8a6847;
+  font-size:calc(10px * var(--reward-scale));
+  line-height:1.35;
+  text-align:center;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+}
+.reward-confirm{
+  min-width:calc(132px * var(--reward-scale));
+  height:calc(36px * var(--reward-scale));
+  border:1px solid rgba(153,104,62,.22);
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(255,238,200,.96), rgba(227,187,132,.90));
+  color:#67401f;
+  font-size:calc(13px * var(--reward-scale));
+  font-weight:950;
+  cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72), 0 calc(4px * var(--reward-scale)) calc(12px * var(--reward-scale)) rgba(112,80,42,.10);
+}
+.reward-confirm:disabled{opacity:.55; cursor:not-allowed;}
+
+.reward-mask[data-type="title"] .reward-card{
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255,235,204,.72), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(255,229,154,.58), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,242,219,.96));
+}
+
+@media (max-width:540px){
+  .reward-mask{--reward-scale:.82; padding:14px;}
+}
+@media (max-width:380px), (max-height:590px){
+  .reward-mask{--reward-scale:.74;}
+}
+@media (max-width:340px){
+  .reward-list,
+  .reward-list.count-1{grid-template-columns:1fr;}
+}
 </style>
 </head>
 
@@ -998,7 +1291,7 @@ body.stack-layout .ctrlBtn{
     <div id="playArea">
       <div id="viewport">
         <div id="fullLayer">
-          <img id="bg" src="game-name.png" alt="脸萌挑战题图">
+          <img id="bg" src="game-name.png" data-room10-asset="name.gameName" alt="脸萌挑战题图">
           <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
           <div id="labelLayer"></div>
         </div>
@@ -1058,6 +1351,31 @@ body.stack-layout .ctrlBtn{
       <button class="finishBtn primary" type="button" onclick="restartFromFinish()">再玩一次</button>
     </div>
   </div>
+</div>
+
+
+<div id="awardModal" class="reward-mask hidden" aria-hidden="true" data-type="achievement">
+  <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="awardTitle">
+    <div class="reward-petals" aria-hidden="true">
+      <span>✿</span>
+      <span>❀</span>
+      <span>✽</span>
+      <span>✿</span>
+      <span>❀</span>
+    </div>
+
+    <button id="awardCloseBtn" class="reward-close" type="button" aria-label="关闭" onclick="if(!awardClaimBusy) closeAwardModal()">×</button>
+
+    <div class="reward-content">
+      <div class="reward-icon" id="awardRewardIcon" aria-hidden="true">🏆</div>
+      <div class="reward-label" id="awardLabel">脸萌荣誉</div>
+      <h2 class="reward-title" id="awardTitle">脸萌荣誉达成！</h2>
+      <p class="reward-desc" id="awardSummary">请领取本次达成的荣誉。</p>
+      <div class="reward-section-title" id="awardSectionTitle">荣誉内容</div>
+      <div class="reward-list" id="awardList"></div>
+      <button id="awardOkBtn" class="reward-confirm" type="button">一键领取全部</button>
+    </div>
+  </section>
 </div>
 
 <script>
@@ -1169,6 +1487,14 @@ const finishTotalTimeEl = document.getElementById("finishTotalTime");
 const finishMessageEl = document.getElementById("finishMessage");
 const leaderboardHintEl = document.getElementById("leaderboardHint");
 const leaderboardListEl = document.getElementById("leaderboardList");
+const awardModal = document.getElementById("awardModal");
+const awardOkBtn = document.getElementById("awardOkBtn");
+const awardList = document.getElementById("awardList");
+const awardSummary = document.getElementById("awardSummary");
+
+let pendingAwardItems = [];
+let awardClaimBusy = false;
+let awardAutoCloseTimer = null;
 
 const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
@@ -1178,6 +1504,26 @@ const GAME_NOTICE_SOURCE_ID = "game-name";
 const leaderboardClient = window.supabase
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
   : null;
+
+function resolveRoom10Asset(assetKey, fallback = ""){
+  const key = String(assetKey || "").trim();
+  if(key && typeof window.room10Asset === "function"){
+    const configured = window.room10Asset(key);
+    if(configured) return configured;
+  }
+  return String(fallback || "").trim();
+}
+
+function applyConfiguredAssets(){
+  document.querySelectorAll("[data-room10-asset]").forEach(el => {
+    const assetKey = el.getAttribute("data-room10-asset") || "";
+    const fallback = el.getAttribute("src") || "";
+    const value = resolveRoom10Asset(assetKey, fallback);
+    if(value && el.getAttribute("src") !== value){
+      el.setAttribute("src", value);
+    }
+  });
+}
 
 function shouldUseStackLayout(){
   const w = window.innerWidth;
@@ -1352,6 +1698,158 @@ async function notifyOvertakenMembers(beforeRows, score, currentMemberId){
   ));
 }
 
+
+function getAwardRewardGold(item){
+  const value = Number(item && item.reward_gold);
+  return Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+function normalizeAwardItems(items){
+  return (Array.isArray(items) ? items : [])
+    .filter(item => item && item.item_id)
+    .sort((a,b) => {
+      const aType = a.item_type === "title" ? 0 : 1;
+      const bType = b.item_type === "title" ? 0 : 1;
+      return aType - bType ||
+        String(a.requirement_key || "").localeCompare(String(b.requirement_key || ""), "zh-CN") ||
+        Number(a.requirement_value || 0) - Number(b.requirement_value || 0) ||
+        Number(a.item_id || 0) - Number(b.item_id || 0);
+    });
+}
+
+function renderAwardItem(item, index = 0){
+  const isTitle = item.item_type === "title";
+  const label = isTitle ? "获得称号" : "成就达成";
+  const name = item.name || "未命名荣誉";
+  const condition = item.description || "";
+  const rewardGold = getAwardRewardGold(item);
+  const note = condition ? `${condition}｜进度：${item.current_value || 0} / ${item.requirement_value || 0}` : `当前进度：${item.current_value || 0} / ${item.requirement_value || 0}`;
+  const rewardText = rewardGold > 0 ? `${label}｜🪙 +${rewardGold}` : label;
+
+  return `
+    <article class="reward-item ${isTitle ? "title-award" : "achievement-award"}">
+      <div class="reward-item-icon">${isTitle ? "🎖️" : "🏆"}</div>
+      <div class="reward-item-name" title="${escapeHtml(name)}">${escapeHtml(name)}</div>
+      <div class="reward-item-amount">${escapeHtml(rewardText)}</div>
+      <div class="reward-item-note" title="${escapeHtml(note)}">${escapeHtml(note)}</div>
+    </article>
+  `;
+}
+
+function setAwardModalState(state, items){
+  const list = normalizeAwardItems(items);
+  const totalGold = list.reduce((sum, item) => sum + getAwardRewardGold(item), 0);
+  const hasTitle = list.some(item => item.item_type === "title");
+  const countText = list.length ? `本次达成 ${list.length} 项脸萌荣誉。` : "暂无可领取脸萌荣誉。";
+  const goldText = totalGold > 0
+    ? `<br><span class="reward-total-badge"><span>金币合计</span><span>🪙</span><span>+${escapeHtml(totalGold)}</span></span>`
+    : "";
+
+  if(awardModal){
+    awardModal.dataset.type = hasTitle ? "title" : "achievement";
+  }
+
+  const awardRewardIcon = document.getElementById("awardRewardIcon");
+  if(awardRewardIcon) awardRewardIcon.textContent = hasTitle ? "🎖️" : "🏆";
+
+  const awardLabel = document.getElementById("awardLabel");
+  if(awardLabel) awardLabel.textContent = hasTitle ? "获得称号" : "成就达成";
+
+  if(awardSummary){
+    if(state === "claimed") awardSummary.innerHTML = `已领取 ${list.length} 项脸萌荣誉，金币已入账。${goldText}`;
+    else if(state === "loading") awardSummary.textContent = "正在读取脸萌荣誉…";
+    else awardSummary.innerHTML = `${escapeHtml(countText)}${goldText}`;
+  }
+
+  if(awardList){
+    awardList.classList.toggle("empty", !list.length);
+    awardList.classList.toggle("count-1", list.length === 1);
+    awardList.innerHTML = list.length
+      ? list.map((item, index) => renderAwardItem(item, index)).join("")
+      : "";
+  }
+
+  const awardSectionTitle = document.getElementById("awardSectionTitle");
+  if(awardSectionTitle){
+    awardSectionTitle.classList.toggle("empty", !list.length);
+    awardSectionTitle.textContent = hasTitle ? "称号与成就" : "成就内容";
+  }
+
+  if(awardOkBtn){
+    awardOkBtn.disabled = state === "loading" || state === "claiming" || !list.length;
+    awardOkBtn.textContent = state === "claimed" ? "完成" : state === "claiming" ? "领取中…" : "一键领取全部";
+  }
+}
+
+function openAwardModal(items){
+  pendingAwardItems = normalizeAwardItems(items);
+  if(!awardModal || !pendingAwardItems.length) return;
+  clearTimeout(awardAutoCloseTimer);
+  setAwardModalState("ready", pendingAwardItems);
+  awardModal.classList.remove("hidden");
+  awardModal.classList.add("show");
+  awardModal.setAttribute("aria-hidden", "false");
+}
+
+function closeAwardModal(){
+  if(!awardModal) return;
+  awardModal.classList.add("hidden");
+  awardModal.classList.remove("show");
+  awardModal.setAttribute("aria-hidden", "true");
+  pendingAwardItems = [];
+  awardClaimBusy = false;
+  clearTimeout(awardAutoCloseTimer);
+}
+
+async function loadClaimableFaceMatchHonors(){
+  const player = getCurrentPlayer();
+  if(!leaderboardClient || !player.isLoggedIn) return [];
+  const { data, error } = await leaderboardClient.rpc("get_claimable_face_match_honors", {
+    p_member_id:player.memberId
+  });
+  if(error) throw error;
+  return normalizeAwardItems(data);
+}
+
+async function checkFaceMatchAwards(){
+  try{
+    const items = await loadClaimableFaceMatchHonors();
+    if(items.length) openAwardModal(items);
+  }catch(err){
+    console.error("脸萌荣誉读取失败：", err);
+  }
+}
+
+async function claimFaceMatchAwards(){
+  if(awardClaimBusy || !pendingAwardItems.length) return;
+  const player = getCurrentPlayer();
+  if(!leaderboardClient || !player.isLoggedIn) return;
+
+  awardClaimBusy = true;
+  setAwardModalState("claiming", pendingAwardItems);
+
+  try{
+    const { data, error } = await leaderboardClient.rpc("claim_face_match_honors", {
+      p_member_id:player.memberId,
+      p_member_code:player.memberCode,
+      p_item_id:null
+    });
+    if(error) throw error;
+
+    const claimedItems = normalizeAwardItems(data);
+    setAwardModalState("claimed", claimedItems.length ? claimedItems : pendingAwardItems);
+    awardAutoCloseTimer = setTimeout(closeAwardModal, 1600);
+  }catch(err){
+    console.error("脸萌荣誉领取失败：", err);
+    awardClaimBusy = false;
+    if(awardSummary) awardSummary.textContent = "领取失败，请稍后重试。";
+    if(awardOkBtn){
+      awardOkBtn.disabled = false;
+      awardOkBtn.textContent = "重新领取";
+    }
+  }
+}
+
 async function showFinishBoard(score){
   const player = getCurrentPlayer();
 
@@ -1379,6 +1877,7 @@ async function showFinishBoard(score){
       const submitResult = await submitScoreToSupabase(score);
       finishMessageEl.textContent = submitResult.message || "成绩已处理。";
       await notifyOvertakenMembers(beforeRows, score, player.memberId);
+      await checkFaceMatchAwards();
     }
 
     const rows = await loadLeaderboardFromSupabase();
@@ -1728,6 +2227,7 @@ function clearPlacedNames(){
 
 function resetGame(){
   if(finishMask) closeFinishBoard();
+  if(awardModal) closeAwardModal();
   placedCorrect.clear();
   wrongCount = 0;
   penaltySeconds = 0;
@@ -1752,9 +2252,20 @@ function handleResize(){
 }
 
 document.addEventListener("keydown", e => {
-  if(e.key === "Escape" && finishMask && !finishMask.classList.contains("hidden")){
+  if(e.key !== "Escape") return;
+  if(awardModal && !awardModal.classList.contains("hidden")){
+    closeAwardModal();
+    return;
+  }
+  if(finishMask && !finishMask.classList.contains("hidden")){
     closeFinishBoard();
   }
+});
+
+if(awardOkBtn) awardOkBtn.addEventListener("click", claimFaceMatchAwards);
+
+if(awardModal) awardModal.addEventListener("click", e => {
+  if(e.target === awardModal && !awardClaimBusy) closeAwardModal();
 });
 
 finishMask.addEventListener("click", e => {
@@ -1764,6 +2275,7 @@ finishMask.addEventListener("click", e => {
 window.addEventListener("resize", handleResize);
 bg.addEventListener("load", () => applyLayoutMode());
 
+applyConfiguredAssets();
 renderNameCards();
 createZoneElements();
 updateStatus();
