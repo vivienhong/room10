@@ -61,7 +61,7 @@ html,body{
   --game-panel-top:49.5%;
   --game-panel-width:48%;
   --game-panel-design-width:500;
-  --game-panel-design-height:230;
+  --game-panel-design-height:310;
   --game-panel-scale:1.1;
   --game-panel-max-width:none;
   --game-panel-padding:13px;
@@ -261,8 +261,9 @@ button{
   grid-auto-rows:minmax(var(--game-card-height), auto);
   gap:var(--game-menu-gap);
   min-height:0;
-  overflow:visible;
-  padding:0;
+  overflow-x:hidden;
+  overflow-y:auto;
+  padding:0 4px 0 0;
   scrollbar-width:thin;
 }
 
@@ -272,12 +273,11 @@ button{
 
 .game-btn{
   appearance:none;
-  border:none;
   cursor:pointer;
   position:relative;
   width:100%;
   min-height:var(--game-card-height);
-  border-radius:var(--game-card-radius);
+  border-radius:calc(var(--game-card-radius) + 1px);
   padding:var(--game-card-padding);
   text-decoration:none;
   display:flex;
@@ -287,12 +287,12 @@ button{
   gap:var(--game-card-gap);
   text-align:left;
   background:
-    radial-gradient(circle at 18% 18%, rgba(255,255,255,.72), transparent 38%),
-    rgba(255,252,248,0.78);
-  border:1px solid rgba(255,255,255,0.88);
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,.55), transparent 40%),
+    linear-gradient(180deg, rgba(255,253,250,.92) 0%, rgba(249,244,237,.90) 100%);
+  border:1px solid rgba(201,183,161,.34);
   box-shadow:
-    0 8px 20px rgba(129,90,54,0.13),
-    inset 0 1px 0 rgba(255,255,255,0.92);
+    0 6px 16px rgba(129,90,54,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.78);
   transition:
     transform .22s ease,
     box-shadow .22s ease,
@@ -316,14 +316,14 @@ button{
 }
 
 .game-btn:hover{
-  transform:translateY(-6px) scale(1.018);
+  transform:translateY(-4px) scale(1.012);
   background:
-    radial-gradient(circle at 18% 18%, rgba(255,255,255,.82), transparent 38%),
-    rgba(255,252,248,0.94);
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,.70), transparent 40%),
+    linear-gradient(180deg, rgba(255,254,251,.96) 0%, rgba(251,246,240,.94) 100%);
   box-shadow:
-    0 15px 30px rgba(129,90,54,0.23),
-    inset 0 1px 0 rgba(255,255,255,0.98);
-  border-color:rgba(255,255,255,1);
+    0 10px 22px rgba(129,90,54,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.88);
+  border-color:rgba(188,159,127,.42);
 }
 
 .game-btn:hover::before{
@@ -331,7 +331,7 @@ button{
   animation:gameCardSweep .72s ease both;
 }
 
-.game-btn:active{transform:translateY(-1px) scale(.99);}
+.game-btn:active{transform:translateY(-1px) scale(.995);}
 
 @keyframes gameCardSweep{
   0%{left:-55%;}
@@ -396,6 +396,23 @@ button{
 .game-status.ready{
   color:#75451f;
   background:rgba(248,216,161,.58);
+}
+
+.game-list-message{
+  grid-column:1 / -1;
+  min-height:calc(var(--game-card-height) * 2 + var(--game-menu-gap));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  border-radius:var(--game-card-radius);
+  color:#7a5030;
+  font-size:14px;
+  font-weight:850;
+  line-height:1.6;
+  text-align:center;
+  background:rgba(255,252,248,0.70);
+  border:1px solid rgba(255,255,255,0.72);
 }
 
 /* =========================================================
@@ -472,7 +489,7 @@ button{
   padding:0 13px;
   border-radius:999px;
   color:#744a2a;
-  font-size:16px;
+  font-size:18px;
   font-weight:950;
   letter-spacing:.08em;
   background:rgba(255,250,244,.72);
@@ -1171,6 +1188,7 @@ button{
   border:none;
   background:#fffaf4;
   display:block;
+  overflow:hidden;
 }
 
 .fallback-tip{
@@ -1729,7 +1747,7 @@ button{
   .gacha-standalone-label{
     min-height:28px;
     padding:0 16px;
-    font-size:16px;
+    font-size:17px;
   }
 
 
@@ -2461,6 +2479,9 @@ button{
     grid-template-columns:repeat(2, minmax(0, 1fr));
     grid-auto-rows:minmax(var(--game-card-height), auto);
     gap:var(--game-menu-gap);
+    overflow-x:hidden;
+    overflow-y:auto;
+    padding-right:4px;
   }
 
   .game-btn{
@@ -2522,6 +2543,321 @@ button{
     min-height:28px;
     padding:0 13px;
     font-size:16px;
+  }
+}
+
+
+/* =========================================================
+   手机竖屏流式布局修正（540px 及以下）
+   - 不再绑定底图坐标
+   - 从上到下：导航 / 身份 / 游戏列表 / 扭蛋机
+   - 游戏列表单列流式排列
+========================================================= */
+@media (max-width:540px){
+  html,
+  body{
+    width:100%!important;
+    height:auto!important;
+    min-height:100%!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+
+  body{
+    display:block!important;
+    background:
+      linear-gradient(rgba(243,236,223,.72), rgba(243,236,223,.92)),
+      var(--game-room-bg-url, url("room-game.png")) center center / cover no-repeat fixed!important;
+  }
+
+  #bgColorFill,
+  #bgBleed,
+  #bgLight,
+  #bgFrame{
+    display:none!important;
+  }
+
+  #room{
+    position:relative!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:100vh!important;
+    min-height:100dvh!important;
+    display:block!important;
+    overflow:visible!important;
+    padding:10px 12px 16px!important;
+  }
+
+  #overlay{
+    position:relative!important;
+    left:auto!important;
+    top:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:10px!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+    pointer-events:auto!important;
+    --ui-scale:1!important;
+    --bg-ui-scale:1!important;
+    --room-nav-scale:1!important;
+    --identity-scale:1!important;
+  }
+
+  .roomNavLayer{
+    position:relative!important;
+    inset:auto!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-auto-rows:32px!important;
+    gap:5px!important;
+    margin:0!important;
+    padding:0!important;
+    order:0!important;
+    z-index:20!important;
+    pointer-events:auto!important;
+    --s:1!important;
+  }
+
+  .roomNavLayer .navBtn{
+    position:relative!important;
+    left:auto!important;
+    top:auto!important;
+    display:flex!important;
+    width:100%!important;
+    height:32px!important;
+    min-width:0!important;
+    min-height:32px!important;
+    max-height:32px!important;
+    margin:0!important;
+    padding:0!important;
+    border-radius:10px!important;
+    font-size:12px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+  }
+
+  .roomNavLayer .navLabel{
+    width:100%!important;
+    height:100%!important;
+    padding-top:.04em!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+  }
+
+  .roomNavLayer .navEffect{
+    display:none!important;
+  }
+
+  .roomIdentity{
+    --s:1!important;
+    position:relative!important;
+    right:auto!important;
+    top:auto!important;
+    width:100%!important;
+    min-width:0!important;
+    height:40px!important;
+    min-height:40px!important;
+    order:1!important;
+    z-index:90!important;
+  }
+
+  .roomIdentityBar{
+    grid-template-columns:minmax(0,1fr) 34px 42px!important;
+    gap:6px!important;
+    padding:5px 7px!important;
+    border-radius:14px!important;
+  }
+
+  .identityNameBox{
+    padding:0 9px!important;
+    border-radius:10px!important;
+    overflow:visible!important;
+  }
+
+  .identityNameText{
+    font-size:12px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    overflow:visible!important;
+  }
+
+  .identityNickname{transform:translateY(var(--identity-mobile-name-y))!important;}
+  .identitySeparator{font-size:12px!important;transform:translateY(var(--identity-mobile-separator-y))!important;}
+  .identityRole{transform:translateY(var(--identity-mobile-role-y))!important;}
+  .identityNoticeIcon{transform:translateY(var(--identity-mobile-notice-y))!important;}
+  .identityAuthText{transform:translateY(var(--identity-mobile-button-y))!important;}
+
+  .identityNoticePanel{
+    position:fixed!important;
+    top:var(--identity-notice-mobile-top,58px)!important;
+    left:auto!important;
+    right:max(20px, env(safe-area-inset-right))!important;
+    width:min(320px, calc(100% - 40px))!important;
+    min-width:0!important;
+    max-width:320px!important;
+    max-height:calc(100dvh - var(--identity-notice-mobile-top,58px) - 14px)!important;
+    padding:14px!important;
+    border-radius:18px!important;
+    z-index:990!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+
+  .identityNoticePanel::before{
+    display:block!important;
+  }
+
+  .panel{
+    position:relative!important;
+    left:auto!important;
+    top:auto!important;
+    transform:none!important;
+    width:100%!important;
+    height:auto!important;
+    max-width:none!important;
+    max-height:none!important;
+    border-radius:22px!important;
+    padding:16px 14px!important;
+    order:2!important;
+    overflow:visible!important;
+  }
+
+  .game-section,
+  .game-section-main{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+
+  .menu{
+    display:flex!important;
+    flex-direction:column!important;
+    grid-template-columns:none!important;
+    grid-auto-rows:auto!important;
+    gap:10px!important;
+    width:100%!important;
+    max-height:none!important;
+    overflow:visible!important;
+    padding:0!important;
+    scrollbar-width:none!important;
+  }
+
+  .menu::-webkit-scrollbar{
+    display:none!important;
+  }
+
+  .game-btn,
+  .game-btn.is-wide{
+    width:100%!important;
+    min-height:60px!important;
+    padding:10px 12px!important;
+    border-radius:16px!important;
+    gap:10px!important;
+    flex:0 0 auto!important;
+  }
+
+  .game-btn:hover{
+    transform:translateY(-2px)!important;
+  }
+
+  .game-icon{
+    width:34px!important;
+    height:34px!important;
+    border-radius:12px!important;
+    font-size:18px!important;
+  }
+
+  .game-name{
+    font-size:17px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+  }
+
+  .game-status{
+    font-size:10px!important;
+  }
+
+  .gacha-standalone-wrap{
+    position:relative!important;
+    left:auto!important;
+    top:auto!important;
+    width:100%!important;
+    transform:none!important;
+    order:3!important;
+    margin:0!important;
+    z-index:32!important;
+  }
+
+  .gacha-standalone-wrap .gacha-standalone-btn,
+  .gacha-standalone-btn{
+    position:relative!important;
+    left:auto!important;
+    top:auto!important;
+    width:100%!important;
+    min-height:148px!important;
+    transform:none!important;
+    order:initial!important;
+    margin:0!important;
+    padding:12px!important;
+    border-radius:20px!important;
+  }
+
+  .gacha-standalone-wrap .gacha-standalone-btn:hover,
+  .gacha-standalone-btn:hover{
+    transform:translateY(-3px)!important;
+  }
+
+  .gacha-standalone-img{
+    width:88px!important;
+    height:88px!important;
+  }
+
+  .gacha-standalone-label{
+    min-height:30px!important;
+    padding:0 16px!important;
+    font-size:17px!important;
+  }
+
+  .game-modal-mask{
+    padding:10px!important;
+    align-items:stretch!important;
+    justify-content:center!important;
+  }
+
+  .game-modal-box{
+    width:100%!important;
+    height:calc(100dvh - 20px)!important;
+    max-height:calc(100dvh - 20px)!important;
+    border-radius:18px!important;
+    padding-top:34px!important;
+    overflow:hidden!important;
+  }
+
+  .game-modal-close{
+    top:7px!important;
+    right:8px!important;
+    min-width:46px!important;
+    height:24px!important;
+    z-index:5!important;
+  }
+
+  #gameModalFrame{
+    width:100%!important;
+    height:100%!important;
+    overflow:hidden!important;
   }
 }
 
@@ -2623,40 +2959,13 @@ button{
 
     <div class="panel">
       <section class="game-section game-section-main" aria-label="小游戏">
-        <div class="menu game-list">
-          <button class="game-btn" type="button" onclick="openConfiguredGame('gameName', '脸萌挑战', 'name/name.html')">
-            <span class="game-icon" aria-hidden="true">🙂</span><div class="game-name">脸萌挑战</div>
-          </button>
-
-          <button class="game-btn" type="button" onclick="openConfiguredGame('gameBomb', '拆弹专家', 'bomb/bomb.html')">
-            <span class="game-icon" aria-hidden="true">💣</span><div class="game-name">拆弹专家</div>
-          </button>
-
-          <button class="game-btn" type="button" onclick="openConfiguredGame('gameTime', '时间的答案', 'time.html')">
-            <span class="game-icon" aria-hidden="true">⏳</span><div class="game-name">时间的答案</div>
-          </button>
-
-          <button class="game-btn" type="button" onclick="openReservedGame('mango-hit')">
-            <span class="game-icon" aria-hidden="true">🥭</span><div class="game-name">暴打芒果</div>
-          </button>
-
-          <button class="game-btn" type="button" onclick="openReservedGame('dragon-size')">
-            <span class="game-icon" aria-hidden="true">🐉</span><div class="game-name">接大小龙</div>
-          </button>
-
-          <button class="game-btn" type="button" onclick="openConfiguredGame('gamePasswordMaster', '密码大师', 'pwmaster.html')">
-            <span class="game-icon" aria-hidden="true">🔐</span><div class="game-name">密码大师</div>
-          </button>
+        <div class="menu game-list" id="gameList" aria-live="polite">
+          <div class="game-list-message">正在读取游戏列表...</div>
         </div>
       </section>
     </div>
 
-    <div class="gacha-standalone-wrap" id="gachaEntryWrap">
-      <button class="gacha-standalone-btn" type="button" onclick="openReservedGame('gacha')" aria-label="扭蛋机">
-        <img class="gacha-standalone-img" src="../dorm/book-gacha.png" data-room10-asset="dorm.bookGacha" alt="" aria-hidden="true">
-        <span class="gacha-standalone-label">扭蛋机</span>
-      </button>
-    </div>
+    <div class="gacha-standalone-wrap hidden" id="gachaEntryWrap"></div>
   </div>
 </div>
 
@@ -2679,7 +2988,7 @@ button{
 <div id="gameModalMask" class="game-modal-mask hidden" aria-hidden="true">
   <div id="gameModalBox" class="game-modal-box" role="dialog" aria-modal="true" aria-label="小游戏">
     <button class="game-modal-close" type="button" onclick="closeGameModal()">关闭</button>
-    <iframe id="gameModalFrame" title="小游戏"></iframe>
+    <iframe id="gameModalFrame" title="小游戏" scrolling="no"></iframe>
   </div>
 </div>
 
@@ -2739,6 +3048,8 @@ const loginHint = document.getElementById("loginHint");
 const gameModalMask = document.getElementById("gameModalMask");
 const gameModalBox = document.getElementById("gameModalBox");
 const gameModalFrame = document.getElementById("gameModalFrame");
+const gameList = document.getElementById("gameList");
+const gachaEntryWrap = document.getElementById("gachaEntryWrap");
 
 const PENDING_REDIRECT_KEY = "room10_pending_redirect";
 
@@ -2920,6 +3231,132 @@ function handleGameAwardMessage(event){
 window.addEventListener("message", handleGameAwardMessage);
 
 
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function showGameListMessage(message){
+  if(!gameList) return;
+  gameList.innerHTML = `<div class="game-list-message">${escapeHtml(message)}</div>`;
+}
+
+function normalizeGameEntry(row){
+  return {
+    gameKey:String(row?.game_key || "").trim(),
+    displayName:String(row?.display_name || "").trim(),
+    iconText:String(row?.icon_text || "").trim() || "🎮",
+    pageKey:String(row?.page_key || "").trim(),
+    fallbackUrl:String(row?.fallback_url || "").trim(),
+    entryType:String(row?.entry_type || "panel").trim() || "panel",
+    imageAssetKey:String(row?.image_asset_key || "").trim(),
+    imageUrl:String(row?.image_url || "").trim(),
+    isEnabled:row?.is_enabled !== false,
+    disabledMessage:String(row?.disabled_message || "").trim(),
+    statusText:String(row?.status_text || "").trim()
+  };
+}
+
+function validateGameEntry(entry){
+  if(!entry.gameKey || !entry.displayName) return false;
+  if(entry.isEnabled && !entry.pageKey && !entry.fallbackUrl) return false;
+  return true;
+}
+
+function renderGameButton(entry){
+  const statusClass = entry.isEnabled ? "ready" : "";
+  const statusText = entry.statusText || (entry.isEnabled ? "" : "待更新");
+  return `
+    <button class="game-btn${entry.isEnabled ? "" : " is-coming-soon"}" type="button" data-game-key="${escapeHtml(entry.gameKey)}">
+      <span class="game-icon" aria-hidden="true">${escapeHtml(entry.iconText)}</span>
+      <div>
+        <div class="game-name">${escapeHtml(entry.displayName)}</div>
+        ${statusText ? `<div class="game-status ${statusClass}">${escapeHtml(statusText)}</div>` : ""}
+      </div>
+    </button>
+  `;
+}
+
+function renderStandaloneGame(entry){
+  if(!gachaEntryWrap) return;
+  const imageSrc = entry.imageAssetKey ? resolveRoom10Asset(entry.imageAssetKey, entry.imageUrl) : entry.imageUrl;
+  gachaEntryWrap.classList.remove("hidden");
+  gachaEntryWrap.innerHTML = `
+    <button class="gacha-standalone-btn" type="button" data-game-key="${escapeHtml(entry.gameKey)}" aria-label="${escapeHtml(entry.displayName)}">
+      ${imageSrc ? `<img class="gacha-standalone-img" src="${escapeHtml(imageSrc)}" alt="" aria-hidden="true">` : `<span class="game-icon" aria-hidden="true">${escapeHtml(entry.iconText)}</span>`}
+      <span class="gacha-standalone-label">${escapeHtml(entry.displayName)}</span>
+    </button>
+  `;
+}
+
+let gameEntryMap = new Map();
+
+async function loadGameEntries(){
+  showGameListMessage("正在读取游戏列表...");
+  if(gachaEntryWrap){
+    gachaEntryWrap.classList.add("hidden");
+    gachaEntryWrap.innerHTML = "";
+  }
+
+  const { data, error } = await client
+    .from("game_room_entries")
+    .select("game_key,display_name,icon_text,page_key,fallback_url,entry_type,image_asset_key,image_url,is_active,is_enabled,disabled_message,status_text,sort_order")
+    .eq("is_active", true)
+    .order("sort_order", { ascending:true })
+    .order("created_at", { ascending:true });
+
+  if(error){
+    console.error("loadGameEntries() 读取失败：", error);
+    showGameListMessage(`游戏列表读取失败：${error.message || "请检查 game_room_entries 表"}`);
+    return;
+  }
+
+  const entries = (Array.isArray(data) ? data : []).map(normalizeGameEntry).filter(validateGameEntry);
+  if(!entries.length){
+    showGameListMessage("游戏列表配置缺失，请先在 game_room_entries 表中添加游戏。 ");
+    return;
+  }
+
+  gameEntryMap = new Map(entries.map(entry => [entry.gameKey, entry]));
+  const panelEntries = entries.filter(entry => entry.entryType !== "standalone" && entry.entryType !== "standalone_gacha");
+  const standaloneEntries = entries.filter(entry => entry.entryType === "standalone" || entry.entryType === "standalone_gacha");
+
+  if(panelEntries.length){
+    gameList.innerHTML = panelEntries.map(renderGameButton).join("");
+  }else{
+    showGameListMessage("游戏列表配置缺失：没有可显示在主面板的游戏。 ");
+  }
+
+  standaloneEntries.slice(0, 1).forEach(renderStandaloneGame);
+}
+
+function openDbGame(gameKey){
+  const key = String(gameKey || "").trim();
+  const entry = gameEntryMap.get(key);
+  if(!entry){
+    showTip("游戏配置缺失，请刷新后重试。");
+    return;
+  }
+
+  if(!entry.isEnabled){
+    showTip(entry.disabledMessage || `《${entry.displayName}》待更新。`);
+    return;
+  }
+
+  const targetUrl = resolveRoom10Page(entry.pageKey, entry.fallbackUrl);
+  if(!targetUrl){
+    showTip(`《${entry.displayName}》页面路径配置缺失。`);
+    return;
+  }
+
+  openGameModal(targetUrl, entry.displayName);
+}
+
 const RESERVED_GAMES = {
   "time-answer": {
     title:"时间的答案",
@@ -2951,6 +3388,22 @@ const RESERVED_GAMES = {
   }
 };
 
+if(gameList){
+  gameList.addEventListener("click", (event) => {
+    const btn = event.target.closest("[data-game-key]");
+    if(!btn) return;
+    openDbGame(btn.getAttribute("data-game-key"));
+  });
+}
+
+if(gachaEntryWrap){
+  gachaEntryWrap.addEventListener("click", (event) => {
+    const btn = event.target.closest("[data-game-key]");
+    if(!btn) return;
+    openDbGame(btn.getAttribute("data-game-key"));
+  });
+}
+
 function isTinyScreen(){
   return window.innerWidth <= 540;
 }
@@ -2971,6 +3424,11 @@ function clearDesktopOverlayStyles(){
 }
 
 function syncOverlayToImage(){
+  if(isTinyScreen()){
+    clearDesktopOverlayStyles();
+    return;
+  }
+
   if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
 
   const frame = bgFrame.getBoundingClientRect();
@@ -3344,6 +3802,7 @@ function openGameModal(url, title = "小游戏"){
   }
 
   gameModalFrame.title = safeTitle;
+  gameModalFrame.setAttribute("scrolling", "no");
   gameModalFrame.setAttribute("data-current-src", safeUrl);
   gameModalFrame.src = safeUrl;
   gameModalMask.classList.remove("hidden");
@@ -3372,6 +3831,7 @@ function closeGameModal(){
   gameModalMask.classList.add("hidden");
   gameModalMask.setAttribute("aria-hidden", "true");
   gameModalFrame.removeAttribute("data-current-src");
+  gameModalFrame.setAttribute("scrolling", "no");
   gameModalFrame.src = "about:blank";
 }
 
@@ -3696,11 +4156,12 @@ if(img && img.complete && img.naturalWidth){
 
 setTimeout(syncOverlayToImage, 120);
 setupRoomNav("game");
+loadGameEntries();
 updateIdentityUI();
 refreshGameNotice();
 </script>
 
 
-<!-- GAME_PAGE_VERSION: game-room-final-compact-panel-gacha-position -->
+<!-- GAME_PAGE_VERSION: game-room-db-driven-game-list -->
 </body>
 </html>
