@@ -714,9 +714,11 @@ button{font-family:inherit;}
   z-index:3;
 }
 
-.trophyRect{
-  fill:rgba(255,255,255,0);
-  stroke:rgba(255,255,255,0);
+/* 奖杯热区：保留一套最终样式，避免重复覆盖 */
+.trophyRect,
+#map rect{
+  fill:rgba(255,255,255,0) !important;
+  stroke:rgba(255,255,255,0) !important;
   stroke-width:.45;
   cursor:pointer;
   transition:fill .18s ease, stroke .18s ease, filter .18s ease;
@@ -724,14 +726,14 @@ button{font-family:inherit;}
 }
 
 .trophyRect:hover{
-  fill:rgba(255,186,92,.14);
-  stroke:rgba(255,178,76,.78);
+  fill:rgba(255,186,92,.14) !important;
+  stroke:rgba(255,178,76,.78) !important;
   stroke-width:.75;
 }
 
 .trophyRect.active{
-  fill:rgba(255,218,130,.26);
-  stroke:#ffb24c;
+  fill:rgba(255,218,130,.26) !important;
+  stroke:#ffb24c !important;
   stroke-width:1.1;
   filter:drop-shadow(0 0 5px rgba(255,196,108,.85));
 }
@@ -1817,25 +1819,6 @@ button{font-family:inherit;}
 
 /* ===== 牛马解说员样式已合并到荣誉墙专属细化区，避免重复冲突 ===== */
 
-/* 强制奖杯热区透明，避免 SVG 默认黑色填充 */
-.trophyRect,
-#map rect{
-  fill:rgba(255,255,255,0) !important;
-  stroke:rgba(255,255,255,0) !important;
-  pointer-events:all;
-}
-
-.trophyRect:hover{
-  fill:rgba(255,186,92,.14) !important;
-  stroke:rgba(255,178,76,.78) !important;
-}
-
-.trophyRect.active{
-  fill:rgba(255,218,130,.26) !important;
-  stroke:#ffb24c !important;
-  filter:drop-shadow(0 0 5px rgba(255,196,108,.85));
-}
-
 @media (max-width:540px){
   #rankPanelInner{overflow:hidden;}
   #rankTitle{font-size:24px;line-height:1.18;margin-bottom:7px;}
@@ -2207,230 +2190,6 @@ button{font-family:inherit;}
   }
 }
 
-/* ===== 全站通用荣誉获得弹窗：称号 / 成就共用，不占用顶部组件 ===== */
-#honorRewardUI{
-  position:fixed;
-  inset:0;
-  z-index:1200;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:22px;
-  background:
-    radial-gradient(circle at center, rgba(255,244,226,.30) 0%, rgba(255,244,226,0) 42%),
-    rgba(69,48,31,.34);
-  backdrop-filter:blur(5px);
-  -webkit-backdrop-filter:blur(5px);
-}
-
-#honorRewardUI.show{
-  display:flex;
-}
-
-#honorRewardCard{
-  position:relative;
-  width:min(430px, 92vw);
-  min-height:230px;
-  border-radius:28px;
-  padding:28px 26px 24px;
-  text-align:center;
-  color:#68472e;
-  background:
-    radial-gradient(circle at 22% 0%, rgba(255,236,190,.55) 0%, rgba(255,236,190,0) 40%),
-    radial-gradient(circle at 88% 14%, rgba(255,216,164,.30) 0%, rgba(255,216,164,0) 36%),
-    linear-gradient(180deg, rgba(255,251,244,.98) 0%, rgba(248,235,216,.96) 100%);
-  border:1px solid rgba(205,166,116,.38);
-  box-shadow:
-    0 24px 60px rgba(66,42,22,.24),
-    inset 0 1px 0 rgba(255,255,255,.90),
-    inset 0 -8px 20px rgba(174,123,72,.06);
-  overflow:hidden;
-  transform:translateY(10px) scale(.985);
-  opacity:0;
-  animation:honorRewardIn .28s cubic-bezier(.22,.8,.2,1) forwards;
-}
-
-#honorRewardCard::before,
-#honorRewardCard::after{
-  content:"";
-  position:absolute;
-  pointer-events:none;
-  border-radius:999px;
-}
-
-#honorRewardCard::before{
-  left:50%;
-  top:18px;
-  width:160px;
-  height:160px;
-  transform:translateX(-50%);
-  background:radial-gradient(circle, rgba(246,204,126,.22) 0%, rgba(246,204,126,0) 70%);
-}
-
-#honorRewardCard::after{
-  right:-38px;
-  bottom:-44px;
-  width:130px;
-  height:130px;
-  background:radial-gradient(circle, rgba(199,142,86,.14) 0%, rgba(199,142,86,0) 68%);
-}
-
-@keyframes honorRewardIn{
-  to{
-    opacity:1;
-    transform:translateY(0) scale(1);
-  }
-}
-
-#honorRewardClose{
-  position:absolute;
-  right:14px;
-  top:12px;
-  z-index:3;
-  width:30px;
-  height:30px;
-  border:none;
-  border-radius:999px;
-  cursor:pointer;
-  color:#805a39;
-  font-size:18px;
-  font-weight:900;
-  line-height:1;
-  background:rgba(255,255,255,.62);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.85);
-}
-
-#honorRewardClose:hover{
-  background:rgba(255,255,255,.86);
-}
-
-.honorRewardSparkles{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  z-index:1;
-}
-
-.honorRewardSparkles span{
-  position:absolute;
-  color:rgba(196,133,67,.42);
-  font-weight:900;
-  line-height:1;
-  animation:honorRewardFloat 2.8s ease-in-out infinite;
-}
-
-.honorRewardSparkles span:nth-child(1){left:14%;top:17%;font-size:18px;animation-delay:0s;}
-.honorRewardSparkles span:nth-child(2){right:16%;top:22%;font-size:15px;animation-delay:.35s;}
-.honorRewardSparkles span:nth-child(3){left:20%;bottom:24%;font-size:14px;animation-delay:.7s;}
-.honorRewardSparkles span:nth-child(4){right:20%;bottom:26%;font-size:17px;animation-delay:1s;}
-
-@keyframes honorRewardFloat{
-  0%,100%{transform:translateY(3px) rotate(-4deg);opacity:.28;}
-  50%{transform:translateY(-5px) rotate(5deg);opacity:.74;}
-}
-
-.honorRewardBody{
-  position:relative;
-  z-index:2;
-}
-
-#honorRewardIcon{
-  width:70px;
-  height:70px;
-  margin:0 auto 14px;
-  border-radius:999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:34px;
-  background:
-    radial-gradient(circle at 35% 25%, rgba(255,255,255,.96) 0%, rgba(255,255,255,0) 42%),
-    linear-gradient(180deg, rgba(250,224,176,.96) 0%, rgba(230,183,119,.88) 100%);
-  border:1px solid rgba(176,118,56,.24);
-  box-shadow:
-    0 10px 24px rgba(118,78,35,.16),
-    inset 0 1px 0 rgba(255,255,255,.82);
-}
-
-#honorRewardType{
-  margin-bottom:7px;
-  color:#9a6a3e;
-  font-size:13px;
-  font-weight:950;
-  letter-spacing:.12em;
-}
-
-#honorRewardName{
-  color:#543925;
-  font-size:26px;
-  font-weight:1000;
-  line-height:1.2;
-  margin:0 0 12px;
-}
-
-#honorRewardDesc{
-  color:#7c5e46;
-  font-size:14px;
-  font-weight:700;
-  line-height:1.62;
-  margin:0 auto 20px;
-  max-width:340px;
-}
-
-#honorRewardOk{
-  appearance:none;
-  border:none;
-  cursor:pointer;
-  min-width:118px;
-  height:38px;
-  padding:0 22px;
-  border-radius:999px;
-  color:#fffaf1;
-  font-size:14px;
-  font-weight:900;
-  background:linear-gradient(180deg, #b9854d 0%, #9a6536 100%);
-  box-shadow:
-    0 8px 18px rgba(123,78,38,.18),
-    inset 0 1px 0 rgba(255,255,255,.26);
-}
-
-#honorRewardOk:hover{
-  filter:brightness(1.04);
-  transform:translateY(-1px);
-}
-
-@media (max-width:540px){
-  #honorRewardUI{
-    padding:16px;
-  }
-
-  #honorRewardCard{
-    width:min(92vw, 390px);
-    min-height:218px;
-    padding:26px 20px 22px;
-    border-radius:24px;
-  }
-
-  #honorRewardIcon{
-    width:62px;
-    height:62px;
-    font-size:30px;
-    margin-bottom:12px;
-  }
-
-  #honorRewardName{
-    font-size:22px;
-  }
-
-  #honorRewardDesc{
-    font-size:13px;
-    line-height:1.58;
-    margin-bottom:18px;
-  }
-}
-
-
-
 /* ===== 541px-920px：锁定底图坐标的小屏横屏适配（统一字号版）
    保持排行榜与大屏同一套百分比位置，只压缩内部字号和间距。
    分数/右侧内容不再设置 max-width，避免 541px-760px 被截断。 */
@@ -2623,42 +2382,6 @@ button{font-family:inherit;}
     font-size:clamp(6.4px, .98vw, 8px);
     line-height:1.05;
     letter-spacing:-0.06em;
-  }
-
-  #honorRewardCard{
-    width:min(370px, 88vw);
-    min-height:190px;
-    padding:20px 21px 18px;
-    border-radius:22px;
-  }
-
-  #honorRewardIcon{
-    width:54px;
-    height:54px;
-    margin-bottom:9px;
-    font-size:27px;
-  }
-
-  #honorRewardKicker{
-    font-size:12.5px;
-  }
-
-  #honorRewardName{
-    font-size:23px;
-    margin-top:4px;
-  }
-
-  #honorRewardDesc{
-    font-size:12.5px;
-    line-height:1.48;
-    margin-top:8px;
-  }
-
-  #honorRewardOk{
-    height:35px;
-    min-width:100px;
-    margin-top:14px;
-    font-size:12.5px;
   }
 }
 
@@ -2886,7 +2609,7 @@ button{font-family:inherit;}
         <div id="rankPanelInner">
           <button id="rankClose" onclick="closeRank()" title="关闭">×</button>
           <div id="rankTitle">点击左侧奖杯查看排行榜</div>
-          <div id="rankDesc">这里会展示对应奖杯的排行榜、说明和统计起始时间。</div>
+          <div id="rankDesc">这里会读取数据库中的实时排行榜；如果没有数据，会显示暂无数据。</div>
           <div id="rankSince">统计时间：待设置</div>
           <div id="rankList">
             <div id="rankEmpty">请先点击左侧奖杯柜中的任意奖杯。</div>
@@ -2942,28 +2665,6 @@ button{font-family:inherit;}
     </div>
   </div>
 </div>
-
-
-
-<div id="honorRewardUI" aria-live="polite" aria-modal="true" role="dialog">
-  <div id="honorRewardCard">
-    <button id="honorRewardClose" type="button" aria-label="关闭荣誉获得提示">×</button>
-    <div class="honorRewardSparkles" aria-hidden="true">
-      <span>✦</span>
-      <span>✧</span>
-      <span>★</span>
-      <span>✿</span>
-    </div>
-    <div class="honorRewardBody">
-      <div id="honorRewardIcon">🏅</div>
-      <div id="honorRewardType">获得称号</div>
-      <h2 id="honorRewardName">十号房石耶耶</h2>
-      <p id="honorRewardDesc">本季荣誉墙登顶次数最多，正式确诊为「十号房石耶耶」。</p>
-      <button id="honorRewardOk" type="button">收下荣誉</button>
-    </div>
-  </div>
-</div>
-
 <div id="loginUI">
   <div class="login-panel">
     <img id="loginPanelBg" src="../login.png" data-room10-asset="root.login" alt="登录框">
@@ -3166,7 +2867,6 @@ async function login(){
     msg.innerText = roleMessage;
 
     updateIdentity();
-    syncHonorSeasonAwards();
 
     setTimeout(() => {
       nicknameInput.value = "";
@@ -3239,123 +2939,9 @@ function goManagerRoom(){
   window.location.href = resolveHonorPageUrl("manager-member.html");
 }
 
-const fallbackTrophyData = {
-  1:{
-    title:"最佳尖叫鸡",
-    desc:"记录成员在作品中唱到的最高音。谁把屋顶掀得最高，谁就会出现在这里。",
-    since:"统计时间：按当前数据库实时统计",
-    list:[
-      {name:"夏", score:"#C6"},
-      {name:"扬", score:"#C6"},
-      {name:"桃", score:"#A5"},
-      {name:"罐", score:"#G5"},
-      {name:"糖", score:"#F5"}
-    ]
-  },
-  2:{
-    title:"觉醒狮子王",
-    desc:"记录成员在作品中唱到的最低音。低到像从地板下传来的声音，也会被荣誉墙记住。",
-    since:"统计时间：按当前数据库实时统计",
-    list:[
-      {name:"扬", score:"E2"},
-      {name:"夏", score:"F2"},
-      {name:"罐", score:"G2"},
-      {name:"桃", score:"A2"},
-      {name:"糖", score:"B2"}
-    ]
-  },
-  3:{
-    title:"最刺激过山车",
-    desc:"记录成员在单首作品里的最大音域跨度。最高音和最低音拉得越开，过山车就越刺激。",
-    since:"统计时间：按当前数据库实时统计",
-    list:[
-      {name:"夏", score:"19半音"},
-      {name:"桃", score:"17半音"},
-      {name:"扬", score:"16半音"},
-      {name:"罐", score:"15半音"},
-      {name:"糖", score:"13半音"}
-    ]
-  },
-  4:{
-    title:"好多人啊",
-    desc:"记录成员已交音作品中唱过的不同原唱 / 角色数量。唱过的身份越多，越像住进了整个舞台。",
-    since:"统计时间：按当前数据库实时统计",
-    list:[
-      {name:"桃", score:"12角"},
-      {name:"夏", score:"10角"},
-      {name:"扬", score:"9角"},
-      {name:"糖", score:"7角"},
-      {name:"罐", score:"6角"}
-    ]
-  },
-  5:{
-    title:"最佳双子星",
-    desc:"记录同一项目中两位成员都已交音的合作次数。一起完成得越多，默契值越高。",
-    since:"统计时间：按当前数据库实时统计",
-    list:[
-      {name:"夏 × 扬", score:"9次"},
-      {name:"桃 × 罐", score:"7次"},
-      {name:"夏 × 桃", score:"6次"},
-      {name:"扬 × 糖", score:"5次"},
-      {name:"罐 × 糖", score:"4次"}
-    ]
-  },
-  6:{
-    title:"闲工夫不负有心人",
-    desc:"记录成员报名参与项目的次数。不管最后站在哪一首歌里，积极举手都会被看见。",
-    since:"统计时间：按当前数据库实时统计",
-    list:[
-      {name:"桃", score:"32次"},
-      {name:"夏", score:"28次"},
-      {name:"扬", score:"24次"},
-      {name:"糖", score:"20次"},
-      {name:"罐", score:"18次"}
-    ]
-  },
-  7:{
-    title:"还要再战五百年",
-    desc:"记录制作中项目里，成员当前还没交音的演唱任务数。不是催债，是荣誉墙温柔地提醒：该开录啦。",
-    since:"统计时间：按当前数据库实时统计",
-    list:[
-      {name:"夏", score:"7项"},
-      {name:"桃", score:"5项"},
-      {name:"罐", score:"4项"},
-      {name:"扬", score:"3项"},
-      {name:"糖", score:"2项"}
-    ]
-  },
-  8:{
-    title:"送你一朵小红花",
-    desc:"记录成员已完成的演唱交音次数。每一次按时交上的人声，都值得一朵小红花。",
-    since:"统计时间：按当前数据库实时统计",
-    list:[
-      {name:"扬", score:"14次"},
-      {name:"夏", score:"12次"},
-      {name:"糖", score:"10次"},
-      {name:"桃", score:"8次"},
-      {name:"罐", score:"6次"}
-    ]
-  },
-  9:{
-    title:"音之炼金术师",
-    desc:"记录成员已完成的混音 / 后期交付次数。把零散的人声炼成作品的人，也该有自己的奖杯。",
-    since:"统计时间：按当前数据库实时统计",
-    list:[
-      {name:"扬", score:"26首"},
-      {name:"夏", score:"22首"},
-      {name:"桃", score:"17首"},
-      {name:"糖", score:"11首"},
-      {name:"罐", score:"8首"}
-    ]
-  }
-};
-
-
-
 /* =========================================================
-   荣誉墙赛季规则 + 十号房石耶耶自动同步
-   页面显示正常统计说明；后台从 2026-07-01 起自动记录与结算。
-   页面打开时：记录当前榜首快照，并结算已经结束的赛季。
+   荣誉墙赛季统计说明
+   这里只生成排行榜上的赛季文字，不做后台结算或弹窗。
 ========================================================= */
 const HONOR_OFFICIAL_START_YEAR = 2026;
 const HONOR_OFFICIAL_START_MONTH_INDEX = 6; // JS月份从0开始：6 = 7月
@@ -3412,193 +2998,6 @@ function buildHonorSeasonSince(baseSince){
   return `${info.label}｜${info.rangeText}｜每 3 个月为一季｜${normalSince}`;
 }
 
-
-/* =========================================================
-   全站通用荣誉获得弹窗：称号 / 成就共用
-   这里只负责展示，不改变铃铛、房间按钮、排行榜布局。
-========================================================= */
-const honorRewardQueue = [];
-let honorRewardShowing = false;
-let currentHonorReward = null;
-
-function getHonorRewardShownKey(reward){
-  const type = String(reward?.type || "title").trim() || "title";
-  const code = String(reward?.code || reward?.name || "reward").trim();
-  const memberId = String(reward?.memberId || readStoredUser().memberId || "guest").trim();
-  const scope = String(reward?.scope || reward?.seasonKey || "global").trim();
-  return `room10HonorRewardShown:${type}:${code}:${memberId}:${scope}`;
-}
-
-function hasShownHonorReward(reward){
-  try{
-    return localStorage.getItem(getHonorRewardShownKey(reward)) === "true";
-  }catch(e){
-    return false;
-  }
-}
-
-function markHonorRewardShown(reward){
-  try{
-    localStorage.setItem(getHonorRewardShownKey(reward), "true");
-  }catch(e){}
-}
-
-function normalizeHonorReward(reward){
-  const type = String(reward?.type || "title").trim().toLowerCase();
-  const isAchievement = type === "achievement" || type === "achieve";
-  const name = String(reward?.name || "").trim();
-  const desc = String(reward?.desc || reward?.description || "").trim();
-
-  return {
-    type:isAchievement ? "achievement" : "title",
-    typeLabel:isAchievement ? "解锁成就" : "获得称号",
-    icon:isAchievement ? "🏆" : "🏅",
-    code:String(reward?.code || name || "reward").trim(),
-    name:name || (isAchievement ? "新的成就" : "新的称号"),
-    desc:desc || (isAchievement ? "新的成就已经记录到你的荣誉里。" : "新的称号已经记录到你的荣誉里。"),
-    memberId:String(reward?.memberId || "").trim(),
-    seasonKey:String(reward?.seasonKey || "").trim(),
-    scope:String(reward?.scope || reward?.seasonKey || "global").trim()
-  };
-}
-
-function enqueueHonorRewardModal(reward){
-  const normalized = normalizeHonorReward(reward);
-  if(hasShownHonorReward(normalized)) return;
-
-  honorRewardQueue.push(normalized);
-  if(!honorRewardShowing) showNextHonorRewardModal();
-}
-
-function showNextHonorRewardModal(){
-  const ui = document.getElementById("honorRewardUI");
-  const icon = document.getElementById("honorRewardIcon");
-  const typeEl = document.getElementById("honorRewardType");
-  const nameEl = document.getElementById("honorRewardName");
-  const descEl = document.getElementById("honorRewardDesc");
-
-  if(!ui || !icon || !typeEl || !nameEl || !descEl){
-    honorRewardQueue.length = 0;
-    honorRewardShowing = false;
-    currentHonorReward = null;
-    return;
-  }
-
-  const reward = honorRewardQueue.shift();
-  if(!reward){
-    honorRewardShowing = false;
-    currentHonorReward = null;
-    return;
-  }
-
-  currentHonorReward = reward;
-  honorRewardShowing = true;
-
-  closeSiteNoticePanel();
-
-  icon.textContent = reward.icon;
-  typeEl.textContent = reward.typeLabel;
-  nameEl.textContent = `「${reward.name}」`;
-  descEl.textContent = reward.desc;
-  ui.classList.add("show");
-}
-
-function closeHonorRewardModal(){
-  const ui = document.getElementById("honorRewardUI");
-
-  if(currentHonorReward){
-    markHonorRewardShown(currentHonorReward);
-  }
-
-  if(ui) ui.classList.remove("show");
-
-  currentHonorReward = null;
-  honorRewardShowing = false;
-
-  setTimeout(showNextHonorRewardModal, 120);
-}
-
-function enqueueSeasonTitleRewards(rows){
-  const user = readStoredUser();
-  if(!user.loggedIn || !user.memberId) return;
-
-  (Array.isArray(rows) ? rows : []).forEach(row => {
-    const rowMemberId = String(row?.member_id || row?.memberId || "").trim();
-    const granted = row?.title_granted === true || row?.title_granted === "true";
-
-    if(!granted || rowMemberId !== String(user.memberId)) return;
-
-    enqueueHonorRewardModal({
-      type:"title",
-      code:"honor_season_shiyeyeye",
-      name:"十号房石耶耶",
-      memberId:rowMemberId,
-      seasonKey:String(row?.season_key || "honor-season").trim(),
-      scope:String(row?.season_key || "honor-season").trim(),
-      desc:"本季荣誉墙登顶次数最多，正式确诊为「十号房石耶耶」。"
-    });
-  });
-}
-
-let honorSeasonRpcUnavailable = false;
-
-function isHonorSeasonOfficialNow(){
-  return getHonorSeasonInfo(new Date()).isOfficial === true;
-}
-
-function isMissingHonorSeasonRpcError(error){
-  const message = String(error?.message || error?.details || error?.hint || "").toLowerCase();
-  const code = String(error?.code || "").toLowerCase();
-  const status = Number(error?.status || 0);
-
-  return (
-    status === 404 ||
-    code === "404" ||
-    code === "pgrst202" ||
-    message.includes("could not find the function") ||
-    message.includes("not found") ||
-    message.includes("404")
-  );
-}
-
-async function callHonorSeasonRpc(name){
-  const result = await client.rpc(name);
-
-  if(result?.error){
-    throw result.error;
-  }
-
-  return result?.data;
-}
-
-async function syncHonorSeasonAwards(){
-  if(!client || honorSeasonRpcUnavailable) return;
-
-  /*
-    7 月正式启用前不调用赛季 RPC。
-    这样页面现在仍然正常显示实时排行榜，
-    但不会因为后台结算函数尚未启用而在控制台刷 404。
-  */
-  if(!isHonorSeasonOfficialNow()) return;
-
-  try{
-    await callHonorSeasonRpc("honor_record_current_firsts");
-    const data = await callHonorSeasonRpc("honor_settle_due_seasons");
-
-    if(Array.isArray(data) && data.length){
-      console.info("荣誉墙赛季称号结算结果：", data);
-      enqueueSeasonTitleRewards(data);
-    }
-  }catch(err){
-    if(isMissingHonorSeasonRpcError(err)){
-      honorSeasonRpcUnavailable = true;
-      console.warn("荣誉墙赛季结算函数尚未部署，已跳过本次后台同步：", err);
-      return;
-    }
-
-    console.warn("荣誉墙赛季称号同步异常：", err);
-  }
-}
 
 const rankConfigs = {
   1:{
@@ -3785,7 +3184,17 @@ function renderAvatarStack(items){
 }
 
 function applyFallbackRanks(){
-  trophyData = JSON.parse(JSON.stringify(fallbackTrophyData));
+  trophyData = {};
+
+  Object.entries(rankConfigs).forEach(([id, config]) => {
+    trophyData[id] = {
+      title:config.title,
+      desc:config.desc,
+      since:config.since,
+      list:[]
+    };
+  });
+
   trophyDataReady = true;
 }
 
@@ -3824,7 +3233,7 @@ async function loadTrophyDataFromDatabase(){
     const { data, error } = rankResult;
 
     if(error){
-      console.warn("荣誉墙实时榜单读取失败，已使用备用数据：", error);
+      console.warn("荣誉墙实时榜单读取失败：", error);
       return;
     }
 
@@ -3840,14 +3249,14 @@ async function loadTrophyDataFromDatabase(){
         title:config.title,
         desc:config.desc,
         since:config.since,
-        list:list.length ? list : (fallbackTrophyData[id]?.list || [])
+        list:list
       };
     });
 
     trophyDataReady = true;
     renderPlaqueWinners();
   }catch(e){
-    console.warn("荣誉墙实时榜单读取异常，已使用备用数据：", e);
+    console.warn("荣誉墙实时榜单读取异常：", e);
   }
 }
 
@@ -4104,7 +3513,7 @@ function openRankPanel(){
 
 function showTrophy(id){
   if(!trophyDataReady) applyFallbackRanks();
-  const data = trophyData[id] || fallbackTrophyData[id];
+  const data = trophyData[id];
   if(!data) return;
 
   currentTrophyId = id;
@@ -4132,7 +3541,7 @@ function closeRank(){
 
 function getPlaqueText(id){
   if(!trophyDataReady) applyFallbackRanks();
-  const list = (trophyData[id] || fallbackTrophyData[id])?.list || [];
+  const list = trophyData[id]?.list || [];
   if(!list.length) return "-";
 
   const first = list[0];
@@ -4310,36 +3719,6 @@ const siteNoticeBtn = document.getElementById("siteNoticeBtn");
 const loginOpenBtn = document.getElementById("loginOpenBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const siteNoticePanel = document.getElementById("siteNoticePanel");
-const honorRewardUI = document.getElementById("honorRewardUI");
-const honorRewardClose = document.getElementById("honorRewardClose");
-const honorRewardOk = document.getElementById("honorRewardOk");
-
-if(honorRewardClose){
-  honorRewardClose.addEventListener("click", event => {
-    event.stopPropagation();
-    closeHonorRewardModal();
-  });
-}
-
-if(honorRewardOk){
-  honorRewardOk.addEventListener("click", event => {
-    event.stopPropagation();
-    closeHonorRewardModal();
-  });
-}
-
-if(honorRewardUI){
-  honorRewardUI.addEventListener("click", event => {
-    if(event.target === honorRewardUI) closeHonorRewardModal();
-  });
-}
-
-document.addEventListener("keydown", event => {
-  if(event.key === "Escape" && honorRewardShowing){
-    closeHonorRewardModal();
-  }
-});
-
 if(siteNoticeBtn){
   siteNoticeBtn.addEventListener("click", event => {
     event.stopPropagation();
@@ -4390,7 +3769,6 @@ document.addEventListener("pointermove", event => {
 
 document.addEventListener("click", event => {
   if(!siteNoticePanel || !siteNoticeBtn) return;
-  if(honorRewardUI && honorRewardUI.contains(event.target)) return;
   if(siteNoticePanel.contains(event.target) || siteNoticeBtn.contains(event.target)) return;
   closeSiteNoticePanel();
 });
@@ -4399,7 +3777,7 @@ window.addEventListener("resize", () => {
   updateStageScale();
 
   if(currentTrophyId && rankPanel.classList.contains("show")){
-    const data = trophyData[currentTrophyId] || fallbackTrophyData[currentTrophyId];
+    const data = trophyData[currentTrophyId];
     if(data) renderRankList(data.list);
   }
 });
@@ -4420,7 +3798,7 @@ document.getElementById("password").addEventListener("keydown", (e) => {
 
 applyFallbackRanks();
 renderPlaqueWinners();
-loadTrophyDataFromDatabase().then(syncHonorSeasonAwards);
+loadTrophyDataFromDatabase();
 updateIdentity();
 renderNoticeList([]);
 updateStageScale();
