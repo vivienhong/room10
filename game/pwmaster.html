@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>密码大师｜十号房</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../room10-paths.js"></script>
 <style>
 *{box-sizing:border-box;}
 html,body{margin:0;width:100%;min-height:100%;font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;}
@@ -55,7 +56,335 @@ body{color:var(--text-main);background:radial-gradient(circle at 18% 8%,rgba(255
 table{width:100%;table-layout:fixed;border-collapse:collapse;color:#7a5030;font-size:13px;}th,td{padding:10px 6px;border-bottom:1px solid rgba(180,135,92,.14);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}th{color:#8a6547;font-size:12px;font-weight:950;}.rank-no{color:#c98c4f;font-weight:950;}tr.is-me td{background:rgba(248,216,161,.28);font-weight:950;}
 .color-board{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;margin:14px 0;}.color-slot,.color-chip{height:54px;border-radius:18px;border:1px solid rgba(180,135,92,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 4px 12px rgba(129,90,54,0.08);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:950;color:#76502f;background:rgba(255,252,248,.72);}.color-slot.filled{color:#fff;text-shadow:0 1px 2px rgba(60,40,20,.28);}.color-palette{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;margin:12px 0;}.color-chip{cursor:pointer;color:#fff;text-shadow:0 1px 2px rgba(60,40,20,.34);}.color-chip.used{opacity:.38;filter:grayscale(.2);}.color-chip.selected{outline:4px solid rgba(201,140,79,.22);transform:translateY(-1px);}.color-chip{user-select:none;-webkit-user-select:none;touch-action:none;}.color-slot{touch-action:none;}.color-slot.drag-over{outline:4px solid rgba(201,140,79,.24);transform:translateY(-1px);}.color-drag-ghost{position:fixed;z-index:9999;pointer-events:none;width:54px;height:54px;border-radius:18px;display:flex;align-items:center;justify-content:center;color:#fff;text-shadow:0 1px 2px rgba(60,40,20,.34);font-size:12px;font-weight:950;box-shadow:0 10px 24px rgba(85,58,34,.22),inset 0 1px 0 rgba(255,255,255,.75);opacity:.92;transform:translate(-50%,-50%);}.color-red{background:#c95f55!important}.color-orange{background:#d7964d!important}.color-yellow{background:#d4b64c!important}.color-green{background:#7c9b63!important}.color-blue{background:#5f86bd!important}.color-purple{background:#9b76b8!important}.color-actions{display:flex;gap:8px;margin-top:10px;}.color-actions .secondary-btn,.color-actions .main-btn{flex:1;}
 .rank-modal-mask{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(76,48,27,.25);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}.rank-modal-mask.show{display:flex;}.rank-modal{width:min(680px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;padding:22px;border-radius:26px;background:rgba(255,249,241,0.98);border:1px solid rgba(203,167,123,0.34);box-shadow:0 20px 48px rgba(85,58,34,0.22),inset 0 1px 0 rgba(255,255,255,.88);}.rank-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}.rank-modal-title{margin:0;color:#744a2a;font-size:22px;font-weight:950;}.rank-modal-close{appearance:none;border:none;cursor:pointer;min-height:34px;padding:0 14px;border-radius:999px;background:linear-gradient(180deg,#efd5ab 0%,#dfbd8a 100%);color:#6a4120;font-size:13px;font-weight:950;}.rank-modal-desc{margin:0 0 14px;color:#8a6547;font-size:13px;line-height:1.7;font-weight:800;}.result-card{margin:0 0 14px;padding:14px;border-radius:18px;background:rgba(255,246,226,.72);border:1px solid rgba(218,166,87,.24);box-shadow:inset 0 1px 0 rgba(255,255,255,.82);}.result-title{margin:0 0 10px;color:#744a2a;font-size:17px;font-weight:950;}.result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}.result-stat{padding:10px 8px;border-radius:14px;background:rgba(255,252,248,.76);border:1px solid rgba(180,135,92,.14);text-align:center;}.result-stat b{display:block;margin-bottom:3px;color:#6f4726;font-size:18px;font-weight:950;}.result-stat span{color:#8a6547;font-size:11px;font-weight:900;}.rank-section-title{margin:14px 0 8px;color:#744a2a;font-size:14px;font-weight:950;}
-.reward-mask{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(64,45,30,.30);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);}.reward-mask.show{display:flex!important;}.reward-card{position:relative;width:min(430px,calc(100vw - 28px));max-height:calc(100dvh - 28px);padding:28px 24px 22px;border-radius:26px;overflow:hidden auto;text-align:center;color:var(--reward-ink);background:radial-gradient(circle at 12% 16%,rgba(255,226,235,.68),transparent 30%),radial-gradient(circle at 86% 18%,rgba(255,240,181,.62),transparent 32%),linear-gradient(180deg,rgba(255,253,247,.98),rgba(255,244,226,.96));border:2px solid var(--reward-line);box-shadow:0 22px 54px var(--card-shadow),inset 0 1px 0 rgba(255,255,255,.9);}.reward-mask[data-type="title"] .reward-card{background:radial-gradient(circle at 12% 16%,rgba(255,235,204,.72),transparent 30%),radial-gradient(circle at 86% 18%,rgba(255,229,154,.58),transparent 32%),linear-gradient(180deg,rgba(255,253,247,.98),rgba(255,242,219,.96));}.reward-close{position:absolute;z-index:6;top:12px;right:12px;width:30px;height:30px;border:none;border-radius:999px;background:rgba(255,250,242,.88);color:#7b5636;font-size:18px;font-weight:900;line-height:1;cursor:pointer;}.reward-icon{width:62px;height:62px;margin:4px auto 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:rgba(255,246,226,.78);border:1px solid rgba(220,164,102,.25);font-size:34px;}.reward-label{min-height:25px;padding:0 13px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:rgba(255,249,232,.66);border:1px solid rgba(218,166,87,.20);color:#b26a3a;font-size:13px;font-weight:950;letter-spacing:.06em;}.reward-title{max-width:100%;margin:10px auto 8px;padding:8px 18px;border-radius:999px;color:var(--reward-ink);font-size:22px;font-weight:950;line-height:1.15;background:rgba(255,249,232,.72);border:1px solid rgba(218,166,87,.24);}.reward-desc{width:100%;max-width:330px;margin:0 auto 14px;color:var(--reward-text);font-size:13px;line-height:1.65;text-align:center;white-space:pre-line;}.reward-section-title{margin:0 0 10px;color:#8a5c33;font-size:12px;font-weight:950;letter-spacing:.08em;}.reward-list{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));justify-content:center;gap:8px;margin:0 0 16px;}.reward-list.count-1{grid-template-columns:minmax(0,120px);}.reward-list.count-2{grid-template-columns:repeat(2,minmax(0,120px));}.reward-list.empty,.reward-section-title.empty{display:none;}.reward-item{min-width:0;min-height:84px;padding:10px 7px 9px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,252,247,.72);border:1px solid var(--reward-soft-line);}.reward-item-icon{font-size:28px;line-height:1;margin-bottom:7px;}.reward-item-name{width:100%;color:#7b593b;font-size:11px;font-weight:900;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.reward-item-amount{margin-top:3px;color:var(--reward-ink);font-size:13px;font-weight:950;line-height:1.2;white-space:nowrap;}.reward-confirm{min-width:132px;height:36px;border:1px solid rgba(153,104,62,.22);border-radius:999px;background:linear-gradient(180deg,rgba(255,238,200,.96),rgba(227,187,132,.90));color:#67401f;font-size:13px;font-weight:950;cursor:pointer;}
+
+/* ===== 统一奖励弹窗 ===== */
+.reward-mask{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(64,45,30,.30);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+  --reward-scale:var(--reward-modal-scale,1);
+}
+.reward-mask.show{display:flex!important;}
+.reward-card{
+  position:relative;
+  width:min(calc(430px * var(--reward-scale)),calc(100vw - 28px));
+  max-height:calc(100dvh - 28px);
+  padding:calc(28px * var(--reward-scale)) calc(24px * var(--reward-scale)) calc(22px * var(--reward-scale));
+  border-radius:calc(26px * var(--reward-scale));
+  overflow:hidden auto;
+  text-align:center;
+  color:var(--reward-ink);
+  background:
+    radial-gradient(circle at 12% 16%,rgba(255,226,235,.68),transparent 30%),
+    radial-gradient(circle at 86% 18%,rgba(255,240,181,.62),transparent 32%),
+    linear-gradient(180deg,rgba(255,253,247,.98),rgba(255,244,226,.96));
+  border:calc(2px * var(--reward-scale)) solid var(--reward-line);
+  box-shadow:
+    0 calc(22px * var(--reward-scale)) calc(54px * var(--reward-scale)) var(--card-shadow),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  animation:rewardPop .42s cubic-bezier(.2,1.12,.34,1) both;
+}
+.reward-card::before,
+.reward-card::after{
+  position:absolute;
+  left:calc(12px * var(--reward-scale));
+  right:calc(12px * var(--reward-scale));
+  font-size:calc(15px * var(--reward-scale));
+  letter-spacing:calc(8px * var(--reward-scale));
+  white-space:nowrap;
+  overflow:hidden;
+  pointer-events:none;
+}
+.reward-card::before{
+  content:"✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  top:calc(9px * var(--reward-scale));
+  color:rgba(209,120,148,.52);
+}
+.reward-card::after{
+  content:"✿  ❀  ✽  ✿  ❀  ✽  ✿";
+  bottom:calc(8px * var(--reward-scale));
+  color:rgba(199,145,75,.44);
+}
+@keyframes rewardPop{
+  0%{opacity:0;transform:translateY(calc(12px * var(--reward-scale))) scale(.9);}
+  64%{opacity:1;transform:translateY(0) scale(1.025);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+.reward-close{
+  position:absolute;
+  z-index:6;
+  top:calc(12px * var(--reward-scale));
+  right:calc(12px * var(--reward-scale));
+  width:calc(30px * var(--reward-scale));
+  height:calc(30px * var(--reward-scale));
+  border:none;
+  border-radius:999px;
+  background:rgba(255,250,242,.88);
+  color:#7b5636;
+  font-size:calc(18px * var(--reward-scale));
+  font-weight:900;
+  line-height:1;
+  cursor:pointer;
+  box-shadow:
+    0 calc(2px * var(--reward-scale)) calc(8px * var(--reward-scale)) rgba(105,75,43,.10),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+.reward-close:hover{filter:brightness(1.02);}
+.reward-petals{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  overflow:hidden;
+}
+.reward-petals span{
+  position:absolute;
+  top:calc(-18px * var(--reward-scale));
+  color:rgba(220,132,154,.56);
+  font-size:calc(16px * var(--reward-scale));
+  opacity:0;
+  text-shadow:0 calc(2px * var(--reward-scale)) calc(4px * var(--reward-scale)) rgba(255,255,255,.76);
+  animation:rewardPetalFall 1.35s ease-in-out both;
+}
+.reward-petals span:nth-child(1){left:12%;animation-delay:.05s;}
+.reward-petals span:nth-child(2){left:28%;animation-delay:.18s;}
+.reward-petals span:nth-child(3){left:48%;animation-delay:.02s;}
+.reward-petals span:nth-child(4){left:66%;animation-delay:.22s;}
+.reward-petals span:nth-child(5){left:82%;animation-delay:.10s;}
+@keyframes rewardPetalFall{
+  0%{opacity:0;transform:translateY(calc(-14px * var(--reward-scale))) rotate(0deg) scale(.78);}
+  20%{opacity:.85;}
+  100%{opacity:0;transform:translateY(calc(145px * var(--reward-scale))) rotate(160deg) scale(1);}
+}
+.reward-content{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.reward-icon{
+  width:calc(62px * var(--reward-scale));
+  height:calc(62px * var(--reward-scale));
+  margin:calc(4px * var(--reward-scale)) auto calc(12px * var(--reward-scale));
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,246,226,.78);
+  border:1px solid rgba(220,164,102,.25);
+  box-shadow:
+    0 calc(8px * var(--reward-scale)) calc(20px * var(--reward-scale)) rgba(126,92,51,.10),
+    inset 0 1px 0 rgba(255,255,255,.85);
+  font-size:calc(34px * var(--reward-scale));
+}
+.reward-label{
+  min-height:calc(25px * var(--reward-scale));
+  padding:0 calc(13px * var(--reward-scale));
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:rgba(255,249,232,.66);
+  border:1px solid rgba(218,166,87,.20);
+  color:#b26a3a;
+  font-size:calc(13px * var(--reward-scale));
+  font-weight:950;
+  line-height:1;
+  letter-spacing:.06em;
+  animation:rewardStamp .42s ease both;
+}
+.reward-title{
+  position:relative;
+  max-width:100%;
+  margin:calc(10px * var(--reward-scale)) auto calc(8px * var(--reward-scale));
+  padding:calc(8px * var(--reward-scale)) calc(18px * var(--reward-scale));
+  border-radius:999px;
+  color:var(--reward-ink);
+  font-size:calc(22px * var(--reward-scale));
+  font-weight:950;
+  line-height:1.15;
+  background:rgba(255,249,232,.72);
+  border:1px solid rgba(218,166,87,.24);
+  box-shadow:
+    0 calc(5px * var(--reward-scale)) calc(14px * var(--reward-scale)) rgba(126,92,51,.08),
+    inset 0 1px 0 rgba(255,255,255,.82);
+  overflow:hidden;
+}
+.reward-title::after{
+  content:"";
+  position:absolute;
+  inset:-30% auto -30% -42%;
+  width:36%;
+  background:linear-gradient(90deg,transparent,rgba(255,234,160,.80),transparent);
+  transform:skewX(-18deg);
+  animation:rewardSweep 1.25s ease .22s both;
+}
+@keyframes rewardStamp{
+  0%{opacity:0;transform:scale(1.12);}
+  72%{opacity:1;transform:scale(.97);}
+  100%{opacity:1;transform:scale(1);}
+}
+@keyframes rewardSweep{
+  0%{left:-42%;}
+  100%{left:118%;}
+}
+.reward-desc{
+  width:100%;
+  max-width:calc(330px * var(--reward-scale));
+  margin:0 auto calc(14px * var(--reward-scale));
+  color:var(--reward-text);
+  font-size:calc(13px * var(--reward-scale));
+  line-height:1.65;
+  text-align:center;
+  white-space:pre-line;
+}
+.reward-section-title{
+  margin:0 0 calc(10px * var(--reward-scale));
+  color:#8a5c33;
+  font-size:calc(12px * var(--reward-scale));
+  font-weight:950;
+  line-height:1;
+  letter-spacing:.08em;
+}
+.reward-list{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  justify-content:center;
+  gap:calc(8px * var(--reward-scale));
+  margin:0 0 calc(16px * var(--reward-scale));
+}
+.reward-list.count-1{grid-template-columns:minmax(0,calc(120px * var(--reward-scale)));}
+.reward-list.count-2{grid-template-columns:repeat(2,minmax(0,calc(120px * var(--reward-scale)));}
+.reward-list.empty,
+.reward-section-title.empty{display:none;}
+.reward-item{
+  min-width:0;
+  min-height:calc(84px * var(--reward-scale));
+  padding:calc(10px * var(--reward-scale)) calc(7px * var(--reward-scale)) calc(9px * var(--reward-scale));
+  border-radius:calc(16px * var(--reward-scale));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,252,247,.72);
+  border:1px solid var(--reward-soft-line);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.82),
+    0 calc(3px * var(--reward-scale)) calc(10px * var(--reward-scale)) rgba(116,86,54,.06);
+  animation:rewardItemIn .38s ease both;
+}
+.reward-item:nth-child(1){animation-delay:.14s;}
+.reward-item:nth-child(2){animation-delay:.24s;}
+.reward-item:nth-child(3){animation-delay:.34s;}
+.reward-item:nth-child(4){animation-delay:.44s;}
+@keyframes rewardItemIn{
+  0%{opacity:0;transform:translateY(calc(8px * var(--reward-scale))) scale(.96);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+.reward-item-icon{
+  width:calc(46px * var(--reward-scale));
+  height:calc(46px * var(--reward-scale));
+  margin:0 auto calc(7px * var(--reward-scale));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:calc(28px * var(--reward-scale));
+  line-height:1;
+  filter:drop-shadow(0 calc(2px * var(--reward-scale)) calc(3px * var(--reward-scale)) rgba(96,65,35,.12));
+}
+.reward-item-icon-img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+.reward-item-icon-text{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+}
+.reward-item-name{
+  width:100%;
+  color:#7b593b;
+  font-size:calc(11px * var(--reward-scale));
+  font-weight:900;
+  line-height:1.2;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.reward-item-amount{
+  margin-top:calc(3px * var(--reward-scale));
+  color:var(--reward-ink);
+  font-size:calc(13px * var(--reward-scale));
+  font-weight:950;
+  line-height:1.2;
+  white-space:nowrap;
+}
+.reward-confirm{
+  min-width:calc(132px * var(--reward-scale));
+  height:calc(36px * var(--reward-scale));
+  border:1px solid rgba(153,104,62,.22);
+  border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,238,200,.96),rgba(227,187,132,.90));
+  color:#67401f;
+  font-size:calc(13px * var(--reward-scale));
+  font-weight:950;
+  cursor:pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.72),
+    0 calc(4px * var(--reward-scale)) calc(12px * var(--reward-scale)) rgba(112,80,42,.10);
+}
+.reward-confirm:hover{filter:brightness(1.02);}
+.reward-confirm:disabled{opacity:.62;cursor:wait;filter:none;}
+.reward-mask[data-type="title"] .reward-card{
+  background:
+    radial-gradient(circle at 12% 16%,rgba(255,235,204,.72),transparent 30%),
+    radial-gradient(circle at 86% 18%,rgba(255,229,154,.58),transparent 32%),
+    linear-gradient(180deg,rgba(255,253,247,.98),rgba(255,242,219,.96));
+}
+.reward-mask[data-type="daily"] .reward-card{
+  background:
+    radial-gradient(circle at 12% 16%,rgba(224,244,216,.70),transparent 30%),
+    radial-gradient(circle at 86% 18%,rgba(255,239,181,.50),transparent 32%),
+    linear-gradient(180deg,rgba(255,253,247,.98),rgba(241,248,229,.96));
+}
+.reward-mask[data-type="gift"] .reward-card{
+  background:
+    radial-gradient(circle at 12% 16%,rgba(255,226,235,.74),transparent 30%),
+    radial-gradient(circle at 86% 18%,rgba(223,235,255,.58),transparent 32%),
+    linear-gradient(180deg,rgba(255,253,247,.98),rgba(255,240,231,.96));
+}
+.reward-mask[data-type="item"] .reward-card,
+.reward-mask[data-type="gold"] .reward-card{
+  background:
+    radial-gradient(circle at 12% 16%,rgba(223,239,255,.66),transparent 30%),
+    radial-gradient(circle at 86% 18%,rgba(255,240,181,.52),transparent 32%),
+    linear-gradient(180deg,rgba(255,253,247,.98),rgba(235,246,252,.94));
+}
+@media(max-width:540px){
+  .reward-mask{--reward-scale:.82;padding:14px;}
+}
+@media(max-width:380px),(max-height:590px){
+  .reward-mask{--reward-scale:.74;}
+}
+@media(max-width:340px){
+  .reward-list,
+  .reward-list.count-1,
+  .reward-list.count-2{grid-template-columns:1fr;}
+}
+
 @media(max-width:820px){.layout{grid-template-columns:1fr;}.hero h1{font-size:28px;}.hero-title-row{align-items:flex-start;}.color-board,.color-palette{grid-template-columns:repeat(3,minmax(0,1fr));}}
 @media(max-width:540px){.result-grid{grid-template-columns:1fr;}.simple-login-row,.password-row{grid-template-columns:1fr;}.form-btn{width:100%;flex-basis:auto;}.page{width:calc(100% - 20px);padding:12px 0 18px;}.hero{padding:20px 16px;border-radius:22px;}.card{padding:15px;border-radius:20px;}.digits input{height:62px;font-size:28px;border-radius:17px;}.status{gap:8px;}.stat{padding:10px 6px;border-radius:15px;}.stat b{font-size:21px;}.layout{gap:12px;}.color-slot,.color-chip{height:48px;border-radius:15px;}}
 @media(max-width:360px){.digits{gap:7px;}.digits input{height:56px;font-size:24px;}th,td{font-size:12px;padding:9px 4px;}}
@@ -148,7 +477,16 @@ table{width:100%;table-layout:fixed;border-collapse:collapse;color:#7a5030;font-
 
 <div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
   <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
-    <button class="reward-close" type="button" aria-label="关闭" onclick="closeRewardModal()">×</button>
+    <div class="reward-petals" aria-hidden="true">
+      <span>✿</span>
+      <span>❀</span>
+      <span>✽</span>
+      <span>✿</span>
+      <span>❀</span>
+    </div>
+
+    <button class="reward-close" type="button" aria-label="关闭" onclick="closeRewardModalAndContinue()">×</button>
+
     <div class="reward-content">
       <div class="reward-icon" id="rewardIcon" aria-hidden="true">🏆</div>
       <div class="reward-label" id="rewardLabel">成就达成</div>
@@ -156,7 +494,7 @@ table{width:100%;table-layout:fixed;border-collapse:collapse;color:#7a5030;font-
       <p class="reward-desc" id="rewardDesc">奖励已经记录完成。</p>
       <div class="reward-section-title" id="rewardSectionTitle">奖励内容</div>
       <div class="reward-list" id="rewardList"></div>
-      <button class="reward-confirm" type="button" onclick="closeRewardModal()">收下奖励</button>
+      <button class="reward-confirm" id="rewardConfirmBtn" type="button" onclick="confirmRewardModalAndContinue()">收下奖励</button>
     </div>
   </section>
 </div>
@@ -269,15 +607,180 @@ function renderQuarterRank(rows){ if(!rows.length){els.rankBox.innerHTML=`<div c
 function renderColorLevelRank(rows){ if(!rows.length){els.rankBox.innerHTML=`<div class="empty">第 ${colorLevel} 关暂无成绩。</div>`;return;} els.rankBox.innerHTML=`<div class="tabs"><button class="tab active" type="button">第 ${colorLevel} 关</button></div>` + rankTable(["排名","成员","用时","猜测"],rows.map(r=>[r.rank_no,escapeHtml(r.nickname||"成员"),formatSeconds(r.best_seconds),`${r.best_guess_count}次`])); }
 function renderColorChallengeRank(rows){ if(!rows.length){els.rankBox.innerHTML=`<div class="empty">挑战榜暂无成绩。</div>`;return;} els.rankBox.innerHTML=rankTable(["排名","成员","总用时","总猜测"],rows.map(r=>[r.rank_no,escapeHtml(r.nickname||"成员"),formatSeconds(r.total_seconds),`${r.total_guess_count}次`])); }
 
-const rewardTypeMeta={achievement:{label:"成就达成",icon:"🏆"},title:{label:"获得称号",icon:"🎖️"},gold:{label:"金币奖励",icon:"🪙"}};
-function normalizeRewardItem(item){ return {name:item.name||"金币",amount:item.amount??item.reward_gold??"",unit:item.unit||"",icon:item.icon||"🪙"}; }
-function formatRewardAmount(item){ if(item.amount===""||item.amount===null||item.amount===undefined) return ""; if(typeof item.amount==="number") return `${item.amount>0?"+":""}${item.amount}${item.unit||""}`; return `${item.amount}${item.unit||""}`; }
-function renderRewards(rewards){ const list=document.getElementById("rewardList"); const title=document.getElementById("rewardSectionTitle"); list.innerHTML=""; list.className="reward-list"; title.className="reward-section-title"; if(!rewards.length){list.classList.add("empty");title.classList.add("empty");return;} list.classList.add(`count-${Math.min(rewards.length,3)}`); rewards.forEach(reward=>{ const item=document.createElement("div"); item.className="reward-item"; item.innerHTML=`<div class="reward-item-icon">${escapeHtml(reward.icon)}</div><div class="reward-item-name">${escapeHtml(reward.name)}</div><div class="reward-item-amount">${escapeHtml(formatRewardAmount(reward))}</div>`; list.appendChild(item); }); }
-function showRewardModal(options={}){ const mask=document.getElementById("rewardMask"); const type=options.type||"achievement"; const meta=rewardTypeMeta[type]||rewardTypeMeta.achievement; const rewards=Array.isArray(options.rewards)?options.rewards.map(normalizeRewardItem):[]; mask.dataset.type=type; document.getElementById("rewardIcon").textContent=options.icon||meta.icon; document.getElementById("rewardLabel").textContent=options.label||meta.label; document.getElementById("rewardTitle").textContent=options.title||"奖励已领取"; document.getElementById("rewardDesc").textContent=options.desc||"奖励已经记录完成。"; renderRewards(rewards); mask.classList.add("show"); mask.style.display="flex"; mask.setAttribute("aria-hidden","false"); document.body.style.overflow="hidden"; }
-function closeRewardModal(){ const mask=document.getElementById("rewardMask"); mask.classList.remove("show"); mask.style.display=""; mask.setAttribute("aria-hidden","true"); document.body.style.overflow=""; }
-function showAwards(awards){ const list=Array.isArray(awards)?awards:[]; if(!list.length) return; list.forEach(award=>{ const type=award.item_type==="title"?"title":"achievement"; showRewardModal({type,title:award.item_name||"奖励已达成",desc:award.item_desc||"奖励已经记录完成。",rewards:award.reward_gold?[{name:"金币",amount:Number(award.reward_gold),icon:"🪙"}]:[]}); }); if(window.parent && window.parent!==window){ window.parent.postMessage({type:"room10:awards",payload:list},"*"); } }
-document.getElementById("rewardMask").addEventListener("click",function(event){ if(event.target===this) closeRewardModal(); });
-document.addEventListener("keydown",event=>{ if(event.key==="Escape") closeRewardModal(); });
+const rewardTypeMeta = {
+  achievement:{label:"成就达成", icon:"🏆"},
+  title:{label:"获得称号", icon:"🎖️"},
+  daily:{label:"每日奖励", icon:"☀️"},
+  gift:{label:"礼包奖励", icon:"🎁"},
+  item:{label:"获得道具", icon:"🌟"},
+  gold:{label:"金币奖励", icon:"🪙"}
+};
+
+const rewardIconMap = {
+  金币:"🪙",
+  成就:"🏆",
+  称号:"🎖️"
+};
+
+let rewardModalQueue = [];
+let rewardModalQueueBusy = false;
+
+function isImageIcon(value){
+  return typeof value === "string" && /\.(png|jpe?g|gif|webp|svg)$/i.test(value.trim());
+}
+
+function renderRewardIcon(icon, name){
+  if(isImageIcon(icon)){
+    return `<img src="${escapeHtml(icon)}" alt="${escapeHtml(name || "奖励图标")}" class="reward-item-icon-img">`;
+  }
+  return `<span class="reward-item-icon-text">${escapeHtml(icon || "✨")}</span>`;
+}
+
+function normalizeRewardItem(item){
+  if(typeof item === "string"){
+    return {
+      name:item,
+      amount:"",
+      unit:"",
+      icon:rewardIconMap[item] || "✨"
+    };
+  }
+
+  const name = item?.name || item?.item_name || "奖励";
+  return {
+    name,
+    amount:item?.amount ?? item?.reward_gold ?? "",
+    unit:item?.unit || "",
+    icon:item?.icon || item?.item_icon || rewardIconMap[name] || "✨",
+    prefix:item?.prefix || ""
+  };
+}
+
+function formatRewardAmount(item){
+  if(item.amount === "" || item.amount === null || item.amount === undefined) return "";
+  if(typeof item.amount === "number"){
+    const sign = item.amount > 0 ? "+" : "";
+    return `${sign}${item.amount}${item.unit || ""}`;
+  }
+  return `${item.prefix || ""}${item.amount}${item.unit || ""}`;
+}
+
+function renderRewards(rewards){
+  const list = document.getElementById("rewardList");
+  const title = document.getElementById("rewardSectionTitle");
+
+  list.innerHTML = "";
+  list.className = "reward-list";
+  title.className = "reward-section-title";
+
+  if(!rewards.length){
+    list.classList.add("empty");
+    title.classList.add("empty");
+    return;
+  }
+
+  list.classList.add(`count-${Math.min(rewards.length, 3)}`);
+
+  rewards.forEach(reward => {
+    const item = document.createElement("div");
+    item.className = "reward-item";
+    item.innerHTML = `
+      <div class="reward-item-icon">${renderRewardIcon(reward.icon, reward.name)}</div>
+      <div class="reward-item-name">${escapeHtml(reward.name)}</div>
+      <div class="reward-item-amount">${escapeHtml(formatRewardAmount(reward))}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function showRewardModal(options = {}){
+  const mask = document.getElementById("rewardMask");
+  const type = options.type || "achievement";
+  const meta = rewardTypeMeta[type] || rewardTypeMeta.achievement;
+  const rewards = Array.isArray(options.rewards)
+    ? options.rewards.map(normalizeRewardItem)
+    : [];
+
+  mask.dataset.type = type;
+  document.getElementById("rewardIcon").textContent = options.icon || meta.icon;
+  document.getElementById("rewardLabel").textContent = options.label || meta.label;
+  document.getElementById("rewardTitle").textContent = options.title || "奖励已领取";
+  document.getElementById("rewardDesc").textContent = options.desc || "奖励已经记录完成。";
+
+  renderRewards(rewards);
+
+  mask.classList.add("show");
+  mask.style.display = "flex";
+  mask.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function showNextRewardModal(){
+  if(!rewardModalQueue.length){
+    rewardModalQueueBusy = false;
+    return;
+  }
+
+  rewardModalQueueBusy = true;
+  const next = rewardModalQueue.shift();
+  showRewardModal(next);
+}
+
+function closeRewardModal(){
+  const mask = document.getElementById("rewardMask");
+  mask.classList.remove("show");
+  mask.style.display = "";
+  mask.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+function closeRewardModalAndContinue(){
+  closeRewardModal();
+  setTimeout(showNextRewardModal, 180);
+}
+
+function confirmRewardModalAndContinue(){
+  closeRewardModalAndContinue();
+}
+
+function awardToRewardOptions(award){
+  const type = award?.item_type === "title" ? "title" : "achievement";
+  const rewardGold = Number(award?.reward_gold || 0);
+  const rewards = rewardGold > 0
+    ? [{name:"金币", amount:rewardGold, icon:"🪙"}]
+    : [];
+
+  return {
+    type,
+    title:award?.item_name || award?.name || "奖励已达成",
+    desc:award?.item_desc || award?.description || "奖励已经记录完成。",
+    rewards
+  };
+}
+
+function showAwards(awards){
+  const list = Array.isArray(awards) ? awards : [];
+  if(!list.length) return;
+
+  rewardModalQueue.push(...list.map(awardToRewardOptions));
+
+  if(!document.getElementById("rewardMask").classList.contains("show") && !rewardModalQueueBusy){
+    showNextRewardModal();
+  }
+
+  if(window.parent && window.parent !== window){
+    window.parent.postMessage({type:"room10:awards", payload:list}, "*");
+  }
+}
+
+document.getElementById("rewardMask").addEventListener("click", function(event){
+  if(event.target === this) closeRewardModalAndContinue();
+});
+document.addEventListener("keydown", event => {
+  if(event.key === "Escape" && document.getElementById("rewardMask").classList.contains("show")){
+    closeRewardModalAndContinue();
+  }
+});
 
 window.addEventListener("storage",e=>{ if(["room10LoggedIn","room10User","room10Role","room10MemberId","room10MemberCode"].includes(e.key)){ updateIdentity(); refreshCurrentMode(); } });
 window.addEventListener("message",event=>{ const data=event?.data||{}; if(data.type==="room10:refreshIdentity"){ updateIdentity(); refreshCurrentMode(); } });
