@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜接大小龙</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../room10-paths.js"></script>
 <style>
 :root{
   --bg:#fff8ed;
@@ -21,6 +22,12 @@
   --shadow:0 14px 34px rgba(86,57,34,.16);
   --radius:24px;
   --font:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  --reward-modal-scale:1;
+  --reward-ink:#6b5141;
+  --reward-text:#7d6557;
+  --reward-line:rgba(190,143,112,0.24);
+  --reward-soft-line:rgba(174,132,103,0.14);
+  --card-shadow:rgba(106,78,55,0.20);
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:var(--font);color:var(--text);background:
@@ -527,7 +534,7 @@ h1{margin:0;font-size:24px;line-height:1.15;font-weight:950;letter-spacing:.03em
   background: rgba(64, 45, 30, 0.30);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
-  --reward-scale: 1;
+  --reward-scale: var(--reward-modal-scale, 1);
 }
 
 .reward-mask.show {
@@ -545,14 +552,14 @@ h1{margin:0;font-size:24px;line-height:1.15;font-weight:950;letter-spacing:.03em
   border-radius: calc(26px * var(--reward-scale));
   overflow: hidden auto;
   text-align: center;
-  color: var(--text);
+  color: var(--reward-ink);
   background:
     radial-gradient(circle at 12% 16%, rgba(255,226,235,.68), transparent 30%),
     radial-gradient(circle at 86% 18%, rgba(255,240,181,.62), transparent 32%),
     linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,244,226,.96));
-  border: calc(2px * var(--reward-scale)) solid var(--line);
+  border: calc(2px * var(--reward-scale)) solid var(--reward-line);
   box-shadow:
-    0 calc(22px * var(--reward-scale)) calc(54px * var(--reward-scale)) rgba(86,57,34,.16),
+    0 calc(22px * var(--reward-scale)) calc(54px * var(--reward-scale)) var(--card-shadow),
     inset 0 1px 0 rgba(255,255,255,.9);
   animation: rewardPop .42s cubic-bezier(.2, 1.12, .34, 1) both;
 }
@@ -714,7 +721,7 @@ h1{margin:0;font-size:24px;line-height:1.15;font-weight:950;letter-spacing:.03em
     calc(8px * var(--reward-scale))
     calc(18px * var(--reward-scale));
   border-radius: 999px;
-  color: var(--text);
+  color: var(--reward-ink);
   font-size: calc(22px * var(--reward-scale));
   font-weight: 950;
   line-height: 1.15;
@@ -760,7 +767,7 @@ h1{margin:0;font-size:24px;line-height:1.15;font-weight:950;letter-spacing:.03em
   width: 100%;
   max-width: calc(330px * var(--reward-scale));
   margin: 0 auto calc(14px * var(--reward-scale));
-  color: var(--text);
+  color: var(--reward-text);
   font-size: calc(13px * var(--reward-scale));
   line-height: 1.65;
   text-align: center;
@@ -814,7 +821,7 @@ h1{margin:0;font-size:24px;line-height:1.15;font-weight:950;letter-spacing:.03em
   align-items: center;
   justify-content: center;
   background: rgba(255,252,247,.72);
-  border: 1px solid var(--line);
+  border: 1px solid var(--reward-soft-line);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.82),
     0 calc(3px * var(--reward-scale)) calc(10px * var(--reward-scale)) rgba(116,86,54,.06);
@@ -861,7 +868,7 @@ h1{margin:0;font-size:24px;line-height:1.15;font-weight:950;letter-spacing:.03em
 
 .reward-item-amount {
   margin-top: calc(3px * var(--reward-scale));
-  color: var(--text);
+  color: var(--reward-ink);
   font-size: calc(13px * var(--reward-scale));
   font-weight: 950;
   line-height: 1.2;
@@ -1021,11 +1028,9 @@ h1{margin:0;font-size:24px;line-height:1.15;font-weight:950;letter-spacing:.03em
 
         <div class="reward-label" id="rewardLabel">成就达成</div>
 
-        <h2 class="reward-title" id="rewardTitle">新手照顾员</h2>
+        <h2 class="reward-title" id="rewardTitle">奖励已领取</h2>
 
-        <p class="reward-desc" id="rewardDesc">
-          成就达成：累计照顾宠物 1 次
-        </p>
+        <p class="reward-desc" id="rewardDesc">奖励已经记录完成。</p>
 
         <div class="reward-section-title" id="rewardSectionTitle">奖励内容</div>
 
@@ -2484,6 +2489,12 @@ function closeRewardModal() {
   mask.classList.remove("show");
   mask.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
+  const confirmBtn = $("rewardConfirmBtn");
+  if(confirmBtn){
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = "收下奖励";
+  }
+  rewardConfirmBusy = false;
 }
 
 let activeRewardQueueItem = null;
