@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜花房</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../room10-paths.js"></script>
 
 <style>
 *{box-sizing:border-box;}
@@ -81,6 +82,7 @@
   --flower-app-top:22.2%;
   --flower-app-width:66.8%;
   --flower-app-height:67.6%;
+  --flower-room-bg-image:url("room-flower.png");
 
 }
 
@@ -2451,7 +2453,7 @@ button,input{
     display:block;
     background:
       linear-gradient(rgba(243,236,223,.72), rgba(243,236,223,.92)),
-      url("room-flower.png") center center / cover no-repeat fixed;
+      var(--flower-room-bg-image) center center / cover no-repeat fixed;
   }
 
   #room{
@@ -2875,7 +2877,7 @@ button,input{
 <body>
 <div id="room">
   <div id="bgFrame" aria-hidden="true">
-    <img id="bg" src="room-flower.png" alt="十号房花房背景" />
+    <img id="bg" src="room-flower.png" data-room10-asset="flower.roomFlower" alt="十号房花房背景" />
   </div>
 
   <div id="flowerBgFx" aria-hidden="true">
@@ -3010,7 +3012,7 @@ button,input{
 
           <div class="potImageStage">
             <div class="potStageInner">
-              <img id="potImage" src="pot-empty.png" alt="当前花盆状态">
+              <img id="potImage" src="pot-empty.png" data-room10-asset="flower.potEmpty" alt="当前花盆状态">
             </div>
           </div>
 
@@ -3020,17 +3022,17 @@ button,input{
 
           <div class="potCareStats" aria-label="花房道具库存">
             <div class="potStat">
-              <img class="potStatIcon" src="seed.png" alt="">
+              <img class="potStatIcon" src="seed.png" data-room10-asset="flower.seed" alt="">
               <div class="potStatLabel">种子</div>
               <div class="potStatValue" id="potSeedCount">0</div>
             </div>
             <div class="potStat">
-              <img class="potStatIcon" src="water.png" alt="">
+              <img class="potStatIcon" src="water.png" data-room10-asset="flower.water" alt="">
               <div class="potStatLabel">水</div>
               <div class="potStatValue" id="potWaterCount">0</div>
             </div>
             <div class="potStat">
-              <img class="potStatIcon" src="fert.png" alt="">
+              <img class="potStatIcon" src="fert.png" data-room10-asset="flower.fert" alt="">
               <div class="potStatLabel">肥料</div>
               <div class="potStatValue" id="potFertCount">0</div>
             </div>
@@ -3096,7 +3098,7 @@ button,input{
   </div>
 </div>
 
-<!-- 统一奖励弹窗：原样来自 reward-modal-test.html -->
+<!-- 统一奖励弹窗 -->
 <div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
     <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
       <div class="reward-petals" aria-hidden="true">
@@ -3114,11 +3116,9 @@ button,input{
 
         <div class="reward-label" id="rewardLabel">成就达成</div>
 
-        <h2 class="reward-title" id="rewardTitle">新手照顾员</h2>
+        <h2 class="reward-title" id="rewardTitle">奖励已领取</h2>
 
-        <p class="reward-desc" id="rewardDesc">
-          成就达成：累计照顾宠物 1 次
-        </p>
+        <p class="reward-desc" id="rewardDesc">奖励已经记录完成。</p>
 
         <div class="reward-section-title" id="rewardSectionTitle">奖励内容</div>
 
@@ -3131,7 +3131,7 @@ button,input{
 
 <div id="loginUI">
   <div class="login-panel">
-    <img src="login.png" alt="登录框">
+    <img src="login.png" data-room10-asset="root.login" alt="登录框">
     <input id="username" type="text" autocomplete="username">
     <input id="password" type="password" autocomplete="current-password">
     <button id="togglePassword" type="button" onclick="togglePassword()"></button>
@@ -3146,6 +3146,135 @@ button,input{
 const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const FLOWER_FILE_ASSET_KEYS = {
+  "room-flower.png":"flower.roomFlower",
+  "pot-empty.png":"flower.potEmpty",
+  "pot-growing.png":"flower.potGrowing",
+  "pot-seed.png":"flower.potSeed",
+  "pot-sprout.png":"flower.potSprout",
+
+  "pot-bloom-daisy.png":"flower.potBloomDaisy",
+  "pot-bloom-lavender.png":"flower.potBloomLavender",
+  "pot-bloom-peony.png":"flower.potBloomPeony",
+  "pot-bloom-rose.png":"flower.potBloomRose",
+  "pot-bloom-tulip.png":"flower.potBloomTulip",
+
+  "pot-wither-daisy.png":"flower.potWitherDaisy",
+  "pot-wither-lavender.png":"flower.potWitherLavender",
+  "pot-wither-peony.png":"flower.potWitherPeony",
+  "pot-wither-rose.png":"flower.potWitherRose",
+  "pot-wither-tulip.png":"flower.potWitherTulip",
+
+  "bouquet-daisy.png":"flower.bouquetDaisy",
+  "bouquet-lavender.png":"flower.bouquetLavender",
+  "bouquet-peony.png":"flower.bouquetPeony",
+  "bouquet-rose.png":"flower.bouquetRose",
+  "bouquet-tulip.png":"flower.bouquetTulip",
+  "bouquet-withered.png":"flower.bouquetWithered",
+
+  "seed.png":"flower.seed",
+  "water.png":"flower.water",
+  "fert.png":"flower.fert",
+  "login.png":"root.login",
+  "coin.png":"root.coin"
+};
+
+const FLOWER_PAGE_KEYS_BY_FILE = {
+  "index.html":"index",
+  "living.html":"living",
+  "honor.html":"honor",
+  "studio-todo.html":"studioTodo",
+  "game.html":"game",
+  "dorm.html":"dorm",
+  "flower.html":"flower",
+  "pets.html":"pet",
+  "manager-owner.html":"managerOwner",
+  "manager-admin.html":"managerAdmin",
+  "manager-member.html":"managerMember",
+  "manager-visitor.html":"managerVisitor",
+  "register.html":"managerRegister"
+};
+
+function isExternalPath(path){
+  return /^(https?:|data:|blob:|\/)/.test(String(path || ""));
+}
+
+function getFileNameFromPath(path){
+  return String(path || "").split("?")[0].split("#")[0].split("/").filter(Boolean).pop() || "";
+}
+
+function resolveRoom10Asset(assetKey, fallback=""){
+  const key = String(assetKey || "").trim();
+  if(key && typeof window.room10Asset === "function"){
+    const value = window.room10Asset(key);
+    if(value) return value;
+  }
+  return String(fallback || "").trim();
+}
+
+function resolveRoom10Page(pageKey, fallback=""){
+  const key = String(pageKey || "").trim();
+  if(key && typeof window.room10Page === "function"){
+    const value = window.room10Page(key);
+    if(value) return value;
+  }
+  return String(fallback || "").trim();
+}
+
+function flowerAsset(assetKey, fallback=""){
+  return resolveRoom10Asset(assetKey, fallback);
+}
+
+function flowerAssetFromFile(path, fallback=""){
+  const raw = String(path || fallback || "").trim();
+  if(!raw) return "";
+
+  if(isExternalPath(raw)) return raw;
+
+  const filename = getFileNameFromPath(raw);
+  const assetKey = FLOWER_FILE_ASSET_KEYS[filename];
+
+  if(assetKey){
+    return resolveRoom10Asset(assetKey, raw);
+  }
+
+  if(raw.includes("/") && typeof window.room10Path === "function"){
+    return window.room10Path(raw);
+  }
+
+  return raw;
+}
+
+function getConfiguredPageUrl(page){
+  const raw = String(page || "").trim();
+  if(!raw) return "";
+  const pageKey = FLOWER_PAGE_KEYS_BY_FILE[raw] || "";
+  if(pageKey) return resolveRoom10Page(pageKey, raw);
+  return raw;
+}
+
+function addQueryToUrl(url, query){
+  if(!url || !query) return url || "";
+  return `${url}${url.includes("?") ? "&" : "?"}${query}`;
+}
+
+function applyConfiguredAssets(){
+  document.querySelectorAll("[data-room10-asset]").forEach(el => {
+    const assetKey = el.getAttribute("data-room10-asset") || "";
+    const fallback = el.getAttribute("src") || "";
+    const value = resolveRoom10Asset(assetKey, fallback);
+    if(value && el.getAttribute("src") !== value){
+      el.setAttribute("src", value);
+    }
+  });
+
+  const flowerBg = flowerAsset("flower.roomFlower", "room-flower.png");
+  if(flowerBg){
+    document.documentElement.style.setProperty("--flower-room-bg-image", `url("${flowerBg}")`);
+  }
+}
+
 
 const STORAGE_KEYS = {
   loggedIn:"room10LoggedIn",
@@ -3319,7 +3448,7 @@ function roleLabel(role){
   if(r === "owner") return "维修工";
   if(r === "admin") return "宿管";
   if(r === "member") return "房客";
-  if(r === "applying") return "申请中";
+  if(r === "applying") return "申请人";
   return "参观者";
 }
 
@@ -3397,11 +3526,11 @@ function handleLogout(){
 function getManagerPageByRole(){
   const role = String(authState.role || localStorage.getItem(STORAGE_KEYS.role) || "").toLowerCase();
 
-  if(role === "owner") return "manager-owner.html";
-  if(role === "admin") return "manager-admin.html";
-  if(role === "member") return "manager-member.html";
+  if(role === "owner") return getConfiguredPageUrl("manager-owner.html");
+  if(role === "admin") return getConfiguredPageUrl("manager-admin.html");
+  if(role === "member" || role === "applying") return getConfiguredPageUrl("manager-member.html");
 
-  return "manager-visitor.html";
+  return getConfiguredPageUrl("manager-visitor.html");
 }
 
 function enterManagerRoom(){
@@ -3420,12 +3549,14 @@ function enterRoom(page, needLogin){
     return;
   }
 
+  const targetUrl = getConfiguredPageUrl(targetPage);
+
   if((targetPage === "flower.html" || targetPage === "pets.html") && !authState.loggedIn){
-    window.location.href = `${targetPage}?mode=guest`;
+    window.location.href = addQueryToUrl(targetUrl, "mode=guest");
     return;
   }
 
-  window.location.href = targetPage;
+  window.location.href = targetUrl;
 }
 
 function setupRoomNav(currentRoom){
@@ -3483,8 +3614,8 @@ function togglePassword(){
 }
 
 function goRegisterFromFlower(){
-  sessionStorage.setItem("room10RegisterReturn","flower.html");
-  window.location.href = "register.html?from=flower.html";
+  sessionStorage.setItem("room10RegisterReturn", getConfiguredPageUrl("flower.html"));
+  window.location.href = addQueryToUrl(getConfiguredPageUrl("register.html"), "from=flower.html");
 }
 
 async function login(){
@@ -3679,7 +3810,7 @@ function renderRewards(rewards){
     item.className = "reward-item";
 
     const iconHtml = reward.img
-      ? `<img src="${escapeHtml(reward.img)}" alt="" style="width:calc(30px * var(--reward-scale));height:calc(30px * var(--reward-scale));object-fit:contain;display:block;margin:0 auto calc(6px * var(--reward-scale));">`
+      ? `<img src="${escapeHtml(flowerAssetFromFile(reward.img))}" alt="" style="width:calc(30px * var(--reward-scale));height:calc(30px * var(--reward-scale));object-fit:contain;display:block;margin:0 auto calc(6px * var(--reward-scale));">`
       : `<div class="reward-item-icon">${escapeHtml(reward.icon)}</div>`;
 
     item.innerHTML = `
@@ -3795,9 +3926,9 @@ function showFirstVisitFlowerRewardModal(){
     name:"第一次走进花房",
     text:"你推开花房的门，第一颗种子也在这里等你。\n以后每天登录花房可以自动领取水 ×1 和肥料 ×1。",
     rewards:[
-      { img:"water.png", name:"水", qty:"×5" },
-      { img:"fert.png", name:"肥料", qty:"×5" },
-      { img:"seed.png", name:"花种子", qty:"×1" }
+      { img:flowerAsset("flower.water", "water.png"), name:"水", qty:"×5" },
+      { img:flowerAsset("flower.fert", "fert.png"), name:"肥料", qty:"×5" },
+      { img:flowerAsset("flower.seed", "seed.png"), name:"花种子", qty:"×1" }
     ],
     buttonText:"领取成就奖励",
     onConfirm:claimFlowerRewardFromModal
@@ -4336,18 +4467,18 @@ function getFlowerLanguage(row){
 
 function getFreshBouquetImg(row){
   const imgPath = String(row?.bouquet_img || "").trim();
-  if(imgPath && !imgPath.toLowerCase().includes("wither")) return imgPath;
+  if(imgPath && !imgPath.toLowerCase().includes("wither")) return flowerAssetFromFile(imgPath);
 
   const key = String(row?.flower_key || "");
   const freshMap = {
-    daisy:"bouquet-daisy.png",
-    lavender:"bouquet-lavender.png",
-    tulip:"bouquet-tulip.png",
-    rose:"bouquet-rose.png",
-    peony:"bouquet-peony.png"
+    daisy:flowerAsset("flower.bouquetDaisy", "bouquet-daisy.png"),
+    lavender:flowerAsset("flower.bouquetLavender", "bouquet-lavender.png"),
+    tulip:flowerAsset("flower.bouquetTulip", "bouquet-tulip.png"),
+    rose:flowerAsset("flower.bouquetRose", "bouquet-rose.png"),
+    peony:flowerAsset("flower.bouquetPeony", "bouquet-peony.png")
   };
 
-  return freshMap[key] || "bouquet-daisy.png";
+  return freshMap[key] || flowerAsset("flower.bouquetDaisy", "bouquet-daisy.png");
 }
 
 function hasWitheredFlowers(row){
@@ -4368,7 +4499,7 @@ function hasWitheredFlowers(row){
 }
 
 function getInventoryBouquetImg(row){
-  if(hasWitheredFlowers(row)) return "bouquet-withered.png";
+  if(hasWitheredFlowers(row)) return flowerAsset("flower.bouquetWithered", "bouquet-withered.png");
   return getFreshBouquetImg(row);
 }
 
@@ -4406,7 +4537,7 @@ function getMerchantFlowerMeta(row){
   return getMarketRow(key) || {
     flower_key:key,
     flower_name:key === "low_quality" ? "低品质花束" : "花束",
-    bouquet_img:"bouquet-daisy.png"
+    bouquet_img:flowerAsset("flower.bouquetDaisy", "bouquet-daisy.png")
   };
 }
 
@@ -4431,7 +4562,7 @@ function getMerchantQualityText(row){
 }
 
 function getMerchantBouquetImg(row){
-  if(String(row?.quality || "") === "wilting") return "bouquet-withered.png";
+  if(String(row?.quality || "") === "wilting") return flowerAsset("flower.bouquetWithered", "bouquet-withered.png");
   return getFreshBouquetImg(getMerchantFlowerMeta(row));
 }
 
@@ -5299,7 +5430,7 @@ function updatePotUsedCareNumbers(pot=null, loggedOut=false){
 }
 
 function renderPotEmpty(desc="当前是空花盆。", loggedOut=false){
-  if(potImage) potImage.src = "pot-empty.png";
+  if(potImage) potImage.src = flowerAsset("flower.potEmpty", "pot-empty.png");
   if(potStatusTitle) potStatusTitle.textContent = "空花盆";
   if(potStatusDesc) potStatusDesc.textContent = desc;
 
@@ -5310,7 +5441,7 @@ function renderPotEmpty(desc="当前是空花盆。", loggedOut=false){
     potActions.className = "potActions single";
     potActions.innerHTML = loggedOut
       ? `<button class="potActionBtn" type="button" onclick="openLogin()"><span class="potActionContent">登录后种花</span></button>`
-      : `<button class="potActionBtn" type="button" onclick="plantSeed()"><span class="potActionContent"><img class="potActionIcon" src="seed.png" alt="">种下种子</span></button>`;
+      : `<button class="potActionBtn" type="button" onclick="plantSeed()"><span class="potActionContent"><img class="potActionIcon" src="${escapeHtml(flowerAsset('flower.seed', 'seed.png'))}" alt="">种下种子</span></button>`;
   }
 
   showBoxMessage(potMessage, "");
@@ -5325,7 +5456,7 @@ function renderPot(row){
     return;
   }
 
-  if(potImage) potImage.src = pot.display_img || "pot-empty.png";
+  if(potImage) potImage.src = flowerAssetFromFile(pot.display_img || "pot-empty.png");
   updatePotResourceNumbers(false);
   updatePotUsedCareNumbers(pot, false);
 
@@ -5342,8 +5473,8 @@ function renderPot(row){
       const fertilizerDisabled = getDailyCareRemaining("fertilizer") <= 0;
       potActions.className = "potActions";
       potActions.innerHTML = `
-        <button class="potActionBtn" type="button" ${waterDisabled ? "data-disabled=\"true\" disabled" : ""} onclick="careFlowerPot('water')" title="每天最多浇水 3 次"><span class="potActionContent"><img class="potActionIcon" src="water.png" alt="">浇水</span></button>
-        <button class="potActionBtn" type="button" ${fertilizerDisabled ? "data-disabled=\"true\" disabled" : ""} onclick="careFlowerPot('fertilizer')" title="每天最多施肥 3 次"><span class="potActionContent"><img class="potActionIcon" src="fert.png" alt="">施肥</span></button>
+        <button class="potActionBtn" type="button" ${waterDisabled ? "data-disabled=\"true\" disabled" : ""} onclick="careFlowerPot('water')" title="每天最多浇水 3 次"><span class="potActionContent"><img class="potActionIcon" src="${escapeHtml(flowerAsset('flower.water', 'water.png'))}" alt="">浇水</span></button>
+        <button class="potActionBtn" type="button" ${fertilizerDisabled ? "data-disabled=\"true\" disabled" : ""} onclick="careFlowerPot('fertilizer')" title="每天最多施肥 3 次"><span class="potActionContent"><img class="potActionIcon" src="${escapeHtml(flowerAsset('flower.fert', 'fert.png'))}" alt="">施肥</span></button>
       `;
     }
     showBoxMessage(potMessage, "");
@@ -5796,7 +5927,7 @@ async function clearWitheredFlowerPot(){
         label:"道具获得",
         title:"清理花盆",
         desc:"清理枯萎花盆时，意外翻到了一点肥料。",
-        rewards:[{ img:"fert.png", name:"肥料", amount:`×${Number(row?.fertilizer_quantity) || 1}` }],
+        rewards:[{ img:flowerAsset("flower.fert", "fert.png"), name:"肥料", amount:`×${Number(row?.fertilizer_quantity) || 1}` }],
         autoCloseMs:2200
       });
     }else{
@@ -5860,7 +5991,7 @@ async function clearWitheredMarketFlower(flowerKey){
         label:"道具获得",
         title:"清理枯萎市场花",
         desc:"清理时意外翻到了一点肥料。",
-        rewards:[{ img:"fert.png", name:"肥料", amount:`×${Number(row?.fertilizer_quantity) || 1}` }],
+        rewards:[{ img:flowerAsset("flower.fert", "fert.png"), name:"肥料", amount:`×${Number(row?.fertilizer_quantity) || 1}` }],
         autoCloseMs:2200
       });
     }else{
@@ -5956,6 +6087,7 @@ function renderSiteNotifications(){
    初始化
 ========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
+  applyConfiguredAssets();
   readLocalAuth();
   setupRoomNav("flower");
   updateIdentity();
