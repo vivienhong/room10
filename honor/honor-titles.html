@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜成就称号馆</title>
 
+<script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -57,10 +58,10 @@
   --room-nav-current-bg:rgba(239,224,205,.86);
 
   /* 主面板坐标绑定底图实际显示区域：全站统一规则，不按分辨率单独改坐标 */
-  --honor-panel-left:20.4%;
-  --honor-panel-top:27.2%;
-  --honor-panel-width:61.8%;
-  --honor-panel-height:64.4%;
+  --honor-panel-left:15.0%;
+  --honor-panel-top:19.0%;
+  --honor-panel-width:67.3%;
+  --honor-panel-height:74.4%;
 
   --panel-border:rgba(198,145,79,.24);
   --card-border:rgba(170,122,82,.16);
@@ -1169,7 +1170,7 @@ button{font-family:inherit;}
     display:block;
     background:
       linear-gradient(rgba(243,236,223,.60), rgba(243,236,223,.88)),
-      url("honor-titles.png") center top / cover no-repeat fixed;
+      url("../honor/honor-titles.png") center top / cover no-repeat fixed;
   }
 
   #room{
@@ -1340,13 +1341,14 @@ button{font-family:inherit;}
     font-size:11px;
   }
 }
+
 </style>
 </head>
 
 <body>
 <div id="room">
   <div id="bgFrame">
-    <img id="bg" src="honor-titles.png" alt="十号房成就称号馆背景">
+    <img id="bg" src="../honor/honor-titles.png" data-room10-asset="honor.honorTitles" alt="十号房成就称号馆背景">
   </div>
 
   <div id="overlay">
@@ -1433,8 +1435,8 @@ button{font-family:inherit;}
             <div class="panelTitleArea">
               <h2 class="panelTitle">共同荣誉</h2>
               <div class="branchNav" aria-label="荣誉墙分支导航">
-                <button class="branchBtn" type="button" onclick="window.location.href='honor.html'">返回荣誉墙</button>
-                <button class="branchBtn" type="button" onclick="window.location.href='honor-gallery.html'">作品展览</button>
+                <button class="branchBtn" type="button" onclick="goHonorHome()">返回荣誉墙</button>
+                <button class="branchBtn" type="button" onclick="goHonorGallery()">作品展览</button>
               </div>
             </div>
             <div class="tabGroup">
@@ -1503,10 +1505,71 @@ button{font-family:inherit;}
 
 <div class="toast" id="toast"></div>
 
+
 <script>
 const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+const ROOM10_ROOT_PREFIX = window.ROOM10_ROOT || "../";
+
+function room10Url(path){
+  const raw = String(path || "").trim();
+  if(!raw) return "";
+  if(/^(https?:|data:|mailto:|tel:|#|\/)/i.test(raw)) return raw;
+  if(raw.startsWith("./") || raw.startsWith("../")) return raw;
+  if(typeof window.room10Path === "function") return window.room10Path(raw);
+  return `${ROOM10_ROOT_PREFIX}${raw}`;
+}
+
+function room10PageUrl(key,fallbackPath){
+  const pageKey = String(key || "").trim();
+  if(pageKey && typeof window.room10Page === "function"){
+    const url = window.room10Page(pageKey);
+    if(url) return url;
+  }
+  return room10Url(fallbackPath || "");
+}
+
+function room10AssetUrl(keyPath,fallbackPath){
+  const key = String(keyPath || "").trim();
+  if(key && typeof window.room10Asset === "function"){
+    const url = window.room10Asset(key);
+    if(url) return url;
+  }
+  return room10Url(fallbackPath || "");
+}
+
+function goHonorHome(){
+  window.location.href = room10PageUrl("honor","honor/honor.html");
+}
+
+function goHonorGallery(){
+  window.location.href = room10PageUrl("honorGallery","honor/honor-gallery.html");
+}
+
+function resolveLegacyRoomPage(page){
+  const raw = String(page || "").trim();
+  const map = {
+    "index.html":"index",
+    "living.html":"living",
+    "dorm.html":"dorm",
+    "flower.html":"flower",
+    "game.html":"game",
+    "studio-todo.html":"studioTodo",
+    "pets.html":"pet",
+    "honor.html":"honor",
+    "honor-gallery.html":"honorGallery",
+    "honor-titles.html":"honorTitles",
+    "manager-owner.html":"managerOwner",
+    "manager-admin.html":"managerAdmin",
+    "manager-member.html":"managerMember",
+    "manager-visitor.html":"managerVisitor"
+  };
+  if(map[raw]) return room10PageUrl(map[raw], raw);
+  return room10Url(raw);
+}
 
 const STORAGE_KEYS = {
   loggedIn:"room10LoggedIn",
@@ -1517,6 +1580,9 @@ const STORAGE_KEYS = {
 };
 
 const img = document.getElementById("bg");
+if(img){
+  img.src = room10AssetUrl("honor.honorTitles","honor/honor-titles.png");
+}
 const bgFrame = document.getElementById("bgFrame");
 const overlay = document.getElementById("overlay");
 const root = document.documentElement;
@@ -1552,46 +1618,66 @@ let membersById = new Map();
 let activeSourceFilter = "all";
 let sourceFilterOptions = [];
 
-const DEFAULT_HONOR_SOURCE_GROUPS = [
-  { source_group:"anniversary", room_key:"home", display_name:"十号房", sort_order:10, is_active:true, show_in_honor_filter:true },
-  { source_group:"flower", room_key:"flower", display_name:"花房区", sort_order:20, is_active:true, show_in_honor_filter:true },
-  { source_group:"game", room_key:"game", display_name:"游戏房", sort_order:30, is_active:true, show_in_honor_filter:true },
-  { source_group:"number_bomb", room_key:"game", display_name:"拆弹专家", sort_order:40, is_active:true, show_in_honor_filter:true },
-  { source_group:"face_match", room_key:"game", display_name:"脸萌挑战", sort_order:50, is_active:true, show_in_honor_filter:true },
-  { source_group:"time_answer", room_key:"game", display_name:"时间的答案", sort_order:60, is_active:true, show_in_honor_filter:true },
-  { source_group:"pet", room_key:"pets", display_name:"宠物区", sort_order:70, is_active:true, show_in_honor_filter:true },
-  { source_group:"pets", room_key:"pets", display_name:"宠物区", sort_order:70, is_active:true, show_in_honor_filter:true },
-  { source_group:"honor", room_key:"honor", display_name:"荣誉房", sort_order:80, is_active:true, show_in_honor_filter:true },
-  { source_group:"studio", room_key:"studio", display_name:"工作间", sort_order:90, is_active:true, show_in_honor_filter:false },
-  { source_group:"studio_project", room_key:"studio", display_name:"歌曲协作", sort_order:100, is_active:true, show_in_honor_filter:false },
-  { source_group:"studio_vocal", room_key:"studio", display_name:"音域记录", sort_order:110, is_active:true, show_in_honor_filter:false },
-  { source_group:"holiday", room_key:"home", display_name:"节日礼包", sort_order:120, is_active:true, show_in_honor_filter:false },
-  { source_group:"other", room_key:"other", display_name:"其他", sort_order:999, is_active:true, show_in_honor_filter:true }
-];
-
 function rebuildHonorSourceGroupMap(sourceGroups){
-  const merged = new Map();
+  const map = new Map();
 
-  DEFAULT_HONOR_SOURCE_GROUPS.forEach(row => {
-    merged.set(normalizeSourceKey(row.source_group), { ...row });
-  });
+  if(!Array.isArray(sourceGroups) || sourceGroups.length <= 0){
+    throw new Error("来源筛选读取失败：honor_source_groups 没有可用配置。");
+  }
 
-  (sourceGroups || []).forEach(row => {
-    const key = normalizeSourceKey(row.source_group);
-    if(!key) return;
-    merged.set(key, {
+  sourceGroups.forEach(row => {
+    const key = normalizeSourceKey(row?.source_group);
+    const filterKey = normalizeSourceKey(row?.filter_group);
+    const displayName = String(row?.display_name || "").trim();
+    const sortOrder = Number(row?.sort_order);
+
+    if(!key){
+      throw new Error("来源配置缺失：honor_source_groups.source_group 为空。");
+    }
+
+    if(!filterKey){
+      throw new Error(`来源配置缺失：${key} 缺少 filter_group。`);
+    }
+
+    if(!displayName){
+      throw new Error(`来源配置缺失：${key} 缺少 display_name。`);
+    }
+
+    if(!Number.isFinite(sortOrder)){
+      throw new Error(`来源配置缺失：${key} 缺少 sort_order。`);
+    }
+
+    map.set(key, {
       source_group:key,
-      room_key:row.room_key || merged.get(key)?.room_key || key,
-      display_name:row.display_name || merged.get(key)?.display_name || key,
-      sort_order:Number.isFinite(Number(row.sort_order)) ? Number(row.sort_order) : (merged.get(key)?.sort_order ?? 999),
-      is_active:row.is_active !== false,
-      show_in_honor_filter:row.show_in_honor_filter !== false,
-      note:row.note || merged.get(key)?.note || ""
+      filter_group:filterKey,
+      room_key:String(row?.room_key || "").trim(),
+      display_name:displayName,
+      sort_order:sortOrder,
+      is_active:row?.is_active === true,
+      show_in_honor_filter:row?.show_in_honor_filter === true,
+      note:String(row?.note || "")
     });
   });
 
-  honorSourceGroupMap = merged;
-  return merged;
+  map.forEach(config => {
+    if(!map.has(config.filter_group)){
+      throw new Error(`来源配置缺失：${config.source_group} 的 filter_group=${config.filter_group} 没有对应配置。`);
+    }
+  });
+
+  const visibleNameMap = new Map();
+  map.forEach(config => {
+    if(config.is_active === true && config.show_in_honor_filter === true){
+      const old = visibleNameMap.get(config.display_name);
+      if(old){
+        throw new Error(`来源配置重复：${old} 和 ${config.source_group} 都显示为「${config.display_name}」。`);
+      }
+      visibleNameMap.set(config.display_name, config.source_group);
+    }
+  });
+
+  honorSourceGroupMap = map;
+  return map;
 }
 
 /* =========================================================
@@ -1695,6 +1781,50 @@ function numberValue(value){
   return Number.isFinite(num) ? num : 0;
 }
 
+
+function rewardSuppressStorageKey(){
+  const memberId = String(authState.memberId || currentMember?.id || "visitor");
+  return `room10SuppressedHonorRewards:${memberId}`;
+}
+
+function readSuppressedRewardKeys(){
+  try{
+    const raw = localStorage.getItem(rewardSuppressStorageKey());
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
+  }catch(err){
+    return new Set();
+  }
+}
+
+function writeSuppressedRewardKeys(set){
+  try{
+    localStorage.setItem(rewardSuppressStorageKey(), JSON.stringify(Array.from(set || [])));
+  }catch(err){}
+}
+
+function honorRewardKey(itemType,itemId){
+  return `${String(itemType || "").toLowerCase()}:${String(itemId || "")}`;
+}
+
+function isRewardLocallySuppressed(itemType,itemId){
+  return readSuppressedRewardKeys().has(honorRewardKey(itemType,itemId));
+}
+
+function suppressHonorReward(itemType,itemId){
+  const set = readSuppressedRewardKeys();
+  set.add(honorRewardKey(itemType,itemId));
+  writeSuppressedRewardKeys(set);
+}
+
+function suppressPendingHonorRewards(){
+  const set = readSuppressedRewardKeys();
+  (pendingHonorRewardItems || []).forEach(item => {
+    set.add(honorRewardKey(item.itemType,item.itemId));
+  });
+  writeSuppressedRewardKeys(set);
+}
+
 function byRequirementValueDesc(a,b){
   return numberValue(b.requirement_value) - numberValue(a.requirement_value);
 }
@@ -1732,12 +1862,12 @@ function isHonorGoldRewardClaimed(itemType,itemId){
     const subcategory = String(row.subcategory || "").toLowerCase();
     const category = String(row.category || "").toLowerCase();
     const note = String(row.note || "");
+    const tableMatches = relatedTable === expectedTable || relatedTable === "";
+    const idMatches = relatedId === normalizedId || note.includes(marker);
+    const typeMatches = subcategory === expectedSubcategory || note.includes(marker);
 
-    if(category === "honor" && subcategory === expectedSubcategory && relatedTable === expectedTable && note.includes(marker)){
-      return true;
-    }
-
-    return relatedTable === expectedTable && relatedId === normalizedId && category === "honor";
+    if(category !== "honor") return false;
+    return (tableMatches && idMatches) || (typeMatches && idMatches);
   });
 }
 
@@ -1755,10 +1885,15 @@ function isHonorItemRewardClaimed(itemType,itemId,itemKey){
 
   return honorItemRewardLedger.some(row => {
     const itemMatch = String(row.item_key || "") === normalizedItemKey;
-    const sourceMatch = String(row.source_type || "").toLowerCase() === expectedSourceType;
-    const tableMatch = String(row.related_table || "").toLowerCase() === expectedTable;
-    const noteMatch = String(row.note || "").includes(marker);
-    return itemMatch && sourceMatch && tableMatch && noteMatch;
+    const sourceType = String(row.source_type || "").toLowerCase();
+    const relatedTable = String(row.related_table || "").toLowerCase();
+    const relatedId = String(row.related_id || "");
+    const note = String(row.note || "");
+    const sourceDetail = String(row.source_detail || "");
+    const sourceMatch = sourceType === expectedSourceType || note.includes(marker) || sourceDetail.includes(marker);
+    const tableMatch = relatedTable === expectedTable || relatedTable === "";
+    const idMatch = relatedId === normalizedId || note.includes(marker) || sourceDetail.includes(marker);
+    return itemMatch && sourceMatch && tableMatch && idMatch;
   });
 }
 
@@ -1766,6 +1901,16 @@ function getClaimableRewardInfo(itemType,item){
   const itemId = item?.id;
   const rewardGold = numberValue(item?.rewardGold);
   const itemRewards = Array.isArray(item?.itemRewards) ? item.itemRewards : getHonorItemRewards(itemType,itemId);
+
+  if(isRewardLocallySuppressed(itemType,itemId)){
+    return {
+      goldClaimable:false,
+      claimableItemRewards:[],
+      hasClaimable:false,
+      totalGold:0,
+      totalItemQuantity:0
+    };
+  }
 
   const goldClaimable = rewardGold > 0 && !isHonorGoldRewardClaimed(itemType,itemId);
   const claimableItemRewards = itemRewards.filter(reward =>
@@ -1893,11 +2038,11 @@ function handleLogout(){
 function getManagerPageByRole(){
   const role = String(authState.role || localStorage.getItem(STORAGE_KEYS.role) || "").toLowerCase();
 
-  if(role === "owner") return "manager-owner.html";
-  if(role === "admin") return "manager-admin.html";
-  if(role === "member") return "manager-member.html";
+  if(role === "owner") return room10PageUrl("managerOwner","manager/manager-owner.html");
+  if(role === "admin") return room10PageUrl("managerAdmin","manager/manager-admin.html");
+  if(role === "member" || role === "applying") return room10PageUrl("managerMember","manager/manager-member.html");
 
-  return "manager-visitor.html";
+  return room10PageUrl("managerVisitor","manager/manager-visitor.html");
 }
 
 function enterManagerRoom(){
@@ -1912,16 +2057,17 @@ function enterRoom(page, needLogin){
 
   if(needLogin && !loggedIn){
     showToast("该房间需要成员登录后进入");
-    window.location.href = "index.html";
+    window.location.href = room10PageUrl("index","index/index.html");
     return;
   }
 
+  const resolvedUrl = resolveLegacyRoomPage(targetPage);
   if((targetPage === "flower.html" || targetPage === "pets.html") && !loggedIn){
-    window.location.href = `${targetPage}?mode=guest`;
+    window.location.href = `${resolvedUrl}?mode=guest`;
     return;
   }
 
-  window.location.href = targetPage;
+  window.location.href = resolvedUrl;
 }
 
 /* =========================================================
@@ -2025,7 +2171,7 @@ async function fetchHonorRewardLedger(memberId){
     .eq("member_id",memberId)
     .eq("direction","in")
     .order("created_at",{ ascending:false })
-    .limit(500);
+    .limit(5000);
 
   if(error){
     console.warn("金币奖励流水读取失败，奖励领取状态可能无法判断。", error);
@@ -2039,17 +2185,20 @@ async function fetchHonorRewardLedger(memberId){
 async function fetchHonorSourceGroups(){
   const { data,error } = await supabaseClient
     .from("honor_source_groups")
-    .select("source_group,room_key,display_name,sort_order,is_active,show_in_honor_filter,note")
+    .select("source_group,filter_group,room_key,display_name,sort_order,is_active,show_in_honor_filter,note")
     .eq("is_active",true)
     .order("sort_order",{ ascending:true })
     .order("source_group",{ ascending:true });
 
   if(error){
-    console.warn("荣誉来源配置读取失败，将使用内置中文标签兜底。", error);
-    return DEFAULT_HONOR_SOURCE_GROUPS;
+    throw new Error(`来源筛选读取失败：${error.message || "请检查 honor_source_groups 权限或字段。"}`);
   }
 
-  return Array.isArray(data) ? data : DEFAULT_HONOR_SOURCE_GROUPS;
+  if(!Array.isArray(data) || data.length <= 0){
+    throw new Error("来源筛选读取失败：honor_source_groups 没有可用配置。");
+  }
+
+  return data;
 }
 
 async function fetchHonorRewardItems(){
@@ -2103,7 +2252,7 @@ async function fetchHonorItemRewardLedger(memberId){
     .eq("direction","in")
     .in("source_type",["honor_achievement_reward","honor_title_reward"])
     .order("created_at",{ ascending:false })
-    .limit(1000);
+    .limit(5000);
 
   if(error){
     console.warn("荣誉物品奖励流水读取失败，材料领取状态可能无法判断。", error);
@@ -2115,44 +2264,103 @@ async function fetchHonorItemRewardLedger(memberId){
 
 
 function normalizeSourceKey(raw){
-  const value = String(raw || "").trim().toLowerCase();
-  if(!value) return "";
-
-  if(["pets","pet_room","宠物","宠物区"].includes(value)) return "pet";
-  if(["aniversary","join_anniversary","member_join_years","周年","初来乍到"].includes(value)) return "anniversary";
-  return value;
+  return String(raw || "").trim().toLowerCase();
 }
 
 function inferSourceKey(item){
-  return normalizeSourceKey(item?.source_group || item?.category) || "other";
+  const key = normalizeSourceKey(item?.source_group);
+  if(!key){
+    const itemName = item?.name || item?.code || item?.id || "未知记录";
+    throw new Error(`来源配置缺失：${itemName} 缺少 source_group。`);
+  }
+  return key;
 }
 
 function getSourceConfig(key){
   const normalizedKey = normalizeSourceKey(key);
-  return honorSourceGroupMap.get(normalizedKey) || honorSourceGroupMap.get("other") || null;
+  return honorSourceGroupMap.get(normalizedKey) || null;
+}
+
+function getFilterGroupKey(sourceKey){
+  const normalizedKey = normalizeSourceKey(sourceKey);
+  const config = getSourceConfig(normalizedKey);
+  if(!config){
+    throw new Error(`来源配置缺失：${normalizedKey} 未在 honor_source_groups 中配置。`);
+  }
+
+  const filterKey = normalizeSourceKey(config.filter_group);
+  if(!filterKey){
+    throw new Error(`来源配置缺失：${normalizedKey} 缺少 filter_group。`);
+  }
+
+  const filterConfig = getSourceConfig(filterKey);
+  if(!filterConfig){
+    throw new Error(`来源配置缺失：${normalizedKey} 指向的 filter_group=${filterKey} 不存在。`);
+  }
+
+  if(filterConfig.is_active !== true || filterConfig.show_in_honor_filter !== true){
+    throw new Error(`来源配置错误：${normalizedKey} 指向的筛选标签 ${filterKey} 未启用显示。`);
+  }
+
+  return filterKey;
 }
 
 function sourceLabel(key){
   const config = getSourceConfig(key);
-  return config?.display_name || normalizeSourceKey(key) || "其他";
+  if(!config || !config.display_name){
+    throw new Error(`来源配置缺失：${normalizeSourceKey(key)} 缺少 display_name。`);
+  }
+  return config.display_name;
 }
 
 function sourceSortIndex(key){
   const config = getSourceConfig(key);
-  return Number.isFinite(Number(config?.sort_order)) ? Number(config.sort_order) : 999;
+  const order = Number(config?.sort_order);
+  if(!Number.isFinite(order)){
+    throw new Error(`来源配置缺失：${normalizeSourceKey(key)} 缺少 sort_order。`);
+  }
+  return order;
 }
 
 function sourceIsVisible(key){
   const config = getSourceConfig(key);
-  return config ? config.show_in_honor_filter !== false && config.is_active !== false : true;
+  return !!config && config.is_active === true && config.show_in_honor_filter === true;
 }
 
 function sourceMatches(item){
-  return activeSourceFilter === "all" || item.sourceKey === activeSourceFilter;
+  const itemFilterKey = getFilterGroupKey(item?.sourceKey);
+  return activeSourceFilter === "all" || itemFilterKey === normalizeSourceKey(activeSourceFilter);
 }
 
 function filteredRows(rows){
   return Array.isArray(rows) ? rows.filter(sourceMatches) : [];
+}
+
+function validateHonorSourceRows(rows,label){
+  const list = Array.isArray(rows) ? rows : [];
+  list.forEach(item => {
+    const sourceKey = normalizeSourceKey(item?.sourceKey);
+    if(!sourceKey){
+      throw new Error(`${label}来源配置缺失：存在空 source_group。`);
+    }
+    getFilterGroupKey(sourceKey);
+  });
+}
+
+function validateHonorSourceConfiguration(){
+  validateHonorSourceRows(communityAchievementRows,"共同成就");
+  validateHonorSourceRows(communityTitleRows,"共同称号");
+  validateHonorSourceRows(myAchievementRows,"我的成就");
+  validateHonorSourceRows(myTitleRows,"我的称号");
+}
+
+function showSourceFilterError(message){
+  const wrap = document.getElementById("sourceFilterTags");
+  const count = document.getElementById("sourceFilterCount");
+  if(count) count.textContent = "读取失败";
+  if(wrap){
+    wrap.innerHTML = `<div class="errorText">${escapeHtml(message || "来源筛选读取失败。")}</div>`;
+  }
 }
 
 function getActiveCommunityTarget(){
@@ -2161,12 +2369,6 @@ function getActiveCommunityTarget(){
 }
 
 function getSourceFilterBaseRows(){
-  /*
-    来源标签按当前共同荣誉标签页生成：
-    - 共同成就：只显示有成就内容的来源
-    - 共同称号：只显示有称号内容的来源
-    这样荣誉房如果当前只有称号，就不会在“共同成就”下显示荣誉房标签。
-  */
   return getActiveCommunityTarget() === "communityTitles"
     ? communityTitleRows
     : communityAchievementRows;
@@ -2177,9 +2379,8 @@ function updateSourceFilterOptions(){
   const sourceRows = getSourceFilterBaseRows();
 
   sourceRows.forEach(item => {
-    const key = normalizeSourceKey(item.sourceKey || "other") || "other";
-    if(!sourceIsVisible(key)) return;
-    countMap.set(key, (countMap.get(key) || 0) + 1);
+    const filterKey = getFilterGroupKey(item.sourceKey);
+    countMap.set(filterKey, (countMap.get(filterKey) || 0) + 1);
   });
 
   const options = Array.from(countMap.entries())
@@ -2195,21 +2396,26 @@ function updateSourceFilterOptions(){
 }
 
 function renderSourceFilters(){
-  updateSourceFilterOptions();
-
   const wrap = document.getElementById("sourceFilterTags");
   const count = document.getElementById("sourceFilterCount");
   if(!wrap) return;
 
-  wrap.innerHTML = sourceFilterOptions.map(option => `
-    <button class="sourceFilterBtn ${option.key === activeSourceFilter ? "active" : ""}" type="button" data-source-filter="${escapeHtml(option.key)}">
-      ${escapeHtml(option.label)}
-    </button>
-  `).join("");
+  try{
+    updateSourceFilterOptions();
 
-  if(count){
-    const current = sourceFilterOptions.find(option => option.key === activeSourceFilter) || sourceFilterOptions[0];
-    count.textContent = `${current.label} ${numberValue(current.count)} 项`;
+    wrap.innerHTML = sourceFilterOptions.map(option => `
+      <button class="sourceFilterBtn ${option.key === activeSourceFilter ? "active" : ""}" type="button" data-source-filter="${escapeHtml(option.key)}">
+        ${escapeHtml(option.label)}
+      </button>
+    `).join("");
+
+    if(count){
+      const current = sourceFilterOptions.find(option => option.key === activeSourceFilter) || sourceFilterOptions[0];
+      count.textContent = `${current.label} ${numberValue(current.count)} 项`;
+    }
+  }catch(error){
+    console.error(error);
+    showSourceFilterError(error.message || "来源筛选读取失败。");
   }
 }
 
@@ -2397,6 +2603,7 @@ async function loadHonorData(){
     myAchievementRows = buildMyAchievements(achievements,achievementRecords,currentMember?.id || authState.memberId);
     myTitleRows = buildMyTitles(titles,titleRecords,currentMember?.id || authState.memberId);
 
+    validateHonorSourceConfiguration();
     renderAll();
   }catch(error){
     console.error(error);
@@ -2404,6 +2611,7 @@ async function loadHonorData(){
     setListMessage("communityTitles","共同称号读取失败，请检查 titles / member_titles 权限。",true);
     setListMessage("myAchievements","我的成就读取失败。",true);
     setListMessage("myTitles","我的称号读取失败。",true);
+    showSourceFilterError(error.message || "来源筛选读取失败。");
     renderSummary();
   }
 }
@@ -2666,10 +2874,17 @@ async function claimOneHonorReward(itemType,itemId){
 
     const result = Array.isArray(data) ? data[0] : data;
     if(result && result.ok === false){
-      showToast(result.message || "奖励领取失败");
+      const msg = result.message || "奖励领取失败";
+      if(/暂无|没有|已领取|不可领取|无可领取/.test(String(msg))){
+        suppressHonorReward(itemType,itemId);
+        renderAll();
+      }
+      showToast(msg);
+      await loadHonorData();
       return;
     }
 
+    suppressHonorReward(itemType,itemId);
     showToast(result?.message || "奖励已领取");
     await loadHonorData();
   }catch(error){
@@ -2702,13 +2917,26 @@ async function claimAllHonorRewards(){
 
     const result = Array.isArray(data) ? data[0] : data;
     if(result && result.ok === false){
-      showToast(result.message || "一键领取失败");
+      const msg = result.message || "一键领取失败";
+      if(/暂无|没有|已领取|不可领取|无可领取/.test(String(msg))){
+        suppressPendingHonorRewards();
+        renderAll();
+      }
+      showToast(msg);
       await loadHonorData();
       return;
     }
 
     const count = numberValue(result?.claimed_count);
     const gold = numberValue(result?.total_gold);
+    if(count <= 0 && gold <= 0){
+      suppressPendingHonorRewards();
+      showToast(result?.message || "暂无可领取奖励");
+      renderAll();
+      await loadHonorData();
+      return;
+    }
+    suppressPendingHonorRewards();
     showToast(result?.message || `已领取 ${count} 项奖励，共 ${gold} 金币`);
     await loadHonorData();
   }catch(error){
@@ -2781,7 +3009,7 @@ function bindEvents(){
   if(loginOpenBtn){
     loginOpenBtn.addEventListener("click", event => {
       event.stopPropagation();
-      window.location.href = "index.html";
+      window.location.href = room10PageUrl("index","index/index.html");
     });
   }
 
