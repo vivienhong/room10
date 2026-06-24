@@ -14,6 +14,7 @@ window.ROOM10_PATHS = {
     game: "game/game.html",
     gameChain: "game/chain.html",
     gamePasswordMaster: "game/pwmaster.html",
+    gameKnight: "game/knight.html",
     gameTime: "game/time.html",
 
     gameBomb: "game/bomb/bomb.html",
