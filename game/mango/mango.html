@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>暴打芒果｜十号房游戏房</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../room10-paths.js"></script>
 <style>
 *{box-sizing:border-box;}
 :root{
@@ -86,7 +87,7 @@ h1{font-size:36px;}
 
 
 /* =========================
-   统一奖励弹窗（来自独立测试页）
+   全站统一奖励弹窗
 ========================= */
 
 .reward-mask {
@@ -546,9 +547,9 @@ h1{font-size:36px;}
         <div id="mangoStage" class="mango-stage">
           <div class="mango-glow"></div>
           <button id="mangoBtn" class="mango-btn" type="button" aria-label="点击芒果开打">
-            <img id="mangoImg" class="mango-img" src="game-mango.png" alt="暴打芒果">
+            <img id="mangoImg" class="mango-img" src="game-mango.png" data-room10-asset="mango.gameMango" data-img-path="game-mango.png" alt="暴打芒果">
           </button>
-          <img id="hammerImg" class="hammer-img" src="game-hammer.png" alt="锤子">
+          <img id="hammerImg" class="hammer-img" src="game-hammer.png" data-room10-asset="mango.gameHammer" data-img-path="game-hammer.png" alt="锤子">
         </div>
         <div class="status-row">
           <div class="stat-pill"><div id="clickValue" class="stat-value">0</div><div class="stat-label">暴打次数</div></div>
@@ -643,7 +644,7 @@ h1{font-size:36px;}
   </section>
 </div>
 
-<!-- 统一奖励弹窗：原样来自 reward-modal-test.html -->
+<!-- 全站统一奖励弹窗 -->
 <div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
     <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
       <div class="reward-petals" aria-hidden="true">
@@ -661,11 +662,9 @@ h1{font-size:36px;}
 
         <div class="reward-label" id="rewardLabel">成就达成</div>
 
-        <h2 class="reward-title" id="rewardTitle">新手照顾员</h2>
+        <h2 class="reward-title" id="rewardTitle">奖励已领取</h2>
 
-        <p class="reward-desc" id="rewardDesc">
-          成就达成：累计照顾宠物 1 次
-        </p>
+        <p class="reward-desc" id="rewardDesc">奖励已经记录完成。</p>
 
         <div class="reward-section-title" id="rewardSectionTitle">奖励内容</div>
 
@@ -682,6 +681,64 @@ h1{font-size:36px;}
 const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+function room10AssetUrl(keyPath, fallbackPath = ""){
+  if(keyPath && typeof window.room10Asset === "function"){
+    const url = window.room10Asset(keyPath);
+    if(url) return url;
+  }
+
+  if(fallbackPath && typeof window.room10Path === "function" && !/^(https?:|data:|blob:|\/|\.\.?\/)/i.test(fallbackPath)){
+    return window.room10Path(fallbackPath);
+  }
+
+  return fallbackPath || "";
+}
+
+function normalizeAssetPath(value){
+  const src = String(value || "").trim();
+  if(!src) return "";
+  if(/^(https?:|data:|blob:|\/)/i.test(src)) return src;
+
+  const clean = src.replace(/^\.\//, "");
+  if(clean === "coin.png" || clean === "../coin.png" || clean === "../../coin.png"){
+    return room10AssetUrl("root.coin", "../../coin.png");
+  }
+
+  if(clean.startsWith("game/mango/") || clean.startsWith("game/gacha/")){
+    return typeof window.room10Path === "function" ? window.room10Path(clean) : "../../" + clean;
+  }
+
+  if(clean.startsWith("game-mango") || clean === "game-hammer.png"){
+    return typeof window.room10Path === "function" ? window.room10Path("game/mango/" + clean) : clean;
+  }
+
+  if(clean.startsWith("gacha-token-")){
+    return typeof window.room10Path === "function" ? window.room10Path("game/gacha/" + clean) : clean;
+  }
+
+  if(/^(badges|dorm|flower|game|honor|living|manager|pet|studio)\//.test(clean)){
+    return typeof window.room10Path === "function" ? window.room10Path(clean) : "../../" + clean;
+  }
+
+  return src;
+}
+
+const ASSETS = {
+  mangoIdle: room10AssetUrl("mango.gameMango", "game/mango/game-mango.png"),
+  mangoHit: room10AssetUrl("mango.gameMango2", "game/mango/game-mango2.png"),
+  mangoSmallJuice: room10AssetUrl("mango.gameMango3", "game/mango/game-mango3.png"),
+  mangoMediumJuice: room10AssetUrl("mango.gameMango4", "game/mango/game-mango4.png"),
+  mangoLargeJuice: room10AssetUrl("mango.gameMango5", "game/mango/game-mango5.png"),
+  mangoPitcherJuice: room10AssetUrl("mango.gameMango6", "game/mango/game-mango6.png"),
+  mangoTastingJuice: room10AssetUrl("mango.gameMango7", "game/mango/game-mango7.png"),
+  hammer: room10AssetUrl("mango.gameHammer", "game/mango/game-hammer.png"),
+  rootCoin: room10AssetUrl("root.coin", "../../coin.png"),
+  gachaTokenWhite: room10AssetUrl("gacha.gachaTokenWhite", "game/gacha/gacha-token-white.png"),
+  gachaTokenPurple: room10AssetUrl("gacha.gachaTokenPurple", "game/gacha/gacha-token-purple.png"),
+  gachaTokenGold: room10AssetUrl("gacha.gachaTokenGold", "game/gacha/gacha-token-gold.png")
+};
+
 const LOCAL_BOARD_KEY = "room10MangoLocalBoard";
 
 const mangoStage = document.getElementById("mangoStage");
@@ -724,6 +781,9 @@ const playAgainBtn = document.getElementById("playAgainBtn");
 const resultBoardBtn = document.getElementById("resultBoardBtn");
 const toast = document.getElementById("toast");
 
+mangoImg.src = ASSETS.mangoIdle;
+hammerImg.src = ASSETS.hammer;
+
 const rewardTypeMeta = {
   achievement: { label: "成就达成", icon: "🏆" },
   title: { label: "获得称号", icon: "🎖️" },
@@ -734,10 +794,10 @@ const rewardTypeMeta = {
 };
 
 const rewardIconMap = {
-  金币: "coin.png",
-  白金游戏币: "gacha-token-white.png",
-  紫金游戏币: "gacha-token-purple.png",
-  金色游戏币: "gacha-token-gold.png",
+  金币: ASSETS.rootCoin,
+  白金游戏币: ASSETS.gachaTokenWhite,
+  紫金游戏币: ASSETS.gachaTokenPurple,
+  金色游戏币: ASSETS.gachaTokenGold,
   种子: "🌱",
   宠物粮: "🥣",
   医疗卡: "💊",
@@ -761,10 +821,11 @@ function isImageIcon(value){
 }
 
 function renderRewardIcon(icon, name){
-  if(isImageIcon(icon)){
-    return `<img src="${escapeHtml(icon)}" alt="${escapeHtml(name || '奖励图标')}" class="reward-item-icon-img">`;
+  const normalizedIcon = normalizeAssetPath(icon);
+  if(isImageIcon(normalizedIcon)){
+    return `<img src="${escapeHtml(normalizedIcon)}" alt="${escapeHtml(name || '奖励图标')}" class="reward-item-icon-img">`;
   }
-  return `<span class="reward-item-icon-text">${escapeHtml(icon || "✨")}</span>`;
+  return `<span class="reward-item-icon-text">${escapeHtml(normalizedIcon || "✨")}</span>`;
 }
 
 function normalizeRewardItem(item) {
@@ -872,11 +933,11 @@ function closeRewardModal() {
 */
 
 const JUICE_LEVELS = [
-  {key:"mango_juice_tasting", level:"tasting", name:"试饮杯", unit:1, image:"game-mango7.png"},
-  {key:"mango_juice_small", level:"small", name:"小杯", unit:10, image:"game-mango3.png"},
-  {key:"mango_juice_medium", level:"medium", name:"中杯", unit:30, image:"game-mango4.png"},
-  {key:"mango_juice_large", level:"large", name:"大杯", unit:60, image:"game-mango5.png"},
-  {key:"mango_juice_pitcher", level:"pitcher", name:"一扎", unit:120, image:"game-mango6.png"}
+  {key:"mango_juice_tasting", level:"tasting", name:"试饮杯", unit:1, image:ASSETS.mangoTastingJuice},
+  {key:"mango_juice_small", level:"small", name:"小杯", unit:10, image:ASSETS.mangoSmallJuice},
+  {key:"mango_juice_medium", level:"medium", name:"中杯", unit:30, image:ASSETS.mangoMediumJuice},
+  {key:"mango_juice_large", level:"large", name:"大杯", unit:60, image:ASSETS.mangoLargeJuice},
+  {key:"mango_juice_pitcher", level:"pitcher", name:"一扎", unit:120, image:ASSETS.mangoPitcherJuice}
 ];
 const JUICE_LAYOUT_WIDTH = 354;
 const JUICE_LAYOUT_HEIGHT = 340;
@@ -957,7 +1018,7 @@ function resetRound(){
   timer=null;clearTimeout(mangoRecoverTimer);playing=false;startedAt=0;endedAt=0;clickCount=0;
   mangoBtn.disabled=false;
   mangoStage.classList.remove("playing");
-  mangoImg.src="game-mango.png";
+  mangoImg.src=ASSETS.mangoIdle;
   mangoBtn.classList.remove("hit");
   hammerImg.classList.remove("hit");
   clickValue.textContent="0";
@@ -971,8 +1032,8 @@ function resetRound(){
 }
 function startGame(){if(playing)return;resultModal.classList.add("hidden");playing=true;startedAt=performance.now();endedAt=0;clickCount=0;mangoBtn.disabled=false;mangoStage.classList.add("playing");stopBtn.disabled=false;updateModeControls();progressText.textContent="进行中";tick();timer=setInterval(tick,80);}
 function tick(){if(!playing)return;const elapsed=performance.now()-startedAt;if(mode==="time"){const limit=getTimeLimitSeconds()*1000;const remaining=Math.max(0,limit-elapsed);timerValue.textContent=(remaining/1000).toFixed(1);progressFill.style.width=`${Math.min(100,elapsed/limit*100)}%`;progressText.textContent=`剩余 ${(remaining/1000).toFixed(1)} 秒`;if(remaining<=0)finishGame(false);}else{timerValue.textContent=formatSeconds(elapsed);progressFill.style.width=`${Math.min(100,clickCount/getTargetClicks()*100)}%`;progressText.textContent=`${clickCount}/${getTargetClicks()} 次`;}updateAverage();}
-function hitMango(ev){if(!playing)startGame();if(!playing)return;clickCount+=1;clickValue.textContent=String(clickCount);mangoImg.src="game-mango2.png";mangoBtn.classList.remove("hit");void mangoBtn.offsetWidth;mangoBtn.classList.add("hit");hammerImg.classList.remove("hit");void hammerImg.offsetWidth;hammerImg.classList.add("hit");clearTimeout(mangoRecoverTimer);mangoRecoverTimer=setTimeout(()=>{if(playing)mangoImg.src="game-mango.png";},240);spawnJuice(ev);spawnNumber();updateAverage();if(mode==="count"&&clickCount>=getTargetClicks())finishGame(false);}
-function spawnJuice(ev){const img=document.createElement("img");img.src="game-mango3.png";img.className="juice-fly";const rect=mangoStage.getBoundingClientRect();const x=ev&&ev.clientX?ev.clientX-rect.left:rect.width/2;const y=ev&&ev.clientY?ev.clientY-rect.top:rect.height/2;img.style.left=`${x-24}px`;img.style.top=`${y-24}px`;img.style.setProperty("--jx",`${Math.round(Math.random()*160-80)}px`);img.style.setProperty("--jy",`${Math.round(-90-Math.random()*80)}px`);mangoStage.appendChild(img);setTimeout(()=>img.remove(),880);}
+function hitMango(ev){if(!playing)startGame();if(!playing)return;clickCount+=1;clickValue.textContent=String(clickCount);mangoImg.src=ASSETS.mangoHit;mangoBtn.classList.remove("hit");void mangoBtn.offsetWidth;mangoBtn.classList.add("hit");hammerImg.classList.remove("hit");void hammerImg.offsetWidth;hammerImg.classList.add("hit");clearTimeout(mangoRecoverTimer);mangoRecoverTimer=setTimeout(()=>{if(playing)mangoImg.src=ASSETS.mangoIdle;},240);spawnJuice(ev);spawnNumber();updateAverage();if(mode==="count"&&clickCount>=getTargetClicks())finishGame(false);}
+function spawnJuice(ev){const img=document.createElement("img");img.src=ASSETS.mangoSmallJuice;img.className="juice-fly";const rect=mangoStage.getBoundingClientRect();const x=ev&&ev.clientX?ev.clientX-rect.left:rect.width/2;const y=ev&&ev.clientY?ev.clientY-rect.top:rect.height/2;img.style.left=`${x-24}px`;img.style.top=`${y-24}px`;img.style.setProperty("--jx",`${Math.round(Math.random()*160-80)}px`);img.style.setProperty("--jy",`${Math.round(-90-Math.random()*80)}px`);mangoStage.appendChild(img);setTimeout(()=>img.remove(),880);}
 function spawnNumber(){const num=document.createElement("div");num.className="hit-number";num.textContent="+1";mangoStage.appendChild(num);setTimeout(()=>num.remove(),620);}
 function stopCurrentRound(){
   if(!playing)return;
@@ -981,14 +1042,14 @@ function stopCurrentRound(){
     return;
   }
   if(timer)clearInterval(timer);
-  timer=null;clearTimeout(mangoRecoverTimer);playing=false;endedAt=performance.now();mangoStage.classList.remove("playing");mangoImg.src="game-mango.png";mangoBtn.classList.remove("hit");hammerImg.classList.remove("hit");stopBtn.disabled=true;updateModeControls();showToast("本轮已放弃，未提交成绩。");resetRound();
+  timer=null;clearTimeout(mangoRecoverTimer);playing=false;endedAt=performance.now();mangoStage.classList.remove("playing");mangoImg.src=ASSETS.mangoIdle;mangoBtn.classList.remove("hit");hammerImg.classList.remove("hit");stopBtn.disabled=true;updateModeControls();showToast("本轮已放弃，未提交成绩。");resetRound();
 }
 async function finishGame(manual){
   if(!playing)return;
   playing=false;endedAt=performance.now();
   if(timer)clearInterval(timer);
   timer=null;clearTimeout(mangoRecoverTimer);
-  mangoBtn.disabled=true;mangoStage.classList.remove("playing");mangoImg.src="game-mango.png";mangoBtn.classList.remove("hit");hammerImg.classList.remove("hit");
+  mangoBtn.disabled=true;mangoStage.classList.remove("playing");mangoImg.src=ASSETS.mangoIdle;mangoBtn.classList.remove("hit");hammerImg.classList.remove("hit");
   progressText.textContent="已结束";progressFill.style.width="100%";stopBtn.disabled=true;updateModeControls();
   const durationMs=Math.max(1,mode==="time"?(manual?Math.round(endedAt-startedAt):getTimeLimitSeconds()*1000):Math.round(endedAt-startedAt));
   const targetClicks=mode==="count"?getTargetClicks():null;
@@ -1036,7 +1097,7 @@ function buildAchievementRewardItems(achievement){
 
   const gold=Number(achievement?.reward_gold||0);
   if(gold>0){
-    rewards.push({name:"金币",amount:gold,icon:"coin.png"});
+    rewards.push({name:"金币",amount:gold,icon:ASSETS.rootCoin});
   }
 
   return rewards;
@@ -1186,24 +1247,12 @@ function sortRecords(list,meta=getBoardMeta(boardRankKey||getRankKey())){const a
 function renderLeaderboard(list,meta=getBoardMeta(boardRankKey||getRankKey()),localOnly=false){const records=sortRecords(list,meta);if(!records.length){leaderboard.innerHTML=`<div class="empty-state">暂无${meta.title}挑战记录。</div>`;return;}leaderboard.innerHTML=records.map((item,index)=>{const name=item.player_name||item.nickname||item.member_nickname||"神秘房客";const timeText=formatSeconds(item.duration_ms);const date=item.completed_at?new Date(item.completed_at):null;const dateText=date&&!Number.isNaN(date.getTime())?`${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")} ${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`:"--";const scoreText=meta.mode==="time"?`${item.click_count||0} 次`:`${timeText} 秒`;const avg=Number(item.avg_click_per_second || item.avg_clicks_per_second || (Number(item.click_count||0)/(Number(item.duration_ms||1)/1000))).toFixed(2);const subText=meta.mode==="time"?`${item.time_limit_seconds||meta.time_limit_seconds} 秒限时｜平均 ${avg} 次/秒`:`${item.target_clicks||meta.target_clicks} 次竞速｜平均 ${avg} 次/秒`;return `<div class="rank-item"><div class="rank-no">${item.rank_no || index+1}</div><div class="rank-name"><strong>${escapeHtml(name)}</strong><span>${escapeHtml(subText)}｜${dateText}${localOnly?"｜本地":""}</span></div><div class="rank-score">${escapeHtml(scoreText)}</div></div>`;}).join("");}
 
 document.getElementById("rewardMask").addEventListener("click", function(event) {
-  if (event.target === this) {
-    closeRewardModal();
-  }
-});
-
-document.addEventListener("keydown", function(event) {
-  if (event.key === "Escape") {
-    closeRewardModal();
-  }
-});
-
-
-document.getElementById("rewardMask").addEventListener("click", function(event) {
   if (
     event.target === this ||
     event.target.closest(".reward-close") ||
     event.target.closest(".reward-confirm")
   ) {
+    closeRewardModal();
     setTimeout(continueMangoAchievementQueue, 0);
   }
 });
@@ -1213,6 +1262,7 @@ document.addEventListener("keydown", function(event) {
     event.key === "Escape" &&
     document.getElementById("rewardMask").classList.contains("show")
   ) {
+    closeRewardModal();
     setTimeout(continueMangoAchievementQueue, 0);
   }
 });
