@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜作品展览页</title>
+<script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;}
@@ -599,14 +600,17 @@ button{
   display:none;
   align-items:center;
   justify-content:center;
+  min-height:100vh;
+  min-height:100dvh;
   padding:24px;
   background:rgba(68,50,34,.34);
   backdrop-filter:blur(5px);
 }
-.modal-mask.show{display:flex;}
+.modal-mask.show{display:flex;align-items:center;justify-content:center;}
 .modal{
   width:min(760px, 94vw);
   max-height:min(86vh, 780px);
+  margin:auto;
   overflow:auto;
   border-radius:24px;
   background:rgba(255,250,242,.96);
@@ -795,7 +799,7 @@ button{
 
   .room-nav{
     position:relative;left:auto;top:auto;width:100%;height:auto;transform:none;
-    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
     overflow:visible;white-space:normal;justify-content:stretch;
     margin:0 0 10px;padding:8px;gap:6px;
   }
@@ -809,10 +813,174 @@ button{
     position:relative;inset:auto;width:100%;display:flex;flex-direction:column;
     align-items:stretch;gap:8px;margin:0 0 10px;pointer-events:auto;
   }
-  .top-right-box .identity-card,
+  .top-right-box .identity-card{display:none!important;}
+  .top-right-box .roomIdentity,
   .top-right-box .page-switcher{position:relative;left:auto;top:auto;width:100%;pointer-events:auto;}
-  .identity-card{justify-content:center;min-height:40px;padding:7px 10px;gap:7px;border-radius:18px;font-size:13.5px;}
-  .identity-action{height:28px;min-width:54px;font-size:13px;}
+  .roomIdentity{
+    display:block!important;
+    height:40px;
+    min-height:40px;
+    z-index:90;
+    overflow:visible;
+  }
+  .roomIdentityBar{
+    width:100%;
+    height:40px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 34px 42px;
+    gap:6px;
+    padding:5px 7px;
+    border-radius:14px;
+    background:rgba(255,250,244,0.88);
+    border:1px solid rgba(170,132,101,0.20);
+    box-shadow:0 10px 24px rgba(106,78,55,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    overflow:visible;
+    white-space:nowrap;
+  }
+  .identityNameBox,
+  .identityNoticeBtn,
+  .identityAuthBtn{
+    min-width:0;
+    min-height:0;
+    height:100%;
+    border-radius:10px;
+    background:rgba(255,253,249,0.92);
+    color:#6f5746;
+    border:1px solid rgba(160,116,78,0.12);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.95), 0 1px 4px rgba(112,83,52,0.05);
+  }
+  .identityNameBox{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 9px;
+    overflow:visible;
+  }
+  .identityNameText{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    max-width:100%;
+    font-size:12px;
+    font-weight:850;
+    line-height:1;
+    white-space:nowrap;
+    overflow:visible;
+  }
+  .identityNamePart{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+    line-height:1;
+    white-space:nowrap;
+    font:inherit;
+  }
+  .identitySeparator{
+    margin:0 .08em;
+    color:rgba(111,87,70,.78);
+    font-weight:800;
+  }
+  .identityNoticeWrap{
+    position:relative;
+    width:100%;
+    height:100%;
+    overflow:visible;
+  }
+  .identityNoticeBtn,
+  .identityAuthBtn{
+    appearance:none;
+    cursor:pointer;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    line-height:1;
+  }
+  .identityNoticeBtn{
+    width:100%;
+    font-size:14px;
+  }
+  .identityAuthBtn{
+    width:100%;
+    font-size:11px;
+    font-weight:850;
+    white-space:nowrap;
+  }
+  .identityNoticeIcon,
+  .identityAuthText{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    line-height:1;
+  }
+  .identityNoticeCount{
+    position:absolute;
+    right:-6px;
+    top:-6px;
+    min-width:18px;
+    height:18px;
+    padding:0 5px;
+    border-radius:999px;
+    background:#b98f72;
+    color:#fffaf6;
+    font-size:9px;
+    font-weight:900;
+    line-height:1;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    border:2px solid rgba(255,248,239,0.98);
+    box-shadow:0 2px 8px rgba(116,86,54,0.16);
+    z-index:3;
+  }
+  .identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex;}
+  .identityNoticePanel{
+    position:fixed!important;
+    top:58px!important;
+    right:max(20px, env(safe-area-inset-right))!important;
+    width:min(320px, calc(100% - 40px))!important;
+    max-height:calc(100dvh - 72px)!important;
+    padding:14px;
+    border-radius:18px;
+    z-index:990;
+    box-sizing:border-box;
+    overflow:auto;
+    display:none;
+    background:linear-gradient(180deg, rgba(255,250,242,.98), rgba(250,238,224,.98));
+    border:1px solid rgba(174,132,94,.30);
+    box-shadow:0 14px 34px rgba(86,61,39,.18), inset 0 1px 0 rgba(255,255,255,.92);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+  }
+  .identityNoticePanel.show{display:block;}
+  .identityNoticePanel::before{
+    content:"";
+    position:absolute;
+    right:42px;
+    top:-7px;
+    width:14px;
+    height:14px;
+    transform:rotate(45deg);
+    background:rgba(255,250,242,.98);
+    border-left:1px solid rgba(174,132,94,.24);
+    border-top:1px solid rgba(174,132,94,.24);
+  }
+  .identityNoticeTitle{
+    padding:0 0 9px;
+    margin-bottom:10px;
+    border-bottom:1px solid rgba(174,132,94,.16);
+    color:#6f4726;
+    font-size:13px;
+    font-weight:900;
+  }
+  .identityNoticeEmpty{
+    color:#8a6644;
+    font-size:12px;
+    line-height:1.6;
+  }
   .page-switcher{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:7px;padding:8px;border-radius:18px;}
   .page-switch-btn{width:100%;height:34px;padding:0 4px;font-size:12.5px;}
 
@@ -1222,23 +1390,122 @@ button{
   .room-btn::after{display:none;}
 }
 
+
+/* ===== 本页修正：编辑弹窗交互，不影响手机版按钮字号 ===== */
+#editMask.modal-mask,
+#logsMask.modal-mask{
+  align-items:center!important;
+  justify-content:center!important;
+}
+#editMask .modal,
+#logsMask .modal{
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  max-height:min(86vh, 780px);
+}
+#editMask .modal-head,
+#logsMask .modal-head{
+  flex:0 0 auto;
+  position:relative;
+  z-index:6;
+  background:rgba(255,250,242,.98);
+}
+#editMask .modal-body,
+#logsMask .modal-body{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding-bottom:0;
+}
+#editMask .modal-actions,
+#logsMask .modal-actions{
+  position:sticky;
+  bottom:0;
+  z-index:7;
+  margin:14px -18px 0;
+  padding:12px 18px 14px;
+  background:rgba(255,250,242,.98);
+  border-top:1px solid rgba(224,202,176,.76);
+  box-shadow:0 -8px 18px rgba(91,70,50,.07);
+}
+@media (min-width:541px){
+  #editMask .modal-actions .soft-btn,
+  #logsMask .modal-actions .soft-btn{
+    height:38px;
+    min-width:96px;
+    padding:0 18px;
+    font-size:14px;
+  }
+}
+
+
+/* 手机版通用身份组件：桌面隐藏，手机端启用；桌面旧 identity-card 保持原样 */
+.roomIdentity{display:none;}
+/* ===== 手机版仅对房间按钮 / 身份组件贴近通用模板，不改网页版样式 ===== */
+@media (max-width:540px){
+  .room-nav{
+    height:106px!important;
+    min-height:106px!important;
+    max-height:106px!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-template-rows:repeat(3,32px)!important;
+    gap:5px!important;
+    padding:0!important;
+    margin:0 0 10px!important;
+    align-content:start!important;
+    border-radius:0!important;
+    background:transparent!important;
+    border:none!important;
+    box-shadow:none!important;
+    backdrop-filter:none!important;
+  }
+  .room-btn{
+    width:100%!important;
+    height:32px!important;
+    min-height:32px!important;
+    max-height:32px!important;
+    margin:0!important;
+    padding:0!important;
+    border-radius:10px!important;
+    font-size:12px!important;
+    font-weight:900!important;
+    line-height:1!important;
+    letter-spacing:0!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
+  .room-btn.is-current{
+    display:flex!important;
+    visibility:visible!important;
+    background:rgba(239,224,205,.86)!important;
+    border-color:rgba(151,111,82,.42)!important;
+    color:#5d4738!important;
+  }
+}
+
 </style>
 </head>
 <body>
 <div id="room">
   <div id="stageFrame">
-    <img id="bg" src="room-gallery.png" alt="" />
+    <img id="bg" src="../honor/room-gallery.png" data-room10-asset="honor.roomGallery" alt="十号房作品展览背景" />
     <div id="overlay">
       <div class="gallery-bg-effects" id="galleryBgEffects" aria-hidden="true"></div>
       <nav class="room-nav" aria-label="房间切换">
-        <button class="room-btn" data-room="index">大堂</button>
-        <button class="room-btn" data-room="game">游戏房</button>
-        <button class="room-btn" data-room="studio">工作间</button>
-        <button class="room-btn" data-room="living">客厅</button>
-        <button class="room-btn" data-room="dorm">宿舍</button>
-        <button class="room-btn" data-room="manager">宿管室</button>
-        <button class="room-btn" data-room="flower">花房区</button>
-        <button class="room-btn" data-room="pets">宠物区</button>
+        <button class="room-btn" data-room="hall" data-page="index" data-url="index/index.html" type="button">大堂</button>
+        <button class="room-btn" data-room="living" data-page="living" data-url="living/living.html" type="button">客厅</button>
+        <button class="room-btn" data-room="manager" data-page="managerMember" data-url="manager/manager-member.html" type="button">宿管室</button>
+        <button class="room-btn is-current" data-room="honor" data-page="honor" data-url="honor/honor.html" type="button" aria-current="page">荣誉墙</button>
+        <button class="room-btn" data-room="studio" data-page="studioTodo" data-url="studio/studio-todo.html" type="button">工作间</button>
+        <button class="room-btn" data-room="game" data-page="game" data-url="game/game.html" type="button">游戏房</button>
+        <button class="room-btn" data-room="dorm" data-page="dorm" data-url="dorm/dorm.html" type="button">宿舍</button>
+        <button class="room-btn" data-room="flower" data-page="flower" data-url="flower/flower.html" type="button">花房区</button>
+        <button class="room-btn" data-room="pets" data-page="pet" data-url="pet/pets.html" type="button">宠物区</button>
       </nav>
 
       <section class="top-right-box">
@@ -1249,9 +1516,33 @@ button{
           <span class="identity-sep" id="identitySepAction">|</span>
           <button class="identity-action" id="identityAction" type="button">登录</button>
         </div>
+        <section class="roomIdentity" id="roomIdentity" aria-label="当前身份">
+          <div class="roomIdentityBar">
+            <div class="identityNameBox">
+              <span class="identityNameText" id="identityNameTextMobile">
+                <span class="identityNamePart identityNickname" id="identityNicknameMobile">参观者</span>
+                <span class="identityNamePart identitySeparator hidden" id="identitySeparatorMobile">｜</span>
+                <span class="identityNamePart identityRoleText hidden" id="identityRoleMobile">参观者</span>
+              </span>
+            </div>
+            <div class="identityNoticeWrap">
+              <button class="identityNoticeBtn" id="identityNoticeBtn" type="button" aria-label="打开通知">
+                <span class="identityNoticeIcon">🔔</span>
+              </button>
+              <span class="identityNoticeCount" id="identityNoticeCount">0</span>
+              <div class="identityNoticePanel" id="identityNoticePanel" aria-live="polite">
+                <div class="identityNoticeTitle">通知</div>
+                <div class="identityNoticeEmpty" id="identityNoticeContent">暂无通知。</div>
+              </div>
+            </div>
+            <button class="identityAuthBtn" id="identityAuthBtn" type="button">
+              <span class="identityAuthText">登录</span>
+            </button>
+          </div>
+        </section>
         <div class="page-switcher" aria-label="荣誉墙页面切换">
-          <button class="page-switch-btn" onclick="location.href='honor.html'">荣誉墙</button>
-          <button class="page-switch-btn" onclick="location.href='honor-titles.html'">荣誉图鉴</button>
+          <button class="page-switch-btn" type="button" onclick="goHonorHome()">荣誉墙</button>
+          <button class="page-switch-btn" type="button" onclick="goHonorTitles()">荣誉图鉴</button>
           <button class="page-switch-btn active" type="button">作品展览</button>
         </div>
       </section>
@@ -1274,11 +1565,6 @@ button{
             <input id="searchInput" class="search-input" type="text" placeholder="搜索作品（歌名 / 演唱者 / 编号）" />
             <div class="filter-row" id="filterRow">
               <button class="filter-btn active" data-type="全部">全部</button>
-              <button class="filter-btn" data-type="披4">披4</button>
-              <button class="filter-btn" data-type="披哥">披哥</button>
-              <button class="filter-btn" data-type="浪姐">浪姐</button>
-              <button class="filter-btn" data-type="其他">其他</button>
-              <button class="filter-btn" data-type="游戏">游戏</button>
             </div>
           </div>
 
@@ -1345,7 +1631,7 @@ button{
 <div class="modal-mask" id="loginMask">
   <div class="modal login-home-modal">
     <div class="login-home-panel">
-      <img src="login.png" alt="登录框">
+      <img id="loginBg" src="../login.png" data-room10-asset="root.login" alt="登录框">
       <input id="loginNickname" type="text" autocomplete="username">
       <input id="loginCode" type="password" autocomplete="current-password">
       <button id="galleryTogglePassword" type="button" aria-label="显示或隐藏钥匙"></button>
@@ -1371,13 +1657,7 @@ button{
         </label>
         <label class="form-field">
           <span class="form-label">分类</span>
-          <select class="form-select" id="editProjectType">
-            <option value="披4">披4</option>
-            <option value="披哥">披哥</option>
-            <option value="浪姐">浪姐</option>
-            <option value="其他">其他</option>
-            <option value="游戏">游戏</option>
-          </select>
+          <select class="form-select" id="editProjectType"></select>
         </label>
         <label class="form-field wide">
           <span class="form-label">作品名</span>
@@ -1394,6 +1674,10 @@ button{
         <label class="form-field wide">
           <span class="form-label">视频链接</span>
           <input class="form-input" id="editDisplayLink" type="text" />
+        </label>
+        <label class="form-field wide">
+          <span class="form-label">唯一原唱</span>
+          <input class="form-input" id="editUniqueOriginal" type="text" placeholder="如果启用，页面原唱显示优先读取这里，不再从下方分配行拼接。" />
         </label>
         <div class="form-field wide">
           <span class="form-label">原唱 与 对应演唱者</span>
@@ -1427,11 +1711,61 @@ const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+
+const ROOM10_ROOT_PREFIX = window.ROOM10_ROOT || "../";
+
+function room10Url(path){
+  const raw = String(path || "").trim();
+  if(!raw) return "";
+  if(/^(https?:|data:|mailto:|tel:|#|\/)/i.test(raw)) return raw;
+  if(raw.startsWith("./") || raw.startsWith("../")) return raw;
+  if(typeof window.room10Path === "function") return window.room10Path(raw);
+  return `${ROOM10_ROOT_PREFIX}${raw}`;
+}
+
+function room10PageUrl(key,fallbackPath){
+  const pageKey = String(key || "").trim();
+  if(pageKey && typeof window.room10Page === "function"){
+    const url = window.room10Page(pageKey);
+    if(url) return url;
+  }
+  return room10Url(fallbackPath || "");
+}
+
+function room10AssetUrl(keyPath,fallbackPath){
+  const key = String(keyPath || "").trim();
+  if(key && typeof window.room10Asset === "function"){
+    const url = window.room10Asset(key);
+    if(url) return url;
+  }
+  return room10Url(fallbackPath || "");
+}
+
+function withQuery(url,params){
+  const base = String(url || "");
+  const query = new URLSearchParams(params || {}).toString();
+  if(!query) return base;
+  return base + (base.includes("?") ? "&" : "?") + query;
+}
+
+function goHonorHome(){
+  window.location.href = room10PageUrl("honor","honor/honor.html");
+}
+
+function goHonorTitles(){
+  window.location.href = room10PageUrl("honorTitles","honor/honor-titles.html");
+}
+
+function goHonorGallery(){
+  window.location.href = room10PageUrl("honorGallery","honor/honor-gallery.html");
+}
+
 const STAGE_RATIO = 2048 / 1143;
 const stageFrame = document.getElementById("stageFrame");
 const overlay = document.getElementById("overlay");
 const workList = document.getElementById("workList");
 const searchInput = document.getElementById("searchInput");
+const filterRow = document.getElementById("filterRow");
 const videoShell = document.getElementById("videoShell");
 const infoCard = document.getElementById("infoCard");
 const loginMask = document.getElementById("loginMask");
@@ -1443,14 +1777,26 @@ const identityRole = document.getElementById("identityRole");
 const identityAction = document.getElementById("identityAction");
 const identitySepRole = document.getElementById("identitySepRole");
 const identitySepAction = document.getElementById("identitySepAction");
+const identityNicknameMobile = document.getElementById("identityNicknameMobile");
+const identitySeparatorMobile = document.getElementById("identitySeparatorMobile");
+const identityRoleMobile = document.getElementById("identityRoleMobile");
+const identityAuthBtn = document.getElementById("identityAuthBtn");
+const identityNoticeBtn = document.getElementById("identityNoticeBtn");
+const identityNoticePanel = document.getElementById("identityNoticePanel");
+const bgImage = document.getElementById("bg");
+const loginBg = document.getElementById("loginBg");
+if (bgImage) bgImage.src = room10AssetUrl("honor.roomGallery", "honor/room-gallery.png");
+if (loginBg) loginBg.src = room10AssetUrl("root.login", "login.png");
 const filterButtons = () => document.querySelectorAll(".filter-btn");
 
 let WORKS = [];
 let MEMBER_OPTIONS = [];
+let PROJECT_TYPE_OPTIONS = [];
 let currentType = "全部";
 let currentKeyword = "";
 let currentSelectedId = null;
 let currentMember = getStoredMember();
+const READ_ERROR = "读取错误";
 
 
 function updateStageSize(){
@@ -1495,10 +1841,10 @@ function escapeHtml(str){
 }
 
 function formatDateText(dateString){
-  if (!dateString) return "—";
+  if (!dateString) return READ_ERROR;
   const raw = String(dateString).trim();
   const date = new Date(raw.includes("T") ? raw : raw + "T00:00:00");
-  if (Number.isNaN(date.getTime())) return raw;
+  if (Number.isNaN(date.getTime())) return READ_ERROR;
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
@@ -1507,7 +1853,7 @@ function formatDateText(dateString){
 
 function dateInputValue(dateString){
   const text = formatDateText(dateString);
-  return text === "—" ? "" : text;
+  return text === READ_ERROR ? "" : text;
 }
 
 function normalizeName(value){
@@ -1595,13 +1941,24 @@ function clearStoredMember(){
 
 function updateIdentity(){
   currentMember = getStoredMember();
-  if (currentMember && currentMember.nickname && currentMember.code) {
+  const loggedIn = !!(currentMember && currentMember.nickname && currentMember.code);
+
+  if (loggedIn) {
+    const roleName = getRoleName(currentMember.role);
     identityName.textContent = currentMember.nickname;
-    identityRole.textContent = getRoleName(currentMember.role);
+    identityRole.textContent = roleName;
     identityRole.style.display = "";
     if (identitySepRole) identitySepRole.style.display = "";
     if (identitySepAction) identitySepAction.style.display = "";
     identityAction.textContent = "登出";
+
+    if (identityNicknameMobile) identityNicknameMobile.textContent = currentMember.nickname;
+    if (identityRoleMobile) {
+      identityRoleMobile.textContent = roleName;
+      identityRoleMobile.classList.remove("hidden");
+    }
+    if (identitySeparatorMobile) identitySeparatorMobile.classList.remove("hidden");
+    if (identityAuthBtn) identityAuthBtn.querySelector(".identityAuthText").textContent = "登出";
   } else {
     identityName.textContent = "参观者";
     identityRole.textContent = "";
@@ -1609,7 +1966,16 @@ function updateIdentity(){
     if (identitySepRole) identitySepRole.style.display = "none";
     if (identitySepAction) identitySepAction.style.display = "";
     identityAction.textContent = "登录";
+
+    if (identityNicknameMobile) identityNicknameMobile.textContent = "参观者";
+    if (identityRoleMobile) {
+      identityRoleMobile.textContent = "参观者";
+      identityRoleMobile.classList.add("hidden");
+    }
+    if (identitySeparatorMobile) identitySeparatorMobile.classList.add("hidden");
+    if (identityAuthBtn) identityAuthBtn.querySelector(".identityAuthText").textContent = "登录";
   }
+
   renderInfoCard(getSelectedWork());
 }
 
@@ -1625,17 +1991,40 @@ function closeModal(mask){
   if (mask) mask.classList.remove("show");
 }
 
+function hasEditDirty(){
+  const work = getSelectedWork();
+  if (!editMask || !editMask.classList.contains("show") || !work) return false;
+  const valueOf = id => String(document.getElementById(id)?.value || "").trim();
+  if (valueOf("editProjectCode") !== (work.no === READ_ERROR ? "" : String(work.no || ""))) return true;
+  if (valueOf("editProjectName") !== String(work.title === READ_ERROR ? "" : work.title || "")) return true;
+  if (valueOf("editProjectType") !== String(work.type === READ_ERROR ? "" : work.type || "")) return true;
+  if (valueOf("editReleaseDate") !== String(work.releaseRaw || "")) return true;
+  if (valueOf("editDisplayLink") !== String(work.rawLink || "")) return true;
+  if (valueOf("editUniqueOriginal") !== String(work.unique_original_name || "")) return true;
+  return false;
+}
+
+function closeModalById(id){
+  const mask = document.getElementById(id);
+  if (!mask) return;
+  if (id === "editMask" && hasEditDirty()) {
+    if (!confirm("当前修改还没有保存，确认退出吗？")) return;
+  }
+  closeModal(mask);
+}
+
 document.querySelectorAll("[data-close]").forEach(btn => {
-  btn.addEventListener("click", () => closeModal(document.getElementById(btn.dataset.close)));
+  btn.addEventListener("click", () => closeModalById(btn.dataset.close));
 });
 
 document.querySelectorAll(".modal-mask").forEach(mask => {
   mask.addEventListener("click", (e) => {
-    if (e.target === mask) closeModal(mask);
+    if (e.target !== mask) return;
+    if (mask.id === "loginMask") closeModal(mask);
   });
 });
 
-identityAction.addEventListener("click", () => {
+function handleIdentityAction(){
   if (isLoggedIn()) {
     if (!confirm("确认登出吗？")) return;
     clearStoredMember();
@@ -1647,7 +2036,21 @@ identityAction.addEventListener("click", () => {
     document.getElementById("loginCode").value = "";
     openModal(loginMask);
   }
-});
+}
+
+identityAction.addEventListener("click", handleIdentityAction);
+if (identityAuthBtn) identityAuthBtn.addEventListener("click", handleIdentityAction);
+if (identityNoticeBtn && identityNoticePanel) {
+  identityNoticeBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    identityNoticePanel.classList.toggle("show");
+  });
+  document.addEventListener("click", (event) => {
+    if (!identityNoticePanel.classList.contains("show")) return;
+    if (identityNoticePanel.contains(event.target) || identityNoticeBtn.contains(event.target)) return;
+    identityNoticePanel.classList.remove("show");
+  });
+}
 
 document.getElementById("loginSubmit").addEventListener("click", async () => {
   const nickname = document.getElementById("loginNickname").value.trim();
@@ -1708,8 +2111,8 @@ if (galleryTogglePassword) {
 
 if (galleryRegisterLink) {
   galleryRegisterLink.addEventListener("click", () => {
-    sessionStorage.setItem("room10RegisterReturn", "honor-gallery.html");
-    window.location.href = "register.html?from=honor-gallery.html";
+    sessionStorage.setItem("room10RegisterReturn", room10PageUrl("honorGallery", "honor/honor-gallery.html"));
+    window.location.href = withQuery(room10PageUrl("managerRegister", "manager/register.html"), { from: "honor-gallery.html" });
   });
 }
 
@@ -1725,25 +2128,27 @@ document.querySelectorAll(".room-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     const room = btn.dataset.room;
     const routes = {
-      index:"index.html",
-      game:"game.html",
-      studio:"studio-Submit.html",
-      living:"living.html",
-      dorm:"dorm.html",
-      flower:"flower.html",
-      pets:"pets.html"
+      hall: ["index", "index/index.html"],
+      living: ["living", "living/living.html"],
+      honor: ["honor", "honor/honor.html"],
+      studio: ["studioTodo", "studio/studio-todo.html"],
+      game: ["game", "game/game.html"],
+      dorm: ["dorm", "dorm/dorm.html"],
+      flower: ["flower", "flower/flower.html"],
+      pets: ["pet", "pet/pets.html"]
     };
 
     if (room === "manager") {
       const role = currentMember?.role || "";
-      if (role === "owner") location.href = "manager-owner.html";
-      else if (role === "admin") location.href = "manager-admin.html";
-      else if (role) location.href = "manager-member.html";
-      else location.href = "manager-visitor.html";
+      if (role === "owner") window.location.href = room10PageUrl("managerOwner", "manager/manager-owner.html");
+      else if (role === "admin") window.location.href = room10PageUrl("managerAdmin", "manager/manager-admin.html");
+      else if (role) window.location.href = room10PageUrl("managerMember", "manager/manager-member.html");
+      else window.location.href = room10PageUrl("managerVisitor", "manager/manager-visitor.html");
       return;
     }
 
-    location.href = routes[room] || "index.html";
+    const route = routes[room] || routes.hall;
+    window.location.href = room10PageUrl(route[0], route[1]);
   });
 });
 
@@ -1795,18 +2200,46 @@ function isReadyForHonorShow(task){
   return today >= releaseDate;
 }
 
-function deriveSingersText(task){
-  const names = [];
+function memberCodeNumber(value){
+  const raw = String(value || "").trim();
+  const digits = raw.replace(/\D/g, "");
+  return digits ? Number(digits) : Number.POSITIVE_INFINITY;
+}
+
+function compareMemberOrder(a, b){
+  const aNum = memberCodeNumber(a.member_code);
+  const bNum = memberCodeNumber(b.member_code);
+  if (aNum !== bNum) return aNum - bNum;
+  return String(a.member_code || "").localeCompare(String(b.member_code || ""), "zh-Hans-CN");
+}
+
+function collectSortedSingerItems(task){
+  const items = [];
   (task.singers || []).forEach(item => {
-    const name = String(item.member_name || "").trim();
-    if (name) names.push(name);
+    items.push({
+      member_id: String(item.member_id || "").trim(),
+      member_name: String(item.member_name || "").trim(),
+      member_code: String(item.member_code || "").trim()
+    });
   });
   (task.parts || []).forEach(item => {
-    const name = String(item.assigned_member_name || "").trim();
-    if (name) names.push(name);
+    items.push({
+      member_id: String(item.assigned_member_id || "").trim(),
+      member_name: String(item.assigned_member_name || "").trim(),
+      member_code: String(item.assigned_member_code || "").trim()
+    });
   });
-  const uniqueNames = uniqueBy(names, normalizeName);
-  return uniqueNames.join(" / ") || "—";
+
+  const uniqueItems = uniqueBy(items, item => item.member_id || normalizeName(item.member_name));
+  if (!uniqueItems.length) return [];
+  if (uniqueItems.some(item => !item.member_name || !item.member_code)) return null;
+  return uniqueItems.sort(compareMemberOrder);
+}
+
+function deriveSingersText(task){
+  const sortedItems = collectSortedSingerItems(task);
+  if (sortedItems === null || !sortedItems.length) return READ_ERROR;
+  return sortedItems.map(item => item.member_name).join(" / ");
 }
 
 function transformDisplayLink(raw){
@@ -1841,29 +2274,57 @@ function canEmbed(link){
   return /player\.bilibili\.com\/player\.html/i.test(link) || /youtube\.com\/embed\//i.test(link);
 }
 
-function buildOriginalLine(parts){
-  if (!parts || !parts.length) return "—";
-  return parts.map(part => String(part.original_name || "未填写").trim() || "未填写").join(" / ");
+function getSharedOriginalName(parts){
+  const names = (parts || [])
+    .map(part => String(part.original_name || "").trim())
+    .filter(Boolean);
+  if (!names.length) return "";
+  const uniqueNames = uniqueBy(names, name => normalizeName(name));
+  return uniqueNames.length === 1 ? uniqueNames[0] : "";
+}
+
+function buildOriginalLine(parts, uniqueOriginalName = ""){
+  const uniqueOriginal = String(uniqueOriginalName || "").trim();
+  if (uniqueOriginal) return uniqueOriginal;
+  if (!parts || !parts.length) return READ_ERROR;
+  const names = parts.map(part => String(part.original_name || "").trim());
+  if (names.some(name => !name)) return READ_ERROR;
+  const sharedOriginal = getSharedOriginalName(parts);
+  if (sharedOriginal) return sharedOriginal;
+  return names.join(" / ");
 }
 
 function buildSingerLine(parts){
-  if (!parts || !parts.length) return "—";
-  return parts.map(part => String(part.assigned_member_name || "未分配").trim() || "未分配").join(" / ");
+  const sortedItems = collectSortedSingerItems({ parts: parts || [], singers: [] });
+  if (sortedItems === null || !sortedItems.length) return READ_ERROR;
+  return sortedItems.map(item => item.member_name).join(" / ");
+}
+
+function buildPartPairLines(parts){
+  if (!parts || !parts.length) return READ_ERROR;
+  const lines = parts.map(part => {
+    const original = String(part.original_name || "").trim();
+    const singer = String(part.assigned_member_name || "").trim();
+    if (!original || !singer) return READ_ERROR;
+    return `${escapeHtml(original)}：${escapeHtml(singer)}`;
+  });
+  return lines.includes(READ_ERROR) ? READ_ERROR : lines.join("<br>");
 }
 
 function buildWorkRecord(task){
   return {
     id: String(task.id || ""),
-    no: pickText(task, ["project_code"], "—"),
-    type: pickText(task, ["project_type"], "其他"),
-    title: pickText(task, ["project_name"], "未命名作品"),
+    no: pickText(task, ["project_code"], READ_ERROR),
+    type: pickText(task, ["project_type"], READ_ERROR),
+    title: pickText(task, ["project_name"], READ_ERROR),
     singers: deriveSingersText(task),
-    mixer: String(task.producer_name || "").trim() || "—",
+    mixer: String(task.producer_name || "").trim() || READ_ERROR,
     producer_member_id: String(task.producer_member_id || "").trim(),
     releaseDate: formatDateText(task.release_date),
     releaseRaw: dateInputValue(task.release_date),
     embedUrl: transformDisplayLink(task.display_link),
     rawLink: String(task.display_link || "").trim(),
+    unique_original_name: String(task.unique_original_name || "").trim(),
     createdAt: String(task.created_at || ""),
     parts: task.parts || [],
     rawTask: task
@@ -1902,6 +2363,7 @@ async function loadWorksFromSupabase(){
           assigned_member_id,
           members!project_parts_assigned_member_id_fkey (
             id,
+            member_code,
             nickname,
             name
           )
@@ -1921,6 +2383,7 @@ async function loadWorksFromSupabase(){
           submitted_at,
           members!project_singers_member_id_fkey (
             id,
+            member_code,
             nickname,
             name
           )
@@ -1941,6 +2404,7 @@ async function loadWorksFromSupabase(){
         part_order: part.part_order,
         original_name: part.original_name,
         assigned_member_id: part.assigned_member_id ? String(part.assigned_member_id) : "",
+        assigned_member_code: part.members?.member_code || "",
         assigned_member_name: part.members?.nickname || part.members?.name || ""
       });
     });
@@ -1951,6 +2415,7 @@ async function loadWorksFromSupabase(){
       singerMap.get(key).push({
         id: singer.id,
         member_id: singer.member_id ? String(singer.member_id) : "",
+        member_code: singer.members?.member_code || "",
         member_name: singer.members?.nickname || singer.members?.name || "",
         is_submitted: !!singer.is_submitted,
         submitted_at: singer.submitted_at || null
@@ -1970,12 +2435,20 @@ async function loadWorksFromSupabase(){
         producer_name: project.producer_member?.nickname || project.producer_member?.name || "",
         release_date: pickDate(project, ["release_date","published_at","publish_date","scheduled_release_date"]) || null,
         display_link: pickText(project, ["display_link","video_link","publish_link","bilibili_link","youtube_link","link"], ""),
+        unique_original_name: pickText(project, ["unique_original_name"], ""),
         project_tone: project.project_tone || "",
         created_at: project.created_at || null,
         parts: (partMap.get(id) || []).sort((a, b) => (a.part_order || 0) - (b.part_order || 0)),
-        singers: singerMap.get(id) || []
+        singers: (singerMap.get(id) || []).sort(compareMemberOrder)
       };
     });
+
+    PROJECT_TYPE_OPTIONS = uniqueBy(
+      (projectsData || [])
+        .map(project => normalizeProjectType(project.project_type))
+        .filter(Boolean),
+      value => value.toLowerCase()
+    );
 
     WORKS = projectTasks
       .filter(isReadyForHonorShow)
@@ -1991,6 +2464,7 @@ async function loadWorksFromSupabase(){
       currentSelectedId = null;
     }
 
+    renderFilterButtons();
     renderList();
 
     if (currentSelectedId) {
@@ -2003,23 +2477,23 @@ async function loadWorksFromSupabase(){
     }
   } catch (err) {
     console.error("读取作品失败：", err);
-    workList.innerHTML = '<div class="empty-state">读取作品失败，请检查 projects / project_parts / project_singers 的读取权限。</div>';
+    workList.innerHTML = '<div class="empty-state">读取错误</div>';
     videoShell.innerHTML = `
       <div class="placeholder">
         <div class="placeholder-icon">!</div>
-        <div>作品读取失败</div>
+        <div>读取错误</div>
       </div>
     `;
     infoCard.innerHTML = `
       <div class="info-top">
         <div class="info-title-line">
           <span class="info-no">!</span>
-          <h3 class="info-title">读取失败</h3>
+          <h3 class="info-title">读取错误</h3>
         </div>
-        <span class="info-type">异常</span>
+        <span class="info-type">读取错误</span>
       </div>
       <div class="detail-card wide">
-        <div class="detail-value">请检查数据库表权限、外键名称和展示链接字段。</div>
+        <div class="detail-value">读取错误</div>
       </div>
     `;
   }
@@ -2062,7 +2536,7 @@ function renderList(){
   workList.innerHTML = works.map(work => `
     <button class="work-item ${work.id === currentSelectedId ? "active" : ""}" data-id="${escapeHtml(work.id)}">
       <div class="work-main-row">
-        <span class="work-no">${escapeHtml(work.no === "—" ? "编号待补" : "#" + work.no)}</span>
+        <span class="work-no">${escapeHtml(work.no === READ_ERROR ? READ_ERROR : "#" + work.no)}</span>
         <h3 class="work-title">${escapeHtml(work.title)}</h3>
         <span class="work-type">${escapeHtml(work.type)}</span>
       </div>
@@ -2083,8 +2557,8 @@ function renderList(){
 function renderPlayerUnavailable(work){
   videoShell.innerHTML = `
     <div class="placeholder">
-      <div class="placeholder-icon">♪</div>
-      <div>${work?.rawLink ? '该链接暂不支持直接嵌入，可在作品资料中打开原链接。' : '该作品还没有填写展示链接。'}</div>
+      <div class="placeholder-icon">!</div>
+      <div>读取错误</div>
     </div>
   `;
 }
@@ -2186,7 +2660,7 @@ function renderInfoCard(work){
 
   const linkHtml = work.rawLink
     ? `<a class="link-text" href="${escapeHtml(work.rawLink)}" target="_blank" rel="noopener noreferrer">${escapeHtml(work.rawLink)}</a>`
-    : "—";
+    : READ_ERROR;
 
   const editButtons = isLoggedIn()
     ? `<div class="action-row">
@@ -2197,10 +2671,13 @@ function renderInfoCard(work){
         <button class="soft-btn" type="button" id="needLoginEditBtn">登录后可纠正资料</button>
       </div>`;
 
+  const originalText = buildOriginalLine(work.parts, work.unique_original_name);
+  const singerText = work.singers || READ_ERROR;
+
   infoCard.innerHTML = `
     <div class="info-top">
       <div class="info-title-line">
-        <span class="info-no">${escapeHtml(work.no === "—" ? "编号待补" : "#" + work.no)}</span>
+        <span class="info-no">${escapeHtml(work.no === READ_ERROR ? READ_ERROR : "#" + work.no)}</span>
         <h3 class="info-title">${escapeHtml(work.title)}</h3>
       </div>
       <span class="info-type">${escapeHtml(work.type)}</span>
@@ -2209,12 +2686,12 @@ function renderInfoCard(work){
     <div class="detail-grid">
       <div class="detail-card wide">
         <div class="detail-label">原唱</div>
-        <div class="part-line">${escapeHtml(buildOriginalLine(work.parts))}</div>
+        <div class="part-line">${escapeHtml(originalText)}</div>
       </div>
       <div class="detail-card wide perform-row">
         <div>
           <div class="detail-label">演唱者</div>
-          <div class="part-line">${escapeHtml(buildSingerLine(work.parts))}</div>
+          <div class="part-line">${escapeHtml(singerText)}</div>
         </div>
         <div>
           <div class="detail-label">混音</div>
@@ -2256,7 +2733,13 @@ async function loadMemberOptions(){
     });
 
     if (error) throw error;
-    MEMBER_OPTIONS = data || [];
+    MEMBER_OPTIONS = (data || []).sort((a, b) => compareMemberOrder({
+      member_code: a.member_code || a.code || a.member_no || "",
+      member_name: a.nickname || ""
+    }, {
+      member_code: b.member_code || b.code || b.member_no || "",
+      member_name: b.nickname || ""
+    }));
     return MEMBER_OPTIONS;
   } catch (err) {
     console.error("读取成员选项失败：", err);
@@ -2266,12 +2749,45 @@ async function loadMemberOptions(){
 }
 
 function buildMemberOptionsHtml(selectedId, includeEmpty = true){
-  const empty = includeEmpty ? `<option value="">未选择</option>` : "";
+  const empty = includeEmpty ? `<option value="">读取错误</option>` : "";
   return empty + (MEMBER_OPTIONS || []).map(member => `
     <option value="${escapeHtml(member.member_id)}" ${String(member.member_id) === String(selectedId || "") ? "selected" : ""}>
       ${escapeHtml(member.nickname || "")}
     </option>
   `).join("");
+}
+
+function normalizeProjectType(value){
+  return String(value || "").trim();
+}
+
+function buildProjectTypeOptionsHtml(selectedType){
+  const selected = normalizeProjectType(selectedType);
+  const options = uniqueBy([selected, ...PROJECT_TYPE_OPTIONS].map(normalizeProjectType).filter(Boolean), value => value.toLowerCase());
+  if (!options.length) return `<option value="">读取错误</option>`;
+  return options.map(type => `
+    <option value="${escapeHtml(type)}" ${type === selected ? "selected" : ""}>${escapeHtml(type)}</option>
+  `).join("");
+}
+
+function renderFilterButtons(){
+  if (!filterRow) return;
+  const options = uniqueBy(PROJECT_TYPE_OPTIONS.map(normalizeProjectType).filter(Boolean), value => value.toLowerCase());
+  if (currentType !== "全部" && !options.includes(currentType)) currentType = "全部";
+
+  filterRow.innerHTML = [
+    `<button class="filter-btn ${currentType === "全部" ? "active" : ""}" data-type="全部">全部</button>`,
+    ...options.map(type => `<button class="filter-btn ${currentType === type ? "active" : ""}" data-type="${escapeHtml(type)}">${escapeHtml(type)}</button>`)
+  ].join("");
+
+  filterButtons().forEach(btn => {
+    btn.addEventListener("click", () => {
+      filterButtons().forEach(item => item.classList.remove("active"));
+      btn.classList.add("active");
+      currentType = btn.dataset.type || "全部";
+      renderList();
+    });
+  });
 }
 
 async function openEditModal(work){
@@ -2282,12 +2798,15 @@ async function openEditModal(work){
 
   if (!MEMBER_OPTIONS.length) await loadMemberOptions();
 
-  document.getElementById("editProjectCode").value = work.no === "—" ? "" : work.no;
+  document.getElementById("editProjectCode").value = work.no === READ_ERROR ? "" : work.no;
   document.getElementById("editProjectName").value = work.title || "";
-  document.getElementById("editProjectType").value = work.type || "其他";
+  document.getElementById("editProjectType").innerHTML = buildProjectTypeOptionsHtml(work.type === READ_ERROR ? "" : work.type);
   document.getElementById("editReleaseDate").value = work.releaseRaw || "";
   document.getElementById("editDisplayLink").value = work.rawLink || "";
   document.getElementById("editProducer").innerHTML = buildMemberOptionsHtml(work.producer_member_id, true);
+
+  const uniqueOriginalInput = document.getElementById("editUniqueOriginal");
+  uniqueOriginalInput.value = work.unique_original_name || "";
 
   const partsWrap = document.getElementById("editParts");
   partsWrap.innerHTML = (work.parts || []).map(part => `
@@ -2303,7 +2822,7 @@ async function openEditModal(work){
         </select>
       </label>
     </div>
-  `).join("") || `<div class="empty-state">暂无分配行。</div>`;
+  `).join("") || `<div class="empty-state">读取错误</div>`;
 
   document.getElementById("editMsg").textContent = "保存前会再次确认，并自动保存修改记录。";
   openModal(editMask);
@@ -2330,7 +2849,8 @@ document.getElementById("saveEditBtn").addEventListener("click", async () => {
     project_type: document.getElementById("editProjectType").value.trim(),
     producer_member_id: normalizeUuidValue(document.getElementById("editProducer").value),
     release_date: document.getElementById("editReleaseDate").value.trim(),
-    display_link: document.getElementById("editDisplayLink").value.trim()
+    display_link: document.getElementById("editDisplayLink").value.trim(),
+    unique_original_name: document.getElementById("editUniqueOriginal").value.trim() || null
   };
 
   const partsPatch = Array.from(document.querySelectorAll(".edit-part-row")).map(row => ({
@@ -2341,13 +2861,6 @@ document.getElementById("saveEditBtn").addEventListener("click", async () => {
 
   if (!projectPatch.project_code || !projectPatch.project_name || !projectPatch.project_type) {
     msg.textContent = "编号、作品名、分类不能为空。";
-    return;
-  }
-
-  const assignedIds = partsPatch.map(part => part.assigned_member_id).filter(Boolean);
-  const duplicatedId = assignedIds.find((id, index) => assignedIds.indexOf(id) !== index);
-  if (duplicatedId) {
-    msg.textContent = "同一个成员不能在同一作品里重复对应多个原唱。";
     return;
   }
 
@@ -2379,6 +2892,32 @@ document.getElementById("saveEditBtn").addEventListener("click", async () => {
     }
 
     msg.textContent = row.message || "已保存。";
+    const localWork = getSelectedWork();
+    if (localWork) {
+      localWork.unique_original_name = projectPatch.unique_original_name || "";
+      localWork.no = projectPatch.project_code || READ_ERROR;
+      localWork.title = projectPatch.project_name || READ_ERROR;
+      localWork.type = projectPatch.project_type || READ_ERROR;
+      localWork.rawLink = projectPatch.display_link || "";
+      localWork.embedUrl = transformDisplayLink(projectPatch.display_link || "");
+      localWork.releaseDate = formatDateText(projectPatch.release_date);
+      localWork.releaseRaw = dateInputValue(projectPatch.release_date);
+      localWork.parts = (localWork.parts || []).map(part => {
+        const patch = partsPatch.find(item => item.id === part.id);
+        if (!patch) return part;
+        const member = (MEMBER_OPTIONS || []).find(item => String(item.member_id) === String(patch.assigned_member_id));
+        return {
+          ...part,
+          original_name: patch.original_name,
+          assigned_member_id: patch.assigned_member_id,
+          assigned_member_code: member?.member_code || part.assigned_member_code || "",
+          assigned_member_name: member?.nickname || part.assigned_member_name || ""
+        };
+      });
+      localWork.singers = deriveSingersText(localWork.rawTask ? { ...localWork.rawTask, parts: localWork.parts, singers: localWork.rawTask.singers || [] } : { parts: localWork.parts, singers: [] });
+      renderInfoCard(localWork);
+      renderList();
+    }
     closeModal(editMask);
     await loadWorksFromSupabase();
   } catch (err) {
@@ -2418,9 +2957,9 @@ async function openLogsModal(work){
       return `
         <div class="log-item">
           <div class="log-main">
-            <strong>${escapeHtml(log.editor_nickname || "未知成员")}</strong>
+            <strong>${escapeHtml(log.editor_nickname || READ_ERROR)}</strong>
             <span> 于 ${escapeHtml(timeText)} 修改</span>
-            <div class="log-status">${reverted ? `已由 ${escapeHtml(log.reverted_by_nickname || "未知成员")} 撤回` : "可撤回"}</div>
+            <div class="log-status">${reverted ? `已由 ${escapeHtml(log.reverted_by_nickname || READ_ERROR)} 撤回` : "可撤回"}</div>
           </div>
           <button class="soft-btn ${reverted ? "" : "warn-btn"}" type="button" data-log-id="${escapeHtml(log.log_id)}" ${reverted ? "disabled" : ""}>
             ${reverted ? "已撤回" : "撤回"}
@@ -2439,7 +2978,7 @@ async function openLogsModal(work){
 }
 
 function formatDateTime(value){
-  if (!value) return "—";
+  if (!value) return READ_ERROR;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
   const y = date.getFullYear();
@@ -2489,15 +3028,6 @@ async function revertLog(logId){
 searchInput.addEventListener("input", (e) => {
   currentKeyword = e.target.value || "";
   renderList();
-});
-
-filterButtons().forEach(btn => {
-  btn.addEventListener("click", () => {
-    filterButtons().forEach(item => item.classList.remove("active"));
-    btn.classList.add("active");
-    currentType = btn.dataset.type;
-    renderList();
-  });
 });
 
 
