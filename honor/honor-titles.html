@@ -1608,9 +1608,9 @@ let communityAchievementRows = [];
 let communityTitleRows = [];
 let myAchievementRows = [];
 let myTitleRows = [];
-let honorRewardLedger = [];
-let honorItemRewardLedger = [];
 let honorRewardItemRows = [];
+let honorRewardStatusRows = [];
+let honorRewardStatusMap = new Map();
 let honorSourceGroupRows = [];
 let honorSourceGroupMap = new Map();
 let pendingHonorRewardItems = [];
@@ -1781,49 +1781,29 @@ function numberValue(value){
   return Number.isFinite(num) ? num : 0;
 }
 
-
-function rewardSuppressStorageKey(){
-  const memberId = String(authState.memberId || currentMember?.id || "visitor");
-  return `room10SuppressedHonorRewards:${memberId}`;
-}
-
-function readSuppressedRewardKeys(){
-  try{
-    const raw = localStorage.getItem(rewardSuppressStorageKey());
-    const parsed = raw ? JSON.parse(raw) : [];
-    return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
-  }catch(err){
-    return new Set();
+function requireDbText(value,label){
+  const text = String(value ?? "").trim();
+  if(!text){
+    throw new Error(`配置缺失：${label}。`);
   }
+  return text;
 }
 
-function writeSuppressedRewardKeys(set){
-  try{
-    localStorage.setItem(rewardSuppressStorageKey(), JSON.stringify(Array.from(set || [])));
-  }catch(err){}
-}
 
-function honorRewardKey(itemType,itemId){
-  return `${String(itemType || "").toLowerCase()}:${String(itemId || "")}`;
-}
 
-function isRewardLocallySuppressed(itemType,itemId){
-  return readSuppressedRewardKeys().has(honorRewardKey(itemType,itemId));
-}
 
-function suppressHonorReward(itemType,itemId){
-  const set = readSuppressedRewardKeys();
-  set.add(honorRewardKey(itemType,itemId));
-  writeSuppressedRewardKeys(set);
-}
 
-function suppressPendingHonorRewards(){
-  const set = readSuppressedRewardKeys();
-  (pendingHonorRewardItems || []).forEach(item => {
-    set.add(honorRewardKey(item.itemType,item.itemId));
-  });
-  writeSuppressedRewardKeys(set);
-}
+
+
+
+
+
+
+
+
+
+
+
 
 function byRequirementValueDesc(a,b){
   return numberValue(b.requirement_value) - numberValue(a.requirement_value);
@@ -1845,115 +1825,119 @@ function getHonorItemRewards(itemType,itemId){
     .sort((a,b) => numberValue(a.sort_order) - numberValue(b.sort_order) || String(a.item_key || "").localeCompare(String(b.item_key || "")));
 }
 
-function isHonorGoldRewardClaimed(itemType,itemId){
-  const normalizedType = String(itemType || "").toLowerCase();
-  const normalizedId = String(itemId || "");
-  const expectedTable = normalizedType === "achievement" ? "achievements" : "titles";
-  const expectedSubcategory = normalizedType === "achievement"
-    ? "honor_achievement_reward"
-    : "honor_title_reward";
-  const marker = normalizedType === "achievement"
-    ? `achievement_id:${normalizedId}`
-    : `title_id:${normalizedId}`;
-
-  return honorRewardLedger.some(row => {
-    const relatedTable = String(row.related_table || "").toLowerCase();
-    const relatedId = String(row.related_id || "");
-    const subcategory = String(row.subcategory || "").toLowerCase();
-    const category = String(row.category || "").toLowerCase();
-    const note = String(row.note || "");
-    const tableMatches = relatedTable === expectedTable || relatedTable === "";
-    const idMatches = relatedId === normalizedId || note.includes(marker);
-    const typeMatches = subcategory === expectedSubcategory || note.includes(marker);
-
-    if(category !== "honor") return false;
-    return (tableMatches && idMatches) || (typeMatches && idMatches);
-  });
+function normalizeHonorItemType(itemType){
+  return String(itemType || "").trim().toLowerCase();
 }
 
-function isHonorItemRewardClaimed(itemType,itemId,itemKey){
-  const normalizedType = String(itemType || "").toLowerCase();
-  const normalizedId = String(itemId || "");
-  const normalizedItemKey = String(itemKey || "");
-  const expectedTable = normalizedType === "achievement" ? "achievements" : "titles";
-  const expectedSourceType = normalizedType === "achievement"
-    ? "honor_achievement_reward"
-    : "honor_title_reward";
-  const marker = normalizedType === "achievement"
-    ? `achievement_id:${normalizedId}`
-    : `title_id:${normalizedId}`;
+function honorItemId(itemOrId){
+  if(itemOrId && typeof itemOrId === "object") return String(itemOrId.id || "");
+  return String(itemOrId || "");
+}
 
-  return honorItemRewardLedger.some(row => {
-    const itemMatch = String(row.item_key || "") === normalizedItemKey;
-    const sourceType = String(row.source_type || "").toLowerCase();
-    const relatedTable = String(row.related_table || "").toLowerCase();
-    const relatedId = String(row.related_id || "");
-    const note = String(row.note || "");
-    const sourceDetail = String(row.source_detail || "");
-    const sourceMatch = sourceType === expectedSourceType || note.includes(marker) || sourceDetail.includes(marker);
-    const tableMatch = relatedTable === expectedTable || relatedTable === "";
-    const idMatch = relatedId === normalizedId || note.includes(marker) || sourceDetail.includes(marker);
-    return itemMatch && sourceMatch && tableMatch && idMatch;
+function honorStatusKey(itemType,itemOrId){
+  return `${normalizeHonorItemType(itemType)}:${honorItemId(itemOrId)}`;
+}
+
+function getHonorRewardStatus(itemType,itemOrId){
+  return honorRewardStatusMap.get(honorStatusKey(itemType,itemOrId)) || null;
+}
+
+function normalizeStatusRewardItem(row){
+  return {
+    item_key:String(row?.item_key || ""),
+    item_name:String(row?.item_name || row?.item_key || ""),
+    item_icon:String(row?.item_icon || ""),
+    quantity:numberValue(row?.configured_quantity),
+    configured_quantity:numberValue(row?.configured_quantity),
+    claimed_quantity:numberValue(row?.claimed_quantity),
+    remaining_quantity:numberValue(row?.remaining_quantity),
+    has_claimable:row?.has_claimable === true || numberValue(row?.remaining_quantity) > 0
+  };
+}
+
+function rebuildHonorRewardStatusMap(rows){
+  honorRewardStatusRows = Array.isArray(rows) ? rows : [];
+  honorRewardStatusMap = new Map();
+
+  honorRewardStatusRows.forEach(row => {
+    const key = honorStatusKey(row?.item_type,row?.item_id);
+    const itemRewards = Array.isArray(row?.item_rewards)
+      ? row.item_rewards.map(normalizeStatusRewardItem)
+      : [];
+
+    honorRewardStatusMap.set(key, {
+      item_type:normalizeHonorItemType(row?.item_type),
+      item_id:String(row?.item_id || ""),
+      member_honor_row_id:String(row?.member_honor_row_id || ""),
+      reward_gold:numberValue(row?.reward_gold),
+      gold_claimed:row?.gold_claimed === true,
+      gold_remaining:numberValue(row?.gold_remaining),
+      item_total_quantity:numberValue(row?.item_total_quantity),
+      item_claimed_quantity:numberValue(row?.item_claimed_quantity),
+      item_remaining_quantity:numberValue(row?.item_remaining_quantity),
+      has_claimable:row?.has_claimable === true,
+      item_rewards:itemRewards
+    });
   });
 }
 
 function getClaimableRewardInfo(itemType,item){
-  const itemId = item?.id;
-  const rewardGold = numberValue(item?.rewardGold);
-  const itemRewards = Array.isArray(item?.itemRewards) ? item.itemRewards : getHonorItemRewards(itemType,itemId);
-
-  if(isRewardLocallySuppressed(itemType,itemId)){
+  const status = getHonorRewardStatus(itemType,item);
+  if(!status){
     return {
       goldClaimable:false,
       claimableItemRewards:[],
       hasClaimable:false,
       totalGold:0,
-      totalItemQuantity:0
+      totalItemQuantity:0,
+      isSupplement:false
     };
   }
 
-  const goldClaimable = rewardGold > 0 && !isHonorGoldRewardClaimed(itemType,itemId);
-  const claimableItemRewards = itemRewards.filter(reward =>
-    !isHonorItemRewardClaimed(itemType,itemId,reward.item_key)
-  );
-
-  const totalItemQuantity = claimableItemRewards.reduce((sum,reward) => sum + numberValue(reward.quantity), 0);
+  const goldRemaining = numberValue(status.gold_remaining);
+  const claimableItemRewards = (Array.isArray(status.item_rewards) ? status.item_rewards : [])
+    .filter(reward => numberValue(reward.remaining_quantity) > 0);
+  const totalItemQuantity = claimableItemRewards.reduce((sum,reward) => sum + numberValue(reward.remaining_quantity), 0);
+  const hasClaimable = goldRemaining > 0 || totalItemQuantity > 0;
 
   return {
-    goldClaimable,
+    goldClaimable:goldRemaining > 0,
     claimableItemRewards,
-    hasClaimable: goldClaimable || claimableItemRewards.length > 0,
-    totalGold: goldClaimable ? rewardGold : 0,
-    totalItemQuantity
+    hasClaimable,
+    totalGold:goldRemaining,
+    totalItemQuantity,
+    isSupplement:hasClaimable && goldRemaining <= 0 && totalItemQuantity > 0
   };
 }
 
 function isHonorRewardClaimed(itemType,itemOrId){
-  const itemId = typeof itemOrId === "object" && itemOrId !== null ? itemOrId.id : itemOrId;
-  const rewardGold = typeof itemOrId === "object" && itemOrId !== null
-    ? numberValue(itemOrId.rewardGold ?? itemOrId.reward_gold)
-    : 0;
-  const itemRewards = typeof itemOrId === "object" && itemOrId !== null && Array.isArray(itemOrId.itemRewards)
-    ? itemOrId.itemRewards
-    : getHonorItemRewards(itemType,itemId);
-
-  const goldClaimed = rewardGold > 0 ? isHonorGoldRewardClaimed(itemType,itemId) : true;
-  const itemsClaimed = itemRewards.every(reward => isHonorItemRewardClaimed(itemType,itemId,reward.item_key));
-
-  return goldClaimed && itemsClaimed;
+  const status = getHonorRewardStatus(itemType,itemOrId);
+  if(!status) return false;
+  return status.has_claimable !== true;
 }
 
 function rewardPillHtml(itemType,item,onlyUnclaimed=false){
-  const rewardGold = numberValue(item.rewardGold);
-  const itemRewards = Array.isArray(item.itemRewards) ? item.itemRewards : getHonorItemRewards(itemType,item.id);
   const parts = [];
 
-  if(rewardGold > 0 && (!onlyUnclaimed || !isHonorGoldRewardClaimed(itemType,item.id))){
+  if(onlyUnclaimed){
+    const claimable = getClaimableRewardInfo(itemType,item);
+    if(claimable.totalGold > 0){
+      parts.push(`<span class="metaPill">金币 ${claimable.totalGold}</span>`);
+    }
+    claimable.claimableItemRewards.forEach(reward => {
+      parts.push(`<span class="metaPill">${escapeHtml(reward.item_name || reward.item_key)} ×${numberValue(reward.remaining_quantity)}</span>`);
+    });
+    return parts.join("");
+  }
+
+  const rewardGold = numberValue(item.rewardGold);
+  const itemRewards = Array.isArray(item.itemRewards) ? item.itemRewards : getHonorItemRewards(itemType,item.id);
+
+  if(rewardGold > 0){
     parts.push(`<span class="metaPill">金币 ${rewardGold}</span>`);
   }
 
   itemRewards.forEach(reward => {
-    if(onlyUnclaimed && isHonorItemRewardClaimed(itemType,item.id,reward.item_key)) return;
     parts.push(`<span class="metaPill">${escapeHtml(reward.item_name || reward.item_key)} ×${numberValue(reward.quantity)}</span>`);
   });
 
@@ -1967,7 +1951,8 @@ function rewardActionHtml(itemType,item){
     return "";
   }
 
-  return `<button class="actionBtn" type="button" data-claim-type="${escapeHtml(itemType)}" data-claim-id="${escapeHtml(item.id)}">领取奖励</button>`;
+  const buttonText = claimable.isSupplement ? "补领奖励" : "领取奖励";
+  return `<button class="actionBtn" type="button" data-claim-type="${escapeHtml(itemType)}" data-claim-id="${escapeHtml(item.id)}">${buttonText}</button>`;
 }
 
 function rewardBadgeText(item){
@@ -1978,7 +1963,9 @@ function rewardBadgeText(item){
     return "已获得";
   }
 
-  return getClaimableRewardInfo(itemType,item).hasClaimable ? "可领奖励" : "已领取";
+  const claimable = getClaimableRewardInfo(itemType,item);
+  if(!claimable.hasClaimable) return "已领取";
+  return claimable.isSupplement ? "可补领" : "可领奖励";
 }
 
 function rewardMetaHtml(item){
@@ -2147,7 +2134,7 @@ async function fetchTitleRows(){
 async function fetchAchievementRecords(){
   const { data,error } = await supabaseClient
     .from("member_achievements")
-    .select("achievement_id,member_id,obtained_at");
+    .select("id,achievement_id,member_id,obtained_at");
 
   if(error) throw error;
   return Array.isArray(data) ? data : [];
@@ -2156,37 +2143,31 @@ async function fetchAchievementRecords(){
 async function fetchTitleRecords(){
   const { data,error } = await supabaseClient
     .from("member_titles")
-    .select("title_id,member_id,obtained_at");
+    .select("id,title_id,member_id,obtained_at");
 
   if(error) throw error;
   return Array.isArray(data) ? data : [];
 }
 
-async function fetchHonorRewardLedger(memberId){
-  if(!memberId) return [];
+async function fetchHonorRewardStatus(memberId,memberCode){
+  if(!memberId || !memberCode) return [];
 
-  const { data,error } = await supabaseClient
-    .from("gold_ledger")
-    .select("id,category,subcategory,related_table,related_id,amount,note,created_at")
-    .eq("member_id",memberId)
-    .eq("direction","in")
-    .order("created_at",{ ascending:false })
-    .limit(5000);
+  const { data,error } = await supabaseClient.rpc("get_honor_reward_status",{
+    p_member_id:memberId,
+    p_member_code:memberCode
+  });
 
   if(error){
-    console.warn("金币奖励流水读取失败，奖励领取状态可能无法判断。", error);
-    return [];
+    throw new Error(`荣誉奖励领取状态读取失败：${error.message || "请检查 get_honor_reward_status RPC。"}`);
   }
 
   return Array.isArray(data) ? data : [];
 }
 
-
 async function fetchHonorSourceGroups(){
   const { data,error } = await supabaseClient
     .from("honor_source_groups")
     .select("source_group,filter_group,room_key,display_name,sort_order,is_active,show_in_honor_filter,note")
-    .eq("is_active",true)
     .order("sort_order",{ ascending:true })
     .order("source_group",{ ascending:true });
 
@@ -2195,7 +2176,7 @@ async function fetchHonorSourceGroups(){
   }
 
   if(!Array.isArray(data) || data.length <= 0){
-    throw new Error("来源筛选读取失败：honor_source_groups 没有可用配置。");
+    throw new Error("来源筛选读取失败：honor_source_groups 读取到 0 行，请检查 Supabase 项目、表名和 RLS 权限。");
   }
 
   return data;
@@ -2211,12 +2192,11 @@ async function fetchHonorRewardItems(){
     .order("sort_order",{ ascending:true });
 
   if(error){
-    console.warn("荣誉物品奖励配置读取失败。", error);
-    return [];
+    throw new Error(`荣誉物品奖励配置读取失败：${error.message || "请检查 honor_reward_items 权限。"}`);
   }
 
   const rows = Array.isArray(data) ? data : [];
-  const itemKeys = Array.from(new Set(rows.map(row => row.item_key).filter(Boolean)));
+  const itemKeys = Array.from(new Set(rows.map(row => String(row.item_key || "").trim()).filter(Boolean)));
 
   if(!itemKeys.length) return rows;
 
@@ -2226,42 +2206,35 @@ async function fetchHonorRewardItems(){
     .in("item_key",itemKeys);
 
   if(itemError){
-    console.warn("荣誉奖励物品名称读取失败。", itemError);
-    return rows;
+    throw new Error(`荣誉奖励物品名称读取失败：${itemError.message || "请检查 item_types 权限。"}`);
   }
 
   const itemMap = new Map((itemRows || []).map(item => [String(item.item_key), item]));
 
   return rows.map(row => {
-    const item = itemMap.get(String(row.item_key)) || {};
+    const itemKey = String(row.item_key || "").trim();
+    const item = itemMap.get(itemKey);
+
+    if(!item){
+      throw new Error(`奖励物品配置缺失：item_types 中找不到 ${itemKey}。`);
+    }
+
+    if(item.is_active !== true){
+      throw new Error(`奖励物品配置错误：${itemKey} 未启用。`);
+    }
+
+    const itemName = String(item.item_name || "").trim();
+    if(!itemName){
+      throw new Error(`奖励物品配置缺失：${itemKey} 缺少 item_name。`);
+    }
+
     return {
       ...row,
-      item_name:item.item_name || row.item_key,
-      item_icon:item.item_icon || ""
+      item_name:itemName,
+      item_icon:String(item.item_icon || "")
     };
   });
 }
-
-async function fetchHonorItemRewardLedger(memberId){
-  if(!memberId) return [];
-
-  const { data,error } = await supabaseClient
-    .from("member_item_ledger")
-    .select("id,item_key,source_type,source_detail,related_table,related_id,note,created_at")
-    .eq("member_id",memberId)
-    .eq("direction","in")
-    .in("source_type",["honor_achievement_reward","honor_title_reward"])
-    .order("created_at",{ ascending:false })
-    .limit(5000);
-
-  if(error){
-    console.warn("荣誉物品奖励流水读取失败，材料领取状态可能无法判断。", error);
-    return [];
-  }
-
-  return Array.isArray(data) ? data : [];
-}
-
 
 function normalizeSourceKey(raw){
   return String(raw || "").trim().toLowerCase();
@@ -2322,10 +2295,7 @@ function sourceSortIndex(key){
   return order;
 }
 
-function sourceIsVisible(key){
-  const config = getSourceConfig(key);
-  return !!config && config.is_active === true && config.show_in_honor_filter === true;
-}
+
 
 function sourceMatches(item){
   const itemFilterKey = getFilterGroupKey(item?.sourceKey);
@@ -2430,6 +2400,7 @@ function buildCommunityAchievements(achievements,records,memberMap){
   });
 
   return achievements.map(item => {
+    const itemKey = item?.code || item?.id || "未知成就";
     const obtainedSet = countMap.get(String(item.id)) || new Set();
     const obtainedCount = obtainedSet.size || 0;
     const unlockedNames = Array.from(obtainedSet)
@@ -2439,9 +2410,9 @@ function buildCommunityAchievements(achievements,records,memberMap){
 
     return {
       id:item.id,
-      code:item.code,
-      condition:item.description || "未填写达成条件",
-      stageName:isUnrevealed ? "？？？" : (item.name || "未命名阶段"),
+      code:requireDbText(item.code,`achievements ${itemKey} 缺少 code`),
+      condition:requireDbText(item.description,`achievements ${itemKey} 缺少 description`),
+      stageName:isUnrevealed ? "？？？" : requireDbText(item.name,`achievements ${itemKey} 缺少 name`),
       progress:obtainedCount,
       total:totalMemberCount,
       rewardGold:numberValue(item.reward_gold),
@@ -2467,25 +2438,26 @@ function buildCommunityTitles(titles,records,memberMap){
   });
 
   return titles.map(item => {
+    const itemKey = item?.code || item?.id || "未知称号";
     const obtainedSet = countMap.get(String(item.id)) || new Set();
     const unlockedNames = Array.from(obtainedSet)
       .map(memberId => memberMap?.get(String(memberId))?.nickname || "")
       .filter(Boolean);
 
     return {
-    id:item.id,
-    code:item.code,
-    name:item.name || "未命名称号",
-    condition:item.description || "未填写获得条件",
-    obtainedCount:obtainedSet.size || 0,
-    unlockedNames,
-    rewardGold:numberValue(item.reward_gold),
-    itemRewards:getHonorItemRewards("title",item.id),
-    itemType:"title",
-    sourceKey:inferSourceKey(item),
-    requirement_key:item.requirement_key,
-    requirement_value:item.requirement_value
-  };
+      id:item.id,
+      code:requireDbText(item.code,`titles ${itemKey} 缺少 code`),
+      name:requireDbText(item.name,`titles ${itemKey} 缺少 name`),
+      condition:requireDbText(item.description,`titles ${itemKey} 缺少 description`),
+      obtainedCount:obtainedSet.size || 0,
+      unlockedNames,
+      rewardGold:numberValue(item.reward_gold),
+      itemRewards:getHonorItemRewards("title",item.id),
+      itemType:"title",
+      sourceKey:inferSourceKey(item),
+      requirement_key:item.requirement_key,
+      requirement_value:item.requirement_value
+    };
   });
 }
 
@@ -2512,19 +2484,22 @@ function buildMyAchievements(achievements,records,memberId){
 
   return Array.from(grouped.values())
     .sort(byRequirementValueDesc)
-    .map(item => ({
-      id:item.id,
-      code:item.code,
-      stageName:item.name || "未命名阶段",
-      condition:item.description || "未填写达成条件",
-      rewardGold:numberValue(item.reward_gold),
-      itemRewards:getHonorItemRewards("achievement",item.id),
-      itemType:"achievement",
-      sourceKey:inferSourceKey(item),
-      claimed:isHonorRewardClaimed("achievement",item),
-      requirement_key:item.requirement_key,
-      requirement_value:item.requirement_value
-    }));
+    .map(item => {
+      const itemKey = item?.code || item?.id || "未知成就";
+      return {
+        id:item.id,
+        code:requireDbText(item.code,`achievements ${itemKey} 缺少 code`),
+        stageName:requireDbText(item.name,`achievements ${itemKey} 缺少 name`),
+        condition:requireDbText(item.description,`achievements ${itemKey} 缺少 description`),
+        rewardGold:numberValue(item.reward_gold),
+        itemRewards:getHonorItemRewards("achievement",item.id),
+        itemType:"achievement",
+        sourceKey:inferSourceKey(item),
+        claimed:isHonorRewardClaimed("achievement",item),
+        requirement_key:item.requirement_key,
+        requirement_value:item.requirement_value
+      };
+    });
 }
 
 function buildMyTitles(titles,records,memberId){
@@ -2539,19 +2514,22 @@ function buildMyTitles(titles,records,memberId){
   return titles
     .filter(item => obtainedIds.has(String(item.id)))
     .sort(byRequirementValueDesc)
-    .map(item => ({
-      id:item.id,
-      code:item.code,
-      name:item.name || "未命名称号",
-      condition:item.description || "未填写获得条件",
-      rewardGold:numberValue(item.reward_gold),
-      itemRewards:getHonorItemRewards("title",item.id),
-      itemType:"title",
-      sourceKey:inferSourceKey(item),
-      claimed:isHonorRewardClaimed("title",item),
-      requirement_key:item.requirement_key,
-      requirement_value:item.requirement_value
-    }));
+    .map(item => {
+      const itemKey = item?.code || item?.id || "未知称号";
+      return {
+        id:item.id,
+        code:requireDbText(item.code,`titles ${itemKey} 缺少 code`),
+        name:requireDbText(item.name,`titles ${itemKey} 缺少 name`),
+        condition:requireDbText(item.description,`titles ${itemKey} 缺少 description`),
+        rewardGold:numberValue(item.reward_gold),
+        itemRewards:getHonorItemRewards("title",item.id),
+        itemType:"title",
+        sourceKey:inferSourceKey(item),
+        claimed:isHonorRewardClaimed("title",item),
+        requirement_key:item.requirement_key,
+        requirement_value:item.requirement_value
+      };
+    });
 }
 
 async function loadHonorData(){
@@ -2573,10 +2551,9 @@ async function loadHonorData(){
       titles,
       achievementRecords,
       titleRecords,
-      rewardLedger,
-      itemRewardLedger,
       rewardItems,
-      sourceGroups
+      sourceGroups,
+      rewardStatus
     ] = await Promise.all([
       fetchTotalMembers(),
       fetchMemberRows(),
@@ -2584,19 +2561,17 @@ async function loadHonorData(){
       fetchTitleRows(),
       fetchAchievementRecords(),
       fetchTitleRecords(),
-      fetchHonorRewardLedger(currentMember?.id || authState.memberId),
-      fetchHonorItemRewardLedger(currentMember?.id || authState.memberId),
       fetchHonorRewardItems(),
-      fetchHonorSourceGroups()
+      fetchHonorSourceGroups(),
+      fetchHonorRewardStatus(currentMember?.id || authState.memberId, authState.memberCode)
     ]);
 
     totalMemberCount = memberCount || 0;
     membersById = new Map((memberRows || []).map(member => [String(member.id), member]));
-    honorRewardLedger = rewardLedger;
-    honorItemRewardLedger = itemRewardLedger;
     honorRewardItemRows = rewardItems;
     honorSourceGroupRows = sourceGroups;
     rebuildHonorSourceGroupMap(sourceGroups);
+    rebuildHonorRewardStatusMap(rewardStatus);
 
     communityAchievementRows = buildCommunityAchievements(achievements,achievementRecords,membersById);
     communityTitleRows = buildCommunityTitles(titles,titleRecords,membersById);
@@ -2676,7 +2651,7 @@ function refreshPendingRewards(){
 
   const parts = [`${count} 项`];
   if(gold > 0) parts.push(`${gold} 金币`);
-  if(itemQuantity > 0) parts.push(`${itemQuantity} 个材料`);
+  if(itemQuantity > 0) parts.push(`${itemQuantity} 个道具`);
   claimHint.textContent = parts.join("｜");
 }
 
@@ -2875,16 +2850,11 @@ async function claimOneHonorReward(itemType,itemId){
     const result = Array.isArray(data) ? data[0] : data;
     if(result && result.ok === false){
       const msg = result.message || "奖励领取失败";
-      if(/暂无|没有|已领取|不可领取|无可领取/.test(String(msg))){
-        suppressHonorReward(itemType,itemId);
-        renderAll();
-      }
       showToast(msg);
       await loadHonorData();
       return;
     }
 
-    suppressHonorReward(itemType,itemId);
     showToast(result?.message || "奖励已领取");
     await loadHonorData();
   }catch(error){
@@ -2918,10 +2888,6 @@ async function claimAllHonorRewards(){
     const result = Array.isArray(data) ? data[0] : data;
     if(result && result.ok === false){
       const msg = result.message || "一键领取失败";
-      if(/暂无|没有|已领取|不可领取|无可领取/.test(String(msg))){
-        suppressPendingHonorRewards();
-        renderAll();
-      }
       showToast(msg);
       await loadHonorData();
       return;
@@ -2929,15 +2895,13 @@ async function claimAllHonorRewards(){
 
     const count = numberValue(result?.claimed_count);
     const gold = numberValue(result?.total_gold);
-    if(count <= 0 && gold <= 0){
-      suppressPendingHonorRewards();
+    const itemQuantity = numberValue(result?.item_total_quantity);
+    if(count <= 0 && gold <= 0 && itemQuantity <= 0){
       showToast(result?.message || "暂无可领取奖励");
-      renderAll();
       await loadHonorData();
       return;
     }
-    suppressPendingHonorRewards();
-    showToast(result?.message || `已领取 ${count} 项奖励，共 ${gold} 金币`);
+    showToast(result?.message || `已领取 ${count} 项奖励`);
     await loadHonorData();
   }catch(error){
     console.error(error);
