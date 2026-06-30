@@ -77,8 +77,8 @@ window.ROOM10_PATHS = {
       bookOpen2: "dorm/book-open2.png",
       bookPrev: "dorm/book-prev.png",
       gachaBall: "dorm/gacha-ball.png",
-      mascotIumaL: "dorm/mascot-iuma(L).png",
-      mascotIumaR: "dorm/mascot-iuma(R).png",
+      mascotNiumaL: "dorm/mascot-niuma(L).png",
+      mascotNiumaR: "dorm/mascot-niuma(R).png",
       roomDorm: "dorm/room-dorm.png"
     },
 
@@ -189,6 +189,35 @@ window.ROOM10_PATHS = {
 
     studio: {
       roomStudio: "studio/room-studio.png"
+    }
+  },
+
+  // 固定素材命名说明
+  // 作用：记录容易混淆的图片文件名含义，方便以后直接替换本配置文件时保留说明。
+  // 注意：这里只是说明，不影响 room10Asset() / room10Page() 的现有读取逻辑。
+  assetNotes: {
+    badges: {
+      fileNameRule: "badges/0.png 至 badges/5.png 分别代表成员入室年限徽章。",
+      badge0: "入室当年",
+      badge1: "入室 1 年",
+      badge2: "入室 2 年",
+      badge3: "入室 3 年",
+      badge4: "入室 4 年",
+      badge5: "入室 5 年"
+    },
+
+    mango: {
+      fileNameRule: "game-mango3.png 至 game-mango7.png 分别代表芒果游戏的杯型/容量素材。",
+      gameMango3: "小杯",
+      gameMango4: "中杯",
+      gameMango5: "大杯",
+      gameMango6: "一扎",
+      gameMango7: "试饮杯"
+    },
+
+    dorm: {
+      mascotNiumaL: "牛马吉祥物左向图，文件位置：dorm/mascot-niuma(L).png",
+      mascotNiumaR: "牛马吉祥物右向图，文件位置：dorm/mascot-niuma(R).png"
     }
   }
 };
