@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Room10</title>
+<title></title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
 
@@ -59,6 +59,30 @@ button{
 .hidden{
   display:none !important;
 }
+
+#pageError{
+  position:fixed;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  z-index:1600;
+  max-width:min(680px, calc(100vw - 28px));
+  padding:12px 16px;
+  border-radius:16px;
+  background:rgba(255,248,240,0.97);
+  border:1px solid rgba(165,94,64,0.28);
+  color:#7a3f2b;
+  box-shadow:0 12px 30px rgba(87,50,31,0.16);
+  font-size:13px;
+  font-weight:800;
+  line-height:1.55;
+  text-align:left;
+  white-space:pre-line;
+  display:none;
+}
+
+#pageError.show{display:block;}
+
 
 /* ===== 首页舞台 ===== */
 #home{
@@ -1013,98 +1037,70 @@ button{
 
 <div id="home">
   <div id="homeStage">
-    <img id="homeImage" src="" alt="Room10 首页">
+    <img id="homeImage" src="" alt="">
     <canvas id="seasonLayer" aria-hidden="true"></canvas>
 
     <!-- 首页只保留身份组件，不加房间切换组件 -->
     <div id="topActions" class="roomIdentity">
       <div id="topIdentityBar" class="roomIdentityBar">
         <div id="topIdentityBadge" class="identityNameBox">
-          <span class="identityText identityNameText" id="currentUserText">参观者</span>
+          <span class="identityText identityNameText" id="currentUserText"></span>
         </div>
 
         <div id="siteNoticeWrap" class="identityNoticeWrap">
-          <button id="siteNoticeBtn" class="identityNoticeBtn" type="button" aria-label="消息通知">
-            <span id="siteNoticeIcon" class="identityNoticeIcon">🔔</span>
+          <button id="siteNoticeBtn" class="identityNoticeBtn" type="button" aria-label="">
+            <span id="siteNoticeIcon" class="identityNoticeIcon"></span>
           </button>
-          <span id="siteNoticeCount" class="identityNoticeCount">0</span>
+          <span id="siteNoticeCount" class="identityNoticeCount"></span>
 
           <div id="siteNoticePanel" class="identityNoticePanel" aria-live="polite">
             <div class="siteNoticeHeader">
-              <div class="siteNoticeTitle">通知中心</div>
-              <button id="noticeClearBtn" class="noticeClear" type="button">全部已读</button>
+              <div class="siteNoticeTitle" id="siteNoticeTitle"></div>
+              <button id="noticeClearBtn" class="noticeClear" type="button"></button>
             </div>
 
-            <div id="siteNoticeContent">
-              <div class="siteNoticeEmpty">暂时还没有新的通知</div>
-            </div>
+            <div id="siteNoticeContent"></div>
           </div>
         </div>
 
-        <button id="loginOpenBtn" class="identityAuthBtn" type="button"><span class="identityAuthText">登录</span></button>
-        <button id="logoutBtn" class="identityAuthBtn hidden" type="button"><span class="identityAuthText">登出</span></button>
+        <button id="loginOpenBtn" class="identityAuthBtn" type="button"><span class="identityAuthText"></span></button>
+        <button id="logoutBtn" class="identityAuthBtn hidden" type="button"><span class="identityAuthText"></span></button>
       </div>
     </div>
 
-    <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <a href="#" onclick="enterRoom(room10Page('dorm'), true);return false;">
-        <rect x="16.7" y="25.9" width="27.7" height="22.5"></rect>
-      </a>
-
-      <a href="#" onclick="enterRoom(room10Page('studioTodo'), true);return false;">
-        <rect x="57" y="25.9" width="27.5" height="22.5"></rect>
-      </a>
-
-      <a href="#" onclick="enterRoom(room10Page('living'), true);return false;">
-        <rect x="16.6" y="49.4" width="27" height="21.5"></rect>
-      </a>
-
-      <a href="#" onclick="enterRoom(room10Page('game'), false);return false;">
-        <rect x="57" y="49.4" width="27.5" height="21.5"></rect>
-      </a>
-
-      <a href="#" onclick="enterRoom(room10Page('honor'), false);return false;">
-        <rect x="16.7" y="72" width="27" height="22"></rect>
-      </a>
-
-      <a href="#" onclick="enterManagerRoom();return false;">
-        <rect x="57" y="72" width="27.5" height="22"></rect>
-      </a>
-
-      <a href="#" onclick="enterRoom(room10Page('flower'), false);return false;">
-        <rect x="5.3" y="50.2" width="11" height="42.6"></rect>
-      </a>
-
-      <a href="#" onclick="enterRoom(room10Page('pet'), false);return false;">
-        <rect x="84.8" y="47" width="11" height="45"></rect>
-      </a>
-
-      <a href="#" onclick="handleDoorClick();return false;">
-        <rect x="44" y="75" width="13" height="20"></rect>
-      </a>
+    <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="">
+      <a href="#" data-room-key="dorm" data-need-login="true"><rect x="16.7" y="25.9" width="27.7" height="22.5"></rect></a>
+      <a href="#" data-room-key="studioTodo" data-need-login="true"><rect x="57" y="25.9" width="27.5" height="22.5"></rect></a>
+      <a href="#" data-room-key="living" data-need-login="true"><rect x="16.6" y="49.4" width="27" height="21.5"></rect></a>
+      <a href="#" data-room-key="game" data-need-login="false"><rect x="57" y="49.4" width="27.5" height="21.5"></rect></a>
+      <a href="#" data-room-key="honor" data-need-login="false"><rect x="16.7" y="72" width="27" height="22"></rect></a>
+      <a href="#" data-manager-room="true"><rect x="57" y="72" width="27.5" height="22"></rect></a>
+      <a href="#" data-room-key="flower" data-need-login="false" data-guest-mode="true"><rect x="5.3" y="50.2" width="11" height="42.6"></rect></a>
+      <a href="#" data-room-key="pet" data-need-login="false" data-guest-mode="true"><rect x="84.8" y="47" width="11" height="45"></rect></a>
+      <a href="#" data-login-door="true"><rect x="44" y="75" width="13" height="20"></rect></a>
     </svg>
   </div>
 </div>
 
 <div id="loginUI">
   <div class="login-panel">
-    <img id="loginFrameImage" src="" alt="登录框">
+    <img id="loginFrameImage" src="" alt="">
 
     <input id="username" type="text" autocomplete="username">
     <input id="password" type="password" autocomplete="current-password">
 
-    <button id="togglePassword" type="button" onclick="togglePassword()"></button>
-    <button id="loginBtn" type="button" onclick="login()"></button>
+    <button id="togglePassword" type="button"></button>
+    <button id="loginBtn" type="button"></button>
 
-    <button id="registerLink" type="button" onclick="goRegisterFromIndex()">新成员先登记哦</button>
+    <button id="registerLink" type="button"></button>
 
-    <button class="closeBtn" type="button" onclick="closeLogin(false)">×</button>
+    <button id="loginCloseBtn" class="closeBtn" type="button">×</button>
 
     <div id="loginMessage"></div>
   </div>
 </div>
 
-<div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
+<div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="">
   <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
     <div class="reward-petals" aria-hidden="true">
       <span>✿</span>
@@ -1114,16 +1110,16 @@ button{
       <span>❀</span>
     </div>
 
-    <button class="reward-close" type="button" aria-label="关闭" onclick="closeRewardModal()">×</button>
+    <button class="reward-close" id="rewardCloseBtn" type="button" aria-label="">×</button>
 
     <div class="reward-content">
-      <div class="reward-icon" id="rewardIcon" aria-hidden="true">🏆</div>
-      <div class="reward-label" id="rewardLabel">成就达成</div>
-      <h2 class="reward-title" id="rewardTitle">奖励已领取</h2>
-      <p class="reward-desc" id="rewardDesc">奖励已经记录完成。</p>
-      <div class="reward-section-title" id="rewardSectionTitle">奖励内容</div>
+      <div class="reward-icon" id="rewardIcon" aria-hidden="true"></div>
+      <div class="reward-label" id="rewardLabel"></div>
+      <h2 class="reward-title" id="rewardTitle"></h2>
+      <p class="reward-desc" id="rewardDesc"></p>
+      <div class="reward-section-title" id="rewardSectionTitle"></div>
       <div class="reward-list" id="rewardList"></div>
-      <button class="reward-confirm" type="button" onclick="closeRewardModal()">收下奖励</button>
+      <button class="reward-confirm" id="rewardConfirmBtn" type="button"></button>
     </div>
   </section>
 </div>
@@ -1139,44 +1135,215 @@ const loginFrameImage = document.getElementById("loginFrameImage");
 const homeStage = document.getElementById("homeStage");
 const topActions = document.getElementById("topActions");
 const currentUserText = document.getElementById("currentUserText");
+const siteNoticeTitle = document.getElementById("siteNoticeTitle");
 const siteNoticeBtn = document.getElementById("siteNoticeBtn");
+const siteNoticeIcon = document.getElementById("siteNoticeIcon");
 const siteNoticePanel = document.getElementById("siteNoticePanel");
 const siteNoticeCount = document.getElementById("siteNoticeCount");
 const siteNoticeContent = document.getElementById("siteNoticeContent");
 const noticeClearBtn = document.getElementById("noticeClearBtn");
 const loginOpenBtn = document.getElementById("loginOpenBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+const loginMessage = document.getElementById("loginMessage");
+const loginCloseBtn = document.getElementById("loginCloseBtn");
+const togglePasswordBtn = document.getElementById("togglePassword");
+const loginBtn = document.getElementById("loginBtn");
+const registerLink = document.getElementById("registerLink");
+const rewardMask = document.getElementById("rewardMask");
+const rewardCloseBtn = document.getElementById("rewardCloseBtn");
+const rewardConfirmBtn = document.getElementById("rewardConfirmBtn");
 
 const PENDING_REDIRECT_KEY = "room10_pending_redirect";
-const NOTICE_ACK_KEY = "room10_notice_ack_v3";
+const NOTICE_ACK_KEY = "room10_notice_ack_v4";
 const HOLIDAY_GIFT_CHECK_KEY = "room10_holiday_gift_checked_v1";
+const PAGE_KEY = "index";
 
+const REQUIRED_TEXT_KEYS = [
+  "page.title",
+  "home.image_alt",
+  "home.map_label",
+  "login.frame_alt",
+  "notice.aria_label",
+  "identity.visitor",
+  "identity.login_button",
+  "identity.logout_button",
+  "notice.icon",
+  "notice.title",
+  "notice.clear_button",
+  "notice.login_required",
+  "notice.empty",
+  "notice.read_error",
+  "login.register_link",
+  "login.close_label",
+  "login.missing_input",
+  "login.check_failed",
+  "login.no_record",
+  "login.config_error",
+  "login.failed",
+  "login.success.owner",
+  "login.success.admin",
+  "login.success.member",
+  "login.success.trainee",
+  "login.success.applying",
+  "role.owner",
+  "role.admin",
+  "role.member",
+  "role.trainee",
+  "role.applying",
+  "role.visitor",
+  "error.path_missing",
+  "error.asset_missing",
+  "error.member_missing",
+  "error.member_read_failed",
+  "error.page_text_missing",
+  "error.page_text_read_failed",
+  "error.notice_config_invalid",
+  "error.reward_config_invalid",
+  "reward.close_label",
+  "reward.section_title",
+  "reward.confirm_button"
+];
+
+let pageTexts = new Map();
+let pageTextReady = false;
+let currentMember = null;
 let rewardQueue = [];
 let rewardModalShowing = false;
 let rewardAfterCloseCallback = null;
 let holidayGiftCheckInFlight = false;
 let anniversaryCheckInFlight = false;
-
 let seasonEffectState = { rafId: 0, onResize: null };
 let homeImageLoadBound = false;
-let noticeState = {
-  signature: "",
-  items: []
-};
-let noticeCache = {
-  at: 0,
-  memberId: "",
-  role: "",
-  items: [],
-  signature: ""
-};
+let noticeState = { signature: "", items: [] };
+let noticeCache = { at: 0, memberId: "", items: [], signature: "" };
+
+function showPageError(message, detail = ""){
+  let panel = document.getElementById("pageError");
+  if(!panel){
+    panel = document.createElement("div");
+    panel.id = "pageError";
+    document.body.appendChild(panel);
+  }
+  panel.textContent = detail ? `${message}\n${detail}` : message;
+  panel.classList.add("show");
+}
+
+function clearPageError(){
+  const panel = document.getElementById("pageError");
+  if(panel) panel.classList.remove("show");
+}
+
+function fail(message, detail = ""){
+  showPageError(message, detail);
+  throw new Error(detail ? `${message} ${detail}` : message);
+}
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function normalizeTextValue(value){
+  return String(value ?? "").trim();
+}
+
+function text(key){
+  const value = pageTexts.get(key);
+  if(!normalizeTextValue(value)){
+    const message = pageTexts.get("error.page_text_missing") || "首页文案配置缺失";
+    fail(message, `page_key=${PAGE_KEY}, text_key=${key}`);
+  }
+  return String(value);
+}
+
+function formatText(key, vars = {}){
+  return text(key).replace(/\{(\w+)\}/g, (match, name) => {
+    if(!Object.prototype.hasOwnProperty.call(vars, name)){
+      return match;
+    }
+    return String(vars[name]);
+  });
+}
+
+async function loadPageTexts(){
+  const { data, error } = await client
+    .from("room10_page_texts")
+    .select("text_key,text_value")
+    .eq("page_key", PAGE_KEY)
+    .eq("is_active", true);
+
+  if(error){
+    showPageError("首页文案读取失败", error.message || "room10_page_texts 查询失败");
+    throw error;
+  }
+
+  if(!Array.isArray(data) || data.length === 0){
+    showPageError("首页文案配置缺失", "room10_page_texts 没有 index 页面文案");
+    throw new Error("首页文案配置缺失");
+  }
+
+  pageTexts = new Map();
+  data.forEach(row => {
+    const key = normalizeTextValue(row.text_key);
+    const value = String(row.text_value ?? "");
+    if(key) pageTexts.set(key, value);
+  });
+
+  const missingKeys = REQUIRED_TEXT_KEYS.filter(key => !normalizeTextValue(pageTexts.get(key)));
+  if(missingKeys.length){
+    const message = pageTexts.get("error.page_text_missing") || "首页文案配置缺失";
+    showPageError(message, missingKeys.join("、"));
+    throw new Error(`${message}：${missingKeys.join(", ")}`);
+  }
+
+  pageTextReady = true;
+}
+
+function applyStaticTexts(){
+  document.title = text("page.title");
+  homeImg.alt = text("home.image_alt");
+  document.getElementById("map").setAttribute("aria-label", text("home.map_label"));
+  loginFrameImage.alt = text("login.frame_alt");
+  siteNoticeBtn.setAttribute("aria-label", text("notice.aria_label"));
+  siteNoticeIcon.textContent = text("notice.icon");
+  siteNoticeTitle.textContent = text("notice.title");
+  noticeClearBtn.textContent = text("notice.clear_button");
+  loginOpenBtn.querySelector(".identityAuthText").textContent = text("identity.login_button");
+  logoutBtn.querySelector(".identityAuthText").textContent = text("identity.logout_button");
+  registerLink.textContent = text("login.register_link");
+  loginCloseBtn.setAttribute("aria-label", text("login.close_label"));
+  rewardCloseBtn.setAttribute("aria-label", text("reward.close_label"));
+  rewardConfirmBtn.textContent = text("reward.confirm_button");
+}
+
+function requirePage(key){
+  const path = window.room10Page ? window.room10Page(key) : "";
+  if(!normalizeTextValue(path)){
+    fail(text("error.path_missing"), key);
+  }
+  return path;
+}
+
+function requireAsset(keyPath){
+  const path = window.room10Asset ? window.room10Asset(keyPath) : "";
+  if(!normalizeTextValue(path)){
+    fail(text("error.asset_missing"), keyPath);
+  }
+  return path;
+}
 
 function getPendingRedirect(){
   return sessionStorage.getItem(PENDING_REDIRECT_KEY) || "";
 }
 
 function setPendingRedirect(page){
-  const safePage = String(page || "").trim();
+  const safePage = normalizeTextValue(page);
   if(!safePage) return;
   sessionStorage.setItem(PENDING_REDIRECT_KEY, safePage);
 }
@@ -1185,236 +1352,143 @@ function clearPendingRedirect(){
   sessionStorage.removeItem(PENDING_REDIRECT_KEY);
 }
 
-function goRegisterFromIndex(){
-  const returnPath = room10Page("index");
-  const registerPath = room10Page("managerRegister");
-
-  sessionStorage.setItem("room10RegisterReturn", returnPath);
-  window.location.href = `${registerPath}?from=${encodeURIComponent(returnPath)}`;
-}
-
-function updateHomeImageByTime(){
-  const hour = new Date().getHours();
-  const nextSrc = (hour >= 18 || hour < 6)
-    ? room10Asset("index.homeNight")
-    : room10Asset("index.homeDay");
-
-  if(homeImg.getAttribute("src") !== nextSrc){
-    homeImg.src = nextSrc;
-  }
-}
-
-function clamp(v, min, max){
-  return Math.max(min, Math.min(max, v));
-}
-
-function mixColor(a, b, t){
-  return {
-    r: Math.round(a.r + (b.r - a.r) * t),
-    g: Math.round(a.g + (b.g - a.g) * t),
-    b: Math.round(a.b + (b.b - a.b) * t)
-  };
-}
-
-function colorToCss(c){
-  return `rgb(${c.r}, ${c.g}, ${c.b})`;
-}
-
-function lighten(c, amt){
-  return {
-    r: clamp(c.r + amt, 0, 255),
-    g: clamp(c.g + amt, 0, 255),
-    b: clamp(c.b + amt, 0, 255)
-  };
-}
-
-function saturate(c, factor){
-  const avg = (c.r + c.g + c.b) / 3;
-  return {
-    r: clamp(Math.round(avg + (c.r - avg) * factor), 0, 255),
-    g: clamp(Math.round(avg + (c.g - avg) * factor), 0, 255),
-    b: clamp(Math.round(avg + (c.b - avg) * factor), 0, 255)
-  };
-}
-
-function sampleRectAverage(ctx, x, y, w, h){
-  const data = ctx.getImageData(x, y, w, h).data;
-  let r = 0, g = 0, b = 0, count = 0;
-  for(let i = 0; i < data.length; i += 4){
-    const alpha = data[i + 3];
-    if(alpha < 8) continue;
-    r += data[i];
-    g += data[i + 1];
-    b += data[i + 2];
-    count++;
-  }
-  if(count === 0){
-    return { r:225, g:233, b:230 };
-  }
-  return {
-    r: Math.round(r / count),
-    g: Math.round(g / count),
-    b: Math.round(b / count)
-  };
-}
-
-function applyBetterHomeBackground(img){
-  const w = img.naturalWidth;
-  const h = img.naturalHeight;
-  if(!w || !h) return;
-
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext("2d", { willReadFrequently:true });
-  ctx.drawImage(img, 0, 0, w, h);
-
-  const sideW = Math.max(12, Math.round(w * 0.08));
-  const upperH = Math.max(12, Math.round(h * 0.42));
-  const lowerH = Math.max(12, Math.round(h * 0.22));
-
-  const leftSky = sampleRectAverage(ctx, 0, 0, sideW, upperH);
-  const rightSky = sampleRectAverage(ctx, w - sideW, 0, sideW, upperH);
-  const leftGround = sampleRectAverage(ctx, 0, h - lowerH, sideW, lowerH);
-  const rightGround = sampleRectAverage(ctx, w - sideW, h - lowerH, sideW, lowerH);
-
-  let skyColor = mixColor(leftSky, rightSky, 0.5);
-  let groundColor = mixColor(leftGround, rightGround, 0.5);
-
-  skyColor = saturate(lighten(skyColor, 12), 1.08);
-  groundColor = saturate(lighten(groundColor, 8), 1.05);
-
-  document.body.style.background = `
-    linear-gradient(
-      180deg,
-      ${colorToCss(skyColor)} 0%,
-      ${colorToCss(mixColor(skyColor, groundColor, 0.35))} 48%,
-      ${colorToCss(groundColor)} 100%
-    )
-  `;
-}
-
-function applyCurrentHomeBackground(){
-  if(homeImg.complete && homeImg.naturalWidth){
-    try{
-      applyBetterHomeBackground(homeImg);
-    }catch(err){
-      console.warn("背景采样失败：", err);
-    }
-  }
-}
-
-function bindHomeImageLoadOnce(){
-  if(homeImageLoadBound) return;
-  homeImageLoadBound = true;
-
-  homeImg.addEventListener("load", () => {
-    applyCurrentHomeBackground();
-    syncHomeTopbarScale();
-    initSeasonEffect();
-  });
-}
-
-function syncHomeTopbarScale(){
-  const rect = homeStage?.getBoundingClientRect() || homeImg?.getBoundingClientRect();
-  const stageWidth = Number(rect?.width || 0);
-  if(!topActions || !stageWidth) return;
-
-  const identityScale = Math.max(0.34, Math.min(3.2, stageWidth / 1629));
-  root.style.setProperty("--identity-scale", String(identityScale));
-
-  root.style.setProperty("--identity-top", "5.15%");
-  root.style.setProperty("--identity-right", "5.20%");
-}
-
 function isLoggedIn(){
   return localStorage.getItem("room10LoggedIn") === "true";
 }
 
-function getCurrentUser(){
-  return {
-    nickname: localStorage.getItem("room10User") || "",
-    role: localStorage.getItem("room10Role") || "",
-    memberId: localStorage.getItem("room10MemberId") || "",
-    memberCode: localStorage.getItem("room10MemberCode") || ""
-  };
+function getStoredMemberId(){
+  return normalizeTextValue(localStorage.getItem("room10MemberId"));
+}
+
+function getStoredMemberCode(){
+  return normalizeTextValue(localStorage.getItem("room10MemberCode"));
+}
+
+function clearStoredLogin(){
+  localStorage.removeItem("room10LoggedIn");
+  localStorage.removeItem("room10User");
+  localStorage.removeItem("room10Role");
+  localStorage.removeItem("room10MemberId");
+  localStorage.removeItem("room10MemberCode");
+  localStorage.removeItem("room10ApplicantSession");
+  localStorage.removeItem("room10ApplicationDraft");
+  sessionStorage.removeItem(HOLIDAY_GIFT_CHECK_KEY);
+  currentMember = null;
+}
+
+function validateMember(row, sourceLabel){
+  const id = normalizeTextValue(row?.id || row?.member_id);
+  const nickname = normalizeTextValue(row?.nickname);
+  const role = normalizeTextValue(row?.role).toLowerCase();
+  const memberCode = normalizeTextValue(row?.member_code || row?.memberCode || row?.code);
+
+  if(!id || !nickname || !role || !memberCode){
+    fail(text("login.config_error"), sourceLabel);
+  }
+
+  return { id, nickname, role, memberCode };
+}
+
+async function fetchCurrentMember(){
+  if(!isLoggedIn()){
+    currentMember = null;
+    return null;
+  }
+
+  const memberId = getStoredMemberId();
+  if(!memberId){
+    showPageError(text("error.member_missing"));
+    return null;
+  }
+
+  const { data, error } = await client
+    .from("members")
+    .select("id,nickname,role,member_code")
+    .eq("id", memberId)
+    .maybeSingle();
+
+  if(error){
+    showPageError(text("error.member_read_failed"), error.message || "members 查询失败");
+    return null;
+  }
+
+  if(!data){
+    showPageError(text("error.member_missing"), memberId);
+    return null;
+  }
+
+  currentMember = validateMember(data, "members 当前登录成员记录");
+  localStorage.setItem("room10User", currentMember.nickname);
+  localStorage.setItem("room10Role", currentMember.role);
+  localStorage.setItem("room10MemberId", currentMember.id);
+  localStorage.setItem("room10MemberCode", currentMember.memberCode);
+  return currentMember;
 }
 
 function getRoleLabel(role){
-  const map = {
-    owner: "维修工",
-    admin: "宿管",
-    member: "房客",
-    applying: "申请人",
-    visitor: "参观者"
-  };
-  return map[String(role || "visitor").toLowerCase()] || "参观者";
+  return text(`role.${normalizeTextValue(role).toLowerCase()}`);
 }
 
 function updateIdentityDisplay(){
-  if(!currentUserText || !loginOpenBtn || !logoutBtn) return;
-
-  if(isLoggedIn()){
-    const user = getCurrentUser();
-    currentUserText.textContent = `${user.nickname || "已登录"} | ${getRoleLabel(user.role)}`;
+  if(isLoggedIn() && currentMember){
+    currentUserText.textContent = `${currentMember.nickname} | ${getRoleLabel(currentMember.role)}`;
     loginOpenBtn.classList.add("hidden");
     logoutBtn.classList.remove("hidden");
-  }else{
-    currentUserText.textContent = "参观者";
-    loginOpenBtn.classList.remove("hidden");
-    logoutBtn.classList.add("hidden");
-  }
-}
-
-function escapeHtml(str){
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-const rewardTypeMeta = {
-  achievement:{ label:"成就达成", icon:"🏆" },
-  title:{ label:"获得称号", icon:"🎖️" },
-  daily:{ label:"日常奖励", icon:"☀️" },
-  gift:{ label:"礼包领取", icon:"🎁" },
-  item:{ label:"道具获得", icon:"🧺" },
-  gold:{ label:"金币奖励", icon:"🪙" }
-};
-
-const rewardIconMap = {
-  金币:"🪙",
-  种子:"🌱",
-  水:"💧",
-  肥料:"🧺",
-  宠物零食:"🥣",
-  宠物粮:"🥣",
-  医疗卡:"💊",
-  亲密度:"💗",
-  道具:"🧺",
-  成就:"🏆",
-  称号:"🎖️"
-};
-
-function normalizeRewardItem(item){
-  if(typeof item === "string"){
-    return {
-      name:item,
-      amount:"",
-      unit:"",
-      icon:rewardIconMap[item] || "✨"
-    };
+    return;
   }
 
-  return {
-    name:item?.name || "奖励",
-    amount:item?.amount ?? "",
-    unit:item?.unit || "",
-    icon:item?.icon || rewardIconMap[item?.name] || "✨",
-    prefix:item?.prefix || ""
-  };
+  currentUserText.textContent = text("identity.visitor");
+  loginOpenBtn.classList.remove("hidden");
+  logoutBtn.classList.add("hidden");
+}
+
+function normalizeLoginInput(value){
+  return String(value || "")
+    .replace(/\u3000/g, " ")
+    .trim();
+}
+
+function setLoginMessage(message, isSuccess = false){
+  loginMessage.style.color = isSuccess ? "#5f7d3a" : "#8b4a2d";
+  loginMessage.innerText = message;
+}
+
+function getLocalDateString(){
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function getHolidayGiftCheckSignature(memberId){
+  return `${memberId}__${getLocalDateString()}`;
+}
+
+function hasCheckedHolidayGiftToday(memberId){
+  return sessionStorage.getItem(HOLIDAY_GIFT_CHECK_KEY) === getHolidayGiftCheckSignature(memberId);
+}
+
+function markHolidayGiftCheckedToday(memberId){
+  sessionStorage.setItem(HOLIDAY_GIFT_CHECK_KEY, getHolidayGiftCheckSignature(memberId));
+}
+
+function normalizeRewardItem(item, index){
+  if(!item || typeof item !== "object"){
+    fail(text("error.reward_config_invalid"), `rewards[${index}]`);
+  }
+
+  const name = normalizeTextValue(item.name);
+  const icon = normalizeTextValue(item.icon);
+  const amount = item.amount;
+  const unit = String(item.unit ?? "");
+  const prefix = String(item.prefix ?? "");
+
+  if(!name){
+    fail(text("error.reward_config_invalid"), `rewards[${index}].name`);
+  }
+
+  return { name, icon, amount, unit, prefix };
 }
 
 function formatRewardAmount(item){
@@ -1432,27 +1506,43 @@ function isImageIcon(icon){
   return /\.(png|jpg|jpeg|gif|webp|svg)(\?.*)?$/i.test(String(icon || "").trim());
 }
 
-function renderRewardIcon(icon, name = "奖励"){
-  const safeIcon = String(icon || "").trim();
-  if(!safeIcon){
-    return "✨";
-  }
+function renderRewardIcon(icon, name){
+  const safeIcon = normalizeTextValue(icon);
+  if(!safeIcon) return "";
 
   if(isImageIcon(safeIcon)){
-    return `<img src="${escapeHtml(safeIcon)}" alt="${escapeHtml(name || "奖励")}" loading="lazy">`;
+    return `<img src="${escapeHtml(safeIcon)}" alt="${escapeHtml(name)}" loading="lazy">`;
   }
 
   return escapeHtml(safeIcon);
 }
 
+function normalizeRewardModalPayload(modal, sourceLabel){
+  if(!modal || typeof modal !== "object"){
+    fail(text("error.reward_config_invalid"), `${sourceLabel}.modal`);
+  }
+
+  const type = normalizeTextValue(modal.type);
+  const icon = normalizeTextValue(modal.icon);
+  const label = normalizeTextValue(modal.label);
+  const title = normalizeTextValue(modal.title);
+  const desc = normalizeTextValue(modal.desc);
+  const rewards = Array.isArray(modal.rewards) ? modal.rewards.map(normalizeRewardItem) : [];
+
+  if(!type || !label || !title || !desc){
+    fail(text("error.reward_config_invalid"), `${sourceLabel}.modal.type/icon/label/title/desc`);
+  }
+
+  return { type, icon, label, title, desc, rewards };
+}
+
 function renderRewards(rewards){
   const list = document.getElementById("rewardList");
   const sectionTitle = document.getElementById("rewardSectionTitle");
-  if(!list || !sectionTitle) return;
-
   list.innerHTML = "";
   list.className = "reward-list";
   sectionTitle.className = "reward-section-title";
+  sectionTitle.textContent = text("reward.section_title");
 
   if(!rewards.length){
     list.classList.add("empty");
@@ -1474,32 +1564,22 @@ function renderRewards(rewards){
   });
 }
 
-function openRewardModal(options = {}){
-  const mask = document.getElementById("rewardMask");
-  if(!mask) return;
-
-  const type = options.type || "achievement";
-  const meta = rewardTypeMeta[type] || rewardTypeMeta.achievement;
-  const rewards = Array.isArray(options.rewards)
-    ? options.rewards.map(normalizeRewardItem)
-    : [];
-
-  mask.dataset.type = type;
-  document.getElementById("rewardIcon").textContent = options.icon || meta.icon;
-  document.getElementById("rewardLabel").textContent = options.label || meta.label;
-  document.getElementById("rewardTitle").textContent = options.title || "奖励已领取";
-  document.getElementById("rewardDesc").textContent = options.desc || "奖励已经记录完成。";
-
-  renderRewards(rewards);
+function openRewardModal(modal){
+  rewardMask.dataset.type = modal.type;
+  document.getElementById("rewardIcon").textContent = modal.icon;
+  document.getElementById("rewardLabel").textContent = modal.label;
+  document.getElementById("rewardTitle").textContent = modal.title;
+  document.getElementById("rewardDesc").textContent = modal.desc;
+  renderRewards(modal.rewards);
 
   rewardModalShowing = true;
-  mask.classList.add("show");
-  mask.setAttribute("aria-hidden", "false");
+  rewardMask.classList.add("show");
+  rewardMask.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
 }
 
-function showRewardModal(options = {}, afterClose = null){
-  rewardQueue.push({ options, afterClose });
+function showRewardModal(modal, afterClose = null){
+  rewardQueue.push({ modal, afterClose });
   if(!rewardModalShowing){
     playNextRewardModal();
   }
@@ -1512,16 +1592,14 @@ function playNextRewardModal(){
     rewardAfterCloseCallback = null;
     return;
   }
+
   rewardAfterCloseCallback = typeof next.afterClose === "function" ? next.afterClose : null;
-  openRewardModal(next.options);
+  openRewardModal(next.modal);
 }
 
 function closeRewardModal(){
-  const mask = document.getElementById("rewardMask");
-  if(mask){
-    mask.classList.remove("show");
-    mask.setAttribute("aria-hidden", "true");
-  }
+  rewardMask.classList.remove("show");
+  rewardMask.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
 
   const callback = rewardAfterCloseCallback;
@@ -1539,67 +1617,35 @@ function closeRewardModal(){
   }
 }
 
-function getLocalDateString(){
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-function getHolidayGiftCheckSignature(memberId){
-  return `${memberId || "visitor"}__${getLocalDateString()}`;
-}
-
-function hasCheckedHolidayGiftToday(memberId){
-  return sessionStorage.getItem(HOLIDAY_GIFT_CHECK_KEY) === getHolidayGiftCheckSignature(memberId);
-}
-
-function markHolidayGiftCheckedToday(memberId){
-  sessionStorage.setItem(HOLIDAY_GIFT_CHECK_KEY, getHolidayGiftCheckSignature(memberId));
-}
-
 async function maybeClaimJoinAnniversaryAchievements(options = {}){
-  if(!isLoggedIn() || anniversaryCheckInFlight) return false;
-
-  const user = getCurrentUser();
-  const memberId = String(user.memberId || "").trim();
-  const memberCode = String(user.memberCode || "").trim();
-  if(!memberId || !memberCode) return false;
+  if(!isLoggedIn() || anniversaryCheckInFlight || !currentMember) return false;
 
   anniversaryCheckInFlight = true;
 
   try{
     const { data, error } = await client.rpc("claim_join_anniversary_achievements", {
-      p_member_id: memberId,
-      p_member_code: memberCode,
+      p_member_id: currentMember.id,
+      p_member_code: currentMember.memberCode,
       p_local_date: getLocalDateString()
     });
 
     if(error){
-      console.warn("加入周年成就检查失败：", error);
+      showPageError("加入周年成就读取失败", error.message || "claim_join_anniversary_achievements RPC 失败");
       return false;
     }
 
     const claims = Array.isArray(data?.claims) ? data.claims : [];
-    if(!data?.claimed_any || claims.length === 0){
-      return false;
-    }
+    if(!data?.claimed_any || claims.length === 0) return false;
 
     claims.forEach((claim, index) => {
-      const modal = claim?.modal || {};
+      const modal = normalizeRewardModalPayload(claim?.modal, `claim_join_anniversary_achievements.claims[${index}]`);
       const isLast = index === claims.length - 1;
-      showRewardModal({
-        type: modal.type || "achievement",
-        title: modal.title || claim?.achievement_name || "加入周年",
-        desc: modal.desc || "周年成就已达成。",
-        rewards: Array.isArray(modal.rewards) ? modal.rewards : []
-      }, isLast ? options.afterAllRewards : null);
+      showRewardModal(modal, isLast ? options.afterAllRewards : null);
     });
 
     return true;
   }catch(err){
-    console.warn("加入周年成就检查异常：", err);
+    showPageError("加入周年成就处理失败", err.message || String(err));
     return false;
   }finally{
     anniversaryCheckInFlight = false;
@@ -1607,13 +1653,9 @@ async function maybeClaimJoinAnniversaryAchievements(options = {}){
 }
 
 async function maybeClaimLoginHolidayGifts(options = {}){
-  if(!isLoggedIn() || holidayGiftCheckInFlight) return false;
+  if(!isLoggedIn() || holidayGiftCheckInFlight || !currentMember) return false;
 
-  const user = getCurrentUser();
-  const memberId = String(user.memberId || "").trim();
-  if(!memberId) return false;
-
-  if(!options.force && hasCheckedHolidayGiftToday(memberId)){
+  if(!options.force && hasCheckedHolidayGiftToday(currentMember.id)){
     return false;
   }
 
@@ -1621,36 +1663,29 @@ async function maybeClaimLoginHolidayGifts(options = {}){
 
   try{
     const { data, error } = await client.rpc("claim_login_holiday_gifts", {
-      p_member_id: memberId,
+      p_member_id: currentMember.id,
       p_local_date: getLocalDateString()
     });
 
-    markHolidayGiftCheckedToday(memberId);
+    markHolidayGiftCheckedToday(currentMember.id);
 
     if(error){
-      console.warn("节日礼包检查失败：", error);
+      showPageError("登录礼包读取失败", error.message || "claim_login_holiday_gifts RPC 失败");
       return false;
     }
 
     const claims = Array.isArray(data?.claims) ? data.claims : [];
-    if(!data?.claimed_any || claims.length === 0){
-      return false;
-    }
+    if(!data?.claimed_any || claims.length === 0) return false;
 
     claims.forEach((claim, index) => {
-      const modal = claim?.modal || {};
+      const modal = normalizeRewardModalPayload(claim?.modal, `claim_login_holiday_gifts.claims[${index}]`);
       const isLast = index === claims.length - 1;
-      showRewardModal({
-        type: modal.type || "gift",
-        title: modal.title || `${claim?.holiday_name || "节日"}礼包`,
-        desc: modal.desc || "礼包已经放进你的背包。",
-        rewards: Array.isArray(modal.rewards) ? modal.rewards : []
-      }, isLast ? options.afterAllRewards : null);
+      showRewardModal(modal, isLast ? options.afterAllRewards : null);
     });
 
     return true;
   }catch(err){
-    console.warn("节日礼包检查异常：", err);
+    showPageError("登录礼包处理失败", err.message || String(err));
     return false;
   }finally{
     holidayGiftCheckInFlight = false;
@@ -1665,200 +1700,62 @@ function setAckSignature(signature){
   localStorage.setItem(NOTICE_ACK_KEY, String(signature || ""));
 }
 
-function buildNoticeSignature(items){
-  return items.map(item => `${item.main}__${item.sub}`).join("||");
-}
-
-function sortParts(parts){
-  return [...parts].sort((a, b) => {
-    const aOrder = Number(a.part_order || 0);
-    const bOrder = Number(b.part_order || 0);
-    if(aOrder !== bOrder) return aOrder - bOrder;
-    return String(a.id || "").localeCompare(String(b.id || ""));
-  });
-}
-
-function getReleaseSortValue(project){
-  const raw = project?.release_date;
-  if(!raw) return Number.POSITIVE_INFINITY;
-  const time = new Date(raw).getTime();
-  if(Number.isNaN(time)) return Number.POSITIVE_INFINITY;
-  return time;
-}
-
-function sortProjectsByUrgency(projects){
-  return [...projects].sort((a, b) => {
-    const aHasDate = !!a.release_date;
-    const bHasDate = !!b.release_date;
-
-    if(aHasDate !== bHasDate){
-      return aHasDate ? -1 : 1;
-    }
-
-    const aTime = getReleaseSortValue(a);
-    const bTime = getReleaseSortValue(b);
-    if(aTime !== bTime){
-      return aTime - bTime;
-    }
-
-    const aCode = parseInt(String(a.project_code || "").match(/\d+/)?.[0] || "0", 10);
-    const bCode = parseInt(String(b.project_code || "").match(/\d+/)?.[0] || "0", 10);
-    if(aCode !== bCode){
-      return aCode - bCode;
-    }
-
-    return String(a.project_name || "").localeCompare(String(b.project_name || ""));
-  });
-}
-
-function getDisplayTaskName(project){
-  return String(project?.project_name || project?.project_code || "未命名项目").trim();
-}
-
-function buildTitlePreview(names){
-  const clean = names.filter(Boolean);
-  if(clean.length <= 3){
-    return clean.join("、");
-  }
-  return `${clean.slice(0, 3).join("、")} 等${clean.length}项`;
-}
-
-async function buildTaskNoticeItems(){
-  const user = getCurrentUser();
-  const memberId = String(user.memberId || "").trim();
-  const role = String(user.role || "").trim().toLowerCase();
-
-  if(!memberId) return { items: [], signature: "" };
-
-  const now = Date.now();
-  if(
-    noticeCache.memberId === memberId &&
-    noticeCache.role === role &&
-    now - noticeCache.at < 15000
-  ){
-    return {
-      items: noticeCache.items,
-      signature: noticeCache.signature
-    };
-  }
-
-  const [
-    projectsResult,
-    partsResult,
-    singersResult
-  ] = await Promise.all([
-    client
-      .from("projects")
-      .select("id, project_code, project_name, release_date, lyrics_lottery_enabled"),
-    client
-      .from("project_parts")
-      .select("id, project_id, part_order, original_name, assigned_member_id"),
-    client
-      .from("project_singers")
-      .select("id, project_id, member_id")
-  ]);
-
-  if(projectsResult.error) throw projectsResult.error;
-  if(partsResult.error) throw partsResult.error;
-  if(singersResult.error) throw singersResult.error;
-
-  const partMap = new Map();
-  const singerMap = new Map();
-
-  (partsResult.data || []).forEach(part => {
-    const key = String(part.project_id || "");
-    if(!partMap.has(key)) partMap.set(key, []);
-    partMap.get(key).push({
-      id: String(part.id || ""),
-      part_order: part.part_order || 0,
-      original_name: String(part.original_name || "").trim(),
-      assigned_member_id: String(part.assigned_member_id || "").trim()
-    });
-  });
-
-  (singersResult.data || []).forEach(singer => {
-    const key = String(singer.project_id || "");
-    if(!singerMap.has(key)) singerMap.set(key, []);
-    singerMap.get(key).push({
-      id: String(singer.id || ""),
-      member_id: String(singer.member_id || "").trim()
-    });
-  });
-
-  const lotteryProjects = [];
-
-  (projectsResult.data || []).forEach(project => {
-    const projectId = String(project.id || "");
-    const parts = sortParts(partMap.get(projectId) || []);
-    const singers = singerMap.get(projectId) || [];
-
-    const isSingerInTask = singers.some(item => item.member_id === memberId)
-      || parts.some(row => row.assigned_member_id === memberId);
-
-    const assignedRowsForCurrentMember = parts.filter(row => row.assigned_member_id === memberId);
-    const hasUnassignedRows = parts.some(row => !String(row.assigned_member_id || "").trim());
-
-    const shouldDrawNow = !!project.lyrics_lottery_enabled
-      && isSingerInTask
-      && hasUnassignedRows
-      && assignedRowsForCurrentMember.length === 0;
-
-    if(shouldDrawNow){
-      lotteryProjects.push(project);
-    }
-  });
-
-  const sortedLottery = sortProjectsByUrgency(lotteryProjects);
-  const lotteryNames = sortedLottery.map(getDisplayTaskName);
-
-  const items = [];
-
-  if(sortedLottery.length > 0){
-    items.push({
-      icon: "🎲",
-      main: `抽签待处理：${sortedLottery.length} 项`,
-      sub: `已开启抽签，等待你抽签：${buildTitlePreview(lotteryNames)}`
-    });
-  }
-
-  const signature = buildNoticeSignature(items);
-
-  noticeCache = {
-    at: now,
-    memberId,
-    role,
-    items,
-    signature
-  };
-
-  return {
-    items,
-    signature
-  };
-}
-
 function setNoticeCount(count){
   const n = Number(count) || 0;
   siteNoticeCount.textContent = n > 99 ? "99+" : String(n);
   siteNoticeBtn.classList.toggle("hasNotice", n > 0);
 }
 
+function validateNoticeItem(item, index){
+  const icon = normalizeTextValue(item?.icon);
+  const main = normalizeTextValue(item?.main || item?.title);
+  const sub = normalizeTextValue(item?.sub || item?.description);
+
+  if(!main){
+    fail(text("error.notice_config_invalid"), `items[${index}].main`);
+  }
+
+  return { icon, main, sub };
+}
+
+async function loadNoticeItems(){
+  if(!currentMember) return { items: [], signature: "" };
+
+  const now = Date.now();
+  if(noticeCache.memberId === currentMember.id && now - noticeCache.at < 15000){
+    return { items: noticeCache.items, signature: noticeCache.signature };
+  }
+
+  const { data, error } = await client.rpc("get_index_notice_items", {
+    p_member_id: currentMember.id
+  });
+
+  if(error) throw error;
+
+  const itemsSource = Array.isArray(data?.items) ? data.items : [];
+  const items = itemsSource.map(validateNoticeItem);
+  const signature = normalizeTextValue(data?.signature) || items.map(item => `${item.main}__${item.sub}`).join("||");
+
+  noticeCache = { at: now, memberId: currentMember.id, items, signature };
+  return { items, signature };
+}
+
 async function renderNotices(){
-  if(!isLoggedIn()){
+  if(!isLoggedIn() || !currentMember){
     noticeState = { signature: "", items: [] };
-    siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">登录后可查看通知</div>`;
+    siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">${escapeHtml(text("notice.login_required"))}</div>`;
     setNoticeCount(0);
     return;
   }
 
   try{
-    const result = await buildTaskNoticeItems();
-    const items = result.items || [];
-    const signature = result.signature || "";
+    const result = await loadNoticeItems();
+    const items = result.items;
+    const signature = result.signature;
     noticeState = { signature, items };
 
     if(!items.length){
-      siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">暂时还没有新的通知</div>`;
+      siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">${escapeHtml(text("notice.empty"))}</div>`;
       setNoticeCount(0);
       return;
     }
@@ -1871,19 +1768,19 @@ async function renderNotices(){
       <div class="siteNoticeList">
         ${items.map(item => `
           <div class="siteNoticeItem">
-            <div class="siteNoticeItemIcon">${escapeHtml(item.icon || "🔔")}</div>
+            <div class="siteNoticeItemIcon">${escapeHtml(item.icon)}</div>
             <div class="siteNoticeItemText">
-              <div class="siteNoticeItemTitle">${escapeHtml(item.main || "")}</div>
-              <div class="siteNoticeItemDesc">${escapeHtml(item.sub || "")}</div>
+              <div class="siteNoticeItemTitle">${escapeHtml(item.main)}</div>
+              <div class="siteNoticeItemDesc">${escapeHtml(item.sub)}</div>
             </div>
           </div>
         `).join("")}
       </div>
     `;
   }catch(err){
-    console.error("读取首页通知失败：", err);
     noticeState = { signature: "", items: [] };
-    siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">通知读取失败，请稍后再试</div>`;
+    siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">${escapeHtml(text("notice.read_error"))}</div>`;
+    showPageError(text("notice.read_error"), err.message || String(err));
     setNoticeCount(0);
   }
 }
@@ -1911,142 +1808,89 @@ function toggleNoticePanel(){
   }
 }
 
-async function updateLogoutDisplay(){
-  updateIdentityDisplay();
-  await renderNotices();
-}
-
-async function safeSyncHomeUI(options = {}){
-  try{
-    updateHomeImageByTime();
-    applyCurrentHomeBackground();
-    syncHomeTopbarScale();
-    await updateLogoutDisplay();
-    if(!options.skipAnniversaryCheck){
-      await maybeClaimJoinAnniversaryAchievements();
-    }
-    if(!options.skipHolidayGiftCheck){
-      await maybeClaimLoginHolidayGifts();
-    }
-  }catch(err){
-    console.warn("safeSyncHomeUI 失败：", err);
-    syncHomeTopbarScale();
-    await updateLogoutDisplay();
+async function updateHomeImageByTime(){
+  const hour = new Date().getHours();
+  const key = (hour >= 18 || hour < 6) ? "index.homeNight" : "index.homeDay";
+  const nextSrc = requireAsset(key);
+  if(homeImg.getAttribute("src") !== nextSrc){
+    homeImg.src = nextSrc;
   }
 }
 
-window.addEventListener("pageshow", () => {
-  safeSyncHomeUI();
-});
+function initAssets(){
+  loginFrameImage.src = requireAsset("root.login");
+}
 
-window.addEventListener("resize", () => {
-  syncHomeTopbarScale();
-});
+function goRegisterFromIndex(){
+  const returnPath = requirePage("index");
+  const registerPath = requirePage("managerRegister");
+  sessionStorage.setItem("room10RegisterReturn", returnPath);
+  window.location.href = `${registerPath}?from=${encodeURIComponent(returnPath)}`;
+}
 
-window.addEventListener("focus", () => {
-  safeSyncHomeUI();
-});
+function getManagerPageByRole(){
+  if(!isLoggedIn() || !currentMember) return requirePage("managerVisitor");
+  const role = currentMember.role;
+  if(role === "owner") return requirePage("managerOwner");
+  if(role === "admin") return requirePage("managerAdmin");
+  if(role === "member" || role === "trainee" || role === "applying") return requirePage("managerMember");
+  return requirePage("managerVisitor");
+}
 
-document.addEventListener("visibilitychange", () => {
-  if(!document.hidden){
-    safeSyncHomeUI();
+function enterManagerRoom(){
+  clearPendingRedirect();
+  window.location.href = getManagerPageByRole();
+}
+
+function enterRoom(pageKey, needLogin, allowGuestMode){
+  const page = requirePage(pageKey);
+
+  if(needLogin && !isLoggedIn()){
+    openLogin(page);
+    return;
   }
-});
 
-window.addEventListener("storage", (e) => {
-  if(
-    e.key === "room10LoggedIn" ||
-    e.key === "room10User" ||
-    e.key === "room10Role" ||
-    e.key === "room10MemberId" ||
-    e.key === "room10MemberCode" ||
-    e.key === NOTICE_ACK_KEY
-  ){
-    noticeCache.at = 0;
-    safeSyncHomeUI();
+  if(allowGuestMode && !isLoggedIn()){
+    window.location.href = `${page}?mode=guest`;
+    return;
   }
-});
 
-if(siteNoticeBtn){
-  siteNoticeBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    toggleNoticePanel();
-  });
-}
-
-if(siteNoticePanel){
-  siteNoticePanel.addEventListener("click", (e) => {
-    e.stopPropagation();
-  });
-}
-
-if(noticeClearBtn){
-  noticeClearBtn.addEventListener("click", () => {
-    markAllNoticesRead();
-  });
-}
-
-if(loginOpenBtn){
-  loginOpenBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    openLogin();
-  });
-}
-
-if(logoutBtn){
-  logoutBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    handleLogout();
-  });
-}
-
-document.addEventListener("click", (e) => {
-  if(!topActions) return;
-  if(!topActions.contains(e.target)){
-    closeNoticePanel();
-  }
-});
-
-function handleLogout(){
-  localStorage.removeItem("room10LoggedIn");
-  localStorage.removeItem("room10User");
-  localStorage.removeItem("room10Role");
-  localStorage.removeItem("room10MemberId");
-  localStorage.removeItem("room10MemberCode");
-  localStorage.removeItem("room10ApplicantSession");
-  localStorage.removeItem("room10ApplicationDraft");
-  sessionStorage.removeItem(HOLIDAY_GIFT_CHECK_KEY);
-
-  closeNoticePanel();
-  noticeCache.at = 0;
-  safeSyncHomeUI();
-  closeLogin(false);
-  window.location.href = room10Page("index");
+  clearPendingRedirect();
+  window.location.href = page;
 }
 
 function handleDoorClick(){
   if(!isLoggedIn()) openLogin();
 }
 
-function normalizeLoginInput(value){
-  return String(value || "")
-    .replace(/\u3000/g, " ")
-    .trim();
+function openLogin(targetPage = ""){
+  if(isLoggedIn()){
+    if(targetPage) window.location.href = targetPage;
+    return;
+  }
+
+  if(targetPage) setPendingRedirect(targetPage);
+  document.getElementById("loginUI").classList.add("show");
+  loginMessage.innerText = "";
+}
+
+function closeLogin(keepRedirect = true){
+  document.getElementById("loginUI").classList.remove("show");
+  loginMessage.innerText = "";
+  if(!keepRedirect) clearPendingRedirect();
+}
+
+function togglePassword(){
+  passwordInput.type = (passwordInput.type === "password") ? "text" : "password";
 }
 
 async function login(){
-  const nicknameInput = document.getElementById("username");
-  const passwordInput = document.getElementById("password");
-  const msg = document.getElementById("loginMessage");
-
-  const nickname = normalizeLoginInput(nicknameInput.value);
+  const nickname = normalizeLoginInput(usernameInput.value);
   const key = normalizeLoginInput(passwordInput.value);
-
-  msg.innerText = "";
-  msg.style.color = "#8b4a2d";
+  loginMessage.innerText = "";
 
   if(!nickname || !key){
-    msg.innerText = "还没填写完整呢";
+    setLoginMessage(text("login.missing_input"));
     return;
   }
 
@@ -2057,36 +1901,25 @@ async function login(){
     });
 
     if(error){
-      console.error("KEY 登录失败：", error);
-      msg.innerText = `登录检查失败：${error.message || "请稍后再试"}`;
+      setLoginMessage(`${text("login.check_failed")}：${error.message || "verify_member_login"}`);
       return;
     }
 
     if(!Array.isArray(data) || data.length === 0){
-      msg.innerText = "没有找到你的记录哎";
+      setLoginMessage(text("login.no_record"));
       return;
     }
 
-    const user = data[0] || {};
-
+    const member = validateMember(data[0], "verify_member_login 返回值");
     localStorage.setItem("room10LoggedIn", "true");
-    localStorage.setItem("room10User", user.nickname || nickname);
-    localStorage.setItem("room10Role", user.role || "member");
-    localStorage.setItem("room10MemberId", user.member_id || user.id || "");
-    localStorage.setItem("room10MemberCode", user.member_code || user.memberCode || user.code || key);
-
+    localStorage.setItem("room10User", member.nickname);
+    localStorage.setItem("room10Role", member.role);
+    localStorage.setItem("room10MemberId", member.id);
+    localStorage.setItem("room10MemberCode", member.memberCode);
+    currentMember = member;
     noticeCache.at = 0;
 
-    const roleMessageMap = {
-      owner: "维修工已上线",
-      admin: "宿管已上线",
-      member: "房客已登录",
-      applying: "当前身份为申请中"
-    };
-
-    msg.style.color = "#5f7d3a";
-    msg.innerText = roleMessageMap[user.role] || "登录成功";
-
+    setLoginMessage(text(`login.success.${member.role}`), true);
     await safeSyncHomeUI({ skipHolidayGiftCheck:true, skipAnniversaryCheck:true });
 
     setTimeout(async () => {
@@ -2098,18 +1931,12 @@ async function login(){
         }
       };
 
-      nicknameInput.value = "";
+      usernameInput.value = "";
       passwordInput.value = "";
       closeLogin(true);
 
-      const claimedAnniversary = await maybeClaimJoinAnniversaryAchievements({
-        force:true
-      });
-
-      const claimedGift = await maybeClaimLoginHolidayGifts({
-        force:true,
-        afterAllRewards:goTarget
-      });
+      const claimedAnniversary = await maybeClaimJoinAnniversaryAchievements({ force:true });
+      const claimedGift = await maybeClaimLoginHolidayGifts({ force:true, afterAllRewards:goTarget });
 
       if(!claimedAnniversary && !claimedGift){
         goTarget();
@@ -2123,74 +1950,48 @@ async function login(){
           rewardAfterCloseCallback = goTarget;
         }
       }
-    }, 700);
-  }catch(e){
-    console.error("login() 查询异常：", e);
-    msg.style.color = "#8b4a2d";
-    msg.innerText = `登录失败：${e?.message || "请稍后再试"}`;
+    }, 420);
+  }catch(err){
+    setLoginMessage(`${text("login.failed")}：${err.message || String(err)}`);
   }
 }
 
-function openLogin(targetPage = ""){
-  if(isLoggedIn()){
-    if(targetPage){
-      window.location.href = targetPage;
-    }
-    return;
-  }
-
-  if(targetPage){
-    setPendingRedirect(targetPage);
-  }
-
-  document.getElementById("loginUI").classList.add("show");
-  document.getElementById("loginMessage").innerText = "";
+function handleLogout(){
+  clearStoredLogin();
+  closeNoticePanel();
+  noticeCache.at = 0;
+  closeLogin(false);
+  safeSyncHomeUI();
 }
 
-function closeLogin(keepRedirect = true){
-  document.getElementById("loginUI").classList.remove("show");
-  document.getElementById("loginMessage").innerText = "";
+function bindHomeImageLoadOnce(){
+  if(homeImageLoadBound) return;
+  homeImageLoadBound = true;
 
-  if(!keepRedirect){
-    clearPendingRedirect();
-  }
+  homeImg.addEventListener("load", () => {
+    applyHomeShellBackground();
+    syncHomeTopbarScale();
+    initSeasonEffect();
+  });
+
+  homeImg.addEventListener("error", () => {
+    showPageError(text("error.asset_missing"), homeImg.getAttribute("src") || "index.homeDay/index.homeNight");
+  });
 }
 
-function getManagerPageByRole(){
-  if(!isLoggedIn()) return room10Page("managerVisitor");
-
-  const role = String(getCurrentUser().role || "").toLowerCase();
-  if(role === "owner") return room10Page("managerOwner");
-  if(role === "admin") return room10Page("managerAdmin");
-  if(role === "member" || role === "applying") return room10Page("managerMember");
-  return room10Page("managerVisitor");
+function applyHomeShellBackground(){
+  document.body.style.background = "linear-gradient(180deg, #f3ecdf 0%, #eee4d4 48%, #e4d4bf 100%)";
 }
 
-function enterManagerRoom(){
-  clearPendingRedirect();
-  window.location.href = getManagerPageByRole();
-}
+function syncHomeTopbarScale(){
+  const rect = homeStage?.getBoundingClientRect() || homeImg?.getBoundingClientRect();
+  const stageWidth = Number(rect?.width || 0);
+  if(!topActions || !stageWidth) return;
 
-function enterRoom(page, needLogin){
-  if(needLogin && !isLoggedIn()){
-    openLogin(page);
-    return;
-  }
-
-  if(page === room10Page("flower") || page === room10Page("pet")){
-    if(!isLoggedIn()){
-      window.location.href = page + "?mode=guest";
-      return;
-    }
-  }
-
-  clearPendingRedirect();
-  window.location.href = page;
-}
-
-function togglePassword(){
-  const p = document.getElementById("password");
-  p.type = (p.type === "password") ? "text" : "password";
+  const identityScale = Math.max(0.34, Math.min(3.2, stageWidth / 1629));
+  root.style.setProperty("--identity-scale", String(identityScale));
+  root.style.setProperty("--identity-top", "5.15%");
+  root.style.setProperty("--identity-right", "5.20%");
 }
 
 /* ===== 四季特效 ===== */
@@ -2480,47 +2281,145 @@ function initSeasonEffect(){
   seasonEffectState.onResize = onResize;
 }
 
-document.getElementById("username").addEventListener("keydown", (e) => {
-  if(e.key === "Enter"){
-    login();
-  }
-});
+async function safeSyncHomeUI(options = {}){
+  if(!pageTextReady) return;
 
-document.getElementById("password").addEventListener("keydown", (e) => {
-  if(e.key === "Enter"){
-    login();
-  }
-});
+  try{
+    await fetchCurrentMember();
+    updateIdentityDisplay();
+    await updateHomeImageByTime();
+    applyHomeShellBackground();
+    syncHomeTopbarScale();
+    await renderNotices();
 
-const rewardMask = document.getElementById("rewardMask");
-if(rewardMask){
+    if(!options.skipAnniversaryCheck){
+      await maybeClaimJoinAnniversaryAchievements();
+    }
+    if(!options.skipHolidayGiftCheck){
+      await maybeClaimLoginHolidayGifts();
+    }
+  }catch(err){
+    showPageError("首页同步失败", err.message || String(err));
+    syncHomeTopbarScale();
+  }
+}
+
+function bindEvents(){
+  siteNoticeBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleNoticePanel();
+  });
+
+  siteNoticePanel.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+
+  noticeClearBtn.addEventListener("click", markAllNoticesRead);
+  loginOpenBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openLogin();
+  });
+  logoutBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    handleLogout();
+  });
+  loginCloseBtn.addEventListener("click", () => closeLogin(false));
+  togglePasswordBtn.addEventListener("click", togglePassword);
+  loginBtn.addEventListener("click", login);
+  registerLink.addEventListener("click", goRegisterFromIndex);
+
+  usernameInput.addEventListener("keydown", (event) => {
+    if(event.key === "Enter") login();
+  });
+  passwordInput.addEventListener("keydown", (event) => {
+    if(event.key === "Enter") login();
+  });
+
+  document.getElementById("map").addEventListener("click", (event) => {
+    const link = event.target.closest("a");
+    if(!link) return;
+    event.preventDefault();
+
+    if(link.dataset.managerRoom === "true"){
+      enterManagerRoom();
+      return;
+    }
+
+    if(link.dataset.loginDoor === "true"){
+      handleDoorClick();
+      return;
+    }
+
+    const pageKey = link.dataset.roomKey;
+    const needLogin = link.dataset.needLogin === "true";
+    const allowGuestMode = link.dataset.guestMode === "true";
+    enterRoom(pageKey, needLogin, allowGuestMode);
+  });
+
+  document.addEventListener("click", (event) => {
+    if(!topActions.contains(event.target)){
+      closeNoticePanel();
+    }
+  });
+
   rewardMask.addEventListener("click", (event) => {
     if(event.target === rewardMask){
       closeRewardModal();
     }
   });
+
+  rewardCloseBtn.addEventListener("click", closeRewardModal);
+  rewardConfirmBtn.addEventListener("click", closeRewardModal);
+
+  document.addEventListener("keydown", (event) => {
+    if(event.key === "Escape"){
+      closeRewardModal();
+    }
+  });
+
+  window.addEventListener("pageshow", () => safeSyncHomeUI());
+  window.addEventListener("resize", () => syncHomeTopbarScale());
+  window.addEventListener("focus", () => safeSyncHomeUI());
+  document.addEventListener("visibilitychange", () => {
+    if(!document.hidden) safeSyncHomeUI();
+  });
+  window.addEventListener("storage", (event) => {
+    if([
+      "room10LoggedIn",
+      "room10User",
+      "room10Role",
+      "room10MemberId",
+      "room10MemberCode",
+      NOTICE_ACK_KEY
+    ].includes(event.key)){
+      noticeCache.at = 0;
+      safeSyncHomeUI();
+    }
+  });
 }
 
-document.addEventListener("keydown", (event) => {
-  if(event.key === "Escape"){
-    closeRewardModal();
+async function initIndexPage(){
+  try{
+    await loadPageTexts();
+    applyStaticTexts();
+    initAssets();
+    bindEvents();
+    bindHomeImageLoadOnce();
+    await updateHomeImageByTime();
+
+    if(homeImg.complete && homeImg.naturalWidth){
+      applyHomeShellBackground();
+      syncHomeTopbarScale();
+      initSeasonEffect();
+    }
+
+    await safeSyncHomeUI();
+  }catch(err){
+    showPageError("首页初始化失败", err.message || String(err));
   }
-});
-
-if(loginFrameImage){
-  loginFrameImage.src = room10Asset("root.login");
 }
 
-bindHomeImageLoadOnce();
-updateHomeImageByTime();
-
-if(homeImg.complete && homeImg.naturalWidth){
-  applyCurrentHomeBackground();
-  syncHomeTopbarScale();
-  initSeasonEffect();
-}
-
-safeSyncHomeUI();
+initIndexPage();
 </script>
 
 </body>
