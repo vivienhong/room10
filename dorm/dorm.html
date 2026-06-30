@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜宿舍</title>
-<!-- dorm inventory db-driven fixed v18: 最近获得位置上移 + 通用路径配置同步 + 代码清减 -->
+<!-- dorm clean db-driven v13: 通用模板路径同步 + 文案/配置数据库驱动 + 清减前端兜底 -->
 
 <script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -70,6 +70,10 @@
   --dorm-app-top:22.2%;
   --dorm-app-width:60.8%;
   --dorm-app-height:58.5%;
+
+  --recent-panel-left:71.8%;
+  --recent-panel-top:23.3%;
+  --recent-panel-width:15.3%;
 }
 
 html,body{
@@ -801,7 +805,7 @@ button{
   top:22px;
   width:70px;
   height:70px;
-  background:url("../coin.png") center center / contain no-repeat;
+  background:var(--dorm-coin-bg, none) center center / contain no-repeat;
   opacity:.34;
   pointer-events:none;
 }
@@ -912,7 +916,7 @@ button{
 }
 
 .collectionBookCard::after{
-  content:"查看收集图鉴";
+  content:attr(data-hover-text);
   position:absolute;
   left:50%;
   bottom:7px;
@@ -2277,7 +2281,7 @@ button{
     display:block;
     background:
       linear-gradient(rgba(243,236,223,.72), rgba(243,236,223,.92)),
-      url("./room-dorm.png") center center / cover no-repeat fixed;
+      var(--dorm-mobile-bg, none) center center / cover no-repeat fixed;
   }
 
   #room{
@@ -2864,7 +2868,7 @@ button{
 
 
 
-/* dorm v4: 钱包/背包图标路径修复：room10 根目录图片优先，例如 ../coin.png */
+/* 钱包/背包图标统一由 room10-paths.js 配置读取 */
 .ledgerArrow img,
 .inventoryIcon img{
   width:72%;
@@ -2964,7 +2968,7 @@ button{
 }
 
 .inventoryBookEntry .collectionBookCard::after{
-  content:"查看收集图鉴";
+  content:attr(data-hover-text);
   position:static;
   left:auto;
   bottom:auto;
@@ -3129,7 +3133,7 @@ button{
 }
 
 .inventoryBookEntry .collectionBookCard::after{
-  content:"查看收集图鉴"!important;
+  content:attr(data-hover-text)!important;
   position:static!important;
   display:block!important;
   transform:none!important;
@@ -3433,12 +3437,12 @@ button{
 }
 
 .recentObtainedPanel{
-  position:fixed;
-  left:calc(var(--dorm-app-left) + var(--dorm-app-width) + 3.4%);
-  top:calc(var(--dorm-app-top) + 5.8%);
-  width:min(calc(236px * var(--ui-scale)), 16.8vw);
+  position:absolute;
+  left:var(--recent-panel-left);
+  top:var(--recent-panel-top);
+  width:var(--recent-panel-width);
   min-width:calc(190px * var(--ui-scale));
-  max-width:260px;
+  max-width:calc(274px * var(--ui-scale));
   padding:calc(13px * var(--ui-scale)) calc(13px * var(--ui-scale)) calc(12px * var(--ui-scale));
   border-radius:calc(20px * var(--ui-scale));
   background:linear-gradient(180deg, rgba(255,251,243,.64), rgba(255,244,225,.44));
@@ -3618,7 +3622,7 @@ body.recent-obtained-visible .recentObtainedPanel{
 }
 
 .gachaStoredBallItem::after{
-  content:"可打开";
+  content:attr(data-open-label);
   position:absolute;
   right:6px;
   top:6px;
@@ -3787,184 +3791,184 @@ body.recent-obtained-visible .recentObtainedPanel{
 <body>
 <div id="room">
   <div id="bgFrame">
-    <img id="bg" src="./room-dorm.png" alt="十号房宿舍背景">
+    <img id="bg" src="" alt="">
   </div>
 
   <div id="overlay">
     <!-- 房间按钮：全站通用模板样式 -->
-    <nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换">
+    <nav class="roomNavLayer" id="roomNavLayer" aria-label="">
       <button class="navBtn" data-room="hall" type="button" data-page="index" data-url="../index/index.html" data-login="false">
-        <span class="navLabel">大堂</span>
+        <span class="navLabel" data-text-key="nav.hall"></span>
         <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
       </button>
 
       <button class="navBtn" data-room="living" type="button" data-page="living" data-url="../living/living.html" data-login="true">
-        <span class="navLabel">客厅</span>
+        <span class="navLabel" data-text-key="nav.living"></span>
         <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
       </button>
 
       <button class="navBtn" data-room="manager" type="button" data-manager="true">
-        <span class="navLabel">宿管室</span>
+        <span class="navLabel" data-text-key="nav.manager"></span>
         <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
       </button>
 
       <button class="navBtn" data-room="honor" type="button" data-page="honor" data-url="../honor/honor.html" data-login="false">
-        <span class="navLabel">荣誉墙</span>
+        <span class="navLabel" data-text-key="nav.honor"></span>
         <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
       </button>
 
       <button class="navBtn" data-room="studio" type="button" data-page="studioTodo" data-url="../studio/studio-todo.html" data-login="true">
-        <span class="navLabel">工作间</span>
+        <span class="navLabel" data-text-key="nav.studio"></span>
         <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
       </button>
 
       <button class="navBtn" data-room="game" type="button" data-page="game" data-url="../game/game.html" data-login="false">
-        <span class="navLabel">游戏房</span>
+        <span class="navLabel" data-text-key="nav.game"></span>
         <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span>
       </button>
 
       <button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-url="../dorm/dorm.html" data-login="true">
-        <span class="navLabel">宿舍</span>
+        <span class="navLabel" data-text-key="nav.dorm"></span>
         <span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span>
       </button>
 
       <button class="navBtn" data-room="flower" type="button" data-page="flower" data-url="../flower/flower.html" data-login="false">
-        <span class="navLabel">花房区</span>
+        <span class="navLabel" data-text-key="nav.flower"></span>
         <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
       </button>
 
       <button class="navBtn" data-room="pets" type="button" data-page="pet" data-url="../pet/pets.html" data-login="false">
-        <span class="navLabel">宠物区</span>
+        <span class="navLabel" data-text-key="nav.pets"></span>
         <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
       </button>
     </nav>
 
     <!-- 身份组件：全站通用模板样式，保留宿舍页登录/登出逻辑 -->
-    <section class="roomIdentity" id="roomIdentity" aria-label="当前身份">
+    <section class="roomIdentity" id="roomIdentity" aria-label="">
       <div class="roomIdentityBar">
         <div class="identityNameBox">
           <span class="identityNameText" id="currentUserText">
-            <span class="identityNamePart identityNickname" id="identityNickname">读取中</span>
+            <span class="identityNamePart identityNickname" id="identityNickname"></span>
             <span class="identityNamePart identitySeparator hidden" id="identitySeparator">｜</span>
-            <span class="identityNamePart identityRole hidden" id="identityRole">参观者</span>
+            <span class="identityNamePart identityRole hidden" id="identityRole"></span>
           </span>
         </div>
 
         <div class="identityNoticeWrap">
-          <button class="identityNoticeBtn" id="siteNoticeBtn" type="button" aria-label="打开系统通知">
-            <span class="identityNoticeIcon">🔔</span>
+          <button class="identityNoticeBtn" id="siteNoticeBtn" type="button" aria-label="">
+            <span class="identityNoticeIcon" id="identityNoticeIcon"></span>
           </button>
           <span class="identityNoticeCount" id="identityNoticeCount">0</span>
         </div>
 
         <button class="identityAuthBtn" id="identityAuthBtn" type="button">
-          <span class="identityAuthText">登出</span>
+          <span class="identityAuthText"></span>
         </button>
       </div>
     </section>
 
     <main id="dormShell">
       <aside id="sidePanel" class="glassPanel">
-        <button class="sideBtn active" data-view="tasks"><span class="sideIcon">📮</span>我的任务</button>
-        <button class="sideBtn" data-view="notice"><span class="sideIcon">💌</span>系统通知</button>
-        <button class="sideBtn" data-view="wallet"><span class="sideIcon"><img src="../coin.png" alt=""></span>钱包记录</button>
-        <button class="sideBtn" data-view="inventory"><span class="sideIcon">🎒</span>我的背包</button>
-        <button class="sideBtn" data-view="profile"><span class="sideIcon">📇</span>我的档案</button>
+        <button class="sideBtn active" data-view="tasks"><span class="sideIcon">📮</span><span class="sideLabel" data-text-key="side.tasks"></span></button>
+        <button class="sideBtn" data-view="notice"><span class="sideIcon">💌</span><span class="sideLabel" data-text-key="side.notice"></span></button>
+        <button class="sideBtn" data-view="wallet"><span class="sideIcon"><img class="dormCoinImg" src="" alt=""></span><span class="sideLabel" data-text-key="side.wallet"></span></button>
+        <button class="sideBtn" data-view="inventory"><span class="sideIcon">🎒</span><span class="sideLabel" data-text-key="side.inventory"></span></button>
+        <button class="sideBtn" data-view="profile"><span class="sideIcon">📇</span><span class="sideLabel" data-text-key="side.profile"></span></button>
 
         <div id="mascotBox">
-          <img src="./mascot-niuma(L).png" alt="十号房牛马吉祥物">
-          <div id="mascotBubble" class="bubble-calm">收到啦</div>
+          <img id="mascotImage" src="" alt="">
+          <div id="mascotBubble" class="bubble-calm"></div>
         </div>
       </aside>
 
       <section id="mainPanel" class="glassPanel">
         <div class="view" id="view-wallet">
           <div class="walletHeader">
-            <div class="walletIcon" aria-hidden="true"><img src="../coin.png" alt=""></div>
+            <div class="walletIcon" aria-hidden="true"><img class="dormCoinImg" src="" alt=""></div>
             <div>
-              <h1 class="walletTitle" id="walletTitle">钱包</h1>
-              <p class="walletSub" id="goldSub">正在读取金币与收支记录……</p>
+              <h1 class="walletTitle" id="walletTitle"></h1>
+              <p class="walletSub" id="goldSub"></p>
             </div>
           </div>
 
           <div class="balanceCard">
-            <div class="goldLabel">当前余额</div>
+            <div class="goldLabel" data-text-key="wallet.current_balance"></div>
             <span class="goldNumber" id="goldBalance">0</span>
-            <span class="goldUnit">金币</span>
+            <span class="goldUnit" data-text-key="wallet.gold_unit"></span>
           </div>
 
           <div class="goldStats">
             <div class="statCard">
-              <div class="statLabel">累计获得</div>
+              <div class="statLabel" data-text-key="wallet.total_earned"></div>
               <div class="statValue" id="goldEarned">0</div>
             </div>
             <div class="statCard">
-              <div class="statLabel">累计花费</div>
+              <div class="statLabel" data-text-key="wallet.total_spent"></div>
               <div class="statValue" id="goldSpent">0</div>
             </div>
             <div class="statCard">
-              <div class="statLabel">今日获得</div>
+              <div class="statLabel" data-text-key="wallet.today_earned"></div>
               <div class="statValue todayValue none" id="todayGold">0</div>
             </div>
           </div>
 
           <div class="walletLedgerBlock">
             <div class="walletLedgerHead">
-              <h2 class="sectionTitle">金币记录</h2>
-              <p class="sectionDesc">最近 30 条金币收入与支出。</p>
+              <h2 class="sectionTitle" data-text-key="wallet.ledger_title"></h2>
+              <p class="sectionDesc" data-text-key="wallet.ledger_desc"></p>
             </div>
             <div class="ledgerList" id="ledgerList">
-              <div class="emptyText">正在读取金币记录……</div>
+              <div class="emptyText" data-text-key="wallet.ledger_loading"></div>
             </div>
           </div>
         </div>
 
         <div class="view" id="view-notice">
-          <h2 class="sectionTitle">系统通知</h2>
+          <h2 class="sectionTitle" data-text-key="notice.title"></h2>
           <div class="noticeCenter" id="dormNoticeCenter">
-            <div class="emptyText">正在整理系统通知……</div>
+            <div class="emptyText" data-text-key="notice.loading"></div>
           </div>
         </div>
 
         <div class="view" id="view-inventory">
-          <h2 class="sectionTitle">我的背包</h2>
+          <h2 class="sectionTitle" data-text-key="inventory.title"></h2>
           <div class="inventoryContentGrid">
             <div class="inventoryMainCol">
               <div class="inventoryList" id="inventoryList">
-                <div class="emptyText">正在读取我的道具……</div>
+                <div class="emptyText" data-text-key="inventory.loading"></div>
               </div>
             </div>
           </div>
         </div>
 
         <div class="view active" id="view-tasks">
-          <h2 class="sectionTitle">我的任务</h2>
-          <div class="taskTabs" id="taskTabs" aria-label="我的任务分类">
-            <button class="taskTab active" type="button" data-task-tab="vocal_submit">待交音<span>0</span></button>
-            <button class="taskTab" type="button" data-task-tab="mix_submit">待后期<span>0</span></button>
-            <button class="taskTab" type="button" data-task-tab="claim">待认领<span>0</span></button>
+          <h2 class="sectionTitle" data-text-key="tasks.title"></h2>
+          <div class="taskTabs" id="taskTabs" aria-label="">
+            <button class="taskTab active" type="button" data-task-tab="vocal_submit"><span class="taskTabLabel" data-text-key="tasks.tab.vocal_submit"></span><span>0</span></button>
+            <button class="taskTab" type="button" data-task-tab="mix_submit"><span class="taskTabLabel" data-text-key="tasks.tab.mix_submit"></span><span>0</span></button>
+            <button class="taskTab" type="button" data-task-tab="claim"><span class="taskTabLabel" data-text-key="tasks.tab.claim"></span><span>0</span></button>
           </div>
           <div class="taskList" id="taskList">
-            <div class="emptyText">正在读取我的任务……</div>
+            <div class="emptyText" data-text-key="tasks.loading"></div>
           </div>
         </div>
 
         <div class="view" id="view-profile">
-          <h2 class="sectionTitle">我的档案</h2>
+          <h2 class="sectionTitle" data-text-key="profile.title"></h2>
           <div class="profileScroll" id="profileScroll">
-            <div class="emptyText">正在读取个人档案……</div>
+            <div class="emptyText" data-text-key="profile.loading"></div>
           </div>
         </div>
       </section>
     </main>
 
-    <aside class="recentObtainedPanel" id="recentObtainedPanel" aria-label="最近获得的道具">
+    <aside class="recentObtainedPanel" id="recentObtainedPanel" aria-label="">
       <div class="recentObtainedHead">
-        <div class="recentObtainedTitle">最近获得</div>
-        <div class="recentObtainedHint">最近 3 条</div>
+        <div class="recentObtainedTitle" data-text-key="recent.title"></div>
+        <div class="recentObtainedHint" data-text-key="recent.hint"></div>
       </div>
       <div class="recentObtainedList" id="recentObtainedList">
-        <div class="recentObtainedEmpty">正在整理最近获得的道具……</div>
+        <div class="recentObtainedEmpty" data-text-key="recent.loading"></div>
       </div>
     </aside>
 
@@ -3975,17 +3979,17 @@ body.recent-obtained-visible .recentObtainedPanel{
 <div class="gachaStoredBallModalMask" id="gachaStoredBallModalMask" aria-hidden="true">
   <div class="gachaStoredBallModal" role="dialog" aria-modal="true" aria-labelledby="gachaStoredBallTitle">
     <div class="gachaStoredBallIcon">
-      <img id="gachaStoredBallIconImg" src="./gacha-ball.png" alt="">
+      <img id="gachaStoredBallIconImg" src="" alt="">
     </div>
-    <h3 class="gachaStoredBallTitle" id="gachaStoredBallTitle">未打开扭蛋</h3>
-    <div class="gachaStoredBallDesc" id="gachaStoredBallDesc">打开后奖励会自动入账。</div>
+    <h3 class="gachaStoredBallTitle" id="gachaStoredBallTitle"></h3>
+    <div class="gachaStoredBallDesc" id="gachaStoredBallDesc"></div>
     <div class="gachaStoredBallActions">
-      <button class="gachaStoredBallBtn primary" id="gachaOpenOneBtn" type="button">打开一个</button>
-      <button class="gachaStoredBallBtn secondary" id="gachaOpenAllBtn" type="button">全部打开</button>
+      <button class="gachaStoredBallBtn primary" id="gachaOpenOneBtn" type="button"></button>
+      <button class="gachaStoredBallBtn secondary" id="gachaOpenAllBtn" type="button"></button>
     </div>
     <div class="gachaStoredBallResult" id="gachaStoredBallResult"></div>
     <div class="gachaStoredBallCloseRow">
-      <button class="gachaStoredBallCloseBtn" id="gachaStoredBallCloseBtn" type="button">关闭</button>
+      <button class="gachaStoredBallCloseBtn" id="gachaStoredBallCloseBtn" type="button"></button>
     </div>
   </div>
 </div>
@@ -3998,31 +4002,267 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const CURRENT_ROOM = "dorm";
 
-/* 路径配置：与全站通用模板保持一致，优先读取 room10-paths.js。 */
-const ROOM10_ROOT_PREFIX = window.ROOM10_ROOT || "../";
+
+const dormTexts = Object.create(null);
+
+const DORM_REQUIRED_TEXT_KEYS = [
+  "page.title","background.alt","room_nav.aria_label","identity.aria_label",
+  "nav.hall","nav.living","nav.manager","nav.honor","nav.studio","nav.game","nav.dorm","nav.flower","nav.pets",
+  "role.owner","role.admin","role.member","role.trainee","role.applying","role.visitor",
+  "identity.loading","identity.login_button","identity.logout_button","identity.notice_aria_label","identity.notice_icon",
+  "side.tasks","side.notice","side.wallet","side.inventory","side.profile",
+  "mascot.alt","mascot.line.01","mascot.line.02","mascot.line.03","mascot.line.04","mascot.line.05","mascot.line.06","mascot.line.07","mascot.line.08","mascot.line.09","mascot.line.10","mascot.line.11","mascot.line.12",
+  "wallet.title","wallet.loading","wallet.current_balance","wallet.gold_unit","wallet.total_earned","wallet.total_spent","wallet.today_earned","wallet.ledger_title","wallet.ledger_desc","wallet.ledger_loading","wallet.ledger_empty","wallet.member_missing","wallet.no_gold_record","wallet.read_failed","wallet.ledger_read_failed",
+  "notice.title","notice.loading","notice.empty","notice.default_title","notice.default_desc_missing","notice.read_failed","notice.fold_open","notice.fold_close",
+  "inventory.title","inventory.loading","inventory.login_required","inventory.empty","inventory.read_failed","inventory.item_types_failed","inventory.item_categories_failed","inventory.book_button","inventory.book_hover",
+  "tasks.meta.tone_label","tasks.meta.release_date","tasks.meta.original","tasks.meta.singer_count","tasks.meta.singer_missing","tasks.title","tasks.tab.vocal_submit","tasks.tab.mix_submit","tasks.tab.claim","tasks.loading","tasks.login_required","tasks.empty_by_type","tasks.read_failed","tasks.action_failed","tasks.rpc_failed","tasks.action.submit_vocal","tasks.action.submit_mix","tasks.action.claim_singer","tasks.action.claim_mix","tasks.action.undo_vocal","tasks.action.undo_mix","tasks.claimed_singer_hint","tasks.claimed_mix_hint",
+  "profile.field.name","profile.field.mbti","profile.field.qq","profile.field.birthday_month","profile.field.birthday_day","profile.field.skill_request","profile.placeholder.name","profile.placeholder.location","profile.placeholder.empty_allowed","profile.placeholder.skill_request","profile.placeholder.message","profile.title","profile.loading","profile.empty","profile.edit_button","profile.edit_title","profile.save_button","profile.cancel_button","profile.section.basic","profile.section.skills","profile.section.social","profile.section.message","profile.field.location","profile.field.birthday","profile.field.xiaohongshu","profile.field.douyin","profile.field.bilibili","profile.field.weibo","profile.unfilled","profile.skills_empty","profile.save_loading","profile.save_no_change","profile.save_failed","profile.save_log_failed","profile.name_invalid","profile.location_invalid","profile.birthday_invalid","profile.name_duplicate","profile.skill_existing","profile.skill_normalized","profile.skill_request",
+  "honor.loading","honor.read_failed","honor.unavailable","honor.recent_empty","honor.titles_count","honor.achievements_count","honor.recent",
+  "recent.title","recent.hint","recent.loading","recent.login_required","recent.empty","recent.read_failed","recent.just_now","recent.minutes_ago","recent.hours_ago","recent.days_ago",
+  "gacha.title","gacha.desc","gacha.open_one","gacha.open_all","gacha.open_all_count","gacha.close","gacha.quantity","gacha.opening_one","gacha.opening_all","gacha.success","gacha.remaining","gacha.empty_after_open","gacha.no_rewards","gacha.open_failed","gacha.wallet_refresh_failed",
+  "tasks.tabs.aria_label","recent.aria_label","inventory.gacha_open_badge",
+  "date.month_suffix","date.day_suffix",
+  "profile.log_label.skills","profile.log_label.skill_request",
+  "notice.config.rooms_json","notice.config.room_aliases_json","notice.config.finished_statuses_json","notice.config.studio_task_types_json","notice.config.studio_task_keywords_json","notice.config.released_project_statuses_json",
+  "gacha.config.stored_ball_tiers_json",
+  "profile.config.allowed_locations_json","profile.config.skill_aliases_json","profile.config.mbti_options_json",
+  "common.page_text_missing","common.page_text_read_failed","common.path_missing","common.asset_missing","common.config_error"
+];
+
+const dormConfig = {
+  noticeRooms: [],
+  noticeRoomAliases: {},
+  noticeFinishedStatuses: new Set(),
+  noticeStudioTaskTypes: new Set(),
+  noticeStudioTaskKeywords: [],
+  noticeReleasedProjectStatuses: new Set(),
+  storedGachaBallTiers: {},
+  allowedLocations: [],
+  skillAliases: [],
+  mbtiOptions: []
+};
+
+function parseDormJsonText(key){
+  const raw = String(dormTexts[key] || "").trim();
+  try{
+    return JSON.parse(raw);
+  }catch(error){
+    throw new Error(`宿舍页数据库配置不是有效 JSON：${key}`);
+  }
+}
+
+function requireDormJsonArray(key){
+  const value = parseDormJsonText(key);
+  if(!Array.isArray(value)){
+    throw new Error(`宿舍页数据库配置必须是数组：${key}`);
+  }
+  return value;
+}
+
+function requireDormJsonObject(key){
+  const value = parseDormJsonText(key);
+  if(!value || Array.isArray(value) || typeof value !== "object"){
+    throw new Error(`宿舍页数据库配置必须是对象：${key}`);
+  }
+  return value;
+}
+
+function loadDormConfigFromTexts(){
+  const noticeRooms = requireDormJsonArray("notice.config.rooms_json")
+    .map(item => ({
+      key:String(item?.key || "").trim(),
+      labelKey:String(item?.labelKey || "").trim(),
+      icon:String(item?.icon || "").trim()
+    }))
+    .filter(item => item.key && item.labelKey);
+
+  if(!noticeRooms.length){
+    throw new Error("宿舍页数据库配置缺失：notice.config.rooms_json");
+  }
+
+  const noticeAliases = requireDormJsonObject("notice.config.room_aliases_json");
+  const storedGachaBallTiers = requireDormJsonObject("gacha.config.stored_ball_tiers_json");
+  const allowedLocations = requireDormJsonArray("profile.config.allowed_locations_json").map(item => String(item || "").trim()).filter(Boolean);
+  const skillAliases = requireDormJsonArray("profile.config.skill_aliases_json")
+    .map(group => ({
+      name:String(group?.name || "").trim(),
+      values:Array.isArray(group?.values) ? group.values.map(item => String(item || "").trim()).filter(Boolean) : []
+    }))
+    .filter(group => group.name && group.values.length);
+  const mbtiOptions = requireDormJsonArray("profile.config.mbti_options_json").map(item => String(item ?? "").trim());
+
+  if(!allowedLocations.length){
+    throw new Error("宿舍页数据库配置缺失：profile.config.allowed_locations_json");
+  }
+  if(!skillAliases.length){
+    throw new Error("宿舍页数据库配置缺失：profile.config.skill_aliases_json");
+  }
+  if(!mbtiOptions.length){
+    throw new Error("宿舍页数据库配置缺失：profile.config.mbti_options_json");
+  }
+
+  dormConfig.noticeRooms = noticeRooms;
+  dormConfig.noticeRoomAliases = noticeAliases;
+  dormConfig.noticeFinishedStatuses = new Set(requireDormJsonArray("notice.config.finished_statuses_json").map(item => String(item || "").trim().toLowerCase()).filter(Boolean));
+  dormConfig.noticeStudioTaskTypes = new Set(requireDormJsonArray("notice.config.studio_task_types_json").map(item => String(item || "").trim().toLowerCase()).filter(Boolean));
+  dormConfig.noticeStudioTaskKeywords = requireDormJsonArray("notice.config.studio_task_keywords_json").map(item => String(item || "").trim()).filter(Boolean);
+  dormConfig.noticeReleasedProjectStatuses = new Set(requireDormJsonArray("notice.config.released_project_statuses_json").map(item => String(item || "").trim().toLowerCase()).filter(Boolean));
+  dormConfig.storedGachaBallTiers = storedGachaBallTiers;
+  dormConfig.allowedLocations = allowedLocations;
+  dormConfig.skillAliases = skillAliases;
+  dormConfig.mbtiOptions = mbtiOptions;
+}
+
+function formatTemplate(value, params = {}){
+  return String(value ?? "").replace(/\{([a-zA-Z0-9_]+)\}/g, (_, key) => {
+    return Object.prototype.hasOwnProperty.call(params, key) ? String(params[key]) : "";
+  });
+}
+
+function t(key, params = {}){
+  if(!Object.prototype.hasOwnProperty.call(dormTexts, key)){
+    throw new Error(`宿舍页文案配置缺失：${key}`);
+  }
+  return formatTemplate(dormTexts[key], params);
+}
+
+function tHtml(key, params = {}){
+  return escapeHtml(t(key, params));
+}
+
+function dormErrorText(key, fallback){
+  return Object.prototype.hasOwnProperty.call(dormTexts, key) ? dormTexts[key] : fallback;
+}
+
+function showDormFatalError(error){
+  const message = error?.message || String(error || "");
+  const readable = dormErrorText("common.page_text_read_failed", "宿舍页初始化失败");
+  const target = document.getElementById("mainPanel") || document.body;
+  if(target){
+    target.innerHTML = `<div class="errorText">${escapeHtml(readable)}<br>${escapeHtml(message)}</div>`;
+  }
+}
+
+async function loadDormPageTexts(){
+  const { data, error } = await supabaseClient
+    .from("room10_page_texts")
+    .select("text_key,text_value")
+    .eq("page_key", "dorm")
+    .eq("is_active", true);
+
+  if(error){
+    throw new Error(`宿舍页文案读取失败：${error.message || "room10_page_texts"}`);
+  }
+
+  (Array.isArray(data) ? data : []).forEach(row => {
+    const key = String(row.text_key || "").trim();
+    const value = String(row.text_value || "").trim();
+    if(key && value) dormTexts[key] = value;
+  });
+
+  const missing = DORM_REQUIRED_TEXT_KEYS.filter(key => !Object.prototype.hasOwnProperty.call(dormTexts, key));
+  if(missing.length){
+    throw new Error(`宿舍页文案配置缺失：${missing.join(", ")}`);
+  }
+
+  loadDormConfigFromTexts();
+}
+
+function requirePageUrl(key){
+  const pageKey = String(key || "").trim();
+  const url = pageKey && typeof window.room10Page === "function" ? window.room10Page(pageKey) : "";
+  if(!url){
+    throw new Error(`${t("common.path_missing")}：${pageKey || "empty page key"}`);
+  }
+  return url;
+}
+
+function requireAssetUrl(key){
+  const assetKey = String(key || "").trim();
+  const url = assetKey && typeof window.room10Asset === "function" ? window.room10Asset(assetKey) : "";
+
+  if(!url){
+    throw new Error(`${t("common.asset_missing")}：${assetKey || "empty asset key"}`);
+  }
+
+  return url;
+}
+
+function applyDormStaticTexts(){
+  document.title = t("page.title");
+
+  document.querySelectorAll("[data-text-key]").forEach(el => {
+    el.textContent = t(el.dataset.textKey);
+  });
+
+  const bg = document.getElementById("bg");
+  if(bg) bg.alt = t("background.alt");
+
+  const nav = document.getElementById("roomNavLayer");
+  if(nav) nav.setAttribute("aria-label", t("room_nav.aria_label"));
+
+  const identity = document.getElementById("roomIdentity");
+  if(identity) identity.setAttribute("aria-label", t("identity.aria_label"));
+
+  if(identityNickname) identityNickname.textContent = t("identity.loading");
+  if(identityAuthText) identityAuthText.textContent = t("identity.logout_button");
+  if(siteNoticeBtn) siteNoticeBtn.setAttribute("aria-label", t("identity.notice_aria_label"));
+  const noticeIcon = document.getElementById("identityNoticeIcon");
+  if(noticeIcon) noticeIcon.textContent = t("identity.notice_icon");
+
+  setText("walletTitle", t("wallet.title"));
+  setText("goldSub", t("wallet.loading"));
+
+  const gachaTitle = document.getElementById("gachaStoredBallTitle");
+  const gachaDesc = document.getElementById("gachaStoredBallDesc");
+  const gachaOpenOne = document.getElementById("gachaOpenOneBtn");
+  const gachaOpenAll = document.getElementById("gachaOpenAllBtn");
+  const gachaClose = document.getElementById("gachaStoredBallCloseBtn");
+  const taskTabs = document.getElementById("taskTabs");
+  if(taskTabs) taskTabs.setAttribute("aria-label", t("tasks.tabs.aria_label"));
+
+  const recentPanel = document.getElementById("recentObtainedPanel");
+  if(recentPanel) recentPanel.setAttribute("aria-label", t("recent.aria_label"));
+
+  if(gachaTitle) gachaTitle.textContent = t("gacha.title");
+  if(gachaDesc) gachaDesc.textContent = t("gacha.desc");
+  if(gachaOpenOne) gachaOpenOne.textContent = t("gacha.open_one");
+  if(gachaOpenAll) gachaOpenAll.textContent = t("gacha.open_all");
+  if(gachaClose) gachaClose.textContent = t("gacha.close");
+}
+
+function applyDormAssets(){
+  const roomBg = requireAssetUrl("dorm.roomDorm");
+  if(img) img.src = roomBg;
+  root.style.setProperty("--dorm-mobile-bg", `url("${roomBg}")`);
+
+  const coin = requireAssetUrl("root.coin");
+  root.style.setProperty("--dorm-coin-bg", `url("${coin}")`);
+  document.querySelectorAll(".dormCoinImg").forEach(el => { el.src = coin; });
+
+  const mascot = requireAssetUrl("dorm.mascotNiumaL");
+  const mascotImg = document.getElementById("mascotImage");
+  if(mascotImg){
+    mascotImg.src = mascot;
+    mascotImg.alt = t("mascot.alt");
+  }
+
+  const gachaBall = requireAssetUrl("dorm.gachaBall");
+  const gachaIcon = document.getElementById("gachaStoredBallIconImg");
+  if(gachaIcon) gachaIcon.src = gachaBall;
+}
 
 function room10Url(path){
   const raw = String(path || "").trim();
   if(!raw) return "";
   if(/^(https?:|data:|mailto:|tel:|#|\/)/i.test(raw)) return raw;
   if(raw.startsWith("./") || raw.startsWith("../")) return raw;
-
-  if(typeof window.room10Path === "function"){
-    return window.room10Path(raw);
-  }
-
-  return `${ROOM10_ROOT_PREFIX}${raw}`;
+  if(typeof window.room10Path === "function") return window.room10Path(raw);
+  throw new Error(`${t("common.path_missing")}：${raw}`);
 }
 
-function room10PageUrl(key, fallbackPath){
-  const pageKey = String(key || "").trim();
-
-  if(pageKey && typeof window.room10Page === "function"){
-    const url = window.room10Page(pageKey);
-    if(url) return url;
-  }
-
-  return room10Url(fallbackPath || "");
+function room10PageUrl(key){
+  return requirePageUrl(key);
 }
 
 const STORAGE_KEYS = {
@@ -4063,38 +4303,30 @@ const recentDormTaskActions = new Map();
 const DORM_ACTIVE_VIEW_KEY = "room10DormActiveView";
 const DORM_VIEW_KEYS = new Set(["tasks","notice","wallet","inventory","profile"]);
 
-const STORED_GACHA_BALL_KEYS = {
-  gacha_ball_white:"white",
-  gacha_ball_purple:"purple",
-  gacha_ball_gold:"gold"
-};
-
 let currentStoredGachaBall = null;
 
 const mascotLines = [
-  { text:"在做了在做了", style:"work" },
-  { text:"收到啦", style:"ok" },
-  { text:"没事哒", style:"calm" },
-  { text:"冲鸭！", style:"energy" },
-  { text:"马上就好", style:"wait" },
-  { text:"安排上了", style:"plan" },
-  { text:"努力营业中", style:"busy" },
-  { text:"今天也要加油", style:"cheer" },
-  { text:"灵感加载中", style:"thinking" },
-  { text:"休息一下也可以", style:"soft" },
-  { text:"慢慢来不着急", style:"calm" },
-  { text:"一起加油呀", style:"cheer" }
+  { key:"mascot.line.01", style:"work" },
+  { key:"mascot.line.02", style:"ok" },
+  { key:"mascot.line.03", style:"calm" },
+  { key:"mascot.line.04", style:"energy" },
+  { key:"mascot.line.05", style:"wait" },
+  { key:"mascot.line.06", style:"plan" },
+  { key:"mascot.line.07", style:"busy" },
+  { key:"mascot.line.08", style:"cheer" },
+  { key:"mascot.line.09", style:"thinking" },
+  { key:"mascot.line.10", style:"soft" },
+  { key:"mascot.line.11", style:"calm" },
+  { key:"mascot.line.12", style:"cheer" }
 ];
 
-const roomNoticeGroups = [
-  { key:"studio", label:"工作间", icon:"🎙" },
-  { key:"manager", label:"宿管室", icon:"✎" },
-  { key:"game", label:"游戏房", icon:"🎮" },
-  { key:"flower", label:"花房区", icon:"✿" },
-  { key:"pets", label:"宠物区", icon:"🐾" }
-];
+function roomNoticeGroups(){
+  return dormConfig.noticeRooms;
+}
 
-const allowedNoticeRooms = new Set(roomNoticeGroups.map(room => room.key));
+function allowedNoticeRooms(){
+  return new Set(dormConfig.noticeRooms.map(room => room.key));
+}
 
 function isTinyScreen(){
   return window.innerWidth <= 540;
@@ -4160,6 +4392,11 @@ function syncOverlayToImage(){
   root.style.setProperty("--identity-scale", String(scale));
 }
 
+function syncDormResponsiveLayout(){
+  syncOverlayToImage();
+  syncRecentObtainedPanelPlacement();
+}
+
 /* =========================================================
    通用工具
 ========================================================= */
@@ -4173,41 +4410,17 @@ function escapeHtml(value){
 }
 
 function roleLabel(role){
-  const r = String(role || "").toLowerCase();
-  if(r === "owner") return "维修工";
-  if(r === "admin") return "宿管";
-  if(r === "member") return "房客";
-  if(r === "applying") return "申请人";
-  return "参观者";
+  const r = String(role || "visitor").toLowerCase();
+  const key = `role.${r}`;
+  return Object.prototype.hasOwnProperty.call(dormTexts, key) ? t(key) : t("role.visitor");
 }
 
 function cleanGoldLedgerNote(value){
-  const raw = String(value || "").trim();
-  if(!raw) return "";
-
-  const cleaned = raw
-    .replace(/（\s*title_id\s*:\s*\d+\s*）/g, "")
-    .replace(/\(\s*title_id\s*:\s*\d+\s*\)/g, "")
-    .replace(/（\s*achievement_id\s*:\s*\d+\s*）/g, "")
-    .replace(/\(\s*achievement_id\s*:\s*\d+\s*\)/g, "")
-    .replace(/历史金币余额校准[：:][^。]*。?/g, "金币余额调整")
-    .trim();
-
-  return cleaned || "金币变动";
+  return String(value || "").trim();
 }
 
 function ledgerLabel(item){
-  const sub = String(item.subcategory || "");
-  if(sub === "submit") return "演唱交音奖励";
-  if(sub === "publish") return "演唱发布奖励";
-  if(sub === "mix_submit") return "后期交付奖励";
-  if(sub === "mix_publish") return "后期发布奖励";
-  if(sub === "pet_adopt") return "宠物领养";
-  if(sub === "flower_buy") return "花房买入";
-  if(sub === "flower_sell") return "花房卖出";
-
-  const note = cleanGoldLedgerNote(item.note);
-  return note || item.subcategory || item.category || "金币变动";
+  return cleanGoldLedgerNote(item.note) || String(item.subcategory || item.category || "").trim() || t("common.config_error");
 }
 
 function formatDate(value){
@@ -4244,9 +4457,7 @@ function setLedgerMessage(message,isError=false){
   list.innerHTML = `<div class="${isError ? "errorText" : "emptyText"}">${escapeHtml(message)}</div>`;
 }
 
-/* =========================================================
-   身份与登录状态
-========================================================= */
+/* 身份与登录状态 */
 function readLocalAuth(){
   authState.loggedIn = localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
   authState.nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
@@ -4255,7 +4466,7 @@ function readLocalAuth(){
   authState.memberCode = localStorage.getItem(STORAGE_KEYS.memberCode) || "";
 
   if(!authState.loggedIn || !authState.nickname || !authState.memberId){
-    window.location.href = room10PageUrl("index", "../index/index.html");
+    window.location.href = requirePageUrl("index");
     return false;
   }
 
@@ -4269,14 +4480,14 @@ function updateIdentity(member){
   if(!currentUserText) return;
 
   if(!name){
-    if(identityNickname) identityNickname.textContent = "参观者";
+    if(identityNickname) identityNickname.textContent = t("role.visitor");
     if(identitySeparator) identitySeparator.classList.add("hidden");
     if(identityRole){
       identityRole.classList.add("hidden");
-      identityRole.textContent = "参观者";
+      identityRole.textContent = t("role.visitor");
     }
-    if(!identityNickname) currentUserText.textContent = "参观者";
-    if(identityAuthText) identityAuthText.textContent = "登录";
+    if(!identityNickname) currentUserText.textContent = t("role.visitor");
+    if(identityAuthText) identityAuthText.textContent = t("identity.login_button");
     return;
   }
 
@@ -4289,7 +4500,7 @@ function updateIdentity(member){
     currentUserText.textContent = `${name}｜${role}`;
   }
 
-  if(identityAuthText) identityAuthText.textContent = "登出";
+  if(identityAuthText) identityAuthText.textContent = t("identity.logout_button");
 }
 
 function handleLogout(){
@@ -4303,7 +4514,7 @@ function handleLogout(){
   localStorage.removeItem("room10_current_user");
   localStorage.removeItem("currentUser");
 
-  window.location.href = room10PageUrl("index", "../index/index.html");
+  window.location.href = requirePageUrl("index");
 }
 
 /* =========================================================
@@ -4312,11 +4523,11 @@ function handleLogout(){
 function getManagerPageByRole(){
   const role = String(authState.role || localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
 
-  if(role === "owner") return room10PageUrl("managerOwner", "../manager/manager-owner.html");
-  if(role === "admin") return room10PageUrl("managerAdmin", "../manager/manager-admin.html");
-  if(role === "member" || role === "applying") return room10PageUrl("managerMember", "../manager/manager-member.html");
+  if(role === "owner") return requirePageUrl("managerOwner");
+  if(role === "admin") return requirePageUrl("managerAdmin");
+  if(role === "member" || role === "applying") return requirePageUrl("managerMember");
 
-  return room10PageUrl("managerVisitor", "../manager/manager-visitor.html");
+  return requirePageUrl("managerVisitor");
 }
 
 function enterManagerRoom(){
@@ -4374,7 +4585,7 @@ function setupRoomNav(currentRoom){
         return;
       }
 
-      const targetUrl = room10PageUrl(btn.dataset.page, btn.dataset.url);
+      const targetUrl = requirePageUrl(btn.dataset.page);
       enterRoom(targetUrl, btn.dataset.login === "true", btn.dataset.room);
     });
   });
@@ -4386,31 +4597,15 @@ function setupRoomNav(currentRoom){
 ========================================================= */
 function noticeRoomKey(value){
   const raw = String(value || "").trim().toLowerCase();
-
-  const aliases = {
-    work:"studio",
-    studio:"studio",
-    project:"studio",
-    projects:"studio",
-    manager:"manager",
-    admin:"manager",
-    game:"game",
-    games:"game",
-    pet:"pets",
-    pets:"pets",
-    flower:"flower",
-    flowers:"flower",
-    market:"flower"
-  };
-
-  const key = aliases[raw] || raw;
-  return allowedNoticeRooms.has(key) ? key : "";
+  const aliases = dormConfig.noticeRoomAliases || {};
+  const key = String(aliases[raw] || raw).trim();
+  return allowedNoticeRooms().has(key) ? key : "";
 }
 
 function normalizeNoticeItem(item){
   const roomKey = noticeRoomKey(item.room || item.room_key || item.roomKey || item.category || item.notice_room || item.source_room);
 
-  const rawTitle = item.title || item.notice_title || item.subject || item.name || "系统通知";
+  const rawTitle = item.title || item.notice_title || item.subject || item.name || t("notice.default_title");
   const rawDesc = item.desc || item.description || item.content || item.message || item.body || item.notice_content || "";
 
   return {
@@ -4443,10 +4638,7 @@ function noticeStillUseful(item){
   if(!noticeVisibleToCurrentUser(item)) return false;
 
   const status = String(item.status || item.notice_status || item.state || "").toLowerCase();
-  const finishedStatuses = new Set([
-    "done","completed","complete","confirmed","handled","processed","resolved","expired","archived","closed","cancelled","canceled","invalid"
-  ]);
-  if(finishedStatuses.has(status)) return false;
+  if(dormConfig.noticeFinishedStatuses.has(status)) return false;
 
   const expiresAt = item.expires_at || item.expire_at || item.valid_until || item.end_at || item.ended_at || null;
   if(expiresAt){
@@ -4462,9 +4654,8 @@ function noticeStillUseful(item){
 
   /* 个人任务类只留在“我的任务”，不重复进入系统通知。 */
   if(roomKey === "studio"){
-    const taskTypes = new Set(["vocal_submit","mix_submit","claim","singer_claim","mix_claim","todo_vocal","todo_mix"]);
-    if(taskTypes.has(type)) return false;
-    if(/待交音|待后期|待认领/.test(text)) return false;
+    if(dormConfig.noticeStudioTaskTypes.has(type)) return false;
+    if(dormConfig.noticeStudioTaskKeywords.some(keyword => keyword && text.includes(keyword))) return false;
 
     const releaseDateRaw = item.release_date || item.publish_at || item.scheduled_at || item.release_at || null;
     const projectStatus = String(item.project_status || item.work_status || item.publish_status || "").toLowerCase();
@@ -4472,7 +4663,7 @@ function noticeStillUseful(item){
       const releaseDate = new Date(releaseDateRaw);
       if(!Number.isNaN(releaseDate.getTime())){
         const isPastRelease = releaseDate.getTime() < Date.now();
-        const isReleased = ["released","published","done","complete","completed"].includes(projectStatus);
+        const isReleased = dormConfig.noticeReleasedProjectStatuses.has(projectStatus);
         if(isPastRelease || isReleased) return false;
       }
     }
@@ -4488,10 +4679,10 @@ function renderDormNoticeCenter(items){
   const list = (Array.isArray(items) ? items : [])
     .filter(noticeStillUseful)
     .map(normalizeNoticeItem)
-    .filter(item => item.room && allowedNoticeRooms.has(item.room) && (item.title || item.desc));
+    .filter(item => item.room && allowedNoticeRooms().has(item.room) && (item.title || item.desc));
 
   const byRoom = new Map();
-  roomNoticeGroups.forEach(room => byRoom.set(room.key, []));
+  roomNoticeGroups().forEach(room => byRoom.set(room.key, []));
 
   list.forEach(item => {
     if(byRoom.has(item.room)){
@@ -4499,35 +4690,35 @@ function renderDormNoticeCenter(items){
     }
   });
 
-  wrap.innerHTML = roomNoticeGroups.map(room => {
+  wrap.innerHTML = roomNoticeGroups().map(room => {
     const roomItems = byRoom.get(room.key) || [];
     const shouldOpen = false;
 
     const body = roomItems.length
       ? roomItems.map(item => {
-        const desc = item.desc || "暂无详细内容。";
+        const desc = item.desc || t("notice.default_desc_missing");
         const time = item.created_at ? formatDate(item.created_at) : "";
 
         return `
           <div class="noticeRoomItem">
             <div class="noticeRoomTitleLine">
-              <div class="noticeRoomItemTitle">${escapeHtml(item.title || "通知")}</div>
+              <div class="noticeRoomItemTitle">${escapeHtml(item.title || t("notice.default_title"))}</div>
               ${time ? `<div class="noticeRoomTime">${escapeHtml(time)}</div>` : ""}
             </div>
             <div class="noticeRoomItemDesc">${escapeHtml(desc)}</div>
           </div>
         `;
       }).join("")
-      : '<div class="noticeRoomEmpty">暂无通知。</div>';
+      : `<div class="noticeRoomEmpty">${tHtml("notice.empty")}</div>`;
 
     return `
       <section class="noticeRoomGroup${shouldOpen ? " open" : ""}" data-room="${escapeHtml(room.key)}">
         <div class="noticeRoomHeader">
           <button class="noticeRoomToggle" type="button">
-            <span>${escapeHtml(room.icon)} ${escapeHtml(room.label)}</span>
+            <span>${escapeHtml(room.icon)} ${tHtml(room.labelKey)}</span>
           </button>
           <span class="noticeRoomCount">${roomItems.length}</span>
-          <button class="noticeRoomFoldBtn" type="button">${shouldOpen ? "收起" : "展开"}</button>
+          <button class="noticeRoomFoldBtn" type="button">${shouldOpen ? tHtml("notice.fold_close") : tHtml("notice.fold_open")}</button>
         </div>
         <div class="noticeRoomBody">${body}</div>
       </section>
@@ -4542,7 +4733,7 @@ function renderDormNoticeCenter(items){
       group.classList.toggle("open");
       const foldBtn = group.querySelector(".noticeRoomFoldBtn");
       if(foldBtn){
-        foldBtn.textContent = group.classList.contains("open") ? "收起" : "展开";
+        foldBtn.textContent = group.classList.contains("open") ? t("notice.fold_close") : t("notice.fold_open");
       }
     });
   });
@@ -4563,7 +4754,7 @@ async function loadSystemNotices(){
   if(!wrap) return;
 
   if(!authState.memberId || !authState.memberCode){
-    wrap.innerHTML = '<div class="errorText">请先登录后查看系统通知。</div>';
+    wrap.innerHTML = `<div class="errorText">${tHtml("notice.read_failed")}</div>`;
     return;
   }
 
@@ -4579,7 +4770,7 @@ async function loadSystemNotices(){
     renderDormNoticeCenter(rows);
   }catch(error){
     console.error(error);
-    wrap.innerHTML = '<div class="errorText">系统通知读取失败，请检查 get_room10_system_notifications RPC 或 RLS 权限。</div>';
+    wrap.innerHTML = `<div class="errorText">${tHtml("notice.read_failed")}：${escapeHtml(error.message || "get_room10_system_notifications")}</div>`;
   }
 }
 
@@ -4592,7 +4783,6 @@ function syncRecentObtainedPanelPlacement(){
   const panel = document.getElementById("recentObtainedPanel");
   const inventoryView = document.getElementById("view-inventory");
   const overlayEl = document.getElementById("overlay");
-  const shell = document.getElementById("dormShell");
   if(!panel || !inventoryView || !overlayEl) return;
 
   if(isDormMobileLayout()){
@@ -4609,14 +4799,9 @@ function syncRecentObtainedPanelPlacement(){
     overlayEl.appendChild(panel);
   }
 
-  if(shell){
-    const rect = shell.getBoundingClientRect();
-    const gap = Math.max(12, Math.round(window.innerWidth * 0.014));
-    const topOffset = Math.max(18, Math.round(rect.height * 0.095));
-    panel.style.left = `${Math.round(rect.right + gap)}px`;
-    panel.style.top = `${Math.round(rect.top + topOffset)}px`;
-    panel.style.width = "";
-  }
+  panel.style.left = "";
+  panel.style.top = "";
+  panel.style.width = "";
 }
 
 function activateDormView(target, saveState=true){
@@ -4650,10 +4835,10 @@ function jumpToSystemNotice(){
    我的任务：读取 / 渲染 / 快捷操作
 ========================================================= */
 function taskTypeLabel(type){
-  if(type === "vocal_submit" || type === "vocal_submitted") return "待交音";
-  if(type === "mix_submit" || type === "mix_submitted") return "待后期";
-  if(type === "claim" || type === "singer_claim" || type === "mix_claim" || type === "singer_claimed" || type === "mix_claimed") return "待认领";
-  return "我的任务";
+  if(type === "vocal_submit" || type === "vocal_submitted") return t("tasks.tab.vocal_submit");
+  if(type === "mix_submit" || type === "mix_submitted") return t("tasks.tab.mix_submit");
+  if(type === "claim" || type === "singer_claim" || type === "mix_claim" || type === "singer_claimed" || type === "mix_claimed") return t("tasks.tab.claim");
+  return t("tasks.title");
 }
 
 function taskTabKey(type){
@@ -4672,7 +4857,7 @@ function taskToneText(task){
     return escapeHtml(tone);
   }
 
-  return `调：${escapeHtml(tone)}`;
+  return `${tHtml("tasks.meta.tone_label")}：${escapeHtml(tone)}`;
 }
 
 function firstTaskText(task,keys){
@@ -4711,7 +4896,7 @@ function taskDateLine(task){
     "release_at"
   ]);
 
-  return releaseDate ? `预计发布：${escapeHtml(releaseDate)}` : "";
+  return releaseDate ? `${tHtml("tasks.meta.release_date")}：${escapeHtml(releaseDate)}` : "";
 }
 
 function taskOriginalLine(task){
@@ -4728,55 +4913,55 @@ function taskOriginalLine(task){
     "my_part_name"
   ]);
 
-  return originalNames ? `你负责：${escapeHtml(originalNames)}` : "";
+  return originalNames ? `${tHtml("tasks.meta.original")}：${escapeHtml(originalNames)}` : "";
 }
 
 function taskSingerNeedLine(task){
   const current = firstTaskNumber(task,["singer_count","current_singer_count","claimed_singer_count"],0);
   const target = firstTaskNumber(task,["target_singer_count","required_singer_count","need_singer_count"],0);
   const missing = firstTaskNumber(task,["missing_singer_count","need_claim_count"],Math.max(target - current, 0));
-  if(target > 0) return `演唱人数：${current}/${target}${missing > 0 ? `，缺 ${missing} 人` : ""}`;
-  return `演唱人数：${current}`;
+  if(target > 0) return `${tHtml("tasks.meta.singer_count")}：${current}/${target}${missing > 0 ? `，${t("tasks.meta.singer_missing", { count:missing })}` : ""}`;
+  return `${tHtml("tasks.meta.singer_count")}：${current}`;
 }
 
 function taskSingerCountLine(task){
   const singerCount = firstTaskNumber(task,["singer_count","current_singer_count","claimed_singer_count"],0);
-  return `演唱人数：${singerCount}`;
+  return `${tHtml("tasks.meta.singer_count")}：${singerCount}`;
 }
 
 function taskMainButtonHtml(task){
   const projectId = escapeHtml(task.project_id);
 
   if(task.task_type === "vocal_submit"){
-    return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="submit_vocal" data-project-id="${projectId}">交音</button>`;
+    return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="submit_vocal" data-project-id="${projectId}">${tHtml("tasks.action.submit_vocal")}</button>`;
   }
 
   if(task.task_type === "mix_submit"){
-    return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="submit_mix" data-project-id="${projectId}">交付</button>`;
+    return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="submit_mix" data-project-id="${projectId}">${tHtml("tasks.action.submit_mix")}</button>`;
   }
 
   if(task.task_type === "singer_claim"){
-    return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="claim_singer" data-project-id="${projectId}">认领</button>`;
+    return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="claim_singer" data-project-id="${projectId}">${tHtml("tasks.action.claim_singer")}</button>`;
   }
 
   if(task.task_type === "mix_claim"){
-    return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="claim_mix" data-project-id="${projectId}">认领后期</button>`;
+    return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="claim_mix" data-project-id="${projectId}">${tHtml("tasks.action.claim_mix")}</button>`;
   }
 
   if(task.task_type === "vocal_submitted"){
-    return `<button class="dormSubBtn dormTaskActionBtn" type="button" data-action="undo_vocal" data-project-id="${projectId}">撤回交音</button>`;
+    return `<button class="dormSubBtn dormTaskActionBtn" type="button" data-action="undo_vocal" data-project-id="${projectId}">${tHtml("tasks.action.undo_vocal")}</button>`;
   }
 
   if(task.task_type === "mix_submitted"){
-    return `<button class="dormSubBtn dormTaskActionBtn" type="button" data-action="undo_mix" data-project-id="${projectId}">撤回</button>`;
+    return `<button class="dormSubBtn dormTaskActionBtn" type="button" data-action="undo_mix" data-project-id="${projectId}">${tHtml("tasks.action.undo_mix")}</button>`;
   }
 
   if(task.task_type === "singer_claimed"){
-    return `<span class="taskDoneText">已认领，撤回请去工作间</span>`;
+    return `<span class="taskDoneText">${tHtml("tasks.claimed_singer_hint")}</span>`;
   }
 
   if(task.task_type === "mix_claimed"){
-    return `<span class="taskDoneText">已认领后期，撤回请去工作间</span>`;
+    return `<span class="taskDoneText">${tHtml("tasks.claimed_mix_hint")}</span>`;
   }
 
   return "";
@@ -4819,7 +5004,9 @@ function taskMetaItems(task){
 
 function formatTaskTitle(task){
   const rawCode = firstTaskText(task,["project_code","code","project_no","project_number"]);
-  const name = escapeHtml(firstTaskText(task,["project_name","name","title","song_name","work_name"]) || "未命名项目");
+  const rawName = firstTaskText(task,["project_name","name","title","song_name","work_name"]);
+  if(!rawName) throw new Error(`${t("common.config_error")}：project_name`);
+  const name = escapeHtml(rawName);
 
   if(!rawCode) return name;
 
@@ -4903,7 +5090,7 @@ function updateDormTaskTabs(rows){
   document.querySelectorAll(".taskTab").forEach(btn => {
     const key = btn.dataset.taskTab;
     btn.classList.toggle("active", key === activeDormTaskTab);
-    const badge = btn.querySelector("span");
+    const badge = btn.querySelector("span:last-child");
     if(badge) badge.textContent = String(counts[key] || 0);
   });
 }
@@ -4914,7 +5101,7 @@ function normalizeDormTaskRows(rows){
 
     item.project_id = firstTaskText(item,["project_id","id","projectId","project_code"]);
     item.project_code = firstTaskText(item,["project_code","code","project_no","project_number"]);
-    item.project_name = firstTaskText(item,["project_name","name","title","song_name","work_name"]) || "未命名项目";
+    item.project_name = firstTaskText(item,["project_name","name","title","song_name","work_name"]);
     item.project_tone = firstTaskText(item,["project_tone","tone","key","song_key"]);
     item.release_date = firstTaskText(item,["release_date","project_release_date","scheduled_release_date","publish_date","publish_at","scheduled_at","release_at"]);
     item.my_original_names = firstTaskText(item,["my_original_names","my_original_name","assigned_original_names","assigned_original_name","original_names","original_name","part_names","part_name","my_part_names","my_part_name"]);
@@ -4933,7 +5120,7 @@ function renderDormTasks(rows){
   if(!allRows.length){
     list.innerHTML = `
       <div class="taskCard">
-        <h3 class="taskCardTitle">今天没有需要你处理的任务</h3>
+        <h3 class="taskCardTitle">${tHtml("tasks.empty_by_type", { type:t("tasks.title") })}</h3>
       </div>
     `;
     return;
@@ -4945,7 +5132,7 @@ function renderDormTasks(rows){
   );
 
   if(!currentRows.length){
-    list.innerHTML = `<div class="emptyText">${escapeHtml(taskTypeLabel(activeDormTaskTab))}暂无任务。</div>`;
+    list.innerHTML = `<div class="emptyText">${tHtml("tasks.empty_by_type", { type:taskTypeLabel(activeDormTaskTab) })}</div>`;
     return;
   }
 
@@ -4958,11 +5145,11 @@ async function loadDormTasks(){
 
   if(!authState.memberId || !authState.memberCode){
     updateDormTaskTabs([]);
-    list.innerHTML = '<div class="errorText">请先登录后查看我的任务。</div>';
+    list.innerHTML = `<div class="errorText">${tHtml("tasks.login_required")}</div>`;
     return;
   }
 
-  list.innerHTML = '<div class="emptyText">正在读取我的任务……</div>';
+  list.innerHTML = '<div class="emptyText" data-text-key="tasks.loading"></div>';
 
   try{
     const { data,error } = await supabaseClient.rpc("get_dorm_work_tasks",{
@@ -4976,7 +5163,7 @@ async function loadDormTasks(){
     renderDormTasks(dormTaskRows);
   }catch(error){
     console.error(error);
-    list.innerHTML = '<div class="errorText">我的任务读取失败，请检查 get_dorm_work_tasks RPC。</div>';
+    list.innerHTML = `<div class="errorText">${tHtml("tasks.read_failed")}：${escapeHtml(error.message || "get_dorm_work_tasks")}</div>`;
   }
 }
 
@@ -5013,7 +5200,7 @@ async function runDormTaskAction(action,projectId){
 
     const result = Array.isArray(data) ? data[0] : data;
     if(!result || result.ok !== true){
-      alert(result?.message || "操作失败，任务状态可能已变化。");
+      alert(result?.message || t("tasks.action_failed"));
       await loadDormTasks();
       return;
     }
@@ -5059,7 +5246,7 @@ async function runDormTaskAction(action,projectId){
     await loadDormTasks();
   }catch(error){
     console.error(error);
-    alert(`操作失败：${error.message || "请检查任务 RPC"}`);
+    alert(`${t("tasks.rpc_failed")}：${error.message || fn}`);
     await loadDormTasks();
   }
 }
@@ -5120,16 +5307,16 @@ async function loadGoldInfo(){
     member = await fetchCurrentMember();
   }catch(error){
     console.error(error);
-    setText("walletTitle",`${authState.nickname || "成员"}的钱包`);
-    setText("goldSub","金币信息读取失败，请检查 members 表读取权限。");
-    setLedgerMessage("金币记录读取失败，请检查 gold_ledger 表读取权限。",true);
+    setText("walletTitle", t("wallet.title"));
+    setText("goldSub", `${t("wallet.read_failed")}：${error.message || "members"}`);
+    setLedgerMessage(t("wallet.ledger_read_failed"), true);
     return;
   }
 
   if(!member){
-    setText("walletTitle","无法读取钱包");
-    setText("goldSub","当前登录缓存对应的成员不存在，请重新登录。");
-    setLedgerMessage("没有找到当前成员的金币记录。",true);
+    setText("walletTitle", t("wallet.title"));
+    setText("goldSub", t("wallet.member_missing"));
+    setLedgerMessage(t("wallet.no_gold_record"), true);
     return;
   }
 
@@ -5149,8 +5336,8 @@ async function loadGoldInfo(){
   loadHonorSummary(member.id);
   loadInventory();
 
-  setText("walletTitle",`${member.nickname || "成员"}的钱包`);
-  setText("goldSub","金币余额与最近收支记录集中显示");
+  setText("walletTitle", t("wallet.title"));
+  setText("goldSub", t("wallet.ledger_desc"));
   setText("goldBalance",member.gold_balance ?? 0);
   setText("goldEarned",member.gold_total_earned ?? 0);
   setText("goldSpent",member.gold_total_spent ?? 0);
@@ -5168,12 +5355,12 @@ async function loadGoldLedger(memberId){
 
   if(error){
     console.error(error);
-    setLedgerMessage("金币记录读取失败，请检查 gold_ledger 权限。",true);
+    setLedgerMessage(`${t("wallet.ledger_read_failed")}：${error.message || "gold_ledger"}`, true);
     return;
   }
 
   if(!data || !data.length){
-    setLedgerMessage("当前账号暂无金币流水。");
+    setLedgerMessage(t("wallet.ledger_empty"));
     setText("todayGold","0");
     return;
   }
@@ -5221,14 +5408,14 @@ async function loadGoldLedger(memberId){
    前端只负责渲染，不再手写 item_key 映射。
 ========================================================= */
 function openCollectionBook(){
-  window.location.href = "./book.html";
+  window.location.href = requirePageUrl("dormBook");
 }
 
 function collectionBookCardHtml(){
   return `
     <div class="inventoryBookEntry">
-      <button class="collectionBookCard" type="button" onclick="openCollectionBook()" aria-label="打开收集图鉴">
-        <img src="./book.png" alt="" loading="lazy">
+      <button class="collectionBookCard" type="button" onclick="openCollectionBook()" aria-label="${tHtml("inventory.book_button")}" data-hover-text="${tHtml("inventory.book_hover")}">
+        <img src="${escapeHtml(requireAssetUrl("dorm.book"))}" alt="" loading="lazy">
       </button>
     </div>
   `;
@@ -5246,7 +5433,8 @@ function itemDisplayName(item){
   const directName = itemValue(item,["item_name","item_display_name","display_name","name","title","resource_name"]);
   if(directName) return String(directName);
   const key = itemValue(item,["item_key","item_code","code","resource_key"]);
-  return key ? String(key) : "未命名道具";
+  if(key) throw new Error(`${t("common.config_error")}：item_types.item_name(${key})`);
+  throw new Error(`${t("common.config_error")}：item_key`);
 }
 
 function isKeyFallbackName(item){
@@ -5271,18 +5459,7 @@ function itemCategorySortOrder(item){
 }
 
 function inventoryFallbackEmoji(item){
-  const text = String(`${item?.item_key || ""} ${item?.item_name || ""} ${item?.item_category || ""}`).toLowerCase();
-  if(text.includes("water") || text.includes("水")) return "💧";
-  if(text.includes("fert") || text.includes("肥")) return "🌱";
-  if(text.includes("seed") || text.includes("种子")) return "🌰";
-  if(text.includes("mango") || text.includes("芒果")) return "🥭";
-  if(text.includes("flower") || text.includes("花")) return "🌸";
-  if(text.includes("pet") || text.includes("宠")) return "🐾";
-  if(text.includes("holiday") || text.includes("节日")) return "🎁";
-  if(text.includes("badge") || text.includes("徽章")) return "🏅";
-  if(text.includes("paper") || text.includes("note") || text.includes("纸条")) return "📝";
-  if(text.includes("gold") || text.includes("coin") || text.includes("token") || text.includes("金币") || text.includes("游戏币")) return "🪙";
-  return "🎒";
+  throw new Error(`${t("common.config_error")}：item_icon(${item?.item_key || "unknown"})`);
 }
 
 function htmlAttrJson(value){
@@ -5309,11 +5486,24 @@ function iconSourceCandidates(rawIcon){
     return [];
   }
 
-  const clean = icon.replace(/^\.\//,"").replace(/^\.\.\//,"");
-  if(!/\.(png|jpe?g|gif|webp|svg)$/i.test(clean)) return [];
+  const candidates = [];
 
-  if(icon.startsWith("../") || icon.startsWith("./")) return [icon];
-  return ["../" + clean];
+  if(typeof window.room10Asset === "function"){
+    const assetUrl = window.room10Asset(icon);
+    if(assetUrl) candidates.push(assetUrl);
+  }
+
+  const clean = icon.replace(/^\.\//,"").replace(/^\.\.\//,"");
+  if(/\.(png|jpe?g|gif|webp|svg)$/i.test(clean)){
+    if(icon.startsWith("../") || icon.startsWith("./")){
+      candidates.push(icon);
+    }else{
+      candidates.push(icon);
+      candidates.push("../" + clean);
+    }
+  }
+
+  return uniqueList(candidates);
 }
 
 function imageFallbackHtml(fallback, className="inventoryEmoji"){
@@ -5344,18 +5534,18 @@ function tryNextDormImgSource(img){
 
   const span = document.createElement("span");
   span.className = img.dataset.fallbackClass || "inventoryEmoji";
-  span.textContent = img.dataset.fallback || "🎒";
+  span.textContent = `${t("common.asset_missing")}：${img.getAttribute("src") || "item_icon"}`;
   img.replaceWith(span);
 }
 
 function ledgerIconHtml(isIn){
   const fallback = isIn ? "↑" : "↓";
-  return safeIconImgHtml(["../coin.png"], fallback, "inventoryEmoji");
+  return safeIconImgHtml([requireAssetUrl("root.coin")], fallback, "inventoryEmoji");
 }
 
 function itemIconHtml(item){
   const rawIcon = String(itemValue(item,["item_icon","icon","emoji","image","image_url","icon_url"])).trim();
-  const fallback = inventoryFallbackEmoji(item);
+  const fallback = "";
 
   if(rawIcon && rawIcon.length <= 4 && !/\.(png|jpe?g|gif|webp|svg)$/i.test(rawIcon)){
     return imageFallbackHtml(rawIcon);
@@ -5366,7 +5556,7 @@ function itemIconHtml(item){
     return safeIconImgHtml(candidates, fallback, "inventoryEmoji");
   }
 
-  return imageFallbackHtml(fallback);
+  throw new Error(`${t("common.config_error")}：item_icon(${item?.item_key || "unknown"})`);
 }
 
 function mergeInventoryRows(memberItems,itemTypes,itemCategories){
@@ -5374,39 +5564,44 @@ function mergeInventoryRows(memberItems,itemTypes,itemCategories){
   const categoryMap = new Map((Array.isArray(itemCategories) ? itemCategories : []).map(category => [String(category.category_key || "").trim(), category]));
 
   return (Array.isArray(memberItems) ? memberItems : []).map(row => {
-    const type = typeMap.get(String(row.item_key || "").trim()) || {};
-    const categoryKey = String(type.item_category || row.item_category || "general").trim() || "general";
-    const category = categoryMap.get(categoryKey) || {};
+    const itemKey = String(row.item_key || "").trim();
+    const type = typeMap.get(itemKey);
+    if(!type) throw new Error(`${t("inventory.item_types_failed")}：${itemKey}`);
+    const categoryKey = String(type.item_category || "").trim();
+    if(!categoryKey) throw new Error(`${t("inventory.item_categories_failed")}：${itemKey}`);
+    const category = categoryMap.get(categoryKey);
+    if(!category) throw new Error(`${t("inventory.item_categories_failed")}：${categoryKey}`);
     const categoryName = String(category.category_name || "").trim();
+    if(!categoryName) throw new Error(`${t("inventory.item_categories_failed")}：${categoryKey}.category_name`);
     return {
       ...row,
       ...type,
       item_category: categoryKey,
-      category_name: categoryName || categoryKey || "其他",
+      category_name: categoryName,
       category_sort_order: Number.isFinite(Number(category.sort_order)) ? Number(category.sort_order) : 9999
     };
   });
 }
 
 function inventoryCategoryKey(item){
-  return String(item?.item_category || "general").trim() || "general";
+  return String(item?.item_category || "").trim();
 }
 
 function inventoryCategoryLabel(item){
-  return String(item?.category_name || item?.item_category || "其他").trim() || "其他";
+  return String(item?.category_name || "").trim();
 }
 
 
 function isStoredGachaBallKey(itemKey){
-  return Object.prototype.hasOwnProperty.call(STORED_GACHA_BALL_KEYS, String(itemKey || "").trim());
+  return Object.prototype.hasOwnProperty.call(dormConfig.storedGachaBallTiers, String(itemKey || "").trim());
 }
 
 function storedGachaTierFromKey(itemKey){
-  return STORED_GACHA_BALL_KEYS[String(itemKey || "").trim()] || "";
+  return String(dormConfig.storedGachaBallTiers[String(itemKey || "").trim()] || "");
 }
 
 function storedGachaBallLabel(itemKey){
-  return "未打开扭蛋";
+  return t("gacha.title");
 }
 
 function isStoredGachaBallItem(item){
@@ -5421,23 +5616,24 @@ function storedGachaBallItemAttrs(item,qty){
   return [
     'role="button"',
     'tabindex="0"',
-    'aria-label="' + escapeHtml(name + "，点击打开") + '"',
+    'aria-label="' + escapeHtml(name) + '"',
     'data-gacha-ball="true"',
     'data-item-key="' + escapeHtml(itemKey) + '"',
     'data-tier-key="' + escapeHtml(tierKey) + '"',
     'data-item-name="' + escapeHtml(name) + '"',
-    'data-quantity="' + escapeHtml(qty) + '"'
+    'data-quantity="' + escapeHtml(qty) + '"',
+    'data-open-label="' + tHtml("inventory.gacha_open_badge") + '"'
   ].join(" ");
 }
 
 function renderStoredGachaRewards(rewards){
   const list = Array.isArray(rewards) ? rewards : [];
-  if(!list.length) return "没有读取到奖励内容。";
+  if(!list.length) return t("gacha.no_rewards");
 
   return list.map(reward => {
-    const name = reward.display_name || reward.item_name || reward.name || "奖励";
+    const name = reward.display_name || reward.item_name || reward.name || t("common.config_error");
     const amount = Number(reward.quantity ?? reward.amount ?? 0);
-    return `获得 <strong>${escapeHtml(name)}</strong>${amount > 0 ? ` ×${amount}` : ""}`;
+    return `<strong>${escapeHtml(name)}</strong>${amount > 0 ? ` ×${amount}` : ""}`;
   }).join("<br>");
 }
 
@@ -5484,10 +5680,10 @@ function openStoredGachaBallModalFromElement(el){
   const icon = document.getElementById("gachaStoredBallIconImg");
   const openAllBtn = document.getElementById("gachaOpenAllBtn");
 
-  if(title) title.textContent = "未打开扭蛋";
-  if(desc) desc.textContent = `当前数量：${quantity} 个 · 打开后奖励会自动入账。`;
-  if(icon) icon.src = "./gacha-ball.png";
-  if(openAllBtn) openAllBtn.textContent = `全部打开${quantity > 1 ? `（${quantity}个）` : ""}`;
+  if(title) title.textContent = t("gacha.title");
+  if(desc) desc.textContent = t("gacha.quantity", { count:quantity });
+  if(icon) icon.src = requireAssetUrl("dorm.gachaBall");
+  if(openAllBtn) openAllBtn.textContent = quantity > 1 ? t("gacha.open_all_count", { count:quantity }) : t("gacha.open_all");
 
   showStoredGachaResult("");
   setStoredGachaButtonsDisabled(false);
@@ -5522,7 +5718,7 @@ async function refreshDormWalletAfterStoredGacha(){
       await loadGoldLedger(member.id);
     }
   }catch(error){
-    console.warn("打开扭蛋后刷新钱包失败。", error);
+    showStoredGachaResult(`${t("gacha.wallet_refresh_failed")}：${error.message || "members/gold_ledger"}`);
   }
 }
 
@@ -5531,7 +5727,7 @@ async function openStoredGachaBall(mode){
 
   const openMode = mode === "all" ? "all" : "one";
   setStoredGachaButtonsDisabled(true);
-  showStoredGachaResult(openMode === "all" ? "正在打开全部扭蛋……" : "正在打开一个扭蛋……");
+  showStoredGachaResult(openMode === "all" ? t("gacha.opening_all") : t("gacha.opening_one"));
 
   try{
     const { data,error } = await supabaseClient.rpc("open_stored_gacha_balls",{
@@ -5544,14 +5740,14 @@ async function openStoredGachaBall(mode){
 
     const result = Array.isArray(data) ? data[0] : data;
     if(!result || result.success !== true){
-      showStoredGachaResult(result?.message || "打开失败，可能背包数量已经变化。");
+      showStoredGachaResult(result?.message || t("gacha.open_failed"));
       setStoredGachaButtonsDisabled(false);
       await loadInventory();
       return;
     }
 
     const rewardHtml = renderStoredGachaRewards(result.rewards);
-    showStoredGachaResult(`打开成功，共打开 <strong>${Number(result.opened_count || 0)}</strong> 个。<br>${rewardHtml}`, true);
+    showStoredGachaResult(`${escapeHtml(t("gacha.success", { count:Number(result.opened_count || 0) }))}<br>${rewardHtml}`, true);
 
     await loadInventory();
     await refreshDormWalletAfterStoredGacha();
@@ -5563,17 +5759,17 @@ async function openStoredGachaBall(mode){
     const openAllBtn = document.getElementById("gachaOpenAllBtn");
     if(desc){
       desc.textContent = nextQuantity > 0
-        ? `背包里还剩 ${nextQuantity} 个，可以继续打开。`
-        : "这类未打开扭蛋已经全部打开。";
+        ? t("gacha.remaining", { count:nextQuantity })
+        : t("gacha.empty_after_open");
     }
     if(openAllBtn){
-      openAllBtn.textContent = `全部打开${nextQuantity > 1 ? `（${nextQuantity}个）` : ""}`;
+      openAllBtn.textContent = nextQuantity > 1 ? t("gacha.open_all_count", { count:nextQuantity }) : t("gacha.open_all");
     }
 
     setStoredGachaButtonsDisabled(nextQuantity <= 0);
   }catch(error){
     console.error(error);
-    showStoredGachaResult(`打开失败：${error.message || "请检查 open_stored_gacha_balls RPC。"}`);
+    showStoredGachaResult(`${t("gacha.open_failed")}：${error.message || "open_stored_gacha_balls"}`);
     setStoredGachaButtonsDisabled(false);
   }
 }
@@ -5642,7 +5838,7 @@ function renderInventoryGroup(key, rows){
     <section class="inventoryGroup" data-category="${escapeHtml(key)}">
       <div class="inventoryGroupTitle">
         <span>${escapeHtml(label)}</span>
-        <span class="inventoryGroupCount">${rows.length} 件</span>
+        <span class="inventoryGroupCount">${rows.length}</span>
       </div>
       <div class="inventoryGroupGrid">
         ${rows.map(({ item, qty }) => {
@@ -5678,7 +5874,7 @@ function renderInventory(items){
   const bookCard = collectionBookCardHtml();
 
   if(!rows.length){
-    wrap.innerHTML = `${bookCard}<div class="emptyText inventoryEmptyNote">当前背包暂无道具。</div>`;
+    wrap.innerHTML = `${bookCard}<div class="emptyText inventoryEmptyNote">${tHtml("inventory.empty")}</div>`;
     return;
   }
 
@@ -5698,35 +5894,90 @@ function renderInventory(items){
 }
 
 
+function escapeRegExp(value){
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function recentSourceLabel(row){
+  const directLabel = itemValue(row,[
+    "source_label",
+    "source_display_name",
+    "source_name",
+    "display_source",
+    "recent_source_label",
+    "recent_source"
+  ]);
+
+  if(directLabel) return String(directLabel).trim();
+
   const sourceType = String(row?.source_type || "").trim();
   const sourceDetail = String(row?.source_detail || "").trim();
   const note = String(row?.note || "").trim();
-  const combined = `${sourceType} ${sourceDetail} ${note}`;
 
-  if(/gacha/i.test(combined)) return "扭蛋机";
-  if(/flower|花房/.test(combined)) return "花房";
-  if(/daily|礼包|签到|领取/.test(combined)) return "领取";
-  if(/pet|宠物/.test(combined)) return "宠物区";
-  if(/achievement|成就/.test(combined)) return "成就";
-  if(sourceType) return sourceType;
-  return "道具";
+  for(const value of [sourceDetail, sourceType, note]){
+    if(/[\u4e00-\u9fff]/.test(value)) return value;
+  }
+
+  return "";
 }
+
+function cleanRecentSourceLabel(sourceLabel, itemName, qty){
+  let source = String(sourceLabel || "").trim();
+  const name = String(itemName || "").trim();
+
+  if(!source || !name) return source;
+
+  const count = Number(qty || 0);
+  const qtyPart = count > 0 ? escapeRegExp(String(count)) : "\\d+";
+  const nameWithQtyRe = new RegExp(`${escapeRegExp(name)}\\s*(?:×|x|X)\\s*${qtyPart}`, "g");
+
+  source = source.replace(nameWithQtyRe, "").trim();
+
+  if(source.includes("：")){
+    const parts = source.split("：");
+    const prefix = parts.shift().trim();
+    const rest = parts.join("：").trim();
+
+    if(!rest || rest === name || rest.includes(name)){
+      source = prefix;
+    }
+  }
+
+  if(source === name){
+    source = "";
+  }
+
+  const unopenedGachaName = t("gacha.title");
+  const gachaCleanName = t("inventory.gacha_open_badge");
+  if(name === unopenedGachaName && source.includes(unopenedGachaName)){
+    source = source.replaceAll(unopenedGachaName, gachaCleanName).trim();
+  }
+
+  source = source
+    .replace(new RegExp(`^${escapeRegExp(name)}$`), "")
+    .replace(/\s*·\s*$/,"")
+    .replace(/[:：]\s*$/,"")
+    .replace(/\s+/g," ")
+    .trim();
+
+  return source;
+}
+
 
 function formatRecentTime(value){
   const time = new Date(value);
-  if(Number.isNaN(time.getTime())) return "刚刚";
+  if(Number.isNaN(time.getTime())) return t("recent.just_now");
 
   const diffMs = Date.now() - time.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if(diffMin < 1) return "刚刚";
-  if(diffMin < 60) return `${diffMin}分钟前`;
+  if(diffMin < 1) return t("recent.just_now");
+  if(diffMin < 60) return t("recent.minutes_ago", { count:diffMin });
 
   const diffHour = Math.floor(diffMin / 60);
-  if(diffHour < 24) return `${diffHour}小时前`;
+  if(diffHour < 24) return t("recent.hours_ago", { count:diffHour });
 
   const diffDay = Math.floor(diffHour / 24);
-  if(diffDay < 7) return `${diffDay}天前`;
+  if(diffDay < 7) return t("recent.days_ago", { count:diffDay });
 
   const month = time.getMonth() + 1;
   const day = time.getDate();
@@ -5746,7 +5997,7 @@ function renderRecentObtained(rows){
 
   const list = Array.isArray(rows) ? rows : [];
   if(!list.length){
-    wrap.innerHTML = `<div class="recentObtainedEmpty">最近还没有新的道具入账。</div>`;
+    wrap.innerHTML = `<div class="recentObtainedEmpty">${tHtml("recent.empty")}</div>`;
     return;
   }
 
@@ -5757,8 +6008,8 @@ function renderRecentObtained(rows){
       <div class="recentObtainedItem">
         <div class="recentObtainedIcon">${itemIconHtml(item)}</div>
         <div class="recentObtainedBody">
-          <div class="recentObtainedName">${escapeHtml(name)}${qty > 0 ? ` ×${qty}` : ""}</div>
-          <div class="recentObtainedMeta">${escapeHtml(item.recent_source_label)} · ${escapeHtml(item.recent_time_label)}</div>
+          <div class="recentObtainedName" title="${escapeHtml(name)}${qty > 0 ? ` ×${qty}` : ""}">${escapeHtml(name)}${qty > 0 ? ` ×${qty}` : ""}</div>
+          <div class="recentObtainedMeta">${escapeHtml([item.recent_source_label, item.recent_time_label].filter(Boolean).join(" · "))}</div>
         </div>
       </div>
     `;
@@ -5770,11 +6021,11 @@ async function loadRecentObtained(memberId){
   if(!wrap) return;
 
   if(!memberId){
-    wrap.innerHTML = `<div class="recentObtainedEmpty">登录后可查看最近获得。</div>`;
+    wrap.innerHTML = `<div class="recentObtainedEmpty">${tHtml("recent.login_required")}</div>`;
     return;
   }
 
-  wrap.innerHTML = `<div class="recentObtainedEmpty">正在整理最近获得的道具……</div>`;
+  wrap.innerHTML = `<div class="recentObtainedEmpty" data-text-key="recent.loading"></div>`;
 
   try{
     const { data,error } = await supabaseClient.rpc("get_recent_obtained_items", {
@@ -5789,10 +6040,10 @@ async function loadRecentObtained(memberId){
       .map(row => ({
         ...row,
         quantity:Number(row.quantity || 0),
-        item_name:row.item_name || row.item_key,
+        item_name:row.item_name,
         item_icon:row.item_icon || "",
-        item_category:row.item_category || "general",
-        recent_source_label:recentSourceLabel(row),
+        item_category:row.item_category,
+        recent_source_label:cleanRecentSourceLabel(recentSourceLabel(row), isStoredGachaBallItem(row) ? storedGachaBallLabel(row.item_key) : itemDisplayName(row), Number(row.quantity || 0)),
         recent_time_label:formatRecentTime(row.created_at)
       }))
       .filter(row => row.item_key && row.quantity > 0)
@@ -5801,7 +6052,7 @@ async function loadRecentObtained(memberId){
     renderRecentObtained(rows);
   }catch(error){
     console.error(error);
-    wrap.innerHTML = `<div class="recentObtainedEmpty">最近获得读取失败。</div>`;
+    wrap.innerHTML = `<div class="recentObtainedEmpty">${tHtml("recent.read_failed")}：${escapeHtml(error.message || "get_recent_obtained_items")}</div>`;
   }
 }
 
@@ -5811,12 +6062,12 @@ async function loadInventory(){
 
   const memberId = currentMemberProfile?.id || authState.memberId;
   if(!memberId){
-    wrap.innerHTML = '<div class="errorText">请先登录后查看我的背包。</div>';
+    wrap.innerHTML = `<div class="errorText">${tHtml("inventory.login_required")}</div>`;
     await loadRecentObtained(null);
     return;
   }
 
-  wrap.innerHTML = '<div class="emptyText">正在读取我的道具……</div>';
+  wrap.innerHTML = '<div class="emptyText" data-text-key="inventory.loading"></div>';
   await loadRecentObtained(memberId);
 
   try{
@@ -5839,7 +6090,7 @@ async function loadInventory(){
         .in("item_key",itemKeys);
 
       if(typeError){
-        console.warn("item_types 读取失败，背包将先显示 item_key。", typeError);
+        throw new Error(`${t("inventory.item_types_failed")}：${typeError.message || "item_types"}`);
       }else{
         itemTypes = Array.isArray(typeRows) ? typeRows : [];
       }
@@ -5850,7 +6101,7 @@ async function loadInventory(){
         .order("sort_order",{ ascending:true });
 
       if(categoryError){
-        console.warn("item_categories 读取失败，背包将先显示分类 key。", categoryError);
+        throw new Error(`${t("inventory.item_categories_failed")}：${categoryError.message || "item_categories"}`);
       }else{
         itemCategories = (Array.isArray(categoryRows) ? categoryRows : []).filter(category => category.is_visible !== false);
       }
@@ -5859,7 +6110,7 @@ async function loadInventory(){
     renderInventory(mergeInventoryRows(memberItems,itemTypes,itemCategories));
   }catch(error){
     console.error(error);
-    wrap.innerHTML = `<div class="errorText">背包读取失败：${escapeHtml(error.message || "请检查 member_items / item_types / item_categories 读取权限。")}</div>`;
+    wrap.innerHTML = `<div class="errorText">${tHtml("inventory.read_failed")}：${escapeHtml(error.message || "member_items / item_types / item_categories")}</div>`;
   }
 }
 
@@ -5869,12 +6120,12 @@ async function loadInventory(){
 ========================================================= */
 function valueOrDash(value){
   const text = String(value ?? "").trim();
-  return text || "未填写";
+  return text || t("profile.unfilled");
 }
 
 function formatBirthday(month,day){
-  if(!month || !day) return "未填写";
-  return `${Number(month)}月${Number(day)}日`;
+  if(!month || !day) return t("profile.unfilled");
+  return `${Number(month)}${t("date.month_suffix")}${Number(day)}${t("date.day_suffix")}`;
 }
 
 function normalizeSkills(value){
@@ -5901,22 +6152,22 @@ function uniqueSkills(list){
 
 function skillPillsHtml(skills){
   const list = uniqueSkills(normalizeSkills(skills));
-  if(!list.length) return '<span class="profileHint">暂未登记技能。</span>';
+  if(!list.length) return `<span class="profileHint">${tHtml("profile.skills_empty")}</span>`;
   return `<div class="skillPills">${list.map(skill => `<span class="skillPill">${escapeHtml(skill)}</span>`).join("")}</div>`;
 }
 
 function honorSummaryHtml(summary){
   if(!summary){
-    return '<span class="profileHint">荣誉摘要读取中……</span>';
+    return `<span class="profileHint">${tHtml("honor.loading")}</span>`;
   }
   if(summary.error){
     return `<span class="profileHint">${escapeHtml(summary.error)}</span>`;
   }
-  const recent = summary.recent ? `<span class="honorPill">最近获得：${escapeHtml(summary.recent)}</span>` : '<span class="honorPill">暂无最近记录</span>';
+  const recent = summary.recent ? `<span class="honorPill">${tHtml("honor.recent", { name:summary.recent })}</span>` : `<span class="honorPill">${tHtml("honor.recent_empty")}</span>`;
   return `
     <div class="honorPills">
-      <span class="honorPill">已领取称号：${Number(summary.titles || 0)} 个</span>
-      <span class="honorPill">已领取成就：${Number(summary.achievements || 0)} 个</span>
+      <span class="honorPill">${tHtml("honor.titles_count", { count:Number(summary.titles || 0) })}</span>
+      <span class="honorPill">${tHtml("honor.achievements_count", { count:Number(summary.achievements || 0) })}</span>
       ${recent}
     </div>
   `;
@@ -5927,7 +6178,7 @@ function renderProfileView(member){
   if(!wrap) return;
 
   if(!member){
-    wrap.innerHTML = '<div class="errorText">没有读取到当前成员档案。</div>';
+    wrap.innerHTML = `<div class="errorText">${tHtml("profile.empty")}</div>`;
     return;
   }
 
@@ -5944,7 +6195,7 @@ function renderProfileView(member){
   wrap.innerHTML = `
     <div class="profileCard">
       <div class="profileTop">
-        <img class="profileAvatar" src="${escapeHtml(avatar || './mascot-niuma(L).png')}" alt="成员头像" onerror="this.src='./mascot-niuma(L).png'">
+        <img class="profileAvatar" src="${escapeHtml(avatar || requireAssetUrl('dorm.mascotNiumaL'))}" alt="">
         <div class="profileTopInfo">
           <div class="profileNameLine">
             <div class="profileName">${escapeHtml(valueOrDash(member.name))}</div>
@@ -5952,66 +6203,66 @@ function renderProfileView(member){
             ${cohort}
           </div>
           <div class="profileMeta">
-            昵称：${escapeHtml(valueOrDash(member.nickname))} ｜ 钥匙：${escapeHtml(valueOrDash(member.member_code || authState.memberCode))}<br>
-            登堂入室：${escapeHtml(valueOrDash(member.joined_at))}
+            ${escapeHtml(valueOrDash(member.nickname))} ｜ ${escapeHtml(valueOrDash(member.member_code || authState.memberCode))}<br>
+            ${escapeHtml(valueOrDash(member.joined_at))}
           </div>
         </div>
         <div class="profileTopHonor">
           ${honorHtml}
         </div>
         <div class="profileTopAction">
-          <button class="dormMiniBtn profileEditQuick" type="button" onclick="openProfileEdit()">编辑档案</button>
+          <button class="dormMiniBtn profileEditQuick" type="button" onclick="openProfileEdit()">${tHtml("profile.edit_button")}</button>
         </div>
       </div>
     </div>
 
     <div class="profileCard">
-      <h3 class="profileCardTitle">个人资料</h3>
+      <h3 class="profileCardTitle">${tHtml("profile.section.basic")}</h3>
       <div class="profileGrid">
-        <div class="profileField"><div class="profileLabel">所在地</div><div class="profileValue">${escapeHtml(valueOrDash(member.location))}</div></div>
-        <div class="profileField"><div class="profileLabel">生日</div><div class="profileValue">${escapeHtml(formatBirthday(member.birthday_month, member.birthday_day))}</div></div>
-        <div class="profileField"><div class="profileLabel">MBTI</div><div class="profileValue">${escapeHtml(valueOrDash(member.mbti))}</div></div>
-        <div class="profileField"><div class="profileLabel">QQ</div><div class="profileValue">${escapeHtml(valueOrDash(member.contact_qq))}</div></div>
+        <div class="profileField"><div class="profileLabel">${tHtml("profile.field.location")}</div><div class="profileValue">${escapeHtml(valueOrDash(member.location))}</div></div>
+        <div class="profileField"><div class="profileLabel">${tHtml("profile.field.birthday")}</div><div class="profileValue">${escapeHtml(formatBirthday(member.birthday_month, member.birthday_day))}</div></div>
+        <div class="profileField"><div class="profileLabel">${tHtml("profile.field.mbti")}</div><div class="profileValue">${escapeHtml(valueOrDash(member.mbti))}</div></div>
+        <div class="profileField"><div class="profileLabel">${tHtml("profile.field.qq")}</div><div class="profileValue">${escapeHtml(valueOrDash(member.contact_qq))}</div></div>
       </div>
     </div>
 
     <div class="profileCard">
-      <h3 class="profileCardTitle">技能</h3>
+      <h3 class="profileCardTitle">${tHtml("profile.section.skills")}</h3>
       ${skillPillsHtml(member.skills)}
     </div>
 
     <div class="profileCard">
-      <h3 class="profileCardTitle">社交账号</h3>
+      <h3 class="profileCardTitle">${tHtml("profile.section.social")}</h3>
       <div class="profileGrid">
-        <div class="profileField"><div class="profileLabel">小红书</div><div class="profileValue">${escapeHtml(valueOrDash(member.social_xiaohongshu))}</div></div>
-        <div class="profileField"><div class="profileLabel">抖音</div><div class="profileValue">${escapeHtml(valueOrDash(member.social_douyin))}</div></div>
-        <div class="profileField"><div class="profileLabel">B站</div><div class="profileValue">${escapeHtml(valueOrDash(member.social_bilibili))}</div></div>
-        <div class="profileField"><div class="profileLabel">微博</div><div class="profileValue">${escapeHtml(valueOrDash(member.social_weibo))}</div></div>
+        <div class="profileField"><div class="profileLabel">${tHtml("profile.field.xiaohongshu")}</div><div class="profileValue">${escapeHtml(valueOrDash(member.social_xiaohongshu))}</div></div>
+        <div class="profileField"><div class="profileLabel">${tHtml("profile.field.douyin")}</div><div class="profileValue">${escapeHtml(valueOrDash(member.social_douyin))}</div></div>
+        <div class="profileField"><div class="profileLabel">${tHtml("profile.field.bilibili")}</div><div class="profileValue">${escapeHtml(valueOrDash(member.social_bilibili))}</div></div>
+        <div class="profileField"><div class="profileLabel">${tHtml("profile.field.weibo")}</div><div class="profileValue">${escapeHtml(valueOrDash(member.social_weibo))}</div></div>
       </div>
     </div>
 
     <div class="profileCard">
-      <h3 class="profileCardTitle">公开留言</h3>
+      <h3 class="profileCardTitle">${tHtml("profile.section.message")}</h3>
       <div class="profileValue">${escapeHtml(valueOrDash(member.public_message))}</div>
     </div>
   `;
 }
 
 function monthOptions(selected){
-  let html = '<option value="">月份</option>';
-  for(let i=1;i<=12;i++) html += `<option value="${i}" ${Number(selected) === i ? "selected" : ""}>${i}月</option>`;
+  let html = `<option value="">${tHtml("profile.field.birthday")}</option>`;
+  for(let i=1;i<=12;i++) html += `<option value="${i}" ${Number(selected) === i ? "selected" : ""}>${i}${tHtml("date.month_suffix")}</option>`;
   return html;
 }
 
 function dayOptions(selected){
-  let html = '<option value="">日期</option>';
-  for(let i=1;i<=31;i++) html += `<option value="${i}" ${Number(selected) === i ? "selected" : ""}>${i}日</option>`;
+  let html = `<option value="">${tHtml("profile.field.birthday")}</option>`;
+  for(let i=1;i<=31;i++) html += `<option value="${i}" ${Number(selected) === i ? "selected" : ""}>${i}${tHtml("date.day_suffix")}</option>`;
   return html;
 }
 
 function mbtiOptions(selected){
-  const list = ["","INTJ","INTP","ENTJ","ENTP","INFJ","INFP","ENFJ","ENFP","ISTJ","ISFJ","ESTJ","ESFJ","ISTP","ISFP","ESTP","ESFP"];
-  return list.map(item => `<option value="${escapeHtml(item)}" ${item === String(selected || "") ? "selected" : ""}>${item || "不填写"}</option>`).join("");
+  const list = dormConfig.mbtiOptions;
+  return list.map(item => `<option value="${escapeHtml(item)}" ${item === String(selected || "") ? "selected" : ""}>${item || tHtml("profile.unfilled")}</option>`).join("");
 }
 
 function renderProfileEdit(member){
@@ -6021,45 +6272,45 @@ function renderProfileEdit(member){
   wrap.innerHTML = `
     <div class="profileCard">
       <div class="profileCardHead">
-        <h3 class="profileCardTitle">编辑我的档案</h3>
+        <h3 class="profileCardTitle">${tHtml("profile.edit_title")}</h3>
         <div class="profileActionRow" style="margin-top:0;">
-          <button class="dormMiniBtn" type="button" onclick="saveProfileEdit()">保存修改</button>
-          <button class="dormSubBtn" type="button" onclick="cancelProfileEdit()">取消</button>
+          <button class="dormMiniBtn" type="button" onclick="saveProfileEdit()">${tHtml("profile.save_button")}</button>
+          <button class="dormSubBtn" type="button" onclick="cancelProfileEdit()">${tHtml("profile.cancel_button")}</button>
         </div>
       </div>
       <form class="profileForm" id="profileEditForm">
-        <label>圈名
-          <input id="profileNameInput" type="text" maxlength="20" value="${escapeHtml(member.name || "")}" placeholder="请输入圈名">
+        <label>${tHtml("profile.field.name")}
+          <input id="profileNameInput" type="text" maxlength="20" value="${escapeHtml(member.name || "")}" placeholder="${tHtml("profile.placeholder.name")}">
         </label>
-        <label>所在地
-          <input id="profileLocationInput" type="text" value="${escapeHtml(member.location || "")}" placeholder="中国地区填省份；海外填地区或国家">
+        <label>${tHtml("profile.field.location")}
+          <input id="profileLocationInput" type="text" value="${escapeHtml(member.location || "")}" placeholder="${tHtml("profile.placeholder.location")}">
         </label>
-        <label>生日月份
+        <label>${tHtml("profile.field.birthday_month")}
           <select id="profileBirthdayMonth">${monthOptions(member.birthday_month)}</select>
         </label>
-        <label>生日日期
+        <label>${tHtml("profile.field.birthday_day")}
           <select id="profileBirthdayDay">${dayOptions(member.birthday_day)}</select>
         </label>
-        <label>MBTI
+        <label>${tHtml("profile.field.mbti")}
           <select id="profileMbtiInput">${mbtiOptions(member.mbti)}</select>
         </label>
-        <label>小红书
-          <input id="profileXhsInput" type="text" value="${escapeHtml(member.social_xiaohongshu || "")}" placeholder="没有可留空">
+        <label>${tHtml("profile.field.xiaohongshu")}
+          <input id="profileXhsInput" type="text" value="${escapeHtml(member.social_xiaohongshu || "")}" placeholder="${tHtml("profile.placeholder.empty_allowed")}">
         </label>
-        <label>抖音
-          <input id="profileDouyinInput" type="text" value="${escapeHtml(member.social_douyin || "")}" placeholder="没有可留空">
+        <label>${tHtml("profile.field.douyin")}
+          <input id="profileDouyinInput" type="text" value="${escapeHtml(member.social_douyin || "")}" placeholder="${tHtml("profile.placeholder.empty_allowed")}">
         </label>
-        <label>B站
-          <input id="profileBilibiliInput" type="text" value="${escapeHtml(member.social_bilibili || "")}" placeholder="没有可留空">
+        <label>${tHtml("profile.field.bilibili")}
+          <input id="profileBilibiliInput" type="text" value="${escapeHtml(member.social_bilibili || "")}" placeholder="${tHtml("profile.placeholder.empty_allowed")}">
         </label>
-        <label>微博
-          <input id="profileWeiboInput" type="text" value="${escapeHtml(member.social_weibo || "")}" placeholder="没有可留空">
+        <label>${tHtml("profile.field.weibo")}
+          <input id="profileWeiboInput" type="text" value="${escapeHtml(member.social_weibo || "")}" placeholder="${tHtml("profile.placeholder.empty_allowed")}">
         </label>
-        <label>申请新增技能
-          <input id="profileSkillInput" type="text" placeholder="例如：后期、修音、剪辑、海报……">
+        <label>${tHtml("profile.field.skill_request")}
+          <input id="profileSkillInput" type="text" placeholder="${tHtml("profile.placeholder.skill_request")}">
         </label>
-        <label class="full">公开留言
-          <textarea id="profileMessageInput" maxlength="500" placeholder="这段内容会对外展示。">${escapeHtml(member.public_message || "")}</textarea>
+        <label class="full">${tHtml("profile.section.message")}
+          <textarea id="profileMessageInput" maxlength="500" placeholder="${tHtml("profile.placeholder.message")}">${escapeHtml(member.public_message || "")}</textarea>
         </label>
       </form>
       <div id="profileStatus" class="profileStatus"></div>
@@ -6092,23 +6343,14 @@ function validateProfileName(value){
 function validateProfileLocation(value){
   const text = String(value || "").trim();
   if(!text) return true;
-  const allowedLocations = [
-    "北京","天津","上海","重庆","河北","山西","辽宁","吉林","黑龙江","江苏","浙江","安徽","福建","江西","山东","河南","湖北","湖南","广东","海南","四川","贵州","云南","陕西","甘肃","青海","台湾","内蒙古","广西","西藏","宁夏","新疆","香港","澳门","美国","加拿大","美东","美西","美中"
-  ];
-  return allowedLocations.includes(text);
+  return dormConfig.allowedLocations.includes(text);
 }
 
 function standardSkillName(raw){
   const value = String(raw || "").trim().toLowerCase();
   if(!value) return { input:"", matched:"", status:"empty" };
 
-  const aliases = [
-    { name:"混音", values:["混音","后期","修音","贴唱","混","mix","mixing","mixer"] },
-    { name:"视频剪辑", values:["视频剪辑","剪辑","视频","pv","做视频","视频后期","video"] },
-    { name:"美工", values:["美工","海报","作图","排版","封面","设计","平面设计"] }
-  ];
-
-  const found = aliases.find(group => group.values.some(item => item.toLowerCase() === value));
+  const found = dormConfig.skillAliases.find(group => group.values.some(item => String(item || "").trim().toLowerCase() === value));
   if(found) return { input:raw.trim(), matched:found.name, status:"matched" };
   return { input:raw.trim(), matched:"", status:"unmatched" };
 }
@@ -6130,18 +6372,18 @@ function collectProfilePayload(){
 
 function fieldLabel(key){
   const labels = {
-    name:"圈名",
-    location:"所在地",
-    birthday_month:"生日月份",
-    birthday_day:"生日日期",
-    mbti:"MBTI",
-    social_xiaohongshu:"小红书",
-    social_douyin:"抖音",
-    social_bilibili:"B站",
-    social_weibo:"微博",
-    public_message:"公开留言",
-    skills:"正式技能",
-    skill_request:"新增技能申请"
+    name:t("profile.field.name"),
+    location:t("profile.field.location"),
+    birthday_month:t("profile.field.birthday"),
+    birthday_day:t("profile.field.birthday"),
+    mbti:t("profile.field.mbti"),
+    social_xiaohongshu:t("profile.field.xiaohongshu"),
+    social_douyin:t("profile.field.douyin"),
+    social_bilibili:t("profile.field.bilibili"),
+    social_weibo:t("profile.field.weibo"),
+    public_message:t("profile.section.message"),
+    skills:t("profile.section.skills"),
+    skill_request:t("profile.field.skill_request")
   };
   return labels[key] || key;
 }
@@ -6189,7 +6431,7 @@ async function logProfileChanges(changes){
     const { error } = await supabaseClient.from("member_profile_change_logs").insert(rows);
     if(error) throw error;
   }catch(error){
-    console.warn("成员资料修改记录表尚未可用，已跳过日志写入。", error);
+    throw new Error(`${t("profile.save_log_failed")}：${error.message || "member_profile_change_logs"}`);
   }
 }
 
@@ -6214,26 +6456,26 @@ async function saveProfileEdit(){
   let skillMessage = "";
 
   if(!validateProfileName(payload.name)){
-    setProfileStatus("圈名不能为空，且最多 20 个字符。","error");
+    setProfileStatus(t("profile.name_invalid"),"error");
     return;
   }
 
   if(!validateProfileLocation(payload.location)){
-    setProfileStatus("所在地仅可填写省份、美东/美西/美中、美国或加拿大。","error");
+    setProfileStatus(t("profile.location_invalid"),"error");
     return;
   }
 
   if((payload.birthday_month && !payload.birthday_day) || (!payload.birthday_month && payload.birthday_day)){
-    setProfileStatus("生日月份和日期需要一起填写。","error");
+    setProfileStatus(t("profile.birthday_invalid"),"error");
     return;
   }
 
-  setProfileStatus("正在保存档案……");
+  setProfileStatus(t("profile.save_loading"));
 
   try{
     const duplicated = await checkProfileNameDuplicate(payload.name);
     if(duplicated){
-      setProfileStatus("这个圈名已经有人使用了，请换一个。","error");
+      setProfileStatus(t("profile.name_duplicate"),"error");
       return;
     }
 
@@ -6244,30 +6486,30 @@ async function saveProfileEdit(){
         payload.skills = nextSkills.join(",");
         changes.push({
           field_key:"skills",
-          field_label:"正式技能",
+          field_label:t("profile.log_label.skills"),
           old_value:currentSkills.join("、"),
           new_value:nextSkills.join("、"),
           change_type:"skill_auto_matched",
           status:"logged"
         });
-        skillMessage = `“${skillMatch.input}”已归并为正式技能「${skillMatch.matched}」。`;
+        skillMessage = t("profile.skill_normalized", { input:skillMatch.input, skill:skillMatch.matched });
       }else{
-        skillMessage = `你已经有正式技能「${skillMatch.matched}」。`;
+        skillMessage = t("profile.skill_existing", { skill:skillMatch.matched });
       }
     }else if(skillMatch.status === "unmatched"){
       changes.push({
         field_key:"skill_request",
-        field_label:"新增技能申请",
+        field_label:t("profile.log_label.skill_request"),
         old_value:"",
         new_value:skillMatch.input,
         change_type:"skill_request",
         status:"logged"
       });
-      skillMessage = `“${skillMatch.input}”已记录给宿管查看，后续如需调整会提醒你。`;
+      skillMessage = t("profile.skill_request", { input:skillMatch.input });
     }
 
     if(!changes.length){
-      setProfileStatus(skillMessage || "没有检测到需要保存的修改。","success");
+      setProfileStatus(skillMessage || t("profile.save_no_change"),"success");
       return;
     }
 
@@ -6290,7 +6532,7 @@ async function saveProfileEdit(){
     renderProfileView(currentMemberProfile);
   }catch(error){
     console.error(error);
-    setProfileStatus(`保存失败：${error.message || "请检查 members 表更新权限"}`,"error");
+    setProfileStatus(`${t("profile.save_failed")}：${error.message || "members"}`,"error");
   }
 }
 
@@ -6326,8 +6568,8 @@ async function loadHonorSummary(memberId){
       recent:latestTitleTime >= latestAchievementTime ? latestTitleName : latestAchievementName
     };
   }catch(error){
-    console.warn("荣誉摘要读取失败。", error);
-    honorSummaryState = { error:"荣誉摘要暂时无法读取。" };
+    console.error(error);
+    honorSummaryState = { error:`${t("honor.read_failed")}：${error.message || "member_titles/member_achievements"}` };
   }
 
   if(!profileEditMode) renderProfileView(currentMemberProfile);
@@ -6351,7 +6593,7 @@ function setMascotBubbleOnce(){
   if(!bubble) return;
 
   const item = mascotLines[Math.floor(Math.random()*mascotLines.length)];
-  bubble.textContent = item.text;
+  bubble.textContent = t(item.key);
   bubble.className = `bubble-${item.style}`;
 }
 
@@ -6360,6 +6602,16 @@ function setMascotBubbleOnce(){
    初始化
 ========================================================= */
 async function initDormPage(){
+  try{
+    await loadDormPageTexts();
+    applyDormStaticTexts();
+    applyDormAssets();
+  }catch(error){
+    console.error(error);
+    showDormFatalError(error);
+    return;
+  }
+
   if(!readLocalAuth()) return;
 
   setupRoomNav(CURRENT_ROOM);
@@ -6388,12 +6640,12 @@ async function initDormPage(){
       if(authState.loggedIn){
         handleLogout();
       }else{
-        window.location.href = room10PageUrl("index", "../index/index.html");
+        window.location.href = requirePageUrl("index");
       }
     });
   }
 
-  syncOverlayToImage();
+  syncDormResponsiveLayout();
 
   /*
     先读取 members 表，回填 member_code / role / nickname 后，
@@ -6412,7 +6664,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initDormPage();
 });
 
-window.addEventListener("resize", syncOverlayToImage);
+window.addEventListener("resize", syncDormResponsiveLayout);
 
 window.addEventListener("storage", event => {
   if(
@@ -6429,12 +6681,12 @@ window.addEventListener("storage", event => {
 });
 
 if(img && img.complete && img.naturalWidth){
-  syncOverlayToImage();
+  syncDormResponsiveLayout();
 }else if(img){
-  img.addEventListener("load", syncOverlayToImage, { once:true });
+  img.addEventListener("load", syncDormResponsiveLayout, { once:true });
 }
 
-setTimeout(syncOverlayToImage, 120);
+setTimeout(syncDormResponsiveLayout, 120);
 </script>
 </body>
 </html>
