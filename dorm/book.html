@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜收集图鉴</title>
+<!-- book clean db-driven v1: 固定素材走 room10-paths.js；图鉴分类/页面文案走数据库；删除前端路径猜测 -->
 <script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -34,7 +35,7 @@ html,body{
   color:var(--ink);
   background:
     linear-gradient(rgba(255,248,238,.14), rgba(255,248,238,.24)),
-    url("room-dorm.png") center center / cover no-repeat fixed;
+    var(--book-body-bg, none) center center / cover no-repeat fixed;
 }
 body{
   min-height:100vh;
@@ -614,7 +615,7 @@ body.gachaPopupOpen{
     aspect-ratio:941 / 1672;
     max-height:95vh;
   }
-  .bookBg{ content:url("book-open2.png"); }
+  .bookBg{ content:normal; }
   .bookPageHeading{
     left:25.15%;
     top:13.84%;
@@ -729,8 +730,8 @@ body.gachaPopupOpen{
     display:block;
     width:100%;
   }
-  .prevBtn::before{ content:"上一页"; }
-  .nextBtn::before{ content:"下一页"; }
+  .prevBtn::before{ content:attr(data-mobile-label); }
+  .nextBtn::before{ content:attr(data-mobile-label); }
 
   .prevBtn{ left:20.40%; top:35.20%; }
   .nextBtn{ left:62.97%; top:35.20%; }
@@ -747,57 +748,57 @@ body.gachaPopupOpen{
 </head>
 <body>
 <div class="collectionBookModal show" id="collectionBookModal" aria-hidden="false">
-  <div class="bookStage" role="dialog" aria-modal="true" aria-label="收集图鉴">
-    <img class="bookBg" src="book-open.png" alt="" aria-hidden="true">
+  <div class="bookStage" role="dialog" aria-modal="true" aria-label="" id="bookDialog">
+    <img class="bookBg" id="bookBg" src="" alt="" aria-hidden="true">
     <div class="bookOverlayLayer">
-      <h2 class="bookPageHeading" id="bookTitle">日常礼包</h2>
+      <h2 class="bookPageHeading" id="bookTitle"></h2>
 
       <section class="bookLeftPanel">
         <div class="progressCard">
-          <div class="progressLabel">收集进度</div>
-          <div class="progressText" id="categoryProgress">0 / 12</div>
+          <div class="progressLabel" id="progressLabel"></div>
+          <div class="progressText" id="categoryProgress"></div>
           <div class="progressBar"><div class="progressFill" id="categoryProgressFill"></div></div>
         </div>
         <div class="mobileTabs" id="mobileTabs"></div>
       </section>
 
-      <p class="bookNote" id="bookNote">日常或节日期间领取过的礼包物品会在这里点亮。</p>
+      <p class="bookNote" id="bookNote"></p>
 
       <section class="bookLeftGridPanel">
         <div class="itemGrid leftItemGrid" id="leftItemGrid"></div>
       </section>
 
-      <div class="bookTotalProgress" id="totalProgress">总收集：0 / 31</div>
+      <div class="bookTotalProgress" id="totalProgress"></div>
 
       <section class="bookGridPanel">
         <div class="itemGrid rightItemGrid" id="itemGrid"></div>
       </section>
 
-      <div class="bookTags" aria-label="分类快捷标签">
-        <button class="tagHit tagFestivalRange" type="button" data-page="0" title="日常礼包" aria-label="日常礼包"></button>
-        <button class="tagHit tagMaterialRange" type="button" data-page="1" title="道具资源" aria-label="道具资源"></button>
-        <button class="tagHit tagPetRange" type="button" data-page="2" title="宠物收集" aria-label="宠物收集"></button>
-        <span class="tagText tagFestival" aria-hidden="true">礼包</span>
-        <span class="tagText tagMaterial" aria-hidden="true">资源</span>
-        <span class="tagText tagPet" aria-hidden="true">宠物</span>
+      <div class="bookTags" id="bookTags" aria-label="">
+        <button class="tagHit tagFestivalRange" type="button" data-page="0" title="" aria-label=""></button>
+        <button class="tagHit tagMaterialRange" type="button" data-page="1" title="" aria-label=""></button>
+        <button class="tagHit tagPetRange" type="button" data-page="2" title="" aria-label=""></button>
+        <span class="tagText tagFestival" aria-hidden="true"></span>
+        <span class="tagText tagMaterial" aria-hidden="true"></span>
+        <span class="tagText tagPet" aria-hidden="true"></span>
       </div>
 
-      <button class="otherCategoryBtn" type="button" data-page="3" title="其他分类">其他</button>
+      <button class="otherCategoryBtn" type="button" data-page="3" title=""></button>
 
-      <button class="bookControl closeBtn" id="closeBookBtn" type="button" aria-label="关闭图鉴"><img src="book-close.png" alt=""></button>
-      <button class="bookControl prevBtn" id="prevBookBtn" type="button" aria-label="上一页"><img src="book-prev.png" alt=""></button>
-      <button class="bookControl nextBtn" id="nextBookBtn" type="button" aria-label="下一页"><img src="book-next.png" alt=""></button>
-      <button class="bookControl gachaBtn" id="bookGachaBtn" type="button" aria-label="前往扭蛋机"><img src="book-gacha.png" alt=""></button>
+      <button class="bookControl closeBtn" id="closeBookBtn" type="button" aria-label=""><img data-asset-key="dorm.bookClose" src="" alt=""></button>
+      <button class="bookControl prevBtn" id="prevBookBtn" type="button" aria-label="" data-mobile-label=""><img data-asset-key="dorm.bookPrev" src="" alt=""></button>
+      <button class="bookControl nextBtn" id="nextBookBtn" type="button" aria-label="" data-mobile-label=""><img data-asset-key="dorm.bookNext" src="" alt=""></button>
+      <button class="bookControl gachaBtn" id="bookGachaBtn" type="button" aria-label=""><img data-asset-key="dorm.bookGacha" src="" alt=""></button>
     </div>
   </div>
 </div>
 
 
 <div class="gachaPopupModal" id="gachaPopupModal" aria-hidden="true">
-  <div class="gachaPopupStage" role="dialog" aria-modal="true" aria-label="扭蛋机">
-    <button class="gachaPopupClose" type="button" id="gachaPopupCloseBtn" aria-label="关闭扭蛋机">×</button>
+  <div class="gachaPopupStage" role="dialog" aria-modal="true" aria-label="" id="gachaPopupDialog">
+    <button class="gachaPopupClose" type="button" id="gachaPopupCloseBtn" aria-label=""></button>
     <div class="gachaPopupInner">
-      <iframe id="gachaPopupFrame" src="about:blank" title="十号房扭蛋机" loading="lazy"></iframe>
+      <iframe id="gachaPopupFrame" src="about:blank" title="" loading="lazy"></iframe>
     </div>
   </div>
 </div>
@@ -806,7 +807,7 @@ body.gachaPopupOpen{
   <div class="imagePreviewCard">
     <img id="imagePreviewImg" src="" alt="">
     <div class="imagePreviewTitle" id="imagePreviewTitle"></div>
-    <button class="imagePreviewClose" type="button" id="imagePreviewCloseBtn">关闭</button>
+    <button class="imagePreviewClose" type="button" id="imagePreviewCloseBtn"></button>
   </div>
 </div>
 
@@ -828,7 +829,7 @@ function room10Url(path){
   return `${ROOM10_ROOT_PREFIX}${raw}`;
 }
 
-function room10PageUrl(key, fallbackPath){
+function room10PageUrl(key, fallbackPath = ""){
   const pageKey = String(key || "").trim();
   if(pageKey && typeof window.room10Page === "function"){
     const url = window.room10Page(pageKey);
@@ -837,13 +838,118 @@ function room10PageUrl(key, fallbackPath){
   return room10Url(fallbackPath || "");
 }
 
-function room10AssetUrl(keyPath, fallbackPath){
+function room10AssetUrl(keyPath, fallbackPath = ""){
   const assetKey = String(keyPath || "").trim();
   if(assetKey && typeof window.room10Asset === "function"){
     const url = window.room10Asset(assetKey);
     if(url) return url;
   }
-  return room10Url(fallbackPath || "");
+  return fallbackPath ? room10Url(fallbackPath) : "";
+}
+
+function requireBookAssetUrl(keyPath){
+  const assetKey = String(keyPath || "").trim();
+  const url = room10AssetUrl(assetKey);
+  if(!url){
+    throw new Error(`收集图鉴固定素材配置缺失：${assetKey || "empty asset key"}`);
+  }
+  return url;
+}
+
+const BOOK_REQUIRED_TEXT_KEYS = [
+  "book.document_title",
+  "book.dialog_aria",
+  "book.progress_label",
+  "book.category_progress_loading",
+  "book.category_progress_closed",
+  "book.total_progress_template",
+  "book.total_progress_loading",
+  "book.total_progress_empty",
+  "book.loading",
+  "book.read_failed",
+  "book.empty_html",
+  "book.locked_placeholder",
+  "book.locked_icon_placeholder",
+  "book.tags_aria",
+  "book.close_aria",
+  "book.prev_aria",
+  "book.next_aria",
+  "book.prev_mobile_label",
+  "book.next_mobile_label",
+  "book.gacha_aria",
+  "book.preview_default_title",
+  "book.preview_default_alt",
+  "book.preview_close",
+  "book.gacha_popup_aria",
+  "book.gacha_popup_close_aria",
+  "book.gacha_popup_close_text",
+  "book.gacha_iframe_title",
+  "book.config.categories_json"
+];
+
+const bookTexts = {};
+let CATEGORY_META = [];
+
+function t(key){
+  return Object.prototype.hasOwnProperty.call(bookTexts, key) ? String(bookTexts[key] ?? "") : "";
+}
+
+function tHtml(key){
+  return escapeHtml(t(key));
+}
+
+function formatTemplate(value, params = {}){
+  return String(value ?? "").replace(/\{([a-zA-Z0-9_]+)\}/g, (_, key) => {
+    return Object.prototype.hasOwnProperty.call(params, key) ? String(params[key]) : "";
+  });
+}
+
+function parseBookJsonText(key){
+  const raw = String(bookTexts[key] || "").trim();
+  try{
+    return JSON.parse(raw);
+  }catch(error){
+    throw new Error(`收集图鉴数据库配置不是有效 JSON：${key}`);
+  }
+}
+
+function loadBookConfigFromTexts(){
+  const categories = parseBookJsonText("book.config.categories_json");
+  if(!Array.isArray(categories) || !categories.length){
+    throw new Error("收集图鉴数据库配置缺失：book.config.categories_json");
+  }
+
+  CATEGORY_META = categories.map(item => ({
+    key:String(item?.key || "").trim(),
+    title:String(item?.title || "").trim(),
+    shortTitle:String(item?.shortTitle || item?.title || "").trim(),
+    note:String(item?.note || "").trim()
+  })).filter(item => item.key && item.title);
+
+  if(!CATEGORY_META.length){
+    throw new Error("收集图鉴数据库配置无有效分类：book.config.categories_json");
+  }
+}
+
+async function loadBookPageTexts(){
+  const { data, error } = await supabaseClient
+    .from("room10_page_texts")
+    .select("text_key,text_value")
+    .eq("page_key", "book")
+    .eq("is_active", true);
+
+  if(error) throw error;
+
+  (data || []).forEach(row => {
+    bookTexts[row.text_key] = row.text_value;
+  });
+
+  const missing = BOOK_REQUIRED_TEXT_KEYS.filter(key => !Object.prototype.hasOwnProperty.call(bookTexts, key));
+  if(missing.length){
+    throw new Error(`收集图鉴文案配置缺失：${missing.join(", ")}`);
+  }
+
+  loadBookConfigFromTexts();
 }
 
 const STORAGE_KEYS = {
@@ -854,14 +960,7 @@ const STORAGE_KEYS = {
   memberCode:"room10MemberCode"
 };
 
-const CATEGORY_META = [
-  { key:"festival", title:"日常礼包", shortTitle:"礼包", note:"成员领取过的礼包奖励和特殊成就纪念会在这里点亮。" },
-  { key:"materials", title:"道具资源", shortTitle:"资源", note:"成员获得过的可使用道具会在这里点亮，只记录是否获得过。" },
-  { key:"pet", title:"宠物收集", shortTitle:"宠物", note:"宠物房玩法中获得过的掉落纪念物会在这里点亮。" },
-  { key:"other", title:"其他", shortTitle:"其他", note:"不属于礼包、道具资源或宠物收集的物品会统一放在这里。" }
-];
-
-let categories = CATEGORY_META.map(category => ({ ...category, items:[] }));
+let categories = [];
 let currentCategory = 0;
 let currentBookPage = 0;
 let isLoadingBookData = false;
@@ -869,6 +968,9 @@ let bookLoadError = "";
 
 const root = document.documentElement;
 const bookStageEl = document.querySelector(".bookStage");
+const bookBg = document.getElementById("bookBg");
+const bookDialog = document.getElementById("bookDialog");
+const progressLabel = document.getElementById("progressLabel");
 
 function syncBookScale(){
   const stageWidth = bookStageEl?.getBoundingClientRect().width || 0;
@@ -907,7 +1009,7 @@ function categoryPageCount(category){
   return Math.max(1, Math.ceil(category.items.length / perBookPage()));
 }
 function currentCategoryData(){
-  return categories[currentCategory] || categories[0];
+  return categories[currentCategory] || categories[0] || { key:"", title:"", shortTitle:"", note:"", items:[] };
 }
 function currentPageItems(category){
   const size = perBookPage();
@@ -928,30 +1030,17 @@ function escapeHtml(value){
   }[char]));
 }
 function isImageIcon(icon){
-  return /\.(png|jpe?g|webp|gif|svg)$/i.test(String(icon || ""));
-}
-function getGachaColorAssetKey(itemKey){
-  const map = {
-    gacha_color_blue:"gacha.gachaBallBlue",
-    gacha_color_green:"gacha.gachaBallGreen",
-    gacha_color_pink:"gacha.gachaBallPink",
-    gacha_color_yellow:"gacha.gachaBallYellow",
-    gacha_color_purple:"gacha.gachaBallPurple"
-  };
-  return map[String(itemKey || "").trim()] || "";
+  return /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(String(icon || ""));
 }
 
-function getGachaColorFileName(itemKey, icon){
-  const key = String(itemKey || "").trim();
-  const iconName = String(icon || "").trim().replace(/^\.\//, "").split("/").pop();
-  const map = {
-    gacha_color_blue:"gacha-ball-blue.png",
-    gacha_color_green:"gacha-ball-green.png",
-    gacha_color_pink:"gacha-ball-pink.png",
-    gacha_color_yellow:"gacha-ball-yellow.png",
-    gacha_color_purple:"gacha-ball-purple.png"
-  };
-  return map[key] || iconName || "";
+function isAssetKey(value){
+  return /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(String(value || "").trim());
+}
+
+function isDatabaseImageIcon(icon){
+  const raw = String(icon || "").trim();
+  if(!raw) return false;
+  return isImageIcon(raw) || isAssetKey(raw) || /^(https?:|data:|blob:|\/)/i.test(raw);
 }
 
 function uniquePaths(paths){
@@ -966,44 +1055,18 @@ function uniquePaths(paths){
 
 function resolveBookIconPath(item){
   const icon = String(item?.icon || "").trim();
-  if(!icon || !isImageIcon(icon)) return icon;
+  if(!icon || !isDatabaseImageIcon(icon)) return icon;
 
-  if(/^https?:\/\//i.test(icon) || icon.startsWith("data:") || icon.startsWith("blob:") || icon.startsWith("/")){
+  if(/^(https?:|data:|blob:|\/)/i.test(icon)){
     return icon;
   }
 
-  const key = String(item?.key || "").trim();
-  const category = String(item?.category || "").trim();
-  const bookCategory = String(item?.bookCategory || "").trim();
-  const gachaAssetKey = getGachaColorAssetKey(key);
-
-  if(gachaAssetKey){
-    const fileName = getGachaColorFileName(key, icon);
-    return room10AssetUrl(gachaAssetKey, `game/gacha/${fileName}`);
+  if(isAssetKey(icon)){
+    return room10AssetUrl(icon);
   }
 
   if(icon.startsWith("../") || icon.startsWith("./")){
     return icon;
-  }
-
-  if(category === "collection" || bookCategory === "collection" || key.startsWith("badge_")){
-    return room10Url(`badges/${icon}`);
-  }
-
-  if(category === "flower" || category === "paper" || bookCategory === "flower" || bookCategory === "paper" || key.startsWith("flower_")){
-    return room10Url(icon.includes("/") ? icon : `flower/${icon}`);
-  }
-
-  if(category === "gacha" || key.startsWith("gacha_")){
-    return room10Url(icon.includes("/") ? icon : `game/gacha/${icon}`);
-  }
-
-  if(key.includes("mango") || icon.startsWith("game-mango")){
-    return room10Url(icon.includes("/") ? icon : `game/mango/${icon}`);
-  }
-
-  if(icon.includes("/")){
-    return room10Url(icon);
   }
 
   return room10Url(icon);
@@ -1011,25 +1074,18 @@ function resolveBookIconPath(item){
 
 function getBookIconFallbackPaths(item){
   const icon = String(item?.icon || "").trim();
-  if(!icon || !isImageIcon(icon)) return [];
+  if(!icon || !isDatabaseImageIcon(icon)) return [];
 
-  const key = String(item?.key || "").trim();
-  const fileName = getGachaColorFileName(key, icon);
-
-  if(getGachaColorAssetKey(key)){
-    return uniquePaths([
-      room10Url(`game/gacha/${fileName}`),
-      room10Url(`dorm/${fileName}`),
-      `./${fileName}`,
-      icon
-    ]);
+  if(isAssetKey(icon)){
+    return [];
   }
 
+  const resolved = resolveBookIconPath(item);
   return uniquePaths([
+    resolved,
     icon,
-    icon.replace(/^\.\//, ""),
-    room10Url(icon.replace(/^\.\//, ""))
-  ]);
+    icon.replace(/^\.\//, "")
+  ]).filter(path => path !== resolved);
 }
 
 function handleBookIconError(img){
@@ -1056,7 +1112,7 @@ function handleBookIconError(img){
 function renderIcon(item){
   const icon = item?.icon || "";
   if(!icon) return "?";
-  if(isImageIcon(icon)){
+  if(isDatabaseImageIcon(icon)){
     const resolvedIcon = resolveBookIconPath(item);
     const fallbacks = getBookIconFallbackPaths(item).filter(path => path !== resolvedIcon);
     const safeIcon = escapeHtml(resolvedIcon);
@@ -1069,7 +1125,7 @@ function displayItemName(name){
   return String(name ?? "").replace(/徽章/g, "").trim();
 }
 function renderMobileTabs(){
-  mobileTabs.innerHTML = categories.map((category,index) =>
+  mobileTabs.innerHTML = (categories || []).map((category,index) =>
     `<button class="mobileTab ${index === currentCategory ? "active" : ""}" type="button" data-category="${index}">${escapeHtml(category.shortTitle || category.title)}</button>`
   ).join("");
 }
@@ -1118,11 +1174,12 @@ function normalizeBookItem(row){
 
 function buildCategoriesFromRows(rows){
   const grouped = new Map(CATEGORY_META.map(category => [category.key, []]));
+  const fallbackKey = CATEGORY_META.some(category => category.key === "other") ? "other" : CATEGORY_META[0]?.key;
 
   (rows || []).forEach(row => {
     const item = normalizeBookItem(row);
-    const key = grouped.has(item.bookCategory) ? item.bookCategory : "other";
-    grouped.get(key).push(item);
+    const key = grouped.has(item.bookCategory) ? item.bookCategory : fallbackKey;
+    if(key && grouped.has(key)) grouped.get(key).push(item);
   });
 
   categories = CATEGORY_META.map(category => ({
@@ -1131,6 +1188,102 @@ function buildCategoriesFromRows(rows){
       (a.sortOrder - b.sortOrder) || String(a.key).localeCompare(String(b.key), "zh-Hans-CN")
     )
   }));
+}
+
+function applyBookAssets(){
+  document.body.style.setProperty("--book-body-bg", `url("${requireBookAssetUrl("dorm.roomDorm")}")`);
+
+  document.querySelectorAll("[data-asset-key]").forEach(img => {
+    const key = img.getAttribute("data-asset-key");
+    img.src = requireBookAssetUrl(key);
+  });
+
+  updateBookBackground();
+}
+
+function updateBookBackground(){
+  if(!bookBg) return;
+  const key = isMobileLayout() ? "dorm.bookOpen2" : "dorm.bookOpen";
+  const url = requireBookAssetUrl(key);
+  if(bookBg.getAttribute("src") !== url){
+    bookBg.setAttribute("src", url);
+  }
+}
+
+function applyBookStaticTexts(){
+  document.title = t("book.document_title");
+  if(bookDialog) bookDialog.setAttribute("aria-label", t("book.dialog_aria"));
+  if(progressLabel) progressLabel.textContent = t("book.progress_label");
+
+  const bookTags = document.getElementById("bookTags");
+  if(bookTags) bookTags.setAttribute("aria-label", t("book.tags_aria"));
+
+  const closeBookBtn = document.getElementById("closeBookBtn");
+  const prevBookBtn = document.getElementById("prevBookBtn");
+  const nextBookBtn = document.getElementById("nextBookBtn");
+  const bookGachaBtn = document.getElementById("bookGachaBtn");
+  if(closeBookBtn) closeBookBtn.setAttribute("aria-label", t("book.close_aria"));
+  if(prevBookBtn){
+    prevBookBtn.setAttribute("aria-label", t("book.prev_aria"));
+    prevBookBtn.setAttribute("data-mobile-label", t("book.prev_mobile_label"));
+  }
+  if(nextBookBtn){
+    nextBookBtn.setAttribute("aria-label", t("book.next_aria"));
+    nextBookBtn.setAttribute("data-mobile-label", t("book.next_mobile_label"));
+  }
+  if(bookGachaBtn) bookGachaBtn.setAttribute("aria-label", t("book.gacha_aria"));
+
+  const gachaDialog = document.getElementById("gachaPopupDialog");
+  const gachaClose = document.getElementById("gachaPopupCloseBtn");
+  if(gachaDialog) gachaDialog.setAttribute("aria-label", t("book.gacha_popup_aria"));
+  if(gachaClose){
+    gachaClose.setAttribute("aria-label", t("book.gacha_popup_close_aria"));
+    gachaClose.textContent = t("book.gacha_popup_close_text");
+  }
+  if(gachaPopupFrame) gachaPopupFrame.setAttribute("title", t("book.gacha_iframe_title"));
+
+  const previewClose = document.getElementById("imagePreviewCloseBtn");
+  if(previewClose) previewClose.textContent = t("book.preview_close");
+
+  renderCategoryControls();
+}
+
+function renderCategoryControls(){
+  const desktopButtons = Array.from(document.querySelectorAll(".tagHit"));
+  const desktopTexts = [
+    document.querySelector(".tagFestival"),
+    document.querySelector(".tagMaterial"),
+    document.querySelector(".tagPet")
+  ];
+
+  desktopButtons.forEach((btn, index) => {
+    const category = categories[index] || CATEGORY_META[index];
+    if(!category){
+      btn.classList.add("hidden");
+      if(desktopTexts[index]) desktopTexts[index].textContent = "";
+      return;
+    }
+
+    btn.classList.remove("hidden");
+    btn.dataset.page = String(index);
+    btn.title = category.title;
+    btn.setAttribute("aria-label", category.title);
+    if(desktopTexts[index]) desktopTexts[index].textContent = category.shortTitle || category.title;
+  });
+
+  const otherBtn = document.querySelector(".otherCategoryBtn");
+  const otherCategory = categories[3] || CATEGORY_META[3];
+  if(otherBtn){
+    if(otherCategory){
+      otherBtn.classList.remove("hidden");
+      otherBtn.dataset.page = "3";
+      otherBtn.title = otherCategory.title;
+      otherBtn.textContent = otherCategory.shortTitle || otherCategory.title;
+    }else{
+      otherBtn.classList.add("hidden");
+      otherBtn.textContent = "";
+    }
+  }
 }
 
 async function loadCollectionBookItems(options = {}){
@@ -1162,7 +1315,7 @@ async function loadCollectionBookItems(options = {}){
     }
   }catch(error){
     console.error("读取图鉴数据失败：", error);
-    bookLoadError = "图鉴读取失败，请稍后重试。";
+    bookLoadError = t("book.read_failed");
     buildCategoriesFromRows([]);
   }finally{
     isLoadingBookData = false;
@@ -1172,6 +1325,7 @@ async function loadCollectionBookItems(options = {}){
 
 function renderBook(){
   syncBookScale();
+  updateBookBackground();
   const category = currentCategoryData();
   normalizeBookPage();
 
@@ -1180,26 +1334,28 @@ function renderBook(){
   const visibleItems = currentPageItems(category);
 
   bookTitle.textContent = category.title;
-  categoryProgress.textContent = total ? `${unlocked} / ${total}` : (isLoadingBookData ? "读取中" : "暂未开放");
+  categoryProgress.textContent = total ? `${unlocked} / ${total}` : (isLoadingBookData ? t("book.category_progress_loading") : t("book.category_progress_closed"));
   categoryProgressFill.style.width = total ? `${Math.round(unlocked / total * 100)}%` : "0%";
   bookNote.textContent = bookLoadError || category.note;
-  totalProgress.textContent = totalItems() ? `总收集：${totalUnlocked()} / ${totalItems()}` : (isLoadingBookData ? "图鉴读取中" : "总收集：0 / 0");
+  totalProgress.textContent = totalItems()
+    ? formatTemplate(t("book.total_progress_template"), { unlocked:totalUnlocked(), total:totalItems() })
+    : (isLoadingBookData ? t("book.total_progress_loading") : t("book.total_progress_empty"));
 
   const cardHtml = item => {
-    const previewable = item.isUnlocked && isImageIcon(item.icon);
+    const previewable = item.isUnlocked && isDatabaseImageIcon(item.icon);
     const safeKey = escapeHtml(item.key);
     const safeName = escapeHtml(displayItemName(item.name));
     const safeIcon = escapeHtml(resolveBookIconPath(item));
     return `
     <div class="itemCard ${item.isUnlocked ? "" : "locked"} ${previewable ? "is-previewable" : ""}" data-key="${safeKey}" data-preview-icon="${previewable ? safeIcon : ""}" data-preview-name="${previewable ? safeName : ""}">
-      <div class="itemIcon">${item.isUnlocked ? renderIcon(item) : "?"}</div>
-      <div class="itemName">${item.isUnlocked ? safeName : "？？？"}</div>
+      <div class="itemIcon">${item.isUnlocked ? renderIcon(item) : tHtml("book.locked_icon_placeholder")}</div>
+      <div class="itemName">${item.isUnlocked ? safeName : tHtml("book.locked_placeholder")}</div>
     </div>`;
   };
 
   if(isLoadingBookData){
     leftItemGrid.innerHTML = "";
-    itemGrid.innerHTML = `<div class="emptySpecial">图鉴读取中...</div>`;
+    itemGrid.innerHTML = `<div class="emptySpecial">${tHtml("book.loading")}</div>`;
   }else if(bookLoadError){
     leftItemGrid.innerHTML = "";
     itemGrid.innerHTML = `<div class="emptySpecial">${escapeHtml(bookLoadError)}</div>`;
@@ -1221,7 +1377,7 @@ function renderBook(){
     }
   }else{
     leftItemGrid.innerHTML = "";
-    itemGrid.innerHTML = `<div class="emptySpecial">更多收藏内容准备中<br>后续可直接在数据库里新增图鉴条目</div>`;
+    itemGrid.innerHTML = `<div class="emptySpecial">${tHtml("book.empty_html").replace(/\\n/g, "<br>")}</div>`;
   }
 
   document.querySelectorAll(".tagHit").forEach(btn => {
@@ -1270,6 +1426,7 @@ function closeBook(){
   window.location.href = room10PageUrl("dorm", "dorm/dorm.html");
 }
 function goCategory(index){
+  if(!categories.length) return;
   currentCategory = ((index % categories.length) + categories.length) % categories.length;
   currentBookPage = 0;
   renderBook();
@@ -1282,8 +1439,8 @@ function turnBookPage(delta){
 function openImagePreview(icon,name){
   if(!icon) return;
   document.getElementById("imagePreviewImg").src = icon;
-  document.getElementById("imagePreviewImg").alt = name || "图鉴图案";
-  document.getElementById("imagePreviewTitle").textContent = name || "图鉴图案";
+  document.getElementById("imagePreviewImg").alt = name || t("book.preview_default_alt");
+  document.getElementById("imagePreviewTitle").textContent = name || t("book.preview_default_title");
   document.getElementById("imagePreviewModal").classList.add("show");
   document.getElementById("imagePreviewModal").setAttribute("aria-hidden","false");
 }
@@ -1343,7 +1500,24 @@ function requestBookRender(){
 window.addEventListener("resize", requestBookRender);
 window.addEventListener("orientationchange", requestBookRender);
 
-loadCollectionBookItems();
+async function initCollectionBookPage(){
+  try{
+    await loadBookPageTexts();
+    buildCategoriesFromRows([]);
+    applyBookAssets();
+    applyBookStaticTexts();
+    await loadCollectionBookItems();
+  }catch(error){
+    console.error("收集图鉴初始化失败：", error);
+    bookLoadError = error?.message || "收集图鉴初始化失败。";
+    if(!categories.length && CATEGORY_META.length){
+      buildCategoriesFromRows([]);
+    }
+    renderBook();
+  }
+}
+
+initCollectionBookPage();
 </script>
 
 </body>
