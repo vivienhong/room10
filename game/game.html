@@ -6,6 +6,7 @@
 <title>游戏房｜十号房</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
+<!-- game clean db-driven v2: 游戏入口完全读取 game_room_entries；页面/素材路径走 room10-paths.js；删除前端固定游戏入口与旧施工兜底 -->
 
 <style>
 *{box-sizing:border-box;}
@@ -130,7 +131,7 @@ button{
   position:fixed;
   inset:-8vh -8vw;
   z-index:1;
-  background:var(--game-room-bg-url, url("room-game.png")) center center / cover no-repeat;
+  background:var(--game-room-bg-url, none) center center / cover no-repeat;
   filter:blur(30px) saturate(1.05);
   transform:scale(1.08);
   opacity:.72;
@@ -1383,7 +1384,7 @@ button{
     display:block;
     background:
       linear-gradient(rgba(243,236,223,.72), rgba(243,236,223,.92)),
-      var(--game-room-bg-url, url("room-game.png")) center center / cover no-repeat fixed;
+      var(--game-room-bg-url, none) center center / cover no-repeat fixed;
   }
 
   #bgColorFill,
@@ -2254,300 +2255,6 @@ button{
 
 
 /* =========================================================
-   游戏房响应式修正：
-   - 仍按通用模板把 overlay 绑定到底图实际显示区域
-   - 页面自定义内容使用 底图缩放 × 页面确认比例
-   - 小屏不再切成普通流式布局，避免脱离底图坐标
-========================================================= */
-@media (max-height:700px) and (min-width:761px){
-  :root{
-    --game-panel-left:55%;
-    --game-panel-top:49.5%;
-    --game-panel-width:48%;
-  }
-}
-
-@media (max-width:760px) and (min-width:541px){
-  :root{
-    --game-panel-left:55%;
-    --game-panel-top:49.5%;
-    --game-panel-width:48%;
-  }
-}
-
-@media (max-width:540px){
-  html,body{
-    width:100%;
-    height:100%;
-    min-height:100%;
-    overflow:hidden;
-  }
-
-  body{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:
-      radial-gradient(circle at center, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 62%),
-      linear-gradient(90deg, var(--bg-left) 0%, var(--bg-right) 100%);
-  }
-
-  #bgColorFill,
-  #bgBleed,
-  #bgLight,
-  #bgFrame{
-    display:block!important;
-  }
-
-  #room{
-    position:relative;
-    width:100vw;
-    height:100vh;
-    height:100dvh;
-    min-height:100vh;
-    min-height:100dvh;
-    display:block;
-    overflow:hidden;
-    padding:0;
-  }
-
-  #overlay{
-    position:absolute!important;
-    display:block!important;
-    left:0;
-    top:0;
-    right:auto;
-    bottom:auto;
-    width:100%;
-    max-width:none;
-    height:100%;
-    gap:0;
-    margin:0!important;
-    padding:0!important;
-    overflow:visible;
-    pointer-events:none;
-    --ui-scale:var(--bg-ui-scale,1);
-  }
-
-  .roomNavLayer{
-    position:absolute!important;
-    inset:0!important;
-    width:100%!important;
-    height:100%!important;
-    min-height:0!important;
-    max-height:none!important;
-    display:block!important;
-    margin:0!important;
-    padding:0!important;
-    order:initial!important;
-    z-index:55;
-    pointer-events:none;
-    --s:var(--room-nav-scale,1);
-  }
-
-  .roomNavLayer .navBtn{
-    position:absolute!important;
-    top:var(--room-nav-top)!important;
-    display:inline-flex!important;
-    align-items:center;
-    justify-content:center;
-    width:var(--room-nav-btn-width)!important;
-    height:var(--room-nav-btn-height)!important;
-    min-width:0!important;
-    min-height:0!important;
-    max-height:none!important;
-    margin:0!important;
-    padding:0!important;
-    border-radius:var(--nav-btn-radius)!important;
-    font-size:var(--nav-btn-font)!important;
-    line-height:normal;
-    white-space:nowrap;
-    overflow:visible!important;
-  }
-
-  .roomNavLayer .navBtn[data-room="hall"]{left:var(--room-nav-hall-left)!important;}
-  .roomNavLayer .navBtn[data-room="living"]{left:var(--room-nav-living-left)!important;}
-  .roomNavLayer .navBtn[data-room="manager"]{left:var(--room-nav-manager-left)!important;}
-  .roomNavLayer .navBtn[data-room="honor"]{left:var(--room-nav-honor-left)!important;}
-  .roomNavLayer .navBtn[data-room="studio"]{left:var(--room-nav-studio-left)!important;}
-  .roomNavLayer .navBtn[data-room="game"]{left:var(--room-nav-game-left)!important;}
-  .roomNavLayer .navBtn[data-room="dorm"]{left:var(--room-nav-dorm-left)!important;}
-  .roomNavLayer .navBtn[data-room="flower"]{left:var(--room-nav-flower-left)!important;}
-  .roomNavLayer .navBtn[data-room="pets"]{left:var(--room-nav-pets-left)!important;}
-
-  .roomNavLayer .navLabel{
-    width:100%;
-    height:100%;
-    padding-top:.06em;
-    line-height:normal;
-    white-space:nowrap;
-    overflow:visible!important;
-  }
-
-  .roomNavLayer .navEffect{
-    display:block;
-  }
-
-  .roomIdentity{
-    --s:var(--identity-scale,1);
-    position:absolute!important;
-    right:var(--identity-right)!important;
-    top:var(--identity-top)!important;
-    width:calc(var(--identity-base-width) * 1px * var(--s))!important;
-    height:calc(var(--identity-base-height) * 1px * var(--s))!important;
-    min-width:calc(var(--identity-base-width) * 1px * var(--s))!important;
-    min-height:calc(var(--identity-base-height) * 1px * var(--s))!important;
-    order:initial!important;
-    z-index:70;
-  }
-
-  .roomIdentityBar{
-    grid-template-columns:minmax(calc(130px * var(--s)),1fr) calc(30px * var(--s)) calc(42px * var(--s));
-    gap:calc(5px * var(--s));
-    padding:calc(4px * var(--s)) calc(5px * var(--s));
-    border-radius:calc(13px * var(--s));
-  }
-
-  .identityNameBox{
-    padding:0 calc(8px * var(--s));
-    border-radius:calc(9px * var(--s));
-    overflow:visible;
-  }
-
-  .identityNameText{
-    font-size:calc(13px * var(--s));
-    line-height:1;
-    overflow:visible;
-  }
-
-  .identitySeparator{
-    font-size:inherit;
-    transform:translateY(var(--identity-separator-y));
-  }
-
-  .identityNickname{transform:translateY(var(--identity-name-y));}
-  .identityRole{transform:translateY(var(--identity-role-y));}
-  .identityNoticeIcon{transform:translateY(var(--identity-notice-y));}
-  .identityAuthText{transform:translateY(var(--identity-button-y));}
-
-  .identityNoticeBtn{
-    font-size:calc(14px * var(--s));
-    border-radius:calc(9px * var(--s));
-  }
-
-  .identityAuthBtn{
-    font-size:calc(12px * var(--s));
-    border-radius:calc(9px * var(--s));
-    line-height:1.18;
-  }
-
-  .identityNoticePanel{
-    position:absolute!important;
-    top:calc(100% + 10px * var(--s))!important;
-    right:0!important;
-    left:auto!important;
-    width:min(calc(360px * var(--s)),72vw)!important;
-    min-width:0!important;
-    max-width:none!important;
-    max-height:min(calc(540px * var(--s)),70vh)!important;
-    padding:calc(12px * var(--s));
-    border-radius:calc(16px * var(--s));
-    z-index:950;
-  }
-
-  .identityNoticePanel::before{
-    display:none;
-  }
-
-  .panel{
-    position:absolute!important;
-    left:var(--game-panel-left)!important;
-    top:var(--game-panel-top)!important;
-    transform:translate(-50%,-50%) scale(calc(var(--bg-ui-scale) * var(--game-panel-scale)))!important;
-    transform-origin:center center;
-    width:calc(var(--game-panel-design-width) * 1px)!important;
-    height:calc(var(--game-panel-design-height) * 1px)!important;
-    max-width:none!important;
-    max-height:none!important;
-    border-radius:var(--game-panel-radius);
-    padding:var(--game-panel-padding);
-    order:initial!important;
-    overflow:hidden;
-  }
-
-  .menu{
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-    grid-auto-rows:minmax(var(--game-card-height), auto);
-    gap:var(--game-menu-gap);
-    overflow-x:hidden;
-    overflow-y:auto;
-    padding-right:4px;
-  }
-
-  .game-btn{
-    min-height:var(--game-card-height);
-    padding:var(--game-card-padding);
-    border-radius:var(--game-card-radius);
-    gap:var(--game-card-gap);
-  }
-
-  .game-icon{
-    width:var(--game-icon-size);
-    height:var(--game-icon-size);
-    border-radius:var(--game-icon-radius);
-    font-size:var(--game-icon-font-size);
-  }
-
-  .game-name{
-    font-size:clamp(15px, var(--game-name-size), 30px);
-    line-height:1.15;
-  }
-
-  .gacha-standalone-wrap{
-    position:absolute!important;
-    left:var(--gacha-entry-left)!important;
-    top:var(--gacha-entry-top)!important;
-    width:var(--gacha-entry-width)!important;
-    transform:translate(-50%,-50%) scale(calc(var(--bg-ui-scale) * var(--game-panel-scale) * var(--gacha-entry-scale)))!important;
-    transform-origin:center center;
-    order:initial!important;
-    margin:0!important;
-    z-index:32;
-  }
-
-  .gacha-standalone-wrap .gacha-standalone-btn,
-  .gacha-standalone-btn{
-    position:relative!important;
-    left:auto!important;
-    top:auto!important;
-    width:100%!important;
-    min-height:calc(var(--gacha-entry-image-size) + 48px)!important;
-    transform:none!important;
-    order:initial!important;
-    margin:0!important;
-    padding:10px 12px 12px;
-    border-radius:22px;
-  }
-
-  .gacha-standalone-wrap .gacha-standalone-btn:hover,
-  .gacha-standalone-btn:hover{
-    transform:translateY(-6px) scale(1.04)!important;
-  }
-
-  .gacha-standalone-img{
-    width:var(--gacha-entry-image-size)!important;
-    height:var(--gacha-entry-image-size)!important;
-  }
-
-  .gacha-standalone-label{
-    min-height:28px;
-    padding:0 13px;
-    font-size:16px;
-  }
-}
-
-
-/* =========================================================
    手机竖屏流式布局修正（540px 及以下）
    - 不再绑定底图坐标
    - 从上到下：导航 / 身份 / 游戏列表 / 扭蛋机
@@ -2557,6 +2264,7 @@ button{
   html,
   body{
     width:100%!important;
+    max-width:100%!important;
     height:auto!important;
     min-height:100%!important;
     overflow-x:hidden!important;
@@ -2567,7 +2275,7 @@ button{
     display:block!important;
     background:
       linear-gradient(rgba(243,236,223,.72), rgba(243,236,223,.92)),
-      var(--game-room-bg-url, url("room-game.png")) center center / cover no-repeat fixed!important;
+      var(--game-room-bg-url, none) center center / cover no-repeat fixed!important;
   }
 
   #bgColorFill,
@@ -2580,12 +2288,14 @@ button{
   #room{
     position:relative!important;
     width:100%!important;
+    max-width:100%!important;
     height:auto!important;
     min-height:100vh!important;
     min-height:100dvh!important;
     display:block!important;
     overflow:visible!important;
-    padding:10px 12px 16px!important;
+    padding:10px 12px 14px!important;
+    box-sizing:border-box!important;
   }
 
   #overlay{
@@ -2603,7 +2313,9 @@ button{
     margin:0!important;
     padding:0!important;
     overflow:visible!important;
+    transform:none!important;
     pointer-events:auto!important;
+    box-sizing:border-box!important;
     --ui-scale:1!important;
     --bg-ui-scale:1!important;
     --room-nav-scale:1!important;
@@ -2614,18 +2326,23 @@ button{
     position:relative!important;
     inset:auto!important;
     width:100%!important;
-    height:auto!important;
-    min-height:0!important;
-    max-height:none!important;
+    max-width:100%!important;
+    height:106px!important;
+    min-height:106px!important;
+    max-height:106px!important;
     display:grid!important;
     grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    grid-auto-rows:32px!important;
+    grid-template-rows:repeat(3,32px)!important;
     gap:5px!important;
     margin:0!important;
     padding:0!important;
+    align-content:start!important;
+    justify-content:normal!important;
     order:0!important;
     z-index:20!important;
     pointer-events:auto!important;
+    transform:none!important;
+    box-sizing:border-box!important;
     --s:1!important;
   }
 
@@ -2634,7 +2351,10 @@ button{
     left:auto!important;
     top:auto!important;
     display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
     width:100%!important;
+    max-width:100%!important;
     height:32px!important;
     min-width:0!important;
     min-height:32px!important;
@@ -2646,6 +2366,13 @@ button{
     line-height:1!important;
     white-space:nowrap!important;
     overflow:hidden!important;
+    transform:none!important;
+    box-sizing:border-box!important;
+  }
+
+  .roomNavLayer .navBtn.is-current{
+    display:flex!important;
+    visibility:visible!important;
   }
 
   .roomNavLayer .navLabel{
@@ -2667,11 +2394,14 @@ button{
     right:auto!important;
     top:auto!important;
     width:100%!important;
+    max-width:100%!important;
     min-width:0!important;
     height:40px!important;
     min-height:40px!important;
     order:1!important;
     z-index:90!important;
+    transform:none!important;
+    box-sizing:border-box!important;
   }
 
   .roomIdentityBar{
@@ -2871,10 +2601,10 @@ button{
 <div id="bgBleed"></div>
 <div id="bgLight"></div>
 
-<!-- TEMPLATE_VERSION: game-room-path-config-common-nav-no-gacha-close; manual-game-panel-scale -->
+<!-- TEMPLATE_VERSION: game-room-db-driven-clean-v3-common-mobile-nav -->
 <div id="room">
   <div id="bgFrame">
-    <img id="bg" src="room-game.png" data-room10-asset="game.roomGame" alt="十号房游戏房背景" />
+    <img id="bg" data-room10-asset="game.roomGame" alt="十号房游戏房背景" />
   </div>
 
   <div id="overlay">
@@ -2911,12 +2641,12 @@ button{
 
     <!-- 房间切换按钮：使用全站通用模板结构，游戏房按钮保留并标记当前页 -->
     <nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换">
-      <button class="navBtn" data-room="hall" type="button" data-page="index" data-url="../index/index.html" data-login="false">
+      <button class="navBtn" data-room="hall" type="button" data-page="index" data-login="false">
         <span class="navLabel">大堂</span>
         <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
       </button>
 
-      <button class="navBtn" data-room="living" type="button" data-page="living" data-url="../living/living.html" data-login="false">
+      <button class="navBtn" data-room="living" type="button" data-page="living" data-login="false">
         <span class="navLabel">客厅</span>
         <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
       </button>
@@ -2926,32 +2656,32 @@ button{
         <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
       </button>
 
-      <button class="navBtn" data-room="honor" type="button" data-page="honor" data-url="../honor/honor.html" data-login="false">
+      <button class="navBtn" data-room="honor" type="button" data-page="honor" data-login="false">
         <span class="navLabel">荣誉墙</span>
         <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
       </button>
 
-      <button class="navBtn" data-room="studio" type="button" data-page="studioTodo" data-url="../studio/studio-todo.html" data-login="true">
+      <button class="navBtn" data-room="studio" type="button" data-page="studioTodo" data-login="true">
         <span class="navLabel">工作间</span>
         <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
       </button>
 
-      <button class="navBtn is-current" data-room="game" type="button" data-page="game" data-url="game.html" data-login="false" aria-current="page" tabindex="-1">
+      <button class="navBtn is-current" data-room="game" type="button" data-page="game" data-login="false" aria-current="page" tabindex="-1">
         <span class="navLabel">游戏房</span>
         <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🕹</span>
       </button>
 
-      <button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-url="../dorm/dorm.html" data-login="true">
+      <button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-login="true">
         <span class="navLabel">宿舍</span>
         <span class="navEffect navEffectA">☁</span><span class="navEffect navEffectB">☾</span><span class="navEffect navEffectC">💤</span>
       </button>
 
-      <button class="navBtn" data-room="flower" type="button" data-page="flower" data-url="../flower/flower.html" data-login="false">
+      <button class="navBtn" data-room="flower" type="button" data-page="flower" data-login="false">
         <span class="navLabel">花房区</span>
         <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
       </button>
 
-      <button class="navBtn" data-room="pets" type="button" data-page="pet" data-url="../pet/pets.html" data-login="false">
+      <button class="navBtn" data-room="pets" type="button" data-page="pet" data-login="false">
         <span class="navLabel">宠物区</span>
         <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
       </button>
@@ -2971,7 +2701,7 @@ button{
 
 <div id="loginMask" class="login-mask hidden" aria-hidden="true">
   <div class="login-panel" role="dialog" aria-modal="true" aria-label="钥匙验证">
-    <img src="../login.png" data-room10-asset="root.login" alt="登录框">
+    <img data-room10-asset="root.login" alt="登录框">
 
     <input id="loginNickname" type="text" autocomplete="username">
     <input id="loginCode" type="password" autocomplete="current-password">
@@ -3078,7 +2808,7 @@ function cssUrl(value){
 }
 
 function applyConfiguredAssets(){
-  const roomBg = resolveRoom10Asset("game.roomGame", "room-game.png");
+  const roomBg = resolveRoom10Asset("game.roomGame");
   root.style.setProperty("--game-room-bg-url", cssUrl(roomBg));
 
   document.querySelectorAll("[data-room10-asset]").forEach(el => {
@@ -3091,9 +2821,6 @@ function applyConfiguredAssets(){
   });
 }
 
-function openConfiguredGame(pageKey, title, fallbackUrl = ""){
-  openGameModal(resolveRoom10Page(pageKey, fallbackUrl), title);
-}
 
 
 /* =========================================================
@@ -3270,7 +2997,7 @@ function validateGameEntry(entry){
 
 function renderGameButton(entry){
   const statusClass = entry.isEnabled ? "ready" : "";
-  const statusText = entry.statusText || (entry.isEnabled ? "" : "待更新");
+  const statusText = entry.statusText;
   return `
     <button class="game-btn${entry.isEnabled ? "" : " is-coming-soon"}" type="button" data-game-key="${escapeHtml(entry.gameKey)}">
       <span class="game-icon" aria-hidden="true">${escapeHtml(entry.iconText)}</span>
@@ -3344,7 +3071,7 @@ function openDbGame(gameKey){
   }
 
   if(!entry.isEnabled){
-    showTip(entry.disabledMessage || `《${entry.displayName}》待更新。`);
+    showTip(entry.disabledMessage || `《${entry.displayName}》当前不可用。`);
     return;
   }
 
@@ -3356,37 +3083,6 @@ function openDbGame(gameKey){
 
   openGameModal(targetUrl, entry.displayName);
 }
-
-const RESERVED_GAMES = {
-  "time-answer": {
-    title:"时间的答案",
-    page:"gameTime",
-    url:"time.html",
-    enabled:true,
-    message:"《时间的答案》还在施工中，待更新。"
-  },
-  "mango-hit": {
-    title:"暴打芒果",
-    page:"gameMango",
-    url:"mango/mango.html",
-    enabled:true,
-    message:"《暴打芒果》暂时无法打开。"
-  },
-  "dragon-size": {
-    title:"接大小龙",
-    page:"gameChain",
-    url:"chain.html",
-    enabled:true,
-    message:"《接大小龙》还在施工中，待更新。"
-  },
-  "gacha": {
-    title:"扭蛋机",
-    page:"gameGacha",
-    url:"gacha/gacha.html",
-    enabled:true,
-    message:"《扭蛋机》还在施工中，待更新。"
-  }
-};
 
 if(gameList){
   gameList.addEventListener("click", (event) => {
@@ -3507,14 +3203,6 @@ function getCurrentMemberCode(){
   return localStorage.getItem("room10MemberCode") || "";
 }
 
-function escapeHtml(value){
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
 
 function getRoleLabel(roleValue = getRole()){
   const role = String(roleValue || "").toLowerCase();
@@ -3588,8 +3276,8 @@ function clearPendingRedirect(){
 }
 
 function goRegisterFromGame(){
-  const returnPage = resolveRoom10Page("game", "../game/game.html");
-  const registerPage = resolveRoom10Page("managerRegister", "../manager/register.html");
+  const returnPage = resolveRoom10Page("game");
+  const registerPage = resolveRoom10Page("managerRegister");
   sessionStorage.setItem("room10RegisterReturn", returnPage);
   window.location.href = `${registerPage}?from=${encodeURIComponent(returnPage)}`;
 }
@@ -3600,10 +3288,10 @@ function toggleLoginCode(){
 
 function getManagerPageByRole(roleValue = getRole()){
   const role = String(roleValue || "").toLowerCase();
-  if(role === "owner") return resolveRoom10Page("managerOwner", "../manager/manager-owner.html");
-  if(role === "admin") return resolveRoom10Page("managerAdmin", "../manager/manager-admin.html");
-  if(role === "member" || role === "applying") return resolveRoom10Page("managerMember", "../manager/manager-member.html");
-  return resolveRoom10Page("managerVisitor", "../manager/manager-visitor.html");
+  if(role === "owner") return resolveRoom10Page("managerOwner");
+  if(role === "admin") return resolveRoom10Page("managerAdmin");
+  if(role === "member" || role === "applying") return resolveRoom10Page("managerMember");
+  return resolveRoom10Page("managerVisitor");
 }
 
 function enterManagerRoom(){
@@ -3665,7 +3353,7 @@ function setupRoomNav(currentRoom = "game"){
         return;
       }
 
-      const targetPage = resolveRoom10Page(btn.dataset.page, btn.dataset.url);
+      const targetPage = resolveRoom10Page(btn.dataset.page);
       enterRoom(targetPage, btn.dataset.login === "true", btn.dataset.room);
     });
   });
@@ -3809,21 +3497,6 @@ function openGameModal(url, title = "小游戏"){
   gameModalMask.setAttribute("aria-hidden", "false");
 }
 
-function openReservedGame(gameKey){
-  const config = RESERVED_GAMES[gameKey];
-  if(!config){
-    showTip("这个入口还在施工中，待更新。");
-    return;
-  }
-
-  if(!config.enabled){
-    showTip(config.message || `《${config.title}》待更新。`);
-    return;
-  }
-
-  const targetUrl = resolveRoom10Page(config.page, config.url);
-  openGameModal(targetUrl, config.title);
-}
 
 
 
@@ -4162,6 +3835,6 @@ refreshGameNotice();
 </script>
 
 
-<!-- GAME_PAGE_VERSION: game-room-db-driven-game-list -->
+<!-- GAME_PAGE_VERSION: game-room-db-driven-clean-v2 -->
 </body>
 </html>
