@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜宿舍</title>
-<!-- dorm clean db-driven v13: 通用模板路径同步 + 文案/配置数据库驱动 + 清减前端兜底 -->
+<!-- dorm clean db-driven v16: 通用模板路径同步 + 文案/配置数据库驱动 + 移除前端固定文案清单 -->
 
 <script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -4005,30 +4005,6 @@ const CURRENT_ROOM = "dorm";
 
 const dormTexts = Object.create(null);
 
-const DORM_REQUIRED_TEXT_KEYS = [
-  "page.title","background.alt","room_nav.aria_label","identity.aria_label",
-  "nav.hall","nav.living","nav.manager","nav.honor","nav.studio","nav.game","nav.dorm","nav.flower","nav.pets",
-  "role.owner","role.admin","role.member","role.trainee","role.applying","role.visitor",
-  "identity.loading","identity.login_button","identity.logout_button","identity.notice_aria_label","identity.notice_icon",
-  "side.tasks","side.notice","side.wallet","side.inventory","side.profile",
-  "mascot.alt","mascot.line.01","mascot.line.02","mascot.line.03","mascot.line.04","mascot.line.05","mascot.line.06","mascot.line.07","mascot.line.08","mascot.line.09","mascot.line.10","mascot.line.11","mascot.line.12",
-  "wallet.title","wallet.loading","wallet.current_balance","wallet.gold_unit","wallet.total_earned","wallet.total_spent","wallet.today_earned","wallet.ledger_title","wallet.ledger_desc","wallet.ledger_loading","wallet.ledger_empty","wallet.member_missing","wallet.no_gold_record","wallet.read_failed","wallet.ledger_read_failed",
-  "notice.title","notice.loading","notice.empty","notice.default_title","notice.default_desc_missing","notice.read_failed","notice.fold_open","notice.fold_close",
-  "inventory.title","inventory.loading","inventory.login_required","inventory.empty","inventory.read_failed","inventory.item_types_failed","inventory.item_categories_failed","inventory.book_button","inventory.book_hover",
-  "tasks.meta.tone_label","tasks.meta.release_date","tasks.meta.original","tasks.meta.singer_count","tasks.meta.singer_missing","tasks.title","tasks.tab.vocal_submit","tasks.tab.mix_submit","tasks.tab.claim","tasks.loading","tasks.login_required","tasks.empty_by_type","tasks.read_failed","tasks.action_failed","tasks.rpc_failed","tasks.action.submit_vocal","tasks.action.submit_mix","tasks.action.claim_singer","tasks.action.claim_mix","tasks.action.undo_vocal","tasks.action.undo_mix","tasks.claimed_singer_hint","tasks.claimed_mix_hint",
-  "profile.field.name","profile.field.mbti","profile.field.qq","profile.field.birthday_month","profile.field.birthday_day","profile.field.skill_request","profile.placeholder.name","profile.placeholder.location","profile.placeholder.empty_allowed","profile.placeholder.skill_request","profile.placeholder.message","profile.title","profile.loading","profile.empty","profile.edit_button","profile.edit_title","profile.save_button","profile.cancel_button","profile.section.basic","profile.section.skills","profile.section.social","profile.section.message","profile.field.location","profile.field.birthday","profile.field.xiaohongshu","profile.field.douyin","profile.field.bilibili","profile.field.weibo","profile.unfilled","profile.skills_empty","profile.save_loading","profile.save_no_change","profile.save_failed","profile.save_log_failed","profile.name_invalid","profile.location_invalid","profile.birthday_invalid","profile.name_duplicate","profile.skill_existing","profile.skill_normalized","profile.skill_request",
-  "honor.loading","honor.read_failed","honor.unavailable","honor.recent_empty","honor.titles_count","honor.achievements_count","honor.recent",
-  "recent.title","recent.hint","recent.loading","recent.login_required","recent.empty","recent.read_failed","recent.just_now","recent.minutes_ago","recent.hours_ago","recent.days_ago",
-  "gacha.title","gacha.desc","gacha.open_one","gacha.open_all","gacha.open_all_count","gacha.close","gacha.quantity","gacha.opening_one","gacha.opening_all","gacha.success","gacha.remaining","gacha.empty_after_open","gacha.no_rewards","gacha.open_failed","gacha.wallet_refresh_failed",
-  "tasks.tabs.aria_label","recent.aria_label","inventory.gacha_open_badge",
-  "date.month_suffix","date.day_suffix",
-  "profile.log_label.skills","profile.log_label.skill_request",
-  "notice.config.rooms_json","notice.config.room_aliases_json","notice.config.finished_statuses_json","notice.config.studio_task_types_json","notice.config.studio_task_keywords_json","notice.config.released_project_statuses_json",
-  "gacha.config.stored_ball_tiers_json",
-  "profile.config.allowed_locations_json","profile.config.skill_aliases_json","profile.config.mbti_options_json",
-  "common.page_text_missing","common.page_text_read_failed","common.path_missing","common.asset_missing","common.config_error"
-];
-
 const dormConfig = {
   noticeRooms: [],
   noticeRoomAliases: {},
@@ -4159,11 +4135,6 @@ async function loadDormPageTexts(){
     const value = String(row.text_value || "").trim();
     if(key && value) dormTexts[key] = value;
   });
-
-  const missing = DORM_REQUIRED_TEXT_KEYS.filter(key => !Object.prototype.hasOwnProperty.call(dormTexts, key));
-  if(missing.length){
-    throw new Error(`宿舍页文案配置缺失：${missing.join(", ")}`);
-  }
 
   loadDormConfigFromTexts();
 }
@@ -5567,28 +5538,43 @@ function mergeInventoryRows(memberItems,itemTypes,itemCategories){
     const itemKey = String(row.item_key || "").trim();
     const type = typeMap.get(itemKey);
     if(!type) throw new Error(`${t("inventory.item_types_failed")}：${itemKey}`);
-    const categoryKey = String(type.item_category || "").trim();
-    if(!categoryKey) throw new Error(`${t("inventory.item_categories_failed")}：${itemKey}`);
+
+    /*
+      背包分类与图鉴分类分离：
+      - 背包只看 item_types.inventory_category
+      - 图鉴继续由 collection_book_items.book_category 控制
+      - inventory_category 为空的物品，只用于图鉴/系统记录，不显示在“我的背包”
+    */
+    const categoryKey = String(type.inventory_category || "").trim();
+    if(!categoryKey) return null;
+
     const category = categoryMap.get(categoryKey);
-    if(!category) throw new Error(`${t("inventory.item_categories_failed")}：${categoryKey}`);
+    if(!category) throw new Error(`${inventoryCategoryErrorLabel()}：${categoryKey}`);
+
     const categoryName = String(category.category_name || "").trim();
-    if(!categoryName) throw new Error(`${t("inventory.item_categories_failed")}：${categoryKey}.category_name`);
+    if(!categoryName) throw new Error(`${inventoryCategoryErrorLabel()}：${categoryKey}.category_name`);
+
     return {
       ...row,
       ...type,
+      inventory_category: categoryKey,
       item_category: categoryKey,
       category_name: categoryName,
       category_sort_order: Number.isFinite(Number(category.sort_order)) ? Number(category.sort_order) : 9999
     };
-  });
+  }).filter(Boolean);
 }
 
 function inventoryCategoryKey(item){
-  return String(item?.item_category || "").trim();
+  return String(item?.inventory_category || item?.item_category || "").trim();
 }
 
 function inventoryCategoryLabel(item){
   return String(item?.category_name || "").trim();
+}
+
+function inventoryCategoryErrorLabel(){
+  return t("inventory.inventory_categories_failed") || "背包分类读取失败";
 }
 
 
@@ -6086,7 +6072,7 @@ async function loadInventory(){
     if(itemKeys.length){
       const { data:typeRows,error:typeError } = await supabaseClient
         .from("item_types")
-        .select("item_key,item_name,item_category,item_desc,item_icon,sort_order")
+        .select("item_key,item_name,item_category,inventory_category,item_desc,item_icon,sort_order")
         .in("item_key",itemKeys);
 
       if(typeError){
@@ -6096,21 +6082,24 @@ async function loadInventory(){
       }
 
       const { data:categoryRows,error:categoryError } = await supabaseClient
-        .from("item_categories")
+        .from("item_inventory_categories")
         .select("category_key,category_name,sort_order,is_visible")
         .order("sort_order",{ ascending:true });
 
       if(categoryError){
-        throw new Error(`${t("inventory.item_categories_failed")}：${categoryError.message || "item_categories"}`);
+        throw new Error(`${inventoryCategoryErrorLabel()}：${categoryError.message || "item_inventory_categories"}`);
       }else{
         itemCategories = (Array.isArray(categoryRows) ? categoryRows : []).filter(category => category.is_visible !== false);
+        if(!itemCategories.length){
+          throw new Error(`${inventoryCategoryErrorLabel()}：item_inventory_categories`);
+        }
       }
     }
 
     renderInventory(mergeInventoryRows(memberItems,itemTypes,itemCategories));
   }catch(error){
     console.error(error);
-    wrap.innerHTML = `<div class="errorText">${tHtml("inventory.read_failed")}：${escapeHtml(error.message || "member_items / item_types / item_categories")}</div>`;
+    wrap.innerHTML = `<div class="errorText">${tHtml("inventory.read_failed")}：${escapeHtml(error.message || "member_items / item_types / item_inventory_categories")}</div>`;
   }
 }
 
