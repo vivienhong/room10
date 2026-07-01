@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜宿舍</title>
-<!-- dorm clean db-driven v16: 通用模板路径同步 + 文案/配置数据库驱动 + 移除前端固定文案清单 -->
+<!-- dorm clean db-driven v20: 通用模板路径同步 + 文案/配置数据库驱动 + 吉祥物气泡配置数据库驱动 + 清理横屏气泡冲突样式 -->
 
 <script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1749,9 +1749,16 @@ button{
     right:calc(7px * var(--ui-scale));
     top:calc(8px * var(--ui-scale));
     max-width:calc(136px * var(--ui-scale));
-    min-height:calc(24px * var(--ui-scale));
-    padding:calc(4px * var(--ui-scale)) calc(9px * var(--ui-scale));
+    min-height:calc(26px * var(--ui-scale));
+    height:auto;
+    padding:calc(5px * var(--ui-scale)) calc(9px * var(--ui-scale)) calc(6px * var(--ui-scale));
     font-size:calc(10.5px * var(--ui-scale));
+    line-height:1.25;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:visible;
+    white-space:nowrap;
   }
 
   #mainPanel{
@@ -3292,43 +3299,6 @@ button{
   }
 }
 
-/* dorm v11: 小屏/窄布局时牛马气泡文字避免被图片或容器裁掉 */
-#mascotBubble{
-  z-index:3;
-  line-height:1.25;
-}
-
-@media(min-width:541px) and (max-width:1122px){
-  #mascotBox{
-    overflow:hidden;
-    padding-top:calc(34px * var(--ui-scale));
-  }
-
-  #mascotBox img{
-    max-height:calc(118px * var(--ui-scale));
-  }
-
-  #mascotBubble{
-    left:50%!important;
-    right:auto!important;
-    top:calc(7px * var(--ui-scale))!important;
-    transform:translateX(-50%)!important;
-    width:max-content!important;
-    max-width:calc(100% - 12px)!important;
-    min-height:calc(24px * var(--ui-scale))!important;
-    padding:calc(4px * var(--ui-scale)) calc(8px * var(--ui-scale))!important;
-    white-space:normal!important;
-    overflow:visible!important;
-    text-overflow:clip!important;
-    font-size:calc(10px * var(--ui-scale))!important;
-  }
-
-  #mascotBubble::after{
-    right:50%!important;
-    transform:translateX(50%) rotate(45deg)!important;
-  }
-}
-
 
 
 /* inventory v12: 图鉴入口放大、分类标题不裁切、物品名尽量单行完整 */
@@ -3785,6 +3755,47 @@ body.recent-obtained-visible .recentObtainedPanel{
   font-family:inherit;
 }
 
+/* dorm v20: 横屏/窄桌面吉祥物气泡唯一修正规则 */
+@media(min-width:541px) and (max-width:1122px){
+  #mascotBox{
+    overflow:visible;
+    padding-top:calc(42px * var(--ui-scale));
+  }
+
+  #mascotBox img{
+    max-height:calc(118px * var(--ui-scale));
+  }
+
+  #mascotBubble{
+    left:50%;
+    right:auto;
+    top:calc(4px * var(--ui-scale));
+    transform:translateX(-50%);
+    width:max-content;
+    max-width:calc(100% - 12px);
+    min-height:calc(30px * var(--ui-scale));
+    height:auto;
+    padding:calc(7px * var(--ui-scale)) calc(11px * var(--ui-scale)) calc(8px * var(--ui-scale));
+    font-size:calc(10.5px * var(--ui-scale));
+    line-height:1.35;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    box-sizing:border-box;
+    white-space:nowrap;
+    overflow:visible;
+    text-overflow:clip;
+    z-index:10;
+  }
+
+  #mascotBubble::after{
+    right:50%;
+    bottom:calc(-5px * var(--ui-scale));
+    transform:translateX(50%) rotate(45deg);
+    z-index:-1;
+  }
+}
+
 </style>
 </head>
 
@@ -4013,6 +4024,7 @@ const dormConfig = {
   noticeStudioTaskKeywords: [],
   noticeReleasedProjectStatuses: new Set(),
   storedGachaBallTiers: {},
+  mascotLines: [],
   allowedLocations: [],
   skillAliases: [],
   mbtiOptions: []
@@ -4058,6 +4070,12 @@ function loadDormConfigFromTexts(){
 
   const noticeAliases = requireDormJsonObject("notice.config.room_aliases_json");
   const storedGachaBallTiers = requireDormJsonObject("gacha.config.stored_ball_tiers_json");
+  const mascotLines = requireDormJsonArray("mascot.config.lines_json")
+    .map(item => ({
+      key:String(item?.key || "").trim(),
+      style:String(item?.style || "").trim()
+    }))
+    .filter(item => item.key && item.style);
   const allowedLocations = requireDormJsonArray("profile.config.allowed_locations_json").map(item => String(item || "").trim()).filter(Boolean);
   const skillAliases = requireDormJsonArray("profile.config.skill_aliases_json")
     .map(group => ({
@@ -4067,6 +4085,9 @@ function loadDormConfigFromTexts(){
     .filter(group => group.name && group.values.length);
   const mbtiOptions = requireDormJsonArray("profile.config.mbti_options_json").map(item => String(item ?? "").trim());
 
+  if(!mascotLines.length){
+    throw new Error("宿舍页数据库配置缺失：mascot.config.lines_json");
+  }
   if(!allowedLocations.length){
     throw new Error("宿舍页数据库配置缺失：profile.config.allowed_locations_json");
   }
@@ -4084,6 +4105,7 @@ function loadDormConfigFromTexts(){
   dormConfig.noticeStudioTaskKeywords = requireDormJsonArray("notice.config.studio_task_keywords_json").map(item => String(item || "").trim()).filter(Boolean);
   dormConfig.noticeReleasedProjectStatuses = new Set(requireDormJsonArray("notice.config.released_project_statuses_json").map(item => String(item || "").trim().toLowerCase()).filter(Boolean));
   dormConfig.storedGachaBallTiers = storedGachaBallTiers;
+  dormConfig.mascotLines = mascotLines;
   dormConfig.allowedLocations = allowedLocations;
   dormConfig.skillAliases = skillAliases;
   dormConfig.mbtiOptions = mbtiOptions;
@@ -4275,21 +4297,6 @@ const DORM_ACTIVE_VIEW_KEY = "room10DormActiveView";
 const DORM_VIEW_KEYS = new Set(["tasks","notice","wallet","inventory","profile"]);
 
 let currentStoredGachaBall = null;
-
-const mascotLines = [
-  { key:"mascot.line.01", style:"work" },
-  { key:"mascot.line.02", style:"ok" },
-  { key:"mascot.line.03", style:"calm" },
-  { key:"mascot.line.04", style:"energy" },
-  { key:"mascot.line.05", style:"wait" },
-  { key:"mascot.line.06", style:"plan" },
-  { key:"mascot.line.07", style:"busy" },
-  { key:"mascot.line.08", style:"cheer" },
-  { key:"mascot.line.09", style:"thinking" },
-  { key:"mascot.line.10", style:"soft" },
-  { key:"mascot.line.11", style:"calm" },
-  { key:"mascot.line.12", style:"cheer" }
-];
 
 function roomNoticeGroups(){
   return dormConfig.noticeRooms;
@@ -6581,7 +6588,12 @@ function setMascotBubbleOnce(){
   const bubble = document.getElementById("mascotBubble");
   if(!bubble) return;
 
-  const item = mascotLines[Math.floor(Math.random()*mascotLines.length)];
+  const lines = Array.isArray(dormConfig.mascotLines) ? dormConfig.mascotLines : [];
+  if(!lines.length){
+    throw new Error("宿舍页数据库配置缺失：mascot.config.lines_json");
+  }
+
+  const item = lines[Math.floor(Math.random()*lines.length)];
   bubble.textContent = t(item.key);
   bubble.className = `bubble-${item.style}`;
 }
