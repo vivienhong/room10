@@ -6,6 +6,7 @@
 <title>十号房｜花房</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
+<!-- flower clean db-driven v21: 通用模板导航路径统一；业务展示优先数据库；清减旧备用路径与前端提示兜底；支持 trainee 练习生身份 -->
 
 <style>
 *{box-sizing:border-box;}
@@ -82,7 +83,7 @@
   --flower-app-top:22.2%;
   --flower-app-width:66.8%;
   --flower-app-height:67.6%;
-  --flower-room-bg-image:url("room-flower.png");
+  --flower-room-bg-image:none;
 
 }
 
@@ -830,6 +831,18 @@ button,input{
   object-fit:contain;
   display:block;
   filter:drop-shadow(0 calc(6px * var(--ui-scale)) calc(9px * var(--ui-scale)) rgba(116,83,47,.13));
+}
+
+.flowerCardImgMissing{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:rgba(111,87,70,.62);
+  font-size:calc(11px * var(--ui-scale));
+  font-weight:900;
+  line-height:1.25;
+  filter:none;
 }
 
 .flowerCardName{
@@ -2877,7 +2890,7 @@ button,input{
 <body>
 <div id="room">
   <div id="bgFrame" aria-hidden="true">
-    <img id="bg" src="room-flower.png" data-room10-asset="flower.roomFlower" alt="十号房花房背景" />
+    <img id="bg" data-room10-asset="flower.roomFlower" alt="十号房花房背景" />
   </div>
 
   <div id="flowerBgFx" aria-hidden="true">
@@ -2901,12 +2914,12 @@ button,input{
   <div id="overlay">
     <!-- 房间按钮 -->
     <nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换">
-      <button class="navBtn" data-room="hall" type="button" data-url="index.html" data-login="false">
+      <button class="navBtn" data-room="hall" type="button" data-page="index" data-login="false">
         <span class="navLabel">大堂</span>
         <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
       </button>
 
-      <button class="navBtn" data-room="living" type="button" data-url="living.html" data-login="true">
+      <button class="navBtn" data-room="living" type="button" data-page="living" data-login="true">
         <span class="navLabel">客厅</span>
         <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
       </button>
@@ -2916,32 +2929,32 @@ button,input{
         <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
       </button>
 
-      <button class="navBtn" data-room="honor" type="button" data-url="honor.html" data-login="false">
+      <button class="navBtn" data-room="honor" type="button" data-page="honor" data-login="false">
         <span class="navLabel">荣誉墙</span>
         <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
       </button>
 
-      <button class="navBtn" data-room="studio" type="button" data-url="studio-todo.html" data-login="true">
+      <button class="navBtn" data-room="studio" type="button" data-page="studioTodo" data-login="true">
         <span class="navLabel">工作间</span>
         <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
       </button>
 
-      <button class="navBtn" data-room="game" type="button" data-url="game.html" data-login="false">
+      <button class="navBtn" data-room="game" type="button" data-page="game" data-login="false">
         <span class="navLabel">游戏房</span>
         <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span>
       </button>
 
-      <button class="navBtn" data-room="dorm" type="button" data-url="dorm.html" data-login="true">
+      <button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-login="true">
         <span class="navLabel">宿舍</span>
         <span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span>
       </button>
 
-      <button class="navBtn" data-room="flower" type="button" data-url="flower.html" data-login="false">
+      <button class="navBtn" data-room="flower" type="button" data-page="flower" data-login="false">
         <span class="navLabel">花房区</span>
         <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
       </button>
 
-      <button class="navBtn" data-room="pets" type="button" data-url="pets.html" data-login="false">
+      <button class="navBtn" data-room="pets" type="button" data-page="pet" data-login="false">
         <span class="navLabel">宠物区</span>
         <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
       </button>
@@ -3012,7 +3025,7 @@ button,input{
 
           <div class="potImageStage">
             <div class="potStageInner">
-              <img id="potImage" src="pot-empty.png" data-room10-asset="flower.potEmpty" alt="当前花盆状态">
+              <img id="potImage" data-room10-asset="flower.potEmpty" alt="当前花盆状态">
             </div>
           </div>
 
@@ -3022,17 +3035,17 @@ button,input{
 
           <div class="potCareStats" aria-label="花房道具库存">
             <div class="potStat">
-              <img class="potStatIcon" src="seed.png" data-room10-asset="flower.seed" alt="">
+              <img class="potStatIcon" data-room10-asset="flower.seed" alt="">
               <div class="potStatLabel">种子</div>
               <div class="potStatValue" id="potSeedCount">0</div>
             </div>
             <div class="potStat">
-              <img class="potStatIcon" src="water.png" data-room10-asset="flower.water" alt="">
+              <img class="potStatIcon" data-room10-asset="flower.water" alt="">
               <div class="potStatLabel">水</div>
               <div class="potStatValue" id="potWaterCount">0</div>
             </div>
             <div class="potStat">
-              <img class="potStatIcon" src="fert.png" data-room10-asset="flower.fert" alt="">
+              <img class="potStatIcon" data-room10-asset="flower.fert" alt="">
               <div class="potStatLabel">肥料</div>
               <div class="potStatValue" id="potFertCount">0</div>
             </div>
@@ -3131,7 +3144,7 @@ button,input{
 
 <div id="loginUI">
   <div class="login-panel">
-    <img src="login.png" data-room10-asset="root.login" alt="登录框">
+    <img data-room10-asset="root.login" alt="登录框">
     <input id="username" type="text" autocomplete="username">
     <input id="password" type="password" autocomplete="current-password">
     <button id="togglePassword" type="button" onclick="togglePassword()"></button>
@@ -3180,20 +3193,20 @@ const FLOWER_FILE_ASSET_KEYS = {
   "coin.png":"root.coin"
 };
 
-const FLOWER_PAGE_KEYS_BY_FILE = {
-  "index.html":"index",
-  "living.html":"living",
-  "honor.html":"honor",
-  "studio-todo.html":"studioTodo",
-  "game.html":"game",
-  "dorm.html":"dorm",
-  "flower.html":"flower",
-  "pets.html":"pet",
-  "manager-owner.html":"managerOwner",
-  "manager-admin.html":"managerAdmin",
-  "manager-member.html":"managerMember",
-  "manager-visitor.html":"managerVisitor",
-  "register.html":"managerRegister"
+const FLOWER_PAGE_KEYS = {
+  index:"index",
+  living:"living",
+  honor:"honor",
+  studioTodo:"studioTodo",
+  game:"game",
+  dorm:"dorm",
+  flower:"flower",
+  pet:"pet",
+  managerOwner:"managerOwner",
+  managerAdmin:"managerAdmin",
+  managerMember:"managerMember",
+  managerVisitor:"managerVisitor",
+  managerRegister:"managerRegister"
 };
 
 function isExternalPath(path){
@@ -3249,8 +3262,11 @@ function flowerAssetFromFile(path, fallback=""){
 function getConfiguredPageUrl(page){
   const raw = String(page || "").trim();
   if(!raw) return "";
-  const pageKey = FLOWER_PAGE_KEYS_BY_FILE[raw] || "";
-  if(pageKey) return resolveRoom10Page(pageKey, raw);
+
+  const pageKey = FLOWER_PAGE_KEYS[raw] || raw;
+  const configured = resolveRoom10Page(pageKey, "");
+  if(configured) return configured;
+
   return raw;
 }
 
@@ -3448,6 +3464,7 @@ function roleLabel(role){
   if(r === "owner") return "维修工";
   if(r === "admin") return "宿管";
   if(r === "member") return "房客";
+  if(r === "trainee") return "练习生";
   if(r === "applying") return "申请人";
   return "参观者";
 }
@@ -3526,11 +3543,11 @@ function handleLogout(){
 function getManagerPageByRole(){
   const role = String(authState.role || localStorage.getItem(STORAGE_KEYS.role) || "").toLowerCase();
 
-  if(role === "owner") return getConfiguredPageUrl("manager-owner.html");
-  if(role === "admin") return getConfiguredPageUrl("manager-admin.html");
-  if(role === "member" || role === "applying") return getConfiguredPageUrl("manager-member.html");
+  if(role === "owner") return getConfiguredPageUrl("managerOwner");
+  if(role === "admin") return getConfiguredPageUrl("managerAdmin");
+  if(role === "member" || role === "trainee" || role === "applying") return getConfiguredPageUrl("managerMember");
 
-  return getConfiguredPageUrl("manager-visitor.html");
+  return getConfiguredPageUrl("managerVisitor");
 }
 
 function enterManagerRoom(){
@@ -3538,20 +3555,27 @@ function enterManagerRoom(){
   window.location.href = getManagerPageByRole();
 }
 
-function enterRoom(page, needLogin){
-  const targetPage = String(page || "").trim();
-  if(!targetPage) return;
+function enterRoom(pageKey, needLogin, room=""){
+  const targetKey = String(pageKey || "").trim();
+  const targetRoom = String(room || targetKey || "").trim();
+  if(!targetKey) return;
 
   readLocalAuth();
+
+  const targetUrl = getConfiguredPageUrl(targetKey);
+  if(!targetUrl) return;
 
   if(needLogin && !authState.loggedIn){
     openLogin();
     return;
   }
 
-  const targetUrl = getConfiguredPageUrl(targetPage);
+  if(targetRoom === "dorm" && authState.role === "applying"){
+    window.location.href = getManagerPageByRole();
+    return;
+  }
 
-  if((targetPage === "flower.html" || targetPage === "pets.html") && !authState.loggedIn){
+  if((targetRoom === "flower" || targetRoom === "pets" || targetRoom === "pet") && !authState.loggedIn){
     window.location.href = addQueryToUrl(targetUrl, "mode=guest");
     return;
   }
@@ -3588,7 +3612,7 @@ function setupRoomNav(currentRoom){
         return;
       }
 
-      enterRoom(btn.dataset.url, btn.dataset.login === "true");
+      enterRoom(btn.dataset.page, btn.dataset.login === "true", btn.dataset.room);
     });
   });
 }
@@ -3614,8 +3638,8 @@ function togglePassword(){
 }
 
 function goRegisterFromFlower(){
-  sessionStorage.setItem("room10RegisterReturn", getConfiguredPageUrl("flower.html"));
-  window.location.href = addQueryToUrl(getConfiguredPageUrl("register.html"), "from=flower.html");
+  sessionStorage.setItem("room10RegisterReturn", getConfiguredPageUrl("flower"));
+  window.location.href = addQueryToUrl(getConfiguredPageUrl("managerRegister"), "from=flower");
 }
 
 async function login(){
@@ -3664,6 +3688,7 @@ async function login(){
     if(user.role === "owner") roleMessage = "维修工已上线";
     else if(user.role === "admin") roleMessage = "宿管已上线";
     else if(user.role === "member") roleMessage = "房客已登录";
+    else if(user.role === "trainee") roleMessage = "练习生已登录";
     else if(user.role === "applying") roleMessage = "当前身份为申请中";
 
     msg.style.color = "#5f7d3a";
@@ -4282,23 +4307,6 @@ function addUniqueFlowerTip(list, tip){
   }
 }
 
-function getFallbackFlowerTips(){
-  const tips = [
-    "花市每 12 小时刷新一次价格，买入后至少等下一轮刷新才能卖出。",
-    "每轮每种花最多买入 5 朵；点击「5朵」会自动填入当前可用的最大数量。",
-    "卖出时以数量框为准；如果数量超过当前可卖数量，系统会自动按最大可卖数量处理。",
-    "市场花彻底枯萎后不能卖，只能清理，清理时有低概率获得肥料。",
-    "当前金币达到 100 才能在花市进行买入交易。",
-    "当天浇水和施肥各最多 3 次。"
-  ];
-
-  if(getCurrentGoldBalance() < 100){
-    tips.splice(3, 0, "当前金币不足 100，暂时不能在花市买入。");
-  }
-
-  return tips;
-}
-
 async function loadFlowerPaperTips(){
   const auth = getFlowerAuth();
   flowerState.paperTips = [];
@@ -4348,7 +4356,6 @@ function getMarketTips(){
   }
 
   (flowerState.paperTips || []).forEach(tip => addUniqueFlowerTip(tips, tip));
-  getFallbackFlowerTips().forEach(tip => addUniqueFlowerTip(tips, tip));
 
   return tips;
 }
@@ -4451,34 +4458,13 @@ function getMarketLimitNote(){
 }
 
 function getFlowerLanguage(row){
-  const fromDb = String(row?.display_phrase || row?.flower_language || "").trim();
-  if(fromDb) return fromDb;
-
-  const key = String(row?.flower_key || "");
-  const languageMap = {
-    daisy:"纯真、希望。",
-    lavender:"等待爱情、宁静。",
-    tulip:"博爱、体贴。",
-    rose:"友谊、祝福。",
-    peony:"富贵、圆满。"
-  };
-  return languageMap[key] || "";
+  return String(row?.display_phrase || row?.flower_language || "").trim();
 }
 
 function getFreshBouquetImg(row){
   const imgPath = String(row?.bouquet_img || "").trim();
   if(imgPath && !imgPath.toLowerCase().includes("wither")) return flowerAssetFromFile(imgPath);
-
-  const key = String(row?.flower_key || "");
-  const freshMap = {
-    daisy:flowerAsset("flower.bouquetDaisy", "bouquet-daisy.png"),
-    lavender:flowerAsset("flower.bouquetLavender", "bouquet-lavender.png"),
-    tulip:flowerAsset("flower.bouquetTulip", "bouquet-tulip.png"),
-    rose:flowerAsset("flower.bouquetRose", "bouquet-rose.png"),
-    peony:flowerAsset("flower.bouquetPeony", "bouquet-peony.png")
-  };
-
-  return freshMap[key] || flowerAsset("flower.bouquetDaisy", "bouquet-daisy.png");
+  return "";
 }
 
 function hasWitheredFlowers(row){
@@ -4524,7 +4510,7 @@ function renderFlowerBundleInventory(loggedOut=false){
     const owned = Number(row.owned_quantity) || 0;
     return `
       <div class="flowerBundleItem" title="${escapeHtml(displayName)} × ${owned}">
-        <img class="flowerBundleIcon" src="${escapeHtml(getInventoryBouquetImg(row))}" alt="${escapeHtml(displayName)}">
+        ${getInventoryBouquetImg(row) ? `<img class="flowerBundleIcon" src="${escapeHtml(getInventoryBouquetImg(row))}" alt="${escapeHtml(displayName)}">` : `<div class="flowerBundleIcon flowerCardImgMissing">图</div>`}
         <div class="flowerBundleName">${escapeHtml(displayName)}</div>
         <div class="flowerBundleQty">×${owned}</div>
       </div>
@@ -4534,10 +4520,13 @@ function renderFlowerBundleInventory(loggedOut=false){
 
 function getMerchantFlowerMeta(row){
   const key = String(row?.flower_key || "");
-  return getMarketRow(key) || {
+  const marketRow = getMarketRow(key);
+  if(marketRow) return marketRow;
+
+  return {
     flower_key:key,
-    flower_name:key === "low_quality" ? "低品质花束" : "花束",
-    bouquet_img:flowerAsset("flower.bouquetDaisy", "bouquet-daisy.png")
+    flower_name:row?.flower_name || "花束",
+    bouquet_img:row?.bouquet_img || ""
   };
 }
 
@@ -4763,7 +4752,7 @@ function renderFlowerMerchantInventory(rows=flowerState.merchantRows){
         const witherText = group.wither_at ? `｜剩余 ${formatWitherCountdown(group.wither_at)}` : "";
         return `
           <div class="flowerMerchantItem" data-merchant-group="${escapeHtml(group.key)}">
-            <img src="${escapeHtml(group.img)}" alt="${escapeHtml(group.displayName)}">
+            ${group.img ? `<img src="${escapeHtml(group.img)}" alt="${escapeHtml(group.displayName)}">` : `<div class="flowerCardImgMissing">素材未配置</div>`}
             <div>
               <div class="flowerMerchantItemName">${escapeHtml(group.displayName)}</div>
               <div class="flowerMerchantItemMeta">${escapeHtml(group.qualityText)}｜共 ${group.totalQuantity} 朵${escapeHtml(witherText)}</div>
@@ -5238,7 +5227,7 @@ async function hasClaimedFirstVisitReward(){
 
     return Boolean(owned?.id);
   }catch(err){
-    console.warn("首次花房奖励状态检查失败，改用本地提示兜底：", err);
+    console.warn("首次花房奖励状态检查失败：", err);
     return false;
   }
 }
@@ -5375,7 +5364,7 @@ function renderMarket(rows){
         return `
           <article class="flowerCard">
             <div class="flowerCardImgWrap">
-              <img class="flowerCardImg" src="${escapeHtml(getFreshBouquetImg(row))}" alt="${escapeHtml(displayName)}">
+              ${getFreshBouquetImg(row) ? `<img class="flowerCardImg" src="${escapeHtml(getFreshBouquetImg(row))}" alt="${escapeHtml(displayName)}">` : `<div class="flowerCardImg flowerCardImgMissing">素材未配置</div>`}
             </div>
             <div class="flowerCardName">${escapeHtml(displayName)}</div>
             <div class="flowerCardPhrase">${escapeHtml(getFlowerLanguage(row))}</div>
