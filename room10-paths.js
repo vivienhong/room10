@@ -60,7 +60,20 @@ window.ROOM10_PATHS = {
       badge2: "badges/2.png",
       badge3: "badges/3.png",
       badge4: "badges/4.png",
-      badge5: "badges/5.png"
+      badge5: "badges/5.png",
+
+      newyear: "badges/newyear.png",
+      spring: "badges/spring.png",
+      lantern: "badges/lantern.png",
+      valentine: "badges/valentine.png",
+      duanwu: "badges/duanwu.png",
+      qixi: "badges/qixi.png",
+      midautumn: "badges/midautumn.png",
+      national: "badges/national.png",
+      independence: "badges/independence.png",
+      halloween: "badges/halloween.png",
+      thanksgiving: "badges/thanksgiving.png",
+      christmas: "badges/christmas.png"
     },
 
     index: {
@@ -203,7 +216,21 @@ window.ROOM10_PATHS = {
       badge2: "入室 2 年",
       badge3: "入室 3 年",
       badge4: "入室 4 年",
-      badge5: "入室 5 年"
+      badge5: "入室 5 年",
+
+      holidayFileNameRule: "badges/newyear.png 至 badges/christmas.png 分别代表节日礼包/节日徽章图案。",
+      newyear: "元旦：新年烟花",
+      spring: "春节：新春红包",
+      lantern: "元宵：团圆花灯",
+      valentine: "情人节：玫瑰信笺",
+      duanwu: "端午：平安香囊",
+      qixi: "七夕：鹊桥双星",
+      midautumn: "中秋：桂月玉兔",
+      national: "国庆：华诞星章",
+      independence: "美国独立日：星条礼花",
+      halloween: "万圣节：南瓜糖袋",
+      thanksgiving: "感恩节：节日火鸡",
+      christmas: "圣诞节：圣诞树"
     },
 
     mango: {
