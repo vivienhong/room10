@@ -957,6 +957,277 @@ button,input{font-family:inherit;}
   }
 }
 
+
+
+/* =========================================================
+   v10：宠物互动配置数据库读取版
+   主体 / 道具 / 特效位置由 pet_interaction_configs.config_json 控制
+========================================================= */
+.careAvatar{
+  overflow:visible!important;
+}
+.careAvatar .carePetStage{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:visible;
+  pointer-events:none;
+}
+.careAvatar .carePetScene{
+  position:absolute;
+  left:50%;
+  bottom:9%;
+  width:58%;
+  transform:translateX(-50%);
+  transform-origin:50% 88%;
+  pointer-events:none;
+}
+.careAvatar .carePetBody{
+  position:relative!important;
+  left:auto!important;
+  top:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:100%!important;
+  height:auto!important;
+  display:block!important;
+  object-fit:contain!important;
+  transform:none!important;
+  z-index:var(--pet-body-layer,3)!important;
+  filter:drop-shadow(0 calc(10px * var(--ui-scale)) calc(14px * var(--ui-scale)) rgba(90,62,38,.18));
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.careAvatar .carePetProp{
+  position:absolute!important;
+  left:var(--pet-prop-left,50%)!important;
+  top:var(--pet-prop-top,82%)!important;
+  width:var(--pet-prop-width,12%)!important;
+  height:auto!important;
+  display:block!important;
+  object-fit:contain!important;
+  transform:translate(-50%,-50%) scale(var(--pet-prop-scale,1))!important;
+  z-index:var(--pet-prop-layer,5)!important;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.careAvatar .carePetProp.is-empty{
+  display:none!important;
+}
+.careAvatar .carePetFx,
+.careAvatar .carePetFx2,
+.careAvatar .carePetFx::before,
+.careAvatar .carePetFx::after,
+.careAvatar .carePetFx2::before,
+.careAvatar .carePetFx2::after{
+  position:absolute;
+  pointer-events:none;
+}
+.careAvatar .carePetFx,
+.careAvatar .carePetFx2{
+  inset:0;
+}
+.careAvatar .carePetFx{
+  z-index:var(--pet-fx-layer,6);
+}
+.careAvatar .carePetFx2{
+  z-index:var(--pet-fx2-layer,7);
+}
+.careAvatar .carePetFx::before,
+.careAvatar .carePetFx::after,
+.careAvatar .carePetFx2::before,
+.careAvatar .carePetFx2::after{
+  content:none;
+  left:var(--pet-fx-left,50%);
+  top:var(--pet-fx-top,50%);
+  transform:translate(-50%,-50%);
+}
+.careAvatar .carePetFx2::before,
+.careAvatar .carePetFx2::after{
+  left:var(--pet-fx2-left,50%);
+  top:var(--pet-fx2-top,50%);
+}
+.careAvatar.pet-db-animate .carePetScene{
+  animation:carePetSoftHop 1.05s ease-in-out 1;
+}
+.careAvatar.pet-db-eat .carePetScene{
+  animation:carePetEatNod .88s ease-in-out 2;
+}
+.careAvatar.pet-db-clean .carePetScene{
+  animation:carePetWetHappy 1.15s ease-in-out 2;
+}
+.careAvatar.pet-db-heal .carePetScene{
+  animation:carePetHealBreath 1.4s ease-in-out 2;
+}
+.careAvatar.pet-db-happy .carePetScene{
+  animation:carePetSoftHop 1.1s ease-in-out 2;
+}
+.careAvatar.pet-db-weak .carePetScene,
+.careAvatar.pet-db-sick .carePetScene{
+  animation:carePetWeakShake 1.35s ease-in-out infinite;
+}
+.careAvatar.pet-db-eat .carePetFx::before{
+  content:"";
+  width:22%;
+  height:14%;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 14px 12px,rgba(159,113,52,.78) 0 3px,transparent 4px),
+    radial-gradient(circle at 30px 23px,rgba(190,139,68,.68) 0 3px,transparent 4px),
+    radial-gradient(circle at 50px 12px,rgba(139,96,48,.58) 0 2px,transparent 3px),
+    radial-gradient(circle at 22px 36px,rgba(212,160,84,.55) 0 2px,transparent 3px);
+  animation:carePetCrumbs 1.1s ease-in-out infinite;
+}
+.careAvatar.pet-db-play .carePetFx::before{
+  content:"";
+  width:22%;
+  height:12%;
+  border-radius:50%;
+  border-top:calc(3px * var(--ui-scale)) solid rgba(149,188,179,.48);
+  border-left:calc(3px * var(--ui-scale)) solid transparent;
+  transform:translate(-50%,-50%) rotate(-16deg);
+  animation:carePetPlayLine .9s ease-in-out infinite;
+}
+.careAvatar.pet-db-clean .carePetFx::before{
+  content:"";
+  width:38%;
+  height:30%;
+  background:
+    radial-gradient(circle at 18% 70%,rgba(156,216,236,.9) 0 10px,rgba(156,216,236,.42) 11px,transparent 12px),
+    radial-gradient(circle at 32% 34%,rgba(186,232,246,.84) 0 13px,rgba(186,232,246,.36) 14px,transparent 15px),
+    radial-gradient(circle at 54% 62%,rgba(144,206,232,.88) 0 9px,rgba(144,206,232,.38) 10px,transparent 11px),
+    radial-gradient(circle at 70% 24%,rgba(175,228,245,.9) 0 11px,rgba(175,228,245,.36) 12px,transparent 13px),
+    radial-gradient(circle at 82% 58%,rgba(152,214,238,.86) 0 8px,rgba(152,214,238,.34) 9px,transparent 10px);
+  animation:carePetBubbles 1.8s ease-in-out infinite;
+}
+.careAvatar.pet-db-clean .carePetFx2::before{
+  content:"";
+  width:34%;
+  height:22%;
+  background:
+    radial-gradient(circle at 14% 64%,rgba(255,255,255,.98) 0 12px,rgba(255,255,255,.82) 13px,transparent 15px),
+    radial-gradient(circle at 28% 40%,rgba(255,255,255,1) 0 16px,rgba(255,255,255,.88) 17px,transparent 19px),
+    radial-gradient(circle at 44% 68%,rgba(255,255,255,.97) 0 12px,rgba(255,255,255,.8) 13px,transparent 15px),
+    radial-gradient(circle at 58% 42%,rgba(255,255,255,1) 0 18px,rgba(255,255,255,.9) 19px,transparent 21px),
+    radial-gradient(circle at 74% 66%,rgba(255,255,255,.98) 0 13px,rgba(255,255,255,.82) 14px,transparent 16px),
+    radial-gradient(circle at 88% 48%,rgba(255,255,255,.97) 0 14px,rgba(255,255,255,.78) 15px,transparent 17px),
+    radial-gradient(ellipse at 50% 56%,rgba(255,255,255,.54),rgba(255,255,255,.12) 58%,transparent 72%);
+  filter:drop-shadow(0 3px 5px rgba(185,208,218,.28));
+  animation:carePetFoam 1.8s ease-in-out infinite;
+}
+.careAvatar.pet-db-heal .carePetFx::before{
+  content:"";
+  width:54%;
+  height:54%;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,233,148,.42),transparent 64%);
+  animation:carePetHealGlow 1.9s ease-in-out infinite;
+}
+.careAvatar.pet-db-heal .carePetFx::after{
+  content:"+";
+  color:rgba(123,174,123,.78);
+  font-size:calc(50px * var(--ui-scale));
+  font-weight:900;
+  top:calc(var(--pet-fx-top,50%) - 22%);
+  animation:carePetCross 1.45s ease-in-out infinite;
+}
+.careAvatar.pet-db-happy .carePetFx::before{
+  content:"♥";
+  color:rgba(238,137,130,.78);
+  font-size:calc(42px * var(--ui-scale));
+  font-weight:900;
+  animation:carePetHeart 1.4s ease-in-out infinite;
+}
+.careAvatar.pet-db-happy .carePetFx::after{
+  content:"✦";
+  left:calc(var(--pet-fx-left,50%) - 28%);
+  top:calc(var(--pet-fx-top,50%) + 6%);
+  color:rgba(229,181,73,.75);
+  font-size:calc(36px * var(--ui-scale));
+  font-weight:900;
+  animation:carePetStar 1.2s ease-in-out infinite;
+}
+.careAvatar.pet-db-weak .carePetFx::before{
+  content:"";
+  width:8%;
+  height:10%;
+  border-radius:50% 50% 55% 55%;
+  background:rgba(124,177,208,.72);
+  transform:translate(-50%,-50%) rotate(12deg);
+  animation:carePetSweat 1.2s ease-in-out infinite;
+}
+.careAvatar.pet-db-sick .carePetFx::before{
+  content:"";
+  width:24%;
+  height:24%;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M63 15c-18 0-33 15-33 33 0 16 13 29 29 29 14 0 25-11 25-25 0-12-9-21-21-21-10 0-17 7-17 17 0 8 6 14 14 14 6 0 11-5 11-11' fill='none' stroke='%238a71bf' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter:drop-shadow(0 1px 3px rgba(128,96,165,.24));
+  animation:carePetDizzy 1.5s linear infinite;
+}
+
+.careAvatar .carePetConfigNotice{
+  position:absolute;
+  left:50%;
+  bottom:-18px;
+  z-index:80;
+  max-width:180px;
+  padding:4px 8px;
+  border-radius:999px;
+  background:rgba(255,246,236,.94);
+  border:1px solid rgba(184,116,82,.22);
+  color:#8a4f3d;
+  font-size:10px;
+  font-weight:900;
+  line-height:1.25;
+  text-align:center;
+  transform:translateX(-50%);
+  box-shadow:0 3px 10px rgba(90,62,38,.10);
+  pointer-events:none;
+  white-space:nowrap;
+}
+.careAvatar .carePetFallbackImg{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  filter:drop-shadow(0 calc(10px * var(--ui-scale)) calc(14px * var(--ui-scale)) rgba(90,62,38,.18));
+}
+
+@keyframes carePetSoftHop{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-8px);}}
+@keyframes carePetEatNod{0%,100%{transform:translateX(-50%) rotate(0deg) translateY(0);}50%{transform:translateX(-50%) rotate(1deg) translateY(5px);}}
+@keyframes carePetWetHappy{0%,100%{transform:translateX(-50%) rotate(0deg);}25%{transform:translateX(-50%) rotate(1deg);}75%{transform:translateX(-50%) rotate(-1deg);}}
+@keyframes carePetHealBreath{0%,100%{transform:translateX(-50%) scale(1);}50%{transform:translateX(-50%) scale(1.02);}}
+@keyframes carePetWeakShake{0%,100%{transform:translateX(-50%) rotate(0deg);}25%{transform:translateX(-50%) rotate(-.7deg);}75%{transform:translateX(-50%) rotate(.7deg);}}
+@keyframes carePetCrumbs{0%,100%{transform:translate(-50%,-50%) translateY(0);opacity:.22;}45%{transform:translate(-50%,-50%) translateY(-8px);opacity:.9;}}
+@keyframes carePetBubbles{0%{transform:translate(-50%,-50%) translateY(18px);opacity:.12;}45%{opacity:.92;}100%{transform:translate(-50%,-50%) translateY(-24px);opacity:0;}}
+@keyframes carePetFoam{0%{transform:translate(-50%,-50%) translateY(8px) scale(.98);opacity:.72;}45%{transform:translate(-50%,-50%) translateY(0) scale(1);opacity:1;}100%{transform:translate(-50%,-50%) translateY(-8px) scale(1.03);opacity:.84;}}
+@keyframes carePetPlayLine{0%,100%{opacity:.2;transform:translate(-50%,-50%) rotate(-16deg) translateX(0);}50%{opacity:.82;transform:translate(-50%,-50%) rotate(-16deg) translateX(12px);}}
+@keyframes carePetHealGlow{0%,100%{opacity:.25;transform:translate(-50%,-50%) scale(.86);}50%{opacity:.75;transform:translate(-50%,-50%) scale(1.08);}}
+@keyframes carePetCross{0%,100%{opacity:.3;transform:translate(-50%,-50%) translateY(8px);}50%{opacity:1;transform:translate(-50%,-50%) translateY(-8px);}}
+@keyframes carePetHeart{0%{opacity:0;transform:translate(-50%,-50%) translateY(18px) scale(.8);}40%{opacity:1;}100%{opacity:0;transform:translate(-50%,-50%) translateY(-28px) scale(1.1);}}
+@keyframes carePetStar{0%,100%{opacity:.2;transform:translate(-50%,-50%) scale(.8) rotate(0deg);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(14deg);}}
+@keyframes carePetSweat{0%,100%{opacity:.25;transform:translate(-50%,-50%) translateY(0) rotate(12deg) scale(.8);}50%{opacity:1;transform:translate(-50%,-50%) translateY(12px) rotate(12deg) scale(1);}}
+@keyframes carePetDizzy{0%{transform:translate(-50%,-50%) rotate(0deg);}100%{transform:translate(-50%,-50%) rotate(360deg);}}
+
+
+
+/* =========================================================
+   mobile fix：手机版顶部模式按钮居中
+========================================================= */
+@media(max-width:540px){
+  .petModeDock{
+    width:100%!important;
+    justify-content:center!important;
+    align-items:center!important;
+    gap:8px!important;
+    padding:0 4px!important;
+    margin:0 auto!important;
+  }
+  .petModeDock .petToolBtn{
+    flex:0 0 auto!important;
+  }
+}
+
 </style>
 
 </head>
@@ -1074,7 +1345,8 @@ const RPC = {
   careState:"get_pet_care_page_state",
   careAction:"care_pet_action",
   dailyGift:"claim_pet_daily_gift",
-  decay:"process_pet_daily_decay"
+  decay:"process_pet_daily_decay",
+  interactionConfigs:"get_pet_interaction_configs"
 };
 let activeMode = "adopt";
 let selectedPetId = null;
@@ -1086,6 +1358,11 @@ let careState = null;
 let lastDailyGift = null;
 let careItems = {};
 let autoGiftRunning = false;
+let petInteractionConfigs = {};
+let petInteractionConfigSpecies = "";
+let petInteractionConfigLoading = null;
+let petInteractionConfigError = "";
+let careActionReturnTimer = null;
 
 function room10Url(path){const raw=String(path||"").trim();if(!raw)return"";if(/^(https?:|data:|mailto:|tel:|#|\/)/i.test(raw))return raw;if(raw.startsWith("./")||raw.startsWith("../"))return raw;if(typeof window.room10Path==="function")return window.room10Path(raw);return `${ROOM10_ROOT_PREFIX}${raw}`;}
 function room10PageUrl(key,fallback){if(key&&typeof window.room10Page==="function"){const url=window.room10Page(key);if(url)return url;}return room10Url(fallback||"");}
@@ -1172,17 +1449,84 @@ async function loadAdoptionState(){document.getElementById("adoptGrid").innerHTM
 
 function lifeLabel(status){return {healthy:"健康",normal:"正常",weak:"虚弱",sick:"生病",critical:"危险",dead:"死亡"}[status]||"正常";}
 function careSpeech(p){if(!p)return"暂无有效宠物。";if(p.life_status==="critical")return `${p.name} 非常虚弱，需要大家快点照顾。`;if(p.life_status==="sick")return `${p.name} 生病了，喂食和清洁会帮助它恢复。`;if(p.life_status==="weak")return `${p.name} 有些虚弱，正在等大家陪它。`;return `${p.name} 正在宠物区等大家来陪伴。`;}
+
+function speciesKeyForPet(p){return Number(p?.pet_no)===1?"germanShepherd":`pet${Number(p?.pet_no)||"unknown"}`;}
+function getPetInteractionConfig(variantKey){return petInteractionConfigs[String(variantKey||"")]||null;}
+function setPetInteractionConfigError(msg){petInteractionConfigError=String(msg||"").trim();}
+async function ensurePetInteractionConfigs(p){
+  const speciesKey=speciesKeyForPet(p);
+  if(!speciesKey||speciesKey==="petunknown")return;
+  if(petInteractionConfigSpecies===speciesKey&&Object.keys(petInteractionConfigs).length)return;
+  if(petInteractionConfigLoading)return petInteractionConfigLoading;
+  setPetInteractionConfigError("");
+  petInteractionConfigLoading=(async()=>{
+    try{
+      const rows=await callRpc(RPC.interactionConfigs,{p_species_key:speciesKey});
+      const next={};
+      (Array.isArray(rows)?rows:[]).forEach(row=>{if(row&&row.variant_key)next[row.variant_key]=row;});
+      petInteractionConfigs=next;
+      petInteractionConfigSpecies=speciesKey;
+      if(!Object.keys(next).length)setPetInteractionConfigError(`互动配置缺失：${speciesKey}`);
+    }catch(err){
+      petInteractionConfigs={};
+      petInteractionConfigSpecies=speciesKey;
+      setPetInteractionConfigError(`互动配置读取失败：${err.message||"数据库返回错误"}`);
+      console.warn("宠物互动配置读取失败：",err);
+    }finally{
+      petInteractionConfigLoading=null;
+    }
+  })();
+  return petInteractionConfigLoading;
+}
+function careBaseVariant(p){const status=String(p?.life_status||"").toLowerCase();if(status==="sick"||status==="critical")return "sick";if(status==="weak")return "weak";if(status==="dead")return "dead";return "happy";}
+function careActionVariant(action){return {feed_snack:"eat:snack:side",feed_can:"eat:can:near-mouth",feed_dry:"eat:kibble:bowl",clean:"clean",play:"play",heal:"heal",happy:"happy",weak:"weak",sick:"sick"}[String(action||"")]||"happy";}
+function careActionClassFromVariant(variantKey){if(String(variantKey||"").startsWith("eat:"))return "eat";return String(variantKey||"happy").replace(/[^a-z0-9_-]/gi,"-");}
+function petConfigNumber(value){const n=Number(value);return Number.isFinite(n)?n:null;}
+function validatePetInteractionConfig(cfg,variantKey){
+  if(petInteractionConfigError)return petInteractionConfigError;
+  if(!cfg||!cfg.config_json)return `互动配置缺失：${variantKey}`;
+  if(!cfg.body_image_key)return `互动配置缺少主体图：${variantKey}`;
+  const values=cfg.config_json;
+  const miss=["bodyLeft","bodyBottom","bodyWidth","bodyLayer"].filter(k=>petConfigNumber(values[k])===null);
+  if(miss.length)return `互动配置字段缺失：${variantKey} / ${miss.join(", ")}`;
+  return "";
+}
+function renderPetFallbackNotice(message){
+  const avatar=document.getElementById("careAvatar");
+  if(!avatar||!careState)return;
+  const img=careState.image?`<img class="carePetFallbackImg" src="${escapeHtml(careState.image)}" alt="${escapeHtml(careState.name)}">`:"🐾";
+  avatar.className="careAvatar";
+  avatar.innerHTML=`${img}${message?`<div class="carePetConfigNotice">${escapeHtml(message)}</div>`:""}`;
+}
+function resetCarePetScene(content){const avatar=document.getElementById("careAvatar");if(!avatar)return;clearTimeout(careActionReturnTimer);avatar.className="careAvatar";avatar.innerHTML=content||"🐾";}
+function renderCarePetScene(variantKey,{animate=false}={}){
+  const avatar=document.getElementById("careAvatar");
+  if(!avatar||!careState)return;
+  clearTimeout(careActionReturnTimer);
+  const cfg=getPetInteractionConfig(variantKey);
+  const validationMessage=validatePetInteractionConfig(cfg,variantKey);
+  if(validationMessage){renderPetFallbackNotice(validationMessage);return;}
+  const values=cfg.config_json||{};
+  const bodyUrl=room10AssetUrl(cfg.body_image_key,"")||careState.image||"";
+  const propUrl=cfg.prop_image_key?room10AssetUrl(cfg.prop_image_key,""):"";
+  if(!bodyUrl){renderPetFallbackNotice(`互动配置主体图读取失败：${variantKey}`);return;}
+  const actionClass=careActionClassFromVariant(variantKey);
+  avatar.className=`careAvatar pet-db-${escapeHtml(actionClass)}${animate?" pet-db-animate":""}`;
+  const style=[`left:${petConfigNumber(values.bodyLeft) ?? 50}%`,`bottom:${petConfigNumber(values.bodyBottom) ?? 9}%`,`width:${petConfigNumber(values.bodyWidth) ?? 58}%`].join(";");
+  const vars=[`--pet-body-layer:${petConfigNumber(values.bodyLayer) ?? 3}`,`--pet-prop-left:${petConfigNumber(values.propLeft) ?? 50}%`,`--pet-prop-top:${petConfigNumber(values.propTop) ?? 82}%`,`--pet-prop-width:${petConfigNumber(values.propWidth) ?? 12}%`,`--pet-prop-scale:${petConfigNumber(values.propScale) ?? 1}`,`--pet-prop-layer:${petConfigNumber(values.propLayer) ?? 5}`,`--pet-fx-left:${petConfigNumber(values.fxLeft) ?? 50}%`,`--pet-fx-top:${petConfigNumber(values.fxTop) ?? 50}%`,`--pet-fx-layer:${petConfigNumber(values.fxLayer) ?? 6}`,`--pet-fx2-left:${petConfigNumber(values.fx2Left) ?? petConfigNumber(values.fxLeft) ?? 50}%`,`--pet-fx2-top:${petConfigNumber(values.fx2Top) ?? petConfigNumber(values.fxTop) ?? 50}%`,`--pet-fx2-layer:${petConfigNumber(values.fx2Layer) ?? 7}`].join(";");
+  avatar.innerHTML=`<div class="carePetStage" style="${vars}"><div class="carePetScene" style="${style}"><img class="carePetBody" src="${escapeHtml(bodyUrl)}" alt="${escapeHtml(careState.name)}">${propUrl?`<img class="carePetProp" src="${escapeHtml(propUrl)}" alt="">`:`<img class="carePetProp is-empty" alt="">`}<div class="carePetFx"></div><div class="carePetFx2"></div></div></div>`;
+}
 function normalizeCarePet(row){const no=Number(row.pet_no);const state=row.life_status==="dead"?"dead":row.life_status==="critical"?"critical":row.life_status==="sick"?"sick":row.life_status==="weak"?"weak":"front";return {id:row.adoption_id||row.id, pet_no:no, name:row.pet_name||row.animal_name||"宠物", animal_name:row.animal_name||"", image:petStateAsset({pet_no:no},state), cardImage:petCardAsset(no), owner_name:row.owner_name||"", is_owner_me:bool(row.is_owner_me), hunger:numberOrZero(row.hunger), clean:numberOrZero(row.clean), mood:numberOrZero(row.mood), health:numberOrZero(row.health), intimacy:numberOrZero(row.my_intimacy), level:numberOrZero(row.level)||1, life_status:row.life_status||"healthy", status:row.status||"很活泼", feed_count:numberOrZero(row.feed_count), clean_count:numberOrZero(row.clean_count), play_count:numberOrZero(row.play_count), updated_at:row.updated_at||""};}
-function setCareMessage(msg){const text=msg||"这里还没有小动物在等你。先去领养页收集图片卡，集齐后再来领养吧。";document.getElementById("careAvatar").innerHTML="🐾";document.getElementById("careName").textContent="还没有宠物";document.getElementById("careHint").textContent="去领养页收集图片卡，集齐后再来领养吧。";document.getElementById("careSpeechText").textContent=text;document.getElementById("statusGrid").innerHTML="";const av=document.getElementById("careAffinityValue");if(av)av.textContent="0 / 1000";const af=document.getElementById("careAffinityFill");if(af)af.style.width="0%";document.getElementById("careSupplyList").innerHTML=`<div class="dailyText">暂无可显示的宠物道具。</div>`;document.getElementById("careLogList").innerHTML=`<div class="petMessage">${escapeHtml(text)}</div>`;}
+function setCareMessage(msg){setPetInteractionConfigError("");const text=msg||"这里还没有小动物在等你。先去领养页收集图片卡，集齐后再来领养吧。";resetCarePetScene("🐾");document.getElementById("careName").textContent="还没有宠物";document.getElementById("careHint").textContent="去领养页收集图片卡，集齐后再来领养吧。";document.getElementById("careSpeechText").textContent=text;document.getElementById("statusGrid").innerHTML="";const av=document.getElementById("careAffinityValue");if(av)av.textContent="0 / 1000";const af=document.getElementById("careAffinityFill");if(af)af.style.width="0%";document.getElementById("careSupplyList").innerHTML=`<div class="dailyText">暂无可显示的宠物道具。</div>`;document.getElementById("careLogList").innerHTML=`<div class="petMessage">${escapeHtml(text)}</div>`;}
 function statusBar(label,val,max=100,type=""){const n=Math.max(0,Math.min(max,numberOrZero(val)));const width=Math.round(n/max*100);const cls=type==="health"?(n<=35?"health-bad":n<=65?"health-warn":"health-good"):"";const display=max===100?`${Math.round(n)}%`:`${Math.round(n)} / ${max}`;return `<div class="statusItem"><div class="statusTop"><span>${escapeHtml(label)}</span><span class="statusValue">${display}</span></div><div class="statusTrack"><div class="statusFill ${cls}" style="width:${width}%"></div></div></div>`;}
-function renderCare(){if(!careState){setCareMessage("这里还没有小动物在等你。先去领养页收集图片卡，集齐后再来领养吧。");return;}const c=careState;document.getElementById("careAvatar").innerHTML=c.image?`<img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}">`:"🐾";document.getElementById("careName").innerHTML=`${escapeHtml(c.name)} <span class="lifePill ${escapeHtml(c.life_status)}">${escapeHtml(lifeLabel(c.life_status))}</span>`;document.getElementById("careHint").textContent=`${c.animal_name?c.animal_name+" · ":""}等级 ${c.level} · ${c.is_owner_me?"我的领养宠物":"可共同照顾"}`;document.getElementById("careSpeechText").textContent=c.status||careSpeech(c);document.getElementById("statusGrid").innerHTML=[statusBar("饱食",c.hunger),statusBar("清洁",c.clean),statusBar("心情",c.mood),statusBar("健康",c.health,100,"health")].join("");const intimacy=Math.max(0,Math.min(1000,numberOrZero(c.intimacy)));const valueEl=document.getElementById("careAffinityValue");if(valueEl)valueEl.textContent=`${Math.round(intimacy)} / 1000`;const fillEl=document.getElementById("careAffinityFill");if(fillEl)fillEl.style.width=`${Math.round(intimacy/1000*100)}%`;renderSupplies();renderCareLog();}
+function renderCare(){if(!careState){setCareMessage("这里还没有小动物在等你。先去领养页收集图片卡，集齐后再来领养吧。");return;}const c=careState;renderCarePetScene(careBaseVariant(c));document.getElementById("careName").innerHTML=`${escapeHtml(c.name)} <span class="lifePill ${escapeHtml(c.life_status)}">${escapeHtml(lifeLabel(c.life_status))}</span>`;document.getElementById("careHint").textContent=`${c.animal_name?c.animal_name+" · ":""}等级 ${c.level} · ${c.is_owner_me?"我的领养宠物":"可共同照顾"}`;document.getElementById("careSpeechText").textContent=petInteractionConfigError||c.status||careSpeech(c);document.getElementById("statusGrid").innerHTML=[statusBar("饱食",c.hunger),statusBar("清洁",c.clean),statusBar("心情",c.mood),statusBar("健康",c.health,100,"health")].join("");const intimacy=Math.max(0,Math.min(1000,numberOrZero(c.intimacy)));const valueEl=document.getElementById("careAffinityValue");if(valueEl)valueEl.textContent=`${Math.round(intimacy)} / 1000`;const fillEl=document.getElementById("careAffinityFill");if(fillEl)fillEl.style.width=`${Math.round(intimacy/1000*100)}%`;renderSupplies();renderCareLog();}
 function getCareItemQty(key){if(Array.isArray(careItems)){const row=careItems.find(x=>String(x.item_key||x.key||"")===String(key));return numberOrZero(row?.quantity??row?.count??row?.amount);}if(careItems&&typeof careItems==="object"){const v=careItems[key];if(v&&typeof v==="object")return numberOrZero(v.quantity??v.count??v.amount);return numberOrZero(v);}return 0;}
 function renderSupplies(){const names={pet_snack:"宠物零食",pet_can_food:"宠物罐头",pet_dry_food:"宠物干粮",pet_cleaning_tool:"宠物清洁用具",pet_medical_card:"宠物医疗卡"};const keys=Object.keys(names);document.getElementById("careSupplyList").innerHTML=keys.map(k=>{const icon=itemIcon(k);return `<div class="supplyLine"><span class="supplyIcon">${icon?`<img src="${escapeHtml(icon)}" alt="">`:"🐾"}</span><span class="supplyName">${names[k]}</span><span class="supplyQty">× ${getCareItemQty(k)}</span></div>`;}).join("");}
 function renderCareLog(){const list=document.getElementById("careLogList");const selector=carePets.length>1?`<div class="petSelector">${carePets.map(p=>`<button class="petSelectBtn ${p.id===selectedCareAdoptionId?"is-active":""}" type="button" data-adoption-id="${escapeHtml(p.id)}">${escapeHtml(p.name)}</button>`).join("")}</div>`:"";const rows=[careState.status||`${careState.name} 正在这里等你。`,`${careState.name} 当前由大家共同照顾。`,`今日互动次数会按这只宠物全服共享限制计算。`];list.innerHTML=selector+rows.map(t=>`<div class="logItem"><span>${escapeHtml(t)}</span><span class="logTime">🐾</span></div>`).join("");list.querySelectorAll(".petSelectBtn").forEach(btn=>btn.addEventListener("click",()=>{selectedCareAdoptionId=btn.dataset.adoptionId;careState=carePets.find(p=>String(p.id)===String(selectedCareAdoptionId))||carePets[0]||null;renderCare();}));}
 async function maybeRunDecay(){try{await callRpc(RPC.decay,{});}catch(err){console.warn("宠物每日衰减结算失败：",err.message||err);}}
 function setDailyGiftTextFromReward(reward, already=false){const box=document.getElementById("dailyGiftText");if(reward&&reward.item_name){lastDailyGift={item_key:reward.item_key,item_name:reward.item_name,quantity:reward.quantity||1};}if(box)box.textContent="";if(careState)renderSupplies();}
 async function autoClaimDailyGift(){if(autoGiftRunning||!readLoggedIn())return;const memberId=requireMemberId();const key=`room10PetDailyGiftAuto:${memberId}:${todayKey()}`;if(sessionStorage.getItem(key)==="done")return;autoGiftRunning=true;try{const data=await callRpc(RPC.dailyGift,{p_member_id:memberId});sessionStorage.setItem(key,"done");const reward=data?.reward||{};if(data?.success){setDailyGiftTextFromReward(reward,false);await loadCareState({skipAutoGift:true,skipDecay:true});}else{setDailyGiftTextFromReward(reward,true);}}catch(err){sessionStorage.setItem(key,"done");}finally{autoGiftRunning=false;}}
-async function loadCareState(options={}){try{const memberId=requireMemberId();if(!options.skipDecay)await maybeRunDecay();const data=await callRpc(RPC.careState,{p_member_id:memberId});careItems=data?.items||{};const pets=Array.isArray(data?.pets)?data.pets:[];carePets=pets.map(normalizeCarePet);if(!carePets.length){careState=null;setCareMessage("这里还没有小动物在等你。先去领养页收集图片卡，集齐后再来领养吧。");if(!options.skipAutoGift)await autoClaimDailyGift();return;}selectedCareAdoptionId=selectedCareAdoptionId||carePets[0].id;careState=carePets.find(p=>String(p.id)===String(selectedCareAdoptionId))||carePets[0];selectedCareAdoptionId=careState.id;renderCare();if(!options.skipAutoGift)await autoClaimDailyGift();}catch(err){careState=null;carePets=[];setCareMessage(err.message||"数据库读取失败。");}}
+async function loadCareState(options={}){try{const memberId=requireMemberId();if(!options.skipDecay)await maybeRunDecay();const data=await callRpc(RPC.careState,{p_member_id:memberId});careItems=data?.items||{};const pets=Array.isArray(data?.pets)?data.pets:[];carePets=pets.map(normalizeCarePet);if(!carePets.length){careState=null;setCareMessage("这里还没有小动物在等你。先去领养页收集图片卡，集齐后再来领养吧。");if(!options.skipAutoGift)await autoClaimDailyGift();return;}selectedCareAdoptionId=selectedCareAdoptionId||carePets[0].id;careState=carePets.find(p=>String(p.id)===String(selectedCareAdoptionId))||carePets[0];selectedCareAdoptionId=careState.id;await ensurePetInteractionConfigs(careState);renderCare();if(!options.skipAutoGift)await autoClaimDailyGift();}catch(err){careState=null;carePets=[];setCareMessage(err.message||"数据库读取失败。");}}
 
 function setMode(mode){activeMode=mode;const isAdopt=mode==="adopt";document.getElementById("modeAdoptBtn").classList.toggle("is-current",isAdopt);document.getElementById("modeCareBtn").classList.toggle("is-current",!isAdopt);document.getElementById("petShell").classList.toggle("is-active",isAdopt);document.getElementById("adoptView").classList.toggle("is-active",isAdopt);document.getElementById("careView").classList.toggle("is-active",!isAdopt);document.getElementById("petModeTitle").textContent="图片卡";document.getElementById("petModeSub").textContent="";if(isAdopt) loadAdoptionState(); else loadCareState();}
 function openGachaPopup(){const mask=document.getElementById("gachaMask");const frame=document.getElementById("gachaFrame");if(frame){const base=room10PageUrl("gameGacha","game/gacha/gacha.html");const guest=!readLoggedIn();const query=`petModal=1&fresh=${Date.now()}${guest?"&mode=guest":""}`;frame.src=`${base}${base.includes("?")?"&":"?"}${query}`;}mask.classList.add("show");mask.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";}
@@ -1192,11 +1536,11 @@ function openAdoptNameDialog(p){pendingAdoptPet=p;document.getElementById("nameT
 function closeAdoptNameDialog(){pendingAdoptPet=null;document.getElementById("nameMask").classList.remove("show");document.getElementById("nameMask").setAttribute("aria-hidden","true");}
 async function confirmAdoption(){const p=pendingAdoptPet;if(!p)return;const name=document.getElementById("nameInput").value.trim();if(!name){showRewardModal({icon:"🐾",label:"需要取名",title:"请先输入名字",desc:"领养时需要为宠物取一个名字。"});return;}try{const memberId=requireMemberId();await callRpc(RPC.adopt,{p_member_id:memberId,p_pet_no:p.id,p_custom_name:name});closeAdoptNameDialog();showRewardModal({type:"gift",icon:"🐾",label:"领养成功",title:`${name} 来到十号房啦`,desc:"领养记录已经写入数据库。"});await loadAdoptionState();}catch(err){showRewardModal({icon:"⚠️",label:"领养失败",title:"无法领养",desc:err.message||"数据库操作失败。"});}}
 async function upgradePet(p){try{const memberId=requireMemberId();await callRpc(RPC.upgrade,{p_member_id:memberId,p_pet_no:p.id});showRewardModal({icon:"⬆️",label:"升级成功",title:"升级已记录",desc:"宠物升级已写入数据库。"});await loadAdoptionState();}catch(err){showRewardModal({icon:"⚠️",label:"升级失败",title:"无法升级",desc:err.message||"数据库操作失败。"});}}
-function animatePet(action){const avatar=document.getElementById("careAvatar");if(!avatar)return;const cls=action==="clean"?"pet-anim-clean":action==="gift"?"pet-anim-gift":"pet-anim-feed";avatar.classList.remove("pet-anim-feed","pet-anim-clean","pet-anim-gift");void avatar.offsetWidth;avatar.classList.add(cls);const fx=document.createElement("span");fx.className="petFx";fx.textContent=action==="clean"?"✨":"♥";avatar.appendChild(fx);setTimeout(()=>{avatar.classList.remove(cls);fx.remove();},950);}
+function animatePet(action){if(!careState)return;const variant=careActionVariant(action);renderCarePetScene(variant,{animate:true});careActionReturnTimer=setTimeout(()=>{if(careState)renderCarePetScene(careBaseVariant(careState));},1800);}
 function isCareActionOverflow(action){if(!careState)return false;if(action==="clean")return numberOrZero(careState.clean)>=100;if(action==="feed_snack"||action==="feed_can"||action==="feed_dry")return numberOrZero(careState.hunger)>=100;return false;}
 function careActionFullMessage(action){if(action==="clean")return "清洁度已经满了，现在使用清洁道具会溢出，先不用啦。";if(action==="feed_snack")return "饱食度已经满了，现在喂零食会溢出，先不用啦。";if(action==="feed_can")return "饱食度已经满了，现在喂罐头会溢出，先不用啦。";if(action==="feed_dry")return "饱食度已经满了，现在喂干粮会溢出，先不用啦。";return "宠物当前状态已经满了，暂时不需要使用道具。";}
-async function doCareAction(action){const notice=document.getElementById("careSpeechText");if(!careState?.id){if(notice)notice.textContent="这里还没有小动物在等你。先去领养页收集图片卡，集齐后再来领养吧。";return;}if(isCareActionOverflow(action)){if(notice)notice.textContent=careActionFullMessage(action);return;}try{const memberId=requireMemberId();const data=await callRpc(RPC.careAction,{p_member_id:memberId,p_adoption_id:careState.id,p_action_type:action});animatePet(action==="clean"?"clean":"feed");await loadCareState({skipAutoGift:true,skipDecay:true});const pet=data?.pet||{};if(notice)notice.textContent=pet.status||data?.message||"宠物状态已更新。";}catch(err){if(notice)notice.textContent=err.message||"数据库操作失败。";}}
-async function claimDailyGift(){try{const memberId=requireMemberId();const data=await callRpc(RPC.dailyGift,{p_member_id:memberId});const reward=data?.reward||{};setDailyGiftTextFromReward(reward,!data?.success);animatePet("gift");await loadCareState({skipAutoGift:true,skipDecay:true});}catch(err){const notice=document.getElementById("careSpeechText");if(notice)notice.textContent=err.message||"数据库操作失败。";}}
+async function doCareAction(action){const notice=document.getElementById("careSpeechText");if(!careState?.id){if(notice)notice.textContent="这里还没有小动物在等你。先去领养页收集图片卡，集齐后再来领养吧。";return;}const variant=careActionVariant(action);const cfg=getPetInteractionConfig(variant);const validationMessage=validatePetInteractionConfig(cfg,variant);if(validationMessage){renderPetFallbackNotice(validationMessage);if(notice)notice.textContent=validationMessage;return;}if(isCareActionOverflow(action)){if(notice)notice.textContent=careActionFullMessage(action);return;}try{const memberId=requireMemberId();const data=await callRpc(RPC.careAction,{p_member_id:memberId,p_adoption_id:careState.id,p_action_type:action});await loadCareState({skipAutoGift:true,skipDecay:true});animatePet(action);const pet=data?.pet||{};if(notice)notice.textContent=pet.status||data?.message||"宠物状态已更新。";}catch(err){if(notice)notice.textContent=err.message||"数据库操作失败。";}}
+async function claimDailyGift(){try{const memberId=requireMemberId();const data=await callRpc(RPC.dailyGift,{p_member_id:memberId});const reward=data?.reward||{};setDailyGiftTextFromReward(reward,!data?.success);await loadCareState({skipAutoGift:true,skipDecay:true});animatePet("happy");}catch(err){const notice=document.getElementById("careSpeechText");if(notice)notice.textContent=err.message||"数据库操作失败。";}}
 function normalizeRewardItem(item){if(typeof item==="string")return {name:item,amount:"",unit:"",icon:"✨",img:""};return {name:item.name||"奖励",amount:item.amount??item.qty??"",unit:item.unit||"",icon:item.icon||"✨",img:item.img||""};}
 function renderRewards(rewards){const list=document.getElementById("rewardList"),title=document.getElementById("rewardSectionTitle");list.innerHTML="";list.className="reward-list";title.className="reward-section-title";if(!rewards.length){list.classList.add("empty");title.classList.add("empty");return;}list.classList.add(`count-${Math.min(rewards.length,3)}`);rewards.forEach(r=>{const item=document.createElement("div");item.className="reward-item";const iconHtml=r.img?`<img class="reward-item-img" src="${escapeHtml(r.img)}" alt="">`:`<div class="reward-item-icon">${escapeHtml(r.icon)}</div>`;item.innerHTML=`${iconHtml}<div class="reward-item-name">${escapeHtml(r.name)}</div><div class="reward-item-amount">${escapeHtml(r.amount!==""?`+${r.amount}${r.unit||""}`:"")}</div>`;list.appendChild(item);});}
 function showRewardModal(options={}){document.getElementById("rewardIcon").textContent=options.icon||"✨";document.getElementById("rewardLabel").textContent=options.label||"提示";document.getElementById("rewardTitle").textContent=options.title||"完成";const descEl=document.getElementById("rewardDesc");const desc=options.desc===undefined?"操作已完成。":String(options.desc||"");descEl.textContent=desc;descEl.classList.toggle("empty",!desc);renderRewards(Array.isArray(options.rewards)?options.rewards.map(normalizeRewardItem):[]);if(options.hideSectionTitle){document.getElementById("rewardSectionTitle")?.classList.add("empty");}const mask=document.getElementById("rewardMask");mask.classList.add("show");mask.style.display="flex";mask.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";}
