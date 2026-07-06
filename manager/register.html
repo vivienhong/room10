@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>十号房入住申请表</title>
+<title></title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../room10-paths.js"></script>
 
 <style>
 *{
@@ -247,7 +248,7 @@ textarea{
 
 .skills-wrap{
   display:grid;
-  grid-template-columns:repeat(3, minmax(0,1fr));
+  grid-template-columns:repeat(4, minmax(0,1fr));
   gap:0.55vw;
 }
 
@@ -261,6 +262,14 @@ textarea{
   border-radius:0.72vw;
   padding:0.5vw 0.68vw;
   white-space:nowrap;
+}
+
+.skills-wrap.field-error{
+  border:1px solid #cf7d69;
+  border-radius:0.72vw;
+  padding:0.35vw;
+  background:#fff7f4;
+  box-shadow:0 0 0 3px rgba(207,125,105,0.16);
 }
 
 .skill-item input{
@@ -441,7 +450,7 @@ textarea{
   }
 
   .skills-wrap{
-    grid-template-columns:repeat(3, minmax(0,1fr));
+    grid-template-columns:repeat(4, minmax(0,1fr));
   }
 
   .custom-skill-row{
@@ -564,7 +573,7 @@ textarea{
   }
 
   .skills-wrap{
-    grid-template-columns:repeat(3, minmax(0,1fr));
+    grid-template-columns:repeat(4, minmax(0,1fr));
   }
 
   .custom-skill-row{
@@ -586,143 +595,110 @@ textarea{
 
 <div class="stage">
   <div class="sheet-wrap">
-    <img src="room-checkin.png" alt="入住申请表底图" class="sheet-image">
+    <img src="" alt="" class="sheet-image">
 
     <div class="sheet-form" id="sheetForm">
       <div class="form-content" id="formContent">
         <div class="topbar">
-          <button class="back-btn" type="button" onclick="goBackToSource()">返回上一页</button>
-          <div class="top-desc" id="topDesc">
-            欢迎来到十号房~ 入住申请通过审核并分配钥匙后，就可以来这里完成登记。登记完成，你就可以带着昵称和钥匙，正式搬进十号房啦。
-          </div>
+          <button id="backBtn" class="back-btn" type="button" onclick="goBackToSource()"></button>
+          <div class="top-desc" id="topDesc"></div>
         </div>
 
         <div class="form-grid">
 
           <div class="form-group">
-            <label for="inviteKey">钥匙<span class="required-mark">*</span></label>
-            <input id="inviteKey" type="text" placeholder="请输入你的钥匙">
+            <label for="inviteKey"><span id="labelInviteKey"></span><span class="required-mark">*</span></label>
+            <input id="inviteKey" type="text">
           </div>
 
           <div class="form-group">
-            <label for="avatar">上传头像<span class="required-mark">*</span></label>
+            <label for="avatar"><span id="labelAvatar"></span><span class="required-mark">*</span></label>
             <input id="avatar" type="file" accept="image/*">
-            <img id="avatarPreview" class="avatar-preview" alt="头像预览">
+            <img id="avatarPreview" class="avatar-preview" alt="">
           </div>
 
           <div class="form-group">
-            <label for="name">圈名<span class="required-mark">*</span></label>
-            <input id="name" type="text" placeholder="请输入圈名">
+            <label for="name"><span id="labelName"></span><span class="required-mark">*</span></label>
+            <input id="name" type="text">
             <div id="nameHint" class="field-hint"></div>
           </div>
 
           <div class="form-group">
-            <label for="nickname">昵称<span class="required-mark">*</span></label>
-            <input id="nickname" type="text" placeholder="1个中文或1-4个英文字母（首字母大写）">
+            <label for="nickname"><span id="labelNickname"></span><span class="required-mark">*</span></label>
+            <input id="nickname" type="text">
             <div id="nicknameHint" class="field-hint"></div>
           </div>
 
           <div class="form-group">
-            <label for="joinedAt">登堂入室<span class="required-mark">*</span></label>
+            <label for="joinedAt"><span id="labelJoinedAt"></span><span class="required-mark">*</span></label>
             <input id="joinedAt" type="date">
           </div>
 
           <div class="form-group">
-            <label for="location">所在地<span class="required-mark">*</span></label>
-            <input id="location" type="text" placeholder="中国地区请写省份；海外写地区或国家名">
+            <label for="location"><span id="labelLocation"></span><span class="required-mark">*</span></label>
+            <input id="location" type="text">
             <div id="locationHint" class="field-hint"></div>
           </div>
 
           <div class="form-group full">
-            <label>生日<span class="required-mark">*</span></label>
+            <label><span id="labelBirthday"></span><span class="required-mark">*</span></label>
             <div class="birthday-row">
-              <select id="birthdayYear">
-                <option value="">年份（可选）</option>
-              </select>
-              <select id="birthdayMonth">
-                <option value="">月份</option>
-              </select>
-              <select id="birthdayDay">
-                <option value="">日期</option>
-              </select>
+              <select id="birthdayMonth"></select>
+              <select id="birthdayDay"></select>
             </div>
           </div>
 
           <div class="form-group full">
-            <label>MBTI</label>
-            <div class="mbti-grid">
-              <label class="mbti-item mbti-analyst"><input type="radio" name="mbti" value="INTJ"> INTJ</label>
-              <label class="mbti-item mbti-analyst"><input type="radio" name="mbti" value="INTP"> INTP</label>
-              <label class="mbti-item mbti-analyst"><input type="radio" name="mbti" value="ENTJ"> ENTJ</label>
-              <label class="mbti-item mbti-analyst"><input type="radio" name="mbti" value="ENTP"> ENTP</label>
-
-              <label class="mbti-item mbti-diplomat"><input type="radio" name="mbti" value="INFJ"> INFJ</label>
-              <label class="mbti-item mbti-diplomat"><input type="radio" name="mbti" value="INFP"> INFP</label>
-              <label class="mbti-item mbti-diplomat"><input type="radio" name="mbti" value="ENFJ"> ENFJ</label>
-              <label class="mbti-item mbti-diplomat"><input type="radio" name="mbti" value="ENFP"> ENFP</label>
-
-              <label class="mbti-item mbti-sentinel"><input type="radio" name="mbti" value="ISTJ"> ISTJ</label>
-              <label class="mbti-item mbti-sentinel"><input type="radio" name="mbti" value="ISFJ"> ISFJ</label>
-              <label class="mbti-item mbti-sentinel"><input type="radio" name="mbti" value="ESTJ"> ESTJ</label>
-              <label class="mbti-item mbti-sentinel"><input type="radio" name="mbti" value="ESFJ"> ESFJ</label>
-
-              <label class="mbti-item mbti-explorer"><input type="radio" name="mbti" value="ISTP"> ISTP</label>
-              <label class="mbti-item mbti-explorer"><input type="radio" name="mbti" value="ISFP"> ISFP</label>
-              <label class="mbti-item mbti-explorer"><input type="radio" name="mbti" value="ESTP"> ESTP</label>
-              <label class="mbti-item mbti-explorer"><input type="radio" name="mbti" value="ESFP"> ESFP</label>
-            </div>
+            <label id="labelMbti"></label>
+            <div id="mbtiGrid" class="mbti-grid"></div>
           </div>
 
           <div class="form-group full">
-            <label>额外技能</label>
-            <div class="skills-wrap">
-              <label class="skill-item"><input type="checkbox" value="美工" class="skillCheck"> 美工</label>
-              <label class="skill-item"><input type="checkbox" value="混音" class="skillCheck"> 混音</label>
-              <label class="skill-item"><input type="checkbox" value="视频剪辑" class="skillCheck"> 视频剪辑</label>
-            </div>
+            <label><span id="labelSkills"></span><span class="required-mark">*</span></label>
+            <div id="skillsWrap" class="skills-wrap"></div>
           </div>
 
           <div class="form-group full">
             <div class="custom-skill-row">
-              <input id="customSkill" type="text" placeholder="其他技能可直接填写在这里（选填）">
+              <input id="customSkill" type="text">
             </div>
           </div>
 
           <div class="form-group">
-            <label for="contactQq">QQ号<span class="required-mark">*</span></label>
-            <input id="contactQq" type="text" placeholder="请输入QQ号，没有请填写无">
+            <label for="contactQq"><span id="labelContactQq"></span><span class="required-mark">*</span></label>
+            <input id="contactQq" type="text">
           </div>
 
           <div class="form-group">
-            <label for="socialXhs">小红书 ID</label>
-            <input id="socialXhs" type="text" placeholder="没有可留空">
+            <label for="socialXhs" id="labelSocialXhs"></label>
+            <input id="socialXhs" type="text">
           </div>
 
           <div class="form-group">
-            <label for="socialDouyin">抖音 ID</label>
-            <input id="socialDouyin" type="text" placeholder="没有可留空">
+            <label for="socialDouyin" id="labelSocialDouyin"></label>
+            <input id="socialDouyin" type="text">
           </div>
 
           <div class="form-group">
-            <label for="socialBilibili">B站 ID</label>
-            <input id="socialBilibili" type="text" placeholder="没有可留空">
+            <label for="socialBilibili" id="labelSocialBilibili"></label>
+            <input id="socialBilibili" type="text">
           </div>
 
           <div class="form-group">
-            <label for="socialWeibo">微博 ID</label>
-            <input id="socialWeibo" type="text" placeholder="没有可留空">
+            <label for="socialWeibo" id="labelSocialWeibo"></label>
+            <input id="socialWeibo" type="text">
           </div>
 
           <div class="form-group full">
-            <label for="publicMessage">随便说点啥</label>
-            <textarea id="publicMessage" placeholder="这段内容会对外展示。"></textarea>
+            <label for="publicMessage" id="labelPublicMessage"></label>
+            <textarea id="publicMessage"></textarea>
           </div>
 
         </div>
 
         <div class="actions">
-          <button id="submitBtn" class="primary-btn" type="button" onclick="submitRegistration()">提交登记表</button>
-          <button class="secondary-btn" type="button" onclick="clearForm()">清空内容</button>
+          <button id="submitBtn" class="primary-btn" type="button" onclick="submitRegistration()"></button>
+          <button id="clearBtn" class="secondary-btn" type="button" onclick="clearForm()"></button>
         </div>
 
         <div id="formMessage" class="message"></div>
@@ -750,48 +726,392 @@ const contactQqInput = document.getElementById("contactQq");
 const topDesc = document.getElementById("topDesc");
 
 const REGISTER_RETURN_KEY = "room10RegisterReturn";
-const ALLOWED_RETURN_PAGES = ["index.html", "manager-visitor.html", "manager.html"];
+const PAGE_KEY = "managerRegister";
+const REQUIRED_TEXT_KEYS = [
+  "title",
+  "top_desc.default",
+  "top_desc.prefilled",
+  "button.back",
+  "button.submit",
+  "button.clear",
+  "label.invite_key",
+  "placeholder.invite_key",
+  "label.avatar",
+  "alt.avatar_preview",
+  "alt.sheet_image",
+  "label.name",
+  "placeholder.name",
+  "label.nickname",
+  "placeholder.nickname",
+  "label.joined_at",
+  "label.location",
+  "placeholder.location",
+  "label.birthday",
+  "option.month_placeholder",
+  "option.day_placeholder",
+  "option.month_suffix",
+  "option.day_suffix",
+  "label.mbti",
+  "label.skills",
+  "placeholder.custom_skill",
+  "error.skill_required",
+  "label.contact_qq",
+  "placeholder.contact_qq",
+  "value.qq_none",
+  "label.social_xhs",
+  "label.social_douyin",
+  "label.social_bilibili",
+  "label.social_weibo",
+  "placeholder.social_optional",
+  "label.public_message",
+  "placeholder.public_message",
+  "hint.name_prefilled",
+  "hint.name_available",
+  "hint.nickname_available",
+  "error.config_missing",
+  "error.config_read_failed",
+  "error.key_missing",
+  "error.key_wrong",
+  "error.required_missing",
+  "error.nickname_format",
+  "error.nickname_message",
+  "error.qq_invalid",
+  "error.name_duplicate_hint",
+  "error.nickname_duplicate_hint",
+  "error.name_duplicate",
+  "error.nickname_duplicate",
+  "error.key_application_mismatch",
+  "error.name_application_mismatch",
+  "error.qq_application_mismatch",
+  "message.submitting",
+  "error.avatar_upload_failed",
+  "error.registration_failed",
+  "error.submit_failed",
+  "message.registration_success"
+];
+const REQUIRED_OPTION_GROUPS = ["mbti", "skill", "cohort"];
 
 let approvedApplicationContext = null;
+let resizeTimer = null;
+let registerTexts = new Map();
+let registerOptions = new Map();
+let registerConfigReady = false;
 
-function normalizeReturnPage(raw){
-  const value = String(raw || "").trim();
-  return ALLOWED_RETURN_PAGES.includes(value) ? value : "";
+function normalizeText(value){
+  return String(value ?? "").trim();
 }
 
-function getReturnPage(){
+function showConfigError(message, detail = ""){
+  let panel = document.getElementById("pageError");
+  if(!panel){
+    panel = document.createElement("div");
+    panel.id = "pageError";
+    panel.style.cssText = "position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9999;max-width:min(520px,86vw);white-space:pre-wrap;padding:18px 20px;border-radius:16px;background:rgba(255,249,241,.98);border:1px solid rgba(190,143,112,.36);box-shadow:0 18px 42px rgba(78,52,28,.18);color:#7a4b2c;font-size:14px;line-height:1.7;text-align:left;";
+    document.body.appendChild(panel);
+  }
+  panel.textContent = detail ? `${message}\n${detail}` : message;
+}
+
+function text(key){
+  const value = registerTexts.get(key);
+  if(!normalizeText(value)){
+    const message = registerTexts.get("error.config_missing") || "REGISTER_CONFIG_MISSING";
+    throw new Error(`${message}：page_key=${PAGE_KEY}, text_key=${key}`);
+  }
+  return String(value);
+}
+
+function formatText(key, vars = {}){
+  return text(key).replace(/\{(\w+)\}/g, (match, name) => {
+    if(!Object.prototype.hasOwnProperty.call(vars, name)) return match;
+    return String(vars[name]);
+  });
+}
+
+function optionList(groupKey){
+  return registerOptions.get(groupKey) || [];
+}
+
+function optionValues(groupKey){
+  return new Set(optionList(groupKey).map(item => item.value));
+}
+
+function room10Url(path){
+  const raw = normalizeText(path);
+  if(!raw) return "";
+  if(/^(https?:|data:|blob:|mailto:|tel:|#|\/)/i.test(raw)) return raw;
+  if(raw.startsWith("./") || raw.startsWith("../")) return raw;
+  if(typeof window.room10Path === "function") return window.room10Path(raw);
+  return `../${raw}`;
+}
+
+function room10PageUrl(key, fallbackPath){
+  const pageKey = normalizeText(key);
+  if(pageKey && typeof window.room10Page === "function"){
+    const url = window.room10Page(pageKey);
+    if(url) return url;
+  }
+  return room10Url(fallbackPath || "");
+}
+
+function room10AssetUrl(keyPath, fallbackPath){
+  const assetKey = normalizeText(keyPath);
+  if(assetKey && typeof window.room10Asset === "function"){
+    const url = window.room10Asset(assetKey);
+    if(url) return url;
+  }
+  return room10Url(fallbackPath || "");
+}
+
+function applyStaticAssets(){
+  sheetImage.src = room10AssetUrl("manager.roomCheckin", "manager/room-checkin.png");
+}
+
+function normalizeReturnKey(raw){
+  const value = normalizeText(raw);
+  const compact = value
+    .replace(/^\.\//, "")
+    .replace(/^\.\.\//, "")
+    .replace(/^manager\//, "")
+    .toLowerCase();
+
+  const map = {
+    "index":"index",
+    "index.html":"index",
+    "manager":"managerVisitor",
+    "manager.html":"managerVisitor",
+    "managervisitor":"managerVisitor",
+    "manager-visitor":"managerVisitor",
+    "manager-visitor.html":"managerVisitor",
+    "register":"managerRegister",
+    "register.html":"managerRegister",
+    "managermember":"managerMember",
+    "manager-member":"managerMember",
+    "manager-member.html":"managerMember",
+    "manageradmin":"managerAdmin",
+    "manager-admin":"managerAdmin",
+    "manager-admin.html":"managerAdmin"
+  };
+
+  return map[compact] || "";
+}
+
+function getReturnPageKey(){
   const params = new URLSearchParams(window.location.search);
-  const fromQuery = normalizeReturnPage(params.get("from"));
-  const fromSession = normalizeReturnPage(sessionStorage.getItem(REGISTER_RETURN_KEY));
+  const fromQuery = normalizeReturnKey(params.get("from"));
+  const fromSession = normalizeReturnKey(sessionStorage.getItem(REGISTER_RETURN_KEY));
 
   if(fromQuery){
     sessionStorage.setItem(REGISTER_RETURN_KEY, fromQuery);
     return fromQuery;
   }
 
-  if(fromSession){
-    return fromSession;
-  }
+  if(fromSession) return fromSession;
 
-  sessionStorage.setItem(REGISTER_RETURN_KEY, "index.html");
-  return "index.html";
+  sessionStorage.setItem(REGISTER_RETURN_KEY, "index");
+  return "index";
+}
+
+function getReturnPageUrl(){
+  const key = getReturnPageKey();
+  if(key === "managerVisitor") return room10PageUrl("managerVisitor", "manager/manager-visitor.html");
+  if(key === "managerMember") return room10PageUrl("managerMember", "manager/manager-member.html");
+  if(key === "managerAdmin") return room10PageUrl("managerAdmin", "manager/manager-admin.html");
+  return room10PageUrl("index", "index/index.html");
 }
 
 function goBackToSource(){
-  window.location.href = getReturnPage();
+  window.location.href = getReturnPageUrl();
 }
 
 function clearReturnPageCache(){
   sessionStorage.removeItem(REGISTER_RETURN_KEY);
 }
 
+async function loadRegisterConfig(){
+  const { data, error } = await client.rpc("get_room10_register_page_config");
+  if(error){
+    throw new Error(`REGISTER_CONFIG_READ_FAILED: ${error.message || "get_room10_register_page_config"}`);
+  }
+
+  registerTexts = new Map();
+  registerOptions = new Map();
+
+  (Array.isArray(data) ? data : []).forEach(row => {
+    const configType = normalizeText(row.config_type);
+    const groupKey = normalizeText(row.group_key);
+    const configKey = normalizeText(row.config_key);
+    const textValue = String(row.text_value ?? "");
+    const sortOrder = Number(row.sort_order || 100);
+    const extra = row.extra_json && typeof row.extra_json === "object" ? row.extra_json : {};
+
+    if(configType === "text" && configKey){
+      registerTexts.set(configKey, textValue);
+      return;
+    }
+
+    if(configType === "option" && groupKey && configKey){
+      const list = registerOptions.get(groupKey) || [];
+      list.push({
+        value: configKey,
+        label: textValue,
+        cssClass: normalizeText(extra.css_class),
+        extra,
+        sortOrder
+      });
+      registerOptions.set(groupKey, list);
+    }
+  });
+
+  for(const list of registerOptions.values()){
+    list.sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label, "zh-Hans-CN"));
+  }
+
+  const missingTexts = REQUIRED_TEXT_KEYS.filter(key => !normalizeText(registerTexts.get(key)));
+  if(missingTexts.length){
+    const message = registerTexts.get("error.config_missing") || "REGISTER_CONFIG_MISSING";
+    throw new Error(`${message}：${missingTexts.join("、")}`);
+  }
+
+  const missingGroups = REQUIRED_OPTION_GROUPS.filter(group => optionList(group).length === 0);
+  if(missingGroups.length){
+    throw new Error(`${text("error.config_missing")}：${missingGroups.join("、")}`);
+  }
+
+  registerConfigReady = true;
+}
+
+function setTextById(id, key){
+  const el = document.getElementById(id);
+  if(el) el.textContent = text(key);
+}
+
+function setPlaceholder(id, key){
+  const el = document.getElementById(id);
+  if(el) el.placeholder = text(key);
+}
+
+function applyPageContent(){
+  document.title = text("title");
+  topDesc.textContent = text("top_desc.default");
+  sheetImage.alt = text("alt.sheet_image");
+  avatarPreview.alt = text("alt.avatar_preview");
+
+  setTextById("backBtn", "button.back");
+  setTextById("submitBtn", "button.submit");
+  setTextById("clearBtn", "button.clear");
+  setTextById("labelInviteKey", "label.invite_key");
+  setTextById("labelAvatar", "label.avatar");
+  setTextById("labelName", "label.name");
+  setTextById("labelNickname", "label.nickname");
+  setTextById("labelJoinedAt", "label.joined_at");
+  setTextById("labelLocation", "label.location");
+  setTextById("labelBirthday", "label.birthday");
+  setTextById("labelMbti", "label.mbti");
+  setTextById("labelSkills", "label.skills");
+  setTextById("labelContactQq", "label.contact_qq");
+  setTextById("labelSocialXhs", "label.social_xhs");
+  setTextById("labelSocialDouyin", "label.social_douyin");
+  setTextById("labelSocialBilibili", "label.social_bilibili");
+  setTextById("labelSocialWeibo", "label.social_weibo");
+  setTextById("labelPublicMessage", "label.public_message");
+
+  setPlaceholder("inviteKey", "placeholder.invite_key");
+  setPlaceholder("name", "placeholder.name");
+  setPlaceholder("nickname", "placeholder.nickname");
+  setPlaceholder("location", "placeholder.location");
+  setPlaceholder("customSkill", "placeholder.custom_skill");
+  setPlaceholder("contactQq", "placeholder.contact_qq");
+  setPlaceholder("socialXhs", "placeholder.social_optional");
+  setPlaceholder("socialDouyin", "placeholder.social_optional");
+  setPlaceholder("socialBilibili", "placeholder.social_optional");
+  setPlaceholder("socialWeibo", "placeholder.social_optional");
+  setPlaceholder("publicMessage", "placeholder.public_message");
+}
+
+function addSelectPlaceholder(selectEl, label){
+  const opt = document.createElement("option");
+  opt.value = "";
+  opt.textContent = label;
+  selectEl.appendChild(opt);
+}
+
+function populateBirthdayOptions(){
+  const monthSelect = document.getElementById("birthdayMonth");
+  const daySelect = document.getElementById("birthdayDay");
+  monthSelect.innerHTML = "";
+  daySelect.innerHTML = "";
+
+  addSelectPlaceholder(monthSelect, text("option.month_placeholder"));
+  addSelectPlaceholder(daySelect, text("option.day_placeholder"));
+
+  const monthSuffix = text("option.month_suffix");
+  const daySuffix = text("option.day_suffix");
+
+  for(let m = 1; m <= 12; m++){
+    const opt = document.createElement("option");
+    opt.value = String(m);
+    opt.textContent = `${m}${monthSuffix}`;
+    monthSelect.appendChild(opt);
+  }
+
+  for(let d = 1; d <= 31; d++){
+    const opt = document.createElement("option");
+    opt.value = String(d);
+    opt.textContent = `${d}${daySuffix}`;
+    daySelect.appendChild(opt);
+  }
+}
+
+function renderMbtiOptions(){
+  const box = document.getElementById("mbtiGrid");
+  box.innerHTML = "";
+  optionList("mbti").forEach(item => {
+    const label = document.createElement("label");
+    label.className = `mbti-item ${item.cssClass}`.trim();
+
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "mbti";
+    input.value = item.value;
+
+    label.appendChild(input);
+    label.appendChild(document.createTextNode(` ${item.label}`));
+    box.appendChild(label);
+  });
+}
+
+function renderSkillOptions(){
+  const box = document.getElementById("skillsWrap");
+  box.innerHTML = "";
+  optionList("skill").forEach(item => {
+    const label = document.createElement("label");
+    label.className = "skill-item";
+
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = item.value;
+    input.className = "skillCheck";
+
+    label.appendChild(input);
+    label.appendChild(document.createTextNode(` ${item.label}`));
+    box.appendChild(label);
+  });
+}
+
+function renderDynamicOptions(){
+  populateBirthdayOptions();
+  renderMbtiOptions();
+  renderSkillOptions();
+}
+
 function getApplicationParams(){
   const params = new URLSearchParams(window.location.search);
   return {
-    applicationId: (params.get("application_id") || "").trim(),
-    applyName: (params.get("apply_name") || "").trim(),
-    applyQQ: (params.get("apply_qq") || "").trim(),
-    memberCode: (params.get("member_code") || "").trim()
+    applicationId: normalizeText(params.get("application_id")),
+    applyName: normalizeText(params.get("apply_name")),
+    applyQQ: normalizeText(params.get("apply_qq")),
+    memberCode: normalizeText(params.get("member_code"))
   };
 }
 
@@ -811,7 +1131,7 @@ function applyApplicationPrefill(record){
   if(approvedApplicationContext.name){
     nameInput.value = approvedApplicationContext.name;
     nameInput.readOnly = true;
-    setFieldHint("nameHint", "已从通过的申请记录自动带入", "success");
+    setFieldHint("nameHint", text("hint.name_prefilled"), "success");
   }
 
   if(approvedApplicationContext.contact_qq){
@@ -819,15 +1139,13 @@ function applyApplicationPrefill(record){
     contactQqInput.readOnly = true;
   }
 
-  topDesc.textContent = "你已通过审核，圈名、QQ和钥匙已自动带入。继续补全其余资料，完成登记后就能正式入住十号房。";
+  topDesc.textContent = text("top_desc.prefilled");
 }
 
 async function loadApprovedApplicationContext(){
   const { applicationId, applyName, applyQQ, memberCode } = getApplicationParams();
 
-  if(!applicationId && !applyName && !applyQQ && !memberCode){
-    return;
-  }
+  if(!applicationId && !applyName && !applyQQ && !memberCode) return;
 
   try{
     let query = client
@@ -843,29 +1161,17 @@ async function loadApprovedApplicationContext(){
     }
 
     const { data, error } = await query.maybeSingle();
-
-    if(error){
-      console.error("读取申请记录失败：", error);
-      return;
-    }
-
-    if(!data){
-      return;
-    }
+    if(error) throw error;
+    if(!data) return;
 
     const status = String(data.status || "").trim().toLowerCase();
-    if(status !== "approved" && status !== "registered"){
-      return;
-    }
+    if(status !== "approved") return;
 
-    if(memberCode && String(data.member_code || "").trim() !== memberCode){
-      return;
-    }
+    if(memberCode && String(data.member_code || "").trim() !== memberCode) return;
 
     applyApplicationPrefill(data);
-
   }catch(err){
-    console.error("loadApprovedApplicationContext() 异常：", err);
+    showConfigError(text("error.application_read_failed"), err.message || "applications");
   }
 }
 
@@ -881,35 +1187,6 @@ avatarInput.addEventListener("change", () => {
   avatarPreview.style.display = "block";
   requestAnimationFrame(fitFormToSheet);
 });
-
-function populateBirthdayOptions(){
-  const yearSelect = document.getElementById("birthdayYear");
-  const monthSelect = document.getElementById("birthdayMonth");
-  const daySelect = document.getElementById("birthdayDay");
-
-  const currentYear = new Date().getFullYear();
-
-  for(let y = currentYear; y >= 1950; y--){
-    const opt = document.createElement("option");
-    opt.value = y;
-    opt.textContent = y + "年";
-    yearSelect.appendChild(opt);
-  }
-
-  for(let m = 1; m <= 12; m++){
-    const opt = document.createElement("option");
-    opt.value = m;
-    opt.textContent = m + "月";
-    monthSelect.appendChild(opt);
-  }
-
-  for(let d = 1; d <= 31; d++){
-    const opt = document.createElement("option");
-    opt.value = d;
-    opt.textContent = d + "日";
-    daySelect.appendChild(opt);
-  }
-}
 
 function fitFormToSheet(){
   if(window.innerWidth <= 700){
@@ -938,17 +1215,17 @@ function fitFormToSheet(){
   sheetForm.style.height = `${naturalHeight * scale}px`;
 }
 
-function setMessage(text, type){
+function setMessage(message, type){
   const box = document.getElementById("formMessage");
-  box.textContent = text;
+  box.textContent = message;
   box.className = "message" + (type ? " " + type : "");
   requestAnimationFrame(fitFormToSheet);
 }
 
-function setFieldHint(id, text, type = ""){
+function setFieldHint(id, message, type = ""){
   const el = document.getElementById(id);
   if(!el) return;
-  el.textContent = text;
+  el.textContent = message;
   el.className = "field-hint" + (type ? " " + type : "");
   requestAnimationFrame(fitFormToSheet);
 }
@@ -961,20 +1238,34 @@ function getToday(){
   return `${y}-${m}-${day}`;
 }
 
+function parseConfigDate(value, endOfDay = false){
+  const raw = normalizeText(value);
+  if(!raw) return null;
+  return new Date(`${raw}T${endOfDay ? "23:59:59" : "00:00:00"}`);
+}
+
 function calcCohort(dateStr){
   if(!dateStr) return "";
 
-  const d = new Date(dateStr + "T00:00:00");
-  const oneEnd = new Date("2025-04-04T23:59:59");
-  const twoStart = new Date("2025-04-05T00:00:00");
-  const twoEnd = new Date("2025-12-31T23:59:59");
-  const threeStart = new Date("2026-01-01T00:00:00");
+  const target = parseConfigDate(dateStr);
+  if(!target || Number.isNaN(target.getTime())) return "";
 
-  if(d <= oneEnd) return "一期生";
-  if(d >= twoStart && d <= twoEnd) return "二期生";
-  if(d >= threeStart) return "三期生";
+  const cohorts = optionList("cohort");
+  const defaultCohort = cohorts.find(item => item.extra && item.extra.is_default === true);
 
-  return "待判定";
+  for(const item of cohorts){
+    if(item.extra && item.extra.is_default === true) continue;
+
+    const startDate = parseConfigDate(item.extra?.start_date);
+    const endDate = parseConfigDate(item.extra?.end_date, true);
+
+    if(startDate && target < startDate) continue;
+    if(endDate && target > endDate) continue;
+
+    return item.label;
+  }
+
+  return defaultCohort ? defaultCohort.label : "";
 }
 
 function clearFieldErrors(){
@@ -982,25 +1273,17 @@ function clearFieldErrors(){
 }
 
 function markError(el){
-  if(el){
-    el.classList.add("field-error");
-  }
+  if(el) el.classList.add("field-error");
 }
 
 function clearError(el){
-  if(el){
-    el.classList.remove("field-error");
-  }
+  if(el) el.classList.remove("field-error");
 }
 
 function focusElement(el){
   if(!el) return;
-  if(typeof el.focus === "function"){
-    el.focus();
-  }
-  if(typeof el.scrollIntoView === "function"){
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
+  if(typeof el.focus === "function") el.focus();
+  if(typeof el.scrollIntoView === "function") el.scrollIntoView({ behavior:"smooth", block:"center" });
 }
 
 function validateNickname(nickname){
@@ -1009,26 +1292,11 @@ function validateNickname(nickname){
 }
 
 function validateKeyFormat(key){
-  return /^A\d{2}$/.test(key);
+  return /^[AB]\d{2}$/.test(key);
 }
 
 function validateQq(value){
-  return value === "无" || /^[1-9]\d{4,14}$/.test(value);
-}
-
-function validateLocation(value){
-  const allowedLocations = [
-    "北京","天津","上海","重庆",
-    "河北","山西","辽宁","吉林","黑龙江",
-    "江苏","浙江","安徽","福建","江西","山东",
-    "河南","湖北","湖南","广东","海南",
-    "四川","贵州","云南","陕西","甘肃","青海",
-    "台湾","内蒙古","广西","西藏","宁夏","新疆",
-    "香港","澳门",
-    "美国","加拿大",
-    "美东","美西","美中"
-  ];
-  return allowedLocations.includes(value);
+  return value === text("value.qq_none") || /^[1-9]\d{4,14}$/.test(value);
 }
 
 function getMbtiValue(){
@@ -1043,11 +1311,7 @@ async function checkNameExists(name){
     .eq("name", name)
     .limit(1);
 
-  if(error){
-    console.error("圈名查重失败：", error);
-    return false;
-  }
-
+  if(error) return false;
   return Array.isArray(data) && data.length > 0;
 }
 
@@ -1058,75 +1322,68 @@ async function checkNicknameExists(nickname){
     .eq("nickname", nickname)
     .limit(1);
 
-  if(error){
-    console.error("昵称查重失败：", error);
-    return false;
-  }
-
+  if(error) return false;
   return Array.isArray(data) && data.length > 0;
 }
 
 nameInput.addEventListener("blur", async () => {
-  if(approvedApplicationContext && nameInput.readOnly){
-    return;
-  }
+  if(!registerConfigReady) return;
+  if(approvedApplicationContext && nameInput.readOnly) return;
 
   const value = nameInput.value.trim();
   setFieldHint("nameHint", "");
-
-  if(!value){
-    return;
-  }
+  if(!value) return;
 
   const exists = await checkNameExists(value);
   if(exists){
     markError(nameInput);
-    setFieldHint("nameHint", "这个圈名已经有人先住进去啦", "error");
+    setFieldHint("nameHint", text("error.name_duplicate_hint"), "error");
   }else{
     clearError(nameInput);
-    setFieldHint("nameHint", "这个圈名可以使用", "success");
+    setFieldHint("nameHint", text("hint.name_available"), "success");
   }
 });
 
 nicknameInput.addEventListener("blur", async () => {
+  if(!registerConfigReady) return;
+
   const value = nicknameInput.value.trim();
   setFieldHint("nicknameHint", "");
-
-  if(!value){
-    return;
-  }
+  if(!value) return;
 
   if(!validateNickname(value)){
     markError(nicknameInput);
-    setFieldHint("nicknameHint", "昵称要么是1个中文，要么是1-4个英文字母，且首字母大写", "error");
+    setFieldHint("nicknameHint", text("error.nickname_format"), "error");
     return;
   }
 
   const exists = await checkNicknameExists(value);
   if(exists){
     markError(nicknameInput);
-    setFieldHint("nicknameHint", "这个昵称已经被别人抢先用了", "error");
+    setFieldHint("nicknameHint", text("error.nickname_duplicate_hint"), "error");
   }else{
     clearError(nicknameInput);
-    setFieldHint("nicknameHint", "这个昵称可以使用", "success");
+    setFieldHint("nicknameHint", text("hint.nickname_available"), "success");
   }
 });
 
 locationInput.addEventListener("blur", () => {
+  if(!registerConfigReady) return;
   const value = locationInput.value.trim();
   setFieldHint("locationHint", "");
-
-  if(!value){
-    return;
-  }
-
-  if(!validateLocation(value)){
-    markError(locationInput);
-    setFieldHint("locationHint", "仅可填写省份、美东/美西/美中、美国或加拿大", "error");
-  }else{
+  if(value){
     clearError(locationInput);
-    setFieldHint("locationHint", "", "");
   }
+});
+
+document.getElementById("skillsWrap").addEventListener("change", () => {
+  clearError(document.getElementById("skillsWrap"));
+  clearError(document.getElementById("customSkill"));
+});
+
+document.getElementById("customSkill").addEventListener("input", () => {
+  clearError(document.getElementById("skillsWrap"));
+  clearError(document.getElementById("customSkill"));
 });
 
 function clearForm(){
@@ -1137,7 +1394,6 @@ function clearForm(){
   document.getElementById("contactQq").value = approvedApplicationContext?.contact_qq || "";
   document.getElementById("location").value = "";
   document.querySelectorAll('input[name="mbti"]').forEach(el => el.checked = false);
-  document.getElementById("birthdayYear").value = "";
   document.getElementById("birthdayMonth").value = "";
   document.getElementById("birthdayDay").value = "";
   document.getElementById("joinedAt").value = getToday();
@@ -1151,7 +1407,7 @@ function clearForm(){
   document.getElementById("formMessage").textContent = "";
   document.getElementById("formMessage").className = "message";
 
-  setFieldHint("nameHint", approvedApplicationContext ? "已从通过的申请记录自动带入" : "");
+  setFieldHint("nameHint", approvedApplicationContext ? text("hint.name_prefilled") : "");
   setFieldHint("nicknameHint", "");
   setFieldHint("locationHint", "");
 
@@ -1173,13 +1429,12 @@ async function uploadAvatar(file, keyCode){
   const { error } = await client.storage
     .from("avatars")
     .upload(fileName, file, {
-      upsert: false,
-      contentType: file.type || "image/png"
+      upsert:false,
+      contentType:file.type || "image/png"
     });
 
   if(error){
-    console.error("头像上传失败详情：", error);
-    throw new Error(`头像搬家失败了：${error.message || "未知错误"}`);
+    throw new Error(formatText("error.avatar_upload_failed", { reason:error.message || text("error.registration_failed") }));
   }
 
   const { data } = client.storage
@@ -1189,63 +1444,26 @@ async function uploadAvatar(file, keyCode){
   return data.publicUrl;
 }
 
-async function checkInviteKey(keyCode){
-  const { data, error } = await client
-    .from("invite_keys")
-    .select("key_code,is_used")
-    .eq("key_code", keyCode)
-    .maybeSingle();
-
-  if(error){
-    console.error("钥匙校验失败详情：", error);
-    throw new Error("钥匙校验失败");
-  }
-
-  return data;
-}
-
-async function markInviteKeyUsed(keyCode, nickname){
-  const { error } = await client
-    .from("invite_keys")
-    .update({
-      is_used: true,
-      used_by_nickname: nickname
-    })
-    .eq("key_code", keyCode);
-
-  if(error){
-    console.error("钥匙状态更新失败详情：", error);
-    throw new Error("钥匙状态更新失败");
-  }
-}
-
-async function markApplicationRegistered(applicationId){
-  if(!applicationId) return;
-
-  const { error } = await client
-    .from("applications")
-    .update({
-      status: "registered"
-    })
-    .eq("id", applicationId);
-
-  if(error){
-    console.error("申请状态更新为 registered 失败：", error);
-    throw new Error("登记成功，但申请状态更新失败");
-  }
+function extractRpcRow(result){
+  if(Array.isArray(result)) return result[0] || null;
+  return result || null;
 }
 
 async function submitRegistration(){
   const submitBtn = document.getElementById("submitBtn");
 
-  const inviteKey = document.getElementById("inviteKey").value.trim();
+  if(!registerConfigReady){
+    showConfigError("REGISTER_CONFIG_MISSING");
+    return;
+  }
+
+  const inviteKey = document.getElementById("inviteKey").value.trim().toUpperCase();
   const name = document.getElementById("name").value.trim();
   const nickname = document.getElementById("nickname").value.trim();
   const avatarFile = document.getElementById("avatar").files[0];
   const mbti = getMbtiValue();
   const location = document.getElementById("location").value.trim();
   const qq = document.getElementById("contactQq").value.trim();
-  const birthdayYearValue = document.getElementById("birthdayYear").value.trim();
   const birthdayMonthValue = document.getElementById("birthdayMonth").value.trim();
   const birthdayDayValue = document.getElementById("birthdayDay").value.trim();
   const joinedAt = document.getElementById("joinedAt").value || getToday();
@@ -1258,8 +1476,6 @@ async function submitRegistration(){
 
   const birthdayMonth = parseInt(birthdayMonthValue, 10);
   const birthdayDay = parseInt(birthdayDayValue, 10);
-  const birthdayYear = birthdayYearValue ? parseInt(birthdayYearValue, 10) : null;
-
   const selectedSkills = [...document.querySelectorAll(".skillCheck:checked")].map(el => el.value);
 
   clearFieldErrors();
@@ -1267,71 +1483,70 @@ async function submitRegistration(){
 
   if(!inviteKey){
     markError(document.getElementById("inviteKey"));
-    setMessage("你还没把钥匙带上呢", "error");
+    setMessage(text("error.key_missing"), "error");
     focusElement(document.getElementById("inviteKey"));
     return;
   }
 
   if(!validateKeyFormat(inviteKey)){
     markError(document.getElementById("inviteKey"));
-    setMessage("拿错钥匙了", "error");
+    setMessage(text("error.key_wrong"), "error");
     focusElement(document.getElementById("inviteKey"));
     return;
   }
 
   const requiredFields = [
-    { el: document.getElementById("avatar"), empty: !avatarFile },
-    { el: document.getElementById("name"), empty: !name },
-    { el: document.getElementById("nickname"), empty: !nickname },
-    { el: document.getElementById("location"), empty: !location },
-    { el: document.getElementById("contactQq"), empty: !qq },
-    { el: document.getElementById("birthdayMonth"), empty: !birthdayMonthValue },
-    { el: document.getElementById("birthdayDay"), empty: !birthdayDayValue },
-    { el: document.getElementById("joinedAt"), empty: !joinedAt }
+    { el:document.getElementById("avatar"), empty:!avatarFile },
+    { el:document.getElementById("name"), empty:!name },
+    { el:document.getElementById("nickname"), empty:!nickname },
+    { el:document.getElementById("location"), empty:!location },
+    { el:document.getElementById("contactQq"), empty:!qq },
+    { el:document.getElementById("birthdayMonth"), empty:!birthdayMonthValue },
+    { el:document.getElementById("birthdayDay"), empty:!birthdayDayValue },
+    { el:document.getElementById("joinedAt"), empty:!joinedAt }
   ];
 
   const missingFields = requiredFields.filter(item => item.empty);
-
   if(missingFields.length > 0){
     missingFields.forEach(item => markError(item.el));
-    setMessage("还没填写完整呢", "error");
+    setMessage(text("error.required_missing"), "error");
     focusElement(missingFields[0].el);
+    return;
+  }
+
+  if(selectedSkills.length === 0 && !customSkill){
+    markError(document.getElementById("skillsWrap"));
+    markError(document.getElementById("customSkill"));
+    setMessage(text("error.skill_required"), "error");
+    focusElement(document.getElementById("customSkill"));
     return;
   }
 
   if(!validateNickname(nickname)){
     markError(document.getElementById("nickname"));
-    setFieldHint("nicknameHint", "昵称要么是1个中文，要么是1-4个英文字母，且首字母大写", "error");
-    setMessage("昵称格式不对喔", "error");
+    setFieldHint("nicknameHint", text("error.nickname_format"), "error");
+    setMessage(text("error.nickname_message"), "error");
     focusElement(document.getElementById("nickname"));
-    return;
-  }
-
-  if(!validateLocation(location)){
-    markError(document.getElementById("location"));
-    setFieldHint("locationHint", "仅可填写省份、美东/美西/美中、美国或加拿大", "error");
-    setMessage("所在地填写不符合要求", "error");
-    focusElement(document.getElementById("location"));
     return;
   }
 
   if(!validateQq(qq)){
     markError(document.getElementById("contactQq"));
-    setMessage("QQ号请填写正确的数字，若没有请填写“无”", "error");
+    setMessage(text("error.qq_invalid"), "error");
     focusElement(document.getElementById("contactQq"));
     return;
   }
 
   if(isNaN(birthdayMonth) || birthdayMonth < 1 || birthdayMonth > 12){
     markError(document.getElementById("birthdayMonth"));
-    setMessage("还没填写完整呢", "error");
+    setMessage(text("error.required_missing"), "error");
     focusElement(document.getElementById("birthdayMonth"));
     return;
   }
 
   if(isNaN(birthdayDay) || birthdayDay < 1 || birthdayDay > 31){
     markError(document.getElementById("birthdayDay"));
-    setMessage("还没填写完整呢", "error");
+    setMessage(text("error.required_missing"), "error");
     focusElement(document.getElementById("birthdayDay"));
     return;
   }
@@ -1343,8 +1558,8 @@ async function submitRegistration(){
       const nameExists = await checkNameExists(name);
       if(nameExists){
         markError(document.getElementById("name"));
-        setFieldHint("nameHint", "这个圈名已经有人先住进去啦", "error");
-        setMessage("圈名重复了", "error");
+        setFieldHint("nameHint", text("error.name_duplicate_hint"), "error");
+        setMessage(text("error.name_duplicate"), "error");
         focusElement(document.getElementById("name"));
         submitBtn.disabled = false;
         return;
@@ -1354,8 +1569,8 @@ async function submitRegistration(){
     const nicknameExists = await checkNicknameExists(nickname);
     if(nicknameExists){
       markError(document.getElementById("nickname"));
-      setFieldHint("nicknameHint", "这个昵称已经被别人抢先用了", "error");
-      setMessage("昵称重复了", "error");
+      setFieldHint("nicknameHint", text("error.nickname_duplicate_hint"), "error");
+      setMessage(text("error.nickname_duplicate"), "error");
       focusElement(document.getElementById("nickname"));
       submitBtn.disabled = false;
       return;
@@ -1364,7 +1579,7 @@ async function submitRegistration(){
     if(approvedApplicationContext){
       if(inviteKey !== approvedApplicationContext.member_code){
         markError(document.getElementById("inviteKey"));
-        setMessage("这把钥匙和你的通过记录对不上", "error");
+        setMessage(text("error.key_application_mismatch"), "error");
         focusElement(document.getElementById("inviteKey"));
         submitBtn.disabled = false;
         return;
@@ -1372,7 +1587,7 @@ async function submitRegistration(){
 
       if(name !== approvedApplicationContext.name){
         markError(document.getElementById("name"));
-        setMessage("圈名需要和通过记录保持一致", "error");
+        setMessage(text("error.name_application_mismatch"), "error");
         focusElement(document.getElementById("name"));
         submitBtn.disabled = false;
         return;
@@ -1380,137 +1595,110 @@ async function submitRegistration(){
 
       if(qq !== approvedApplicationContext.contact_qq){
         markError(document.getElementById("contactQq"));
-        setMessage("QQ号需要和通过记录保持一致", "error");
+        setMessage(text("error.qq_application_mismatch"), "error");
         focusElement(document.getElementById("contactQq"));
         submitBtn.disabled = false;
         return;
       }
-    }else{
-      const inviteRow = await checkInviteKey(inviteKey);
-
-      if(!inviteRow){
-        markError(document.getElementById("inviteKey"));
-        setMessage("拿错钥匙了", "error");
-        focusElement(document.getElementById("inviteKey"));
-        submitBtn.disabled = false;
-        return;
-      }
-
-      if(inviteRow.is_used){
-        markError(document.getElementById("inviteKey"));
-        setMessage("这把钥匙是别人的喔", "error");
-        focusElement(document.getElementById("inviteKey"));
-        submitBtn.disabled = false;
-        return;
-      }
     }
 
-    setMessage("宿管正在翻登记本，稍等一下下……", "");
+    setMessage(text("message.submitting"), "");
 
     const cohort = calcCohort(joinedAt);
     const avatarUrl = await uploadAvatar(avatarFile, inviteKey);
-
     const skillsValue = selectedSkills.length ? selectedSkills.join(",") : null;
     const customSkillValue = customSkill || null;
 
-    const { error: insertError } = await client.from("members").insert([{
-      member_code: inviteKey,
-      name: name,
-      nickname: nickname,
-      avatar_url: avatarUrl,
-      mbti: mbti || null,
-      location: location || null,
-      contact_qq: qq,
-      birthday_year: birthdayYear,
-      birthday_month: birthdayMonth,
-      birthday_day: birthdayDay,
-      skills: skillsValue,
-      custom_skill: customSkillValue,
-      social_xiaohongshu: socialXhs || null,
-      social_douyin: socialDouyin || null,
-      social_bilibili: socialBilibili || null,
-      social_weibo: socialWeibo || null,
-      joined_at: joinedAt,
-      cohort: cohort,
-      public_message: publicMessage || null
-    }]);
+    const rpcResult = await client.rpc("submit_room10_member_registration", {
+      p_application_id: approvedApplicationContext?.id ? Number(approvedApplicationContext.id) : null,
+      p_member_code: inviteKey,
+      p_name: name,
+      p_nickname: nickname,
+      p_avatar_url: avatarUrl,
+      p_mbti: mbti || null,
+      p_location: location || null,
+      p_contact_qq: qq,
+      p_birthday_month: birthdayMonth,
+      p_birthday_day: birthdayDay,
+      p_skills: skillsValue,
+      p_custom_skill: customSkillValue,
+      p_social_xiaohongshu: socialXhs || null,
+      p_social_douyin: socialDouyin || null,
+      p_social_bilibili: socialBilibili || null,
+      p_social_weibo: socialWeibo || null,
+      p_joined_at: joinedAt,
+      p_cohort: cohort,
+      p_public_message: publicMessage || null
+    });
 
-    if(insertError){
-      console.error("成员写入失败详情：", insertError);
-      const msg = String(insertError.message || "");
+    if(rpcResult.error){
+      throw new Error(rpcResult.error.message || text("error.registration_failed"));
+    }
 
-      if(msg.includes("name")){
-        markError(document.getElementById("name"));
-        setFieldHint("nameHint", "这个圈名已经有人先住进去啦", "error");
-        throw new Error("这个圈名已经有人先住进去啦");
-      }
-
-      if(msg.includes("nickname")){
-        markError(document.getElementById("nickname"));
-        setFieldHint("nicknameHint", "这个昵称已经被别人抢先用了", "error");
-        throw new Error("这个昵称已经被别人抢先用了");
-      }
-
-      if(msg.includes("member_code")){
-        markError(document.getElementById("inviteKey"));
-        throw new Error("这把钥匙已经被使用了");
-      }
-
-      if(msg.includes("contact_qq")){
-        markError(document.getElementById("contactQq"));
-        throw new Error("这个QQ号已经有记录了");
-      }
-
-      throw new Error("入住申请提交失败");
+    const row = extractRpcRow(rpcResult.data);
+    if(!row || row.success !== true){
+      throw new Error(row?.message || text("error.registration_failed"));
     }
 
     if(approvedApplicationContext){
-      await markApplicationRegistered(approvedApplicationContext.id);
       localStorage.removeItem("room10ApplicantSession");
       localStorage.removeItem("room10ApplicationDraft");
-    }else{
-      await markInviteKeyUsed(inviteKey, nickname);
     }
 
-    localStorage.setItem("room10Role", "member");
+    localStorage.setItem("room10Role", row.role || (inviteKey.startsWith("B") ? "trainee" : "member"));
     localStorage.setItem("room10LoggedIn", "true");
-    localStorage.setItem("room10User", nickname);
+    localStorage.setItem("room10User", row.nickname || nickname);
+    localStorage.setItem("room10MemberId", row.member_id || "");
+    localStorage.setItem("room10MemberCode", row.member_code || inviteKey);
 
-    setMessage(`入住登记成功～你的钥匙是 ${inviteKey}，快带着它去十号房开门吧`, "success");
+    setMessage(row.message || formatText("message.registration_success", { member_code:inviteKey }), "success");
 
-    const returnPage = getReturnPage();
-
+    const returnPage = getReturnPageUrl();
     setTimeout(() => {
       clearReturnPageCache();
       window.location.href = returnPage;
     }, 1800);
-
   }catch(err){
-    setMessage(err.message || "提交失败", "error");
+    const message = err.message || text("error.submit_failed");
+    setMessage(message, "error");
+
+    if(message.includes(text("label.name"))) markError(document.getElementById("name"));
+    if(message.includes(text("label.nickname"))) markError(document.getElementById("nickname"));
+    if(message.includes(text("label.invite_key"))) markError(document.getElementById("inviteKey"));
+    if(message.includes(text("label.contact_qq"))) markError(document.getElementById("contactQq"));
   }finally{
     submitBtn.disabled = false;
   }
 }
 
+function initResizeListeners(){
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      requestAnimationFrame(fitFormToSheet);
+    }, 60);
+  });
+
+  document.fonts?.ready?.then(() => {
+    requestAnimationFrame(fitFormToSheet);
+  });
+}
+
 document.getElementById("joinedAt").value = getToday();
-populateBirthdayOptions();
-getReturnPage();
+applyStaticAssets();
+getReturnPageKey();
+initResizeListeners();
 
 window.addEventListener("load", async () => {
-  await loadApprovedApplicationContext();
-  requestAnimationFrame(fitFormToSheet);
-});
-
-let resizeTimer = null;
-window.addEventListener("resize", () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
+  try{
+    await loadRegisterConfig();
+    applyPageContent();
+    renderDynamicOptions();
+    await loadApprovedApplicationContext();
     requestAnimationFrame(fitFormToSheet);
-  }, 60);
-});
-
-document.fonts?.ready?.then(() => {
-  requestAnimationFrame(fitFormToSheet);
+  }catch(err){
+    showConfigError(err.message || "REGISTER_CONFIG_MISSING");
+  }
 });
 </script>
 
