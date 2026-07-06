@@ -278,12 +278,6 @@ textarea{
   padding:0;
 }
 
-.custom-skill-row{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:0.55vw;
-  align-items:center;
-}
 
 .avatar-preview{
   margin-top:0.35vw;
@@ -309,7 +303,7 @@ textarea{
 
 .birthday-row{
   display:grid;
-  grid-template-columns:1fr 1fr 1fr;
+  grid-template-columns:1fr 1fr;
   gap:0.55vw;
 }
 
@@ -410,8 +404,7 @@ textarea{
   .actions,
   .skills-wrap,
   .birthday-row,
-  .mbti-grid,
-  .custom-skill-row{
+  .mbti-grid{
     gap:max(8px, 0.55vw);
   }
 
@@ -447,14 +440,6 @@ textarea{
   .sheet-form{
     width:70%;
     top:17.2%;
-  }
-
-  .skills-wrap{
-    grid-template-columns:repeat(4, minmax(0,1fr));
-  }
-
-  .custom-skill-row{
-    grid-template-columns:1fr;
   }
 
   .mbti-grid{
@@ -572,14 +557,6 @@ textarea{
     margin-top:18px;
   }
 
-  .skills-wrap{
-    grid-template-columns:repeat(4, minmax(0,1fr));
-  }
-
-  .custom-skill-row{
-    grid-template-columns:1fr;
-  }
-
   .mbti-grid{
     grid-template-columns:repeat(2, minmax(0,1fr));
   }
@@ -659,9 +636,7 @@ textarea{
           </div>
 
           <div class="form-group full">
-            <div class="custom-skill-row">
-              <input id="customSkill" type="text">
-            </div>
+            <input id="customSkill" type="text">
           </div>
 
           <div class="form-group">
@@ -769,7 +744,6 @@ const REQUIRED_TEXT_KEYS = [
   "hint.name_available",
   "hint.nickname_available",
   "error.config_missing",
-  "error.config_read_failed",
   "error.key_missing",
   "error.key_wrong",
   "error.required_missing",
@@ -832,9 +806,6 @@ function optionList(groupKey){
   return registerOptions.get(groupKey) || [];
 }
 
-function optionValues(groupKey){
-  return new Set(optionList(groupKey).map(item => item.value));
-}
 
 function room10Url(path){
   const raw = normalizeText(path);
@@ -1171,7 +1142,8 @@ async function loadApprovedApplicationContext(){
 
     applyApplicationPrefill(data);
   }catch(err){
-    showConfigError(text("error.application_read_failed"), err.message || "applications");
+    const message = registerTexts.get("error.application_read_failed") || "申请信息读取失败";
+    showConfigError(message, err.message || "applications");
   }
 }
 
