@@ -1,6 +1,6 @@
 // 十号房全站路径配置
-// 作用：统一记录固定页面路径和固定图片路径
-// 注意：这里记录的是相对于 room10 根目录的路径
+// 作用：统一记录固定页面路径、本地固定素材路径和 R2 公开素材路径
+// 注意：本地固定素材路径相对于 room10 根目录；R2 素材路径由公开基础域名 + 数据库相对路径拼接
 
 window.ROOM10_PATHS = {
   pages: {
@@ -31,7 +31,7 @@ window.ROOM10_PATHS = {
 
     managerAdmin: "manager/manager-admin.html",
     managerMember: "manager/manager-member.html",
-    managerOwner: "manager/manager-owner.html",
+    managerOwner: "manager/manager-admin.html",
     managerVisitor: "manager/manager-visitor.html",
     managerRegister: "manager/register.html",
 
@@ -232,11 +232,34 @@ window.ROOM10_PATHS = {
     },
 
     pet: {
-      pet: "pet/pet.png"
+      pet: "pet/pet.png",
+      medical: "pet/medical.png",
+      snack: "pet/snack.png",
+      can: "pet/can.png",
+      kibble: "pet/kibble.png",
+      clean: "pet/clean.png",
+      ball: "pet/ball.png"
     },
 
     studio: {
       roomStudio: "studio/room-studio.png"
+    }
+  },
+
+  remoteAssets: {
+    r2BaseUrl: "https://pub-edd275cb52b34b3884d308696cd915b6.r2.dev",
+    r2Bucket: "room10-assets",
+
+    pet: {
+      basePath: "pet/",
+      fileNameRule: "pet/动物编号/图片编号.png",
+      normal: "1.png",
+      weak: "2.png",
+      dead: "3.png",
+      healing: "4.png",
+      wet: "5.png",
+      eating: "6.png",
+      playing: "7.png"
     }
   },
 
@@ -318,6 +341,31 @@ window.ROOM10_PATHS = {
     dorm: {
       mascotNiumaL: "牛马吉祥物左向图，文件位置：dorm/mascot-niuma(L).png",
       mascotNiumaR: "牛马吉祥物右向图，文件位置：dorm/mascot-niuma(R).png"
+    },
+
+    manager: {
+      managerAdmin: "宿管室管理页；admin 和 owner 统一使用 manager/manager-admin.html"
+    },
+
+    pet: {
+      pet: "宠物房主素材，文件位置：pet/pet.png",
+      medical: "宠物医疗卡道具，文件位置：pet/medical.png",
+      snack: "宠物零食道具，文件位置：pet/snack.png",
+      can: "宠物罐头道具，文件位置：pet/can.png",
+      kibble: "宠物干粮道具，文件位置：pet/kibble.png",
+      clean: "宠物清洁用具道具，文件位置：pet/clean.png",
+      ball: "宠物玩具球道具，文件位置：pet/ball.png",
+
+      petImageSourceRule: "宠物状态图不在 room10-paths.js 写死；前端读取 get_pet_types_with_images(false)，再用 room10R2Asset(image_path) 拼接真实图片地址。",
+      petImagePathRule: "R2 相对路径规则：pet/动物编号/图片编号.png。",
+      petImage1: "1.png：正面图 normal",
+      petImage2: "2.png：虚弱 weak",
+      petImage3: "3.png：死亡 dead",
+      petImage4: "4.png：治疗 healing",
+      petImage5: "5.png：淋湿/洗澡 wet",
+      petImage6: "6.png：吃东西 eating",
+      petImage7: "7.png：玩耍 playing",
+      specialCards: "35 六角恐龙/早安、36 猫头鹰/王铮亮为 special 特殊卡；是否展示由数据库 card_type 控制。"
     }
   }
 };
@@ -330,10 +378,22 @@ window.ROOM10_PATHS = {
     window.ROOM10_ROOT = scriptSrc.replace(/room10-paths\.js(\?.*)?$/, "");
   }
 
+  function isAbsolutePath(path) {
+    return /^(https?:|data:|blob:|\/)/.test(path);
+  }
+
+  function normalizeBaseUrl(baseUrl) {
+    return String(baseUrl || "").replace(/\/+$/, "");
+  }
+
+  function normalizeRemotePath(path) {
+    return String(path || "").replace(/^\/+/, "");
+  }
+
   window.room10Path = function (path) {
     if (!path) return "";
 
-    if (/^(https?:|data:|blob:|\/)/.test(path)) {
+    if (isAbsolutePath(path)) {
       return path;
     }
 
@@ -364,5 +424,27 @@ window.ROOM10_PATHS = {
     }
 
     return window.room10Path(value);
+  };
+
+  window.room10R2Asset = function (path) {
+    if (!path) return "";
+
+    if (isAbsolutePath(path)) {
+      return path;
+    }
+
+    const remoteAssets = window.ROOM10_PATHS && window.ROOM10_PATHS.remoteAssets;
+    const baseUrl = normalizeBaseUrl(remoteAssets && remoteAssets.r2BaseUrl);
+    const cleanPath = normalizeRemotePath(path);
+
+    if (!baseUrl) {
+      return window.room10Path(cleanPath);
+    }
+
+    return baseUrl + "/" + cleanPath;
+  };
+
+  window.room10PetImage = function (imagePath) {
+    return window.room10R2Asset(imagePath);
   };
 })();
