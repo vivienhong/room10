@@ -1,0 +1,1449 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<title>2048｜十号房</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../room10-paths.js"></script>
+<style>
+*{box-sizing:border-box}
+:root{
+  --ink:#68452b;
+  --ink-strong:#56361f;
+  --muted:rgba(104,69,43,.64);
+  --paper:rgba(255,252,246,.90);
+  --paper-2:rgba(249,235,211,.78);
+  --line:rgba(168,124,86,.20);
+  --shadow:0 24px 60px rgba(82,58,35,.18);
+  --soft-shadow:0 10px 28px rgba(92,63,37,.10);
+  --success:#6f9a73;
+  --danger:#b86b61;
+  --board-bg:#cdb18f;
+  --slot-bg:rgba(255,249,239,.44);
+}
+html,body{
+  margin:0;
+  min-height:100%;
+  color:var(--ink);
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:
+    radial-gradient(circle at 14% 8%, rgba(255,252,246,.84), transparent 34%),
+    radial-gradient(circle at 84% 12%, rgba(244,226,194,.62), transparent 36%),
+    linear-gradient(180deg,#efe7dc,#e0cfb6);
+}
+body{overflow-x:hidden;overflow-y:auto}
+button{font-family:inherit;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
+
+.page{
+  width:100%;
+  min-height:100dvh;
+  padding:18px 14px max(18px,env(safe-area-inset-bottom));
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+.shell{
+  width:min(1160px,100%);
+  padding:10px;
+  border-radius:34px;
+  border:1px solid rgba(255,255,255,.86);
+  background:
+    radial-gradient(circle at 14% 10%, rgba(255,255,255,.84), transparent 34%),
+    radial-gradient(circle at 86% 18%, rgba(255,241,212,.64), transparent 34%),
+    rgba(255,247,232,.57);
+  box-shadow:var(--shadow);
+}
+.inner{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 300px;
+  gap:14px;
+}
+.main-card,.side-card{
+  min-width:0;
+  border-radius:28px;
+  border:1px solid rgba(255,255,255,.82);
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255,255,255,.74), transparent 34%),
+    linear-gradient(180deg,var(--paper),var(--paper-2));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.88);
+}
+.main-card{
+  position:relative;
+  min-height:700px;
+  padding:22px;
+  display:flex;
+  flex-direction:column;
+}
+.side-card{
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  margin-bottom:14px;
+}
+.title-wrap{min-width:0}
+.title{
+  margin:0;
+  color:#664024;
+  font-size:34px;
+  font-weight:950;
+  line-height:1.06;
+  letter-spacing:.06em;
+  text-shadow:0 1px 0 rgba(255,255,255,.72);
+}
+.desc{
+  margin:7px 0 0;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:800;
+  line-height:1.55;
+}
+.badge{
+  flex:0 0 auto;
+  min-height:32px;
+  padding:0 14px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:#7a4c27;
+  font-size:12px;
+  font-weight:950;
+  white-space:nowrap;
+  background:rgba(255,249,236,.84);
+  border:1px solid rgba(170,126,88,.16);
+}
+.badge.error{color:#8b4f48;background:rgba(255,238,234,.82)}
+.badge.ok{color:#5f805f;background:rgba(239,250,238,.82)}
+
+.screen{display:none;flex:1 1 auto;min-height:0}
+.screen.active{display:flex}
+
+.permission-screen,.result-screen{
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.permission-box,.result-box{
+  width:min(620px,100%);
+  padding:30px 24px;
+  border-radius:28px;
+  background:rgba(255,253,248,.70);
+  border:1px solid rgba(255,255,255,.82);
+  box-shadow:var(--soft-shadow);
+}
+.permission-box h2,.result-box h2{margin:0;font-size:24px;font-weight:950}
+.permission-box p,.result-box p{
+  margin:10px 0 20px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.75;
+  font-weight:800;
+}
+
+.play-screen{
+  flex-direction:column;
+  gap:12px;
+}
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.stat-card{
+  min-height:62px;
+  padding:8px 10px;
+  border-radius:18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:850;
+  text-align:center;
+  background:rgba(255,252,248,.60);
+  border:1px solid rgba(255,255,255,.76);
+}
+.stat-card strong{
+  display:block;
+  margin-top:3px;
+  color:var(--ink);
+  font-size:20px;
+  font-weight:950;
+}
+
+.board-area{
+  flex:1 1 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:440px;
+}
+.board-frame{
+  position:relative;
+  width:min(100%,500px,calc(100dvw - 84px));
+  aspect-ratio:1/1;
+  padding:13px;
+  border-radius:30px;
+  background:
+    radial-gradient(circle at 14% 10%, rgba(255,255,255,.30), transparent 34%),
+    linear-gradient(180deg,#d8bea0,#c5a57f);
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:
+    0 18px 42px rgba(98,67,40,.18),
+    inset 0 1px 0 rgba(255,255,255,.62);
+  touch-action:none;
+  user-select:none;
+}
+.board{
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  grid-template-rows:repeat(4,1fr);
+  gap:10px;
+}
+.tile{
+  position:relative;
+  min-width:0;
+  min-height:0;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:var(--slot-bg);
+  border:1px solid rgba(255,255,255,.26);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18);
+  contain:layout paint;
+  will-change:transform;
+  transition:background-color .18s ease,color .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+.tile.filled{
+  color:#674127;
+  background:var(--tile-bg,#eee4da);
+  border-color:rgba(255,255,255,.54);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.54),
+    0 5px 14px rgba(92,62,35,.10);
+}
+.tile.new-tile{animation:tilePop .18s cubic-bezier(.2,.8,.2,1) both}
+.tile.tile-change .tile-value{animation:tileSoftChange .16s ease both}
+.tile.tile-merge{animation:tileMerge .20s cubic-bezier(.2,.8,.2,1) both}
+.tile-value{
+  display:block;
+  max-width:94%;
+  font-size:clamp(20px,5.3vw,43px);
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-.04em;
+  text-shadow:0 1px 0 rgba(255,255,255,.25);
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
+.tile[data-digits="4"] .tile-value{font-size:clamp(18px,4.5vw,37px)}
+.tile[data-digits="5"] .tile-value,
+.tile[data-digits="6"] .tile-value{font-size:clamp(15px,3.7vw,31px)}
+@keyframes tilePop{
+  0%{transform:scale(.82);opacity:.55}
+  72%{transform:scale(1.035);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
+@keyframes tileSoftChange{
+  0%{transform:scale(.96);opacity:.78}
+  100%{transform:scale(1);opacity:1}
+}
+@keyframes tileMerge{
+  0%{transform:scale(.94)}
+  55%{transform:scale(1.07)}
+  100%{transform:scale(1)}
+}
+.board-loading{
+  position:absolute;
+  inset:13px;
+  z-index:4;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff9ef;
+  font-size:13px;
+  font-weight:950;
+  background:rgba(94,67,43,.28);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:translateZ(0);
+  transition:opacity .16s ease,visibility 0s linear .16s;
+}
+.board-loading.show{
+  opacity:1;
+  visibility:visible;
+  transition-delay:0s;
+}
+
+.controls{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.btn,.btn-sub{
+  appearance:none;
+  min-height:42px;
+  padding:0 20px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.84);
+  cursor:pointer;
+  font-size:14px;
+  font-weight:950;
+  line-height:1;
+  box-shadow:
+    0 9px 20px rgba(129,90,54,.13),
+    inset 0 1px 0 rgba(255,255,255,.92);
+  transition:.18s ease;
+}
+.btn{
+  color:#68401f;
+  background:linear-gradient(180deg,#fae8c9 0%,#dfbe8f 100%);
+}
+.btn-sub{
+  color:#6f5746;
+  background:rgba(255,252,248,.78);
+}
+.btn:hover,.btn-sub:hover{transform:translateY(-2px)}
+.btn:disabled,.btn-sub:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+}
+.hint{
+  min-height:18px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.55;
+  font-weight:850;
+  text-align:center;
+}
+.dpad{
+  display:none;
+  grid-template-columns:repeat(3,46px);
+  grid-template-rows:repeat(2,42px);
+  gap:7px;
+  justify-content:center;
+  margin-top:2px;
+}
+.dpad button{
+  appearance:none;
+  border:none;
+  border-radius:14px;
+  color:#704c32;
+  font-size:18px;
+  font-weight:950;
+  background:rgba(255,249,238,.78);
+  border:1px solid rgba(255,255,255,.78);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.84),0 5px 14px rgba(92,62,35,.08);
+}
+.dpad button:disabled{opacity:.4}
+.dpad .up{grid-column:2}
+.dpad .left{grid-column:1;grid-row:2}
+.dpad .down{grid-column:2;grid-row:2}
+.dpad .right{grid-column:3;grid-row:2}
+
+.side-title{margin:0;font-size:18px;font-weight:950}
+.side-section{
+  padding:12px;
+  border-radius:18px;
+  background:rgba(255,252,248,.58);
+  border:1px solid rgba(255,255,255,.72);
+}
+.side-label{
+  margin:0 0 8px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:950;
+}
+.member-line{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.member-name{font-size:16px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.member-role{font-size:11px;color:var(--muted);font-weight:900}
+.side-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.side-num{
+  min-height:56px;
+  border-radius:14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:850;
+  background:rgba(255,249,238,.62);
+}
+.side-num strong{color:var(--ink);font-size:18px;font-weight:950;margin-top:3px}
+.rank-list{margin:0;padding:0;list-style:none;display:grid;gap:7px}
+.rank-list li{
+  min-height:34px;
+  display:grid;
+  grid-template-columns:24px minmax(0,1fr) auto;
+  align-items:center;
+  gap:7px;
+  color:#755132;
+  font-size:12px;
+  font-weight:850;
+}
+.rank-list li.current{
+  padding:0 7px;
+  margin:0 -7px;
+  border-radius:12px;
+  background:rgba(255,239,203,.76);
+}
+.rank-list b{color:#b9782e;font-weight:950}
+.rank-list .rank-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-list .rank-score{font-weight:950}
+.side-note{color:var(--muted);font-size:12px;line-height:1.65;font-weight:800}
+.side-note strong{color:var(--ink)}
+.loading-line{color:var(--muted);font-size:12px;font-weight:850}
+
+.result-number{
+  margin:2px 0 0;
+  color:#6d4528;
+  font-size:44px;
+  line-height:1;
+  font-weight:950;
+}
+.result-stats{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin:16px 0 14px;
+}
+.result-stat{
+  min-height:68px;
+  border-radius:18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:850;
+  background:rgba(255,249,238,.68);
+}
+.result-stat strong{margin-top:4px;color:var(--ink);font-size:20px;font-weight:950}
+.reward-box,.encounter-box{
+  margin-top:10px;
+  padding:13px 14px;
+  border-radius:18px;
+  text-align:left;
+  background:rgba(255,252,248,.64);
+  border:1px solid rgba(255,255,255,.76);
+}
+.reward-box h3,.encounter-box h3{margin:0 0 7px;font-size:13px;font-weight:950}
+.reward-line,.encounter-line{margin:0;color:#755132;font-size:13px;line-height:1.6;font-weight:850}
+.encounter-box.triggered{
+  background:linear-gradient(180deg,rgba(255,247,218,.88),rgba(255,237,203,.76));
+  box-shadow:0 0 0 3px rgba(221,176,86,.10),0 12px 28px rgba(136,91,34,.10);
+}
+.result-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:max(24px,calc(env(safe-area-inset-bottom) + 14px));
+  z-index:120;
+  transform:translateX(-50%) translateY(20px);
+  max-width:min(86vw,520px);
+  padding:12px 18px;
+  border-radius:999px;
+  color:#fffaf0;
+  font-size:13px;
+  font-weight:900;
+  text-align:center;
+  background:rgba(90,58,32,.93);
+  box-shadow:0 16px 34px rgba(48,32,20,.22);
+  opacity:0;
+  pointer-events:none;
+  transition:.22s ease;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{background:rgba(128,72,65,.95)}
+
+.mask{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(61,42,28,.38);
+  backdrop-filter:blur(4px);
+}
+.mask.show{display:flex}
+.modal{
+  width:min(430px,100%);
+  padding:24px 20px 20px;
+  border-radius:28px;
+  text-align:center;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,245,207,.92), transparent 42%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(247,226,192,.96));
+  border:1px solid rgba(255,255,255,.88);
+  box-shadow:0 24px 70px rgba(40,28,18,.24);
+}
+.modal h2{margin:0;font-size:22px;font-weight:950}
+.modal p{margin:9px 0 18px;color:var(--muted);font-size:13px;line-height:1.7;font-weight:850}
+.modal-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+
+@media(max-width:880px){
+  .inner{grid-template-columns:1fr}
+  .main-card{min-height:auto;padding:18px 14px 16px}
+  .side-card{padding:14px}
+  .title{font-size:28px}
+  .desc{display:none}
+  .badge{min-height:28px;padding:0 10px;font-size:11px}
+  .board-area{min-height:0;padding:6px 0}
+  .board-frame{width:min(100%,470px,calc(100dvw - 48px));padding:10px;border-radius:24px}
+  .board{gap:7px}
+  .tile{border-radius:14px}
+  .board-loading{inset:10px}
+  .dpad{display:grid}
+}
+@media(max-width:520px){
+  .page{padding:8px}
+  .shell{padding:6px;border-radius:26px}
+  .main-card,.side-card{border-radius:22px}
+  .main-card{padding:14px 10px 12px}
+  .topbar{margin-bottom:10px}
+  .title{font-size:25px}
+  .stats-row{gap:7px}
+  .stat-card{min-height:54px;padding:6px;font-size:10px;border-radius:14px}
+  .stat-card strong{font-size:17px}
+  .board-frame{width:min(100%,calc(100dvw - 34px));padding:8px;border-radius:20px}
+  .board{gap:6px}
+  .tile{border-radius:11px}
+  .tile-value{font-size:clamp(20px,9.4vw,39px)}
+  .tile[data-digits="4"] .tile-value{font-size:clamp(17px,8vw,33px)}
+  .tile[data-digits="5"] .tile-value,.tile[data-digits="6"] .tile-value{font-size:clamp(14px,6.6vw,27px)}
+  .controls{gap:8px}
+  .btn,.btn-sub{min-height:40px;padding:0 16px;font-size:13px}
+  .result-stats{grid-template-columns:1fr 1fr}
+  .result-stats .result-stat:last-child{grid-column:1/-1}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="shell">
+    <div class="inner">
+      <main class="main-card" aria-live="polite">
+        <div class="topbar">
+          <div class="title-wrap">
+            <h1 class="title">2048</h1>
+            <p class="desc">上下左右滑动，相同数字会合并。棋盘、分数、步数与结算结果均由服务器计算。</p>
+          </div>
+          <div class="badge" id="statusBadge">正在连接</div>
+        </div>
+
+        <section class="screen permission-screen active" id="permissionScreen">
+          <div class="permission-box">
+            <h2 id="permissionTitle">正在进入 2048</h2>
+            <p id="permissionBody">正在读取成员身份和游戏状态。</p>
+            <button class="btn" type="button" id="permissionActionBtn">返回游戏房</button>
+          </div>
+        </section>
+
+        <section class="screen play-screen" id="playScreen">
+          <div class="stats-row">
+            <div class="stat-card">本局分数<strong id="scoreValue">0</strong></div>
+            <div class="stat-card">最高方块<strong id="maxTileValue">2</strong></div>
+            <div class="stat-card">移动步数<strong id="moveCountValue">0</strong></div>
+            <div class="stat-card">个人最高<strong id="bestScoreValue">0</strong></div>
+          </div>
+
+          <div class="board-area">
+            <div class="board-frame" id="boardFrame" aria-label="2048 游戏棋盘" tabindex="0">
+              <div class="board" id="board"></div>
+              <div class="board-loading" id="boardLoading">服务器正在计算...</div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <button class="btn-sub" type="button" id="backBtn">返回游戏房</button>
+            <button class="btn" type="button" id="restartBtn">重新开始</button>
+          </div>
+
+          <div class="dpad" id="dpad" aria-label="方向按钮">
+            <button class="up" type="button" data-direction="up" aria-label="向上">↑</button>
+            <button class="left" type="button" data-direction="left" aria-label="向左">←</button>
+            <button class="down" type="button" data-direction="down" aria-label="向下">↓</button>
+            <button class="right" type="button" data-direction="right" aria-label="向右">→</button>
+          </div>
+
+          <div class="hint" id="gameHint">电脑可使用方向键或 WASD；手机可直接滑动棋盘。</div>
+        </section>
+
+        <section class="screen result-screen" id="resultScreen">
+          <div class="result-box">
+            <h2>本局结束</h2>
+            <div class="result-number" id="resultScore">0</div>
+            <p>本局已经由服务器完成统一结算。</p>
+
+            <div class="result-stats">
+              <div class="result-stat">最高方块<strong id="resultMaxTile">2</strong></div>
+              <div class="result-stat">移动步数<strong id="resultMoves">0</strong></div>
+              <div class="result-stat">游戏时长<strong id="resultDuration">0秒</strong></div>
+            </div>
+
+            <div class="reward-box">
+              <h3>本局奖励</h3>
+              <p class="reward-line" id="rewardLine">正在读取结算结果。</p>
+            </div>
+
+            <div class="encounter-box" id="encounterBox">
+              <h3>动物偶遇</h3>
+              <p class="encounter-line" id="encounterLine">正在读取判定结果。</p>
+            </div>
+
+            <div class="result-actions">
+              <button class="btn-sub" type="button" id="resultBackBtn">返回游戏房</button>
+              <button class="btn" type="button" id="newGameBtn">再玩一局</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="side-card">
+        <h2 class="side-title">十号房 · 2048</h2>
+
+        <section class="side-section">
+          <p class="side-label">当前成员</p>
+          <div class="member-line">
+            <div>
+              <div class="member-name" id="memberName">未登录</div>
+              <div class="member-role" id="memberRole">仅登录成员可正式游玩</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="side-section">
+          <p class="side-label">个人记录</p>
+          <div class="side-grid">
+            <div class="side-num">最高分<strong id="sideBestScore">0</strong></div>
+            <div class="side-num">最佳方块<strong id="sideBestTile">2</strong></div>
+            <div class="side-num">完整局数<strong id="sideTotalRuns">0</strong></div>
+            <div class="side-num">全站排名<strong id="sideRank">—</strong></div>
+          </div>
+        </section>
+
+        <section class="side-section">
+          <p class="side-label">排行榜</p>
+          <ol class="rank-list" id="rankList">
+            <li><span>—</span><span class="loading-line">正在读取排行榜</span><span></span></li>
+          </ol>
+        </section>
+
+        <section class="side-section">
+          <p class="side-label">规则</p>
+          <div class="side-note">
+            <strong>免费游玩，不消耗金币。</strong><br />
+            完整结束后按数据库奖励配置统一结算；动物偶遇只在整局结束并结算后判定一次。
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<div class="mask" id="restartMask" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="restartModalTitle">
+    <h2 id="restartModalTitle">重新开始？</h2>
+    <p>当前进行中的对局会被标记为放弃，不结算、不发奖励，也不会触发动物偶遇。</p>
+    <div class="modal-actions">
+      <button class="btn-sub" type="button" id="restartCancelBtn">继续当前对局</button>
+      <button class="btn" type="button" id="restartConfirmBtn">确认重新开始</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const SUPABASE_CONFIG = {
+    url: window.ROOM10_SUPABASE_URL || window.SUPABASE_URL || "https://tfevitwoqmxwaguvtyms.supabase.co",
+    key: window.ROOM10_SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI"
+  };
+
+  const STORAGE_KEYS = {
+    loggedIn: "room10LoggedIn",
+    user: "room10User",
+    role: "room10Role",
+    memberId: "room10MemberId",
+    memberCode: "room10MemberCode",
+    game2048Session: "room10_2048_session_id"
+  };
+
+  const ALLOWED_ROLES = new Set(["owner","admin","manager","member","trainee"]);
+  const ROLE_LABELS = {
+    owner: "维修工",
+    admin: "宿管",
+    manager: "管理员",
+    member: "房客",
+    trainee: "练习生"
+  };
+
+  const TILE_COLORS = {
+    2: "#eee4da",
+    4: "#ede0c8",
+    8: "#f2b179",
+    16: "#f59563",
+    32: "#f67c5f",
+    64: "#f65e3b",
+    128: "#edcf72",
+    256: "#edcc61",
+    512: "#edc850",
+    1024: "#edc53f",
+    2048: "#edc22e"
+  };
+
+  const state = {
+    user: null,
+    session: null,
+    busy: false,
+    bestScore: 0,
+    stats: null,
+    rank: null,
+    leaderboard: [],
+    toastTimer: null,
+    lastBoard: Array(16).fill(0)
+  };
+
+  const el = {
+    permissionScreen: document.getElementById("permissionScreen"),
+    playScreen: document.getElementById("playScreen"),
+    resultScreen: document.getElementById("resultScreen"),
+    permissionTitle: document.getElementById("permissionTitle"),
+    permissionBody: document.getElementById("permissionBody"),
+    permissionActionBtn: document.getElementById("permissionActionBtn"),
+    statusBadge: document.getElementById("statusBadge"),
+    board: document.getElementById("board"),
+    boardFrame: document.getElementById("boardFrame"),
+    boardLoading: document.getElementById("boardLoading"),
+    scoreValue: document.getElementById("scoreValue"),
+    maxTileValue: document.getElementById("maxTileValue"),
+    moveCountValue: document.getElementById("moveCountValue"),
+    bestScoreValue: document.getElementById("bestScoreValue"),
+    gameHint: document.getElementById("gameHint"),
+    restartBtn: document.getElementById("restartBtn"),
+    backBtn: document.getElementById("backBtn"),
+    resultBackBtn: document.getElementById("resultBackBtn"),
+    newGameBtn: document.getElementById("newGameBtn"),
+    memberName: document.getElementById("memberName"),
+    memberRole: document.getElementById("memberRole"),
+    sideBestScore: document.getElementById("sideBestScore"),
+    sideBestTile: document.getElementById("sideBestTile"),
+    sideTotalRuns: document.getElementById("sideTotalRuns"),
+    sideRank: document.getElementById("sideRank"),
+    rankList: document.getElementById("rankList"),
+    resultScore: document.getElementById("resultScore"),
+    resultMaxTile: document.getElementById("resultMaxTile"),
+    resultMoves: document.getElementById("resultMoves"),
+    resultDuration: document.getElementById("resultDuration"),
+    rewardLine: document.getElementById("rewardLine"),
+    encounterBox: document.getElementById("encounterBox"),
+    encounterLine: document.getElementById("encounterLine"),
+    toast: document.getElementById("toast"),
+    restartMask: document.getElementById("restartMask"),
+    restartCancelBtn: document.getElementById("restartCancelBtn"),
+    restartConfirmBtn: document.getElementById("restartConfirmBtn"),
+    dpadButtons: Array.from(document.querySelectorAll("[data-direction]"))
+  };
+
+  function wait(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function normalizeText(value){
+    return String(value ?? "").trim();
+  }
+
+  function getStoredUser(){
+    const loggedIn = localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
+    const nickname = localStorage.getItem(STORAGE_KEYS.user) || "";
+    const role = localStorage.getItem(STORAGE_KEYS.role) || "";
+    const memberId = localStorage.getItem(STORAGE_KEYS.memberId) || "";
+    const memberCode = localStorage.getItem(STORAGE_KEYS.memberCode) || "";
+
+    if (loggedIn && nickname){
+      return {
+        nickname,
+        role: role || "member",
+        member_id: memberId,
+        member_code: memberCode
+      };
+    }
+
+    try{
+      const raw =
+        localStorage.getItem("room10_user") ||
+        localStorage.getItem("room10_current_user") ||
+        localStorage.getItem("currentUser");
+
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (!data) return null;
+
+      return {
+        nickname: data.nickname || data.name || "",
+        role: data.role || "",
+        member_id: data.member_id || data.id || "",
+        member_code: data.member_code || data.memberCode || ""
+      };
+    }catch{
+      return null;
+    }
+  }
+
+  function getRoleLabel(role){
+    const key = normalizeText(role).toLowerCase();
+    return ROLE_LABELS[key] || "成员";
+  }
+
+  function resolveRoomPath(pageKey, fallback){
+    try{
+      if (typeof window.room10Page === "function"){
+        const value = window.room10Page(pageKey);
+        if (value) return value;
+      }
+    }catch{}
+    return fallback;
+  }
+
+  function backToGameRoom(){
+    window.location.href = resolveRoomPath("game", "./game.html");
+  }
+
+  function openLogin(){
+    const loginPage = resolveRoomPath("index", "../index/index.html");
+    const target = encodeURIComponent(window.location.href);
+    window.location.href = `${loginPage}?login=1&target=${target}`;
+  }
+
+  function showScreen(name){
+    el.permissionScreen.classList.toggle("active", name === "permission");
+    el.playScreen.classList.toggle("active", name === "play");
+    el.resultScreen.classList.toggle("active", name === "result");
+  }
+
+  function setStatus(text, type = ""){
+    el.statusBadge.textContent = text;
+    el.statusBadge.classList.toggle("error", type === "error");
+    el.statusBadge.classList.toggle("ok", type === "ok");
+  }
+
+  function setBusy(value, message = "服务器正在计算...", showOverlay = true){
+    state.busy = Boolean(value);
+    el.boardLoading.textContent = message;
+    el.boardLoading.classList.toggle("show", state.busy && showOverlay);
+    el.restartBtn.disabled = state.busy;
+    el.newGameBtn.disabled = state.busy;
+    el.dpadButtons.forEach(btn => btn.disabled = state.busy);
+  }
+
+  function showToast(message, type = ""){
+    clearTimeout(state.toastTimer);
+    el.toast.textContent = normalizeText(message) || "操作完成";
+    el.toast.classList.toggle("error", type === "error");
+    el.toast.classList.add("show");
+    state.toastTimer = setTimeout(() => el.toast.classList.remove("show"), 2600);
+  }
+
+  function formatNumber(value){
+    return Number(value || 0).toLocaleString("zh-CN");
+  }
+
+  function formatDuration(totalSeconds){
+    const seconds = Math.max(0, Number(totalSeconds || 0));
+    if (seconds < 60) return `${seconds}秒`;
+    const minutes = Math.floor(seconds / 60);
+    const rest = seconds % 60;
+    return `${minutes}分${rest}秒`;
+  }
+
+  function getTileStyle(value){
+    if (!value) return { background: "", color: "" };
+    if (TILE_COLORS[value]){
+      return {
+        background: TILE_COLORS[value],
+        color: value <= 4 ? "#68452b" : "#fffaf0"
+      };
+    }
+    const exponent = Math.max(0, Math.log2(value) - 11);
+    const hue = 39 - Math.min(26, exponent * 4);
+    const light = 52 - Math.min(16, exponent * 2);
+    return {
+      background: `hsl(${hue} 78% ${light}%)`,
+      color: "#fffaf0"
+    };
+  }
+
+  function ensureBoardCells(){
+    if (el.board.children.length === 16) return;
+
+    const fragment = document.createDocumentFragment();
+    for (let index = 0; index < 16; index++){
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.dataset.digits = "0";
+
+      const valueEl = document.createElement("span");
+      valueEl.className = "tile-value";
+      tile.appendChild(valueEl);
+      fragment.appendChild(tile);
+    }
+
+    el.board.replaceChildren(fragment);
+  }
+
+  function renderBoard(board, previousBoard = []){
+    const safeBoard = Array.isArray(board) && board.length === 16
+      ? board.map(Number)
+      : Array(16).fill(0);
+    const safePrevious = Array.isArray(previousBoard) && previousBoard.length === 16
+      ? previousBoard.map(Number)
+      : Array(16).fill(0);
+
+    ensureBoardCells();
+    const tiles = Array.from(el.board.children);
+    const hasPreviousState = safePrevious.some(value => value > 0);
+
+    safeBoard.forEach((value, index) => {
+      const tile = tiles[index];
+      const valueEl = tile.querySelector(".tile-value");
+      const previousValue = Number(safePrevious[index] || 0);
+
+      tile.classList.remove("filled","new-tile","tile-change","tile-merge");
+      tile.dataset.digits = String(value || "").length || "0";
+      tile.style.removeProperty("--tile-bg");
+      tile.style.removeProperty("color");
+
+      if (!value){
+        valueEl.textContent = "";
+        return;
+      }
+
+      const style = getTileStyle(value);
+      tile.classList.add("filled");
+      tile.style.setProperty("--tile-bg", style.background);
+      tile.style.color = style.color;
+      valueEl.textContent = formatNumber(value);
+
+      if (!hasPreviousState){
+        tile.classList.add("new-tile");
+      }else if (previousValue > 0 && value > previousValue && value % previousValue === 0){
+        tile.classList.add("tile-merge");
+      }else if (previousValue !== value){
+        tile.classList.add("tile-change");
+      }
+    });
+
+    state.lastBoard = safeBoard.slice();
+  }
+
+  function renderSession(session, previousBoard = []){
+    if (!session) return;
+    state.session = session;
+    localStorage.setItem(STORAGE_KEYS.game2048Session, session.id);
+
+    el.scoreValue.textContent = formatNumber(session.score);
+    el.maxTileValue.textContent = formatNumber(session.max_tile);
+    el.moveCountValue.textContent = formatNumber(session.move_count);
+    el.bestScoreValue.textContent = formatNumber(Math.max(state.bestScore, Number(session.score || 0)));
+    renderBoard(session.board, previousBoard);
+
+    if (session.status === "active"){
+      setStatus("游戏进行中", "ok");
+      showScreen("play");
+      requestAnimationFrame(() => el.boardFrame.focus({preventScroll:true}));
+    }
+  }
+
+  function renderMember(){
+    if (!state.user){
+      el.memberName.textContent = "未登录";
+      el.memberRole.textContent = "仅登录成员可正式游玩";
+      return;
+    }
+    el.memberName.textContent = state.user.nickname;
+    el.memberRole.textContent = getRoleLabel(state.user.role);
+  }
+
+  function renderStats(){
+    const stats = state.stats?.stats || {};
+    state.bestScore = Number(stats.best_score || 0);
+    el.bestScoreValue.textContent = formatNumber(state.bestScore);
+    el.sideBestScore.textContent = formatNumber(stats.best_score || 0);
+    el.sideBestTile.textContent = formatNumber(stats.best_max_tile || 2);
+    el.sideTotalRuns.textContent = formatNumber(stats.total_runs || 0);
+    el.sideRank.textContent = state.rank?.has_record ? `#${state.rank.rank}` : "—";
+  }
+
+  function renderLeaderboard(){
+    const entries = Array.isArray(state.leaderboard) ? state.leaderboard : [];
+    el.rankList.innerHTML = "";
+
+    if (!entries.length){
+      const li = document.createElement("li");
+      li.innerHTML = `<span>—</span><span class="loading-line">还没有正式结算记录</span><span></span>`;
+      el.rankList.appendChild(li);
+      return;
+    }
+
+    entries.slice(0,10).forEach(entry => {
+      const li = document.createElement("li");
+      if (state.user && entry.member_id === state.user.member_id) li.classList.add("current");
+
+      const rank = document.createElement("b");
+      rank.textContent = `#${entry.rank}`;
+
+      const name = document.createElement("span");
+      name.className = "rank-name";
+      name.textContent = entry.nickname || "成员";
+
+      const score = document.createElement("span");
+      score.className = "rank-score";
+      score.textContent = formatNumber(entry.score);
+
+      li.append(rank,name,score);
+      el.rankList.appendChild(li);
+    });
+  }
+
+  function getSupabaseClient(){
+    if (window.room10SupabaseClient?.rpc) return window.room10SupabaseClient;
+    if (window.room10Supabase?.rpc) return window.room10Supabase;
+    if (window.supabaseClient?.rpc) return window.supabaseClient;
+    if (window.supabaseClientPublic?.rpc) return window.supabaseClientPublic;
+    if (window.supabaseClientAnon?.rpc) return window.supabaseClientAnon;
+    if (window.sb?.rpc) return window.sb;
+    if (window.ROOM10_DB?.client?.rpc) return window.ROOM10_DB.client;
+    if (window.Room10DB?.client?.rpc) return window.Room10DB.client;
+
+    if (window.supabase?.createClient && SUPABASE_CONFIG.url && SUPABASE_CONFIG.key){
+      window.room10SupabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+      window.room10Supabase = window.room10SupabaseClient;
+      window.supabaseClient = window.room10SupabaseClient;
+      return window.room10SupabaseClient;
+    }
+
+    throw new Error("Supabase 客户端未加载");
+  }
+
+  async function getSupabaseClientAsync(){
+    let lastError = null;
+    for (let i = 0; i < 30; i++){
+      try{
+        const client = getSupabaseClient();
+        if (client?.rpc) return client;
+      }catch(error){
+        lastError = error;
+      }
+      await wait(100);
+    }
+    throw lastError || new Error("Supabase 客户端未加载");
+  }
+
+  async function callRpc(name, params = {}){
+    const client = await getSupabaseClientAsync();
+    const result = await client.rpc(name, params);
+    if (result.error) throw new Error(result.error.message);
+    return result.data;
+  }
+
+  function authParams(){
+    return {
+      p_nickname: state.user.nickname,
+      p_member_code: state.user.member_code
+    };
+  }
+
+  async function loadStatsAndRanking(){
+    const [statsResult, rankResult, leaderboardResult] = await Promise.all([
+      callRpc("get_game_2048_member_stats", authParams()),
+      callRpc("get_game_2048_member_rank", authParams()),
+      callRpc("get_game_2048_leaderboard", {p_limit:50})
+    ]);
+
+    if (!statsResult?.ok) throw new Error(statsResult?.message || "个人统计读取失败");
+    if (!rankResult?.ok) throw new Error(rankResult?.message || "个人排名读取失败");
+    if (!leaderboardResult?.ok) throw new Error(leaderboardResult?.message || "排行榜读取失败");
+
+    state.stats = statsResult;
+    state.rank = rankResult;
+    state.leaderboard = leaderboardResult.entries || [];
+    renderStats();
+    renderLeaderboard();
+  }
+
+  async function startOrResume(){
+    setBusy(true,"正在读取游戏状态...");
+    try{
+      const result = await callRpc("start_game_2048_session", authParams());
+      if (!result?.ok) throw new Error(result?.message || "无法开始 2048");
+      renderSession(result.session, state.lastBoard);
+      showToast(result.resumed ? "已恢复未完成的 2048 对局" : "新的 2048 对局已经开始");
+    }finally{
+      setBusy(false);
+    }
+  }
+
+  async function settleSession(sessionId, options = {}){
+    const result = await callRpc("settle_game_2048_session", {
+      ...authParams(),
+      p_session_id: sessionId
+    });
+
+    if (result?.ok && result?.run){
+      localStorage.removeItem(STORAGE_KEYS.game2048Session);
+      renderResult(result.run);
+      await loadStatsAndRanking();
+      return { settled:true, result };
+    }
+
+    if (result?.code === "session_not_finished"){
+      return { settled:false, active:true, result };
+    }
+
+    if (options.silent && ["session_not_found","missing_session"].includes(result?.code)){
+      return { settled:false, result };
+    }
+
+    throw new Error(result?.message || "2048 结算失败");
+  }
+
+  async function recoverStoredSession(){
+    const storedSessionId = normalizeText(localStorage.getItem(STORAGE_KEYS.game2048Session));
+    if (!storedSessionId) return false;
+
+    try{
+      const recovery = await settleSession(storedSessionId,{silent:true});
+      if (recovery.settled){
+        if (recovery.result?.already_settled){
+          localStorage.removeItem(STORAGE_KEYS.game2048Session);
+          return false;
+        }
+        return true;
+      }
+      return false;
+    }catch(error){
+      localStorage.removeItem(STORAGE_KEYS.game2048Session);
+      console.warn("2048 session recovery failed:",error);
+      return false;
+    }
+  }
+
+  async function move(direction){
+    if (state.busy || !state.session || state.session.status !== "active") return;
+
+    const previousBoard = Array.isArray(state.session.board) ? state.session.board.slice() : Array(16).fill(0);
+    setBusy(true,"服务器正在计算本次移动...",false);
+
+    try{
+      const result = await callRpc("move_game_2048_session", {
+        ...authParams(),
+        p_session_id: state.session.id,
+        p_direction: direction,
+        p_expected_move_count: Number(state.session.move_count || 0)
+      });
+
+      if (!result?.ok){
+        if (result?.code === "stale_state" && result.session){
+          renderSession(result.session, previousBoard);
+          showToast("游戏状态已更新，已同步最新棋盘");
+          return;
+        }
+        throw new Error(result?.message || "移动失败");
+      }
+
+      if (!result.moved){
+        if (result.game_over){
+          await finishGame(state.session.id);
+        }else{
+          showToast(result.message || "这个方向无法移动");
+        }
+        return;
+      }
+
+      renderSession(result.session, previousBoard);
+      if (Number(result.score_gain || 0) > 0){
+        el.gameHint.textContent = `本次合并 +${formatNumber(result.score_gain)} 分`;
+      }else{
+        el.gameHint.textContent = "继续滑动，把相同数字合并起来。";
+      }
+
+      if (result.game_over || result.session?.status === "finished"){
+        await finishGame(result.session.id);
+      }
+    }catch(error){
+      showToast(error.message || "移动失败","error");
+    }finally{
+      setBusy(false);
+    }
+  }
+
+  async function finishGame(sessionId){
+    setBusy(true,"正在统一结算本局奖励...");
+    try{
+      await settleSession(sessionId);
+      setStatus("本局已结算","ok");
+    }catch(error){
+      setStatus("结算失败","error");
+      showToast(error.message || "本局结算失败","error");
+      throw error;
+    }finally{
+      setBusy(false);
+    }
+  }
+
+  function renderResult(run){
+    state.session = null;
+    showScreen("result");
+    el.resultScore.textContent = formatNumber(run.score);
+    el.resultMaxTile.textContent = formatNumber(run.max_tile);
+    el.resultMoves.textContent = formatNumber(run.move_count);
+    el.resultDuration.textContent = formatDuration(run.duration_seconds);
+
+    const rewards = [];
+    if (Number(run.reward_gold || 0) > 0){
+      rewards.push(`${formatNumber(run.reward_gold)} 金币`);
+    }
+
+    if (Array.isArray(run.reward_items)){
+      run.reward_items.forEach(item => {
+        const key = normalizeText(item?.item_key);
+        const quantity = Number(item?.quantity || 0);
+        if (key && quantity > 0) rewards.push(`${key} × ${quantity}`);
+      });
+    }
+
+    el.rewardLine.textContent = rewards.length ? rewards.join(" · ") : "本局没有额外奖励。";
+
+    const encounter = run.animal_encounter || {};
+    const triggered = Boolean(encounter.triggered);
+    el.encounterBox.classList.toggle("triggered", triggered);
+
+    if (triggered){
+      const data = encounter.data || {};
+      el.encounterLine.textContent = data.message || `遇到了${data.pet_name || "一只动物"}，获得额外图片1张。`;
+    }else{
+      const reason = encounter.reason || "not_hit";
+      const messages = {
+        not_hit: "这次没有遇到小动物。",
+        cooldown: "这次没有触发动物偶遇。",
+        config_missing: "动物偶遇配置暂时缺失。",
+        chance_disabled: "动物偶遇当前未开启。",
+        member_not_allowed: "当前身份不参与动物偶遇。"
+      };
+      el.encounterLine.textContent = messages[reason] || "这次没有遇到小动物。";
+    }
+  }
+
+  function openRestartModal(){
+    if (state.busy) return;
+    el.restartMask.classList.add("show");
+    el.restartMask.setAttribute("aria-hidden","false");
+    el.restartConfirmBtn.focus();
+  }
+
+  function closeRestartModal(){
+    el.restartMask.classList.remove("show");
+    el.restartMask.setAttribute("aria-hidden","true");
+    el.boardFrame.focus({preventScroll:true});
+  }
+
+  async function restartGame(){
+    if (state.busy) return;
+    closeRestartModal();
+    setBusy(true,"正在开始新的 2048 对局...");
+
+    try{
+      const result = await callRpc("restart_game_2048_session", {
+        ...authParams(),
+        p_session_id: state.session?.id || null
+      });
+
+      if (!result?.ok){
+        if (result?.code === "stale_session" && result.session){
+          renderSession(result.session, state.lastBoard);
+          showToast("检测到更新的对局，已恢复最新游戏状态");
+          return;
+        }
+        throw new Error(result?.message || "无法重新开始");
+      }
+
+      state.lastBoard = Array(16).fill(0);
+      renderSession(result.session, state.lastBoard);
+      el.gameHint.textContent = "新的一局开始了。电脑可用方向键或 WASD，手机可直接滑动。";
+      showToast("已开始新的 2048 对局");
+    }catch(error){
+      showToast(error.message || "重新开始失败","error");
+    }finally{
+      setBusy(false);
+    }
+  }
+
+  async function startNewAfterResult(){
+    if (state.busy) return;
+    state.lastBoard = Array(16).fill(0);
+    try{
+      await startOrResume();
+    }catch(error){
+      showToast(error.message || "新对局创建失败","error");
+    }
+  }
+
+  function showPermission(title, body, action = "back"){
+    showScreen("permission");
+    el.permissionTitle.textContent = title;
+    el.permissionBody.textContent = body;
+    el.permissionActionBtn.textContent = action === "login" ? "去登录" : "返回游戏房";
+    el.permissionActionBtn.onclick = action === "login" ? openLogin : backToGameRoom;
+  }
+
+  function bindControls(){
+    el.backBtn.addEventListener("click", backToGameRoom);
+    el.resultBackBtn.addEventListener("click", backToGameRoom);
+    el.restartBtn.addEventListener("click", openRestartModal);
+    el.restartCancelBtn.addEventListener("click", closeRestartModal);
+    el.restartConfirmBtn.addEventListener("click", restartGame);
+    el.newGameBtn.addEventListener("click", startNewAfterResult);
+
+    el.restartMask.addEventListener("click", event => {
+      if (event.target === el.restartMask) closeRestartModal();
+    });
+
+    el.dpadButtons.forEach(btn => {
+      btn.addEventListener("click", () => move(btn.dataset.direction));
+    });
+
+    window.addEventListener("keydown", event => {
+      if (el.restartMask.classList.contains("show")){
+        if (event.key === "Escape") closeRestartModal();
+        return;
+      }
+      if (!el.playScreen.classList.contains("active")) return;
+
+      const keyMap = {
+        ArrowUp: "up",
+        ArrowDown: "down",
+        ArrowLeft: "left",
+        ArrowRight: "right",
+        w: "up",
+        W: "up",
+        s: "down",
+        S: "down",
+        a: "left",
+        A: "left",
+        d: "right",
+        D: "right"
+      };
+
+      const direction = keyMap[event.key];
+      if (!direction) return;
+      event.preventDefault();
+      move(direction);
+    },{passive:false});
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchActive = false;
+
+    el.boardFrame.addEventListener("pointerdown", event => {
+      if (event.pointerType === "mouse") return;
+      touchActive = true;
+      touchStartX = event.clientX;
+      touchStartY = event.clientY;
+      try{ el.boardFrame.setPointerCapture(event.pointerId); }catch{}
+    });
+
+    el.boardFrame.addEventListener("pointerup", event => {
+      if (!touchActive || event.pointerType === "mouse") return;
+      touchActive = false;
+      const dx = event.clientX - touchStartX;
+      const dy = event.clientY - touchStartY;
+      const distance = Math.max(Math.abs(dx),Math.abs(dy));
+      if (distance < 28) return;
+
+      const direction = Math.abs(dx) > Math.abs(dy)
+        ? (dx > 0 ? "right" : "left")
+        : (dy > 0 ? "down" : "up");
+      move(direction);
+    });
+
+    el.boardFrame.addEventListener("pointercancel", () => {
+      touchActive = false;
+    });
+  }
+
+  async function initialize(){
+    bindControls();
+    renderBoard(Array(16).fill(0));
+
+    state.user = getStoredUser();
+    renderMember();
+
+    if (!state.user?.nickname || !state.user?.member_code){
+      setStatus("需要登录","error");
+      showPermission("请先登录", "2048 仅限十号房登录成员正式游玩和结算。", "login");
+      return;
+    }
+
+    const role = normalizeText(state.user.role).toLowerCase();
+    if (!ALLOWED_ROLES.has(role)){
+      setStatus("当前身份不可游玩","error");
+      showPermission("暂时无法进入", "当前身份不能进入 2048 游戏。", "back");
+      return;
+    }
+
+    setStatus("正在连接");
+
+    try{
+      await getSupabaseClientAsync();
+      await loadStatsAndRanking();
+
+      const recoveredResult = await recoverStoredSession();
+      if (recoveredResult){
+        setStatus("已恢复结算结果","ok");
+        return;
+      }
+
+      await startOrResume();
+    }catch(error){
+      console.error(error);
+      setStatus("读取失败","error");
+      showPermission("暂时无法进入 2048", error.message || "数据库读取失败，请稍后重试。", "back");
+    }
+  }
+
+  initialize();
+})();
+</script>
+</body>
+</html>
