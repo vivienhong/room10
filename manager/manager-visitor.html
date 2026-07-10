@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>十号房｜宿管室</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../room10-paths.js"></script>
 
 <style>
 *{box-sizing:border-box;}
@@ -71,7 +72,7 @@ body{
   position:fixed;
   inset:-8vh -8vw;
   z-index:1;
-  background:url("room-manager.png") center center / cover no-repeat;
+  background:var(--manager-room-bg, none) center center / cover no-repeat;
   filter:blur(30px) saturate(1.05);
   transform:scale(1.08);
   opacity:.72;
@@ -992,7 +993,7 @@ body{
     inset:0;
     background:
       linear-gradient(rgba(243,236,223,.78), rgba(243,236,223,.92)),
-      url("room-manager.png") center center / cover no-repeat;
+      var(--manager-room-bg, none) center center / cover no-repeat;
     z-index:-2;
   }
 
@@ -1166,13 +1167,14 @@ body{
 </head>
 
 <body>
+<!-- manager-visitor-path-fix-v9; use room10-paths; admin-owner-single-page; no hardcoded relative jumps -->
 <div id="bgColorFill"></div>
 <div id="bgBleed"></div>
 <div id="bgLight"></div>
 
 <div id="managerPage">
   <div id="managerStage">
-    <img id="managerBg" src="room-manager.png" alt="宿管室背景">
+    <img id="managerBg" src="" alt="宿管室背景">
 
     <div id="managerUI">
       <div id="topActions">
@@ -1202,14 +1204,14 @@ body{
         <div id="navOuter">
           <div id="navScroll">
             <nav id="roomNav">
-              <button class="navBtn" data-room="hall" type="button" onclick="location.href='index.html'"><span class="navLabel">大堂</span><span class="navActiveNote navActiveNoteA">✦</span><span class="navActiveNote navActiveNoteB">✧</span><span class="navActiveNote navActiveNoteC">★</span></button>
-              <button class="navBtn" data-room="honor" type="button" onclick="location.href='honor.html'"><span class="navLabel">荣誉墙</span><span class="navActiveNote navActiveNoteA">🏆</span><span class="navActiveNote navActiveNoteB">🏅</span><span class="navActiveNote navActiveNoteC">✦</span></button>
-              <button class="navBtn" data-room="game" type="button" onclick="location.href='game.html'"><span class="navLabel">游戏房</span><span class="navActiveNote navActiveNoteA">🎮</span><span class="navActiveNote navActiveNoteB">🎲</span><span class="navActiveNote navActiveNoteC">👾</span></button>
-              <button class="navBtn" data-room="studio" type="button" onclick="goNeedLogin('studio-todo.html')"><span class="navLabel">工作间</span><span class="navActiveNote navActiveNoteA">🎙</span><span class="navActiveNote navActiveNoteB">🎧</span><span class="navActiveNote navActiveNoteC">◇</span></button>
-              <button class="navBtn" data-room="living" type="button" onclick="goNeedLogin('living.html')"><span class="navLabel">客厅</span><span class="navActiveNote navActiveNoteA">☕</span><span class="navActiveNote navActiveNoteB">💬</span><span class="navActiveNote navActiveNoteC">♡</span></button>
-              <button class="navBtn" data-room="dorm" type="button" onclick="goNeedLogin('dorm.html')"><span class="navLabel">宿舍</span><span class="navActiveNote navActiveNoteA">☁</span><span class="navActiveNote navActiveNoteB">☾</span><span class="navActiveNote navActiveNoteC">🛏</span></button>
-              <button class="navBtn" data-room="pets" type="button" onclick="goNeedLogin('pets.html')"><span class="navLabel">宠物区</span><span class="navActiveNote navActiveNoteA">🐾</span><span class="navActiveNote navActiveNoteB">♡</span><span class="navActiveNote navActiveNoteC">🐱</span></button>
-              <button class="navBtn" data-room="flower" type="button" onclick="goNeedLogin('flower.html')"><span class="navLabel">花房区</span><span class="navActiveNote navActiveNoteA">✿</span><span class="navActiveNote navActiveNoteB">❀</span><span class="navActiveNote navActiveNoteC">🌸</span></button>
+              <button class="navBtn" data-room="hall" type="button" onclick="goPage('index')"><span class="navLabel">大堂</span><span class="navActiveNote navActiveNoteA">✦</span><span class="navActiveNote navActiveNoteB">✧</span><span class="navActiveNote navActiveNoteC">★</span></button>
+              <button class="navBtn" data-room="honor" type="button" onclick="goPage('honor')"><span class="navLabel">荣誉墙</span><span class="navActiveNote navActiveNoteA">🏆</span><span class="navActiveNote navActiveNoteB">🏅</span><span class="navActiveNote navActiveNoteC">✦</span></button>
+              <button class="navBtn" data-room="game" type="button" onclick="goPage('game')"><span class="navLabel">游戏房</span><span class="navActiveNote navActiveNoteA">🎮</span><span class="navActiveNote navActiveNoteB">🎲</span><span class="navActiveNote navActiveNoteC">👾</span></button>
+              <button class="navBtn" data-room="studio" type="button" onclick="goNeedLogin('studioTodo')"><span class="navLabel">工作间</span><span class="navActiveNote navActiveNoteA">🎙</span><span class="navActiveNote navActiveNoteB">🎧</span><span class="navActiveNote navActiveNoteC">◇</span></button>
+              <button class="navBtn" data-room="living" type="button" onclick="goNeedLogin('living')"><span class="navLabel">客厅</span><span class="navActiveNote navActiveNoteA">☕</span><span class="navActiveNote navActiveNoteB">💬</span><span class="navActiveNote navActiveNoteC">♡</span></button>
+              <button class="navBtn" data-room="dorm" type="button" onclick="goNeedLogin('dorm')"><span class="navLabel">宿舍</span><span class="navActiveNote navActiveNoteA">☁</span><span class="navActiveNote navActiveNoteB">☾</span><span class="navActiveNote navActiveNoteC">🛏</span></button>
+              <button class="navBtn" data-room="pets" type="button" onclick="goNeedLogin('pet')"><span class="navLabel">宠物区</span><span class="navActiveNote navActiveNoteA">🐾</span><span class="navActiveNote navActiveNoteB">♡</span><span class="navActiveNote navActiveNoteC">🐱</span></button>
+              <button class="navBtn" data-room="flower" type="button" onclick="goNeedLogin('flower')"><span class="navLabel">花房区</span><span class="navActiveNote navActiveNoteA">✿</span><span class="navActiveNote navActiveNoteB">❀</span><span class="navActiveNote navActiveNoteC">🌸</span></button>
             </nav>
           </div>
         </div>
@@ -1355,6 +1357,51 @@ body{
 const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+function getRoom10Page(pageKey){
+  const key = String(pageKey || "").trim();
+  const page = window.room10Page ? window.room10Page(key) : "";
+  return page || "";
+}
+
+function getRoom10Asset(assetKey){
+  const key = String(assetKey || "").trim();
+  const asset = window.room10Asset ? window.room10Asset(key) : "";
+  return asset || "";
+}
+
+function cssUrl(value){
+  return `url("${String(value || "").replace(/"/g, "\\\"")}")`;
+}
+
+function getManagerPageKeyByRole(roleValue = getRole()){
+  const role = String(roleValue || "").toLowerCase();
+  if(role === "owner") return "managerOwner";
+  if(role === "admin") return "managerAdmin";
+  if(role === "member" || role === "trainee" || role === "applying") return "managerMember";
+  return "managerVisitor";
+}
+
+function goPage(pageKey){
+  const page = getRoom10Page(pageKey);
+  if(page){
+    window.location.href = page;
+  }
+}
+
+function goManagerRoom(){
+  goPage(getManagerPageKeyByRole());
+}
+
+function applyManagerAssets(){
+  const managerBgUrl = getRoom10Asset("manager.roomManager");
+  if(managerBgUrl){
+    root.style.setProperty("--manager-room-bg", cssUrl(managerBgUrl));
+    if(managerImg && managerImg.getAttribute("src") !== managerBgUrl){
+      managerImg.src = managerBgUrl;
+    }
+  }
+}
 
 const managerImg = document.getElementById("managerBg");
 const managerStage = document.getElementById("managerStage");
@@ -1544,6 +1591,23 @@ function escapeHtml(value){
     .replace(/'/g, "&#39;");
 }
 
+function normalizeLoginRpcMessage(value){
+  return String(value || "").trim();
+}
+
+function showUpgradeLoginNotice(loginRow){
+  if(!loginRow?.should_show_upgrade_notice) return;
+
+  const oldKey = normalizeLoginRpcMessage(loginRow.upgrade_old_key);
+  const newKey = normalizeLoginRpcMessage(loginRow.upgrade_new_key || loginRow.member_code);
+
+  if(!oldKey && !newKey) return;
+
+  window.alert(
+    `升级申请已通过！\n\n你现在已经是房客。\n旧钥匙：${oldKey || "B 系列钥匙"}\n新钥匙：${newKey || "A 系列钥匙"}\n\n请以后使用新的 A 系列钥匙登录。`
+  );
+}
+
 function getRoleLabel(roleValue = getRole()){
   const role = String(roleValue || "").toLowerCase();
   if(role === "admin") return "宿管";
@@ -1680,23 +1744,29 @@ function saveApplicantSessionOnly(){
 }
 
 function openRegisterBook(){
-  sessionStorage.setItem("room10RegisterReturn", "manager-visitor.html");
-  window.location.href = "register.html?from=manager-visitor.html";
+  sessionStorage.setItem("room10RegisterReturn", "managerVisitor");
+  const registerPage = getRoom10Page("managerRegister");
+  if(registerPage){
+    window.location.href = `${registerPage}?from=managerVisitor`;
+  }
 }
 
 function openRegisterBookFromApplication(){
   if(!currentApplicationRecord) return;
 
   const params = new URLSearchParams({
-    from: "manager-visitor.html",
+    from: "managerVisitor",
     application_id: currentApplicationRecord.id || "",
     apply_name: currentApplicationRecord.name || "",
     apply_qq: currentApplicationRecord.contact_qq || "",
     member_code: currentApplicationRecord.member_code || ""
   });
 
-  sessionStorage.setItem("room10RegisterReturn", "manager-visitor.html");
-  window.location.href = `register.html?${params.toString()}`;
+  sessionStorage.setItem("room10RegisterReturn", "managerVisitor");
+  const registerPage = getRoom10Page("managerRegister");
+  if(registerPage){
+    window.location.href = `${registerPage}?${params.toString()}`;
+  }
 }
 
 function scrollContentToBottomPart(targetEl){
@@ -1821,28 +1891,7 @@ async function updateIdentityUI(){
   }
 
   const role = getRole();
-
-  if(role === "owner"){
-    window.location.href = "manager-owner.html";
-    return;
-  }
-
-  if(role === "admin"){
-    window.location.href = "manager-admin.html";
-    return;
-  }
-
-  if(role === "member"){
-    window.location.href = "manager-member.html";
-    return;
-  }
-
-  if(role === "applying"){
-    updateStatusUserUI("申请中");
-    return;
-  }
-
-  updateStatusUserUI("参观者");
+  goPage(getManagerPageKeyByRole(role));
 }
 
 async function quickLogin(){
@@ -1858,32 +1907,25 @@ async function quickLogin(){
   }
 
   try{
-    const memberResult = await client
-      .from("members")
-      .select("id, nickname, member_code, role")
-      .eq("nickname", nickname)
-      .maybeSingle();
+    const loginResult = await client.rpc("room10_member_login", {
+      p_nickname: nickname,
+      p_key_code: key
+    });
 
-    if(memberResult.error){
-      console.error("members 查询失败：", memberResult.error);
+    if(loginResult.error){
+      console.error("room10_member_login 调用失败：", loginResult.error);
       loginHint.textContent = "钥匙核对失败，请稍后再试";
       return;
     }
 
-    const member = memberResult.data;
+    const loginRow = Array.isArray(loginResult.data) && loginResult.data.length ? loginResult.data[0] : null;
 
-    if(member){
-      const dbKey = String(member.member_code || "").trim();
-      if(dbKey !== key){
-        loginHint.textContent = "钥匙无法开启这扇门";
-        return;
-      }
-
+    if(loginRow?.success){
       localStorage.setItem("room10LoggedIn", "true");
-      localStorage.setItem("room10User", member.nickname || nickname);
-      localStorage.setItem("room10Role", member.role || "member");
-      localStorage.setItem("room10MemberId", member.id || "");
-      localStorage.setItem("room10MemberCode", member.member_code || "");
+      localStorage.setItem("room10User", loginRow.nickname || nickname);
+      localStorage.setItem("room10Role", loginRow.role || "member");
+      localStorage.setItem("room10MemberId", loginRow.member_id || "");
+      localStorage.setItem("room10MemberCode", loginRow.member_code || "");
       clearApplicantSession();
 
       loginHint.style.color = "#5f7d3a";
@@ -1892,7 +1934,13 @@ async function quickLogin(){
       quickNicknameInput.value = "";
       quickPasswordInput.value = "";
 
+      showUpgradeLoginNotice(loginRow);
       await updateIdentityUI();
+      return;
+    }
+
+    if(loginRow && loginRow.login_mode !== "no_member"){
+      loginHint.textContent = normalizeLoginRpcMessage(loginRow.message) || "钥匙无法开启这扇门";
       return;
     }
 
@@ -2093,7 +2141,7 @@ function toggleQuickPassword(){
   quickPasswordInput.type = quickPasswordInput.type === "password" ? "text" : "password";
 }
 
-function goNeedLogin(page){
+function goNeedLogin(pageKey){
   if(!isLoggedIn()){
     loginHint.style.color = "#8b5b34";
     loginHint.textContent = "这扇门需要钥匙";
@@ -2102,7 +2150,7 @@ function goNeedLogin(page){
     }
     return;
   }
-  window.location.href = page;
+  goPage(pageKey);
 }
 
 async function logout(){
@@ -2267,6 +2315,7 @@ document.addEventListener("click", event => {
   }
 });
 
+applyManagerAssets();
 renderSiteNoticeList([]);
 
 document.addEventListener("DOMContentLoaded", async () => {
