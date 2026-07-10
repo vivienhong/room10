@@ -1,161 +1,941 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>十号房｜宿管室｜宿管</title>
-<!-- admin-profile-review-clean-v8 -->
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜宿管室｜管理</title>
+<!-- manager-admin-common-template-v29; based-on-common-template-v45; admin-reviewer-no-transition-notice; key-storage-a-b-columns -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<script src="../room10-paths.js"></script>
 <style>
+
 *{box-sizing:border-box;}
 
 :root{
-  --bg-left:#fff3e7;
-  --bg-right:#f4dfc8;
-  --bg-top:#fff7ef;
-  --bg-bottom:#edd8c1;
-  --bg-ui-scale:1;
-  --text:#5b4632;
-  --title:#6a5038;
-  --line:#d8c2a3;
-  --line2:#e3d0b4;
-  --panel:rgba(255,249,240,.92);
-  --btn:#c98e56;
-  --btn-hover:#b97d45;
-  --sub:#e7d3b7;
-  --sub-hover:#dcc29e;
-  --shadow:0 10px 24px rgba(0,0,0,.08);
-  --radius:16px;
-  --green:#5f7d3a;
-  --red:#a14f3f;
-  --muted:#8e7c68;
-  --info:#7b654f;
-  --info-bg:#f7eee1;
-  --success-bg:#eef6e8;
-  --error-bg:#fbeceb;
+    --ui-scale:1;
+  --room-nav-scale:var(--ui-scale);
+  --identity-scale:var(--ui-scale);
+
+    --identity-right:7.35%;
+  --identity-top:6.46%;
+  --identity-base-width:232;
+  --identity-base-height:38;
+  --identity-bg:rgba(255,250,244,0.88);
+  --identity-inner-bg:rgba(255,253,249,0.92);
+  --identity-border:rgba(170,132,101,0.20);
+  --identity-text:#6f5746;
+  --identity-shadow:rgba(106,78,55,0.08);
+  --identity-name-y:0em;
+  --identity-separator-y:0em;
+  --identity-role-y:0em;
+  --identity-notice-y:0em;
+  --identity-button-y:0em;
+
+  /* 手机版身份文字独立校准：昵称 / 分隔符 / 身份 / 铃铛 / 登录按钮 */
+  --identity-mobile-name-y:0em;
+  --identity-mobile-separator-y:0em;
+  --identity-mobile-role-y:0em;
+  --identity-mobile-notice-y:0em;
+  --identity-mobile-button-y:0em;
+  --identity-notice-mobile-top:58px;
+
+    /*
+     外框位置改为底图百分比绑定，不再使用 px × scale。
+     原来的 px × scale 在 541px–650px 会被最小缩放值卡住，导致整排按钮相对底图向右漂移。
+     百分比只控制按钮外框位置和尺寸；--room-nav-scale 只控制内部文字、圆角、阴影和特效。
+  */
+  --room-nav-top:6.35%;
+  --room-nav-start-left:25.83%;
+  --room-nav-btn-width:4.72%;
+  --room-nav-btn-height:5.10%;
+  --room-nav-gap:0.486%;
+
+  --room-nav-hall-left:var(--room-nav-start-left);
+  --room-nav-living-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 1);
+  --room-nav-manager-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 2);
+  --room-nav-honor-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 3);
+  --room-nav-studio-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 4);
+  --room-nav-game-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 5);
+  --room-nav-dorm-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 6);
+  --room-nav-flower-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 7);
+  --room-nav-pets-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 8);
+
+  --room-nav-text:#6f5746;
+  --room-nav-border:rgba(158,122,93,.26);
+  --room-nav-current-text:#5d4738;
+  --room-nav-current-border:rgba(151,111,82,.42);
+  --room-nav-paper:rgba(255,250,242,.78);
+  --room-nav-paper-2:rgba(246,235,219,.74);
+  --room-nav-wash:rgba(214,185,157,.20);
+  --room-nav-current-bg:rgba(239,224,205,.86);
 }
 
 html,body{
   margin:0;
-  padding:0;
   width:100%;
-  min-height:100%;
-}
-
-body{
-  position:relative;
-  font-family:Arial, Helvetica, sans-serif;
-  min-height:100vh;
-  min-height:100dvh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  height:100%;
   overflow:hidden;
-  background:
-    radial-gradient(circle at center, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 62%),
-    linear-gradient(90deg, var(--bg-left) 0%, var(--bg-right) 100%);
-  color:var(--text);
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  color:#5b4632;
+  background:#e7dfd4;
 }
 
-/* ===== 游戏房同款底图舞台 ===== */
-#bgColorFill{
-  position:fixed;
-  inset:0;
-  z-index:0;
-  background:
-    linear-gradient(180deg, var(--bg-top) 0%, rgba(255,255,255,0) 18%, rgba(255,255,255,0) 82%, var(--bg-bottom) 100%),
-    linear-gradient(90deg, var(--bg-left) 0%, var(--bg-right) 100%);
-}
+button{font-family:inherit;}
+.hidden{display:none!important;}
 
-#bgBleed{
-  position:fixed;
-  inset:-8vh -8vw;
-  z-index:1;
-  background:url("room-manager.png") center center / cover no-repeat;
-  filter:blur(30px) saturate(1.05);
-  transform:scale(1.08);
-  opacity:.72;
-  pointer-events:none;
-}
-
-#bgLight{
-  position:fixed;
-  inset:0;
-  z-index:2;
-  pointer-events:none;
-  background:
-    radial-gradient(circle at 50% 35%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0) 58%),
-    linear-gradient(180deg, rgba(255,248,240,0.08), rgba(255,248,240,0.08));
-}
-
-#managerPage{
+#room{
   position:relative;
-  z-index:3;
   width:100vw;
   height:100vh;
   height:100dvh;
   overflow:hidden;
-  background:transparent;
+  background:
+    radial-gradient(circle at 16% 12%,rgba(255,246,238,.72),transparent 34%),
+    radial-gradient(circle at 86% 18%,rgba(226,215,201,.42),transparent 38%),
+    linear-gradient(180deg,#efe7dc 0%,#e5d8c8 100%);
 }
 
-#managerStage{
+#bgFrame{
   position:absolute;
   inset:0;
   z-index:0;
   overflow:hidden;
 }
 
-#managerBg{
+#bg{
   position:absolute;
   inset:0;
-  display:block;
   width:100%;
   height:100%;
   object-fit:contain;
   object-position:center center;
+  display:block;
   user-select:none;
-  -webkit-user-drag:none;
   pointer-events:none;
+  -webkit-user-drag:none;
 }
 
-#managerUI{
+#overlay{
   position:absolute;
-  z-index:1;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  z-index:2;
   overflow:visible;
   pointer-events:none;
-  --ui-scale:var(--bg-ui-scale, 1);
 }
 
-#managerUI *{
+#overlay *{pointer-events:auto;}
+
+/* 修复：#overlay * 的 pointer-events:auto 会把整层 roomNavLayer 变成透明遮罩，挡住主面板按钮 */
+#overlay .roomNavLayer{
+  pointer-events:none!important;
+}
+
+#overlay .roomNavLayer .navBtn{
+  pointer-events:auto!important;
+}
+
+#overlay .roomIdentity{
+  pointer-events:none!important;
+}
+
+#overlay .roomIdentity .roomIdentityBar,
+#overlay .roomIdentity button,
+#overlay .roomIdentity .identityNoticePanel{
+  pointer-events:auto!important;
+}
+
+.roomNavLayer{
+  position:absolute;
+  inset:0;
+  z-index:55;
+  pointer-events:none;
+  --s:var(--room-nav-scale,1);
+  --nav-btn-radius:calc(15px * var(--s));
+  --nav-btn-font:calc(15px * var(--s));
+  --nav-btn-border:calc(1px * var(--s));
+  --nav-btn-shadow-y:calc(3px * var(--s));
+  --nav-btn-shadow-blur:calc(8px * var(--s));
+}
+
+.navBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  position:absolute;
+  top:var(--room-nav-top);
+  width:var(--room-nav-btn-width);
+  height:var(--room-nav-btn-height);
+  min-width:0;
+  min-height:0;
+  padding:0;
+  border-radius:var(--nav-btn-radius);
+  color:var(--room-nav-text);
+  font-size:var(--nav-btn-font);
+  font-weight:900;
+  white-space:nowrap;
+  overflow:visible;
+  isolation:isolate;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,.56), transparent 40%),
+    radial-gradient(circle at 78% 74%, var(--room-nav-wash), transparent 48%),
+    linear-gradient(180deg, var(--room-nav-paper) 0%, var(--room-nav-paper-2) 100%);
+  border:var(--nav-btn-border) solid var(--room-nav-border);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.64),
+    0 calc(2px * var(--s)) calc(7px * var(--s)) rgba(96,70,48,.10);
+  text-shadow:0 calc(1px * var(--s)) 0 rgba(255,255,255,.38);
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
   pointer-events:auto;
 }
 
-/* ===== 面板通用 ===== */
+.navBtn[data-room="hall"]{left:var(--room-nav-hall-left);}
+.navBtn[data-room="living"]{left:var(--room-nav-living-left);}
+.navBtn[data-room="manager"]{left:var(--room-nav-manager-left);}
+.navBtn[data-room="honor"]{left:var(--room-nav-honor-left);}
+.navBtn[data-room="studio"]{left:var(--room-nav-studio-left);}
+.navBtn[data-room="game"]{left:var(--room-nav-game-left);}
+.navBtn[data-room="dorm"]{left:var(--room-nav-dorm-left);}
+.navBtn[data-room="flower"]{left:var(--room-nav-flower-left);}
+.navBtn[data-room="pets"]{left:var(--room-nav-pets-left);}
+
+.navBtn:not(.is-current):hover,
+.navBtn:not(.is-current):focus-visible{
+  color:#5f3d22;
+  background:
+    radial-gradient(circle at 20% 24%, rgba(255,255,255,.66), transparent 42%),
+    radial-gradient(circle at 80% 78%, rgba(207,170,143,.24), transparent 50%),
+    linear-gradient(180deg, rgba(255,252,246,.88) 0%, rgba(239,226,210,.82) 100%);
+  border-color:rgba(151,112,84,.36);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.70),
+    0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.12);
+  filter:saturate(1.02);
+}
+
+.navBtn.is-current{
+  cursor:default;
+  color:var(--room-nav-current-text);
+  background:
+    radial-gradient(circle at 22% 22%, rgba(255,255,255,.62), transparent 42%),
+    radial-gradient(circle at 80% 80%, rgba(190,151,126,.26), transparent 50%),
+    linear-gradient(180deg, rgba(246,235,222,.94) 0%, var(--room-nav-current-bg) 100%);
+  border-color:var(--room-nav-current-border);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.68),
+    0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.13),
+    0 0 0 calc(2px * var(--s)) rgba(255,253,248,.46);
+  filter:none;
+}
+
+.navLabel{
+  position:relative;
+  z-index:5;
+  width:100%;
+  height:100%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  overflow:visible;
+  white-space:nowrap;
+  line-height:normal;
+  padding-top:.06em;
+}
+
+.navEffect{
+  position:absolute;
+  pointer-events:none;
+  opacity:0;
+  z-index:4;
+  display:block;
+  font-weight:900;
+  line-height:1;
+  text-shadow:
+    0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.82),
+    0 0 calc(8px * var(--s)) rgba(255,246,210,.52);
+  filter:saturate(.95);
+}
+
+.navEffectA{left:8%;top:-54%;font-size:calc(var(--nav-btn-font) * .92);}
+.navEffectB{right:8%;top:-62%;font-size:calc(var(--nav-btn-font) * .86);}
+.navEffectC{left:50%;top:-72%;transform:translateX(-50%);font-size:calc(var(--nav-btn-font) * 1.02);}
+
+@keyframes navFloatA{
+  0%,100%{ transform:translateY(calc(4px * var(--s))) rotate(-8deg) scale(.82); opacity:0; }
+  20%,72%{ opacity:.86; }
+  50%{ transform:translateY(calc(-5px * var(--s))) rotate(6deg) scale(1); opacity:.76; }
+}
+@keyframes navFloatB{
+  0%,100%{ transform:translateY(calc(5px * var(--s))) rotate(9deg) scale(.78); opacity:0; }
+  24%,70%{ opacity:.78; }
+  52%{ transform:translateY(calc(-6px * var(--s))) rotate(-7deg) scale(1); opacity:.68; }
+}
+@keyframes navFloatC{
+  0%,100%{ transform:translateX(-50%) translateY(calc(6px * var(--s))) rotate(0deg) scale(.76); opacity:0; }
+  24%,70%{ opacity:.88; }
+  50%{ transform:translateX(-50%) translateY(calc(-6px * var(--s))) rotate(2deg) scale(1); opacity:.78; }
+}
+
+.navBtn:not(.is-current):hover .navEffectA,
+.navBtn:not(.is-current):focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite;}
+.navBtn:not(.is-current):hover .navEffectB,
+.navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite;}
+.navBtn:not(.is-current):hover .navEffectC,
+.navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite;}
+.navBtn.is-current .navEffect{display:none;}
+
+.navBtn[data-room="hall"] .navEffect{color:rgba(255,205,96,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.95),0 0 calc(10px * var(--s)) rgba(255,215,105,.62);}
+.navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82);}
+.navBtn[data-room="honor"] .navEffect{color:rgba(205,143,45,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.92),0 0 calc(8px * var(--s)) rgba(255,220,130,.52);}
+.navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82);}
+.navBtn[data-room="studio"] .navEffect{color:rgba(96,112,145,.84);}
+.navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82);}
+.navBtn[data-room="dorm"] .navEffect{color:rgba(148,112,171,.78);}
+.navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82);}
+.navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82);}
+
+.roomIdentity{
+  --s:var(--identity-scale,1);
+  position:absolute;
+  right:var(--identity-right);
+  top:var(--identity-top);
+  width:calc(var(--identity-base-width) * 1px * var(--s));
+  height:calc(var(--identity-base-height) * 1px * var(--s));
+  min-width:calc(var(--identity-base-width) * 1px * var(--s));
+  min-height:calc(var(--identity-base-height) * 1px * var(--s));
+  z-index:70;
+  pointer-events:none;
+  overflow:visible;
+}
+
+.roomIdentityBar{
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-template-columns:minmax(calc(130px * var(--s)),1fr) calc(30px * var(--s)) calc(42px * var(--s));
+  gap:calc(5px * var(--s));
+  padding:calc(4px * var(--s)) calc(5px * var(--s));
+  border-radius:calc(13px * var(--s));
+  background:var(--identity-bg);
+  border:calc(1px * var(--s)) solid var(--identity-border);
+  box-shadow:
+    0 calc(10px * var(--s)) calc(24px * var(--s)) var(--identity-shadow),
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.9);
+  backdrop-filter:blur(calc(8px * var(--s)));
+  -webkit-backdrop-filter:blur(calc(8px * var(--s)));
+  pointer-events:auto;
+  overflow:visible;
+  white-space:nowrap;
+}
+
+.identityNameBox,
+.identityNoticeBtn,
+.identityAuthBtn{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  border-radius:calc(9px * var(--s));
+  background:var(--identity-inner-bg);
+  color:var(--identity-text);
+  border:calc(1px * var(--s)) solid rgba(160,116,78,0.12);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.95),
+    0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,0.05);
+}
+
+.identityNameBox{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 calc(8px * var(--s));
+  overflow:visible;
+}
+
+.identityNameText{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  max-width:100%;
+  color:var(--identity-text);
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  font-size:calc(13px * var(--s));
+  font-weight:850;
+  line-height:1;
+  letter-spacing:0;
+  white-space:nowrap;
+  overflow:visible;
+  text-overflow:clip;
+}
+
+.identityNameText.isOverflowSafe{overflow:hidden;text-overflow:ellipsis;}
+
+.identityNamePart{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  line-height:1;
+  white-space:nowrap;
+  font:inherit;
+}
+
+.identityNickname{transform:translateY(var(--identity-name-y));}
+.identitySeparator{
+  margin:0 .08em;
+  color:rgba(111,87,70,.78);
+  font-weight:800;
+  transform:translateY(var(--identity-separator-y));
+}
+.identityRole{transform:translateY(var(--identity-role-y));}
+
+.identityNoticeWrap{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+
+.identityNoticeBtn,
+.identityAuthBtn{
+  appearance:none;
+  cursor:pointer;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
+}
+
+.identityNoticeBtn{
+  width:100%;
+  height:100%;
+  font-size:calc(14px * var(--s));
+}
+
+.identityNoticeIcon{
+  display:flex;
+  width:100%;
+  height:100%;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  transform:translateY(var(--identity-notice-y));
+  filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,0.55));
+}
+
+.identityNoticeCount{
+  position:absolute;
+  right:calc(-6px * var(--s));
+  top:calc(-6px * var(--s));
+  min-width:calc(18px * var(--s));
+  height:calc(18px * var(--s));
+  padding:0 calc(5px * var(--s));
+  border-radius:999px;
+  background:#b98f72;
+  color:#fffaf6;
+  font-size:calc(9px * var(--s));
+  font-weight:900;
+  line-height:1;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:calc(2px * var(--s)) solid rgba(255,248,239,0.98);
+  box-shadow:0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(116,86,54,0.16);
+  z-index:3;
+}
+
+.identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex;}
+
+.identityAuthBtn{
+  width:100%;
+  height:100%;
+  color:#6f5746;
+  font-size:calc(12px * var(--s));
+  font-weight:850;
+  line-height:1.18;
+  white-space:nowrap;
+  overflow:visible;
+}
+
+.identityAuthText{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1.18;
+  transform:translateY(var(--identity-button-y));
+}
+
+.identityNoticeBtn:hover,
+.identityAuthBtn:hover{
+  transform:translateY(calc(-1px * var(--s)));
+  background:rgba(255,255,255,0.94);
+}
+
+.identityNoticePanel{
+  position:absolute;
+  top:calc(100% + 10px * var(--s));
+  right:0;
+  width:min(calc(360px * var(--s)),72vw);
+  max-height:min(calc(540px * var(--s)),70vh);
+  overflow:auto;
+  padding:calc(12px * var(--s));
+  border-radius:calc(16px * var(--s));
+  background:rgba(255,249,241,0.98);
+  border:calc(1px * var(--s)) solid rgba(203,167,123,0.28);
+  box-shadow:0 calc(16px * var(--s)) calc(36px * var(--s)) rgba(85,58,34,0.16);
+  display:none;
+  z-index:950;
+  text-align:left;
+}
+
+.identityNoticePanel.show{display:block;}
+
+.identityNoticeTitle{
+  color:#6f4726;
+  font-size:calc(13px * var(--s));
+  font-weight:900;
+  margin-bottom:calc(10px * var(--s));
+}
+
+.identityNoticeEmpty{
+  color:#8a6644;
+  font-size:calc(12px * var(--s));
+  line-height:1.6;
+  padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s));
+}
+
+.templateMainPanel{
+  position:absolute;
+  left:8.8%;
+  top:22.2%;
+  width:60.8%;
+  height:58.5%;
+  z-index:20;
+  border-radius:calc(24px * var(--ui-scale));
+  background:rgba(255,250,240,.58);
+  border:calc(1px * var(--ui-scale)) dashed rgba(170,122,82,.24);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:calc(12px * var(--ui-scale));
+  color:#8a6544;
+  font-weight:900;
+  font-size:calc(18px * var(--ui-scale));
+  text-align:center;
+  padding:calc(20px * var(--ui-scale));
+}
+
+.templateMainPanel p{
+  margin:0;
+  max-width:calc(620px * var(--ui-scale));
+  font-size:calc(13px * var(--ui-scale));
+  line-height:1.7;
+  font-weight:800;
+  color:#9a7656;
+}
+
+
+@media(max-width:540px){
+  html,body{
+    overflow-x:hidden;
+    overflow-y:auto;
+    height:auto;
+    min-height:100%;
+  }
+
+  #room{
+    width:100%;
+    min-height:100vh;
+    min-height:100dvh;
+    height:auto;
+    display:block;
+    overflow:visible;
+    padding:10px 12px 14px;
+    background:
+      linear-gradient(rgba(242,236,229,.74), rgba(238,231,222,.92)),
+      #e7dfd4;
+  }
+
+  #bgFrame{display:none;}
+
+  #overlay{
+    position:relative;
+    left:auto!important;
+    top:auto!important;
+    width:100%!important;
+    height:auto!important;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible;
+    pointer-events:auto;
+  }
+
+  .roomNavLayer{
+    position:relative;
+    inset:auto;
+    width:100%;
+    height:106px;
+    min-height:106px;
+    max-height:106px;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:repeat(3,32px);
+    gap:5px;
+    margin:0!important;
+    padding:0!important;
+    align-content:start;
+    order:0;
+    z-index:20;
+    pointer-events:auto;
+    --s:1;
+  }
+
+  .roomNavLayer .navBtn{
+    position:relative;
+    left:auto!important;
+    top:auto!important;
+    display:flex!important;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:32px;
+    min-width:0;
+    min-height:32px;
+    max-height:32px;
+    margin:0!important;
+    padding:0!important;
+    border-radius:10px;
+    font-size:12px;
+    line-height:1;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+
+  .roomNavLayer .navBtn.is-current{
+    display:flex!important;
+    visibility:visible!important;
+  }
+
+  .roomNavLayer .navLabel{
+    height:100%;
+    padding-top:.04em;
+    line-height:1;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+
+  .roomNavLayer .navEffect{display:none;}
+
+  .roomIdentity{
+    --s:1;
+    position:relative;
+    right:auto;
+    top:auto;
+    width:100%;
+    min-width:0;
+    height:40px;
+    min-height:40px;
+    order:1;
+    z-index:90;
+  }
+
+  .roomIdentityBar{
+    grid-template-columns:minmax(0,1fr) 34px 42px;
+    gap:6px;
+    padding:5px 7px;
+    border-radius:14px;
+  }
+
+  .identityNameBox{
+    padding:0 9px;
+    border-radius:10px;
+    overflow:visible;
+  }
+
+  .identityNameText{
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
+    font-size:12px;
+    font-weight:850;
+    line-height:1;
+    letter-spacing:0;
+    white-space:nowrap;
+    overflow:visible;
+  }
+
+  .identityNamePart{
+    line-height:1;
+    white-space:nowrap;
+  }
+
+  .identityNickname{transform:translateY(var(--identity-mobile-name-y));}
+  .identitySeparator{
+    margin:0 .08em;
+    color:rgba(111,87,70,.78);
+    font-size:12px;
+    font-weight:800;
+    transform:translateY(var(--identity-mobile-separator-y));
+  }
+  .identityRole{transform:translateY(var(--identity-mobile-role-y));}
+
+  .identityNoticeBtn{
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
+    font-size:14px;
+    border-radius:10px;
+  }
+
+  .identityNoticeIcon{transform:translateY(var(--identity-mobile-notice-y));}
+
+  .identityAuthBtn{
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
+    font-size:11px;
+    font-weight:850;
+    line-height:1;
+    border-radius:10px;
+  }
+
+  .identityAuthText{
+    line-height:1;
+    transform:translateY(var(--identity-mobile-button-y));
+  }
+
+  .identityNoticePanel{
+    position:fixed!important;
+    top:var(--identity-notice-mobile-top,58px)!important;
+    left:auto!important;
+    right:max(20px, env(safe-area-inset-right))!important;
+    width:min(320px, calc(100% - 40px))!important;
+    min-width:0!important;
+    max-width:320px!important;
+    max-height:calc(100dvh - var(--identity-notice-mobile-top,58px) - 14px)!important;
+    padding:14px;
+    border-radius:18px;
+    z-index:990;
+    box-sizing:border-box;
+    overflow-x:hidden;
+    overflow-y:auto;
+    background:
+      radial-gradient(circle at 14% 12%, rgba(255,255,255,.82), transparent 38%),
+      linear-gradient(180deg, rgba(255,250,242,.98), rgba(250,238,224,.98));
+    border:1px solid rgba(174,132,94,.30);
+    box-shadow:
+      0 14px 34px rgba(86,61,39,.18),
+      inset 0 1px 0 rgba(255,255,255,.92);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    transform-origin:top right;
+  }
+
+  .identityNoticePanel::before{
+    content:"";
+    position:absolute;
+    right:42px;
+    top:-7px;
+    width:14px;
+    height:14px;
+    transform:rotate(45deg);
+    background:rgba(255,250,242,.98);
+    border-left:1px solid rgba(174,132,94,.24);
+    border-top:1px solid rgba(174,132,94,.24);
+    box-shadow:-2px -2px 5px rgba(86,61,39,.03);
+  }
+
+  .identityNoticeTitle{
+    position:relative;
+    padding:0 0 9px;
+    margin-bottom:10px;
+    border-bottom:1px solid rgba(174,132,94,.16);
+  }
+
+  .identityNoticePanel *,
+  .identityNoticePanel *::before,
+  .identityNoticePanel *::after{
+    max-width:100%;
+    box-sizing:border-box;
+  }
+
+  .identityNoticePanel button,
+  .identityNoticePanel a{
+    max-width:100%;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+
+  .templateMainPanel{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    height:360px;
+    order:2;
+    border-radius:22px;
+    font-size:16px;
+    padding:18px 14px;
+  }
+}
+
+
+
+/* ===== 宿管室管理页：通用模板内容区 ===== */
+:root{
+  --manager-text:#5b4632;
+  --manager-title:#6a5038;
+  --manager-line:#d8c2a3;
+  --manager-line2:#e3d0b4;
+  --manager-panel:rgba(255,249,240,.88);
+  --manager-card:rgba(255,252,247,.92);
+  --manager-btn:#c98e56;
+  --manager-btn-hover:#b97d45;
+  --manager-sub:#e7d3b7;
+  --manager-sub-hover:#dcc29e;
+  --manager-green:#5f7d3a;
+  --manager-red:#a14f3f;
+  --manager-muted:#8e7c68;
+}
+
+#pageMainPanel.managerMainPanel{
+  left:5.65%;
+  top:18.6%;
+  width:86.5%;
+  height:72.5%;
+  padding:0;
+  border:none;
+  background:transparent;
+  border-radius:0;
+  display:grid;
+  grid-template-columns:minmax(180px, 18%) minmax(0, 1fr) minmax(130px, 14.8%);
+  gap:calc(14px * var(--ui-scale));
+  align-items:stretch;
+  justify-content:normal;
+  color:var(--manager-text);
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:400;
+  text-align:left;
+  pointer-events:auto;
+}
+
+#pageMainPanel.managerMainPanel *{pointer-events:auto;}
+
 .panel{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  backdrop-filter:blur(3px);
+  background:var(--manager-panel);
+  border:1px solid var(--manager-line);
+  border-radius:calc(16px * var(--ui-scale));
+  box-shadow:0 10px 24px rgba(116,86,54,.08);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
 }
 
-.hidden{
-  display:none !important;
+
+
+.identity-transition-mask{
+  position:fixed;
+  inset:0;
+  z-index:2800;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(76,54,34,.28);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+  pointer-events:auto;
 }
 
-/* ===== 页面提示：居中自动关闭小弹窗 ===== */
+.identity-transition-mask.show{
+  display:flex;
+}
+
+.identity-transition-card{
+  width:min(420px, calc(100vw - 36px));
+  padding:24px 24px 20px;
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(255,255,255,.82), transparent 38%),
+    linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,241,224,.96));
+  border:1px solid rgba(203,167,123,.36);
+  box-shadow:
+    0 22px 54px rgba(85,58,34,.20),
+    inset 0 1px 0 rgba(255,255,255,.90);
+  color:#6b4d35;
+  text-align:center;
+  animation:identityTransitionPop .28s ease both;
+}
+
+@keyframes identityTransitionPop{
+  from{opacity:0; transform:translateY(10px) scale(.96);}
+  to{opacity:1; transform:translateY(0) scale(1);}
+}
+
+.identity-transition-icon{
+  width:58px;
+  height:58px;
+  margin:0 auto 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:rgba(255,244,220,.86);
+  border:1px solid rgba(202,150,84,.24);
+  box-shadow:
+    0 7px 16px rgba(143,96,48,.12),
+    inset 0 1px 0 rgba(255,255,255,.86);
+  font-size:30px;
+  line-height:1;
+}
+
+.identity-transition-title{
+  margin:0 0 10px;
+  color:#674832;
+  font-size:20px;
+  font-weight:950;
+  line-height:1.25;
+}
+
+.identity-transition-text{
+  margin:0 auto 18px;
+  max-width:330px;
+  color:#7b5c43;
+  font-size:14px;
+  font-weight:820;
+  line-height:1.7;
+  white-space:pre-line;
+}
+
+.identity-transition-confirm{
+  appearance:none;
+  min-width:132px;
+  height:38px;
+  border:none;
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(222,174,113,.96), rgba(194,132,74,.94));
+  color:#fff9f2;
+  font-size:13px;
+  font-weight:950;
+  cursor:pointer;
+  box-shadow:0 5px 12px rgba(141,93,47,.16);
+}
+
+.identity-transition-confirm:hover{
+  filter:brightness(1.02);
+}
+
 #pageNotice{
   position:fixed;
   left:50%;
   top:50%;
   width:min(420px, calc(100vw - 40px));
-  min-height:0;
   padding:14px 16px;
   border-radius:16px;
   border:1px solid rgba(216,194,163,.86);
   background:rgba(247,238,225,.98);
-  color:var(--info);
+  color:#7b654f;
   z-index:3000;
   display:flex;
   align-items:center;
@@ -168,1656 +948,252 @@ body{
   backdrop-filter:blur(8px);
   -webkit-backdrop-filter:blur(8px);
   pointer-events:auto;
-  animation:noticePopIn .18s ease both;
 }
+#pageNotice.notice-success{background:rgba(238,246,232,.98);color:var(--manager-green);}
+#pageNotice.notice-error{background:rgba(251,236,235,.98);color:var(--manager-red);}
+.notice-text{flex:1 1 auto;text-align:center;font-weight:800;}
+.notice-close{flex:0 0 auto;width:24px;height:24px;border:none;border-radius:999px;background:rgba(234,217,188,.56);color:inherit;cursor:pointer;font-size:16px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;}
 
-#pageNotice.notice-success{
-  background:rgba(238,246,232,.98);
-  color:var(--green);
-}
-
-#pageNotice.notice-error{
-  background:rgba(251,236,235,.98);
-  color:var(--red);
-}
-
-.notice-text{
-  flex:1 1 auto;
-  text-align:center;
-  font-weight:800;
-}
-
-.notice-close{
-  flex:0 0 auto;
-  width:24px;
-  height:24px;
-  border:none;
-  border-radius:999px;
-  background:rgba(234,217,188,.56);
-  color:inherit;
-  cursor:pointer;
-  font-size:16px;
-  line-height:1;
-  padding:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-@keyframes noticePopIn{
-  from{ opacity:0; transform:translate(-50%, -46%) scale(.96); }
-  to{ opacity:1; transform:translate(-50%, -50%) scale(1); }
-}
-
-/* ===== 右上角身份组件 ===== */
-#topActions{
-  position:absolute;
-  right:7.35%;
-  top:6.46%;
-  width:calc(232px * var(--ui-scale));
-  height:calc(38px * var(--ui-scale));
-  min-width:0;
-  min-height:0;
-  z-index:10;
-  pointer-events:none;
-}
-
-#topIdentityBar{
-  width:100%;
-  height:100%;
-  display:flex;
-  align-items:stretch;
-  justify-content:flex-start;
-  gap:calc(5px * var(--ui-scale));
-  padding:calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
-  border-radius:calc(13px * var(--ui-scale));
-  background:rgba(255,248,239,0.92);
-  border:1px solid rgba(186,146,103,0.24);
-  box-shadow:
-    0 10px 24px rgba(116,86,54,0.12),
-    inset 0 1px 0 rgba(255,255,255,0.9);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  pointer-events:auto;
-  overflow:visible;
-  white-space:nowrap;
-}
-
-#topIdentityBadge,
-#loginOpenBtn,
-#logoutBtn,
-#siteNoticeBtn{
-  border-radius:calc(9px * var(--ui-scale));
-  background:rgba(255,252,247,0.96);
-  color:#6c4523;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    0 1px 4px rgba(112,83,52,0.05);
-  border:1px solid rgba(160,116,78,0.12);
-}
-
-#topIdentityBadge{
-  flex:1 1 auto;
-  min-width:0;
-  padding:0 calc(8px * var(--ui-scale));
-  font-size:calc(13px * var(--ui-scale));
-  font-weight:800;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  white-space:nowrap;
-}
-
-#topIdentityBadge .identityText{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  line-height:1;
-}
-
-#loginOpenBtn,
-#logoutBtn{
-  appearance:none;
-  cursor:pointer;
-  width:calc(42px * var(--ui-scale));
-  min-width:calc(42px * var(--ui-scale));
-  flex:0 0 calc(42px * var(--ui-scale));
-  padding:0;
-  color:#67401f;
-  font-size:calc(12px * var(--ui-scale));
-  font-weight:800;
-  line-height:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
-  overflow:hidden;
-}
-
-#loginOpenBtn:hover,
-#logoutBtn:hover,
-#siteNoticeBtn:hover{
-  transform:translateY(-1px);
-  background:rgba(255,255,255,0.94);
-}
-
-#siteNoticeWrap{
-  position:relative;
-  width:calc(30px * var(--ui-scale));
-  min-width:calc(30px * var(--ui-scale));
-  flex:0 0 calc(30px * var(--ui-scale));
-  display:flex;
-  align-items:stretch;
-  justify-content:center;
-  overflow:visible;
-}
-
-#siteNoticeBtn{
-  appearance:none;
-  border:none;
-  cursor:pointer;
-  position:relative;
-  width:100%;
-  height:100%;
-  padding:0;
-  font-size:calc(14px * var(--ui-scale));
-  font-weight:800;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
-}
-
-#siteNoticeIcon{
-  display:block;
-  line-height:1;
-  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.55));
-}
-
-#siteNoticeCount{
-  position:absolute;
-  right:calc(-6px * var(--ui-scale));
-  top:calc(-6px * var(--ui-scale));
-  min-width:calc(18px * var(--ui-scale));
-  height:calc(18px * var(--ui-scale));
-  padding:0 calc(5px * var(--ui-scale));
-  border-radius:999px;
-  background:#c98c4f;
-  color:#fff9f1;
-  font-size:calc(9px * var(--ui-scale));
-  font-weight:900;
-  line-height:1;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  border:calc(2px * var(--ui-scale)) solid rgba(255,248,239,0.98);
-  box-shadow:0 2px 8px rgba(116,86,54,0.16);
-  z-index:3;
-}
-
-#siteNoticeBtn.hasNotice #siteNoticeCount{
-  display:flex;
-}
-
-#siteNoticePanel{
-  position:absolute;
-  top:calc(100% + 10px);
-  right:0;
-  width:min(calc(360px * var(--ui-scale)), 72vw);
-  max-height:min(calc(540px * var(--ui-scale)), 70vh);
-  overflow:auto;
-  padding:calc(12px * var(--ui-scale));
-  border-radius:calc(16px * var(--ui-scale));
-  background:rgba(255,249,241,0.98);
-  border:1px solid rgba(203,167,123,0.28);
-  box-shadow:0 16px 36px rgba(85,58,34,0.16);
-  display:none;
-  z-index:80;
-  text-align:left;
-}
-
-#siteNoticePanel.show{ display:block; }
-
-.siteNoticeTitle{
-  color:#6f4726;
-  font-size:calc(13px * var(--ui-scale));
-  font-weight:900;
-  margin-bottom:calc(10px * var(--ui-scale));
-}
-
-.siteNoticeEmpty{
-  color:#8a6644;
-  font-size:calc(12px * var(--ui-scale));
-  line-height:1.6;
-  padding:6px 2px 2px;
-}
-
-.siteNoticeList{
-  display:flex;
-  flex-direction:column;
-  gap:calc(8px * var(--ui-scale));
-}
-
-.siteNoticeItem{
-  padding:calc(10px * var(--ui-scale));
-  border-radius:calc(12px * var(--ui-scale));
-  background:rgba(255,252,247,0.82);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.92), 0 2px 8px rgba(120,92,63,0.05);
-}
-
-.siteNoticeItemTitle{
-  color:#6f4726;
-  font-size:calc(12px * var(--ui-scale));
-  font-weight:800;
-  line-height:1.5;
-  margin-bottom:4px;
-}
-
-.siteNoticeItemDesc{
-  color:#8a6644;
-  font-size:calc(11px * var(--ui-scale));
-  line-height:1.55;
-}
-
-/* ===== 房间切换：同游戏房顶部按钮 ===== */
-#topBar{
-  position:absolute;
-  left:27.2%;
-  top:6.35%;
-  width:45.5%;
-  display:flex;
-  align-items:flex-start;
-  justify-content:flex-start;
-  z-index:9;
-  overflow:visible;
-  --nav-btn-height:calc(40px * var(--ui-scale));
-  --nav-btn-px:calc(16px * var(--ui-scale));
-  --nav-btn-radius:calc(13px * var(--ui-scale));
-  --nav-btn-font:calc(14px * var(--ui-scale));
-  --nav-gap:calc(8px * var(--ui-scale));
-}
-
-#topBar,
-#navOuter,
-#navScroll{
-  overflow:visible;
-}
-
-#navOuter{
-  flex:0 0 auto;
-  min-width:0;
-  width:100%;
-}
-
-#navScroll{
-  width:100%;
-  white-space:nowrap;
-  scrollbar-width:none;
-  -ms-overflow-style:none;
-  padding:0;
-  margin:0;
-}
-
-#navScroll::-webkit-scrollbar{display:none;}
-
-#roomNav{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:var(--nav-gap, 8px);
-  transform-origin:left center;
-}
-
-.navBtn{
-  appearance:none;
-  border:none;
-  cursor:pointer;
-  position:relative;
-  flex:0 0 auto;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height:var(--nav-btn-height, 40px);
-  padding:0 var(--nav-btn-px, 16px);
-  border-radius:var(--nav-btn-radius, 13px);
-  color:#6e4827;
-  font-size:var(--nav-btn-font, 14px);
-  font-weight:900;
-  line-height:1;
-  white-space:nowrap;
-  overflow:visible;
-  isolation:isolate;
-  background:linear-gradient(180deg, rgba(249,232,203,.90) 0%, rgba(226,195,152,.86) 100%);
-  border:1px solid rgba(145,98,56,.34);
-  box-shadow:0 1px 1px rgba(255,255,255,.48) inset, 0 2px 5px rgba(91,68,45,.13);
-  text-shadow:0 1px 0 rgba(255,255,255,.42);
-  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-}
-
-.navBtn:hover,
-.navBtn:focus-visible{
-  color:#5f3d22;
-  background:linear-gradient(180deg, rgba(252,238,215,.95) 0%, rgba(232,205,166,.90) 100%);
-  border-color:rgba(153,102,55,.48);
-  box-shadow:0 1px 1px rgba(255,255,255,.55) inset, 0 3px 7px rgba(91,68,45,.15);
-  filter:brightness(1.015);
-}
-
-.navLabel{position:relative; z-index:5;}
-
-.navActiveNote{
-  position:absolute;
-  pointer-events:none;
-  opacity:0;
-  z-index:4;
-  display:block;
-  font-weight:900;
-  line-height:1;
-  text-shadow:0 1px 2px rgba(255,250,232,.72);
-}
-
-.navActiveNoteA{left:8%; top:-52%; color:rgba(167,104,54,.72); font-size:calc(var(--nav-btn-font, 14px) * .88);}
-.navActiveNoteB{right:8%; top:-60%; color:rgba(122,91,143,.58); font-size:calc(var(--nav-btn-font, 14px) * .80);}
-.navActiveNoteC{left:50%; top:-68%; transform:translateX(-50%); color:rgba(198,124,112,.78); font-size:calc(var(--nav-btn-font, 14px) * .96);}
-
-@keyframes navNotePopA{0%,100%{transform:translateY(3px) rotate(-8deg) scale(.82);opacity:0;}22%,68%{opacity:.88;}48%{transform:translateY(-3px) rotate(5deg) scale(1);opacity:.72;}}
-@keyframes navNotePopB{0%,100%{transform:translateY(4px) rotate(8deg) scale(.78);opacity:0;}26%,72%{opacity:.78;}50%{transform:translateY(-4px) rotate(-6deg) scale(1);opacity:.64;}}
-@keyframes navNotePopC{0%,100%{transform:translateX(-50%) translateY(5px) rotate(0deg) scale(.76);opacity:0;}24%,70%{opacity:.86;}50%{transform:translateX(-50%) translateY(-5px) rotate(2deg) scale(1);opacity:.76;}}
-
-.navBtn:hover .navActiveNoteA,.navBtn:focus-visible .navActiveNoteA{animation:navNotePopA 2.2s ease-in-out infinite;}
-.navBtn:hover .navActiveNoteB,.navBtn:focus-visible .navActiveNoteB{animation:navNotePopB 2.5s ease-in-out infinite;}
-.navBtn:hover .navActiveNoteC,.navBtn:focus-visible .navActiveNoteC{animation:navNotePopC 2.35s ease-in-out infinite;}
-
-.navBtn[data-room="hall"] .navActiveNote{
-  color:rgba(255,205,96,.86);
-  text-shadow:0 1px 2px rgba(255,250,232,.95), 0 0 10px rgba(255,215,105,.62);
-}
-.navBtn[data-room="honor"] .navActiveNote{
-  color:rgba(205,143,45,.86);
-  text-shadow:0 1px 2px rgba(255,250,232,.92), 0 0 8px rgba(255,220,130,.52);
-}
-.navBtn[data-room="game"] .navActiveNote{ color:rgba(117,91,150,.82); }
-.navBtn[data-room="studio"] .navActiveNote{ color:rgba(96,112,145,.84); }
-.navBtn[data-room="living"] .navActiveNote{ color:rgba(150,111,72,.82); }
-.navBtn[data-room="dorm"] .navActiveNote{ color:rgba(143,111,168,.76); }
-.navBtn[data-room="pets"] .navActiveNote{ color:rgba(131,111,78,.82); }
-.navBtn[data-room="flower"] .navActiveNote{ color:rgba(198,119,145,.82); }
-
-
-/* ===== 左侧宿管说明卡 ===== */
 #managerBriefCard{
-  position:absolute;
-  left:5.65%;
-  top:22.4%;
-  width:calc(232px * var(--ui-scale));
+  min-width:0;
+  height:fit-content;
+  max-height:100%;
   padding:calc(13px * var(--ui-scale)) calc(14px * var(--ui-scale));
-  z-index:4;
-  color:#6a4b32;
-  background:rgba(255,249,240,.86);
-  border:1px solid rgba(216,194,163,.78);
-  border-radius:calc(16px * var(--ui-scale));
-  box-shadow:
-    0 10px 24px rgba(116,86,54,.10),
-    inset 0 1px 0 rgba(255,255,255,.78);
-  backdrop-filter:blur(7px);
-  -webkit-backdrop-filter:blur(7px);
-}
-
-.brief-title{
-  margin:0 0 calc(7px * var(--ui-scale));
-  font-size:calc(14px * var(--ui-scale));
-  line-height:1.25;
-  font-weight:900;
-  color:#6b4524;
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-}
-
-.brief-text{
-  margin:0;
-  font-size:calc(12px * var(--ui-scale));
-  line-height:1.55;
-  color:#765a40;
-}
-
-.brief-list{
-  margin:calc(8px * var(--ui-scale)) 0 0;
-  padding:0;
-  list-style:none;
-  display:flex;
-  flex-direction:column;
-  gap:calc(5px * var(--ui-scale));
-}
-
-.brief-list li{
-  position:relative;
-  padding-left:calc(14px * var(--ui-scale));
-  font-size:calc(11px * var(--ui-scale));
-  line-height:1.45;
-  color:#84664a;
-}
-
-.brief-list li::before{
-  content:"•";
-  position:absolute;
-  left:0;
-  top:0;
-  color:#c98e56;
-  font-weight:900;
-}
-
-.brief-sign{
-  margin-top:calc(9px * var(--ui-scale));
-  padding-top:calc(7px * var(--ui-scale));
-  border-top:1px dashed rgba(180,139,94,.32);
-  font-size:calc(10px * var(--ui-scale));
-  line-height:1.35;
-  color:#9a795b;
-  text-align:right;
-}
-
-/* ===== 中栏内容区 ===== */
-#contentArea{
-  position:absolute;
-  left:25.7%;
-  top:10.1%;
-  width:50%;
-  height:79.2%;
-  z-index:2;
-  overflow:hidden;
-  padding-right:0;
-  scrollbar-width:none;
-}
-
-
-.card{
-  position:relative;
-  padding:14px 16px;
-  margin-bottom:10px;
-}
-
-.section-title{
-  margin:0 0 10px 0;
-  font-size:clamp(16px, 1.05vw, 22px);
-  font-weight:700;
-  color:var(--title);
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-  line-height:1.2;
-}
-
-/* ===== 右侧切换栏 ===== */
-#adminSwitchPanel{
-  position:absolute;
-  right:8%;
-  top:24%;
-  width:13.8%;
-  padding:10px;
-  z-index:4;
-}
-
-.switch-title{
-  margin:0 0 8px 0;
-  font-size:clamp(12px, .82vw, 15px);
-  font-weight:700;
-  color:var(--title);
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-  text-align:center;
-}
-
-.switch-group{
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-}
-
-.switch-btn{
-  border:none;
-  border-radius:11px;
-  padding:8px 6px;
-  font-size:clamp(11px, .76vw, 14px);
-  background:#ead9bc;
-  cursor:pointer;
-  text-align:center;
-  color:var(--text);
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-  font-weight:600;
-  line-height:1.2;
-}
-
-.switch-btn:hover{
-  background:#e2ccaa;
-}
-
-.switch-btn.active{
-  background:var(--btn);
-  color:#fff;
-}
-
-/* ===== 管理视图 ===== */
-.admin-view-card{
-  height:100%;
-  min-height:0;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  margin-bottom:0;
-}
-
-.admin-block{
-  background:#fff;
-  padding:14px;
-  border-radius:12px;
-  border:1px solid var(--line2);
-  margin-top:10px;
-  display:flex;
-  flex-direction:column;
-}
-
-.admin-block:first-of-type{
-  margin-top:0;
-}
-
-.admin-view-card > .admin-block{
-  flex:1 1 auto;
-  min-height:0;
-}
-
-.admin-block h3{
-  margin:0 0 8px 0;
-  font-size:clamp(13px, .92vw, 17px);
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-  color:var(--title);
-}
-
-.module-note{
-  margin:0;
-  font-size:clamp(11px, .74vw, 14px);
-  line-height:1.45;
-  color:#7a6755;
-}
-
-.module-scroll{
-  flex:1 1 auto;
-  min-height:0;
   overflow:auto;
-  overflow-x:hidden;
-  padding-right:calc(4px * var(--ui-scale));
-  scrollbar-width:thin;
-  scrollbar-color:#cfad82 rgba(255,255,255,.35);
 }
-
-.module-scroll::-webkit-scrollbar{
-  width:calc(7px * var(--ui-scale));
-}
-.module-scroll::-webkit-scrollbar-track{
-  background:rgba(255,255,255,.35);
-  border-radius:999px;
-}
-.module-scroll::-webkit-scrollbar-thumb{
-  background:#cfad82;
-  border-radius:999px;
-}
-
-/* ===== 档案夹 ===== */
-.apply-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.apply-item{
-  background:rgba(255,252,246,.92);
-  border:1px solid var(--line2);
-  border-radius:12px;
-  padding:10px 12px;
-}
-
-.apply-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:10px;
-  margin-bottom:6px;
-  flex-wrap:wrap;
-}
-
-.apply-head strong{
-  font-size:clamp(12px, .85vw, 16px);
-  color:var(--title);
-}
-
-.apply-time{
-  font-size:clamp(11px, .72vw, 13px);
-  color:var(--muted);
-  white-space:normal;
-}
-
-.apply-body{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  font-size:clamp(11px, .76vw, 14px);
-  line-height:1.45;
-  color:#6b5a45;
-}
-
-.apply-meta{
-  margin-top:6px;
-  font-size:clamp(11px, .72vw, 13px);
-  color:#8d755d;
-}
-
-.apply-actions-row{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:8px;
-}
-
-.inline-btn{
-  height:40px;
-  padding:0 18px;
-  min-width:96px;
-  border:none;
-  border-radius:10px;
-  background:var(--btn);
-  color:#fff;
-  font-size:clamp(13px, .82vw, 16px);
-  cursor:pointer;
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-  font-weight:600;
-  white-space:nowrap;
-  flex:0 0 auto;
-}
-
-.inline-btn:hover{ background:var(--btn-hover); }
-
-.sub-btn{
-  height:40px;
-  padding:0 14px;
-  border:none;
-  border-radius:10px;
-  background:var(--sub);
-  color:var(--text);
-  font-size:clamp(12px, .8vw, 15px);
-  cursor:pointer;
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-  font-weight:600;
-  white-space:nowrap;
-  flex:0 0 auto;
-}
-
-.sub-btn:hover{ background:var(--sub-hover); }
-
-.apply-actions-row .inline-btn,
-.apply-actions-row .sub-btn{
-  height:34px;
-  min-width:82px;
-  padding:0 12px;
-  font-size:clamp(11px, .76vw, 14px);
-}
-
-.inline-btn:disabled,
-.sub-btn:disabled{
-  opacity:.65;
-  cursor:not-allowed;
-}
-
-.vote-summary{
-  margin-top:6px;
-  font-size:clamp(11px, .72vw, 13px);
-  color:#7b654f;
-  line-height:1.4;
-}
-
-.vote-wait{ color:#8b5b34; }
-.vote-pass{ color:var(--green); }
-.vote-reject{ color:var(--red); }
-
-/* ===== 钥匙保管处 ===== */
-.key-list-wrap{
-  margin-top:6px;
-  overflow:auto;
-  overflow-x:hidden;
-  flex:1 1 auto;
-  min-height:0;
-  border:1px solid var(--line2);
-  border-radius:10px;
-  background:rgba(255,252,246,.75);
-  scrollbar-width:thin;
-  scrollbar-color:#cfad82 rgba(255,255,255,.35);
-}
-
-.key-list-wrap::-webkit-scrollbar{
-  width:calc(7px * var(--ui-scale));
-}
-.key-list-wrap::-webkit-scrollbar-thumb{
-  background:#cfad82;
-  border-radius:999px;
-}
-
-.key-storage-box{
-  display:flex;
-  flex-direction:column;
-  flex:1 1 auto;
-  min-height:0;
-}
-
-.key-col-code{ width:28%; }
-.key-col-status{ width:18%; }
-.key-col-user{ width:24%; }
-
-.key-list{
-  width:100%;
-  border-collapse:collapse;
-  table-layout:fixed;
-}
-
-.key-list th,
-.key-list td{
-  padding:8px 10px;
-  text-align:left;
-  border-bottom:1px solid #eee1cb;
-  font-size:clamp(11px, .78vw, 14px);
-  color:var(--text);
-  word-break:break-word;
-  vertical-align:top;
-}
-
-.key-list th{
-  position:sticky;
-  top:0;
-  background:#f5e6cc;
-  color:var(--title);
-  z-index:1;
-}
-
-.key-empty,
-.key-loading,
-.key-error{
-  padding:10px 12px;
-  font-size:clamp(11px, .74vw, 14px);
-  line-height:1.45;
-}
-
-.key-loading{ color:#7a6755; }
-.key-error{ color:#a14f3f; }
-.key-empty{ color:#7a6755; }
-
-.key-status-used{
-  color:var(--red);
-  font-weight:700;
-}
-
-.key-status-free{
-  color:var(--green);
-  font-weight:700;
-}
-
-/* 资料修改记录 */
-.single-review-block{
-  flex:1 1 auto;
-  min-height:0;
-  overflow:hidden;
-}
-
-.profile-summary-list{
-  display:flex;
-  flex-direction:column;
-  gap:calc(7px * var(--ui-scale));
-  min-height:0;
-}
-
-.profile-summary-item{
-  width:100%;
-  appearance:none;
-  border:1px solid rgba(216,194,163,.76);
-  border-radius:calc(12px * var(--ui-scale));
-  background:rgba(255,252,246,.94);
-  padding:calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
-  color:#6b5a45;
-  text-align:left;
-  cursor:pointer;
-  display:grid;
-  grid-template-columns:minmax(0, 1fr) auto;
-  gap:calc(5px * var(--ui-scale)) calc(10px * var(--ui-scale));
-  align-items:center;
-  box-shadow:0 1px 3px rgba(116,86,54,.04);
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-}
-
-.profile-summary-item:hover{
-  background:rgba(255,248,238,.98);
-  border-color:rgba(201,142,86,.52);
-}
-
-.profile-summary-title{
-  min-width:0;
-  color:var(--title);
-  font-size:calc(13px * var(--ui-scale));
-  font-weight:900;
-  line-height:1.35;
-  white-space:normal;
-  overflow:visible;
-  text-overflow:clip;
-  word-break:break-word;
-}
-
-.profile-summary-meta{
-  grid-column:1 / -1;
-  color:#8d755d;
-  font-size:calc(11px * var(--ui-scale));
-  line-height:1.45;
-  white-space:normal;
-  overflow:visible;
-  text-overflow:clip;
-  word-break:break-word;
-}
-
-.log-status-badge{
-  flex:0 0 auto;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-height:calc(22px * var(--ui-scale));
-  padding:0 calc(8px * var(--ui-scale));
-  border-radius:999px;
-  font-size:calc(10px * var(--ui-scale));
-  font-weight:900;
-  white-space:nowrap;
-  border:1px solid rgba(180,139,94,.24);
-}
-
-.log-status-logged{
-  color:#8b5b34;
-  background:#fff5e7;
-}
-
-.log-status-needs_edit{
-  color:var(--red);
-  background:#fbeceb;
-}
-
-.log-status-resolved{
-  color:var(--green);
-  background:#eef6e8;
-}
-
-.profile-detail-overlay{
-  position:fixed;
-  inset:0;
-  z-index:1000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:24px;
-  background:rgba(76,54,34,.28);
-  pointer-events:auto;
-}
-
-.profile-detail-dialog{
-  width:min(760px, calc(100vw - 36px));
-  max-height:min(78vh, 720px);
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  background:rgba(255,249,240,.98);
-}
-
-.profile-detail-head{
-  flex:0 0 auto;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:14px 16px 10px;
-  border-bottom:1px solid rgba(216,194,163,.72);
-}
-
-.profile-detail-head h3{
-  margin:0;
-  color:var(--title);
-  font-size:16px;
-  line-height:1.25;
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-}
-
-.profile-detail-close{
-  appearance:none;
-  border:none;
-  background:rgba(234,217,188,.72);
-  color:#6b4524;
-  border-radius:999px;
-  width:30px;
-  height:30px;
-  cursor:pointer;
-  font-size:18px;
-  line-height:1;
-  font-weight:900;
-}
-
-.profile-detail-content{
-  flex:1 1 auto;
-  min-height:0;
-  overflow:auto;
-  padding:12px 16px;
-  scrollbar-width:thin;
-  scrollbar-color:#cfad82 rgba(255,255,255,.35);
-}
-
-.profile-detail-content::-webkit-scrollbar{ width:8px; }
-.profile-detail-content::-webkit-scrollbar-thumb{
-  background:#cfad82;
-  border-radius:999px;
-}
-
-.profile-detail-meta{
-  color:#7a6755;
-  font-size:13px;
-  line-height:1.55;
-  margin-bottom:10px;
-}
-
-.profile-detail-values{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.profile-detail-value-box{
-  border:1px solid rgba(216,194,163,.75);
-  border-radius:12px;
-  background:rgba(255,255,255,.56);
-  padding:10px;
-  min-width:0;
-}
-
-.profile-detail-label{
-  color:#8d755d;
-  font-size:12px;
-  font-weight:900;
-  margin-bottom:6px;
-}
-
-.profile-detail-text{
-  color:#6b5a45;
-  font-size:13px;
-  line-height:1.58;
-  white-space:pre-wrap;
-  word-break:break-word;
-}
-
-.profile-detail-actions{
-  flex:0 0 auto;
-  display:flex;
-  justify-content:flex-end;
-  gap:8px;
-  padding:10px 16px 14px;
-  border-top:1px solid rgba(216,194,163,.72);
-}
-
-.profile-detail-actions .inline-btn,
-.profile-detail-actions .sub-btn{
-  height:34px;
-  min-width:90px;
-  padding:0 14px;
-  font-size:13px;
-}
-
-@media (max-width: 720px){
-  .profile-detail-values{
-    grid-template-columns:1fr;
-  }
-}
-
-/* ===== 宿管室轻动态：柔光 / 钥匙浮光 / 空气粒子 / 纸张切换 ===== */
-#bgLight{
-  animation:managerLightBreath 7.5s ease-in-out infinite;
-}
-
-#bgBleed{
-  animation:managerBgDrift 18s ease-in-out infinite alternate;
-}
-
-@keyframes managerLightBreath{
-  0%,100%{ opacity:.62; }
-  50%{ opacity:.9; }
-}
-
-@keyframes managerBgDrift{
-  0%{ transform:scale(1.08) translate3d(0,0,0); }
-  100%{ transform:scale(1.095) translate3d(-.4%,.35%,0); }
-}
-
-@media (min-width:541px){
-  #managerUI::before{
-    content:"";
-    position:absolute;
-    right:9.6%;
-    bottom:18.4%;
-    width:19%;
-    height:22%;
-    border-radius:24px;
-    background:
-      linear-gradient(112deg,
-        transparent 0%,
-        transparent 35%,
-        rgba(255,244,204,.06) 44%,
-        rgba(255,238,178,.34) 50%,
-        rgba(255,244,204,.08) 57%,
-        transparent 68%,
-        transparent 100%);
-    mix-blend-mode:screen;
-    opacity:.56;
-    pointer-events:none;
-    animation:managerKeyShine 6.8s ease-in-out infinite;
-  }
-
-  #managerUI::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    opacity:.38;
-    background-image:
-      radial-gradient(circle, rgba(194,139,82,.20) 0 1px, transparent 1.5px),
-      radial-gradient(circle, rgba(255,238,190,.18) 0 1px, transparent 1.6px),
-      radial-gradient(circle, rgba(170,119,77,.12) 0 .8px, transparent 1.4px);
-    background-size:210px 180px, 260px 220px, 320px 260px;
-    background-position:18% 22%, 64% 18%, 42% 68%;
-    animation:managerDustFloat 15s linear infinite;
-  }
-
-  #contentArea,
-  #adminSwitchPanel,
-  #managerBriefCard,
-  #topActions,
-  #topBar{
-    animation:managerPanelIn .55s ease both;
-  }
-
-  .admin-view-card.tab-enter{
-    animation:managerPaperIn .36s ease both;
-  }
-
-  .switch-btn.active{
-    position:relative;
-    overflow:hidden;
-  }
-
-  .switch-btn.active::after{
-    content:"";
-    position:absolute;
-    top:0;
-    left:-65%;
-    width:48%;
-    height:100%;
-    background:linear-gradient(90deg, transparent, rgba(255,255,255,.40), transparent);
-    pointer-events:none;
-    animation:managerBtnShine 4.2s ease-in-out infinite;
-  }
-}
-
-@keyframes managerKeyShine{
-  0%,58%{ opacity:0; transform:translateX(-18%) skewX(-8deg); }
-  68%{ opacity:.72; }
-  88%,100%{ opacity:0; transform:translateX(28%) skewX(-8deg); }
-}
-
-@keyframes managerDustFloat{
-  0%{ transform:translate3d(0,0,0); background-position:18% 22%, 64% 18%, 42% 68%; }
-  100%{ transform:translate3d(0,-10px,0); background-position:20% 18%, 61% 14%, 44% 64%; }
-}
-
-@keyframes managerPanelIn{
-  from{ opacity:0; transform:translateY(8px); }
-  to{ opacity:1; transform:translateY(0); }
-}
-
-@keyframes managerPaperIn{
-  from{ opacity:.15; transform:translateY(7px) scale(.992); filter:blur(1.2px); }
-  to{ opacity:1; transform:translateY(0) scale(1); filter:blur(0); }
-}
-
-@keyframes managerBtnShine{
-  0%,62%{ left:-65%; }
-  100%{ left:125%; }
-}
-
-@media (prefers-reduced-motion: reduce){
-  #bgLight,
-  #bgBleed,
-  #managerUI::before,
-  #managerUI::after,
-  #contentArea,
-  #adminSwitchPanel,
-  #managerBriefCard,
-  #topActions,
-  #topBar,
-  .admin-view-card.tab-enter,
-  .switch-btn.active::after{
-    animation:none !important;
-  }
-}
-
-/* ===== 桌面定位校准：随底图等比例缩放 ===== */
-@media (min-width: 541px){
-  #managerBriefCard{
-    left:5.65%;
-    top:22.4%;
-    width:calc(232px * var(--ui-scale));
-    padding:calc(13px * var(--ui-scale)) calc(14px * var(--ui-scale));
-    border-radius:calc(16px * var(--ui-scale));
-  }
-
-  .brief-title{
-    margin-bottom:calc(7px * var(--ui-scale));
-    font-size:calc(14px * var(--ui-scale));
-  }
-
-  .brief-text{
-    font-size:calc(12px * var(--ui-scale));
-  }
-
-  .brief-list li{
-    font-size:calc(11px * var(--ui-scale));
-  }
-
-  .brief-sign{
-    font-size:calc(10px * var(--ui-scale));
-  }
-
-  #contentArea{
-    left:25.8%;
-    top:16.2%;
-    width:48.8%;
-    height:61.2%;
-    padding-right:0;
-    overflow:hidden;
-  }
-
-  #adminSwitchPanel{
-    right:7.35%;
-    top:18.8%;
-    width:calc(232px * var(--ui-scale));
-    padding:calc(10px * var(--ui-scale));
-    border-radius:calc(16px * var(--ui-scale));
-  }
-
-  .switch-title{
-    margin:0 0 calc(8px * var(--ui-scale)) 0;
-    font-size:calc(13px * var(--ui-scale));
-  }
-
-  .switch-group{
-    gap:calc(7px * var(--ui-scale));
-  }
-
-  .switch-btn{
-    min-height:calc(30px * var(--ui-scale));
-    padding:0 calc(8px * var(--ui-scale));
-    border-radius:calc(11px * var(--ui-scale));
-    font-size:calc(12px * var(--ui-scale));
-  }
-
-  .card{
-    padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
-    margin-bottom:0;
-    border-radius:calc(16px * var(--ui-scale));
-  }
-
-  .section-title{
-    margin-bottom:calc(6px * var(--ui-scale));
-    font-size:calc(17px * var(--ui-scale));
-  }
-
-  .admin-view-card{
-    height:100%;
-    min-height:0;
-  }
-
-  .admin-view-card > .admin-block{
-    flex:1 1 0;
-    min-height:0;
-    overflow:hidden;
-  }
-
-  .admin-block{
-    padding:calc(9px * var(--ui-scale)) calc(10px * var(--ui-scale));
-    margin-top:calc(7px * var(--ui-scale));
-    border-radius:calc(12px * var(--ui-scale));
-  }
-
-  .admin-block h3{
-    margin-bottom:calc(6px * var(--ui-scale));
-    font-size:calc(14px * var(--ui-scale));
-  }
-
-  .admin-block > .module-scroll,
-  .admin-block > .key-storage-box,
-  .key-storage-box > .key-list-wrap{
-    flex:1 1 auto;
-    min-height:0;
-  }
-
-  .profile-summary-item{
-    min-height:auto;
-  }
-
-  .module-note,
-  .apply-body,
-  .apply-meta,
-  .vote-summary,
-  .key-list th,
-  .key-list td,
-  .key-empty,
-  .key-loading,
-  .key-error{
-    font-size:calc(12px * var(--ui-scale));
-  }
+.brief-title{margin:0 0 calc(7px * var(--ui-scale));font-size:calc(14px * var(--ui-scale));line-height:1.25;font-weight:900;color:#6b4524;}
+.brief-text{margin:0;font-size:calc(12px * var(--ui-scale));line-height:1.55;color:#765a40;}
+.brief-list{margin:calc(8px * var(--ui-scale)) 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:calc(5px * var(--ui-scale));}
+.brief-list li{position:relative;padding-left:calc(14px * var(--ui-scale));font-size:calc(11px * var(--ui-scale));line-height:1.45;color:#84664a;}
+.brief-list li::before{content:"•";position:absolute;left:0;top:0;color:#c98e56;font-weight:900;}
+.brief-sign{margin-top:calc(9px * var(--ui-scale));padding-top:calc(7px * var(--ui-scale));border-top:1px dashed rgba(180,139,94,.32);font-size:calc(10px * var(--ui-scale));line-height:1.35;color:#9a795b;text-align:right;}
+
+#contentArea{min-width:0;min-height:0;height:100%;overflow:hidden;}
+.card{position:relative;padding:calc(14px * var(--ui-scale)) calc(16px * var(--ui-scale));}
+.section-title{margin:0 0 calc(10px * var(--ui-scale));font-size:calc(18px * var(--ui-scale));font-weight:900;color:var(--manager-title);line-height:1.2;}
+
+#adminSwitchPanel{min-width:0;height:fit-content;padding:calc(10px * var(--ui-scale));}
+.switch-title{margin:0 0 calc(8px * var(--ui-scale));font-size:calc(13px * var(--ui-scale));font-weight:900;color:var(--manager-title);text-align:center;}
+.switch-group{display:flex;flex-direction:column;gap:calc(7px * var(--ui-scale));}
+.switch-btn{border:none;border-radius:calc(11px * var(--ui-scale));padding:calc(8px * var(--ui-scale)) calc(6px * var(--ui-scale));font-size:calc(12px * var(--ui-scale));background:var(--manager-sub);cursor:pointer;text-align:center;color:var(--manager-text);font-weight:800;line-height:1.2;}
+.switch-btn:hover{background:var(--manager-sub-hover);}
+.switch-btn.active{background:var(--manager-btn);color:#fff;}
+
+.admin-view-card{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden;margin:0;}
+.admin-block{background:rgba(255,255,255,.72);padding:calc(14px * var(--ui-scale));border-radius:calc(12px * var(--ui-scale));border:1px solid var(--manager-line2);margin-top:calc(10px * var(--ui-scale));display:flex;flex-direction:column;min-height:0;}
+.admin-block:first-of-type{margin-top:0;}
+.admin-view-card>.admin-block{flex:1 1 auto;}
+.admin-block h3{margin:0 0 calc(8px * var(--ui-scale));font-size:calc(15px * var(--ui-scale));color:var(--manager-title);}
+.module-note{margin:0;font-size:calc(12px * var(--ui-scale));line-height:1.45;color:#7a6755;}
+.module-scroll{flex:1 1 auto;min-height:0;overflow:auto;overflow-x:hidden;padding-right:calc(4px * var(--ui-scale));scrollbar-width:thin;scrollbar-color:#cfad82 rgba(255,255,255,.35);}
+.module-scroll::-webkit-scrollbar,.key-card-list::-webkit-scrollbar,.key-list-wrap::-webkit-scrollbar,.profile-detail-content::-webkit-scrollbar{width:calc(7px * var(--ui-scale));}
+.module-scroll::-webkit-scrollbar-thumb,.key-card-list::-webkit-scrollbar-thumb,.key-list-wrap::-webkit-scrollbar-thumb,.profile-detail-content::-webkit-scrollbar-thumb{background:#cfad82;border-radius:999px;}
+
+.apply-list{display:flex;flex-direction:column;gap:calc(8px * var(--ui-scale));}
+.apply-item{background:rgba(255,252,246,.92);border:1px solid var(--manager-line2);border-radius:calc(12px * var(--ui-scale));padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));}
+.apply-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.apply-head strong{font-size:calc(13px * var(--ui-scale));color:var(--manager-title);}
+.apply-time,.apply-meta{font-size:calc(11px * var(--ui-scale));color:var(--manager-muted);}
+.apply-body{display:flex;flex-direction:column;gap:4px;font-size:calc(12px * var(--ui-scale));line-height:1.45;color:#6b5a45;}
+.apply-actions-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.inline-btn,.sub-btn{height:calc(34px * var(--ui-scale));min-width:calc(82px * var(--ui-scale));padding:0 calc(12px * var(--ui-scale));border:none;border-radius:calc(10px * var(--ui-scale));font-size:calc(12px * var(--ui-scale));cursor:pointer;font-weight:800;white-space:nowrap;}
+.inline-btn{background:var(--manager-btn);color:#fff;}
+.inline-btn:hover{background:var(--manager-btn-hover);}
+.sub-btn{background:var(--manager-sub);color:var(--manager-text);}
+.sub-btn:hover{background:var(--manager-sub-hover);}
+.inline-btn:disabled,.sub-btn:disabled{opacity:.65;cursor:not-allowed;}
+.vote-summary{margin-top:6px;font-size:calc(11px * var(--ui-scale));color:#7b654f;line-height:1.4;}
+.vote-wait{color:#8b5b34;}.vote-pass{color:var(--manager-green);}.vote-reject{color:var(--manager-red);}
+
+.key-storage-box{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;}
+.key-list-wrap{margin-top:6px;overflow:auto;overflow-x:hidden;flex:1 1 auto;min-height:0;border:1px solid var(--manager-line2);border-radius:10px;background:rgba(255,252,246,.75);scrollbar-width:thin;scrollbar-color:#cfad82 rgba(255,255,255,.35);}
+.key-empty,.key-loading,.key-error{padding:10px 12px;font-size:calc(12px * var(--ui-scale));line-height:1.45;}
+.key-loading,.key-empty{color:#7a6755;}.key-error{color:var(--manager-red);}
+.key-list-columns-wrap{padding:calc(10px * var(--ui-scale));}
+.key-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(10px * var(--ui-scale));min-height:100%;}
+.key-column{min-width:0;display:flex;flex-direction:column;border:1px solid rgba(216,194,163,.72);border-radius:calc(13px * var(--ui-scale));background:rgba(255,252,247,.74);overflow:hidden;}
+.key-column-head{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(9px * var(--ui-scale)) calc(10px * var(--ui-scale));background:rgba(245,230,204,.78);border-bottom:1px solid rgba(216,194,163,.65);}
+.key-column-title{color:var(--manager-title);font-size:calc(13px * var(--ui-scale));font-weight:900;line-height:1.25;white-space:nowrap;}
+.key-column-desc{color:#92765c;font-size:calc(10px * var(--ui-scale));font-weight:800;line-height:1.25;white-space:nowrap;}
+.key-card-list{flex:1 1 auto;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:calc(7px * var(--ui-scale));padding:calc(9px * var(--ui-scale));scrollbar-width:thin;scrollbar-color:#cfad82 rgba(255,255,255,.35);}
+.key-card{min-width:0;border:1px solid rgba(226,208,180,.82);border-radius:calc(12px * var(--ui-scale));background:rgba(255,252,246,.94);padding:calc(9px * var(--ui-scale)) calc(10px * var(--ui-scale));box-shadow:0 1px 4px rgba(116,86,54,.04);}
+.key-card-main{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;}
+.key-card-code{color:#6b4524;font-size:calc(14px * var(--ui-scale));font-weight:950;line-height:1.2;letter-spacing:.02em;}
+.key-card-user{min-width:0;color:#74583f;font-size:calc(12px * var(--ui-scale));font-weight:850;line-height:1.3;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.key-card-meta{display:flex;align-items:flex-start;gap:6px;color:#8a7158;font-size:calc(11px * var(--ui-scale));font-weight:800;line-height:1.45;}
+.key-card-status{flex:0 0 auto;display:inline-flex;align-items:center;min-height:20px;padding:0 7px;border-radius:999px;border:1px solid rgba(180,139,94,.24);background:#fff5e7;color:#8b5b34;font-size:10px;font-weight:900;white-space:nowrap;}
+.key-card-status.is-active{color:var(--manager-green);background:#eef6e8;}.key-card-status.is-stopped{color:var(--manager-red);background:#fbeceb;}
+.key-card-desc{min-width:0;word-break:break-word;}
+.key-card-empty{padding:10px;color:#8d755d;font-size:11px;font-weight:800;line-height:1.55;text-align:center;border:1px dashed rgba(216,194,163,.72);border-radius:12px;background:rgba(255,252,246,.62);}
+
+.profile-summary-list{display:flex;flex-direction:column;gap:calc(7px * var(--ui-scale));min-height:0;}
+.profile-summary-item{width:100%;appearance:none;border:1px solid rgba(216,194,163,.76);border-radius:12px;background:rgba(255,252,246,.94);padding:8px 10px;color:#6b5a45;text-align:left;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;align-items:center;box-shadow:0 1px 3px rgba(116,86,54,.04);}
+.profile-summary-title{min-width:0;color:var(--manager-title);font-size:13px;font-weight:900;line-height:1.35;word-break:break-word;}
+.profile-summary-meta{grid-column:1/-1;color:#8d755d;font-size:11px;line-height:1.45;word-break:break-word;}
+.log-status-badge{display:inline-flex;align-items:center;justify-content:center;min-height:22px;padding:0 8px;border-radius:999px;font-size:10px;font-weight:900;white-space:nowrap;border:1px solid rgba(180,139,94,.24);}
+.log-status-logged{color:#8b5b34;background:#fff5e7;}.log-status-needs_edit{color:var(--manager-red);background:#fbeceb;}.log-status-resolved{color:var(--manager-green);background:#eef6e8;}
+
+.profile-detail-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(76,54,34,.28);pointer-events:auto;}
+.profile-detail-dialog{width:min(760px, calc(100vw - 36px));max-height:min(78vh,720px);display:flex;flex-direction:column;overflow:hidden;background:rgba(255,249,240,.98);}
+.profile-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px 10px;border-bottom:1px solid rgba(216,194,163,.72);}
+.profile-detail-head h3{margin:0;color:var(--manager-title);font-size:16px;line-height:1.25;}
+.profile-detail-close{appearance:none;border:none;background:rgba(234,217,188,.72);color:#6b4524;border-radius:999px;width:30px;height:30px;cursor:pointer;font-size:18px;line-height:1;font-weight:900;}
+.profile-detail-content{flex:1 1 auto;min-height:0;overflow:auto;padding:12px 16px;scrollbar-width:thin;scrollbar-color:#cfad82 rgba(255,255,255,.35);}
+.profile-detail-meta{color:#7a6755;font-size:13px;line-height:1.55;margin-bottom:10px;}
+.profile-detail-values{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.profile-detail-value-box{border:1px solid rgba(216,194,163,.75);border-radius:12px;background:rgba(255,255,255,.56);padding:10px;min-width:0;}
+.profile-detail-label{color:#8d755d;font-size:12px;font-weight:900;margin-bottom:6px;}
+.profile-detail-text{color:#6b5a45;font-size:13px;line-height:1.58;white-space:pre-wrap;word-break:break-word;}
+.profile-detail-actions{display:flex;justify-content:flex-end;gap:8px;padding:10px 16px 14px;border-top:1px solid rgba(216,194,163,.72);}
+
+.siteNoticeList{display:flex;flex-direction:column;gap:8px;}.siteNoticeItem{padding:10px;border-radius:12px;background:rgba(255,252,247,.82);box-shadow:inset 0 1px 0 rgba(255,255,255,.92),0 2px 8px rgba(120,92,63,.05);}.siteNoticeItemTitle{color:#6f4726;font-size:12px;font-weight:800;line-height:1.5;margin-bottom:4px;}.siteNoticeItemDesc{color:#8a6644;font-size:11px;line-height:1.55;}.siteNoticeEmpty{color:#8a6644;font-size:12px;line-height:1.6;padding:6px 2px 2px;}
+
+@media(max-width:900px){
+  #pageMainPanel.managerMainPanel{grid-template-columns:1fr 130px;left:4%;top:18%;width:92%;height:74%;}
+  #managerBriefCard{display:none;}
+}
+
+@media(max-width:540px){
+  #pageMainPanel.managerMainPanel{position:relative;left:auto;top:auto;width:100%;height:auto;order:2;display:flex;flex-direction:column;gap:10px;border-radius:22px;background:rgba(255,250,240,.58);padding:12px;}
+  #managerBriefCard{display:block;width:100%;max-height:none;order:0;}
+  #adminSwitchPanel{width:100%;order:1;}
+  .switch-group{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));}
+  #contentArea{width:100%;height:auto;min-height:420px;order:2;}
+  .admin-view-card{min-height:420px;}
+  .key-columns{grid-template-columns:1fr;}
+  .profile-detail-values{grid-template-columns:1fr;}
 }
-
-/* ===== 真正小屏 ===== */
-@media (max-width: 540px){
-  html,body{
-    width:100%;
-    max-width:100%;
-    overflow-x:hidden;
-  }
-
-  body{
-    overflow-x:hidden;
-    overflow-y:auto;
-    display:block;
-    background:#f3ecdf;
-  }
-
-  #bgColorFill,
-  #bgBleed,
-  #bgLight{
-    display:none;
-  }
-
-  #managerPage{
-    width:100%;
-    max-width:100%;
-    height:auto;
-    min-height:100vh;
-    min-height:100dvh;
-    display:block;
-    overflow:visible;
-  }
-
-  #managerStage{
-    width:100%;
-    max-width:100%;
-    margin:0;
-    aspect-ratio:auto;
-    min-height:100vh;
-    min-height:100dvh;
-    padding:10px 12px 14px;
-    position:relative;
-    overflow-x:hidden;
-  }
-
-  #managerStage::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    background:
-      linear-gradient(rgba(243,236,223,.78), rgba(243,236,223,.92)),
-      url("room-manager.png") center center / cover no-repeat;
-    z-index:-2;
-  }
-
-  #managerStage::after{
-    content:"";
-    position:fixed;
-    inset:0;
-    background:linear-gradient(to bottom, rgba(255,255,255,.18), rgba(255,255,255,0));
-    z-index:-1;
-    pointer-events:none;
-  }
-
-  #managerBg{ display:none; }
-
-  #managerUI{
-    position:relative;
-    inset:auto;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    width:100%;
-    max-width:100%;
-  }
-
-  #topActions{
-    position:sticky;
-    top:10px;
-    right:auto;
-    left:auto;
-    width:100%;
-    height:40px;
-    z-index:10;
-    order:0;
-  }
-
-  #topIdentityBar{
-    gap:6px;
-    padding:5px 7px;
-    border-radius:14px;
-  }
-
-  #topIdentityBadge{
-    padding:0 9px;
-    font-size:12px;
-    border-radius:10px;
-  }
-
-  #loginOpenBtn,
-  #logoutBtn{
-    width:42px;
-    min-width:42px;
-    flex-basis:42px;
-    font-size:11px;
-    border-radius:10px;
-  }
-
-  #siteNoticeWrap{
-    width:34px;
-    min-width:34px;
-    flex-basis:34px;
-  }
-
-  #siteNoticeBtn{
-    font-size:14px;
-    border-radius:10px;
-  }
 
-  #siteNoticePanel{
-    position:fixed;
-    top:58px;
-    right:10px;
-    left:10px;
-    width:auto;
-    max-height:60dvh;
-    z-index:999;
-  }
-
-  #pageNotice{
-    position:fixed;
-    left:50%;
-    top:50%;
-    right:auto;
-    bottom:auto;
-    width:min(360px, calc(100vw - 28px));
-    max-width:calc(100vw - 28px);
-    margin:0;
-    transform:translate(-50%, -50%);
-    z-index:3000;
-    font-size:13px;
-  }
-
-  #topBar,
-  #managerBriefCard,
-  #adminSwitchPanel,
-  #contentArea{
-    position:relative;
-    left:auto;
-    right:auto;
-    top:auto;
-    bottom:auto;
-    width:100%;
-    max-width:100%;
-    max-height:none;
-    overflow:visible;
-    margin:0;
-    padding-right:0;
-    transform:none;
-  }
-
-  #topBar{
-    order:2;
-    padding:10px;
-    display:block;
-  }
-
-  #managerBriefCard{
-    order:3;
-    padding:12px 14px;
-    text-align:left;
-  }
-
-  .brief-title{
-    font-size:14px;
-    margin-bottom:7px;
-  }
-
-  .brief-text{
-    font-size:12px;
-  }
-
-  .brief-list{
-    gap:5px;
-  }
-
-  .brief-list li{
-    font-size:11px;
-    padding-left:14px;
-  }
-
-  .brief-sign{
-    font-size:10px;
-  }
-
-  #adminSwitchPanel{
-    order:4;
-    padding:10px;
-    text-align:center;
-    align-self:stretch;
-  }
-
-  #navOuter,
-  #navScroll{
-    width:100%;
-  }
-
-  #roomNav{
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-    gap:7px;
-    transform:none;
-  }
-
-  .navBtn{
-    width:100%;
-    min-height:34px;
-    height:auto;
-    padding:6px 4px;
-    font-size:12px;
-    border-radius:10px;
-  }
-
-  .switch-title{
-    text-align:center;
-  }
-
-  .switch-group{
-    display:grid;
-    grid-template-columns:repeat(3, minmax(0, 1fr));
-    gap:7px;
-    width:100%;
-  }
-
-  .switch-btn{
-    min-height:34px;
-    padding:6px 4px;
-    font-size:12px;
-    border-radius:10px;
-  }
-
-  #contentArea{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    order:5;
-  }
-
-  .card{
-    padding:10px 12px;
-    margin-bottom:0;
-    border-radius:12px;
-  }
-
-  .section-title{
-    font-size:14px;
-    margin-bottom:6px;
-  }
-
-  .module-scroll{
-    max-height:unset;
-    overflow:visible;
-    padding-right:0;
-  }
-
-  .key-list-wrap{
-    max-height:unset;
-  }
-
-  .apply-head{
-    flex-direction:column;
-    gap:4px;
-  }
-
-  .apply-time{
-    white-space:normal;
-  }
-}
 </style>
 </head>
-
 <body>
-<div id="bgColorFill"></div>
-<div id="bgBleed"></div>
-<div id="bgLight"></div>
+<!-- PAGE_VERSION: manager-admin-common-template-v29; template-components-exact; admin-reviewer-no-transition-notice -->
+<div id="room">
+  <div id="bgFrame">
+    <img id="bg" alt="十号房宿管室背景" src="" />
+  </div>
+  <div id="overlay">
 
-<div id="managerPage">
-  <div id="managerStage">
-    <img id="managerBg" src="room-manager.png" alt="宿管室背景">
+    <nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换">
+      <button class="navBtn" data-room="hall" type="button" data-page="index" data-login="false">
+        <span class="navLabel">大堂</span>
+        <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
+      </button>
 
-    <div id="managerUI">
+      <button class="navBtn" data-room="living" type="button" data-page="living" data-login="true">
+        <span class="navLabel">客厅</span>
+        <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
+      </button>
 
-      <div id="topActions">
-        <div id="topIdentityBar">
-          <div id="topIdentityBadge"><span class="identityText" id="currentUserText">参观者</span></div>
+      <button class="navBtn" data-room="manager" type="button" data-manager="true">
+        <span class="navLabel">宿管室</span>
+        <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
+      </button>
 
-          <div id="siteNoticeWrap">
-            <button id="siteNoticeBtn" type="button" aria-label="查看提醒">
-              <span id="siteNoticeIcon">🔔</span>
-              <span id="siteNoticeCount">0</span>
-            </button>
+      <button class="navBtn" data-room="honor" type="button" data-page="honor" data-login="false">
+        <span class="navLabel">荣誉墙</span>
+        <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
+      </button>
 
-            <div id="siteNoticePanel" aria-live="polite">
-              <div class="siteNoticeTitle">宿管室提醒</div>
-              <div id="siteNoticeContent">
-                <div class="siteNoticeEmpty">暂无提醒。</div>
-              </div>
-            </div>
-          </div>
+      <button class="navBtn" data-room="studio" type="button" data-page="studioTodo" data-login="true">
+        <span class="navLabel">工作间</span>
+        <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
+      </button>
 
-          <button id="loginOpenBtn" type="button">登录</button>
-          <button id="logoutBtn" class="hidden" type="button" onclick="logout()">登出</button>
+      <button class="navBtn" data-room="game" type="button" data-page="game" data-login="false">
+        <span class="navLabel">游戏房</span>
+        <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span>
+      </button>
+
+      <button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-login="true">
+        <span class="navLabel">宿舍</span>
+        <span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span>
+      </button>
+
+      <button class="navBtn" data-room="flower" type="button" data-page="flower" data-login="false">
+        <span class="navLabel">花房区</span>
+        <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
+      </button>
+
+      <button class="navBtn" data-room="pets" type="button" data-page="pet" data-login="false">
+        <span class="navLabel">宠物区</span>
+        <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
+      </button>
+    </nav>
+
+
+    <section class="roomIdentity" id="roomIdentity" aria-label="当前身份">
+      <div class="roomIdentityBar">
+        <div class="identityNameBox">
+          <span class="identityNameText" id="identityNameText">
+            <span class="identityNamePart identityNickname" id="identityNickname">参观者</span>
+            <span class="identityNamePart identitySeparator hidden" id="identitySeparator">｜</span>
+            <span class="identityNamePart identityRole hidden" id="identityRole">参观者</span>
+          </span>
         </div>
-      </div>
 
-      <div id="pageNotice" class="hidden">
-        <div class="notice-text" id="pageNoticeText"></div>
-        <button class="notice-close" type="button" onclick="hideNotice()">×</button>
-      </div>
+        <div class="identityNoticeWrap">
+          <button class="identityNoticeBtn" id="identityNoticeBtn" type="button" aria-label="打开通知">
+            <span class="identityNoticeIcon">🔔</span>
+          </button>
+          <span class="identityNoticeCount" id="identityNoticeCount">0</span>
 
-      <div id="topBar" aria-label="房间切换">
-        <div id="navOuter">
-          <div id="navScroll">
-            <nav id="roomNav">
-              <button class="navBtn" data-room="hall" type="button" onclick="location.href='index.html'"><span class="navLabel">大堂</span><span class="navActiveNote navActiveNoteA">✦</span><span class="navActiveNote navActiveNoteB">✧</span><span class="navActiveNote navActiveNoteC">★</span></button>
-              <button class="navBtn" data-room="living" type="button" onclick="goNeedLogin('living.html')"><span class="navLabel">客厅</span><span class="navActiveNote navActiveNoteA">☕</span><span class="navActiveNote navActiveNoteB">💬</span><span class="navActiveNote navActiveNoteC">♡</span></button>
-              <button class="navBtn" data-room="honor" type="button" onclick="location.href='honor.html'"><span class="navLabel">荣誉墙</span><span class="navActiveNote navActiveNoteA">🏆</span><span class="navActiveNote navActiveNoteB">🏅</span><span class="navActiveNote navActiveNoteC">✦</span></button>
-              <button class="navBtn" data-room="studio" type="button" onclick="goNeedLogin('studio-todo.html')"><span class="navLabel">工作间</span><span class="navActiveNote navActiveNoteA">🎙</span><span class="navActiveNote navActiveNoteB">🎧</span><span class="navActiveNote navActiveNoteC">◇</span></button>
-              <button class="navBtn" data-room="game" type="button" onclick="location.href='game.html'"><span class="navLabel">游戏房</span><span class="navActiveNote navActiveNoteA">🎮</span><span class="navActiveNote navActiveNoteB">🎲</span><span class="navActiveNote navActiveNoteC">👾</span></button>
-              <button class="navBtn" data-room="dorm" type="button" onclick="goNeedLogin('dorm.html')"><span class="navLabel">宿舍</span><span class="navActiveNote navActiveNoteA">☁</span><span class="navActiveNote navActiveNoteB">☾</span><span class="navActiveNote navActiveNoteC">🛏</span></button>
-              <button class="navBtn" data-room="flower" type="button" onclick="goNeedLogin('flower.html')"><span class="navLabel">花房区</span><span class="navActiveNote navActiveNoteA">✿</span><span class="navActiveNote navActiveNoteB">❀</span><span class="navActiveNote navActiveNoteC">🌸</span></button>
-              <button class="navBtn" data-room="pets" type="button" onclick="goNeedLogin('pets.html')"><span class="navLabel">宠物区</span><span class="navActiveNote navActiveNoteA">🐾</span><span class="navActiveNote navActiveNoteB">♡</span><span class="navActiveNote navActiveNoteC">🐱</span></button>
-            </nav>
+          <div class="identityNoticePanel" id="identityNoticePanel" aria-live="polite">
+            <div class="identityNoticeTitle">通知</div>
+            <div class="identityNoticeEmpty" id="identityNoticeContent">这里是通知下拉面板空壳，后续页面接入自己的通知内容。</div>
           </div>
         </div>
-      </div>
 
+        <button class="identityAuthBtn" id="identityAuthBtn" type="button">
+          <span class="identityAuthText">登录</span>
+        </button>
+      </div>
+    </section>
+
+
+    <main class="templateMainPanel managerMainPanel" id="pageMainPanel">
       <aside id="managerBriefCard" class="panel" aria-label="宿管室说明">
         <h3 class="brief-title">宿管室说明</h3>
-        <p class="brief-text">这里是宿管专用的管理页，用来处理入住申请、宿管申请、钥匙保管和档案修改确认。</p>
+        <p class="brief-text">这里是宿管专用的管理页，用来处理入住申请、身份申请、钥匙保管和档案修改确认。</p>
         <ul class="brief-list">
           <li>入住申请可在档案夹内投票处理。</li>
-          <li>钥匙状态请以钥匙保管处为准。</li>
-          <li>维修日志用于确认成员档案修改。</li>
+          <li>身份申请包含练习生升级和房客申请宿管。</li>
+          <li>钥匙保管处分栏显示已分配的 A 系列钥匙和练习生 B 系列钥匙。</li>
         </ul>
         <div class="brief-sign">宿管查看｜请谨慎操作</div>
       </aside>
 
-      <aside id="adminSwitchPanel" class="panel">
-        <h3 class="switch-title">管理切换</h3>
-        <div class="switch-group">
-          <button id="switchArchiveBtn" class="switch-btn active" type="button" onclick="setAdminTab('archive')">档案夹</button>
-          <button id="switchKeysBtn" class="switch-btn" type="button" onclick="setAdminTab('keys')">钥匙保管处</button>
-          <button id="switchLogsBtn" class="switch-btn" type="button" onclick="setAdminTab('logs')">维修日志</button>
-        </div>
-      </aside>
-
-      <main id="contentArea">
-
+      <section id="contentArea">
         <section class="card panel admin-view-card" id="adminArchiveCard">
           <h2 class="section-title">档案夹</h2>
-
           <div class="admin-block">
             <h3>入住申请</h3>
-            <div id="memberApplyList" class="apply-list module-scroll">
-              <div class="module-note">正在读取入住申请…</div>
-            </div>
+            <div id="memberApplyList" class="apply-list module-scroll"><div class="module-note">正在读取入住申请…</div></div>
           </div>
-
           <div class="admin-block">
-            <h3>宿管申请</h3>
-            <div id="adminApplyList" class="apply-list module-scroll">
-              <div class="module-note">正在读取宿管申请…</div>
-            </div>
+            <h3>身份申请</h3>
+            <div id="adminApplyList" class="apply-list module-scroll"><div class="module-note">正在读取身份申请…</div></div>
           </div>
         </section>
 
         <section class="card panel hidden admin-view-card" id="adminKeysCard">
           <h2 class="section-title">钥匙保管处</h2>
-
           <div class="admin-block">
             <div id="keyStorageBox" class="key-storage-box">
               <div id="keyStorageLoading" class="key-loading">正在读取钥匙名单…</div>
               <div id="keyStorageError" class="key-error hidden"></div>
               <div id="keyStorageEmpty" class="key-empty hidden">暂时没有可显示的数据。</div>
-
-              <div id="keyListWrap" class="key-list-wrap hidden">
-                <table class="key-list">
-                  <thead>
-                    <tr>
-                      <th class="key-col-code">钥匙</th>
-                      <th class="key-col-status">状态</th>
-                      <th class="key-col-user">当前使用者</th>
-                      <th>说明</th>
-                    </tr>
-                  </thead>
-                  <tbody id="keyListBody"></tbody>
-                </table>
+              <div id="keyListWrap" class="key-list-wrap key-list-columns-wrap hidden">
+                <div class="key-columns">
+                  <section class="key-column" aria-label="A 系列钥匙">
+                    <div class="key-column-head"><span class="key-column-title">A 系列钥匙</span><span class="key-column-desc">房客 / 宿管 / 维修工</span></div>
+                    <div id="keyListA" class="key-card-list"></div>
+                  </section>
+                  <section class="key-column" aria-label="B 系列钥匙">
+                    <div class="key-column-head"><span class="key-column-title">B 系列钥匙</span><span class="key-column-desc">练习生</span></div>
+                    <div id="keyListB" class="key-card-list"></div>
+                  </section>
+                </div>
               </div>
             </div>
           </div>
@@ -1825,50 +1201,139 @@ body{
 
         <section class="card panel hidden admin-view-card" id="adminLogsCard">
           <h2 class="section-title">维修日志</h2>
-
           <div class="admin-block profile-review-block single-review-block">
-            <div id="profileChangeLogList" class="profile-summary-list module-scroll">
-              <div class="module-note">正在读取档案修改记录…</div>
-            </div>
+            <div id="profileChangeLogList" class="profile-summary-list module-scroll"><div class="module-note">正在读取档案修改记录…</div></div>
           </div>
         </section>
+      </section>
 
-      </main>
-
-      <div id="profileDetailOverlay" class="profile-detail-overlay hidden" aria-hidden="true">
-        <div class="profile-detail-dialog panel" role="dialog" aria-modal="true" aria-labelledby="profileDetailTitle">
-          <div class="profile-detail-head">
-            <h3 id="profileDetailTitle">档案修改详情</h3>
-            <button class="profile-detail-close" type="button" onclick="closeProfileChangeDetail()">×</button>
-          </div>
-          <div id="profileDetailContent" class="profile-detail-content"></div>
-          <div id="profileDetailActions" class="profile-detail-actions"></div>
+      <aside id="adminSwitchPanel" class="panel" aria-label="管理切换">
+        <h3 class="switch-title">管理切换</h3>
+        <div class="switch-group">
+          <button id="switchArchiveBtn" class="switch-btn active" type="button" onclick="setAdminTab('archive')">档案夹</button>
+          <button id="switchKeysBtn" class="switch-btn" type="button" onclick="setAdminTab('keys')">钥匙保管处</button>
+          <button id="switchLogsBtn" class="switch-btn" type="button" onclick="setAdminTab('logs')">维修日志</button>
         </div>
-      </div>
+      </aside>
+    </main>
 
-    </div>
   </div>
 </div>
 
+
+<div id="identityTransitionMask" class="identity-transition-mask" aria-hidden="true">
+  <div class="identity-transition-card" role="dialog" aria-modal="true" aria-labelledby="identityTransitionTitle">
+    <div class="identity-transition-icon">✦</div>
+    <h3 class="identity-transition-title" id="identityTransitionTitle">宿管申请已通过</h3>
+    <p class="identity-transition-text" id="identityTransitionText">恭喜，你的宿管申请已通过。\n现在可以进入宿管管理页处理申请、钥匙和档案记录。</p>
+    <button class="identity-transition-confirm" id="identityTransitionConfirm" type="button">知道了</button>
+  </div>
+</div>
+
+<div id="profileDetailOverlay" class="profile-detail-overlay hidden" aria-hidden="true">
+  <div class="profile-detail-dialog panel" role="dialog" aria-modal="true" aria-labelledby="profileDetailTitle">
+    <div class="profile-detail-head">
+      <h3 id="profileDetailTitle">档案修改详情</h3>
+      <button class="profile-detail-close" type="button" onclick="closeProfileChangeDetail()">×</button>
+    </div>
+    <div id="profileDetailContent" class="profile-detail-content"></div>
+    <div id="profileDetailActions" class="profile-detail-actions"></div>
+  </div>
+</div>
+
+<div id="pageNotice" class="hidden">
+  <div class="notice-text" id="pageNoticeText"></div>
+  <button class="notice-close" type="button" onclick="hideNotice()">×</button>
+</div>
+
 <script>
+
+const CURRENT_ROOM = "manager";
 const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-const managerImg = document.getElementById("managerBg");
-const managerStage = document.getElementById("managerStage");
-const managerUI = document.getElementById("managerUI");
-const root = document.documentElement;
-const roomNav = document.getElementById("roomNav");
-const topBar = document.getElementById("topBar");
+/* ===== 通用模板组件：路径、底图缩放、房间导航、身份栏 ===== */
+const STORAGE_KEYS = {
+  loggedIn:"room10LoggedIn",
+  user:"room10User",
+  role:"room10Role"
+};
 
-const currentUserText = document.getElementById("currentUserText");
-const loginOpenBtn = document.getElementById("loginOpenBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const siteNoticeBtn = document.getElementById("siteNoticeBtn");
-const siteNoticePanel = document.getElementById("siteNoticePanel");
-const siteNoticeCount = document.getElementById("siteNoticeCount");
-const siteNoticeContent = document.getElementById("siteNoticeContent");
+const ROOM10_ROOT_PREFIX = window.ROOM10_ROOT || "../";
+
+function room10Url(path){
+  const raw = String(path || "").trim();
+  if(!raw) return "";
+  if(/^(https?:|data:|mailto:|tel:|#|\/)/i.test(raw)) return raw;
+  if(raw.startsWith("./") || raw.startsWith("../")) return raw;
+
+  if(typeof window.room10Path === "function"){
+    return window.room10Path(raw);
+  }
+
+  return `${ROOM10_ROOT_PREFIX}${raw}`;
+}
+
+function room10PageUrl(key, fallbackPath){
+  const pageKey = String(key || "").trim();
+
+  if(pageKey && typeof window.room10Page === "function"){
+    const url = window.room10Page(pageKey);
+    if(url) return url;
+  }
+
+  return room10Url(fallbackPath || "");
+}
+
+function room10AssetUrl(keyPath, fallbackPath){
+  const assetKey = String(keyPath || "").trim();
+
+  if(assetKey && typeof window.room10Asset === "function"){
+    const url = window.room10Asset(assetKey);
+    if(url) return url;
+  }
+
+  return room10Url(fallbackPath || "");
+}
+
+const img = document.getElementById("bg");
+const bgFrame = document.getElementById("bgFrame");
+const overlay = document.getElementById("overlay");
+const root = document.documentElement;
+
+const identityNickname = document.getElementById("identityNickname");
+const identitySeparator = document.getElementById("identitySeparator");
+const identityRole = document.getElementById("identityRole");
+const identityNameText = document.getElementById("identityNameText");
+const identityNoticeBtn = document.getElementById("identityNoticeBtn");
+const identityNoticeWrap = document.querySelector(".identityNoticeWrap");
+const identityNoticePanel = document.getElementById("identityNoticePanel");
+const identityAuthBtn = document.getElementById("identityAuthBtn");
+const identityNoticeCount = document.getElementById("identityNoticeCount");
+const identityNoticeContent = document.getElementById("identityNoticeContent");
+const identityAuthText = identityAuthBtn ? identityAuthBtn.querySelector(".identityAuthText") : null;
+
+/*
+  兼容原宿管页业务逻辑的旧变量名。
+  页面组件已经使用通用模板的 roomIdentity / identityNotice 结构，
+  但档案、钥匙、维修日志等旧业务函数仍调用 siteNotice* 名称。
+*/
+const siteNoticeBtn = identityNoticeBtn;
+const siteNoticePanel = identityNoticePanel;
+const siteNoticeCount = identityNoticeCount;
+const siteNoticeContent = identityNoticeContent;
+
+/*
+  旧管理功能从 owner 页面迁移过来后，不能再依赖浏览器把 id 自动挂到 window。
+  这里统一显式获取页面元素和状态，避免 loadAllApplications() 在 archiveLoaded / 按钮元素等未定义时直接中断，
+  造成页面一直停在“正在读取入住申请 / 身份申请”。
+*/
+const pageNotice = document.getElementById("pageNotice");
+const pageNoticeText = document.getElementById("pageNoticeText");
+const identityTransitionMask = document.getElementById("identityTransitionMask");
+const identityTransitionText = document.getElementById("identityTransitionText");
+const identityTransitionConfirm = document.getElementById("identityTransitionConfirm");
 
 const switchArchiveBtn = document.getElementById("switchArchiveBtn");
 const switchKeysBtn = document.getElementById("switchKeysBtn");
@@ -1878,50 +1343,51 @@ const adminArchiveCard = document.getElementById("adminArchiveCard");
 const adminKeysCard = document.getElementById("adminKeysCard");
 const adminLogsCard = document.getElementById("adminLogsCard");
 
-
 const keyStorageLoading = document.getElementById("keyStorageLoading");
 const keyStorageError = document.getElementById("keyStorageError");
 const keyStorageEmpty = document.getElementById("keyStorageEmpty");
 const keyListWrap = document.getElementById("keyListWrap");
-const keyListBody = document.getElementById("keyListBody");
+const keyListA = document.getElementById("keyListA");
+const keyListB = document.getElementById("keyListB");
+
 const profileChangeLogList = document.getElementById("profileChangeLogList");
 
-const pageNotice = document.getElementById("pageNotice");
-const pageNoticeText = document.getElementById("pageNoticeText");
-
-let keyListLoaded = false;
-let archiveLoaded = false;
-let logsLoaded = false;
 let activeAdminTab = "archive";
-let actionBusyMap = {};
+let archiveLoaded = false;
+let keyListLoaded = false;
+let logsLoaded = false;
 let profileChangeRows = [];
+const actionBusyMap = Object.create(null);
 
-function isTinyScreen(){
+function isMobileLayout(){
   return window.innerWidth <= 540;
 }
 
+
 function clearDesktopOverlayStyles(){
-  if(managerUI){
-    managerUI.style.left = "";
-    managerUI.style.top = "";
-    managerUI.style.width = "";
-    managerUI.style.height = "";
-  }
-  if(roomNav){
-    roomNav.style.transform = "";
-  }
+  if(!overlay) return;
+
+  overlay.style.left = "";
+  overlay.style.top = "";
+  overlay.style.width = "";
+  overlay.style.height = "";
+
+  root.style.setProperty("--ui-scale","1");
+  root.style.setProperty("--room-nav-scale","1");
+  root.style.setProperty("--identity-scale","1");
 }
 
-function syncManagerUIToImage(){
-  if(isTinyScreen()){
+function syncOverlayToImage(){
+  if(isMobileLayout()){
     clearDesktopOverlayStyles();
     return;
   }
-  if(!managerImg?.naturalWidth || !managerImg?.naturalHeight || !managerStage || !managerUI) return;
 
-  const frame = managerStage.getBoundingClientRect();
+  if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
+
+  const frame = bgFrame.getBoundingClientRect();
   const frameRatio = frame.width / frame.height;
-  const imageRatio = managerImg.naturalWidth / managerImg.naturalHeight;
+  const imageRatio = img.naturalWidth / img.naturalHeight;
 
   let displayWidth;
   let displayHeight;
@@ -1931,37 +1397,225 @@ function syncManagerUIToImage(){
   if(frameRatio > imageRatio){
     displayHeight = frame.height;
     displayWidth = displayHeight * imageRatio;
-    displayLeft = (frame.width - displayWidth) / 2;
-    displayTop = 0;
+    displayLeft = frame.left + (frame.width - displayWidth) / 2;
+    displayTop = frame.top;
   }else{
     displayWidth = frame.width;
     displayHeight = displayWidth / imageRatio;
-    displayLeft = 0;
-    displayTop = (frame.height - displayHeight) / 2;
+    displayLeft = frame.left;
+    displayTop = frame.top + (frame.height - displayHeight) / 2;
   }
 
-  managerUI.style.left = `${displayLeft}px`;
-  managerUI.style.top = `${displayTop}px`;
-  managerUI.style.width = `${displayWidth}px`;
-  managerUI.style.height = `${displayHeight}px`;
+  overlay.style.left = `${displayLeft}px`;
+  overlay.style.top = `${displayTop}px`;
+  overlay.style.width = `${displayWidth}px`;
+  overlay.style.height = `${displayHeight}px`;
 
-  const scale = Math.max(0.34, Math.min(3.2, displayWidth / 1440));
-  root.style.setProperty("--bg-ui-scale", String(scale));
-
-  requestAnimationFrame(fitRoomNavToBar);
+  const scale = Math.max(0.45, Math.min(3.2, displayWidth / 1440));
+  const navScale = Math.max(0.38, Math.min(3.2, displayWidth / 1440));
+  root.style.setProperty("--ui-scale", String(scale));
+  root.style.setProperty("--room-nav-scale", String(navScale));
+  root.style.setProperty("--identity-scale", String(scale));
 }
 
-function fitRoomNavToBar(){
-  if(!roomNav || !topBar || isTinyScreen()) return;
-
-  roomNav.style.transform = "scale(1)";
-  const available = topBar.clientWidth;
-  const needed = roomNav.scrollWidth;
-  const scale = Math.min(1, available / Math.max(needed, 1));
-
-  roomNav.style.transform = `scale(${scale})`;
+function roleLabel(role){
+  const map = {
+    owner:"维修工",
+    admin:"宿管",
+    member:"房客",
+    trainee:"练习生",
+    applying:"申请人",
+    visitor:"参观者"
+  };
+  return map[String(role || "visitor").toLowerCase()] || "房客";
 }
 
+function setIdentityState({nickname="",role="visitor",loggedIn=false,noticeCount=0}={}){
+  if(!identityNickname || !identitySeparator || !identityRole || !identityAuthText) return;
+
+  const roleText = roleLabel(role);
+
+  if(!loggedIn || !nickname){
+    identityNickname.textContent = "参观者";
+    identitySeparator.classList.add("hidden");
+    identityRole.classList.add("hidden");
+    identityRole.textContent = "参观者";
+    identityAuthText.textContent = "登录";
+  }else{
+    identityNickname.textContent = nickname;
+    identitySeparator.classList.remove("hidden");
+    identityRole.classList.remove("hidden");
+    identityRole.textContent = roleText;
+    identityAuthText.textContent = "退出";
+  }
+
+  const count = Number(noticeCount || 0);
+  if(identityNoticeBtn && identityNoticeCount){
+    identityNoticeBtn.classList.toggle("hasNotice", count > 0);
+    identityNoticeCount.textContent = count > 99 ? "99+" : String(count);
+  }
+
+  requestAnimationFrame(() => {
+    if(identityNameText){
+      identityNameText.classList.toggle("isOverflowSafe", identityNameText.scrollWidth > identityNameText.clientWidth);
+    }
+  });
+}
+
+function readLoggedIn(){
+  return isLoggedIn();
+}
+
+function readRole(){
+  return String(getRole() || "visitor").toLowerCase();
+}
+
+function readLocalIdentity(){
+  const user = getStoredUser();
+  const loggedIn = !!(user && user.nickname);
+  const nickname = user?.nickname || "";
+  const role = user?.role || "visitor";
+  setIdentityState({nickname,role,loggedIn,noticeCount:0});
+}
+
+function getManagerPageByRole(){
+  const role = readRole();
+
+  if(role === "owner") return room10PageUrl("managerOwner", "manager/manager-admin.html");
+  if(role === "admin") return room10PageUrl("managerAdmin", "manager/manager-admin.html");
+  if(role === "member" || role === "trainee" || role === "applying") return room10PageUrl("managerMember", "manager/manager-member.html");
+
+  return room10PageUrl("managerVisitor", "manager/manager-visitor.html");
+}
+
+function enterManagerRoom(){
+  window.location.href = getManagerPageByRole();
+}
+
+function enterRoom(page, needLogin, room){
+  const targetPage = String(page || "").trim();
+  const targetRoom = String(room || "").trim();
+  if(!targetPage) return;
+
+  const loggedIn = readLoggedIn();
+  const role = readRole();
+
+  if(needLogin && !loggedIn){
+    openLogin(targetPage);
+    return;
+  }
+
+  if(targetRoom === "dorm" && role === "applying"){
+    window.location.href = getManagerPageByRole();
+    return;
+  }
+
+  if((targetRoom === "flower" || targetRoom === "pets") && !loggedIn){
+    window.location.href = `${room10Url(targetPage)}?mode=guest`;
+    return;
+  }
+
+  window.location.href = room10Url(targetPage);
+}
+
+function setupRoomNav(currentRoom){
+  const buttons = document.querySelectorAll(".navBtn");
+  const current = String(currentRoom || "").trim();
+
+  buttons.forEach(btn => {
+    const room = btn.dataset.room || "";
+    const isCurrent = room === current;
+
+    btn.classList.toggle("is-current", isCurrent);
+
+    if(isCurrent){
+      btn.setAttribute("aria-current","page");
+      btn.setAttribute("tabindex","-1");
+    }else{
+      btn.removeAttribute("aria-current");
+      btn.removeAttribute("tabindex");
+    }
+
+    btn.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if(btn.classList.contains("is-current")) return;
+
+      if(btn.dataset.manager === "true"){
+        enterManagerRoom();
+        return;
+      }
+
+      const targetUrl = room10PageUrl(btn.dataset.page);
+      enterRoom(targetUrl, btn.dataset.login === "true", btn.dataset.room);
+    });
+  });
+}
+
+function positionIdentityNoticePanel(){
+  if(!identityNoticePanel || !identityNoticeBtn) return;
+
+  if(!isMobileLayout()){
+    root.style.setProperty("--identity-notice-mobile-top", "58px");
+    return;
+  }
+
+  const bar = document.querySelector(".roomIdentityBar") || document.getElementById("roomIdentity") || identityNoticeBtn;
+  const rect = bar ? bar.getBoundingClientRect() : { bottom: 50 };
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 640;
+  const gap = 8;
+  const safeTop = Math.max(8, Math.round(rect.bottom + gap));
+  const top = Math.min(safeTop, Math.max(58, viewportHeight - 120));
+
+  root.style.setProperty("--identity-notice-mobile-top", `${top}px`);
+}
+
+/* ===== 管理页兼容函数：保留旧调用名，但底层走通用模板函数 ===== */
+function getRoom10Page(pageKey){
+  return room10PageUrl(pageKey);
+}
+
+function getRoom10Asset(assetKey){
+  return room10AssetUrl(assetKey);
+}
+
+function cssUrl(value){
+  return `url("${String(value || "").replace(/"/g, "\\\"")}")`;
+}
+
+function getManagerPageKeyByRole(roleValue = getRole()){
+  const role = String(roleValue || "").toLowerCase();
+  if(role === "owner") return "managerOwner";
+  if(role === "admin") return "managerAdmin";
+  if(role === "member" || role === "trainee" || role === "applying") return "managerMember";
+  return "managerVisitor";
+}
+
+function goPage(pageKey){
+  const page = room10PageUrl(pageKey);
+  if(page) window.location.href = page;
+}
+
+function goNeedLoginPage(pageKey){
+  const page = room10PageUrl(pageKey);
+  if(!isLoggedIn()){
+    openLogin(page);
+    return;
+  }
+  if(page) window.location.href = page;
+}
+
+function goManagerRoom(){
+  enterManagerRoom();
+}
+
+function applyManagerAssets(){
+  const managerBgUrl = room10AssetUrl("manager.roomManager");
+  if(managerBgUrl && img && img.getAttribute("src") !== managerBgUrl){
+    img.src = managerBgUrl;
+  }
+}
 
 function getStoredUser(){
   const oldLoggedIn = localStorage.getItem("room10LoggedIn") === "true";
@@ -2062,33 +1716,31 @@ function getRoleLabel(roleValue = getRole()){
   const role = String(roleValue || "").toLowerCase();
   if(role === "admin") return "宿管";
   if(role === "owner") return "维修工";
-  if(role === "applying") return "房客";
+  if(role === "trainee") return "练习生";
+  if(role === "applying") return "申请人";
+  if(role === "member") return "房客";
   if(isLoggedIn()) return "房客";
   return "参观者";
 }
 
 function updateStatusUserUI(){
-  if(!currentUserText || !loginOpenBtn || !logoutBtn) return;
-
-  if(isLoggedIn()){
-    const user = getCurrentUser() || "已登录";
-    const roleLabel = getRoleLabel();
-    currentUserText.textContent = `${user} | ${roleLabel}`;
-    loginOpenBtn.classList.add("hidden");
-    logoutBtn.classList.remove("hidden");
-  }else{
-    currentUserText.textContent = "参观者";
-    loginOpenBtn.classList.remove("hidden");
-    logoutBtn.classList.add("hidden");
-  }
+  const user = getStoredUser();
+  const loggedIn = !!(user && user.nickname);
+  setIdentityState({
+    nickname: user?.nickname || "",
+    role: user?.role || "visitor",
+    loggedIn,
+    noticeCount: siteNoticeCount ? Number(siteNoticeCount.textContent || 0) : 0
+  });
 }
 
 function openLogin(targetPage = ""){
   const detail = { targetPage };
   window.dispatchEvent(new CustomEvent("room10:open-login", { detail }));
 
+  const loginPage = getRoom10Page("index");
   const targetParam = targetPage ? `&target=${encodeURIComponent(targetPage)}` : "";
-  window.location.href = `index.html?login=1${targetParam}`;
+  window.location.href = `${loginPage}?login=1${targetParam}`;
 }
 
 function setSiteNoticeCount(count){
@@ -2131,6 +1783,7 @@ function closeSiteNoticePanel(){
 
 function showNotice(message, type = "info", autoHideMs = 2600){
   if(!message) return;
+  if(!pageNotice || !pageNoticeText) return;
   pageNoticeText.textContent = message;
   pageNotice.className = "";
   if(type === "success"){
@@ -2151,7 +1804,70 @@ function showNotice(message, type = "info", autoHideMs = 2600){
 }
 
 function hideNotice(){
-  pageNotice.classList.add("hidden");
+  if(pageNotice) pageNotice.classList.add("hidden");
+}
+
+
+
+function getIdentityTransitionMemberKey(){
+  const user = getStoredUser();
+  return String(user?.member_id || localStorage.getItem("room10MemberId") || getCurrentMemberCode() || user?.nickname || getCurrentUser() || "").trim();
+}
+
+function identityTransitionStorageKey(kind){
+  const memberKey = getIdentityTransitionMemberKey();
+  if(!memberKey) return "";
+  return `room10IdentityTransition:${kind}:${memberKey}`;
+}
+
+function identityTransitionApplicationDoneKey(applicationId){
+  const memberKey = getIdentityTransitionMemberKey();
+  if(!memberKey || !applicationId) return "";
+  return `room10IdentityTransition:admin-approved-application-done:${memberKey}:${applicationId}`;
+}
+
+function getIdentityTransitionWatchData(){
+  const watchKey = identityTransitionStorageKey("admin-pending-watch");
+  if(!watchKey) return null;
+  try{
+    const raw = localStorage.getItem(watchKey);
+    return raw ? JSON.parse(raw) : null;
+  }catch(err){
+    return null;
+  }
+}
+
+function queueSelfApprovedAdminApplicationNotice(items){
+  return false;
+}
+
+function shouldShowAdminApprovalNotice(){
+  return false;
+}
+
+function markAdminApprovalNoticeDone(){
+  const doneKey = identityTransitionStorageKey("admin-approved-done");
+  const watchKey = identityTransitionStorageKey("admin-pending-watch");
+  const previousRoleKey = identityTransitionStorageKey("previous-role");
+
+  const watchData = getIdentityTransitionWatchData();
+  const applicationDoneKey = identityTransitionApplicationDoneKey(watchData?.applicationId);
+
+  if(doneKey) localStorage.setItem(doneKey, "true");
+  if(applicationDoneKey) localStorage.setItem(applicationDoneKey, "true");
+  if(watchKey) localStorage.removeItem(watchKey);
+  if(previousRoleKey) localStorage.setItem(previousRoleKey, "admin");
+}
+
+function showAdminApprovalNoticeOnce(){
+  return;
+}
+
+function closeIdentityTransitionNotice(){
+  if(identityTransitionMask){
+    identityTransitionMask.classList.remove("show");
+    identityTransitionMask.setAttribute("aria-hidden", "true");
+  }
 }
 
 function makeActionKey(kind, id){
@@ -2170,15 +1886,11 @@ function getRequiredVoteCount(adminCount){
   return Math.max(1, Math.ceil((Number(adminCount) || 0) / 2));
 }
 
-function goNeedLogin(page){
-  if(!isLoggedIn()){
-    openLogin(page);
-    return;
-  }
-  window.location.href = page;
+function goNeedLogin(pageKey){
+  goNeedLoginPage(pageKey);
 }
 
-async function logout(){
+function logout(){
   localStorage.removeItem("room10LoggedIn");
   localStorage.removeItem("room10User");
   localStorage.removeItem("room10Role");
@@ -2187,12 +1899,25 @@ async function logout(){
   localStorage.removeItem("room10_user");
   localStorage.removeItem("room10_current_user");
   localStorage.removeItem("currentUser");
-  window.location.href = "manager-visitor.html";
+  goPage("managerVisitor");
 }
 
 
 function getCurrentMemberCode(){
-  return localStorage.getItem("room10MemberCode") || "";
+  const direct = localStorage.getItem("room10MemberCode") || "";
+  if(direct) return direct;
+
+  try{
+    const raw =
+      localStorage.getItem("room10_user") ||
+      localStorage.getItem("room10_current_user") ||
+      localStorage.getItem("currentUser");
+    if(!raw) return "";
+    const data = JSON.parse(raw);
+    return data?.member_code || data?.memberCode || data?.code || "";
+  }catch(err){
+    return "";
+  }
 }
 
 function profileLogStatusLabel(status){
@@ -2383,20 +2108,54 @@ async function requestProfileRevision(logId){
 
 async function getCurrentMemberRecord(){
   const nickname = getCurrentUser();
-  if(!nickname) return null;
+  const storedMemberId = getStoredUser()?.member_id || localStorage.getItem("room10MemberId") || "";
+  const storedMemberCode = getCurrentMemberCode();
 
-  const result = await client
+  if(!nickname && !storedMemberId) return null;
+
+  let query = client
     .from("members")
-    .select("id, nickname, role")
-    .eq("nickname", nickname)
-    .maybeSingle();
+    .select("id, nickname, role, member_code");
+
+  if(storedMemberId){
+    query = query.eq("id", storedMemberId);
+  }else{
+    query = query.eq("nickname", nickname);
+  }
+
+  const result = await query.maybeSingle();
 
   if(result.error){
     console.error("读取当前成员失败：", result.error);
+    if(storedMemberId || nickname){
+      return {
+        id: storedMemberId,
+        nickname,
+        role: getRole(),
+        member_code: storedMemberCode
+      };
+    }
     return null;
   }
 
-  return result.data || null;
+  if(result.data){
+    if(result.data.id) localStorage.setItem("room10MemberId", result.data.id);
+    if(result.data.member_code) localStorage.setItem("room10MemberCode", result.data.member_code);
+    if(result.data.nickname) localStorage.setItem("room10User", result.data.nickname);
+    if(result.data.role) localStorage.setItem("room10Role", result.data.role);
+    return result.data;
+  }
+
+  if(storedMemberId || nickname){
+    return {
+      id: storedMemberId,
+      nickname,
+      role: getRole(),
+      member_code: storedMemberCode
+    };
+  }
+
+  return null;
 }
 
 async function getAdminCount(){
@@ -2455,35 +2214,76 @@ function resetKeyStorageUI(){
   keyStorageError.textContent = "";
   keyStorageEmpty.classList.add("hidden");
   keyListWrap.classList.add("hidden");
-  keyListBody.innerHTML = "";
+  if(window.keyListA) keyListA.innerHTML = "";
+  if(window.keyListB) keyListB.innerHTML = "";
+}
+
+function getKeyPrefix(item){
+  const code = String(item?.key_code || "").trim().toUpperCase();
+  if(code.startsWith("B")) return "B";
+  return "A";
+}
+
+function getKeyStatusClass(item){
+  const status = String(item?.status || "").toLowerCase();
+  const statusLabel = String(item?.status_label || "");
+  if(status === "active" && item?.is_current === true) return "is-active";
+  if(status === "retired" || status === "promoted" || statusLabel.includes("停用")) return "is-stopped";
+  if(item?.is_used === true) return "is-active";
+  return "";
+}
+
+function buildKeyCard(item){
+  const card = document.createElement("article");
+  card.className = "key-card";
+
+  const code = escapeHtml(item.key_code || "—");
+  const user = escapeHtml(item.display_user || "—");
+  const status = escapeHtml(item.status_label || "—");
+  const desc = escapeHtml(item.desc || "—");
+  const statusClass = getKeyStatusClass(item);
+
+  card.innerHTML = `
+    <div class="key-card-main">
+      <div class="key-card-code">${code}</div>
+      <div class="key-card-user">${user}</div>
+    </div>
+    <div class="key-card-meta">
+      <span class="key-card-status ${statusClass}">${status}</span>
+      <span class="key-card-desc">${desc}</span>
+    </div>
+  `;
+
+  return card;
+}
+
+function appendKeyEmpty(target, text){
+  const empty = document.createElement("div");
+  empty.className = "key-card-empty";
+  empty.textContent = text;
+  target.appendChild(empty);
 }
 
 function renderKeyList(rows){
-  keyListBody.innerHTML = "";
+  keyListA.innerHTML = "";
+  keyListB.innerHTML = "";
+
+  const aRows = [];
+  const bRows = [];
 
   rows.forEach(item => {
-    const tr = document.createElement("tr");
-
-    const tdKey = document.createElement("td");
-    tdKey.textContent = item.key_code || "";
-
-    const tdStatus = document.createElement("td");
-    tdStatus.innerHTML = item.is_used
-      ? `<span class="key-status-used">已使用</span>`
-      : `<span class="key-status-free">未使用</span>`;
-
-    const tdUser = document.createElement("td");
-    tdUser.textContent = item.display_user || "—";
-
-    const tdDesc = document.createElement("td");
-    tdDesc.textContent = item.is_used ? "该钥匙已分配给成员" : "该钥匙当前未分配";
-
-    tr.appendChild(tdKey);
-    tr.appendChild(tdStatus);
-    tr.appendChild(tdUser);
-    tr.appendChild(tdDesc);
-    keyListBody.appendChild(tr);
+    if(getKeyPrefix(item) === "B"){
+      bRows.push(item);
+    }else{
+      aRows.push(item);
+    }
   });
+
+  aRows.forEach(item => keyListA.appendChild(buildKeyCard(item)));
+  bRows.forEach(item => keyListB.appendChild(buildKeyCard(item)));
+
+  if(!aRows.length) appendKeyEmpty(keyListA, "暂无已分配的 A 系列钥匙。");
+  if(!bRows.length) appendKeyEmpty(keyListB, "暂无练习生 B 系列钥匙。");
 }
 
 async function loadKeyStorage(force = false){
@@ -2492,55 +2292,30 @@ async function loadKeyStorage(force = false){
   resetKeyStorageUI();
 
   try{
-    const keyResult = await client
-      .from("invite_keys")
-      .select("key_code, is_used, used_by_nickname")
-      .order("key_code", { ascending: true });
+    const currentMember = await getCurrentMemberRecord();
+    const currentMemberCode = currentMember?.member_code || getCurrentMemberCode();
 
-    if(keyResult.error){
-      console.error("读取钥匙保管处失败：", keyResult.error);
+    if(!currentMember?.id || !currentMemberCode){
       keyStorageLoading.classList.add("hidden");
       keyStorageError.classList.remove("hidden");
-      keyStorageError.textContent = "钥匙名单读取失败，请稍后再试。";
+      keyStorageError.textContent = "请重新登录后再查看钥匙保管处。";
       return;
     }
 
-    const keyRows = (keyResult.data || []).filter(item => String(item.key_code || "").trim());
-
-    const memberResult = await client
-      .from("members")
-      .select("member_code, nickname, name");
-
-    if(memberResult.error){
-      console.error("读取成员昵称失败：", memberResult.error);
-      keyStorageLoading.classList.add("hidden");
-      keyStorageError.classList.remove("hidden");
-      keyStorageError.textContent = "钥匙名单读取失败，请稍后再试。";
-      return;
-    }
-
-    const memberMap = {};
-    (memberResult.data || []).forEach(item => {
-      const code = String(item.member_code || "").trim();
-      if(!code) return;
-      memberMap[code] = item;
+    const result = await client.rpc("get_manager_key_storage", {
+      p_manager_member_id: currentMember.id,
+      p_manager_member_code: currentMemberCode
     });
 
-    const rows = keyRows
-      .map(item => {
-        const code = String(item.key_code || "").trim();
-        const memberRow = memberMap[code];
-        return {
-          ...item,
-          display_user: memberRow?.nickname || item.used_by_nickname || memberRow?.name || "—"
-        };
-      })
-      .sort((a, b) => {
-        const pa = parseKeySortValue(a.key_code);
-        const pb = parseKeySortValue(b.key_code);
-        if(pa.num !== pb.num) return pa.num - pb.num;
-        return pa.text.localeCompare(pb.text, "zh-CN");
-      });
+    if(result.error || !result.data?.success){
+      console.error("读取钥匙保管处失败：", result.error || result.data);
+      keyStorageLoading.classList.add("hidden");
+      keyStorageError.classList.remove("hidden");
+      keyStorageError.textContent = result.data?.message || "钥匙名单读取失败，请稍后再试。";
+      return;
+    }
+
+    const rows = Array.isArray(result.data.items) ? result.data.items : [];
 
     keyStorageLoading.classList.add("hidden");
 
@@ -2621,46 +2396,88 @@ function renderMemberApplications(rows, votesMap, currentVoterId, adminCount){
   }).join("");
 }
 
-function renderAdminApplications(rows, votesMap, currentVoterId, adminCount){
+function statusLabel(status){
+  const value = String(status || "pending").toLowerCase();
+  if(value === "approved") return "已通过";
+  if(value === "rejected") return "未通过";
+  if(value === "cancelled") return "已取消";
+  if(value === "pending") return "待处理";
+  return value || "待处理";
+}
+
+function voteLabel(vote){
+  const value = String(vote || "").toLowerCase();
+  if(value === "approve") return "通过";
+  if(value === "reject") return "不通过";
+  return "未操作";
+}
+
+function roleLabelForApplication(role){
+  return getRoleLabel(role || "");
+}
+
+function renderIdentityApplications(items){
   const box = document.getElementById("adminApplyList");
   if(!box) return;
 
+  const rows = Array.isArray(items) ? items : [];
   if(!rows.length){
-    box.innerHTML = `<div class="module-note">当前没有待处理的宿管申请。</div>`;
+    box.innerHTML = `<div class="module-note">当前没有待处理的身份申请。</div>`;
     return;
   }
 
-  const requiredCount = getRequiredVoteCount(adminCount);
-
   box.innerHTML = rows.map(item => {
-    const votes = votesMap[item.id] || [];
-    const myVote = votes.find(v => String(v.voter_member_id) === String(currentVoterId));
-    const busy = isActionBusy("admin", item.id);
-    const approveLabel = busy && myVote?.vote !== "approve" ? "提交中..." : "通过";
-    const rejectLabel = busy && myVote?.vote !== "reject" ? "提交中..." : "不通过";
+    const id = item.id;
+    const status = String(item.status || "pending").toLowerCase();
+    const typeLabel = item.type_label || (item.application_type === "member_upgrade" ? "升级申请" : "宿管申请");
+    const currentRole = roleLabelForApplication(item.member_role);
+    const targetLabel = item.target_label || (item.application_type === "member_upgrade" ? "房客" : "宿管");
+    const reviewLabel = item.review_label || (item.application_type === "member_upgrade" ? "一名宿管通过后生效" : "宿管投票");
+    const approveCount = Number(item.approve_count || 0);
+    const rejectCount = Number(item.reject_count || 0);
+    const requiredCount = Number(item.required_count || 1);
+    const busy = isActionBusy("admin", id);
+    const canReview = status === "pending" && item.can_review !== false;
+    const myVote = item.my_vote || "";
+    const approveLabel = busy ? "处理中..." : "通过";
+    const rejectLabel = busy ? "处理中..." : "不通过";
     const myVoteText = myVote
-      ? `<div class="apply-meta">你当前投票：${myVote.vote === "approve" ? "通过" : "不通过"}（未结算前可修改）</div>`
-      : `<div class="apply-meta">你还未投票</div>`;
+      ? `<div class="apply-meta">你当前操作：${escapeHtml(voteLabel(myVote))}（未结算前可修改）</div>`
+      : (canReview ? `<div class="apply-meta">你还未操作</div>` : ``);
+    const actionHtml = canReview
+      ? `<div class="apply-actions-row">
+          <button class="inline-btn" type="button" ${busy ? "disabled" : ""} onclick="voteAdminApplication('${escapeHtml(id)}', 'approve')">${approveLabel}</button>
+          <button class="sub-btn" type="button" ${busy ? "disabled" : ""} onclick="voteAdminApplication('${escapeHtml(id)}', 'reject')">${rejectLabel}</button>
+        </div>`
+      : `<div class="apply-meta">${status === "pending" ? "不能审核自己的申请。" : "这条申请已经处理完毕。"}</div>`;
 
     return `
       <div class="apply-item">
         <div class="apply-head">
-          <strong>${escapeHtml(item.nickname || "未命名")}</strong>
+          <strong>${escapeHtml(item.nickname || "未命名")}｜${escapeHtml(typeLabel)}</strong>
           <span class="apply-time">${formatTime(item.created_at)}</span>
         </div>
         <div class="apply-body">
-          <div>申请类型：宿管申请</div>
-          <div>当前状态：${escapeHtml(item.status || "pending")}</div>
+          <div>当前身份：${escapeHtml(currentRole)}</div>
+          <div>申请目标：${escapeHtml(targetLabel)}</div>
+          <div>审核方式：${escapeHtml(reviewLabel)}</div>
+          <div>当前状态：${escapeHtml(statusLabel(status))}</div>
         </div>
         ${myVoteText}
-        ${buildVoteSummaryText(votes, requiredCount)}
-        <div class="apply-actions-row">
-          <button class="inline-btn" type="button" ${busy ? "disabled" : ""} onclick="voteAdminApplication('${item.id}', 'approve')">${approveLabel}</button>
-          <button class="sub-btn" type="button" ${busy ? "disabled" : ""} onclick="voteAdminApplication('${item.id}', 'reject')">${rejectLabel}</button>
-        </div>
+        <div class="vote-summary">审核进度：已通过 ${approveCount} / ${requiredCount}，不通过 ${rejectCount}。</div>
+        ${actionHtml}
       </div>
     `;
   }).join("");
+}
+
+function withTimeout(promise, ms, label){
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      window.setTimeout(() => reject(new Error(`${label || "读取"}超时`)), ms);
+    })
+  ]);
 }
 
 async function loadAllApplications(force = false){
@@ -2672,88 +2489,114 @@ async function loadAllApplications(force = false){
   if(!memberApplyList || !adminApplyList) return;
 
   memberApplyList.innerHTML = `<div class="module-note">正在读取入住申请…</div>`;
-  adminApplyList.innerHTML = `<div class="module-note">正在读取宿管申请…</div>`;
+  adminApplyList.innerHTML = `<div class="module-note">正在读取身份申请…</div>`;
+
+  let currentMember = null;
+  let currentVoterId = null;
+  let currentMemberCode = "";
+  let adminCount = 0;
 
   try{
-    const currentMember = await getCurrentMemberRecord();
-    const currentVoterId = currentMember?.id || null;
-    const adminCount = await getAdminCount();
+    currentMember = await withTimeout(getCurrentMemberRecord(), 8000, "当前登录信息读取");
+    currentVoterId = currentMember?.id || null;
+    currentMemberCode = currentMember?.member_code || getCurrentMemberCode();
+  }catch(err){
+    console.error("读取当前登录信息失败：", err);
+    currentMember = null;
+    currentVoterId = null;
+    currentMemberCode = getCurrentMemberCode();
+  }
 
-    const memberResult = await client
-      .from("applications")
-      .select("id, name, contact_qq, status, member_code, created_at")
-      .eq("status", "pending")
-      .order("created_at", { ascending: false });
+  try{
+    adminCount = await withTimeout(getAdminCount(), 8000, "宿管数量读取");
+  }catch(err){
+    console.error("读取宿管数量失败：", err);
+    adminCount = 1;
+  }
 
-    const adminResult = await client
-      .from("admin_applications")
-      .select("id, member_id, nickname, status, created_at, updated_at")
-      .eq("status", "pending")
-      .order("created_at", { ascending: false });
+  let memberDone = false;
+  let identityDone = false;
+
+  try{
+    const memberResult = await withTimeout(
+      client
+        .from("applications")
+        .select("id, name, contact_qq, status, member_code, created_at")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false }),
+      10000,
+      "入住申请读取"
+    );
 
     if(memberResult.error){
       console.error("读取入住申请失败：", memberResult.error);
-      memberApplyList.innerHTML = `<div class="module-note">入住申请读取失败</div>`;
+      memberApplyList.innerHTML = `<div class="module-note">入住申请读取失败，请检查 applications 表读取权限。</div>`;
     }else{
       const memberAppIds = (memberResult.data || []).map(item => item.id);
       let memberVotesMap = {};
 
       if(memberAppIds.length){
-        const memberVoteResult = await client
-          .from("application_votes")
-          .select("application_id, voter_member_id, vote")
-          .in("application_id", memberAppIds);
+        try{
+          const memberVoteResult = await withTimeout(
+            client
+              .from("application_votes")
+              .select("application_id, voter_member_id, vote")
+              .in("application_id", memberAppIds),
+            10000,
+            "入住申请投票读取"
+          );
 
-        if(memberVoteResult.error){
-          console.error("读取入住申请投票失败：", memberVoteResult.error);
-        }else{
-          memberVotesMap = (memberVoteResult.data || []).reduce((acc, row) => {
-            const key = String(row.application_id);
-            if(!acc[key]) acc[key] = [];
-            acc[key].push(row);
-            return acc;
-          }, {});
+          if(memberVoteResult.error){
+            console.error("读取入住申请投票失败：", memberVoteResult.error);
+          }else{
+            memberVotesMap = (memberVoteResult.data || []).reduce((acc, row) => {
+              const key = String(row.application_id);
+              if(!acc[key]) acc[key] = [];
+              acc[key].push(row);
+              return acc;
+            }, {});
+          }
+        }catch(voteErr){
+          console.error("读取入住申请投票异常：", voteErr);
         }
       }
 
       renderMemberApplications(memberResult.data || [], memberVotesMap, currentVoterId, adminCount);
     }
-
-    if(adminResult.error){
-      console.error("读取宿管申请失败：", adminResult.error);
-      adminApplyList.innerHTML = `<div class="module-note">宿管申请读取失败</div>`;
-    }else{
-      const appIds = (adminResult.data || []).map(item => item.id);
-      let votesMap = {};
-
-      if(appIds.length){
-        const voteResult = await client
-          .from("admin_application_votes")
-          .select("application_id, voter_member_id, vote")
-          .in("application_id", appIds);
-
-        if(voteResult.error){
-          console.error("读取宿管申请投票失败：", voteResult.error);
-        }else{
-          votesMap = (voteResult.data || []).reduce((acc, row) => {
-            const key = String(row.application_id);
-            if(!acc[key]) acc[key] = [];
-            acc[key].push(row);
-            return acc;
-          }, {});
-        }
-      }
-
-      renderAdminApplications(adminResult.data || [], votesMap, currentVoterId, adminCount);
-    }
-
-    archiveLoaded = true;
-
+    memberDone = true;
   }catch(err){
-    console.error("loadAllApplications() 异常：", err);
-    memberApplyList.innerHTML = `<div class="module-note">入住申请读取失败</div>`;
-    adminApplyList.innerHTML = `<div class="module-note">宿管申请读取失败</div>`;
+    console.error("loadAllApplications() 入住申请异常：", err);
+    memberApplyList.innerHTML = `<div class="module-note">入住申请读取超时或失败，请刷新后重试。</div>`;
   }
+
+  try{
+    if(!currentMember?.id || !currentMemberCode){
+      adminApplyList.innerHTML = `<div class="module-note">身份申请读取失败：当前登录信息不完整，请重新登录。</div>`;
+    }else{
+      const identityResult = await withTimeout(
+        client.rpc("get_manager_identity_applications", {
+          p_manager_member_id: currentMember.id,
+          p_manager_member_code: currentMemberCode
+        }),
+        10000,
+        "身份申请读取"
+      );
+
+      if(identityResult.error || !identityResult.data?.success){
+        console.error("读取身份申请失败：", identityResult.error || identityResult.data);
+        adminApplyList.innerHTML = `<div class="module-note">${escapeHtml(identityResult.data?.message || "身份申请读取失败")}</div>`;
+      }else{
+        const identityItems = identityResult.data.items || [];
+        renderIdentityApplications(identityItems);
+      }
+    }
+    identityDone = true;
+  }catch(err){
+    console.error("loadAllApplications() 身份申请异常：", err);
+    adminApplyList.innerHTML = `<div class="module-note">身份申请读取超时或失败，请刷新后重试。</div>`;
+  }
+
+  archiveLoaded = memberDone && identityDone;
 }
 
 function renderProfileChangeLogs(rows, errorMessage = ""){
@@ -3183,90 +3026,36 @@ async function voteAdminApplication(applicationId, voteValue){
 
   try{
     const voter = await getCurrentMemberRecord();
+    const voterCode = voter?.member_code || getCurrentMemberCode();
 
-    if(!voter?.id){
+    if(!voter?.id || !voterCode){
       showNotice("未读取到当前管理员信息，请重新登录。", "error");
       return;
     }
 
-    const appInfo = await client
-      .from("admin_applications")
-      .select("id, member_id, status")
-      .eq("id", applicationId)
-      .maybeSingle();
+    const reviewResult = await client.rpc("review_manager_identity_application", {
+      p_manager_member_id: voter.id,
+      p_manager_member_code: voterCode,
+      p_application_id: Number(applicationId),
+      p_vote: voteValue
+    });
 
-    if(appInfo.error || !appInfo.data){
-      console.error("读取宿管申请信息失败：", appInfo.error);
-      showNotice("投票失败，请稍后再试。", "error");
+    if(reviewResult.error || !reviewResult.data?.success){
+      console.error("审核身份申请失败：", reviewResult.error || reviewResult.data);
+      showNotice(reviewResult.data?.message || "审核失败，请稍后再试。", "error");
       return;
     }
-
-    if(String(appInfo.data.status || "").toLowerCase() !== "pending"){
-      showNotice("这条宿管申请已经结算。", "info");
-      archiveLoaded = false;
-      logsLoaded = false;
-      await loadAllApplications(true);
-      await loadProfileReviewLogs(true);
-      return;
-    }
-
-    if(String(appInfo.data.member_id) === String(voter.id)){
-      showNotice("不能给自己的宿管申请投票。", "error");
-      return;
-    }
-
-    const existing = await client
-      .from("admin_application_votes")
-      .select("id, vote")
-      .eq("application_id", applicationId)
-      .eq("voter_member_id", voter.id)
-      .maybeSingle();
-
-    if(existing.error){
-      console.error("检查投票记录失败：", existing.error);
-      showNotice("投票失败，请稍后再试。", "error");
-      return;
-    }
-
-    if(existing.data){
-      const updateResult = await client
-        .from("admin_application_votes")
-        .update({ vote: voteValue })
-        .eq("id", existing.data.id);
-
-      if(updateResult.error){
-        console.error("更新投票失败：", updateResult.error);
-        showNotice("投票失败，请稍后再试。", "error");
-        return;
-      }
-    }else{
-      const insertResult = await client
-        .from("admin_application_votes")
-        .insert([{
-          application_id: applicationId,
-          voter_member_id: voter.id,
-          vote: voteValue
-        }]);
-
-      if(insertResult.error){
-        console.error("写入投票失败：", insertResult.error);
-        showNotice("投票失败，请稍后再试。", "error");
-        return;
-      }
-    }
-
-    const finalized = await finalizeAdminApplicationIfReady(appInfo.data.id, appInfo.data.member_id);
 
     archiveLoaded = false;
     logsLoaded = false;
     await loadAllApplications(true);
     await loadProfileReviewLogs(true);
 
-    showNotice(finalized ? "投票已结算。" : "投票已保存，结算前可继续修改。", finalized ? "success" : "info");
+    showNotice(reviewResult.data.message || "审核结果已提交。", "success");
 
   }catch(err){
     console.error("voteAdminApplication() 异常：", err);
-    showNotice("投票失败，请稍后再试。", "error");
+    showNotice("审核失败，请稍后再试。", "error");
   }finally{
     setActionBusy("admin", applicationId, false);
     archiveLoaded = false;
@@ -3274,31 +3063,16 @@ async function voteAdminApplication(applicationId, voteValue){
   }
 }
 
-async function ensureAdminPage(){
+function ensureAdminPage(){
   if(!isLoggedIn()){
-    window.location.href = "manager-visitor.html";
+    goPage("managerVisitor");
     return;
   }
 
   const role = getRole();
 
-  if(role === "owner"){
-    window.location.href = "manager-owner.html";
-    return;
-  }
-
-  if(role === "member"){
-    window.location.href = "manager-member.html";
-    return;
-  }
-
-  if(role === "applying"){
-    window.location.href = "manager-visitor.html";
-    return;
-  }
-
-  if(role !== "admin"){
-    window.location.href = "manager-visitor.html";
+  if(!isAdminRole(role)){
+    goPage(getManagerPageKeyByRole(role));
     return;
   }
 
@@ -3306,29 +3080,61 @@ async function ensureAdminPage(){
   setAdminTab(activeAdminTab);
 }
 
-window.addEventListener("resize", syncManagerUIToImage);
-
-if(managerImg?.complete && managerImg?.naturalWidth){
-  syncManagerUIToImage();
-}else if(managerImg){
-  managerImg.addEventListener("load", syncManagerUIToImage, { once:true });
-}
-
 renderSiteNoticeList([]);
 
-if(siteNoticeBtn){
-  siteNoticeBtn.addEventListener("click", event => {
+applyManagerAssets();
+syncOverlayToImage();
+setupRoomNav(CURRENT_ROOM);
+readLocalIdentity();
+
+if(identityNoticeBtn){
+  identityNoticeBtn.addEventListener("click", event => {
     event.stopPropagation();
-    toggleSiteNoticePanel();
+    const willShow = !identityNoticePanel.classList.contains("show");
+
+    if(willShow){
+      positionIdentityNoticePanel();
+      identityNoticePanel.classList.add("show");
+    }else{
+      identityNoticePanel.classList.remove("show");
+    }
   });
 }
 
-if(loginOpenBtn){
-  loginOpenBtn.addEventListener("click", event => {
+if(identityAuthBtn){
+  identityAuthBtn.addEventListener("click", event => {
     event.stopPropagation();
-    openLogin();
+    if(isLoggedIn()){
+      logout();
+    }else{
+      openLogin();
+    }
   });
 }
+
+if(img && img.complete && img.naturalWidth){
+  syncOverlayToImage();
+}else if(img){
+  img.addEventListener("load", syncOverlayToImage, { once:true });
+}
+
+window.addEventListener("resize", () => {
+  syncOverlayToImage();
+  if(identityNoticePanel && (identityNoticePanel.classList.contains("show") || !isMobileLayout())){
+    positionIdentityNoticePanel();
+  }
+});
+
+window.addEventListener("orientationchange", () => {
+  setTimeout(() => {
+    syncOverlayToImage();
+    if(identityNoticePanel && (identityNoticePanel.classList.contains("show") || !isMobileLayout())){
+      positionIdentityNoticePanel();
+    }
+  }, 80);
+});
+
+setTimeout(syncOverlayToImage, 80);
 
 document.addEventListener("click", event => {
   if(siteNoticePanel && siteNoticeBtn){
@@ -3340,8 +3146,22 @@ document.addEventListener("click", event => {
 document.addEventListener("keydown", event => {
   if(event.key === "Escape"){
     closeProfileChangeDetail();
+    closeIdentityTransitionNotice();
   }
 });
+
+
+if(identityTransitionConfirm){
+  identityTransitionConfirm.addEventListener("click", closeIdentityTransitionNotice);
+}
+
+if(identityTransitionMask){
+  identityTransitionMask.addEventListener("click", event => {
+    if(event.target === identityTransitionMask){
+      closeIdentityTransitionNotice();
+    }
+  });
+}
 
 const profileDetailOverlay = document.getElementById("profileDetailOverlay");
 if(profileDetailOverlay){
@@ -3372,7 +3192,9 @@ window.addEventListener("storage", async (e) => {
   }
 });
 
-</script>
 
+
+
+</script>
 </body>
 </html>
