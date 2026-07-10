@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>骑士精神｜确认版数据库重接</title>
+<title>骑士精神｜十号房</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -214,11 +214,20 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   text-overflow:ellipsis;
 }
 .option-key{
-  width:100%;
-  text-align:center;
-  color:rgba(107,71,44,.45);
-  font-size:11px;
-  font-weight:900;
+  max-width:100%;
+  min-height:20px;
+  padding:2px 8px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:#7a502c;
+  font-size:10px;
+  font-weight:950;
+  line-height:1;
+  white-space:nowrap;
+  background:rgba(255,248,232,.82);
+  border:1px solid rgba(174,132,94,.18);
 }
 
 .action-row{
@@ -800,16 +809,13 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 }
 
 .fx-clear-burst{
-
   position:absolute;
   left:50%;
   top:50%;
-  transform:translate(-50%,-50%);
-  border-radius:50%;
-}
-.fx-clear-burst{
   width:72%;
   height:72%;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
   border:6px solid rgba(233,248,255,.74);
   box-shadow:
     0 0 0 18px rgba(119,215,255,.12),
@@ -1043,8 +1049,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   border:1px solid rgba(174,132,94,.18);
   cursor:pointer;
 }
-.saved-tip{color:var(--muted);font-size:12px;line-height:1.6;font-weight:800}
-.saved-tip{display:none}
+.saved-tip{display:none;color:var(--muted);font-size:12px;line-height:1.6;font-weight:800}
 .saved-tip.show{display:block}
 
 /* modal */
@@ -1305,13 +1310,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   <script>
     const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
     const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
-    const client = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-    window.ROOM10_SUPABASE_URL = supabaseUrl;
-    window.ROOM10_SUPABASE_ANON_KEY = supabaseKey;
-    window.room10SupabaseClient = client;
-    window.room10Supabase = client;
-    window.supabaseClient = client;
+    window.room10SupabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   </script>
   <script src="../room10-paths.js"></script>
 </head>
@@ -1364,7 +1363,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
             <div class="stat">守护<strong id="guardNum">0</strong></div>
             <div class="stat">翻牌<strong id="flipNum">0</strong></div>
             <div class="stat">剩余<strong id="remainNum">0</strong></div>
-            <div class="stat">幸运x9<strong id="x9Num">0</strong></div>
+            <div class="stat">全家福<strong id="x9Num">0</strong></div>
             <div class="stat">清台<strong id="clearNum">0</strong></div>
           </div>
 
@@ -1404,7 +1403,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
               <div class="stat">守护<strong id="resultGuard">0</strong></div>
               <div class="stat">对碰<strong id="resultPair">0</strong></div>
               <div class="stat">三连<strong id="resultTriple">0</strong></div>
-              <div class="stat">幸运x9<strong id="resultX9">0</strong></div>
+              <div class="stat">全家福<strong id="resultX9">0</strong></div>
               <div class="stat">清台<strong id="resultClear">0</strong></div>
               <div class="stat">总翻牌<strong id="resultFlip">0</strong></div>
               <div class="stat" style="grid-column:1/-1">返还金币<strong id="resultGold">0</strong></div>
@@ -1444,7 +1443,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
             <div class="side-num">守护<strong id="sideGuard">0</strong></div>
             <div class="side-num">对碰<strong id="sidePair">0</strong></div>
             <div class="side-num">三连<strong id="sideTriple">0</strong></div>
-            <div class="side-num">幸运x9<strong id="sideX9">0</strong></div>
+            <div class="side-num">全家福<strong id="sideX9">0</strong></div>
             <div class="side-num">清台<strong id="sideClear">0</strong></div>
             <div class="side-num">翻牌<strong id="sideFlip">0</strong></div>
           </div>
@@ -1452,15 +1451,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 
         <section class="side-section">
           <p class="side-label">风云榜</p>
-          <ol class="rank-list">
-            <li><b>1</b><span>翻牌大师榜</span><button type="button" data-board="flip_master">查看</button></li>
-            <li><b>2</b><span>守护率榜</span><button type="button" data-board="guard_rate">查看</button></li>
-            <li><b>3</b><span>最强守护榜</span><button type="button" data-board="guard_master">查看</button></li>
-            <li><b>4</b><span>幸运 x9 榜</span><button type="button" data-board="lucky_x9">查看</button></li>
-            <li><b>5</b><span>清台榜</span><button type="button" data-board="clear_board">查看</button></li>
-            <li><b>6</b><span>本月最受欢迎守护者</span><button type="button" data-board="popular_knight_month">查看</button></li>
-            <li><b>7</b><span>本月最可靠守护者</span><button type="button" data-board="reliable_knight_month">查看</button></li>
-          </ol>
+          <ol class="rank-list" id="sideRankList"></ol>
         </section>
       </aside>
     </div>
@@ -1502,95 +1493,13 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     leaderboards: "get_knight_spirit_leaderboards"
   };
 
-  const LEADERBOARD_ORDER = [
-    "flip_master",
-    "guard_rate",
-    "guard_master",
-    "lucky_x9",
-    "clear_board",
-    "popular_knight_month",
-    "reliable_knight_month"
-  ];
-
-  const LEADERBOARD_ALIASES = {
-    flips: "flip_master",
-    flip: "flip_master",
-    total_flips: "flip_master",
-    rate: "guard_rate",
-    guardRate: "guard_rate",
-    guards: "guard_master",
-    guard: "guard_master",
-    x9: "lucky_x9",
-    lucky: "lucky_x9",
-    clear: "clear_board",
-    clearBoard: "clear_board",
-    popular: "popular_knight_month",
-    reliable: "reliable_knight_month"
-  };
-
-  const LEADERBOARD_META = {
-    flip_master: {
-      title: "翻牌大师榜",
-      shortDesc: "累计翻牌",
-      description: "统计成员在骑士精神所有已结算旅程中的总翻牌数量。数值越高，代表玩得越多。",
-      valueLabel: "总翻牌",
-      unit: "张"
-    },
-    guard_rate: {
-      title: "守护率榜",
-      shortDesc: "守护 ÷ 翻牌",
-      description: "统计成员获得骑士守护的比例：守护次数 ÷ 总翻牌数。至少总翻牌 20 张后才进入该榜。",
-      valueLabel: "守护率",
-      unit: "%"
-    },
-    guard_master: {
-      title: "最强守护榜",
-      shortDesc: "累计守护",
-      description: "统计成员在所有旅程中获得骑士守护的总次数。数值越高，代表被骑士牌守护得越多。",
-      valueLabel: "守护次数",
-      unit: "次"
-    },
-    lucky_x9: {
-      title: "幸运 x9 榜",
-      shortDesc: "全家福次数",
-      description: "统计成员触发幸运 x9 / 全家福的次数。幸运 x9 是九宫格 9 位成员各出现 1 张。",
-      valueLabel: "幸运 x9",
-      unit: "次"
-    },
-    clear_board: {
-      title: "清台榜",
-      shortDesc: "清空台面",
-      description: "统计成员因三连或对碰消除后触发清台的次数。幸运 x9 清空台面不计入清台。",
-      valueLabel: "清台次数",
-      unit: "次"
-    },
-    popular_knight_month: {
-      title: "本月最受欢迎守护者",
-      shortDesc: "被选择次数",
-      description: "统计本月被其他成员选择为骑士的次数。这里看的是“谁最常被选为骑士”。",
-      valueLabel: "被选择",
-      unit: "局"
-    },
-    reliable_knight_month: {
-      title: "本月最可靠守护者",
-      shortDesc: "平均守护",
-      description: "统计本月被选择为骑士后，平均每局带来的守护次数。至少本月被选择 20 局后才进入该榜。",
-      valueLabel: "平均守护",
-      unit: "次/局"
-    }
-  };
-
   const EMERGENCY_TEXTS = {
     "page.title": "骑士精神",
     "status.loading": "读取中",
-    "status.no_permission": "成员限定",
     "button.back_game": "返回游戏房",
     "button.close": "确认",
-    "button.select_knight": "请先选择骑士",
-    "permission.title": "暂时无法开始旅程",
-    "permission.body": "该游戏仅限十号房成员参与。请先登录并成为成员后再开始旅程。",
     "error.database": "数据库读取失败",
-    "error.no_supabase": "没有找到 Supabase 连接配置。请确认当前页面已引入全站数据库连接脚本，或已创建 window.room10SupabaseClient / window.supabaseClient。",
+    "error.no_supabase": "没有找到 Supabase 连接配置。请确认当前页面已创建 window.room10SupabaseClient。",
     "error.missing_config": "配置缺失：{{key}}"
   };
 
@@ -1632,6 +1541,20 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     "result.reward_title",
     "result.no_reward",
     "leaderboard.title",
+    "leaderboard.flip_master.description",
+    "leaderboard.flip_master.value_label",
+    "leaderboard.guard_rate.description",
+    "leaderboard.guard_rate.value_label",
+    "leaderboard.guard_master.description",
+    "leaderboard.guard_master.value_label",
+    "leaderboard.lucky_x9.description",
+    "leaderboard.lucky_x9.value_label",
+    "leaderboard.clear_board.description",
+    "leaderboard.clear_board.value_label",
+    "leaderboard.popular_knight_month.description",
+    "leaderboard.popular_knight_month.value_label",
+    "leaderboard.reliable_knight_month.description",
+    "leaderboard.reliable_knight_month.value_label",
     "unlock.title",
     "unlock.body",
     "hint.select_knight",
@@ -1674,7 +1597,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     "sideFlip","savedTip","resultAvatar","resultMain","resultGuard","resultPair","resultTriple",
     "resultX9","resultClear","resultFlip","resultGold","rewardList","againBtn","backBtn",
     "permissionBackBtn","rewardMask","modalRewards","closeRewardBtn","leaderMask","leaderTabs",
-    "leaderContent","closeLeaderBtn"
+    "leaderContent","closeLeaderBtn","sideRankList"
   ].forEach(id => {
     el[id] = document.getElementById(id);
   });
@@ -1712,9 +1635,12 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     el.leaderMask.addEventListener("click", event => {
       if (event.target === el.leaderMask) closeLeaderModal();
     });
-    document.querySelectorAll("[data-board]").forEach(button => {
-      button.addEventListener("click", () => openLeaderModal(button.dataset.board));
-    });
+    if (el.sideRankList){
+      el.sideRankList.addEventListener("click", event => {
+        const button = event.target.closest("[data-board]");
+        if (button) openLeaderModal(button.dataset.board);
+      });
+    }
   }
 
   function setLoadingState(){
@@ -1759,6 +1685,10 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     state.canPlay = Boolean(payload.can_play);
     state.candidates = normalizeCandidates(payload.candidates || payload.knights || []);
     state.leaderboards = normalizeLeaderboards(payload.leaderboards || {});
+    renderSideLeaderboards();
+    if (!Object.keys(state.leaderboards).length){
+      loadLeaderboards(false);
+    }
     state.goldCost = Number(payload.gold_cost || 0);
     state.costText = payload.cost_text || payload.status_text || "";
     state.dailyFreeAvailable = Boolean(payload.daily_free_available);
@@ -1803,6 +1733,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     modalTitle.textContent = t("unlock.title");
     modalBody.textContent = t("unlock.body");
     leaderboardTitle.textContent = t("leaderboard.title");
+    el.savedTip.textContent = t("status.restored");
 
     el.startBtn.textContent = t("button.start");
     el.roundBtn.textContent = t("button.start");
@@ -1944,7 +1875,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 
       const code = document.createElement("div");
       code.className = "option-key";
-      code.textContent = member.memberCode || "";
+      code.textContent = member.cohort || "";
       button.appendChild(code);
 
       button.addEventListener("click", () => {
@@ -2058,6 +1989,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       const payload = unwrapPayload(response);
       await applyGamePayload(payload, false);
     } catch (error){
+      state.autoPlay = false;
+      clearAutoTimer();
       showFatalError(error);
     } finally {
       state.busy = false;
@@ -2166,7 +2099,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 
       renderGame();
 
-      el.hint.textContent = event.hint || getEventHint(event.type);
+      el.hint.textContent = event.hint || missingConfigText(`event.${event.type}.hint`);
       await wait(event.type === "clear" ? 720 : 660);
       await showToast(formatEventToast(event));
       await wait(80);
@@ -2293,27 +2226,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     return normalizeBoard(board).map(card => card ? { ...card } : null);
   }
 
-  function getEventHint(type){
-    const hint = {
-      guard:"骑士牌触发守护。",
-      pair:"对碰：两张相同成员相遇。",
-      triple:"三连：三张相同成员连成一线。",
-      x9:"幸运 x9：九位成员齐聚。",
-      clear:"清台：因为对碰或三连清空台面。"
-    };
-    return hint[type] || "";
-  }
-
-  function getEventText(type){
-    const text = {
-      guard:"骑士守护了你",
-      pair:"默契对碰",
-      triple:"同频三连",
-      x9:"✨ 幸运 x9 ✨",
-      clear:"清台！战场已清空"
-    };
-    return text[type] || "";
-  }
 
   function showResult(game){
     showScreen("result");
@@ -2562,7 +2474,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 
       const label = document.createElement("div");
       label.className = "fx-clear-label";
-      label.textContent = "清台";
+      label.textContent = t("stat.clear");
       el.effectLayer.appendChild(label);
       return;
     }
@@ -2631,7 +2543,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 
     const label = document.createElement("div");
     label.className = "fx-x9-label";
-    label.textContent = "幸运x9";
+    label.textContent = t("stat.lucky_x9");
     el.effectLayer.appendChild(label);
   }
 
@@ -2727,7 +2639,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     if (knight){
       el.sideAvatar.appendChild(createAvatar(knight, "avatar small"));
       el.sideName.textContent = knight.name;
-      el.sideKey.textContent = knight.memberCode || "";
+      el.sideKey.textContent = knight.cohort || "";
     } else {
       el.sideAvatar.appendChild(createAvatar({ name:"", avatarText:"", colorA:"#c7aa80", colorB:"#92704b" }, "avatar small"));
       el.sideName.textContent = t("empty.knight");
@@ -2776,13 +2688,13 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   }
 
   function formatEventToast(event){
-    const rawText = String(event.text || getEventText(event.type) || "").trim();
+    const rawText = String(event.text || missingConfigText(`event.${event.type}.text`)).trim();
     const cleanedText = rawText
       .replace(/，?\s*待翻牌\s*\+\s*\d+\s*$/u, "")
       .replace(/,?\s*待翻牌\s*\+\s*\d+\s*$/iu, "")
       .trim();
 
-    const reason = cleanedText || rawText || getEventText(event.type);
+    const reason = cleanedText || rawText;
 
     const delta = getRemainingDelta(event);
     const rewardParts = [];
@@ -2806,15 +2718,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       return delta > 0 ? delta : 0;
     }
 
-    const fallback = {
-      guard: 1,
-      pair: 1,
-      triple: 3,
-      x9: 5,
-      clear: 5
-    };
-
-    return fallback[event.type] || 0;
+    return 0;
   }
 
   function renderRewardList(rewards){
@@ -2898,19 +2802,31 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     el.rewardMask.classList.remove("show");
   }
 
+  async function loadLeaderboards(showFatal = true){
+    try{
+      const response = await callRpc(RPC.leaderboards, { p_game_key: GAME_KEY });
+      const payload = unwrapPayload(response);
+      state.leaderboards = normalizeLeaderboards(payload.leaderboards || payload || {});
+      renderSideLeaderboards();
+      return true;
+    } catch (error){
+      if (showFatal){
+        showFatalError(error);
+      } else {
+        console.error("骑士风云榜读取失败：", error);
+      }
+      return false;
+    }
+  }
+
   async function openLeaderModal(defaultKey){
     if (!state.leaderboards || !Object.keys(state.leaderboards).length){
-      try{
-        const response = await callRpc(RPC.leaderboards, { p_game_key: GAME_KEY });
-        const payload = unwrapPayload(response);
-        state.leaderboards = normalizeLeaderboards(payload.leaderboards || payload || {});
-      } catch (error){
-        showFatalError(error);
-        return;
-      }
+      const loaded = await loadLeaderboards(true);
+      if (!loaded) return;
     }
 
     const key = resolveLeaderKey(defaultKey);
+    if (!key) return;
     renderLeaderTabs(key);
     renderLeaderContent(key);
     el.leaderMask.classList.add("show");
@@ -2921,13 +2837,43 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   }
 
   function resolveLeaderKey(key){
-    const wanted = LEADERBOARD_ALIASES[key] || key;
-    if (wanted && state.leaderboards[wanted]) return wanted;
+    if (key && state.leaderboards[key]) return key;
+    return orderedLeaderboardKeys()[0] || "";
+  }
 
-    const firstOrdered = LEADERBOARD_ORDER.find(boardKey => state.leaderboards[boardKey]);
-    if (firstOrdered) return firstOrdered;
+  function renderSideLeaderboards(){
+    if (!el.sideRankList) return;
+    el.sideRankList.innerHTML = "";
 
-    return Object.keys(state.leaderboards || {})[0] || "";
+    const keys = orderedLeaderboardKeys();
+    if (!keys.length){
+      const li = document.createElement("li");
+      li.textContent = t("empty.leaderboard");
+      el.sideRankList.appendChild(li);
+      return;
+    }
+
+    keys.forEach((key, index) => {
+      const board = state.leaderboards[key];
+      const meta = getLeaderboardMeta(key, board);
+      const li = document.createElement("li");
+
+      const rank = document.createElement("b");
+      rank.textContent = String(index + 1);
+
+      const title = document.createElement("span");
+      title.textContent = meta.title;
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.board = key;
+      button.textContent = "查看";
+
+      li.appendChild(rank);
+      li.appendChild(title);
+      li.appendChild(button);
+      el.sideRankList.appendChild(li);
+    });
   }
 
   function renderLeaderTabs(activeKey){
@@ -2972,13 +2918,13 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     title.textContent = meta.title;
 
     const desc = document.createElement("p");
-    desc.textContent = meta.description || "暂无统计说明。";
+    desc.textContent = meta.description;
 
     const metaRow = document.createElement("div");
     metaRow.className = "leader-meta";
 
     const valueChip = document.createElement("span");
-    valueChip.textContent = "成绩：" + (meta.valueLabel || "成绩");
+    valueChip.textContent = "成绩：" + meta.valueLabel;
 
     const unitChip = document.createElement("span");
     unitChip.textContent = "单位：" + (meta.unit || "无");
@@ -3004,7 +2950,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 
     const thead = document.createElement("thead");
     const headRow = document.createElement("tr");
-    ["排名","成员", meta.valueLabel || "成绩"].forEach(text => {
+    ["排名","成员", meta.valueLabel].forEach(text => {
       const th = document.createElement("th");
       th.textContent = text;
       headRow.appendChild(th);
@@ -3037,25 +2983,33 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   }
 
   function orderedLeaderboardKeys(){
-    const source = state.leaderboards || {};
-    const keys = [];
-    LEADERBOARD_ORDER.forEach(key => {
-      if (source[key]) keys.push(key);
+    return Object.keys(state.leaderboards || {}).sort((a, b) => {
+      const aRawOrder = state.leaderboards[a]?.sortOrder;
+      const bRawOrder = state.leaderboards[b]?.sortOrder;
+      const aHasOrder = aRawOrder !== null && aRawOrder !== undefined && aRawOrder !== "" && Number.isFinite(Number(aRawOrder));
+      const bHasOrder = bRawOrder !== null && bRawOrder !== undefined && bRawOrder !== "" && Number.isFinite(Number(bRawOrder));
+      const aOrder = aHasOrder ? Number(aRawOrder) : null;
+      const bOrder = bHasOrder ? Number(bRawOrder) : null;
+
+      if (aHasOrder && bHasOrder && aOrder !== bOrder) return aOrder - bOrder;
+      if (aHasOrder !== bHasOrder) return aHasOrder ? -1 : 1;
+      return 0;
     });
-    Object.keys(source).forEach(key => {
-      if (!keys.includes(key)) keys.push(key);
-    });
-    return keys;
   }
 
   function getLeaderboardMeta(key, board){
-    const meta = LEADERBOARD_META[key] || {};
+    const descriptionKey = `leaderboard.${key}.description`;
+    const valueLabelKey = `leaderboard.${key}.value_label`;
+
+    const description = state.texts[descriptionKey] || "";
+    const valueLabel = state.texts[valueLabelKey] || "";
+
     return {
-      title: board?.title || meta.title || key || "榜单",
-      shortDesc: meta.shortDesc || "",
-      description: board?.description || meta.description || "",
-      valueLabel: board?.valueLabel || meta.valueLabel || "成绩",
-      unit: board?.unit || meta.unit || ""
+      title: board?.title || missingConfigText(`leaderboard.${key}.title`),
+      shortDesc: valueLabel || missingConfigText(valueLabelKey),
+      description: description || missingConfigText(descriptionKey),
+      valueLabel: valueLabel || missingConfigText(valueLabelKey),
+      unit: board?.unit || ""
     };
   }
 
@@ -3093,11 +3047,14 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   }
 
   function backToGameRoom(){
-    const path =
-      resolveRoomPath("game") ||
-      resolveRoomPath("gameHome") ||
-      resolveRoomPath("game.index") ||
-      "../game/game.html";
+    const path = typeof window.room10Page === "function"
+      ? window.room10Page("game")
+      : "";
+
+    if (!path){
+      showFatalError(new Error(missingConfigText("room10Page(game)")));
+      return;
+    }
 
     window.location.href = path;
   }
@@ -3110,6 +3067,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   }
 
   function showFatalError(error){
+    state.autoPlay = false;
+    clearAutoTimer();
     const message = error && error.message ? error.message : String(error);
     const title = fallbackText("page.title");
     const errorTitle = fallbackText("error.database");
@@ -3124,57 +3083,16 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   }
 
   async function callRpc(name, params){
-    const client = await getSupabaseClientAsync();
+    const client = getSupabaseClient();
     const result = await client.rpc(name, params || {});
     if (result.error) throw new Error(result.error.message);
     return result.data;
   }
 
-  async function getSupabaseClientAsync(){
-    let lastError = null;
-
-    for (let i = 0; i < 30; i++){
-      try{
-        const client = getSupabaseClient();
-        if (client?.rpc) return client;
-      }catch(error){
-        lastError = error;
-      }
-
-      await wait(100);
-    }
-
-    throw lastError || new Error(fallbackText("error.no_supabase"));
-  }
-
   function getSupabaseClient(){
-    if (window.room10SupabaseClient?.rpc) return window.room10SupabaseClient;
-    if (window.room10Supabase?.rpc) return window.room10Supabase;
-    if (window.supabaseClient?.rpc) return window.supabaseClient;
-    if (window.supabaseClientPublic?.rpc) return window.supabaseClientPublic;
-    if (window.supabaseClientAnon?.rpc) return window.supabaseClientAnon;
-    if (window.sb?.rpc) return window.sb;
-
-    if (window.ROOM10_DB?.client?.rpc) return window.ROOM10_DB.client;
-    if (window.Room10DB?.client?.rpc) return window.Room10DB.client;
-
-    if (typeof client !== "undefined" && client?.rpc){
-      window.room10SupabaseClient = client;
-      window.room10Supabase = client;
-      window.supabaseClient = client;
-      return client;
-    }
-
-    const url = window.ROOM10_SUPABASE_URL || window.SUPABASE_URL || "";
-    const anonKey = window.ROOM10_SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || "";
-
-    if (window.supabase?.createClient && url && anonKey){
-      window.room10SupabaseClient = window.supabase.createClient(url, anonKey);
-      window.room10Supabase = window.room10SupabaseClient;
-      window.supabaseClient = window.room10SupabaseClient;
+    if (window.room10SupabaseClient?.rpc){
       return window.room10SupabaseClient;
     }
-
     throw new Error(fallbackText("error.no_supabase"));
   }
 
@@ -3222,6 +3140,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       id: member.member_id || member.memberId || member.id || member.knight_member_id || member.knightMemberId || "",
       name: member.display_name || member.displayName || member.member_name || member.memberName || member.nickname || member.name || "",
       memberCode: member.member_code || member.memberCode || member.code || "",
+      cohort: member.cohort || "",
       avatarUrl: member.avatar_url || member.avatarUrl || member.avatar || member.image_url || member.imageUrl || member.photo_url || member.photoUrl || "",
       avatarText: member.avatar_text || member.avatarText || member.short_name || member.shortName || "",
       colorA: member.avatar_color_a || member.avatarColorA || member.color_a || member.colorA || "",
@@ -3238,6 +3157,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       member_id: rawGame.knight_member_id,
       display_name: rawGame.knight_name,
       member_code: rawGame.knight_member_code,
+      cohort: rawGame.knight_cohort,
       avatar_url: rawGame.knight_avatar_url
     });
 
@@ -3355,42 +3275,35 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   }
 
   function normalizeLeaderboards(source){
-    const temp = {};
+    const boards = {};
 
     if (Array.isArray(source)){
       source.forEach(board => {
-        const rawKey = board.board_key || board.key || board.type;
-        const key = LEADERBOARD_ALIASES[rawKey] || rawKey;
+        const key = board.board_key || board.key || board.type;
         if (!key) return;
-        temp[key] = normalizeLeaderboard({ key, ...board });
+        boards[key] = normalizeLeaderboard({ key, ...board });
       });
-    } else {
-      Object.keys(source || {}).forEach(rawKey => {
-        const key = LEADERBOARD_ALIASES[rawKey] || rawKey;
-        temp[key] = normalizeLeaderboard({ key, ...source[rawKey] });
-      });
+      return boards;
     }
 
-    const boards = {};
-    LEADERBOARD_ORDER.forEach(key => {
-      if (temp[key]) boards[key] = temp[key];
-    });
-    Object.keys(temp).forEach(key => {
-      if (!boards[key]) boards[key] = temp[key];
+    Object.keys(source || {}).forEach(key => {
+      boards[key] = normalizeLeaderboard({ key, ...source[key] });
     });
 
     return boards;
   }
 
   function normalizeLeaderboard(board){
-    const key = LEADERBOARD_ALIASES[board.key] || board.key;
-    const meta = LEADERBOARD_META[key] || {};
-    const rows = board.rows || board.entries || [];
+    const key = board.key || board.board_key || board.type || "";
+    const rows = Array.isArray(board.rows) ? board.rows : (Array.isArray(board.entries) ? board.entries : []);
     return {
-      title: board.title || board.display_name || board.name || meta.title || key || "",
-      description: board.description || meta.description || "",
-      valueLabel: board.value_label || board.valueLabel || meta.valueLabel || "成绩",
-      unit: board.unit || meta.unit || "",
+      key,
+      title: board.title || board.display_name || board.name || "",
+      shortDesc: board.short_desc || board.shortDesc || "",
+      description: board.description || "",
+      valueLabel: board.value_label || board.valueLabel || "",
+      unit: board.unit || "",
+      sortOrder: board.sort_order ?? board.sortOrder ?? null,
       rows: rows.map((row, index) => ({
         rank: row.rank || index + 1,
         name: row.display_name || row.member_name || row.name || "",
@@ -3425,6 +3338,10 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     return "";
   }
 
+  function missingConfigText(key){
+    return applyTemplate(EMERGENCY_TEXTS["error.missing_config"], { key });
+  }
+
   function t(key, params){
     const raw = state.texts[key];
     const text = raw || EMERGENCY_TEXTS[key] || `配置缺失：${key}`;
@@ -3444,28 +3361,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 
   function formatCount(value, suffix){
     return `${Number(value || 0)}${suffix}`;
-  }
-
-  function resolveRoomPath(key){
-    const paths = window.ROOM10_PATHS || window.room10Paths || null;
-
-    if (paths && typeof paths.resolve === "function"){
-      return paths.resolve(key);
-    }
-
-    if (paths && typeof paths.get === "function"){
-      return paths.get(key);
-    }
-
-    if (paths && typeof paths === "object" && paths[key]){
-      return paths[key];
-    }
-
-    if (window.Room10Paths && typeof window.Room10Paths.resolve === "function"){
-      return window.Room10Paths.resolve(key);
-    }
-
-    return "";
   }
 
   function getCurrentMemberId(){
