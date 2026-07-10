@@ -1249,6 +1249,19 @@ body.stack-layout .ctrlBtn{
   -webkit-line-clamp:2;
   -webkit-box-orient:vertical;
 }
+.reward-item-image{
+  width:calc(72px * var(--reward-scale));
+  height:calc(72px * var(--reward-scale));
+  margin-bottom:calc(7px * var(--reward-scale));
+  border-radius:calc(14px * var(--reward-scale));
+  object-fit:cover;
+  background:rgba(255,250,242,.86);
+  border:1px solid rgba(174,132,103,.16);
+  box-shadow:
+    0 calc(4px * var(--reward-scale)) calc(12px * var(--reward-scale)) rgba(116,86,54,.08),
+    inset 0 1px 0 rgba(255,255,255,.82);
+}
+
 .reward-confirm{
   min-width:calc(132px * var(--reward-scale));
   height:calc(36px * var(--reward-scale));
@@ -1378,6 +1391,30 @@ body.stack-layout .ctrlBtn{
   </section>
 </div>
 
+<div id="animalEncounterModal" class="reward-mask hidden" aria-hidden="true" data-type="animal">
+  <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="animalEncounterTitle">
+    <div class="reward-petals" aria-hidden="true">
+      <span>✿</span>
+      <span>❀</span>
+      <span>✽</span>
+      <span>✿</span>
+      <span>❀</span>
+    </div>
+
+    <button class="reward-close" type="button" aria-label="关闭" onclick="closeAnimalEncounterModal()">×</button>
+
+    <div class="reward-content">
+      <div class="reward-icon" id="animalEncounterRewardIcon" aria-hidden="true">🐾</div>
+      <div class="reward-label">动物偶遇</div>
+      <h2 class="reward-title" id="animalEncounterTitle">遇见了一只小动物！</h2>
+      <p class="reward-desc" id="animalEncounterSummary">获得额外宠物图片卡 1 张。</p>
+      <div class="reward-section-title">本次获得</div>
+      <div class="reward-list count-1" id="animalEncounterRewardList"></div>
+      <button class="reward-confirm" type="button" onclick="closeAnimalEncounterModal()">收下图片卡</button>
+    </div>
+  </section>
+</div>
+
 <script>
 const peopleData = [
   { code:"N-01", animal:"德牧",   name:"李克勤"   },
@@ -1492,9 +1529,17 @@ const awardOkBtn = document.getElementById("awardOkBtn");
 const awardList = document.getElementById("awardList");
 const awardSummary = document.getElementById("awardSummary");
 
+const animalEncounterModal = document.getElementById("animalEncounterModal");
+const animalEncounterTitle = document.getElementById("animalEncounterTitle");
+const animalEncounterSummary = document.getElementById("animalEncounterSummary");
+const animalEncounterRewardList = document.getElementById("animalEncounterRewardList");
+
 let pendingAwardItems = [];
 let awardClaimBusy = false;
 let awardAutoCloseTimer = null;
+
+let pendingAnimalEncounter = null;
+let pendingFaceMatchAwardCheck = false;
 
 const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
@@ -1699,6 +1744,118 @@ async function notifyOvertakenMembers(beforeRows, score, currentMemberId){
 }
 
 
+function cleanScoreSubmitMessage(message){
+  const text = String(message || "").trim();
+  if(!text) return "";
+
+  const parts = text
+    .split(/(?<=[。！？!?；;])/)
+    .map(part => part.trim())
+    .filter(Boolean)
+    .filter(part => !(
+      /偶遇/.test(part) &&
+      /(没有|未|无|未能|未触发|没有触发)/.test(part)
+    ));
+
+  return parts.join("").trim();
+}
+
+function normalizeAnimalEncounter(payload){
+  const encounter = payload && payload.animal_encounter
+    ? payload.animal_encounter
+    : payload;
+
+  if(!encounter || encounter.triggered !== true) return null;
+
+  const data = encounter.data && typeof encounter.data === "object"
+    ? encounter.data
+    : {};
+
+  const petName = String(data.pet_name || "").trim();
+  const petItemKey = String(data.pet_item_key || "").trim();
+  const message = String(data.message || "").trim();
+  const icon = String(data.icon || "").trim();
+
+  if(!petName || !petItemKey) return null;
+
+  return {
+    petName,
+    petItemKey,
+    message:message || `${petName}好奇地过来围观，获得额外图片1张`,
+    icon
+  };
+}
+
+function getAnimalEncounterImageSrc(icon){
+  const value = String(icon || "").trim();
+  if(!value) return "";
+
+  if(
+    /^https?:\/\//i.test(value) ||
+    value.startsWith("/") ||
+    value.startsWith("data:")
+  ){
+    return value;
+  }
+
+  return resolveRoom10Asset(value, value);
+}
+
+function renderAnimalEncounter(encounter){
+  if(!encounter || !animalEncounterRewardList) return;
+
+  const imageSrc = getAnimalEncounterImageSrc(encounter.icon);
+  const media = imageSrc
+    ? `<img class="reward-item-image" src="${escapeHtml(imageSrc)}" alt="${escapeHtml(encounter.petName)}图片卡">`
+    : `<div class="reward-item-icon">🐾</div>`;
+
+  if(animalEncounterTitle){
+    animalEncounterTitle.textContent = `遇见了${encounter.petName}！`;
+  }
+
+  if(animalEncounterSummary){
+    animalEncounterSummary.textContent = encounter.message;
+  }
+
+  animalEncounterRewardList.innerHTML = `
+    <article class="reward-item">
+      ${media}
+      <div class="reward-item-name" title="${escapeHtml(encounter.petName)}图片卡">${escapeHtml(encounter.petName)}图片卡</div>
+      <div class="reward-item-amount">× 1</div>
+      <div class="reward-item-note">已放入你的背包</div>
+    </article>
+  `;
+}
+
+function openAnimalEncounterModal(payload){
+  const encounter = normalizeAnimalEncounter(payload);
+  if(!animalEncounterModal || !encounter) return false;
+
+  pendingAnimalEncounter = encounter;
+  renderAnimalEncounter(encounter);
+
+  animalEncounterModal.classList.remove("hidden");
+  animalEncounterModal.classList.add("show");
+  animalEncounterModal.setAttribute("aria-hidden", "false");
+
+  return true;
+}
+
+function closeAnimalEncounterModal(){
+  if(!animalEncounterModal) return;
+
+  animalEncounterModal.classList.add("hidden");
+  animalEncounterModal.classList.remove("show");
+  animalEncounterModal.setAttribute("aria-hidden", "true");
+  pendingAnimalEncounter = null;
+
+  if(pendingFaceMatchAwardCheck){
+    pendingFaceMatchAwardCheck = false;
+    checkFaceMatchAwards();
+  }
+}
+
+
 function getAwardRewardGold(item){
   const value = Number(item && item.reward_gold);
   return Number.isFinite(value) && value > 0 ? value : 0;
@@ -1875,9 +2032,19 @@ async function showFinishBoard(score){
     if(player.isLoggedIn){
       beforeRows = await loadLeaderboardFromSupabase();
       const submitResult = await submitScoreToSupabase(score);
-      finishMessageEl.textContent = submitResult.message || "成绩已处理。";
+      finishMessageEl.textContent = cleanScoreSubmitMessage(submitResult.message) || "成绩已处理。";
+
       await notifyOvertakenMembers(beforeRows, score, player.memberId);
-      await checkFaceMatchAwards();
+
+      const animalEncounterOpened = openAnimalEncounterModal(
+        submitResult && submitResult.animal_encounter
+      );
+
+      if(animalEncounterOpened){
+        pendingFaceMatchAwardCheck = true;
+      }else{
+        await checkFaceMatchAwards();
+      }
     }
 
     const rows = await loadLeaderboardFromSupabase();
@@ -2228,6 +2395,8 @@ function clearPlacedNames(){
 function resetGame(){
   if(finishMask) closeFinishBoard();
   if(awardModal) closeAwardModal();
+  if(animalEncounterModal) closeAnimalEncounterModal();
+  pendingFaceMatchAwardCheck = false;
   placedCorrect.clear();
   wrongCount = 0;
   penaltySeconds = 0;
@@ -2253,6 +2422,10 @@ function handleResize(){
 
 document.addEventListener("keydown", e => {
   if(e.key !== "Escape") return;
+  if(animalEncounterModal && !animalEncounterModal.classList.contains("hidden")){
+    closeAnimalEncounterModal();
+    return;
+  }
   if(awardModal && !awardModal.classList.contains("hidden")){
     closeAwardModal();
     return;
