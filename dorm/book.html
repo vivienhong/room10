@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜收集图鉴</title>
-<!-- book clean db-driven v1: 固定素材走 room10-paths.js；图鉴分类/页面文案走数据库；删除前端路径猜测 -->
+<!-- book clean db-driven v2: 固定素材走 room10-paths.js；图鉴分类/页面文案走数据库；个人图鉴状态统一使用 member_id + member_code 安全 RPC；清减旧缓存兼容读取 -->
 <script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -1131,32 +1131,11 @@ function renderMobileTabs(){
 }
 
 
-function isUuid(value){
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || "").trim());
-}
-
-function getCurrentMemberId(){
-  const directMemberId = localStorage.getItem(STORAGE_KEYS.memberId) ||
-    localStorage.getItem("room10_member_id") ||
-    localStorage.getItem("memberId");
-
-  if(isUuid(directMemberId)) return String(directMemberId).trim();
-
-  const jsonKeys = ["room10Auth", "room10_user", "room10_current_user", "currentUser"];
-  for(const key of jsonKeys){
-    const raw = localStorage.getItem(key);
-    if(!raw) continue;
-
-    try{
-      const parsed = JSON.parse(raw);
-      const possibleId = parsed?.memberId || parsed?.member_id || parsed?.id || parsed?.member?.id;
-      if(isUuid(possibleId)) return String(possibleId).trim();
-    }catch(error){
-      // 旧缓存可能不是 JSON，跳过即可。
-    }
-  }
-
-  return null;
+function getCurrentMemberIdentity(){
+  return {
+    memberId:String(localStorage.getItem(STORAGE_KEYS.memberId) || "").trim(),
+    memberCode:String(localStorage.getItem(STORAGE_KEYS.memberCode) || "").trim()
+  };
 }
 
 function normalizeBookItem(row){
@@ -1298,9 +1277,10 @@ async function loadCollectionBookItems(options = {}){
   renderBook();
 
   try{
-    const memberId = getCurrentMemberId();
+    const { memberId, memberCode } = getCurrentMemberIdentity();
     const { data, error } = await supabaseClient.rpc("get_collection_book_items", {
-      p_member_id:memberId
+      p_member_id:memberId || null,
+      p_member_code:memberCode || null
     });
     if(error) throw error;
 
