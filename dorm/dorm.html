@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜宿舍</title>
-<!-- dorm clean db-driven v20: 通用模板路径同步 + 文案/配置数据库驱动 + 吉祥物气泡配置数据库驱动 + 清理横屏气泡冲突样式 -->
+<!-- dorm clean db-driven v24: 宿舍个人私有数据统一通过 get_dorm_member_private_state 安全读取；前端不直读 members/gold_ledger/member_items/member_titles/member_achievements；最近获得来源完全数据库驱动 -->
 
 <script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -3521,11 +3521,13 @@ body.recent-obtained-visible .recentObtainedPanel{
   margin-top:calc(3px * var(--ui-scale));
   color:#9a704b;
   font-size:calc(10px * var(--ui-scale));
-  line-height:1.2;
+  line-height:1.35;
   font-weight:800;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  word-break:break-word;
+  overflow-wrap:anywhere;
 }
 
 .recentObtainedEmpty{
@@ -3808,12 +3810,12 @@ body.recent-obtained-visible .recentObtainedPanel{
   <div id="overlay">
     <!-- 房间按钮：全站通用模板样式 -->
     <nav class="roomNavLayer" id="roomNavLayer" aria-label="">
-      <button class="navBtn" data-room="hall" type="button" data-page="index" data-url="../index/index.html" data-login="false">
+      <button class="navBtn" data-room="hall" type="button" data-page="index" data-login="false">
         <span class="navLabel" data-text-key="nav.hall"></span>
         <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
       </button>
 
-      <button class="navBtn" data-room="living" type="button" data-page="living" data-url="../living/living.html" data-login="true">
+      <button class="navBtn" data-room="living" type="button" data-page="living" data-login="true">
         <span class="navLabel" data-text-key="nav.living"></span>
         <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
       </button>
@@ -3823,32 +3825,32 @@ body.recent-obtained-visible .recentObtainedPanel{
         <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
       </button>
 
-      <button class="navBtn" data-room="honor" type="button" data-page="honor" data-url="../honor/honor.html" data-login="false">
+      <button class="navBtn" data-room="honor" type="button" data-page="honor" data-login="false">
         <span class="navLabel" data-text-key="nav.honor"></span>
         <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
       </button>
 
-      <button class="navBtn" data-room="studio" type="button" data-page="studioTodo" data-url="../studio/studio-todo.html" data-login="true">
+      <button class="navBtn" data-room="studio" type="button" data-page="studioTodo" data-login="true">
         <span class="navLabel" data-text-key="nav.studio"></span>
         <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
       </button>
 
-      <button class="navBtn" data-room="game" type="button" data-page="game" data-url="../game/game.html" data-login="false">
+      <button class="navBtn" data-room="game" type="button" data-page="game" data-login="false">
         <span class="navLabel" data-text-key="nav.game"></span>
         <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span>
       </button>
 
-      <button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-url="../dorm/dorm.html" data-login="true">
+      <button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-login="true">
         <span class="navLabel" data-text-key="nav.dorm"></span>
         <span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span>
       </button>
 
-      <button class="navBtn" data-room="flower" type="button" data-page="flower" data-url="../flower/flower.html" data-login="false">
+      <button class="navBtn" data-room="flower" type="button" data-page="flower" data-login="false">
         <span class="navLabel" data-text-key="nav.flower"></span>
         <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
       </button>
 
-      <button class="navBtn" data-room="pets" type="button" data-page="pet" data-url="../pet/pets.html" data-login="false">
+      <button class="navBtn" data-room="pets" type="button" data-page="pet" data-login="false">
         <span class="navLabel" data-text-key="nav.pets"></span>
         <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
       </button>
@@ -4288,6 +4290,7 @@ const authState = {
 };
 
 let currentMemberProfile = null;
+let dormPrivateState = null;
 let profileEditMode = false;
 let honorSummaryState = null;
 let dormTaskRows = [];
@@ -4443,7 +4446,7 @@ function readLocalAuth(){
   authState.memberId = localStorage.getItem(STORAGE_KEYS.memberId) || null;
   authState.memberCode = localStorage.getItem(STORAGE_KEYS.memberCode) || "";
 
-  if(!authState.loggedIn || !authState.nickname || !authState.memberId){
+  if(!authState.loggedIn || !authState.nickname || !authState.memberId || !authState.memberCode){
     window.location.href = requirePageUrl("index");
     return false;
   }
@@ -4503,7 +4506,7 @@ function getManagerPageByRole(){
 
   if(role === "owner") return requirePageUrl("managerOwner");
   if(role === "admin") return requirePageUrl("managerAdmin");
-  if(role === "member" || role === "applying") return requirePageUrl("managerMember");
+  if(role === "member" || role === "trainee" || role === "applying") return requirePageUrl("managerMember");
 
   return requirePageUrl("managerVisitor");
 }
@@ -5260,45 +5263,45 @@ function bindDormTaskActions(){
 /* =========================================================
    金币数据
 ========================================================= */
-async function fetchCurrentMember(){
-  const { data,error } = await supabaseClient
-    .from("members")
-    .select("id,member_code,name,nickname,role,avatar_url,location,birthday_month,birthday_day,mbti,contact_qq,social_xiaohongshu,social_douyin,social_bilibili,social_weibo,joined_at,cohort,skills,public_message,gold_balance,gold_total_earned,gold_total_spent")
-    .eq("id",authState.memberId)
-    .maybeSingle();
-
-  if(error) throw error;
-  return data;
-}
-
-async function loadGoldInfo(){
-  if(!readLocalAuth()) return;
-
-  updateIdentity({
-    nickname:authState.nickname,
-    role:authState.role
+async function fetchDormPrivateState(){
+  const { data,error } = await supabaseClient.rpc("get_dorm_member_private_state",{
+    p_member_id:authState.memberId,
+    p_member_code:authState.memberCode
   });
 
-  let member = null;
+  if(error) throw error;
 
-  try{
-    member = await fetchCurrentMember();
-  }catch(error){
-    console.error(error);
-    setText("walletTitle", t("wallet.title"));
-    setText("goldSub", `${t("wallet.read_failed")}：${error.message || "members"}`);
-    setLedgerMessage(t("wallet.ledger_read_failed"), true);
-    return;
+  const state = data && typeof data === "object" ? data : null;
+  if(!state?.member?.id){
+    throw new Error(t("wallet.member_missing"));
   }
 
-  if(!member){
-    setText("walletTitle", t("wallet.title"));
-    setText("goldSub", t("wallet.member_missing"));
-    setLedgerMessage(t("wallet.no_gold_record"), true);
-    return;
-  }
+  dormPrivateState = state;
+  return state;
+}
+
+function applyHonorSummary(summary){
+  const data = summary && typeof summary === "object" ? summary : {};
+
+  const latestTitleTime = data.latest_title_time ? new Date(data.latest_title_time).getTime() : 0;
+  const latestAchievementTime = data.latest_achievement_time ? new Date(data.latest_achievement_time).getTime() : 0;
+
+  honorSummaryState = {
+    titles:Number(data.titles || 0),
+    achievements:Number(data.achievements || 0),
+    recent:latestTitleTime >= latestAchievementTime
+      ? String(data.latest_title_name || "")
+      : String(data.latest_achievement_name || "")
+  };
+}
+
+function applyDormPrivateState(state){
+  const member = state?.member || null;
+  if(!member) return null;
 
   currentMemberProfile = member;
+  dormPrivateState = state;
+
   authState.memberId = member.id || authState.memberId;
   authState.memberCode = member.member_code || authState.memberCode;
   authState.nickname = member.nickname || authState.nickname;
@@ -5309,10 +5312,44 @@ async function loadGoldInfo(){
   if(authState.nickname) localStorage.setItem(STORAGE_KEYS.user, authState.nickname);
   if(authState.role) localStorage.setItem(STORAGE_KEYS.role, authState.role);
 
+  applyHonorSummary(state?.honor_summary);
   updateIdentity(member);
-  renderProfileView(member);
-  loadHonorSummary(member.id);
-  loadInventory();
+
+  if(!profileEditMode){
+    renderProfileView(member);
+  }
+
+  return member;
+}
+
+async function loadGoldInfo(){
+  if(!readLocalAuth()) return;
+
+  updateIdentity({
+    nickname:authState.nickname,
+    role:authState.role
+  });
+
+  let state = null;
+
+  try{
+    state = await fetchDormPrivateState();
+  }catch(error){
+    console.error(error);
+    setText("walletTitle", t("wallet.title"));
+    setText("goldSub", `${t("wallet.read_failed")}：${error.message || "get_dorm_member_private_state"}`);
+    setLedgerMessage(t("wallet.ledger_read_failed"), true);
+    return;
+  }
+
+  const member = applyDormPrivateState(state);
+
+  if(!member){
+    setText("walletTitle", t("wallet.title"));
+    setText("goldSub", t("wallet.member_missing"));
+    setLedgerMessage(t("wallet.no_gold_record"), true);
+    return;
+  }
 
   setText("walletTitle", t("wallet.title"));
   setText("goldSub", t("wallet.ledger_desc"));
@@ -5320,24 +5357,14 @@ async function loadGoldInfo(){
   setText("goldEarned",member.gold_total_earned ?? 0);
   setText("goldSpent",member.gold_total_spent ?? 0);
 
-  await loadGoldLedger(member.id);
+  renderGoldLedger(state?.gold_ledger);
+  await loadInventory();
 }
 
-async function loadGoldLedger(memberId){
-  const { data,error } = await supabaseClient
-    .from("gold_ledger")
-    .select("direction,amount,category,subcategory,note,created_at")
-    .eq("member_id",memberId)
-    .order("created_at",{ ascending:false })
-    .limit(30);
+function renderGoldLedger(rows){
+  const data = Array.isArray(rows) ? rows : [];
 
-  if(error){
-    console.error(error);
-    setLedgerMessage(`${t("wallet.ledger_read_failed")}：${error.message || "gold_ledger"}`, true);
-    return;
-  }
-
-  if(!data || !data.length){
+  if(!data.length){
     setLedgerMessage(t("wallet.ledger_empty"));
     setText("todayGold","0");
     return;
@@ -5354,6 +5381,8 @@ async function loadGoldLedger(memberId){
   }
 
   const list = document.getElementById("ledgerList");
+  if(!list) return;
+
   list.innerHTML = data.map(item => {
     const isIn = item.direction === "in";
     const sign = isIn ? "+" : "-";
@@ -5378,7 +5407,6 @@ async function loadGoldLedger(memberId){
     `;
   }).join("");
 }
-
 
 /* =========================================================
    我的背包
@@ -5601,11 +5629,97 @@ function isStoredGachaBallItem(item){
   return isStoredGachaBallKey(item?.item_key);
 }
 
+function isStoredGachaBallGroupItem(item){
+  return item?.is_stored_gacha_ball_group === true;
+}
+
+function storedGachaTierSortOrderFromKey(itemKey){
+  const tierKey = storedGachaTierFromKey(itemKey);
+  const order = { white:10, purple:20, gold:30 };
+  return Object.prototype.hasOwnProperty.call(order, tierKey) ? order[tierKey] : 999;
+}
+
+function storedGachaBallComponentLabel(component){
+  const name = String(component?.item_name || component?.itemName || storedGachaBallLabel(component?.item_key)).trim();
+  const qty = Math.max(0, Number(component?.quantity || 0));
+  return `${name} ×${qty}`;
+}
+
+function storedGachaBallGroupDesc(components,totalQty){
+  const details = (Array.isArray(components) ? components : [])
+    .filter(component => Number(component.quantity || 0) > 0)
+    .map(component => storedGachaBallComponentLabel(component))
+    .join("、");
+  const totalText = t("gacha.quantity", { count:totalQty });
+  return details ? `${totalText}：${details}` : totalText;
+}
+
+function buildStoredGachaBallDisplayRows(rows){
+  const sourceRows = Array.isArray(rows) ? rows : [];
+  const storedRows = sourceRows.filter(row => isStoredGachaBallItem(row.item));
+  if(storedRows.length <= 1) return sourceRows;
+
+  const normalRows = sourceRows.filter(row => !isStoredGachaBallItem(row.item));
+  const sortedStoredRows = [...storedRows].sort((a,b) => {
+    const ta = storedGachaTierSortOrderFromKey(a.item?.item_key);
+    const tb = storedGachaTierSortOrderFromKey(b.item?.item_key);
+    if(ta !== tb) return ta - tb;
+    return itemSortOrder(a.item) - itemSortOrder(b.item);
+  });
+
+  const totalQty = sortedStoredRows.reduce((sum,row) => sum + Math.max(0, Number(row.qty || 0)), 0);
+  if(totalQty <= 0) return normalRows;
+
+  const baseItem = sortedStoredRows[0].item || {};
+  const components = sortedStoredRows.map(row => {
+    const item = row.item || {};
+    const itemKey = String(item.item_key || "").trim();
+    return {
+      item_key:itemKey,
+      tier_key:storedGachaTierFromKey(itemKey),
+      item_name:itemDisplayName(item),
+      quantity:Math.max(0, Number(row.qty || 0))
+    };
+  }).filter(component => component.item_key && component.tier_key && component.quantity > 0);
+
+  const aggregateItem = {
+    ...baseItem,
+    item_key:"__stored_gacha_balls__",
+    item_name:storedGachaBallLabel(baseItem.item_key),
+    quantity:totalQty,
+    sort_order:Math.min(...sortedStoredRows.map(row => itemSortOrder(row.item))),
+    is_stored_gacha_ball_group:true,
+    stored_gacha_ball_components:components
+  };
+
+  return normalRows.concat([{ item:aggregateItem, qty:totalQty }]);
+}
+
 function storedGachaBallItemAttrs(item,qty){
-  if(!isStoredGachaBallItem(item)) return "";
+  const isGroup = isStoredGachaBallGroupItem(item);
+  if(!isGroup && !isStoredGachaBallItem(item)) return "";
+
+  const name = storedGachaBallLabel(item?.item_key);
+  const safeQty = Math.max(0, Number(qty || 0));
+
+  if(isGroup){
+    const components = Array.isArray(item.stored_gacha_ball_components) ? item.stored_gacha_ball_components : [];
+    return [
+      'role="button"',
+      'tabindex="0"',
+      'aria-label="' + escapeHtml(name) + '"',
+      'data-gacha-ball="true"',
+      'data-gacha-ball-group="true"',
+      'data-item-key="__stored_gacha_balls__"',
+      'data-item-name="' + escapeHtml(name) + '"',
+      'data-quantity="' + escapeHtml(safeQty) + '"',
+      'data-gacha-components="' + htmlAttrJson(components) + '"',
+      'data-open-label="' + tHtml("inventory.gacha_open_badge") + '"'
+    ].join(" ");
+  }
+
   const itemKey = String(item.item_key || "").trim();
   const tierKey = storedGachaTierFromKey(itemKey);
-  const name = storedGachaBallLabel(itemKey);
   return [
     'role="button"',
     'tabindex="0"',
@@ -5614,7 +5728,7 @@ function storedGachaBallItemAttrs(item,qty){
     'data-item-key="' + escapeHtml(itemKey) + '"',
     'data-tier-key="' + escapeHtml(tierKey) + '"',
     'data-item-name="' + escapeHtml(name) + '"',
-    'data-quantity="' + escapeHtml(qty) + '"',
+    'data-quantity="' + escapeHtml(safeQty) + '"',
     'data-open-label="' + tHtml("inventory.gacha_open_badge") + '"'
   ].join(" ");
 }
@@ -5654,18 +5768,48 @@ function openStoredGachaBallModalFromElement(el){
   if(!el) return;
 
   const itemKey = String(el.dataset.itemKey || "").trim();
-  const tierKey = String(el.dataset.tierKey || storedGachaTierFromKey(itemKey)).trim();
+  const isGroup = el.dataset.gachaBallGroup === "true";
   const quantity = Math.max(0, Number(el.dataset.quantity || 0));
   const itemName = String(el.dataset.itemName || storedGachaBallLabel(itemKey)).trim();
+  let components = [];
 
-  if(!itemKey || !tierKey || quantity <= 0) return;
+  if(isGroup){
+    try{
+      components = JSON.parse(el.dataset.gachaComponents || "[]");
+    }catch(error){
+      components = [];
+    }
+    components = (Array.isArray(components) ? components : [])
+      .map(component => ({
+        item_key:String(component?.item_key || "").trim(),
+        tier_key:String(component?.tier_key || "").trim(),
+        item_name:String(component?.item_name || storedGachaBallLabel(component?.item_key)).trim(),
+        quantity:Math.max(0, Number(component?.quantity || 0))
+      }))
+      .filter(component => component.item_key && component.tier_key && component.quantity > 0);
+  }
 
-  currentStoredGachaBall = {
-    itemKey,
-    tierKey,
-    quantity,
-    itemName
-  };
+  const tierKey = String(el.dataset.tierKey || storedGachaTierFromKey(itemKey)).trim();
+
+  if(isGroup){
+    if(!components.length || quantity <= 0) return;
+    currentStoredGachaBall = {
+      itemKey,
+      tierKey:"",
+      quantity,
+      itemName,
+      components
+    };
+  }else{
+    if(!itemKey || !tierKey || quantity <= 0) return;
+    currentStoredGachaBall = {
+      itemKey,
+      tierKey,
+      quantity,
+      itemName,
+      components:[]
+    };
+  }
 
   const mask = document.getElementById("gachaStoredBallModalMask");
   const title = document.getElementById("gachaStoredBallTitle");
@@ -5674,7 +5818,11 @@ function openStoredGachaBallModalFromElement(el){
   const openAllBtn = document.getElementById("gachaOpenAllBtn");
 
   if(title) title.textContent = t("gacha.title");
-  if(desc) desc.textContent = t("gacha.quantity", { count:quantity });
+  if(desc){
+    desc.textContent = isGroup
+      ? storedGachaBallGroupDesc(components, quantity)
+      : t("gacha.quantity", { count:quantity });
+  }
   if(icon) icon.src = requireAssetUrl("dorm.gachaBall");
   if(openAllBtn) openAllBtn.textContent = quantity > 1 ? t("gacha.open_all_count", { count:quantity }) : t("gacha.open_all");
 
@@ -5700,19 +5848,37 @@ function closeStoredGachaBallModal(){
 
 async function refreshDormWalletAfterStoredGacha(){
   try{
-    const member = await fetchCurrentMember();
+    const state = await fetchDormPrivateState();
+    const member = applyDormPrivateState(state);
+
     if(member){
-      currentMemberProfile = member;
       setText("goldBalance",member.gold_balance ?? 0);
       setText("goldEarned",member.gold_total_earned ?? 0);
       setText("goldSpent",member.gold_total_spent ?? 0);
-      updateIdentity(member);
-      if(!profileEditMode) renderProfileView(member);
-      await loadGoldLedger(member.id);
+      renderGoldLedger(state?.gold_ledger);
     }
   }catch(error){
-    showStoredGachaResult(`${t("gacha.wallet_refresh_failed")}：${error.message || "members/gold_ledger"}`);
+    showStoredGachaResult(`${t("gacha.wallet_refresh_failed")}：${error.message || "get_dorm_member_private_state"}`);
   }
+}
+
+async function callOpenStoredGachaTier(tierKey,openMode){
+  const { data,error } = await supabaseClient.rpc("open_stored_gacha_balls",{
+    p_member_id:authState.memberId,
+    p_member_code:authState.memberCode,
+    p_tier_key:tierKey,
+    p_open_mode:openMode
+  });
+
+  if(error) throw error;
+
+  const result = Array.isArray(data) ? data[0] : data;
+  if(!result || result.success !== true){
+    const failMessage = result?.message || t("gacha.open_failed");
+    throw new Error(failMessage);
+  }
+
+  return result;
 }
 
 async function openStoredGachaBall(mode){
@@ -5723,37 +5889,54 @@ async function openStoredGachaBall(mode){
   showStoredGachaResult(openMode === "all" ? t("gacha.opening_all") : t("gacha.opening_one"));
 
   try{
-    const { data,error } = await supabaseClient.rpc("open_stored_gacha_balls",{
-      p_member_id:authState.memberId,
-      p_tier_key:currentStoredGachaBall.tierKey,
-      p_open_mode:openMode
-    });
+    const components = Array.isArray(currentStoredGachaBall.components)
+      ? currentStoredGachaBall.components.filter(component => Number(component.quantity || 0) > 0 && String(component.tier_key || "").trim())
+      : [];
 
-    if(error) throw error;
+    let openedCount = 0;
+    let rewardList = [];
 
-    const result = Array.isArray(data) ? data[0] : data;
-    if(!result || result.success !== true){
-      showStoredGachaResult(result?.message || t("gacha.open_failed"));
-      setStoredGachaButtonsDisabled(false);
-      await loadInventory();
-      return;
+    if(components.length){
+      const targets = openMode === "all" ? components : components.slice(0,1);
+
+      for(const target of targets){
+        const result = await callOpenStoredGachaTier(target.tier_key, openMode === "all" ? "all" : "one");
+        const opened = Math.max(0, Number(result.opened_count || 0));
+        openedCount += opened;
+        rewardList = rewardList.concat(Array.isArray(result.rewards) ? result.rewards : []);
+        target.quantity = Math.max(0, Number(target.quantity || 0) - opened);
+      }
+    }else{
+      const result = await callOpenStoredGachaTier(currentStoredGachaBall.tierKey, openMode);
+      openedCount = Math.max(0, Number(result.opened_count || 0));
+      rewardList = Array.isArray(result.rewards) ? result.rewards : [];
     }
 
-    const rewardHtml = renderStoredGachaRewards(result.rewards);
-    showStoredGachaResult(`${escapeHtml(t("gacha.success", { count:Number(result.opened_count || 0) }))}<br>${rewardHtml}`, true);
+    const rewardHtml = renderStoredGachaRewards(rewardList);
+    showStoredGachaResult(`${escapeHtml(t("gacha.success", { count:openedCount }))}<br>${rewardHtml}`, true);
 
-    await loadInventory();
     await refreshDormWalletAfterStoredGacha();
+    await loadInventory();
 
-    const nextQuantity = Math.max(0, Number(currentStoredGachaBall.quantity || 0) - Number(result.opened_count || 0));
+    let nextQuantity;
+    if(components.length){
+      nextQuantity = components.reduce((sum,component) => sum + Math.max(0, Number(component.quantity || 0)), 0);
+      currentStoredGachaBall.components = components.filter(component => Number(component.quantity || 0) > 0);
+    }else{
+      nextQuantity = Math.max(0, Number(currentStoredGachaBall.quantity || 0) - openedCount);
+    }
     currentStoredGachaBall.quantity = nextQuantity;
 
     const desc = document.getElementById("gachaStoredBallDesc");
     const openAllBtn = document.getElementById("gachaOpenAllBtn");
     if(desc){
-      desc.textContent = nextQuantity > 0
-        ? t("gacha.remaining", { count:nextQuantity })
-        : t("gacha.empty_after_open");
+      if(nextQuantity <= 0){
+        desc.textContent = t("gacha.empty_after_open");
+      }else if(currentStoredGachaBall.components?.length){
+        desc.textContent = storedGachaBallGroupDesc(currentStoredGachaBall.components, nextQuantity);
+      }else{
+        desc.textContent = t("gacha.remaining", { count:nextQuantity });
+      }
     }
     if(openAllBtn){
       openAllBtn.textContent = nextQuantity > 1 ? t("gacha.open_all_count", { count:nextQuantity }) : t("gacha.open_all");
@@ -5835,7 +6018,7 @@ function renderInventoryGroup(key, rows){
       </div>
       <div class="inventoryGroupGrid">
         ${rows.map(({ item, qty }) => {
-          const isStoredBall = isStoredGachaBallItem(item);
+          const isStoredBall = isStoredGachaBallItem(item) || isStoredGachaBallGroupItem(item);
           const attrs = storedGachaBallItemAttrs(item,qty);
           return `
             <div class="inventoryItem${isStoredBall ? " gachaStoredBallItem" : ""}" ${attrs}>
@@ -5854,15 +6037,16 @@ function renderInventory(items){
   const wrap = document.getElementById("inventoryList");
   if(!wrap) return;
 
-  const rows = (Array.isArray(items) ? items : [])
-    .map(item => ({ item, qty:itemQuantity(item) }))
-    .filter(row => row.qty > 0)
-    .sort((a,b) => {
-      const ca = itemCategorySortOrder(a.item);
-      const cb = itemCategorySortOrder(b.item);
-      if(ca !== cb) return ca - cb;
-      return itemSortOrder(a.item) - itemSortOrder(b.item);
-    });
+  const rows = buildStoredGachaBallDisplayRows(
+    (Array.isArray(items) ? items : [])
+      .map(item => ({ item, qty:itemQuantity(item) }))
+      .filter(row => row.qty > 0)
+  ).sort((a,b) => {
+    const ca = itemCategorySortOrder(a.item);
+    const cb = itemCategorySortOrder(b.item);
+    if(ca !== cb) return ca - cb;
+    return itemSortOrder(a.item) - itemSortOrder(b.item);
+  });
 
   const bookCard = collectionBookCardHtml();
 
@@ -5887,76 +6071,6 @@ function renderInventory(items){
 }
 
 
-function escapeRegExp(value){
-  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function recentSourceLabel(row){
-  const directLabel = itemValue(row,[
-    "source_label",
-    "source_display_name",
-    "source_name",
-    "display_source",
-    "recent_source_label",
-    "recent_source"
-  ]);
-
-  if(directLabel) return String(directLabel).trim();
-
-  const sourceType = String(row?.source_type || "").trim();
-  const sourceDetail = String(row?.source_detail || "").trim();
-  const note = String(row?.note || "").trim();
-
-  for(const value of [sourceDetail, sourceType, note]){
-    if(/[\u4e00-\u9fff]/.test(value)) return value;
-  }
-
-  return "";
-}
-
-function cleanRecentSourceLabel(sourceLabel, itemName, qty){
-  let source = String(sourceLabel || "").trim();
-  const name = String(itemName || "").trim();
-
-  if(!source || !name) return source;
-
-  const count = Number(qty || 0);
-  const qtyPart = count > 0 ? escapeRegExp(String(count)) : "\\d+";
-  const nameWithQtyRe = new RegExp(`${escapeRegExp(name)}\\s*(?:×|x|X)\\s*${qtyPart}`, "g");
-
-  source = source.replace(nameWithQtyRe, "").trim();
-
-  if(source.includes("：")){
-    const parts = source.split("：");
-    const prefix = parts.shift().trim();
-    const rest = parts.join("：").trim();
-
-    if(!rest || rest === name || rest.includes(name)){
-      source = prefix;
-    }
-  }
-
-  if(source === name){
-    source = "";
-  }
-
-  const unopenedGachaName = t("gacha.title");
-  const gachaCleanName = t("inventory.gacha_open_badge");
-  if(name === unopenedGachaName && source.includes(unopenedGachaName)){
-    source = source.replaceAll(unopenedGachaName, gachaCleanName).trim();
-  }
-
-  source = source
-    .replace(new RegExp(`^${escapeRegExp(name)}$`), "")
-    .replace(/\s*·\s*$/,"")
-    .replace(/[:：]\s*$/,"")
-    .replace(/\s+/g," ")
-    .trim();
-
-  return source;
-}
-
-
 function formatRecentTime(value){
   const time = new Date(value);
   if(Number.isNaN(time.getTime())) return t("recent.just_now");
@@ -5977,13 +6091,6 @@ function formatRecentTime(value){
   return `${month}/${day}`;
 }
 
-function shouldHideRecentItemKey(itemKey){
-  const key = String(itemKey || "").trim();
-  if(!key) return true;
-  if(key.startsWith("gacha_color_")) return true;
-  return false;
-}
-
 function renderRecentObtained(rows){
   const wrap = document.getElementById("recentObtainedList");
   if(!wrap) return;
@@ -5995,14 +6102,17 @@ function renderRecentObtained(rows){
   }
 
   wrap.innerHTML = list.map(item => {
-    const name = isStoredGachaBallItem(item) ? storedGachaBallLabel(item.item_key) : itemDisplayName(item);
+    const name = String(item.item_name || item.item_key || "").trim();
     const qty = Number(item.quantity || 0);
+    const sourceLabel = String(item.source_label || "").trim();
+    const meta = [sourceLabel, item.recent_time_label].filter(Boolean).join(" · ");
+
     return `
       <div class="recentObtainedItem">
         <div class="recentObtainedIcon">${itemIconHtml(item)}</div>
         <div class="recentObtainedBody">
           <div class="recentObtainedName" title="${escapeHtml(name)}${qty > 0 ? ` ×${qty}` : ""}">${escapeHtml(name)}${qty > 0 ? ` ×${qty}` : ""}</div>
-          <div class="recentObtainedMeta">${escapeHtml([item.recent_source_label, item.recent_time_label].filter(Boolean).join(" · "))}</div>
+          <div class="recentObtainedMeta">${escapeHtml(meta)}</div>
         </div>
       </div>
     `;
@@ -6023,24 +6133,17 @@ async function loadRecentObtained(memberId){
   try{
     const { data,error } = await supabaseClient.rpc("get_recent_obtained_items", {
       p_member_id:memberId,
+      p_member_code:authState.memberCode,
       p_limit:3
     });
 
     if(error) throw error;
 
-    const rows = (Array.isArray(data) ? data : [])
-      .filter(row => !shouldHideRecentItemKey(row.item_key))
-      .map(row => ({
-        ...row,
-        quantity:Number(row.quantity || 0),
-        item_name:row.item_name,
-        item_icon:row.item_icon || "",
-        item_category:row.item_category,
-        recent_source_label:cleanRecentSourceLabel(recentSourceLabel(row), isStoredGachaBallItem(row) ? storedGachaBallLabel(row.item_key) : itemDisplayName(row), Number(row.quantity || 0)),
-        recent_time_label:formatRecentTime(row.created_at)
-      }))
-      .filter(row => row.item_key && row.quantity > 0)
-      .slice(0,3);
+    const rows = (Array.isArray(data) ? data : []).map(row => ({
+      ...row,
+      quantity:Number(row.quantity || 0),
+      recent_time_label:formatRecentTime(row.created_at)
+    }));
 
     renderRecentObtained(rows);
   }catch(error){
@@ -6064,15 +6167,11 @@ async function loadInventory(){
   await loadRecentObtained(memberId);
 
   try{
-    const { data:memberItems,error:itemError } = await supabaseClient
-      .from("member_items")
-      .select("item_key,quantity,updated_at")
-      .eq("member_id",memberId)
-      .order("updated_at",{ ascending:false });
+    const memberItems = Array.isArray(dormPrivateState?.member_items)
+      ? dormPrivateState.member_items
+      : [];
 
-    if(itemError) throw itemError;
-
-    const itemKeys = Array.from(new Set((memberItems || []).map(item => item.item_key).filter(Boolean)));
+    const itemKeys = Array.from(new Set(memberItems.map(item => item.item_key).filter(Boolean)));
     let itemTypes = [];
     let itemCategories = [];
 
@@ -6342,15 +6441,6 @@ function validateProfileLocation(value){
   return dormConfig.allowedLocations.includes(text);
 }
 
-function standardSkillName(raw){
-  const value = String(raw || "").trim().toLowerCase();
-  if(!value) return { input:"", matched:"", status:"empty" };
-
-  const found = dormConfig.skillAliases.find(group => group.values.some(item => String(item || "").trim().toLowerCase() === value));
-  if(found) return { input:raw.trim(), matched:found.name, status:"matched" };
-  return { input:raw.trim(), matched:"", status:"unmatched" };
-}
-
 function collectProfilePayload(){
   return {
     name:document.getElementById("profileNameInput")?.value.trim() || "",
@@ -6366,90 +6456,11 @@ function collectProfilePayload(){
   };
 }
 
-function fieldLabel(key){
-  const labels = {
-    name:t("profile.field.name"),
-    location:t("profile.field.location"),
-    birthday_month:t("profile.field.birthday"),
-    birthday_day:t("profile.field.birthday"),
-    mbti:t("profile.field.mbti"),
-    social_xiaohongshu:t("profile.field.xiaohongshu"),
-    social_douyin:t("profile.field.douyin"),
-    social_bilibili:t("profile.field.bilibili"),
-    social_weibo:t("profile.field.weibo"),
-    public_message:t("profile.section.message"),
-    skills:t("profile.section.skills"),
-    skill_request:t("profile.field.skill_request")
-  };
-  return labels[key] || key;
-}
-
-function stringifyFieldValue(value){
-  if(value === null || value === undefined || value === "") return "";
-  if(Array.isArray(value)) return value.join("、");
-  return String(value);
-}
-
-function diffProfileFields(oldMember,payload){
-  const changes = [];
-  Object.entries(payload).forEach(([key,newValue]) => {
-    const oldValue = oldMember ? oldMember[key] : null;
-    if(stringifyFieldValue(oldValue) !== stringifyFieldValue(newValue)){
-      changes.push({
-        field_key:key,
-        field_label:fieldLabel(key),
-        old_value:stringifyFieldValue(oldValue),
-        new_value:stringifyFieldValue(newValue),
-        change_type:"profile_update",
-        status:"logged"
-      });
-    }
-  });
-  return changes;
-}
-
-async function logProfileChanges(changes){
-  if(!changes.length) return;
-
-  const rows = changes.map(item => ({
-    member_id:authState.memberId,
-    member_code:authState.memberCode,
-    nickname:authState.nickname,
-    field_key:item.field_key,
-    field_label:item.field_label,
-    old_value:item.old_value,
-    new_value:item.new_value,
-    change_type:item.change_type || "profile_update",
-    status:item.status || "logged"
-  }));
-
-  try{
-    const { error } = await supabaseClient.from("member_profile_change_logs").insert(rows);
-    if(error) throw error;
-  }catch(error){
-    throw new Error(`${t("profile.save_log_failed")}：${error.message || "member_profile_change_logs"}`);
-  }
-}
-
-async function checkProfileNameDuplicate(name){
-  const { data,error } = await supabaseClient
-    .from("members")
-    .select("id")
-    .eq("name",name)
-    .neq("id",authState.memberId)
-    .limit(1);
-
-  if(error) throw error;
-  return Array.isArray(data) && data.length > 0;
-}
-
 async function saveProfileEdit(){
   if(!currentMemberProfile) return;
+
   const payload = collectProfilePayload();
   const skillInput = document.getElementById("profileSkillInput")?.value.trim() || "";
-  const skillMatch = standardSkillName(skillInput);
-  let changes = diffProfileFields(currentMemberProfile,payload);
-  let skillMessage = "";
 
   if(!validateProfileName(payload.name)){
     setProfileStatus(t("profile.name_invalid"),"error");
@@ -6469,107 +6480,57 @@ async function saveProfileEdit(){
   setProfileStatus(t("profile.save_loading"));
 
   try{
-    const duplicated = await checkProfileNameDuplicate(payload.name);
-    if(duplicated){
-      setProfileStatus(t("profile.name_duplicate"),"error");
-      return;
-    }
+    const { data,error } = await supabaseClient.rpc("update_member_profile", {
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode,
+      p_name:payload.name,
+      p_location:payload.location,
+      p_birthday_month:payload.birthday_month,
+      p_birthday_day:payload.birthday_day,
+      p_mbti:payload.mbti,
+      p_social_xiaohongshu:payload.social_xiaohongshu,
+      p_social_douyin:payload.social_douyin,
+      p_social_bilibili:payload.social_bilibili,
+      p_social_weibo:payload.social_weibo,
+      p_public_message:payload.public_message,
+      p_skill_input:skillInput || null
+    });
 
-    const currentSkills = uniqueSkills(normalizeSkills(currentMemberProfile.skills));
-    if(skillMatch.status === "matched"){
-      if(!currentSkills.some(item => item === skillMatch.matched)){
-        const nextSkills = uniqueSkills([...currentSkills, skillMatch.matched]);
-        payload.skills = nextSkills.join(",");
-        changes.push({
-          field_key:"skills",
-          field_label:t("profile.log_label.skills"),
-          old_value:currentSkills.join("、"),
-          new_value:nextSkills.join("、"),
-          change_type:"skill_auto_matched",
-          status:"logged"
-        });
-        skillMessage = t("profile.skill_normalized", { input:skillMatch.input, skill:skillMatch.matched });
-      }else{
-        skillMessage = t("profile.skill_existing", { skill:skillMatch.matched });
-      }
-    }else if(skillMatch.status === "unmatched"){
-      changes.push({
-        field_key:"skill_request",
-        field_label:t("profile.log_label.skill_request"),
-        old_value:"",
-        new_value:skillMatch.input,
-        change_type:"skill_request",
-        status:"logged"
+    if(error) throw error;
+
+    const result = data && typeof data === "object" ? data : {};
+    let skillMessage = "";
+
+    if(result.skill_status === "normalized"){
+      skillMessage = t("profile.skill_normalized", {
+        input:result.skill_input || skillInput,
+        skill:result.skill_name || ""
       });
-      skillMessage = t("profile.skill_request", { input:skillMatch.input });
+    }else if(result.skill_status === "existing"){
+      skillMessage = t("profile.skill_existing", {
+        skill:result.skill_name || ""
+      });
+    }else if(result.skill_status === "request"){
+      skillMessage = t("profile.skill_request", {
+        input:result.skill_input || skillInput
+      });
     }
 
-    if(!changes.length){
+    if(result.changed === false){
       setProfileStatus(skillMessage || t("profile.save_no_change"),"success");
       return;
     }
 
-    const { error } = await supabaseClient
-      .from("members")
-      .update(payload)
-      .eq("id",authState.memberId)
-      .eq("member_code",authState.memberCode);
-
-    if(error) throw error;
-
-    await logProfileChanges(changes);
-    const fresh = await fetchCurrentMember();
-    currentMemberProfile = fresh || { ...currentMemberProfile, ...payload };
-    if(currentMemberProfile.nickname) authState.nickname = currentMemberProfile.nickname;
-    if(currentMemberProfile.role) authState.role = currentMemberProfile.role;
-    updateIdentity(currentMemberProfile);
+    const state = await fetchDormPrivateState();
     profileEditMode = false;
-    honorSummaryState = honorSummaryState;
-    renderProfileView(currentMemberProfile);
+    applyDormPrivateState(state);
   }catch(error){
     console.error(error);
-    setProfileStatus(`${t("profile.save_failed")}：${error.message || "members"}`,"error");
+    setProfileStatus(`${t("profile.save_failed")}：${error.message || "update_member_profile"}`,"error");
   }
 }
 
-async function loadHonorSummary(memberId){
-  if(!memberId) return;
 
-  try{
-    const [{ data:titleRows,error:titleError,count:titleCount }, { data:achievementRows,error:achievementError,count:achievementCount }] = await Promise.all([
-      supabaseClient
-        .from("member_titles")
-        .select("obtained_at,titles(name)", { count:"exact" })
-        .eq("member_id",memberId)
-        .order("obtained_at",{ ascending:false })
-        .limit(1),
-      supabaseClient
-        .from("member_achievements")
-        .select("obtained_at,achievements(name,description)", { count:"exact" })
-        .eq("member_id",memberId)
-        .order("obtained_at",{ ascending:false })
-        .limit(1)
-    ]);
-
-    if(titleError || achievementError) throw (titleError || achievementError);
-
-    const latestTitleTime = titleRows?.[0]?.obtained_at ? new Date(titleRows[0].obtained_at).getTime() : 0;
-    const latestAchievementTime = achievementRows?.[0]?.obtained_at ? new Date(achievementRows[0].obtained_at).getTime() : 0;
-    const latestTitleName = titleRows?.[0]?.titles?.name || "";
-    const latestAchievementName = achievementRows?.[0]?.achievements?.name || achievementRows?.[0]?.achievements?.description || "";
-
-    honorSummaryState = {
-      titles:Number(titleCount || 0),
-      achievements:Number(achievementCount || 0),
-      recent:latestTitleTime >= latestAchievementTime ? latestTitleName : latestAchievementName
-    };
-  }catch(error){
-    console.error(error);
-    honorSummaryState = { error:`${t("honor.read_failed")}：${error.message || "member_titles/member_achievements"}` };
-  }
-
-  if(!profileEditMode) renderProfileView(currentMemberProfile);
-}
 
 /* =========================================================
    页面交互
@@ -6649,9 +6610,9 @@ async function initDormPage(){
   syncDormResponsiveLayout();
 
   /*
-    先读取 members 表，回填 member_code / role / nickname 后，
+    先通过 get_dorm_member_private_state 读取并验证当前成员私有状态，
     再读取系统通知和我的任务。
-    这样即使登录缓存里缺少 room10MemberCode，也不会被误判为未登录。
+    前端不直接读取成员、金币流水、背包、称号或成就私有表。
   */
   await loadGoldInfo();
 
@@ -6672,7 +6633,8 @@ window.addEventListener("storage", event => {
     event.key === STORAGE_KEYS.loggedIn ||
     event.key === STORAGE_KEYS.user ||
     event.key === STORAGE_KEYS.role ||
-    event.key === STORAGE_KEYS.memberId
+    event.key === STORAGE_KEYS.memberId ||
+    event.key === STORAGE_KEYS.memberCode
   ){
     updateIdentity({
       nickname:localStorage.getItem(STORAGE_KEYS.user) || "",
