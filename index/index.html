@@ -1034,6 +1034,7 @@ button{
 </head>
 
 <body>
+<!-- index-jump-fix-v25: manager room refreshes latest member role before routing -->
 
 <div id="home">
   <div id="homeStage">
@@ -1564,6 +1565,31 @@ function renderRewards(rewards){
   });
 }
 
+function buildUpgradeLoginNoticeModal(loginRow){
+  const oldKey = normalizeTextValue(loginRow?.upgrade_old_key);
+  const newKey = normalizeTextValue(loginRow?.upgrade_new_key || loginRow?.member_code);
+
+  return {
+    type:"title",
+    icon:"🔑",
+    label:"身份升级",
+    title:"升级申请已通过",
+    desc:`你的练习生升级申请已通过，现在身份已变为房客。\n旧钥匙 ${oldKey || "B 系列钥匙"} 只作为过渡提醒使用，请以后使用新钥匙 ${newKey || "A 系列钥匙"} 登录。`,
+    rewards:newKey ? [{ name:"新登录钥匙", icon:"🔑", amount:newKey }] : []
+  };
+}
+
+function showUpgradeLoginNoticeIfNeeded(loginRow, afterClose = null){
+  if(!loginRow?.should_show_upgrade_notice) return false;
+
+  const oldKey = normalizeTextValue(loginRow.upgrade_old_key);
+  const newKey = normalizeTextValue(loginRow.upgrade_new_key || loginRow.member_code);
+  if(!oldKey && !newKey) return false;
+
+  showRewardModal(buildUpgradeLoginNoticeModal(loginRow), afterClose);
+  return true;
+}
+
 function openRewardModal(modal){
   rewardMask.dataset.type = modal.type;
   document.getElementById("rewardIcon").textContent = modal.icon;
@@ -1664,6 +1690,7 @@ async function maybeClaimLoginHolidayGifts(options = {}){
   try{
     const { data, error } = await client.rpc("claim_login_holiday_gifts", {
       p_member_id: currentMember.id,
+      p_member_code: currentMember.memberCode,
       p_local_date: getLocalDateString()
     });
 
@@ -1727,7 +1754,8 @@ async function loadNoticeItems(){
   }
 
   const { data, error } = await client.rpc("get_index_notice_items", {
-    p_member_id: currentMember.id
+    p_member_id: currentMember.id,
+    p_member_code: currentMember.memberCode
   });
 
   if(error) throw error;
@@ -1828,17 +1856,28 @@ function goRegisterFromIndex(){
   window.location.href = `${registerPath}?from=${encodeURIComponent(returnPath)}`;
 }
 
-function getManagerPageByRole(){
-  if(!isLoggedIn() || !currentMember) return requirePage("managerVisitor");
-  const role = currentMember.role;
+function getManagerPageByRole(member = currentMember){
+  if(!isLoggedIn()) return requirePage("managerVisitor");
+
+  const role = normalizeTextValue(member?.role || localStorage.getItem("room10Role")).toLowerCase();
   if(role === "owner") return requirePage("managerOwner");
   if(role === "admin") return requirePage("managerAdmin");
   if(role === "member" || role === "trainee" || role === "applying") return requirePage("managerMember");
   return requirePage("managerVisitor");
 }
 
-function enterManagerRoom(){
+async function enterManagerRoom(){
   clearPendingRedirect();
+
+  if(isLoggedIn()){
+    try{
+      await fetchCurrentMember();
+      updateIdentityDisplay();
+    }catch(err){
+      showPageError(text("error.member_read_failed"), err.message || String(err));
+    }
+  }
+
   window.location.href = getManagerPageByRole();
 }
 
@@ -1895,22 +1934,24 @@ async function login(){
   }
 
   try{
-    const { data, error } = await client.rpc("verify_member_login", {
-      input_nickname: nickname,
-      input_code: key
+    const { data, error } = await client.rpc("room10_member_login", {
+      p_nickname: nickname,
+      p_key_code: key
     });
 
     if(error){
-      setLoginMessage(`${text("login.check_failed")}：${error.message || "verify_member_login"}`);
+      setLoginMessage(`${text("login.check_failed")}：${error.message || "room10_member_login"}`);
       return;
     }
 
-    if(!Array.isArray(data) || data.length === 0){
-      setLoginMessage(text("login.no_record"));
+    const loginRow = Array.isArray(data) && data.length ? data[0] : null;
+
+    if(!loginRow?.success){
+      setLoginMessage(normalizeTextValue(loginRow?.message) || text("login.no_record"));
       return;
     }
 
-    const member = validateMember(data[0], "verify_member_login 返回值");
+    const member = validateMember(loginRow, "room10_member_login 返回值");
     localStorage.setItem("room10LoggedIn", "true");
     localStorage.setItem("room10User", member.nickname);
     localStorage.setItem("room10Role", member.role);
@@ -1935,21 +1976,29 @@ async function login(){
       passwordInput.value = "";
       closeLogin(true);
 
-      const claimedAnniversary = await maybeClaimJoinAnniversaryAchievements({ force:true });
-      const claimedGift = await maybeClaimLoginHolidayGifts({ force:true, afterAllRewards:goTarget });
+      const continueAfterUpgradeNotice = async () => {
+        const claimedAnniversary = await maybeClaimJoinAnniversaryAchievements({ force:true });
+        const claimedGift = await maybeClaimLoginHolidayGifts({ force:true, afterAllRewards:goTarget });
 
-      if(!claimedAnniversary && !claimedGift){
-        goTarget();
-      }else if(claimedAnniversary && !claimedGift){
-        const lastIndex = rewardQueue.length - 1;
-        if(lastIndex >= 0){
-          rewardQueue[lastIndex].afterClose = goTarget;
-        }else if(!rewardModalShowing){
+        if(!claimedAnniversary && !claimedGift){
           goTarget();
-        }else{
-          rewardAfterCloseCallback = goTarget;
+        }else if(claimedAnniversary && !claimedGift){
+          const lastIndex = rewardQueue.length - 1;
+          if(lastIndex >= 0){
+            rewardQueue[lastIndex].afterClose = goTarget;
+          }else if(!rewardModalShowing){
+            goTarget();
+          }else{
+            rewardAfterCloseCallback = goTarget;
+          }
         }
+      };
+
+      if(showUpgradeLoginNoticeIfNeeded(loginRow, continueAfterUpgradeNotice)){
+        return;
       }
+
+      await continueAfterUpgradeNotice();
     }, 420);
   }catch(err){
     setLoginMessage(`${text("login.failed")}：${err.message || String(err)}`);
