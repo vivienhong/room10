@@ -1533,11 +1533,19 @@ function goManagerRoom(){
 
 function applyManagerAssets(){
   const managerBgUrl = getRoom10Asset("manager.roomManager");
-  if(managerBgUrl){
-    root.style.setProperty("--manager-room-bg", cssUrl(managerBgUrl));
-    if(managerImg && managerImg.getAttribute("src") !== managerBgUrl){
-      managerImg.src = managerBgUrl;
-    }
+  if(!managerBgUrl) return;
+
+  root.style.setProperty("--manager-room-bg", cssUrl(managerBgUrl));
+  if(!managerImg) return;
+
+  if(managerImg.complete && managerImg.naturalWidth && managerImg.getAttribute("src") === managerBgUrl){
+    syncManagerUIToImage();
+    return;
+  }
+
+  managerImg.addEventListener("load", syncManagerUIToImage, { once:true });
+  if(managerImg.getAttribute("src") !== managerBgUrl){
+    managerImg.src = managerBgUrl;
   }
 }
 
@@ -2520,7 +2528,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-if(managerImg?.complete){
+if(managerImg?.complete && managerImg.naturalWidth){
   syncManagerUIToImage();
 }else{
   managerImg?.addEventListener("load", syncManagerUIToImage, { once:true });
