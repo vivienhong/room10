@@ -1483,6 +1483,7 @@ button{font-family:inherit;}
 </style>
 </head>
 <body>
+<!-- manager-member-identity-safe-v2: secure member_id+member_code RPC verification; DB text RPC; stale login auto-cleared; no direct business-table read/write -->
 <div id="room">
   <div id="bgFrame">
     <img id="bg" src="" alt="" data-text-attr-key="alt:manager.bg_alt" />
@@ -1617,9 +1618,11 @@ const REQUIRED_TEXT_KEYS = [
   "role.owner",
   "role.admin",
   "role.member",
+  "role.roomer",
   "role.trainee",
   "role.applying",
   "role.visitor",
+  "role.invalid",
   "nav.aria_label",
   "nav.index",
   "nav.living",
@@ -1689,7 +1692,9 @@ const REQUIRED_TEXT_KEYS = [
   "error.page_text_missing",
   "error.page_text_read_failed",
   "error.path_missing",
-  "error.asset_missing"
+  "error.asset_missing",
+  "error.identity_read_failed",
+  "error.identity_invalid"
 ];
 
 const STORAGE_KEYS = {
@@ -1699,7 +1704,8 @@ const STORAGE_KEYS = {
   memberId:"room10MemberId",
   memberCode:"room10MemberCode"
 };
-
+const VALID_MEMBER_ROLES = new Set(["owner", "admin", "member", "roomer", "trainee", "applying"]);
+let identityValidationInFlight = null;
 
 
 function getIdentityTransitionMemberKey(member = null){
@@ -1794,6 +1800,14 @@ function showPageError(message, detail = ""){
   panel.classList.add("show");
 }
 
+function clearPageError(){
+  const panel = document.getElementById("pageError");
+  if(panel){
+    panel.classList.remove("show");
+    panel.textContent = "";
+  }
+}
+
 function fail(message, detail = ""){
   showPageError(message, detail);
   throw new Error(detail ? `${message} ${detail}` : message);
@@ -1809,14 +1823,14 @@ function text(key){
 }
 
 async function loadPageTexts(){
-  const { data, error } = await client
-    .from("room10_page_texts")
-    .select("text_key,text_value")
-    .eq("page_key", PAGE_KEY)
-    .eq("is_active", true);
+  const { data, error } = await client.rpc("get_room10_page_texts", {
+    p_page_key:PAGE_KEY,
+    p_include_inactive:false
+  });
 
   if(error){
-    showPageError("Page text read failed", error.message || "room10_page_texts query failed");
+    const message = pageTexts.get("error.page_text_read_failed") || "MANAGER_MEMBER_TEXT_READ_FAILED";
+    showPageError(message, error.message || "get_room10_page_texts");
     throw error;
   }
 
@@ -1828,7 +1842,7 @@ async function loadPageTexts(){
 
   const missingKeys = REQUIRED_TEXT_KEYS.filter(key => !normalizeTextValue(pageTexts.get(key)));
   if(missingKeys.length){
-    const message = pageTexts.get("error.page_text_missing") || "Page text config missing";
+    const message = pageTexts.get("error.page_text_missing") || "MANAGER_MEMBER_TEXT_MISSING";
     showPageError(message, missingKeys.join("、"));
     throw new Error(`${message}：${missingKeys.join(", ")}`);
   }
@@ -1927,11 +1941,14 @@ function syncOverlayToImage(){
 }
 
 function getRoleLabel(roleValue){
-  const role = String(roleValue || "visitor").toLowerCase();
-  if(role === "owner" || role === "admin" || role === "member" || role === "trainee" || role === "applying"){
+  const role = normalizeTextValue(roleValue).toLowerCase();
+  if(role === "roomer") return text("role.member");
+  if(role === "applying") return text("role.visitor");
+  if(role === "owner" || role === "admin" || role === "member" || role === "trainee"){
     return text(`role.${role}`);
   }
-  return text("role.visitor");
+  if(!role || role === "visitor") return text("role.visitor");
+  return text("role.invalid");
 }
 
 function setIdentityState({ nickname = "", role = "visitor", loggedIn = false, noticeCount = 0 } = {}){
@@ -1956,29 +1973,21 @@ function setIdentityState({ nickname = "", role = "visitor", loggedIn = false, n
 
 function getStoredUser(){
   const loggedIn = localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
-  const nickname = localStorage.getItem(STORAGE_KEYS.user) || "";
-  const role = localStorage.getItem(STORAGE_KEYS.role) || "";
-  const memberId = localStorage.getItem(STORAGE_KEYS.memberId) || "";
-  const memberCode = localStorage.getItem(STORAGE_KEYS.memberCode) || "";
+  if(!loggedIn) return null;
 
-  if(loggedIn && nickname){
-    return { nickname, role: role || "member", member_id: memberId, member_code: memberCode };
-  }
+  const nickname = normalizeTextValue(localStorage.getItem(STORAGE_KEYS.user));
+  const role = normalizeTextValue(localStorage.getItem(STORAGE_KEYS.role)).toLowerCase();
+  const memberId = normalizeTextValue(localStorage.getItem(STORAGE_KEYS.memberId));
+  const memberCode = normalizeTextValue(localStorage.getItem(STORAGE_KEYS.memberCode));
 
-  try{
-    const raw = localStorage.getItem("room10_user") || localStorage.getItem("room10_current_user") || localStorage.getItem("currentUser");
-    if(!raw) return null;
-    const data = JSON.parse(raw);
-    if(!data) return null;
-    return {
-      nickname: data.nickname || data.name || "",
-      role: data.role || "",
-      member_id: data.member_id || data.id || "",
-      member_code: data.member_code || data.memberCode || ""
-    };
-  }catch(err){
-    return null;
-  }
+  if(!nickname || !memberId || !memberCode) return null;
+
+  return {
+    nickname,
+    role,
+    member_id:memberId,
+    member_code:memberCode
+  };
 }
 
 function isLoggedIn(){
@@ -1988,17 +1997,17 @@ function isLoggedIn(){
 
 function getRole(){
   const user = getStoredUser();
-  return String(user?.role || localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
+  return String(user?.role || "visitor").toLowerCase();
 }
 
 function getCurrentUser(){
   const user = getStoredUser();
-  return user?.nickname || localStorage.getItem(STORAGE_KEYS.user) || "";
+  return user?.nickname || "";
 }
 
 function getCurrentMemberCode(){
   const user = getStoredUser();
-  return normalizeTextValue(user?.member_code || localStorage.getItem(STORAGE_KEYS.memberCode));
+  return normalizeTextValue(user?.member_code);
 }
 
 function updateStatusUserUI(){
@@ -2014,7 +2023,7 @@ function openLogin(targetPage = ""){
   window.location.href = `${loginPage}?login=1${targetParam}`;
 }
 
-function logout(){
+function clearStoredLogin(){
   localStorage.removeItem("room10LoggedIn");
   localStorage.removeItem("room10User");
   localStorage.removeItem("room10Role");
@@ -2025,6 +2034,18 @@ function logout(){
   localStorage.removeItem("room10_user");
   localStorage.removeItem("room10_current_user");
   localStorage.removeItem("currentUser");
+}
+
+function saveStoredMember(member){
+  localStorage.setItem(STORAGE_KEYS.loggedIn, "true");
+  localStorage.setItem(STORAGE_KEYS.user, normalizeTextValue(member.nickname));
+  localStorage.setItem(STORAGE_KEYS.role, normalizeTextValue(member.role).toLowerCase());
+  localStorage.setItem(STORAGE_KEYS.memberId, normalizeTextValue(member.id || member.member_id));
+  localStorage.setItem(STORAGE_KEYS.memberCode, normalizeTextValue(member.member_code));
+}
+
+function logout(){
+  clearStoredLogin();
   const page = getRoom10Page("managerVisitor");
   if(page) window.location.href = page;
 }
@@ -2033,7 +2054,7 @@ function getManagerPageKeyByRole(roleValue = getRole()){
   const role = String(roleValue || "visitor").toLowerCase();
   if(role === "owner") return "managerOwner";
   if(role === "admin") return "managerAdmin";
-  if(role === "member" || role === "trainee" || role === "applying") return "managerMember";
+  if(role === "member" || role === "roomer" || role === "trainee") return "managerMember";
   return "managerVisitor";
 }
 
@@ -2153,50 +2174,76 @@ function positionIdentityNoticePanel(){
   root.style.setProperty("--identity-notice-mobile-top", `${top}px`);
 }
 
+function extractIdentityMember(data){
+  const payload = data && typeof data === "object" ? data : {};
+  if(payload.member && typeof payload.member === "object") return payload.member;
+  if(payload.data && typeof payload.data === "object") return payload.data;
+  if(payload.found === true && payload.identity && typeof payload.identity === "object") return payload.identity;
+  if(payload.id || payload.member_id) return payload;
+  return null;
+}
+
 async function getCurrentMemberRecord(){
   const storedUser = getStoredUser();
-  const memberId = normalizeTextValue(storedUser?.member_id || localStorage.getItem(STORAGE_KEYS.memberId));
-  const nickname = normalizeTextValue(getCurrentUser());
+  const memberId = normalizeTextValue(storedUser?.member_id);
+  const memberCode = normalizeTextValue(storedUser?.member_code);
 
-  if(!memberId && !nickname) return null;
+  if(!memberId || !memberCode) return null;
+  if(identityValidationInFlight) return identityValidationInFlight;
 
-  let result = null;
+  identityValidationInFlight = (async () => {
+    const { data, error } = await client.rpc("get_manager_member_identity", {
+      p_member_id:memberId,
+      p_member_code:memberCode
+    });
 
-  if(memberId){
-    result = await client
-      .from("members")
-      .select("id,nickname,role,member_code")
-      .eq("id", memberId)
-      .maybeSingle();
-
-    if(result.error){
-      console.error("Read current member by id failed:", result.error);
-    }
-  }
-
-  if((!result || !result.data) && nickname){
-    result = await client
-      .from("members")
-      .select("id,nickname,role,member_code")
-      .eq("nickname", nickname)
-      .maybeSingle();
-
-    if(result.error){
-      console.error("Read current member by nickname failed:", result.error);
+    if(error){
+      console.error("get_manager_member_identity RPC failed:", error);
+      showPageError(text("error.identity_read_failed"), error.message || "get_manager_member_identity");
       return null;
     }
-  }
 
-  const data = result?.data || null;
-  if(data){
-    localStorage.setItem(STORAGE_KEYS.loggedIn, "true");
-    localStorage.setItem(STORAGE_KEYS.user, data.nickname || "");
-    localStorage.setItem(STORAGE_KEYS.role, data.role || "");
-    localStorage.setItem(STORAGE_KEYS.memberId, data.id || "");
-    localStorage.setItem(STORAGE_KEYS.memberCode, data.member_code || "");
-  }
+    const member = extractIdentityMember(data);
+    if(!member){
+      clearStoredLogin();
+      clearPageError();
+      return null;
+    }
 
-  return data;
+    const normalizedMember = {
+      id:normalizeTextValue(member.id || member.member_id || memberId),
+      nickname:normalizeTextValue(member.nickname || storedUser.nickname),
+      role:normalizeTextValue(member.role).toLowerCase(),
+      member_code:normalizeTextValue(member.member_code || memberCode)
+    };
+
+    if(!normalizedMember.id || !normalizedMember.nickname || !normalizedMember.member_code){
+      clearStoredLogin();
+      clearPageError();
+      return null;
+    }
+
+    if(!VALID_MEMBER_ROLES.has(normalizedMember.role)){
+      setIdentityState({
+        nickname:normalizedMember.nickname,
+        role:"invalid",
+        loggedIn:true,
+        noticeCount:0
+      });
+      showPageError(text("error.identity_invalid"), normalizedMember.role || "missing role");
+      return { ...normalizedMember, invalid_role:true };
+    }
+
+    clearPageError();
+    saveStoredMember(normalizedMember);
+    return normalizedMember;
+  })();
+
+  try{
+    return await identityValidationInFlight;
+  }finally{
+    identityValidationInFlight = null;
+  }
 }
 
 function getIdentityApplicationType(role = getRole()){
@@ -2256,7 +2303,7 @@ function updateManagerApplyCopyByRole(role = getRole()){
   const normalizedRole = normalizeTextValue(role).toLowerCase();
   const isTrainee = normalizedRole === "trainee";
 
-  const isSimpleApplyView = normalizedRole === "member" || isTrainee;
+  const isSimpleApplyView = normalizedRole === "member" || normalizedRole === "roomer" || isTrainee;
 
   if(pageMainPanel){
     pageMainPanel.classList.toggle("is-simple-apply-view", isSimpleApplyView);
@@ -2332,7 +2379,7 @@ async function refreshManagerApplyUIFromDB(){
   updateStatusUserUI();
   updateManagerApplyCopyByRole(role);
 
-  if(role !== "member" && !isTrainee){
+  if(role !== "member" && role !== "roomer" && !isTrainee){
     setManagerApplyButtons({ applyDisabled:true, applyText:text("apply.blocked_button"), cancelDisabled:true });
     managerApplyHint.style.color = "#8b5b34";
     managerApplyHint.textContent = text("apply.hint.role_blocked");
@@ -2367,7 +2414,7 @@ async function refreshManagerApplyUIFromDB(){
   }
 
   if(data.status === "pending"){
-    if(applicationType === "admin" && role === "member"){
+    if(applicationType === "admin" && (role === "member" || role === "roomer")){
       watchPendingAdminApplicationForIdentityTransition(member, data);
     }
     setManagerApplyButtons({
@@ -2381,7 +2428,7 @@ async function refreshManagerApplyUIFromDB(){
   }
 
   if(data.status === "approved"){
-    if(applicationType === "admin" && role === "member"){
+    if(applicationType === "admin" && (role === "member" || role === "roomer")){
       watchPendingAdminApplicationForIdentityTransition(member, data);
     }
     setManagerApplyButtons({
@@ -2398,7 +2445,7 @@ async function submitManagerApplication(){
   const role = getRole();
   const nickname = getCurrentUser();
 
-  if(role !== "member" && role !== "trainee"){
+  if(role !== "member" && role !== "roomer" && role !== "trainee"){
     managerApplyHint.style.color = "#8b5b34";
     managerApplyHint.textContent = text("apply.hint.not_member_submit");
     return;
@@ -2470,7 +2517,7 @@ async function cancelManagerApplication(){
     return;
   }
 
-  if(role !== "member"){
+  if(role !== "member" && role !== "roomer"){
     managerApplyHint.style.color = "#8b5b34";
     managerApplyHint.textContent = text("apply.hint.not_member_cancel");
     return;
@@ -2523,14 +2570,25 @@ async function cancelManagerApplication(){
 }
 
 async function ensureMemberPage(){
+  const visitorPage = getRoom10Page("managerVisitor");
+
   if(!isLoggedIn()){
-    const page = getRoom10Page("managerVisitor");
-    if(page) window.location.href = page;
+    if(visitorPage) window.location.href = visitorPage;
     return;
   }
 
-  await getCurrentMemberRecord();
-  const role = getRole();
+  const member = await getCurrentMemberRecord();
+  if(!member){
+    if(visitorPage) window.location.href = visitorPage;
+    return;
+  }
+
+  if(member.invalid_role){
+    updateStatusUserUI();
+    return;
+  }
+
+  const role = normalizeTextValue(member.role).toLowerCase();
 
   if(role === "owner" || role === "admin"){
     const page = getRoom10Page(getManagerPageKeyByRole(role));
@@ -2538,9 +2596,14 @@ async function ensureMemberPage(){
     return;
   }
 
-  if(role !== "member" && role !== "trainee" && role !== "applying"){
-    const page = getRoom10Page("managerVisitor");
-    if(page) window.location.href = page;
+  if(role === "applying"){
+    if(visitorPage) window.location.href = visitorPage;
+    return;
+  }
+
+  if(role !== "member" && role !== "roomer" && role !== "trainee"){
+    showPageError(text("error.identity_invalid"), role || "missing role");
+    updateStatusUserUI();
     return;
   }
 
@@ -2617,10 +2680,7 @@ window.addEventListener("storage", async event => {
     "room10User",
     "room10Role",
     "room10MemberId",
-    "room10MemberCode",
-    "room10_user",
-    "room10_current_user",
-    "currentUser"
+    "room10MemberCode"
   ].includes(event.key)){
     await ensureMemberPage();
   }
