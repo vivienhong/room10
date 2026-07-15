@@ -1,12 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>十号房｜宿管室</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title data-text-key="page.title"></title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
-
 <style>
 *{box-sizing:border-box;}
 
@@ -1165,209 +1165,347 @@ body{
 
 </style>
 </head>
-
 <body>
-<!-- manager-visitor-path-fix-v9; use room10-paths; admin-owner-single-page; no hardcoded relative jumps -->
+<!-- manager-visitor-safe-rpc-v10: 入住申请提交/查询/重申/申请人登录状态全部走安全 RPC；前端不直读写 applications / application_votes / members -->
 <div id="bgColorFill"></div>
 <div id="bgBleed"></div>
 <div id="bgLight"></div>
-
 <div id="managerPage">
-  <div id="managerStage">
-    <img id="managerBg" src="" alt="宿管室背景">
-
-    <div id="managerUI">
-      <div id="topActions">
-        <div id="topIdentityBar">
-          <div id="topIdentityBadge"><span class="identityText" id="currentUserText">参观者</span></div>
-
-          <div id="siteNoticeWrap">
-            <button id="siteNoticeBtn" type="button" aria-label="查看提醒">
-              <span id="siteNoticeIcon">🔔</span>
-              <span id="siteNoticeCount">0</span>
-            </button>
-
-            <div id="siteNoticePanel" aria-live="polite">
-              <div class="siteNoticeTitle">宿管室提醒</div>
-              <div id="siteNoticeContent">
-                <div class="siteNoticeEmpty">暂无提醒。</div>
-              </div>
-            </div>
-          </div>
-
-          <button id="loginOpenBtn" type="button">登录</button>
-          <button id="logoutBtn" class="hidden" type="button" onclick="logout()">登出</button>
-        </div>
-      </div>
-
-      <div id="topBar" aria-label="房间切换">
-        <div id="navOuter">
-          <div id="navScroll">
-            <nav id="roomNav">
-              <button class="navBtn" data-room="hall" type="button" onclick="goPage('index')"><span class="navLabel">大堂</span><span class="navActiveNote navActiveNoteA">✦</span><span class="navActiveNote navActiveNoteB">✧</span><span class="navActiveNote navActiveNoteC">★</span></button>
-              <button class="navBtn" data-room="honor" type="button" onclick="goPage('honor')"><span class="navLabel">荣誉墙</span><span class="navActiveNote navActiveNoteA">🏆</span><span class="navActiveNote navActiveNoteB">🏅</span><span class="navActiveNote navActiveNoteC">✦</span></button>
-              <button class="navBtn" data-room="game" type="button" onclick="goPage('game')"><span class="navLabel">游戏房</span><span class="navActiveNote navActiveNoteA">🎮</span><span class="navActiveNote navActiveNoteB">🎲</span><span class="navActiveNote navActiveNoteC">👾</span></button>
-              <button class="navBtn" data-room="studio" type="button" onclick="goNeedLogin('studioTodo')"><span class="navLabel">工作间</span><span class="navActiveNote navActiveNoteA">🎙</span><span class="navActiveNote navActiveNoteB">🎧</span><span class="navActiveNote navActiveNoteC">◇</span></button>
-              <button class="navBtn" data-room="living" type="button" onclick="goNeedLogin('living')"><span class="navLabel">客厅</span><span class="navActiveNote navActiveNoteA">☕</span><span class="navActiveNote navActiveNoteB">💬</span><span class="navActiveNote navActiveNoteC">♡</span></button>
-              <button class="navBtn" data-room="dorm" type="button" onclick="goNeedLogin('dorm')"><span class="navLabel">宿舍</span><span class="navActiveNote navActiveNoteA">☁</span><span class="navActiveNote navActiveNoteB">☾</span><span class="navActiveNote navActiveNoteC">🛏</span></button>
-              <button class="navBtn" data-room="pets" type="button" onclick="goNeedLogin('pet')"><span class="navLabel">宠物区</span><span class="navActiveNote navActiveNoteA">🐾</span><span class="navActiveNote navActiveNoteB">♡</span><span class="navActiveNote navActiveNoteC">🐱</span></button>
-              <button class="navBtn" data-room="flower" type="button" onclick="goNeedLogin('flower')"><span class="navLabel">花房区</span><span class="navActiveNote navActiveNoteA">✿</span><span class="navActiveNote navActiveNoteB">❀</span><span class="navActiveNote navActiveNoteC">🌸</span></button>
-            </nav>
-          </div>
-        </div>
-      </div>
-
-      <aside id="managerBriefCard" class="panel" aria-label="参观者宿管室说明">
-        <h3 class="brief-title">参观者说明</h3>
-        <p class="brief-text">这里是十号房的宿管室。参观者可以在这里提交入住申请或查看申请状态。</p>
-        <ul class="brief-list">
-          <li>已有钥匙的房客可直接验证进入。</li>
-          <li>申请通过后请及时打开登记本。</li>
-          <li>暂未加入也可以先浏览开放房间。</li>
-        </ul>
-        <div class="brief-sign">游客看板</div>
-      </aside>
-
-      <main id="contentArea">
-        <section class="card panel" id="visitorLoginCard">
-          <div class="title-line">
-            <h2 class="section-title">钥匙验证</h2>
-            <p class="title-note">请使用宿管发放的钥匙进入十号房</p>
-          </div>
-
-          <div class="quick-login-row">
-            <input id="quickNickname" type="text" placeholder="输入你的昵称" autocomplete="username">
-            <input id="quickPassword" type="password" placeholder="输入你的钥匙" autocomplete="current-password">
-            <button class="sub-btn" type="button" onclick="toggleQuickPassword()">显示</button>
-            <button class="inline-btn" type="button" onclick="quickLogin()">验证</button>
-          </div>
-
-          <div id="loginHint"></div>
-        </section>
-
-          <section class="card panel" id="visitorRegisterCard">
-            <div class="title-line">
-              <h2 class="section-title">登记本</h2>
-            </div>
-
-            <div class="register-book">
-              <div class="register-book-left">
-                <div class="book-icon">📖</div>
-                <div class="book-text">
-                  <div class="book-desc">通过考核并获得钥匙后，在此登记你的信息，正式入住十号房。</div>
-                </div>
-              </div>
-
-              <button class="inline-btn" type="button" onclick="openRegisterBook()">打开登记本</button>
-            </div>
-          </section>
-
-        <section class="card panel" id="visitorNoticeCard">
-          <div class="title-line">
-            <h2 class="section-title">十号房入住申请方式</h2>
-            <p class="title-note">通过工种考核即可加入十号房</p>
-          </div>
-
-          <div class="notice-box">
-            <ol class="notice-list">
-              <li>在小红书或抖音搜索并私信「十号房工作室」，提交考核文件</li>
-              <li>在下方留下圈名和 QQ，宿管会添加你并联系</li>
-            </ol>
-
-            <p class="notice-note-line">*考核方式二选其一，请提前开启好友添加权限，游客浏览无需登录。</p>
-
-            <div class="dual-fold-row">
-              <button id="applyToggleBtn" class="sub-btn fold-switch-btn" type="button" onclick="toggleApplyPanel()">填写圈名和QQ</button>
-              <button id="queryToggleBtn" class="sub-btn fold-switch-btn" type="button" onclick="toggleQueryPanel()">申请状态查询</button>
-            </div>
-
-            <div id="applyFoldHint" class="fold-hint">点击上方按钮展开对应内容，同一时间只会打开一个区域。</div>
-
-            <div id="applyFormWrap" class="fold-panel hidden">
-              <div class="mini-title">填写圈名和 QQ</div>
-              <div class="apply-form">
-                <input id="applyNickname" type="text" placeholder="留下圈名">
-                <input id="applyQQ" type="text" placeholder="留下 QQ 号">
-
-                <div class="apply-actions">
-                  <button class="inline-btn" type="button" onclick="submitApplication()">提交申请</button>
-                  <div id="applyHint"></div>
-                </div>
-              </div>
-            </div>
-
-            <div id="queryFormWrap" class="fold-panel hidden">
-              <div class="mini-title">申请状态查询</div>
-
-              <div class="apply-query-row">
-                <input id="applyLoginName" type="text" placeholder="输入申请时填写的圈名">
-                <input id="applyLoginQQ" type="text" placeholder="输入申请时填写的 QQ 号">
-                <button class="inline-btn" type="button" onclick="queryApplicationStatus()">查询</button>
-              </div>
-
-              <div id="applyQueryHint">可使用圈名和 QQ 查询当前审核状态。</div>
-              <div id="statusNotice" class="status-notice hidden"></div>
-
-              <div id="applicationResultWrap" class="result-box hidden" style="margin-top:8px;">
-                <p id="applicationResultTitle"><strong>申请记录</strong></p>
-
-                <div class="result-row">
-                  <div class="result-label">圈名</div>
-                  <div class="result-value" id="resultName">-</div>
-                </div>
-
-                <div class="result-row">
-                  <div class="result-label">QQ</div>
-                  <div class="result-value" id="resultQQ">-</div>
-                </div>
-
-                <div class="result-row">
-                  <div class="result-label">状态</div>
-                  <div class="result-value" id="resultStatus">-</div>
-                </div>
-
-                <div class="result-row hidden" id="resultKeyRow">
-                  <div class="result-label">钥匙</div>
-                  <div class="result-value" id="resultKey">-</div>
-                </div>
-
-                <div class="result-row" id="resultMessageRow">
-                  <div class="result-label">提示</div>
-                  <div id="resultMessage">-</div>
-                </div>
-
-                <div class="result-actions" id="resultActions">
-                  <button id="goRegisterBtn" class="inline-btn hidden" type="button" onclick="openRegisterBookFromApplication()">现在登记资料</button>
-                  <button id="saveForLaterBtn" class="sub-btn hidden" type="button" onclick="saveApplicantSessionOnly()">稍后再登记</button>
-                  <button id="reapplyBtn" class="inline-btn hidden" type="button" onclick="reapplyApplication()">再次申请</button>
-                </div>
-
-                <div id="reapplyNote" class="reapply-note hidden">再次申请会清空上一次审核投票，并恢复为申请中。</div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
-  </div>
+<div id="managerStage">
+<img alt="" data-alt-key="manager.bg_alt" id="managerBg" src=""/>
+<div id="managerUI">
+<div id="topActions">
+<div id="topIdentityBar">
+<div id="topIdentityBadge"><span class="identityText" data-text-key="identity.visitor" id="currentUserText"></span></div>
+<div id="siteNoticeWrap">
+<button aria-label="" data-aria-label-key="notice.aria_label" id="siteNoticeBtn" type="button">
+<span id="siteNoticeIcon">🔔</span>
+<span id="siteNoticeCount">0</span>
+</button>
+<div aria-live="polite" id="siteNoticePanel">
+<div class="siteNoticeTitle" data-text-key="notice.title"></div>
+<div id="siteNoticeContent">
+<div class="siteNoticeEmpty" data-text-key="notice.empty"></div>
 </div>
-
+</div>
+</div>
+<button data-text-key="identity.login_button" id="loginOpenBtn" type="button"></button>
+<button class="hidden" data-text-key="identity.logout_button" id="logoutBtn" onclick="logout()" type="button"></button>
+</div>
+</div>
+<div aria-label="" data-aria-label-key="nav.aria_label" id="topBar">
+<div id="navOuter">
+<div id="navScroll">
+<nav id="roomNav">
+<button class="navBtn" data-room="hall" onclick="goPage('index')" type="button"><span class="navLabel" data-text-key="nav.index"></span><span class="navActiveNote navActiveNoteA">✦</span><span class="navActiveNote navActiveNoteB">✧</span><span class="navActiveNote navActiveNoteC">★</span></button>
+<button class="navBtn" data-room="honor" onclick="goPage('honor')" type="button"><span class="navLabel" data-text-key="nav.honor"></span><span class="navActiveNote navActiveNoteA">🏆</span><span class="navActiveNote navActiveNoteB">🏅</span><span class="navActiveNote navActiveNoteC">✦</span></button>
+<button class="navBtn" data-room="game" onclick="goPage('game')" type="button"><span class="navLabel" data-text-key="nav.game"></span><span class="navActiveNote navActiveNoteA">🎮</span><span class="navActiveNote navActiveNoteB">🎲</span><span class="navActiveNote navActiveNoteC">👾</span></button>
+<button class="navBtn" data-room="studio" onclick="goNeedLogin('studioTodo')" type="button"><span class="navLabel" data-text-key="nav.studio"></span><span class="navActiveNote navActiveNoteA">🎙</span><span class="navActiveNote navActiveNoteB">🎧</span><span class="navActiveNote navActiveNoteC">◇</span></button>
+<button class="navBtn" data-room="living" onclick="goNeedLogin('living')" type="button"><span class="navLabel" data-text-key="nav.living"></span><span class="navActiveNote navActiveNoteA">☕</span><span class="navActiveNote navActiveNoteB">💬</span><span class="navActiveNote navActiveNoteC">♡</span></button>
+<button class="navBtn" data-room="dorm" onclick="goNeedLogin('dorm')" type="button"><span class="navLabel" data-text-key="nav.dorm"></span><span class="navActiveNote navActiveNoteA">☁</span><span class="navActiveNote navActiveNoteB">☾</span><span class="navActiveNote navActiveNoteC">🛏</span></button>
+<button class="navBtn" data-room="pets" onclick="goPage('pet')" type="button"><span class="navLabel" data-text-key="nav.pet"></span><span class="navActiveNote navActiveNoteA">🐾</span><span class="navActiveNote navActiveNoteB">♡</span><span class="navActiveNote navActiveNoteC">🐱</span></button>
+<button class="navBtn" data-room="flower" onclick="goPage('flower')" type="button"><span class="navLabel" data-text-key="nav.flower"></span><span class="navActiveNote navActiveNoteA">✿</span><span class="navActiveNote navActiveNoteB">❀</span><span class="navActiveNote navActiveNoteC">🌸</span></button>
+</nav>
+</div>
+</div>
+</div>
+<aside aria-label="" class="panel" data-aria-label-key="brief.aria_label" id="managerBriefCard">
+<h3 class="brief-title" data-text-key="brief.title"></h3>
+<p class="brief-text" data-text-key="brief.desc"></p>
+<ul class="brief-list">
+<li data-text-key="brief.rule_1"></li>
+<li data-text-key="brief.rule_2"></li>
+<li data-text-key="brief.rule_3"></li>
+</ul>
+<div class="brief-sign" data-text-key="brief.sign"></div>
+</aside>
+<main id="contentArea">
+<section class="card panel" id="visitorLoginCard">
+<div class="title-line">
+<h2 class="section-title" data-text-key="login.title"></h2>
+<p class="title-note" data-text-key="login.subtitle"></p>
+</div>
+<div class="quick-login-row">
+<input autocomplete="username" data-placeholder-key="login.placeholder.nickname" id="quickNickname" placeholder="" type="text"/>
+<input autocomplete="current-password" data-placeholder-key="login.placeholder.key" id="quickPassword" placeholder="" type="password"/>
+<button class="sub-btn" data-text-key="login.toggle.show" onclick="toggleQuickPassword()" type="button"></button>
+<button class="inline-btn" data-text-key="login.button.verify" onclick="quickLogin()" type="button"></button>
+</div>
+<div id="loginHint"></div>
+</section>
+<section class="card panel" id="visitorRegisterCard">
+<div class="title-line">
+<h2 class="section-title" data-text-key="register.title"></h2>
+</div>
+<div class="register-book">
+<div class="register-book-left">
+<div class="book-icon">📖</div>
+<div class="book-text">
+<div class="book-desc" data-text-key="register.desc"></div>
+</div>
+</div>
+<button class="inline-btn" data-text-key="register.button" onclick="openRegisterBook()" type="button"></button>
+</div>
+</section>
+<section class="card panel" id="visitorNoticeCard">
+<div class="title-line">
+<h2 class="section-title" data-text-key="application.title"></h2>
+<p class="title-note" data-text-key="application.subtitle"></p>
+</div>
+<div class="notice-box">
+<ol class="notice-list">
+<li data-text-key="application.method_1"></li>
+<li data-text-key="application.method_2"></li>
+</ol>
+<p class="notice-note-line" data-text-key="application.note"></p>
+<div class="dual-fold-row">
+<button class="sub-btn fold-switch-btn" data-text-key="application.toggle.apply" id="applyToggleBtn" onclick="toggleApplyPanel()" type="button"></button>
+<button class="sub-btn fold-switch-btn" data-text-key="application.toggle.query" id="queryToggleBtn" onclick="toggleQueryPanel()" type="button"></button>
+</div>
+<div class="fold-hint" data-text-key="application.fold.default" id="applyFoldHint"></div>
+<div class="fold-panel hidden" id="applyFormWrap">
+<div class="mini-title" data-text-key="apply.title"></div>
+<div class="apply-form">
+<input data-placeholder-key="apply.placeholder.name" id="applyNickname" placeholder="" type="text"/>
+<input data-placeholder-key="apply.placeholder.qq" id="applyQQ" placeholder="" type="text"/>
+<div class="apply-actions">
+<button class="inline-btn" data-text-key="apply.button.submit" onclick="submitApplication()" type="button"></button>
+<div id="applyHint"></div>
+</div>
+</div>
+</div>
+<div class="fold-panel hidden" id="queryFormWrap">
+<div class="mini-title" data-text-key="query.title"></div>
+<div class="apply-query-row">
+<input data-placeholder-key="query.placeholder.name" id="applyLoginName" placeholder="" type="text"/>
+<input data-placeholder-key="query.placeholder.qq" id="applyLoginQQ" placeholder="" type="text"/>
+<button class="inline-btn" data-text-key="query.button" onclick="queryApplicationStatus()" type="button"></button>
+</div>
+<div data-text-key="query.desc" id="applyQueryHint"></div>
+<div class="status-notice hidden" id="statusNotice"></div>
+<div class="result-box hidden" id="applicationResultWrap" style="margin-top:8px;">
+<p id="applicationResultTitle"><strong data-text-key="result.title"></strong></p>
+<div class="result-row">
+<div class="result-label" data-text-key="result.field.name"></div>
+<div class="result-value" id="resultName">-</div>
+</div>
+<div class="result-row">
+<div class="result-label" data-text-key="result.field.qq"></div>
+<div class="result-value" id="resultQQ">-</div>
+</div>
+<div class="result-row">
+<div class="result-label" data-text-key="result.field.status"></div>
+<div class="result-value" id="resultStatus">-</div>
+</div>
+<div class="result-row hidden" id="resultKeyRow">
+<div class="result-label" data-text-key="result.field.key"></div>
+<div class="result-value" id="resultKey">-</div>
+</div>
+<div class="result-row" id="resultMessageRow">
+<div class="result-label" data-text-key="result.field.hint"></div>
+<div id="resultMessage">-</div>
+</div>
+<div class="result-actions" id="resultActions">
+<button class="inline-btn hidden" data-text-key="result.action.register_now" id="goRegisterBtn" onclick="openRegisterBookFromApplication()" type="button"></button>
+<button class="sub-btn hidden" data-text-key="result.action.register_later" id="saveForLaterBtn" onclick="saveApplicantSessionOnly()" type="button"></button>
+<button class="inline-btn hidden" data-text-key="result.action.reapply" id="reapplyBtn" onclick="reapplyApplication()" type="button"></button>
+</div>
+<div class="reapply-note hidden" data-text-key="result.reapply_note" id="reapplyNote"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+</div>
+</div>
 <script>
 
 const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+
+const PAGE_KEY = "managerVisitor";
+const STORAGE_KEYS = {
+  loggedIn:"room10LoggedIn",
+  user:"room10User",
+  role:"room10Role",
+  memberId:"room10MemberId",
+  memberCode:"room10MemberCode"
+};
+const VALID_MEMBER_ROLES = new Set(["owner", "admin", "member", "roomer", "trainee", "applying"]);
+const REQUIRED_DYNAMIC_TEXT_KEYS = [
+  "role.owner",
+  "role.admin",
+  "role.member",
+  "role.roomer",
+  "role.trainee",
+  "role.applying",
+  "role.visitor",
+  "role.invalid",
+  "identity.logged_in_fallback",
+  "notice.empty",
+  "notice.item_title_fallback",
+  "login.hint.prompt",
+  "login.hint.missing_key",
+  "login.hint.check_failed",
+  "login.hint.success",
+  "login.hint.no_record",
+  "login.hint.door_failed",
+  "login.hint.approved_unregistered",
+  "login.hint.pending",
+  "login.hint.rejected",
+  "login.hint.registered",
+  "login.hint.blocked",
+  "login.hint.need_key",
+  "login.toggle.show",
+  "login.toggle.hide",
+  "application.fold.default",
+  "application.fold.apply",
+  "application.fold.query",
+  "apply.hint.missing_fields",
+  "apply.hint.invalid_qq",
+  "apply.hint.failed",
+  "apply.hint.success",
+  "query.hint.missing_fields",
+  "query.hint.invalid_qq",
+  "query.hint.failed",
+  "query.hint.not_found",
+  "query.hint.found",
+  "query.hint.session_saved",
+  "status.pending",
+  "status.pending_message",
+  "status.approved",
+  "status.approved_key_missing",
+  "status.approved_with_key_message",
+  "status.approved_without_key_message",
+  "status.rejected",
+  "status.rejected_message",
+  "status.registered",
+  "status.registered_message",
+  "status.unknown",
+  "status.unknown_message",
+  "reapply.processing",
+  "reapply.failed",
+  "reapply.not_allowed",
+  "reapply.success",
+  "upgrade.title",
+  "upgrade.desc",
+  "error.path_missing",
+  "error.asset_missing",
+  "error.page_text_missing",
+  "error.page_text_read_failed",
+  "error.identity_read_failed",
+  "error.identity_invalid"
+];
+
+let pageTexts = new Map();
+let pageTextReady = false;
+let identityValidationInFlight = null;
+
+function normalizeText(value){
+  return String(value ?? "").trim();
+}
+
+function showPageError(message, detail = ""){
+  let panel = document.getElementById("pageError");
+  if(!panel){
+    panel = document.createElement("div");
+    panel.id = "pageError";
+    panel.style.cssText = "position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:4000;max-width:min(720px,calc(100vw - 28px));padding:12px 16px;border-radius:16px;background:rgba(255,248,240,.97);border:1px solid rgba(165,94,64,.28);color:#7a3f2b;box-shadow:0 12px 30px rgba(87,50,31,.16);font-size:13px;font-weight:800;line-height:1.55;text-align:left;white-space:pre-line;";
+    document.body.appendChild(panel);
+  }
+  panel.textContent = detail ? `${message}\n${detail}` : message;
+}
+
+function clearPageError(){
+  document.getElementById("pageError")?.remove();
+}
+
+function text(key){
+  const value = pageTexts.get(key);
+  if(!normalizeText(value)){
+    const message = pageTexts.get("error.page_text_missing") || "MANAGER_VISITOR_TEXT_MISSING";
+    throw new Error(`${message}：page_key=${PAGE_KEY}, text_key=${key}`);
+  }
+  return String(value);
+}
+
+function formatText(key, vars = {}){
+  return text(key).replace(/\{(\w+)\}/g, (match, name) => {
+    if(!Object.prototype.hasOwnProperty.call(vars, name)) return match;
+    return String(vars[name]);
+  });
+}
+
+function collectRequiredTextKeys(){
+  const keys = new Set(REQUIRED_DYNAMIC_TEXT_KEYS);
+  document.querySelectorAll("[data-text-key]").forEach(el => keys.add(el.dataset.textKey));
+  document.querySelectorAll("[data-placeholder-key]").forEach(el => keys.add(el.dataset.placeholderKey));
+  document.querySelectorAll("[data-aria-label-key]").forEach(el => keys.add(el.dataset.ariaLabelKey));
+  document.querySelectorAll("[data-alt-key]").forEach(el => keys.add(el.dataset.altKey));
+  return [...keys].filter(Boolean);
+}
+
+async function loadPageTexts(){
+  const { data, error } = await client.rpc("get_room10_page_texts", {
+    p_page_key:PAGE_KEY,
+    p_include_inactive:false
+  });
+
+  if(error){
+    throw new Error(`MANAGER_VISITOR_TEXT_READ_FAILED: ${error.message || "get_room10_page_texts"}`);
+  }
+
+  pageTexts = new Map();
+  (Array.isArray(data) ? data : []).forEach(row => {
+    const key = normalizeText(row.text_key);
+    if(key) pageTexts.set(key, String(row.text_value ?? ""));
+  });
+
+  const missing = collectRequiredTextKeys().filter(key => !normalizeText(pageTexts.get(key)));
+  if(missing.length){
+    const message = pageTexts.get("error.page_text_missing") || "MANAGER_VISITOR_TEXT_MISSING";
+    throw new Error(`${message}：${missing.join("、")}`);
+  }
+
+  pageTextReady = true;
+}
+
+function applyPageTexts(){
+  document.querySelectorAll("[data-text-key]").forEach(el => {
+    el.textContent = text(el.dataset.textKey);
+  });
+  document.querySelectorAll("[data-placeholder-key]").forEach(el => {
+    el.placeholder = text(el.dataset.placeholderKey);
+  });
+  document.querySelectorAll("[data-aria-label-key]").forEach(el => {
+    el.setAttribute("aria-label", text(el.dataset.ariaLabelKey));
+  });
+  document.querySelectorAll("[data-alt-key]").forEach(el => {
+    el.alt = text(el.dataset.altKey);
+  });
+}
+
 function getRoom10Page(pageKey){
-  const key = String(pageKey || "").trim();
-  const page = window.room10Page ? window.room10Page(key) : "";
-  return page || "";
+  const key = normalizeText(pageKey);
+  const page = key && typeof window.room10Page === "function" ? window.room10Page(key) : "";
+  if(!page){
+    showPageError(text("error.path_missing"), key || "missing page key");
+    return "";
+  }
+  return page;
 }
 
 function getRoom10Asset(assetKey){
-  const key = String(assetKey || "").trim();
-  const asset = window.room10Asset ? window.room10Asset(key) : "";
-  return asset || "";
+  const key = normalizeText(assetKey);
+  const asset = key && typeof window.room10Asset === "function" ? window.room10Asset(key) : "";
+  if(!asset){
+    showPageError(text("error.asset_missing"), key || "missing asset key");
+    return "";
+  }
+  return asset;
 }
 
 function cssUrl(value){
@@ -1375,10 +1513,10 @@ function cssUrl(value){
 }
 
 function getManagerPageKeyByRole(roleValue = getRole()){
-  const role = String(roleValue || "").toLowerCase();
+  const role = normalizeText(roleValue).toLowerCase();
   if(role === "owner") return "managerOwner";
   if(role === "admin") return "managerAdmin";
-  if(role === "member" || role === "trainee" || role === "applying") return "managerMember";
+  if(role === "member" || role === "roomer" || role === "trainee") return "managerMember";
   return "managerVisitor";
 }
 
@@ -1525,53 +1663,43 @@ function isMediumScrollScreen(){
   return window.innerWidth > 540 && (window.innerWidth <= 900 || window.innerHeight <= 760);
 }
 
+function clearStoredLogin(){
+  Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+}
+
+function saveStoredMember(member){
+  localStorage.setItem(STORAGE_KEYS.loggedIn, "true");
+  localStorage.setItem(STORAGE_KEYS.user, normalizeText(member.nickname));
+  localStorage.setItem(STORAGE_KEYS.role, normalizeText(member.role).toLowerCase());
+  localStorage.setItem(STORAGE_KEYS.memberId, normalizeText(member.id || member.member_id));
+  localStorage.setItem(STORAGE_KEYS.memberCode, normalizeText(member.member_code));
+}
+
 function getStoredUser(){
-  const oldLoggedIn = localStorage.getItem("room10LoggedIn") === "true";
-  const oldUser = localStorage.getItem("room10User") || "";
-  const oldRole = localStorage.getItem("room10Role") || "";
-  const oldMemberId = localStorage.getItem("room10MemberId") || "";
+  if(localStorage.getItem(STORAGE_KEYS.loggedIn) !== "true") return null;
 
-  if(oldLoggedIn && oldUser){
-    return {
-      nickname:oldUser,
-      role:oldRole || "member",
-      member_id:oldMemberId
-    };
-  }
+  return {
+    nickname:normalizeText(localStorage.getItem(STORAGE_KEYS.user)),
+    role:normalizeText(localStorage.getItem(STORAGE_KEYS.role)).toLowerCase(),
+    member_id:normalizeText(localStorage.getItem(STORAGE_KEYS.memberId)),
+    member_code:normalizeText(localStorage.getItem(STORAGE_KEYS.memberCode))
+  };
+}
 
-  try{
-    const raw =
-      localStorage.getItem("room10_user") ||
-      localStorage.getItem("room10_current_user") ||
-      localStorage.getItem("currentUser");
-
-    if(!raw) return null;
-    const data = JSON.parse(raw);
-    if(!data) return null;
-
-    return {
-      nickname:data.nickname || data.name || "",
-      role:data.role || "",
-      member_id:data.member_id || data.id || ""
-    };
-  }catch(err){
-    return null;
-  }
+function isCompleteStoredUser(user){
+  return !!(user?.nickname && user?.role && user?.member_id && user?.member_code);
 }
 
 function isLoggedIn(){
-  const user = getStoredUser();
-  return !!(user && user.nickname);
+  return isCompleteStoredUser(getStoredUser());
 }
 
 function getRole(){
-  const user = getStoredUser();
-  return user?.role || localStorage.getItem("room10Role") || "";
+  return getStoredUser()?.role || "";
 }
 
 function getCurrentUser(){
-  const user = getStoredUser();
-  return user?.nickname || localStorage.getItem("room10User") || "";
+  return getStoredUser()?.nickname || "";
 }
 
 function getApplicantSession(){
@@ -1600,29 +1728,32 @@ function showUpgradeLoginNotice(loginRow){
 
   const oldKey = normalizeLoginRpcMessage(loginRow.upgrade_old_key);
   const newKey = normalizeLoginRpcMessage(loginRow.upgrade_new_key || loginRow.member_code);
+  if(!oldKey || !newKey) return;
 
-  if(!oldKey && !newKey) return;
+  window.alert(`${text("upgrade.title")}
 
-  window.alert(
-    `升级申请已通过！\n\n你现在已经是房客。\n旧钥匙：${oldKey || "B 系列钥匙"}\n新钥匙：${newKey || "A 系列钥匙"}\n\n请以后使用新的 A 系列钥匙登录。`
-  );
+${formatText("upgrade.desc", {
+    old_key:oldKey,
+    new_key:newKey
+  })}`);
 }
 
 function getRoleLabel(roleValue = getRole()){
-  const role = String(roleValue || "").toLowerCase();
-  if(role === "admin") return "宿管";
-  if(role === "owner") return "维修工";
-  if(role === "member") return "房客";
-  if(role === "applying") return "申请中";
-  if(isLoggedIn()) return "房客";
-  return "参观者";
+  const role = normalizeText(roleValue).toLowerCase();
+  if(role === "owner") return text("role.owner");
+  if(role === "admin") return text("role.admin");
+  if(role === "member" || role === "roomer") return text("role.member");
+  if(role === "trainee") return text("role.trainee");
+  if(role === "applying") return text("role.visitor");
+  if(!role) return text("role.visitor");
+  return text("role.invalid");
 }
 
 function updateStatusUserUI(labelOverride){
   if(!currentUserText || !loginOpenBtn || !logoutBtn) return;
 
   if(isLoggedIn()){
-    const user = getCurrentUser() || "已登录";
+    const user = getCurrentUser() || text("identity.logged_in_fallback");
     const roleLabel = labelOverride || getRoleLabel();
     currentUserText.textContent = `${user} | ${roleLabel}`;
     loginOpenBtn.classList.add("hidden");
@@ -1632,14 +1763,14 @@ function updateStatusUserUI(labelOverride){
 
   const applicant = getApplicantSession();
   if(applicant && applicant.name){
-    const roleLabel = labelOverride || "申请中";
+    const roleLabel = labelOverride || text("role.applying");
     currentUserText.textContent = `${applicant.name} | ${roleLabel}`;
     loginOpenBtn.classList.add("hidden");
     logoutBtn.classList.remove("hidden");
     return;
   }
 
-  currentUserText.textContent = "参观者";
+  currentUserText.textContent = text("identity.visitor");
   loginOpenBtn.classList.remove("hidden");
   logoutBtn.classList.add("hidden");
 }
@@ -1656,7 +1787,7 @@ function renderSiteNoticeList(items){
   const list = Array.isArray(items) ? items : [];
 
   if(!list.length){
-    siteNoticeContent.innerHTML = '<div class="siteNoticeEmpty">暂无提醒。</div>';
+    siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">${escapeHtml(text("notice.empty"))}</div>`;
     setSiteNoticeCount(0);
     return;
   }
@@ -1665,7 +1796,7 @@ function renderSiteNoticeList(items){
     <div class="siteNoticeList">
       ${list.map(item => `
         <div class="siteNoticeItem">
-          <div class="siteNoticeItemTitle">${escapeHtml(item.title || "提醒")}</div>
+          <div class="siteNoticeItemTitle">${escapeHtml(item.title || text("notice.item_title_fallback"))}</div>
           <div class="siteNoticeItemDesc">${escapeHtml(item.desc || "")}</div>
         </div>
       `).join("")}
@@ -1688,7 +1819,7 @@ function openLogin(){
   }
   quickNicknameInput?.focus();
   loginHint.style.color = "#8b5b34";
-  loginHint.textContent = "请在这里输入昵称和钥匙。";
+  loginHint.textContent = text("login.hint.prompt");
 }
 
 function showStatusNotice(message, type = "info"){
@@ -1740,7 +1871,7 @@ function saveApplicantSessionOnly(){
   setApplicantSession(currentApplicationRecord.name, currentApplicationRecord.contact_qq);
   updateIdentityUI();
   applyQueryHint.style.color = "#5f7d3a";
-  applyQueryHint.textContent = "已为你保留申请记录，下次可继续用圈名和 QQ 查询。";
+  applyQueryHint.textContent = text("query.hint.session_saved");
 }
 
 function openRegisterBook(){
@@ -1788,7 +1919,7 @@ function setFoldState(type){
   queryToggleBtn.classList.toggle("is-active", openQuery);
 
   if(openApply){
-    applyFoldHint.textContent = "正在填写申请信息。";
+    applyFoldHint.textContent = text("application.fold.apply");
     setTimeout(() => {
       scrollContentToBottomPart(applyFormWrap);
     }, 60);
@@ -1796,14 +1927,14 @@ function setFoldState(type){
   }
 
   if(openQuery){
-    applyFoldHint.textContent = "正在查询申请状态。";
+    applyFoldHint.textContent = text("application.fold.query");
     setTimeout(() => {
       scrollContentToBottomPart(queryFormWrap);
     }, 60);
     return;
   }
 
-  applyFoldHint.textContent = "点击上方按钮展开对应内容，同一时间只会打开一个区域。";
+  applyFoldHint.textContent = text("application.fold.default");
 }
 
 function toggleApplyPanel(){
@@ -1832,66 +1963,157 @@ function renderApplicationResult(record){
   const status = String(record.status || "").trim().toLowerCase();
 
   if(status === "pending"){
-    resultStatus.textContent = "审核中";
+    resultStatus.textContent = text("status.pending");
     resultStatus.className = "result-value result-status-pending";
-    resultMessage.textContent = "审核进行中，请耐心等待~";
+    resultMessage.textContent = text("status.pending_message");
   }else if(status === "approved"){
-    resultStatus.textContent = "审核通过";
+    resultStatus.textContent = text("status.approved");
     resultStatus.className = "result-value result-status-approved";
-    resultKey.textContent = record.member_code || "暂未分配";
+    resultKey.textContent = record.member_code || text("status.approved_key_missing");
     resultKeyRow.classList.remove("hidden");
     resultMessage.textContent = record.member_code
-      ? "这是你的钥匙。你现在可以去登记资料，也可以稍后再登记。"
-      : "已通过，但钥匙尚未生成。";
+      ? text("status.approved_with_key_message")
+      : text("status.approved_without_key_message");
     if(record.member_code){
       goRegisterBtn.classList.remove("hidden");
       saveForLaterBtn.classList.remove("hidden");
     }
   }else if(status === "rejected"){
-    resultStatus.textContent = "未通过";
+    resultStatus.textContent = text("status.rejected");
     resultStatus.className = "result-value result-status-rejected";
-    resultMessage.textContent = "本次申请未通过。你现在的身份是参观者，如需继续加入可再次申请。";
+    resultMessage.textContent = text("status.rejected_message");
     reapplyBtn.classList.remove("hidden");
     reapplyNote.classList.remove("hidden");
   }else if(status === "registered"){
-    resultStatus.textContent = "已登记";
+    resultStatus.textContent = text("status.registered");
     resultStatus.className = "result-value result-status-approved";
-    resultMessage.textContent = "你已完成正式登记，请使用正式昵称和钥匙登录。";
+    resultMessage.textContent = text("status.registered_message");
   }else{
-    resultStatus.textContent = record.status || "未知";
+    resultStatus.textContent = record.status || text("status.unknown");
     resultStatus.className = "result-value";
-    resultMessage.textContent = "当前记录状态暂未识别。";
+    resultMessage.textContent = text("status.unknown_message");
   }
 
   scrollContentToBottomPart(applicationResultWrap);
 }
 
+function extractIdentityMember(data){
+  const payload = data && typeof data === "object" ? data : {};
+  if(payload.member && typeof payload.member === "object") return payload.member;
+  if(payload.data && typeof payload.data === "object") return payload.data;
+  if(payload.found === true && payload.identity && typeof payload.identity === "object") return payload.identity;
+  if(payload.id || payload.member_id) return payload;
+  return null;
+}
+
+async function validateStoredIdentity(){
+  const stored = getStoredUser();
+  if(!stored) return null;
+
+  if(!isCompleteStoredUser(stored)){
+    clearStoredLogin();
+    return null;
+  }
+
+  if(identityValidationInFlight) return identityValidationInFlight;
+
+  identityValidationInFlight = (async () => {
+    const { data, error } = await client.rpc("get_manager_member_identity", {
+      p_member_id:stored.member_id,
+      p_member_code:stored.member_code
+    });
+
+    if(error){
+      showPageError(text("error.identity_read_failed"), error.message || "get_manager_member_identity");
+      return null;
+    }
+
+    const member = extractIdentityMember(data);
+    if(!member){
+      clearStoredLogin();
+      clearPageError();
+      return null;
+    }
+
+    const normalizedRole = normalizeText(member.role).toLowerCase();
+    if(!VALID_MEMBER_ROLES.has(normalizedRole)){
+      updateStatusUserUI(text("role.invalid"));
+      showPageError(text("error.identity_invalid"), normalizedRole || "missing role");
+      return { ...member, role:normalizedRole, invalid_role:true };
+    }
+
+    clearPageError();
+    const normalizedMember = {
+      ...member,
+      id:member.id || member.member_id || stored.member_id,
+      nickname:normalizeText(member.nickname) || stored.nickname,
+      member_code:normalizeText(member.member_code) || stored.member_code,
+      role:normalizedRole
+    };
+    saveStoredMember(normalizedMember);
+    return normalizedMember;
+  })();
+
+  try{
+    return await identityValidationInFlight;
+  }finally{
+    identityValidationInFlight = null;
+  }
+}
+
 async function updateIdentityUI(){
+  const rawStored = getStoredUser();
+  if(rawStored && !isCompleteStoredUser(rawStored)){
+    clearStoredLogin();
+  }
+
   if(!isLoggedIn()){
     const applicant = getApplicantSession();
 
     if(applicant && currentApplicationRecord){
-      const status = String(currentApplicationRecord.status || "").toLowerCase();
+      const status = normalizeText(currentApplicationRecord.status).toLowerCase();
       if(status === "pending"){
-        updateStatusUserUI("申请中");
+        updateStatusUserUI(text("role.applying"));
         return;
       }
       if(status === "rejected"){
-        updateStatusUserUI("参观者");
+        updateStatusUserUI(text("role.visitor"));
         return;
       }
       if(status === "approved"){
-        updateStatusUserUI("申请通过");
+        updateStatusUserUI(text("status.approved"));
         return;
       }
     }
 
-    updateStatusUserUI(applicant ? "申请中" : "参观者");
+    updateStatusUserUI(applicant ? text("role.applying") : text("role.visitor"));
     return;
   }
 
-  const role = getRole();
-  goPage(getManagerPageKeyByRole(role));
+  const member = await validateStoredIdentity();
+  if(!member){
+    updateStatusUserUI(text("role.visitor"));
+    return;
+  }
+
+  if(member.invalid_role){
+    updateStatusUserUI(text("role.invalid"));
+    return;
+  }
+
+  const role = normalizeText(member.role).toLowerCase();
+  if(role === "applying"){
+    updateStatusUserUI(text("role.visitor"));
+    return;
+  }
+
+  const pageKey = getManagerPageKeyByRole(role);
+  if(pageKey !== PAGE_KEY){
+    goPage(pageKey);
+    return;
+  }
+
+  updateStatusUserUI(getRoleLabel(role));
 }
 
 async function quickLogin(){
@@ -1902,7 +2124,7 @@ async function quickLogin(){
   loginHint.style.color = "#8b5b34";
 
   if(!nickname || !key){
-    loginHint.textContent = "你似乎还没有准备好钥匙";
+    loginHint.textContent = text("login.hint.missing_key");
     return;
   }
 
@@ -1914,22 +2136,34 @@ async function quickLogin(){
 
     if(loginResult.error){
       console.error("room10_member_login 调用失败：", loginResult.error);
-      loginHint.textContent = "钥匙核对失败，请稍后再试";
+      loginHint.textContent = text("login.hint.check_failed");
       return;
     }
 
     const loginRow = Array.isArray(loginResult.data) && loginResult.data.length ? loginResult.data[0] : null;
 
     if(loginRow?.success){
-      localStorage.setItem("room10LoggedIn", "true");
-      localStorage.setItem("room10User", loginRow.nickname || nickname);
-      localStorage.setItem("room10Role", loginRow.role || "member");
-      localStorage.setItem("room10MemberId", loginRow.member_id || "");
-      localStorage.setItem("room10MemberCode", loginRow.member_code || "");
+      const normalizedRole = normalizeText(loginRow.role).toLowerCase();
+      const memberId = normalizeText(loginRow.member_id);
+      const memberCode = normalizeText(loginRow.member_code);
+      const memberNickname = normalizeText(loginRow.nickname || nickname);
+
+      if(!VALID_MEMBER_ROLES.has(normalizedRole) || !memberId || !memberCode || !memberNickname){
+        clearStoredLogin();
+        loginHint.textContent = text("error.identity_invalid");
+        return;
+      }
+
+      saveStoredMember({
+        id:memberId,
+        nickname:memberNickname,
+        role:normalizedRole,
+        member_code:memberCode
+      });
       clearApplicantSession();
 
       loginHint.style.color = "#5f7d3a";
-      loginHint.textContent = "验证通过，正在进入对应界面…";
+      loginHint.textContent = text("login.hint.success");
 
       quickNicknameInput.value = "";
       quickPasswordInput.value = "";
@@ -1940,26 +2174,28 @@ async function quickLogin(){
     }
 
     if(loginRow && loginRow.login_mode !== "no_member"){
-      loginHint.textContent = normalizeLoginRpcMessage(loginRow.message) || "钥匙无法开启这扇门";
+      loginHint.textContent = normalizeLoginRpcMessage(loginRow.message) || text("login.hint.door_failed");
       return;
     }
 
-    const appResult = await client
-      .from("applications")
-      .select("id, name, contact_qq, status, member_code")
-      .eq("name", nickname)
-      .maybeSingle();
+    const appResult = await client.rpc("get_room10_application_login_state", {
+      p_name:nickname,
+      p_key_code:key
+    });
 
     if(appResult.error){
-      console.error("applications 查询失败：", appResult.error);
-      loginHint.textContent = "钥匙核对失败，请稍后再试";
+      console.error("get_room10_application_login_state 调用失败：", appResult.error);
+      loginHint.textContent = text("login.hint.check_failed");
       return;
     }
 
-    const app = appResult.data;
+    const appPayload = appResult.data && typeof appResult.data === "object" ? appResult.data : {};
+    const app = appPayload.found === true && appPayload.application && typeof appPayload.application === "object"
+      ? appPayload.application
+      : null;
 
     if(!app){
-      loginHint.textContent = "这里还没有你的记录";
+      loginHint.textContent = appPayload.message || text("login.hint.no_record");
       return;
     }
 
@@ -1967,7 +2203,7 @@ async function quickLogin(){
     const appKey = String(app.member_code || "").trim();
 
     if(appStatus === "approved" && appKey && appKey === key){
-      loginHint.textContent = "你已通过审核，但还没完成登记，请先去登记资料。";
+      loginHint.textContent = text("login.hint.approved_unregistered");
       loginHint.style.color = "#8b5b34";
       setApplicantSession(app.name, app.contact_qq);
       setFoldState("query");
@@ -1977,25 +2213,25 @@ async function quickLogin(){
     }
 
     if(appStatus === "pending"){
-      loginHint.textContent = "你的申请还在审核中，暂时还不能用钥匙进入。";
+      loginHint.textContent = text("login.hint.pending");
       return;
     }
 
     if(appStatus === "rejected"){
-      loginHint.textContent = "你的申请未通过，当前身份为参观者。可在申请状态查询里再次申请。";
+      loginHint.textContent = text("login.hint.rejected");
       return;
     }
 
     if(appStatus === "registered"){
-      loginHint.textContent = "你已经登记完成，请使用正式昵称和钥匙登录。";
+      loginHint.textContent = text("login.hint.registered");
       return;
     }
 
-    loginHint.textContent = "你当前还不能使用这把钥匙，请先查询申请状态。";
+    loginHint.textContent = text("login.hint.blocked");
 
   }catch(err){
     console.error("quickLogin() 异常：", err);
-    loginHint.textContent = "钥匙核对失败，请稍后再试";
+    loginHint.textContent = text("login.hint.check_failed");
   }
 }
 
@@ -2008,37 +2244,39 @@ async function queryApplicationStatus(){
   statusNotice.classList.add("hidden");
 
   if(!name || !qq){
-    applyQueryHint.textContent = "请先填写圈名和 QQ 号";
+    applyQueryHint.textContent = text("query.hint.missing_fields");
     return;
   }
 
   const qqValid = /^[0-9]{5,20}$/.test(qq);
   if(!qqValid){
-    applyQueryHint.textContent = "QQ 号格式好像不太对";
+    applyQueryHint.textContent = text("query.hint.invalid_qq");
     return;
   }
 
   try{
-    const result = await client
-      .from("applications")
-      .select("id, name, contact_qq, status, member_code")
-      .eq("name", name)
-      .eq("contact_qq", qq)
-      .maybeSingle();
+    const result = await client.rpc("query_room10_application_status", {
+      p_name:name,
+      p_contact_qq:qq
+    });
 
     if(result.error){
-      console.error("查询申请状态失败：", result.error);
-      applyQueryHint.textContent = "查询失败，请稍后再试";
+      console.error("query_room10_application_status 调用失败：", result.error);
+      applyQueryHint.textContent = text("query.hint.failed");
       return;
     }
 
-    const data = result.data;
+    const payload = result.data && typeof result.data === "object" ? result.data : {};
+    const data = payload.found === true && payload.application && typeof payload.application === "object"
+      ? payload.application
+      : null;
+
     if(!data){
       currentApplicationRecord = null;
       applicationResultWrap.classList.add("hidden");
       clearApplicantSession();
       await updateIdentityUI();
-      applyQueryHint.textContent = "没有找到对应申请记录";
+      applyQueryHint.textContent = text("query.hint.not_found");
       return;
     }
 
@@ -2047,12 +2285,12 @@ async function queryApplicationStatus(){
     setFoldState("query");
     renderApplicationResult(data);
     applyQueryHint.style.color = "#5f7d3a";
-    applyQueryHint.textContent = "已找到你的申请记录";
+    applyQueryHint.textContent = text("query.hint.found");
     await updateIdentityUI();
 
   }catch(err){
     console.error("queryApplicationStatus() 异常：", err);
-    applyQueryHint.textContent = "查询失败，请稍后再试";
+    applyQueryHint.textContent = text("query.hint.failed");
   }
 }
 
@@ -2065,71 +2303,49 @@ async function reapplyApplication(){
 
   try{
     reapplyBtn.disabled = true;
-    reapplyBtn.textContent = "恢复中...";
+    reapplyBtn.textContent = text("reapply.processing");
     statusNotice.classList.add("hidden");
 
-    const appResult = await client
-      .from("applications")
-      .select("id, name, contact_qq, status, member_code")
-      .eq("id", applicationId)
-      .maybeSingle();
+    const reapplyResult = await client.rpc("reapply_room10_application", {
+      p_application_id:String(applicationId),
+      p_name:String(currentApplicationRecord.name || "").trim(),
+      p_contact_qq:String(currentApplicationRecord.contact_qq || "").trim()
+    });
 
-    if(appResult.error || !appResult.data){
-      console.error("读取申请失败：", appResult.error);
-      showStatusNotice("恢复失败，请稍后再试。", "error");
+    if(reapplyResult.error){
+      console.error("reapply_room10_application 调用失败：", reapplyResult.error);
+      showStatusNotice(text("reapply.failed"), "error");
       return;
     }
 
-    if(String(appResult.data.status || "").toLowerCase() !== "rejected"){
-      currentApplicationRecord = appResult.data;
-      renderApplicationResult(appResult.data);
-      await updateIdentityUI();
-      showStatusNotice("只有未通过的申请才可以再次申请。", "error");
+    const payload = reapplyResult.data && typeof reapplyResult.data === "object" ? reapplyResult.data : {};
+    const updatedApplication = payload.application && typeof payload.application === "object"
+      ? payload.application
+      : null;
+
+    if(payload.success !== true || !updatedApplication){
+      if(updatedApplication){
+        currentApplicationRecord = updatedApplication;
+        renderApplicationResult(updatedApplication);
+        await updateIdentityUI();
+      }
+      showStatusNotice(payload.message || text("reapply.not_allowed"), "error");
       return;
     }
 
-    const deleteVotes = await client
-      .from("application_votes")
-      .delete()
-      .eq("application_id", applicationId);
+    setApplicantSession(updatedApplication.name, updatedApplication.contact_qq);
 
-    if(deleteVotes.error){
-      console.error("清除旧投票失败：", deleteVotes.error);
-      showStatusNotice("恢复失败，请稍后再试。", "error");
-      return;
-    }
-
-    const updateApp = await client
-      .from("applications")
-      .update({
-        status: "pending",
-        member_code: null
-      })
-      .eq("id", applicationId)
-      .eq("status", "rejected")
-      .select()
-      .maybeSingle();
-
-    if(updateApp.error || !updateApp.data){
-      console.error("恢复申请失败：", updateApp.error);
-      showStatusNotice("恢复失败，请稍后再试。", "error");
-      return;
-    }
-
-    localStorage.setItem("room10Role", "applying");
-    setApplicantSession(updateApp.data.name, updateApp.data.contact_qq);
-
-    currentApplicationRecord = updateApp.data;
-    renderApplicationResult(updateApp.data);
+    currentApplicationRecord = updatedApplication;
+    renderApplicationResult(updatedApplication);
     await updateIdentityUI();
 
     applyQueryHint.style.color = "#5f7d3a";
-    applyQueryHint.textContent = "已恢复为申请中，请等待重新审批。";
-    showStatusNotice("已恢复为申请中，请等待重新审批。", "success");
+    applyQueryHint.textContent = text("reapply.success");
+    showStatusNotice(text("reapply.success"), "success");
 
   }catch(err){
     console.error("reapplyApplication() 异常：", err);
-    showStatusNotice("恢复失败，请稍后再试。", "error");
+    showStatusNotice(text("reapply.failed"), "error");
   }finally{
     reapplyBtn.disabled = false;
     reapplyBtn.textContent = oldText;
@@ -2138,13 +2354,20 @@ async function reapplyApplication(){
 }
 
 function toggleQuickPassword(){
-  quickPasswordInput.type = quickPasswordInput.type === "password" ? "text" : "password";
+  const showPassword = quickPasswordInput.type === "password";
+  quickPasswordInput.type = showPassword ? "text" : "password";
+  const button = quickPasswordInput.parentElement?.querySelector('button[onclick="toggleQuickPassword()"]');
+  if(button) button.textContent = text(showPassword ? "login.toggle.hide" : "login.toggle.show");
+}
+
+function hasMemberRoomAccess(){
+  return new Set(["owner", "admin", "member", "roomer", "trainee"]).has(getRole());
 }
 
 function goNeedLogin(pageKey){
-  if(!isLoggedIn()){
+  if(!isLoggedIn() || !hasMemberRoomAccess()){
     loginHint.style.color = "#8b5b34";
-    loginHint.textContent = "这扇门需要钥匙";
+    loginHint.textContent = text("login.hint.need_key");
     if(isMediumScrollScreen()){
       contentArea.scrollTo({ top:0, behavior:"smooth" });
     }
@@ -2154,14 +2377,7 @@ function goNeedLogin(pageKey){
 }
 
 async function logout(){
-  localStorage.removeItem("room10LoggedIn");
-  localStorage.removeItem("room10User");
-  localStorage.removeItem("room10Role");
-  localStorage.removeItem("room10MemberId");
-  localStorage.removeItem("room10MemberCode");
-  localStorage.removeItem("room10_user");
-  localStorage.removeItem("room10_current_user");
-  localStorage.removeItem("currentUser");
+  clearStoredLogin();
   clearApplicantSession();
   currentApplicationRecord = null;
   applicationResultWrap.classList.add("hidden");
@@ -2177,7 +2393,7 @@ async function submitApplication(){
   applyHint.style.color = "#8b5b34";
 
   if(!name || !contactQQ){
-    applyHint.textContent = "请先填写圈名和 QQ 号";
+    applyHint.textContent = text("apply.hint.missing_fields");
     setFoldState("apply");
     scrollContentToBottomPart(applyHint);
     return;
@@ -2185,66 +2401,33 @@ async function submitApplication(){
 
   const qqValid = /^[0-9]{5,20}$/.test(contactQQ);
   if(!qqValid){
-    applyHint.textContent = "QQ 号格式好像不太对";
+    applyHint.textContent = text("apply.hint.invalid_qq");
     setFoldState("apply");
     scrollContentToBottomPart(applyHint);
     return;
   }
 
   try{
-    const [appNameRes, appQQRes, memberNameRes, memberNickRes, memberQQRes] = await Promise.all([
-      client.from("applications").select("id").eq("name", name).maybeSingle(),
-      client.from("applications").select("id").eq("contact_qq", contactQQ).maybeSingle(),
-      client.from("members").select("id").eq("name", name).maybeSingle(),
-      client.from("members").select("id").eq("nickname", name).maybeSingle(),
-      client.from("members").select("id").eq("contact_qq", contactQQ).maybeSingle()
-    ]);
+    const submitResult = await client.rpc("submit_room10_application", {
+      p_name:name,
+      p_contact_qq:contactQQ
+    });
 
-    const queryErrors = [appNameRes, appQQRes, memberNameRes, memberNickRes, memberQQRes]
-      .map(item => item.error)
-      .filter(Boolean);
-
-    if(queryErrors.length){
-      console.error("申请查重失败：", queryErrors);
-      applyHint.textContent = "申请检查失败，请稍后再试";
+    if(submitResult.error){
+      console.error("submit_room10_application 调用失败：", submitResult.error);
+      applyHint.textContent = text("apply.hint.failed");
       setFoldState("apply");
       scrollContentToBottomPart(applyHint);
       return;
     }
 
-    if(appNameRes.data || memberNameRes.data || memberNickRes.data){
-      applyHint.textContent = "这个圈名已经有人使用了，请换一个圈名";
-      setFoldState("apply");
-      scrollContentToBottomPart(applyHint);
-      return;
-    }
+    const submitPayload = submitResult.data && typeof submitResult.data === "object" ? submitResult.data : {};
+    const submittedApplication = submitPayload.application && typeof submitPayload.application === "object"
+      ? submitPayload.application
+      : null;
 
-    if(appQQRes.data || memberQQRes.data){
-      applyHint.textContent = "这个 QQ 号已经有记录了，请确认后再提交";
-      setFoldState("apply");
-      scrollContentToBottomPart(applyHint);
-      return;
-    }
-
-    const insertResult = await client
-      .from("applications")
-      .insert([{
-        name: name,
-        contact_qq: contactQQ,
-        status: "pending"
-      }])
-      .select()
-      .single();
-
-    if(insertResult.error){
-      console.error("申请提交失败：", insertResult.error);
-      const msg = String(insertResult.error.message || "").toLowerCase();
-
-      if(msg.includes("duplicate") || msg.includes("unique")){
-        applyHint.textContent = "圈名或 QQ 已存在，请检查后重新提交";
-      }else{
-        applyHint.textContent = "申请提交失败，请稍后再试";
-      }
+    if(submitPayload.success !== true || !submittedApplication){
+      applyHint.textContent = submitPayload.message || text("apply.hint.failed");
       setFoldState("apply");
       scrollContentToBottomPart(applyHint);
       return;
@@ -2256,14 +2439,13 @@ async function submitApplication(){
     }));
 
     setApplicantSession(name, contactQQ);
-    localStorage.setItem("room10Role", "applying");
     applyLoginNameInput.value = name;
     applyLoginQQInput.value = contactQQ;
 
     applyHint.style.color = "#5f7d3a";
-    applyHint.textContent = "申请已提交，当前状态为审核中。下次可用圈名和 QQ 查询结果。";
+    applyHint.textContent = text("apply.hint.success");
 
-    renderApplicationResult(insertResult.data);
+    renderApplicationResult(submittedApplication);
     await updateIdentityUI();
 
     setTimeout(() => {
@@ -2273,7 +2455,7 @@ async function submitApplication(){
 
   }catch(err){
     console.error("submitApplication() 异常：", err);
-    applyHint.textContent = "申请提交失败，请稍后再试";
+    applyHint.textContent = text("apply.hint.failed");
     setFoldState("apply");
     scrollContentToBottomPart(applyHint);
   }
@@ -2315,19 +2497,26 @@ document.addEventListener("click", event => {
   }
 });
 
-applyManagerAssets();
-renderSiteNoticeList([]);
-
 document.addEventListener("DOMContentLoaded", async () => {
-  loadApplicationDraft();
-  await updateIdentityUI();
+  try{
+    await loadPageTexts();
+    applyPageTexts();
+    applyManagerAssets();
+    renderSiteNoticeList([]);
+    loadApplicationDraft();
+    await updateIdentityUI();
 
-  const applicant = getApplicantSession();
-  if(applicant && applicant.name && applicant.qq && !isLoggedIn()){
-    applyLoginNameInput.value = applicant.name;
-    applyLoginQQInput.value = applicant.qq;
-    setFoldState("query");
-    queryApplicationStatus();
+    const applicant = getApplicantSession();
+    if(applicant && applicant.name && applicant.qq && !isLoggedIn()){
+      applyLoginNameInput.value = applicant.name;
+      applyLoginQQInput.value = applicant.qq;
+      setFoldState("query");
+      await queryApplicationStatus();
+    }
+  }catch(err){
+    console.error("managerVisitor initialization failed:", err);
+    const message = pageTexts.get("error.page_text_read_failed") || "MANAGER_VISITOR_INIT_FAILED";
+    showPageError(message, err.message || "managerVisitor");
   }
 });
 
@@ -2352,12 +2541,9 @@ window.addEventListener("storage", async (event) => {
     event.key === "room10User" ||
     event.key === "room10Role" ||
     event.key === "room10MemberId" ||
-    event.key === "room10MemberCode" ||
-    event.key === "room10_user" ||
-    event.key === "room10_current_user" ||
-    event.key === "currentUser"
+    event.key === "room10MemberCode"
   ){
-    await updateIdentityUI();
+    if(pageTextReady) await updateIdentityUI();
   }
 });
 
