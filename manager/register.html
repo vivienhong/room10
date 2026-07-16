@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title></title>
+<!-- register-safe-rpc-v2: 申请预填与成员查重统一走安全 RPC；前端不直读 applications / members -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
 
@@ -807,35 +808,34 @@ function optionList(groupKey){
 }
 
 
-function room10Url(path){
-  const raw = normalizeText(path);
-  if(!raw) return "";
-  if(/^(https?:|data:|blob:|mailto:|tel:|#|\/)/i.test(raw)) return raw;
-  if(raw.startsWith("./") || raw.startsWith("../")) return raw;
-  if(typeof window.room10Path === "function") return window.room10Path(raw);
-  return `../${raw}`;
+function showPathConfigError(type, key){
+  const message = registerTexts.get("error.config_missing") || "REGISTER_CONFIG_MISSING";
+  showConfigError(message, `${type}:${key}`);
 }
 
-function room10PageUrl(key, fallbackPath){
+function room10PageUrl(key){
   const pageKey = normalizeText(key);
   if(pageKey && typeof window.room10Page === "function"){
     const url = window.room10Page(pageKey);
     if(url) return url;
   }
-  return room10Url(fallbackPath || "");
+  showPathConfigError("page", pageKey || "missing");
+  return "";
 }
 
-function room10AssetUrl(keyPath, fallbackPath){
+function room10AssetUrl(keyPath){
   const assetKey = normalizeText(keyPath);
   if(assetKey && typeof window.room10Asset === "function"){
     const url = window.room10Asset(assetKey);
     if(url) return url;
   }
-  return room10Url(fallbackPath || "");
+  showPathConfigError("asset", assetKey || "missing");
+  return "";
 }
 
 function applyStaticAssets(){
-  sheetImage.src = room10AssetUrl("manager.roomCheckin", "manager/room-checkin.png");
+  const sheetUrl = room10AssetUrl("manager.roomCheckin");
+  if(sheetUrl) sheetImage.src = sheetUrl;
 }
 
 function normalizeReturnKey(raw){
@@ -885,10 +885,10 @@ function getReturnPageKey(){
 
 function getReturnPageUrl(){
   const key = getReturnPageKey();
-  if(key === "managerVisitor") return room10PageUrl("managerVisitor", "manager/manager-visitor.html");
-  if(key === "managerMember") return room10PageUrl("managerMember", "manager/manager-member.html");
-  if(key === "managerAdmin") return room10PageUrl("managerAdmin", "manager/manager-admin.html");
-  return room10PageUrl("index", "index/index.html");
+  if(key === "managerVisitor") return room10PageUrl("managerVisitor");
+  if(key === "managerMember") return room10PageUrl("managerMember");
+  if(key === "managerAdmin") return room10PageUrl("managerAdmin");
+  return room10PageUrl("index");
 }
 
 function goBackToSource(){
@@ -1118,32 +1118,33 @@ async function loadApprovedApplicationContext(){
 
   if(!applicationId && !applyName && !applyQQ && !memberCode) return;
 
+  if(!applicationId || !applyName || !applyQQ || !memberCode){
+    const message = registerTexts.get("error.application_read_failed") || "申请信息读取失败";
+    showConfigError(message, "approved application identity incomplete");
+    return;
+  }
+
   try{
-    let query = client
-      .from("applications")
-      .select("id, name, contact_qq, status, member_code");
+    const { data, error } = await client.rpc("get_room10_approved_application_prefill", {
+      p_application_id:applicationId,
+      p_name:applyName,
+      p_contact_qq:applyQQ,
+      p_member_code:memberCode
+    });
 
-    if(applicationId){
-      query = query.eq("id", applicationId);
-    }else if(applyName && applyQQ){
-      query = query.eq("name", applyName).eq("contact_qq", applyQQ);
-    }else{
-      return;
-    }
-
-    const { data, error } = await query.maybeSingle();
     if(error) throw error;
-    if(!data) return;
 
-    const status = String(data.status || "").trim().toLowerCase();
-    if(status !== "approved") return;
+    const payload = data && typeof data === "object" ? data : {};
+    const record = payload.found === true && payload.application && typeof payload.application === "object"
+      ? payload.application
+      : null;
 
-    if(memberCode && String(data.member_code || "").trim() !== memberCode) return;
-
-    applyApplicationPrefill(data);
+    if(record){
+      applyApplicationPrefill(record);
+    }
   }catch(err){
     const message = registerTexts.get("error.application_read_failed") || "申请信息读取失败";
-    showConfigError(message, err.message || "applications");
+    showConfigError(message, err.message || "get_room10_approved_application_prefill");
   }
 }
 
@@ -1276,26 +1277,28 @@ function getMbtiValue(){
   return checked ? checked.value : "";
 }
 
-async function checkNameExists(name){
-  const { data, error } = await client
-    .from("members")
-    .select("name")
-    .eq("name", name)
-    .limit(1);
+async function checkRegistrationValueExists(field, value){
+  const normalized = normalizeText(value);
+  if(!normalized) return false;
 
-  if(error) return false;
-  return Array.isArray(data) && data.length > 0;
+  const { data, error } = await client.rpc("check_room10_registration_value", {
+    p_field:field,
+    p_value:normalized
+  });
+
+  if(error){
+    throw new Error(error.message || "check_room10_registration_value");
+  }
+
+  return data === true;
+}
+
+async function checkNameExists(name){
+  return checkRegistrationValueExists("name", name);
 }
 
 async function checkNicknameExists(nickname){
-  const { data, error } = await client
-    .from("members")
-    .select("nickname")
-    .eq("nickname", nickname)
-    .limit(1);
-
-  if(error) return false;
-  return Array.isArray(data) && data.length > 0;
+  return checkRegistrationValueExists("nickname", nickname);
 }
 
 nameInput.addEventListener("blur", async () => {
@@ -1306,13 +1309,18 @@ nameInput.addEventListener("blur", async () => {
   setFieldHint("nameHint", "");
   if(!value) return;
 
-  const exists = await checkNameExists(value);
-  if(exists){
+  try{
+    const exists = await checkNameExists(value);
+    if(exists){
+      markError(nameInput);
+      setFieldHint("nameHint", text("error.name_duplicate_hint"), "error");
+    }else{
+      clearError(nameInput);
+      setFieldHint("nameHint", text("hint.name_available"), "success");
+    }
+  }catch(error){
     markError(nameInput);
-    setFieldHint("nameHint", text("error.name_duplicate_hint"), "error");
-  }else{
-    clearError(nameInput);
-    setFieldHint("nameHint", text("hint.name_available"), "success");
+    setFieldHint("nameHint", error.message || "check_room10_registration_value", "error");
   }
 });
 
@@ -1329,13 +1337,18 @@ nicknameInput.addEventListener("blur", async () => {
     return;
   }
 
-  const exists = await checkNicknameExists(value);
-  if(exists){
+  try{
+    const exists = await checkNicknameExists(value);
+    if(exists){
+      markError(nicknameInput);
+      setFieldHint("nicknameHint", text("error.nickname_duplicate_hint"), "error");
+    }else{
+      clearError(nicknameInput);
+      setFieldHint("nicknameHint", text("hint.nickname_available"), "success");
+    }
+  }catch(error){
     markError(nicknameInput);
-    setFieldHint("nicknameHint", text("error.nickname_duplicate_hint"), "error");
-  }else{
-    clearError(nicknameInput);
-    setFieldHint("nicknameHint", text("hint.nickname_available"), "success");
+    setFieldHint("nicknameHint", error.message || "check_room10_registration_value", "error");
   }
 });
 
@@ -1582,7 +1595,7 @@ async function submitRegistration(){
     const customSkillValue = customSkill || null;
 
     const rpcResult = await client.rpc("submit_room10_member_registration", {
-      p_application_id: approvedApplicationContext?.id ? Number(approvedApplicationContext.id) : null,
+      p_application_id: approvedApplicationContext?.id ? String(approvedApplicationContext.id).trim() : null,
       p_member_code: inviteKey,
       p_name: name,
       p_nickname: nickname,
@@ -1674,5 +1687,6 @@ window.addEventListener("load", async () => {
 });
 </script>
 
+<!-- register-v3: applications.id UUID 直接传入登记 RPC，不再转换为 Number -->
 </body>
 </html>
