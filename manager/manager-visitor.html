@@ -1163,10 +1163,147 @@ body{
   .status-notice{margin-top:8px; padding:9px 10px; border-radius:9px; font-size:12px; line-height:1.35;}
 }
 
+
+
+#upgradeNoticeModal{
+  position:fixed;
+  inset:0;
+  z-index:5000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(74,49,29,.38);
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+
+#upgradeNoticeModal.hidden{display:none !important;}
+
+.upgradeNoticeDialog{
+  position:relative;
+  width:min(430px, calc(100vw - 32px));
+  padding:28px 26px 24px;
+  border-radius:22px;
+  background:linear-gradient(180deg, rgba(255,252,247,.99), rgba(251,239,223,.99));
+  border:1px solid rgba(190,145,99,.38);
+  box-shadow:0 24px 70px rgba(67,42,23,.28), inset 0 1px 0 rgba(255,255,255,.96);
+  color:#6c492c;
+  text-align:center;
+  animation:upgradeNoticeIn .24s ease both;
+}
+
+.upgradeNoticeIcon{
+  width:58px;
+  height:58px;
+  margin:0 auto 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:18px;
+  background:rgba(245,226,194,.88);
+  font-size:31px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.88), 0 8px 20px rgba(120,83,47,.10);
+}
+
+#upgradeNoticeTitle{
+  margin:0;
+  color:#694522;
+  font-size:21px;
+  font-weight:900;
+  line-height:1.35;
+  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+}
+
+#upgradeNoticeDesc{
+  margin:13px 0 0;
+  color:#7f6044;
+  font-size:14px;
+  line-height:1.75;
+  white-space:pre-line;
+}
+
+.upgradeNoticeKeys{
+  margin-top:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+.upgradeNoticeKey{
+  min-width:82px;
+  padding:9px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.78);
+  border:1px solid rgba(188,143,97,.28);
+  color:#704824;
+  font-size:15px;
+  font-weight:900;
+  letter-spacing:.04em;
+}
+
+.upgradeNoticeArrow{
+  color:#bd8350;
+  font-size:20px;
+  font-weight:900;
+}
+
+#upgradeNoticeCloseBtn{
+  position:absolute;
+  top:10px;
+  right:11px;
+  width:34px;
+  height:34px;
+  border:0;
+  border-radius:50%;
+  background:rgba(240,221,197,.72);
+  color:#805b3c;
+  font-size:22px;
+  line-height:1;
+  cursor:pointer;
+  transition:transform .16s ease, background .16s ease;
+}
+
+#upgradeNoticeCloseBtn:hover,
+#upgradeNoticeCloseBtn:focus-visible{
+  transform:scale(1.06);
+  background:rgba(231,205,172,.92);
+}
+
+@keyframes upgradeNoticeIn{
+  from{opacity:0; transform:translateY(10px) scale(.97);}
+  to{opacity:1; transform:translateY(0) scale(1);}
+}
+
+@media (max-width:540px){
+  #upgradeNoticeModal{padding:16px;}
+  .upgradeNoticeDialog{padding:25px 18px 21px; border-radius:18px;}
+  .upgradeNoticeIcon{width:52px; height:52px; font-size:28px;}
+  #upgradeNoticeTitle{font-size:18px;}
+  #upgradeNoticeDesc{font-size:13px; line-height:1.65;}
+  .upgradeNoticeKey{min-width:72px; padding:8px 12px; font-size:14px;}
+}
+
 </style>
 </head>
 <body>
 <!-- manager-visitor-safe-rpc-v10: 入住申请提交/查询/重申/申请人登录状态全部走安全 RPC；前端不直读写 applications / application_votes / members -->
+
+<div aria-labelledby="upgradeNoticeTitle" aria-modal="true" class="hidden" id="upgradeNoticeModal" role="dialog">
+  <div class="upgradeNoticeDialog">
+    <button aria-label="关闭" id="upgradeNoticeCloseBtn" type="button">×</button>
+    <div aria-hidden="true" class="upgradeNoticeIcon">🔑</div>
+    <h2 id="upgradeNoticeTitle"></h2>
+    <p id="upgradeNoticeDesc"></p>
+    <div aria-label="钥匙升级" class="upgradeNoticeKeys">
+      <span class="upgradeNoticeKey" id="upgradeNoticeOldKey"></span>
+      <span aria-hidden="true" class="upgradeNoticeArrow">→</span>
+      <span class="upgradeNoticeKey" id="upgradeNoticeNewKey"></span>
+    </div>
+  </div>
+</div>
+
 <div id="bgColorFill"></div>
 <div id="bgBleed"></div>
 <div id="bgLight"></div>
@@ -1565,6 +1702,12 @@ const siteNoticePanel = document.getElementById("siteNoticePanel");
 const siteNoticeCount = document.getElementById("siteNoticeCount");
 const siteNoticeContent = document.getElementById("siteNoticeContent");
 const contentArea = document.getElementById("contentArea");
+const upgradeNoticeModal = document.getElementById("upgradeNoticeModal");
+const upgradeNoticeTitle = document.getElementById("upgradeNoticeTitle");
+const upgradeNoticeDesc = document.getElementById("upgradeNoticeDesc");
+const upgradeNoticeOldKey = document.getElementById("upgradeNoticeOldKey");
+const upgradeNoticeNewKey = document.getElementById("upgradeNoticeNewKey");
+const upgradeNoticeCloseBtn = document.getElementById("upgradeNoticeCloseBtn");
 
 const loginHint = document.getElementById("loginHint");
 const quickNicknameInput = document.getElementById("quickNickname");
@@ -1732,18 +1875,49 @@ function normalizeLoginRpcMessage(value){
 }
 
 function showUpgradeLoginNotice(loginRow){
-  if(!loginRow?.should_show_upgrade_notice) return;
+  if(!loginRow?.should_show_upgrade_notice) return Promise.resolve();
 
   const oldKey = normalizeLoginRpcMessage(loginRow.upgrade_old_key);
   const newKey = normalizeLoginRpcMessage(loginRow.upgrade_new_key || loginRow.member_code);
-  if(!oldKey || !newKey) return;
+  if(!oldKey || !newKey || !upgradeNoticeModal) return Promise.resolve();
 
-  window.alert(`${text("upgrade.title")}
-
-${formatText("upgrade.desc", {
+  upgradeNoticeTitle.textContent = text("upgrade.title");
+  upgradeNoticeDesc.textContent = formatText("upgrade.desc", {
     old_key:oldKey,
     new_key:newKey
-  })}`);
+  });
+  upgradeNoticeOldKey.textContent = oldKey;
+  upgradeNoticeNewKey.textContent = newKey;
+  upgradeNoticeModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+
+  return new Promise(resolve => {
+    let closed = false;
+
+    const close = () => {
+      if(closed) return;
+      closed = true;
+      upgradeNoticeModal.classList.add("hidden");
+      document.body.style.overflow = "";
+      upgradeNoticeCloseBtn?.removeEventListener("click", close);
+      upgradeNoticeModal.removeEventListener("click", onBackdrop);
+      document.removeEventListener("keydown", onKeydown);
+      resolve();
+    };
+
+    const onBackdrop = event => {
+      if(event.target === upgradeNoticeModal) close();
+    };
+
+    const onKeydown = event => {
+      if(event.key === "Escape" || event.key === "Enter") close();
+    };
+
+    upgradeNoticeCloseBtn?.addEventListener("click", close);
+    upgradeNoticeModal.addEventListener("click", onBackdrop);
+    document.addEventListener("keydown", onKeydown);
+    requestAnimationFrame(() => upgradeNoticeCloseBtn?.focus());
+  });
 }
 
 function getRoleLabel(roleValue = getRole()){
@@ -2176,7 +2350,7 @@ async function quickLogin(){
       quickNicknameInput.value = "";
       quickPasswordInput.value = "";
 
-      showUpgradeLoginNotice(loginRow);
+      await showUpgradeLoginNotice(loginRow);
       await updateIdentityUI();
       return;
     }
