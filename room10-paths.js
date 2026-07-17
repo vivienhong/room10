@@ -20,7 +20,6 @@ window.ROOM10_PATHS = {
     gameBomb: "game/bomb/bomb.html",
     gameMango: "game/mango/mango.html",
     gameName: "game/name/name.html",
-
     gameGacha: "game/gacha/gacha.html",
 
     honor: "honor/honor.html",
@@ -91,7 +90,6 @@ window.ROOM10_PATHS = {
       bookPrev: "dorm/book-prev.png",
       gachaBall: "dorm/gacha-ball.png",
       mascotNiumaL: "dorm/mascot-niuma(L).png",
-      mascotNiumaR: "dorm/mascot-niuma(R).png",
       roomDorm: "dorm/room-dorm.png"
     },
 
@@ -213,11 +211,14 @@ window.ROOM10_PATHS = {
       pet31: "game/gacha/pet/31.jpg",
       pet32: "game/gacha/pet/32.jpg",
       pet33: "game/gacha/pet/33.jpg",
-      pet34: "game/gacha/pet/34.jpg"
+      pet34: "game/gacha/pet/34.jpg",
+      pet35: "game/gacha/pet/35.png",
+      pet36: "game/gacha/pet/36.png"
     },
 
     honor: {
       honorTitles: "honor/honor-titles.png",
+      mascotNiumaR: "honor/mascot-niuma(R).png",
       roomGallery: "honor/room-gallery.png",
       roomHonor: "honor/room-honor.png"
     },
@@ -264,8 +265,7 @@ window.ROOM10_PATHS = {
   },
 
   // 固定素材命名说明
-  // 作用：记录容易混淆的图片文件名含义，方便以后直接替换本配置文件时保留说明。
-  // 注意：这里只是说明，不影响 room10Asset() / room10Page() 的现有读取逻辑。
+  // 这里只记录容易混淆的素材含义，不参与路径计算。
   assetNotes: {
     badges: {
       fileNameRule: "badges/0.png 至 badges/5.png 分别代表成员入室年限徽章。",
@@ -276,7 +276,7 @@ window.ROOM10_PATHS = {
       badge4: "入室 4 年",
       badge5: "入室 5 年",
 
-      holidayFileNameRule: "badges/newyear.png 至 badges/christmas.png 分别代表节日礼包/节日徽章图案。",
+      holidayFileNameRule: "badges/newyear.png 至 badges/christmas.png 分别代表节日礼包或节日徽章图案。",
       newyear: "元旦：新年烟花",
       spring: "春节：新春红包",
       lantern: "元宵：团圆花灯",
@@ -292,7 +292,7 @@ window.ROOM10_PATHS = {
     },
 
     mango: {
-      fileNameRule: "game-mango3.png 至 game-mango7.png 分别代表芒果游戏的杯型/容量素材。",
+      fileNameRule: "game-mango3.png 至 game-mango7.png 分别代表芒果游戏的杯型或容量素材。",
       gameMango3: "小杯",
       gameMango4: "中杯",
       gameMango5: "大杯",
@@ -301,7 +301,7 @@ window.ROOM10_PATHS = {
     },
 
     gacha: {
-      petFileNameRule: "game/gacha/pet/1.jpg 至 game/gacha/pet/34.jpg 分别代表扭蛋机宠物收集图鉴素材。",
+      petFileNameRule: "game/gacha/pet/1.jpg 至 game/gacha/pet/34.jpg 代表普通宠物收集图鉴素材；35.png 和 36.png 代表特殊宠物收集图鉴素材。",
       pet1: "宠物收集 1",
       pet2: "宠物收集 2",
       pet3: "宠物收集 3",
@@ -335,12 +335,17 @@ window.ROOM10_PATHS = {
       pet31: "宠物收集 31",
       pet32: "宠物收集 32",
       pet33: "宠物收集 33",
-      pet34: "宠物收集 34"
+      pet34: "宠物收集 34",
+      pet35: "特殊宠物收集 35：六角恐龙/早安",
+      pet36: "特殊宠物收集 36：猫头鹰/王铮亮"
     },
 
     dorm: {
-      mascotNiumaL: "牛马吉祥物左向图，文件位置：dorm/mascot-niuma(L).png",
-      mascotNiumaR: "牛马吉祥物右向图，文件位置：dorm/mascot-niuma(R).png"
+      mascotNiumaL: "宿舍装饰用牛马左向图，文件位置：dorm/mascot-niuma(L).png"
+    },
+
+    honor: {
+      mascotNiumaR: "荣誉墙排行榜装饰用牛马右向图，文件位置：honor/mascot-niuma(R).png"
     },
 
     manager: {
@@ -362,7 +367,7 @@ window.ROOM10_PATHS = {
       petImage2: "2.png：虚弱 weak",
       petImage3: "3.png：死亡 dead",
       petImage4: "4.png：治疗 healing",
-      petImage5: "5.png：淋湿/洗澡 wet",
+      petImage5: "5.png：淋湿或洗澡 wet",
       petImage6: "6.png：吃东西 eating",
       petImage7: "7.png：玩耍 playing",
       specialCards: "35 六角恐龙/早安、36 猫头鹰/王铮亮为 special 特殊卡；是否展示由数据库 card_type 控制。"
@@ -372,14 +377,19 @@ window.ROOM10_PATHS = {
 
 (function () {
   const currentScript = document.currentScript;
-  const scriptSrc = currentScript ? currentScript.getAttribute("src") || "" : "";
+  const scriptSrc = currentScript
+    ? currentScript.getAttribute("src") || ""
+    : "";
 
   if (!window.ROOM10_ROOT) {
-    window.ROOM10_ROOT = scriptSrc.replace(/room10-paths\.js(\?.*)?$/, "");
+    window.ROOM10_ROOT = scriptSrc.replace(
+      /room10-paths\.js(\?.*)?$/,
+      ""
+    );
   }
 
   function isAbsolutePath(path) {
-    return /^(https?:|data:|blob:|\/)/.test(path);
+    return /^(https?:|data:|blob:|\/)/i.test(path);
   }
 
   function normalizeBaseUrl(baseUrl) {
@@ -413,10 +423,15 @@ window.ROOM10_PATHS = {
     if (!keyPath) return "";
 
     const keys = keyPath.split(".");
-    let value = window.ROOM10_PATHS && window.ROOM10_PATHS.assets;
+    let value =
+      window.ROOM10_PATHS &&
+      window.ROOM10_PATHS.assets;
 
     for (const key of keys) {
-      if (!value || !Object.prototype.hasOwnProperty.call(value, key)) {
+      if (
+        !value ||
+        !Object.prototype.hasOwnProperty.call(value, key)
+      ) {
         return "";
       }
 
@@ -433,15 +448,21 @@ window.ROOM10_PATHS = {
       return path;
     }
 
-    const remoteAssets = window.ROOM10_PATHS && window.ROOM10_PATHS.remoteAssets;
-    const baseUrl = normalizeBaseUrl(remoteAssets && remoteAssets.r2BaseUrl);
+    const remoteAssets =
+      window.ROOM10_PATHS &&
+      window.ROOM10_PATHS.remoteAssets;
+
+    const baseUrl = normalizeBaseUrl(
+      remoteAssets && remoteAssets.r2BaseUrl
+    );
+
     const cleanPath = normalizeRemotePath(path);
 
     if (!baseUrl) {
       return window.room10Path(cleanPath);
     }
 
-    return baseUrl + "/" + cleanPath;
+    return `${baseUrl}/${cleanPath}`;
   };
 
   window.room10PetImage = function (imagePath) {
