@@ -54,11 +54,20 @@ button{font-family:inherit;}
   z-index:0;
   --ui-scale:1;
   --bg-ui-scale:var(--ui-scale);
-  --nav-gap:calc(8px * var(--ui-scale));
-  --nav-btn-height:calc(40px * var(--ui-scale));
-  --nav-btn-px:calc(16px * var(--ui-scale));
-  --nav-btn-radius:calc(13px * var(--ui-scale));
-  --nav-btn-font:calc(14px * var(--ui-scale));
+  --room-nav-scale:var(--ui-scale);
+  --room-nav-top:6.35%;
+  --room-nav-left:43.95%;
+  --room-nav-width:42.6%;
+  --room-nav-height:5.10%;
+  --room-nav-gap:calc(7px * var(--room-nav-scale));
+  --room-nav-text:#6f5746;
+  --room-nav-border:rgba(158,122,93,.26);
+  --room-nav-current-text:#5d4738;
+  --room-nav-current-border:rgba(151,111,82,.42);
+  --room-nav-paper:rgba(255,250,242,.78);
+  --room-nav-paper-2:rgba(246,235,219,.74);
+  --room-nav-wash:rgba(214,185,157,.20);
+  --room-nav-current-bg:rgba(239,224,205,.86);
   --switch-font-size:13.2px;
   --switch-ui-scale:1;
   --honor-text-scale:1;
@@ -69,9 +78,6 @@ button{font-family:inherit;}
   --identity-width:calc(232px * var(--ui-scale));
   --identity-height:calc(38px * var(--ui-scale));
 
-  --room-nav-left:43.95%;
-  --room-nav-top:6.35%;
-  --room-nav-width:42.6%;
 
   /* 页面可改颜色，不改结构尺寸 */
   --identity-bg:rgba(255,248,239,0.92);
@@ -80,8 +86,6 @@ button{font-family:inherit;}
   --identity-text:#6c4523;
   --identity-shadow:rgba(116,86,54,0.12);
 
-  --nav-text:#6e4827;
-  --nav-border:rgba(145,98,56,.34);
 }
 
 
@@ -125,111 +129,107 @@ button{font-family:inherit;}
 }
 
 /* =========================================================
-   全站统一房间切换按钮：使用客厅页满意版结构；荣誉墙页不显示“荣誉墙”按钮
+   房间切换：荣誉墙桌面端保留悬停显现，按钮使用全站通用模板样式
 ========================================================= */
 #topBar{
   position:absolute;
   left:var(--room-nav-left);
   top:var(--room-nav-top);
   width:var(--room-nav-width);
-  display:flex;
-  align-items:flex-start;
-  justify-content:flex-start;
+  height:var(--room-nav-height);
   z-index:72;
   overflow:visible;
   pointer-events:none;
-
-  --nav-btn-height:calc(40px * var(--ui-scale));
-  --nav-btn-px:calc(16px * var(--ui-scale));
-  --nav-btn-radius:calc(13px * var(--ui-scale));
-  --nav-btn-font:calc(14px * var(--ui-scale));
-  --nav-gap:calc(8px * var(--ui-scale));
+  --s:var(--room-nav-scale,1);
+  --nav-btn-radius:calc(15px * var(--s));
+  --nav-btn-font:calc(15px * var(--s));
+  --nav-btn-border:calc(1px * var(--s));
 }
 
 #navOuter,
-#navScroll{
+#navScroll,
+#roomNav{
+  width:100%;
+  height:100%;
+  min-width:0;
+  margin:0;
+  padding:0;
   overflow:visible;
 }
 
-#navOuter{
-  flex:0 0 auto;
-  min-width:0;
-  width:100%;
-  pointer-events:auto;
-}
-
-#navScroll{
-  width:100%;
-  white-space:nowrap;
-  padding:0;
-  margin:0;
-}
-
 #roomNav{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:var(--nav-gap);
-  transform-origin:left center;
+  display:grid;
+  grid-template-columns:repeat(9,minmax(0,1fr));
+  gap:var(--room-nav-gap);
+  align-items:stretch;
 }
 
 .navBtn{
   appearance:none;
-  border:none;
   cursor:pointer;
   position:relative;
-  flex:0 0 auto;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height:var(--nav-btn-height);
-  padding:0 var(--nav-btn-px);
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  padding:0;
   border-radius:var(--nav-btn-radius);
-  color:var(--nav-text);
+  color:var(--room-nav-text);
   font-size:var(--nav-btn-font);
   font-weight:900;
   white-space:nowrap;
   overflow:visible;
   isolation:isolate;
   background:
-    linear-gradient(180deg, rgba(249,232,203,.90) 0%, rgba(226,195,152,.86) 100%);
-  border:1px solid var(--nav-border);
+    radial-gradient(circle at 18% 22%,rgba(255,255,255,.56),transparent 40%),
+    radial-gradient(circle at 78% 74%,var(--room-nav-wash),transparent 48%),
+    linear-gradient(180deg,var(--room-nav-paper) 0%,var(--room-nav-paper-2) 100%);
+  border:var(--nav-btn-border) solid var(--room-nav-border);
   box-shadow:
-    0 1px 1px rgba(255,255,255,.48) inset,
-    0 2px 5px rgba(91,68,45,.13);
-  text-shadow:0 1px 0 rgba(255,255,255,.42);
-  transition:
-    background .18s ease,
-    border-color .18s ease,
-    box-shadow .18s ease,
-    color .18s ease,
-    filter .18s ease;
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.64),
+    0 calc(2px * var(--s)) calc(7px * var(--s)) rgba(96,70,48,.10);
+  text-shadow:0 calc(1px * var(--s)) 0 rgba(255,255,255,.38);
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;
   font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
+  pointer-events:auto;
 }
 
-.navBtn:hover,
-.navBtn:focus-visible{
+.navBtn:not(.is-current):hover,
+.navBtn:not(.is-current):focus-visible{
   color:#5f3d22;
   background:
-    linear-gradient(180deg, rgba(252,238,215,.95) 0%, rgba(232,205,166,.90) 100%);
-  border-color:rgba(153,102,55,.48);
+    radial-gradient(circle at 20% 24%,rgba(255,255,255,.66),transparent 42%),
+    radial-gradient(circle at 80% 78%,rgba(207,170,143,.24),transparent 50%),
+    linear-gradient(180deg,rgba(255,252,246,.88) 0%,rgba(239,226,210,.82) 100%);
+  border-color:rgba(151,112,84,.36);
   box-shadow:
-    0 1px 1px rgba(255,255,255,.55) inset,
-    0 3px 7px rgba(91,68,45,.15);
-  filter:brightness(1.015);
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.70),
+    0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.12);
+  filter:saturate(1.02);
+}
+
+.navBtn.is-current{
+  cursor:default;
+  color:var(--room-nav-current-text);
+  background:
+    radial-gradient(circle at 22% 22%,rgba(255,255,255,.62),transparent 42%),
+    radial-gradient(circle at 80% 80%,rgba(190,151,126,.26),transparent 50%),
+    linear-gradient(180deg,rgba(246,235,222,.94) 0%,var(--room-nav-current-bg) 100%);
+  border-color:var(--room-nav-current-border);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.68),
+    0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.13),
+    0 0 0 calc(2px * var(--s)) rgba(255,253,248,.46);
 }
 
 .navLabel{
   position:relative;
   z-index:5;
+  width:100%;
+  height:100%;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  max-width:100%;
-  height:100%;
   overflow:visible;
   white-space:nowrap;
   line-height:normal;
@@ -245,113 +245,48 @@ button{font-family:inherit;}
   font-weight:900;
   line-height:1;
   text-shadow:
-    0 1px 2px rgba(255,250,232,.82),
-    0 0 8px rgba(255,246,210,.52);
+    0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.82),
+    0 0 calc(8px * var(--s)) rgba(255,246,210,.52);
   filter:saturate(.95);
 }
 
-.navEffectA{
-  left:8%;
-  top:-54%;
-  font-size:calc(var(--nav-btn-font) * .92);
-}
-
-.navEffectB{
-  right:8%;
-  top:-62%;
-  font-size:calc(var(--nav-btn-font) * .86);
-}
-
-.navEffectC{
-  left:50%;
-  top:-72%;
-  transform:translateX(-50%);
-  font-size:calc(var(--nav-btn-font) * 1.02);
-}
+.navEffectA{left:8%;top:-54%;font-size:calc(var(--nav-btn-font) * .92);}
+.navEffectB{right:8%;top:-62%;font-size:calc(var(--nav-btn-font) * .86);}
+.navEffectC{left:50%;top:-72%;transform:translateX(-50%);font-size:calc(var(--nav-btn-font) * 1.02);}
 
 @keyframes navFloatA{
-  0%,100%{ transform:translateY(4px) rotate(-8deg) scale(.82); opacity:0; }
-  20%,72%{ opacity:.86; }
-  50%{ transform:translateY(-5px) rotate(6deg) scale(1); opacity:.76; }
+  0%,100%{transform:translateY(calc(4px * var(--s))) rotate(-8deg) scale(.82);opacity:0;}
+  20%,72%{opacity:.86;}
+  50%{transform:translateY(calc(-5px * var(--s))) rotate(6deg) scale(1);opacity:.76;}
 }
-
 @keyframes navFloatB{
-  0%,100%{ transform:translateY(5px) rotate(9deg) scale(.78); opacity:0; }
-  24%,70%{ opacity:.78; }
-  52%{ transform:translateY(-6px) rotate(-7deg) scale(1); opacity:.68; }
+  0%,100%{transform:translateY(calc(5px * var(--s))) rotate(9deg) scale(.78);opacity:0;}
+  24%,70%{opacity:.78;}
+  52%{transform:translateY(calc(-6px * var(--s))) rotate(-7deg) scale(1);opacity:.68;}
 }
-
 @keyframes navFloatC{
-  0%,100%{ transform:translateX(-50%) translateY(6px) rotate(0deg) scale(.76); opacity:0; }
-  24%,70%{ opacity:.88; }
-  50%{ transform:translateX(-50%) translateY(-6px) rotate(2deg) scale(1); opacity:.78; }
+  0%,100%{transform:translateX(-50%) translateY(calc(6px * var(--s))) rotate(0deg) scale(.76);opacity:0;}
+  24%,70%{opacity:.88;}
+  50%{transform:translateX(-50%) translateY(calc(-6px * var(--s))) rotate(2deg) scale(1);opacity:.78;}
 }
 
-.navBtn:hover .navEffectA,
-.navBtn:focus .navEffectA,
-.navBtn:focus-visible .navEffectA,
-.navBtn:active .navEffectA,
-.navBtn.active .navEffectA,
-.navBtn.isSelected .navEffectA,
-.navBtn[aria-current="page"] .navEffectA{
-  animation:navFloatA 2.2s ease-in-out infinite;
-}
+.navBtn:not(.is-current):hover .navEffectA,
+.navBtn:not(.is-current):focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite;}
+.navBtn:not(.is-current):hover .navEffectB,
+.navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite;}
+.navBtn:not(.is-current):hover .navEffectC,
+.navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite;}
+.navBtn.is-current .navEffect{display:none;}
 
-.navBtn:hover .navEffectB,
-.navBtn:focus .navEffectB,
-.navBtn:focus-visible .navEffectB,
-.navBtn:active .navEffectB,
-.navBtn.active .navEffectB,
-.navBtn.isSelected .navEffectB,
-.navBtn[aria-current="page"] .navEffectB{
-  animation:navFloatB 2.5s ease-in-out infinite;
-}
-
-.navBtn:hover .navEffectC,
-.navBtn:focus .navEffectC,
-.navBtn:focus-visible .navEffectC,
-.navBtn:active .navEffectC,
-.navBtn.active .navEffectC,
-.navBtn.isSelected .navEffectC,
-.navBtn[aria-current="page"] .navEffectC{
-  animation:navFloatC 2.35s ease-in-out infinite;
-}
-
-/* 各房间特效颜色 */
-.navBtn[data-room="hall"] .navEffect{
-  color:rgba(255,205,96,.86);
-  text-shadow:
-    0 1px 2px rgba(255,250,232,.95),
-    0 0 10px rgba(255,215,105,.62);
-}
-
-.navBtn[data-room="manager"] .navEffect{
-  color:rgba(128,91,58,.82);
-}
-
-.navBtn[data-room="game"] .navEffect{
-  color:rgba(117,91,150,.82);
-}
-
-.navBtn[data-room="studio"] .navEffect{
-  color:rgba(96,112,145,.84);
-}
-
-.navBtn[data-room="living"] .navEffect{
-  color:rgba(202,132,70,.82);
-}
-
-.navBtn[data-room="dorm"] .navEffect{
-  color:rgba(143,111,168,.76);
-}
-
-.navBtn[data-room="pets"] .navEffect{
-  color:rgba(131,111,78,.82);
-}
-
-.navBtn[data-room="flower"] .navEffect{
-  color:rgba(198,119,145,.82);
-}
+.navBtn[data-room="hall"] .navEffect{color:rgba(255,205,96,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.95),0 0 calc(10px * var(--s)) rgba(255,215,105,.62);}
+.navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82);}
+.navBtn[data-room="honor"] .navEffect{color:rgba(205,143,45,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.92),0 0 calc(8px * var(--s)) rgba(255,220,130,.52);}
+.navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82);}
+.navBtn[data-room="studio"] .navEffect{color:rgba(96,112,145,.84);}
+.navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82);}
+.navBtn[data-room="dorm"] .navEffect{color:rgba(148,112,171,.78);}
+.navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82);}
+.navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82);}
 
 /* =========================================================
    全站统一身份组件：参观者 / 昵称 | 身份 / 铃铛 / 登录登出
@@ -538,11 +473,34 @@ button{font-family:inherit;}
   display:block;
 }
 
+.siteNoticeHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:calc(8px * var(--ui-scale));
+  margin-bottom:calc(10px * var(--ui-scale));
+}
+
 .siteNoticeTitle{
   color:#6f4726;
   font-size:calc(13px * var(--ui-scale));
   font-weight:900;
-  margin-bottom:calc(10px * var(--ui-scale));
+}
+
+#siteNoticeClear{
+  appearance:none;
+  border:0;
+  padding:0;
+  color:#9a7453;
+  background:transparent;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:850;
+  cursor:pointer;
+}
+
+#siteNoticeClear:disabled{
+  opacity:.45;
+  cursor:default;
 }
 
 .siteNoticeEmpty{
@@ -1143,7 +1101,7 @@ button{font-family:inherit;}
     position:fixed;
     left:50%;
     right:auto;
-    top:50px;
+    top:174px;
     width:min(92vw, 460px);
     max-width:calc(100vw - 24px);
     min-height:160px;
@@ -1211,7 +1169,7 @@ button{font-family:inherit;}
     position:absolute;
     left:50%;
     right:auto;
-    top:276px;
+    top:228px;
     bottom:14px;
     width:min(92vw, 460px);
     transform:translateX(-50%);
@@ -1260,9 +1218,9 @@ button{font-family:inherit;}
   #rankPanel{
     left:50%;
     right:auto;
-    top:276px;
+    top:228px;
     width:min(92vw, 460px);
-    height:calc(100dvh - 292px);
+    height:calc(100dvh - 242px);
     z-index:90;
     border-radius:20px;
     transform:translateX(-50%) translateY(18px) scale(.985);
@@ -1294,64 +1252,72 @@ button{font-family:inherit;}
     max-width:none;
   }
 
-  /* 手机房间按钮最终覆盖：完整显示，自适应换行 */
+  /* 手机版完全沿用通用模板：3×3 九按钮、身份栏紧随其后 */
   #topBar{
-    left:50%;
-    right:auto;
+    left:12px;
+    right:12px;
     top:10px;
-    width:min(92vw, 460px);
-    height:auto;
-    transform:translateX(-50%);
+    width:auto;
+    height:106px;
+    transform:none;
     z-index:80;
+    opacity:1!important;
+    pointer-events:auto;
+    --s:1;
   }
 
   #navOuter,
   #navScroll{
     width:100%;
+    height:106px;
     overflow:visible;
   }
 
   #roomNav{
     width:100%;
+    height:106px;
     display:grid;
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-    gap:7px;
-    transform:none;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:repeat(3,32px);
+    gap:5px;
+    transform:none!important;
   }
 
   .navBtn{
     width:100%;
+    height:32px;
     min-width:0;
-    height:34px;
-    padding:0 8px;
-    font-size:12px;
+    min-height:32px;
+    padding:0;
     border-radius:10px;
+    font-size:12px;
+    line-height:1;
     overflow:hidden;
   }
 
-  .navEffect{
-    display:none;
-  }
+  .navEffect{display:none;}
 
   #topActions{
-    left:50%;
-    right:auto;
-    top:174px;
-    width:min(92vw, 460px);
+    left:12px;
+    right:12px;
+    top:126px;
+    width:auto;
     height:40px;
-    transform:translateX(-50%);
+    transform:none;
     z-index:82;
+    opacity:1!important;
+    pointer-events:auto;
   }
 
   #panelSwitch{
-    left:50%;
-    right:auto;
-    top:224px;
-    width:min(92vw, 460px);
+    left:12px;
+    right:12px;
+    top:176px;
+    width:auto;
     height:42px;
     display:flex;
     gap:8px;
-    transform:translateX(-50%);
+    transform:none;
     justify-content:center;
     z-index:76;
     pointer-events:auto;
@@ -1406,34 +1372,6 @@ button{font-family:inherit;}
 
 
 @media (max-width:360px){
-  #roomNav{
-    gap:4px;
-  }
-
-  .navBtn{
-    height:26px;
-    padding:0 2px;
-    border-radius:8px;
-    font-size:9px;
-  }
-
-  #topActions{
-    top:166px;
-  }
-
-  #panelSwitch{
-    top:216px;
-  }
-
-  #mobileTrophyList{
-    top:268px;
-  }
-
-  #rankPanel{
-    top:268px;
-    height:calc(100dvh - 284px);
-  }
-
   #siteNoticePanel{
     width:min(94vw, 460px);
     max-width:calc(100vw - 20px);
@@ -1806,7 +1744,7 @@ button{font-family:inherit;}
 }
 
 
-#rankEmpty{
+.rankEmpty{
   padding:calc(16px * var(--ui-scale)) calc(12px * var(--ui-scale));
   border:1px dashed rgba(176,140,103,.35);
   border-radius:calc(14px * var(--ui-scale));
@@ -1976,7 +1914,7 @@ button{font-family:inherit;}
     font-size:calc(15.5px * var(--honor-text-scale));
   }
 
-  #rankEmpty{
+  .rankEmpty{
     font-size:calc(13px * var(--honor-text-scale));
   }
 
@@ -2504,6 +2442,7 @@ button{font-family:inherit;}
 </head>
 
 <body>
+<!-- HONOR_NAV_VARIANT: desktop-hover-hidden; common-nav-style; mobile-common-3x3 -->
 <div id="room">
   <div id="stageFrame">
     <img id="bg" src="../honor/room-honor.png" data-room10-asset="honor.roomHonor" alt="荣誉墙">
@@ -2534,6 +2473,13 @@ button{font-family:inherit;}
                 <span class="navEffect navEffectA">✎</span>
                 <span class="navEffect navEffectB">▱</span>
                 <span class="navEffect navEffectC">✐</span>
+              </button>
+
+              <button class="navBtn is-current" data-room="honor" type="button" aria-current="page" tabindex="-1">
+                <span class="navLabel">荣誉墙</span>
+                <span class="navEffect navEffectA">🏆</span>
+                <span class="navEffect navEffectB">🏅</span>
+                <span class="navEffect navEffectC">✦</span>
               </button>
 
               <button class="navBtn" data-room="studio" type="button" onclick="goRoom('studio-todo.html', true)">
@@ -2588,7 +2534,10 @@ button{font-family:inherit;}
             </button>
 
             <div id="siteNoticePanel" aria-live="polite">
-              <div class="siteNoticeTitle">荣誉墙提醒</div>
+              <div class="siteNoticeHeader">
+                <div class="siteNoticeTitle">荣誉墙提醒</div>
+                <button id="siteNoticeClear" type="button">全部已读</button>
+              </div>
               <div id="siteNoticeContent">
                 <div class="siteNoticeEmpty">暂无提醒。</div>
               </div>
@@ -2612,14 +2561,14 @@ button{font-family:inherit;}
           <div id="rankDesc">这里会读取数据库中的实时排行榜；如果没有数据，会显示暂无数据。</div>
           <div id="rankSince">统计时间：待设置</div>
           <div id="rankList">
-            <div id="rankEmpty">请先点击左侧奖杯柜中的任意奖杯。</div>
+            <div class="rankEmpty">请先点击左侧奖杯柜中的任意奖杯。</div>
           </div>
         </div>
         <div id="rankMascotGuide" aria-hidden="true">
           <div id="rankMascotBubble">
             <div id="rankMascotText">我来给你讲讲这些奖杯～</div>
           </div>
-          <img id="rankMascotImg" src="../honor/mascot-niuma(R).png" alt="">
+          <img id="rankMascotImg" src="./mascot-niuma(R).png" data-room10-asset="honor.mascotNiumaR" alt="">
         </div>
       </div>
 
@@ -2651,17 +2600,7 @@ button{font-family:inherit;}
         <rect id="trophy9" class="trophyRect" x="28.10" y="67.30" width="10.7" height="20.3" onclick="showTrophy(9)"></rect>
       </svg>
 
-      <div id="mobileTrophyList" aria-label="手机版奖杯排行榜入口">
-        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(1)">最佳尖叫鸡</button>
-        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(2)">觉醒狮子王</button>
-        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(3)">最刺激过山车</button>
-        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(4)">好多人啊</button>
-        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(5)">最佳双子星</button>
-        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(6)">闲工夫不负有心人</button>
-        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(7)">还要再战五百年</button>
-        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(8)">送你一朵小红花</button>
-        <button class="mobileTrophyBtn" type="button" onclick="showTrophy(9)">音之炼金术师</button>
-      </div>
+      <div id="mobileTrophyList" aria-label="手机版奖杯排行榜入口"></div>
     </div>
   </div>
 </div>
@@ -2722,7 +2661,6 @@ const HONOR_PAGE_MAP = {
   "index.html":"index",
   "living.html":"living",
   "manager-visitor.html":"managerVisitor",
-  "manager-owner.html":"managerOwner",
   "manager-admin.html":"managerAdmin",
   "manager-member.html":"managerMember",
   "studio-todo.html":"studioTodo",
@@ -2766,6 +2704,11 @@ function applyHonorConfiguredAssets(){
   if(loginBg){
     const url = room10AssetUrl("root.login", "login.png");
     if(url) loginBg.src = url;
+  }
+
+  const mascot = document.getElementById("rankMascotImg");
+  if(mascot){
+    mascot.src = room10AssetUrl("honor.mascotNiumaR", "honor/mascot-niuma(R).png");
   }
 }
 
@@ -2852,49 +2795,33 @@ async function login(){
     localStorage.setItem("room10MemberId", user.member_id || user.id || "");
     localStorage.setItem("room10MemberCode", key);
 
-    let roleMessage = "登录成功";
-    if(user.role === "owner"){
-      roleMessage = "维修工已上线";
-    }else if(user.role === "admin"){
-      roleMessage = "宿管已上线";
-    }else if(user.role === "member"){
-      roleMessage = "房客已登录";
-    }else if(user.role === "applying"){
-      roleMessage = "当前身份为申请中";
-    }
+    const roleMessageMap = {
+      owner:"维修工已上线",
+      admin:"宿管已上线",
+      member:"房客已登录",
+      trainee:"练习生已登录",
+      applying:"当前身份为申请中"
+    };
+    const pendingRedirect = sessionStorage.getItem("room10_pending_redirect") || "";
+    sessionStorage.removeItem("room10_pending_redirect");
 
     msg.style.color = "#5f7d3a";
-    msg.innerText = roleMessage;
+    msg.innerText = roleMessageMap[String(user.role || "").toLowerCase()] || "登录成功";
 
     updateIdentity();
+    await loadMemberNotifications();
 
     setTimeout(() => {
       nicknameInput.value = "";
       passwordInput.value = "";
       closeLogin();
+      if(pendingRedirect) window.location.href = pendingRedirect;
     }, 650);
   }catch(e){
     console.error("login() 查询异常：", e);
     msg.style.color = "#8b4a2d";
     msg.innerText = `登录失败：${e?.message || "请稍后再试"}`;
   }
-}
-
-function enterRoom(page, needLogin){
-  const targetPage = String(page || "").trim();
-  if(!targetPage) return;
-
-  if(needLogin && localStorage.getItem("room10LoggedIn") !== "true"){
-    openLogin();
-    return;
-  }
-
-  if((targetPage === "flower.html" || targetPage === "pets.html") && localStorage.getItem("room10LoggedIn") !== "true"){
-    window.location.href = resolveHonorPageUrl(targetPage) + "?mode=guest";
-    return;
-  }
-
-  window.location.href = resolveHonorPageUrl(targetPage);
 }
 
 function goRoom(url, needLogin = false){
@@ -2926,12 +2853,7 @@ function goManagerRoom(){
     return;
   }
 
-  if(role === "owner" || role === "creator"){
-    window.location.href = resolveHonorPageUrl("manager-owner.html");
-    return;
-  }
-
-  if(role === "admin"){
+  if(role === "owner" || role === "admin" || role === "creator"){
     window.location.href = resolveHonorPageUrl("manager-admin.html");
     return;
   }
@@ -2940,121 +2862,170 @@ function goManagerRoom(){
 }
 
 /* =========================================================
-   荣誉墙赛季统计说明
-   这里只生成排行榜上的赛季文字，不做后台结算或弹窗。
+   荣誉墙排行榜与赛季配置：统一从数据库读取
 ========================================================= */
-const HONOR_OFFICIAL_START_YEAR = 2026;
-const HONOR_OFFICIAL_START_MONTH_INDEX = 6; // JS月份从0开始：6 = 7月
+let rankConfigs = {};
+let honorRankSettings = null;
+let rankConfigReady = false;
+
+function parseLocalDate(dateText){
+  const raw = String(dateText || "").trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null;
+  const [year, month, day] = raw.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
 
 function getHonorSeasonInfo(date = new Date()){
-  const officialStart = new Date(HONOR_OFFICIAL_START_YEAR, HONOR_OFFICIAL_START_MONTH_INDEX, 1);
-  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const officialStart = parseLocalDate(honorRankSettings?.official_start_date);
+  const seasonMonths = Math.max(1, Number(honorRankSettings?.season_months || 3));
 
-  if(d < officialStart){
+  if(!officialStart){
+    return null;
+  }
+
+  const current = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  if(current < officialStart){
     return {
       isOfficial:false,
-      label:"测试期",
-      rangeText:"正式赛季从 2026 年 7 月开始",
+      label:String(honorRankSettings?.prelaunch_label || "测试期"),
+      rangeText:String(honorRankSettings?.prelaunch_text || ""),
+      seasonMonths,
       startDate:officialStart,
       endDate:null
     };
   }
 
-  const year = d.getFullYear();
-  const month = d.getMonth();
-  let startMonth = 0;
-
-  if(month >= 0 && month <= 2){
-    startMonth = 0;
-  }else if(month >= 3 && month <= 5){
-    startMonth = 3;
-  }else if(month >= 6 && month <= 8){
-    startMonth = 6;
-  }else{
-    startMonth = 9;
-  }
-
+  const year = current.getFullYear();
+  const month = current.getMonth();
+  const startMonth = Math.floor(month / seasonMonths) * seasonMonths;
   const startDate = new Date(year, startMonth, 1);
-  const endDate = new Date(year, startMonth + 3, 0);
-  const seasonNo = startMonth === 0 ? 1 : startMonth === 3 ? 2 : startMonth === 6 ? 3 : 4;
+  const endDate = new Date(year, startMonth + seasonMonths, 0);
+  const seasonNo = Math.floor(startMonth / seasonMonths) + 1;
 
   return {
     isOfficial:true,
     label:`${year} 年第 ${seasonNo} 赛季`,
     rangeText:`${year} 年 ${startMonth + 1} 月 – ${endDate.getMonth() + 1} 月`,
+    seasonMonths,
     startDate,
     endDate
   };
 }
 
 function buildHonorSeasonSince(baseSince){
+  const normalSince = String(baseSince || "统计时间：按当前数据库实时统计");
   const info = getHonorSeasonInfo();
-  const normalSince = baseSince || "统计时间：按当前数据库实时统计";
 
+  if(!info) return normalSince;
   if(!info.isOfficial){
-    return normalSince;
+    return [info.label, info.rangeText, normalSince].filter(Boolean).join("｜");
   }
 
-  return `${info.label}｜${info.rangeText}｜每 3 个月为一季｜${normalSince}`;
+  return `${info.label}｜${info.rangeText}｜每 ${info.seasonMonths} 个月为一季｜${normalSince}`;
 }
 
+function renderMobileTrophyButtons(){
+  const list = document.getElementById("mobileTrophyList");
+  if(!list) return;
 
-const rankConfigs = {
-  1:{
-    key:"highest_note",
-    title:"最佳尖叫鸡",
-    desc:"记录成员在作品中唱到的最高音。谁把屋顶掀得最高，谁就会出现在这里。",
-    since:"统计时间：按当前数据库实时统计"
-  },
-  2:{
-    key:"lowest_note",
-    title:"觉醒狮子王",
-    desc:"记录成员在作品中唱到的最低音。低到像从地板下传来的声音，也会被荣誉墙记住。",
-    since:"统计时间：按当前数据库实时统计"
-  },
-  3:{
-    key:"widest_range",
-    title:"最刺激过山车",
-    desc:"记录成员在单首作品里的最大音域跨度。最高音和最低音拉得越开，过山车就越刺激。",
-    since:"统计时间：按当前数据库实时统计"
-  },
-  4:{
-    key:"role_count",
-    title:"好多人啊",
-    desc:"记录成员已交音作品中唱过的不同原唱 / 角色数量。唱过的身份越多，越像住进了整个舞台。",
-    since:"统计时间：按当前数据库实时统计"
-  },
-  5:{
-    key:"best_duo",
-    title:"最佳双子星",
-    desc:"记录同一项目中两位成员都已交音的合作次数。一起完成得越多，默契值越高。",
-    since:"统计时间：按当前数据库实时统计"
-  },
-  6:{
-    key:"join_count",
-    title:"闲工夫不负有心人",
-    desc:"记录成员报名参与项目的次数。不管最后站在哪一首歌里，积极举手都会被看见。",
-    since:"统计时间：按当前数据库实时统计"
-  },
-  7:{
-    key:"pending_count",
-    title:"还要再战五百年",
-    desc:"记录制作中项目里，成员当前还没交音的演唱任务数。不是催债，是荣誉墙温柔地提醒：该开录啦。",
-    since:"统计时间：按当前数据库实时统计"
-  },
-  8:{
-    key:"catchup_count",
-    title:"送你一朵小红花",
-    desc:"记录成员已完成的演唱交音次数。每一次按时交上的人声，都值得一朵小红花。",
-    since:"统计时间：按当前数据库实时统计"
-  },
-  9:{
-    key:"mix_count",
-    title:"音之炼金术师",
-    desc:"记录成员已完成的混音 / 后期交付次数。把零散的人声炼成作品的人，也该有自己的奖杯。",
-    since:"统计时间：按当前数据库实时统计"
+  const configs = Object.values(rankConfigs).sort((a, b) => a.sortOrder - b.sortOrder);
+  list.innerHTML = configs.map(config => `
+    <button class="mobileTrophyBtn" type="button" data-trophy-no="${config.trophyNo}">
+      ${escapeHtml(config.title)}
+    </button>
+  `).join("");
+
+  list.querySelectorAll(".mobileTrophyBtn").forEach(button => {
+    button.addEventListener("click", () => showTrophy(Number(button.dataset.trophyNo)));
+  });
+}
+
+function applyRankConfigShells(){
+  trophyData = {};
+  Object.entries(rankConfigs).forEach(([id, config]) => {
+    trophyData[id] = {
+      title:config.title,
+      desc:config.desc,
+      since:config.since,
+      list:[]
+    };
+  });
+  trophyDataReady = true;
+}
+
+function showRankConfigError(message){
+  rankConfigs = {};
+  honorRankSettings = null;
+  rankConfigReady = false;
+  trophyData = {};
+  trophyDataReady = false;
+
+  const mobileList = document.getElementById("mobileTrophyList");
+  if(mobileList){
+    mobileList.innerHTML = `<div class="rankEmpty">${escapeHtml(message)}</div>`;
   }
-};
+
+  rankTitle.textContent = "排行榜配置错误";
+  rankDesc.textContent = message;
+  rankSince.textContent = "请检查 honor_rank_configs 与 honor_rank_settings。";
+  rankList.innerHTML = '<div class="rankEmpty">排行榜暂时无法显示。</div>';
+}
+
+async function loadHonorRankConfiguration(){
+  const [configResult, settingResult] = await Promise.all([
+    client
+      .from("honor_rank_configs")
+      .select("trophy_no, rank_key, title, description, since_text, sort_order")
+      .eq("is_active", true)
+      .order("sort_order", { ascending:true }),
+    client
+      .from("honor_rank_settings")
+      .select("setting_key, official_start_date, season_months, prelaunch_label, prelaunch_text")
+      .eq("setting_key", "main")
+      .eq("is_active", true)
+      .maybeSingle()
+  ]);
+
+  if(configResult.error){
+    throw new Error(`排行榜配置读取失败：${configResult.error.message}`);
+  }
+  if(settingResult.error){
+    throw new Error(`赛季配置读取失败：${settingResult.error.message}`);
+  }
+
+  const rows = Array.isArray(configResult.data) ? configResult.data : [];
+  if(rows.length !== 9){
+    throw new Error(`排行榜配置数量应为 9，当前为 ${rows.length}。`);
+  }
+  if(!settingResult.data){
+    throw new Error("缺少 setting_key = main 的赛季配置。");
+  }
+
+  const nextConfigs = {};
+  rows.forEach(row => {
+    const trophyNo = Number(row.trophy_no);
+    if(!Number.isInteger(trophyNo) || trophyNo < 1 || trophyNo > 9){
+      throw new Error(`存在无效奖杯编号：${row.trophy_no}`);
+    }
+
+    nextConfigs[trophyNo] = {
+      trophyNo,
+      key:String(row.rank_key || "").trim(),
+      title:String(row.title || "").trim(),
+      desc:String(row.description || "").trim(),
+      since:String(row.since_text || "").trim(),
+      sortOrder:Number(row.sort_order ?? trophyNo * 10)
+    };
+  });
+
+  rankConfigs = nextConfigs;
+  honorRankSettings = settingResult.data;
+  rankConfigReady = true;
+  renderMobileTrophyButtons();
+  applyRankConfigShells();
+  renderPlaqueWinners();
+}
 
 let trophyData = {};
 let trophyDataReady = false;
@@ -3183,54 +3154,19 @@ function renderAvatarStack(items){
   }).join("");
 }
 
-function applyFallbackRanks(){
-  trophyData = {};
-
-  Object.entries(rankConfigs).forEach(([id, config]) => {
-    trophyData[id] = {
-      title:config.title,
-      desc:config.desc,
-      since:config.since,
-      list:[]
-    };
-  });
-
-  trophyDataReady = true;
-}
-
 async function loadTrophyDataFromDatabase(){
-  applyFallbackRanks();
+  if(!rankConfigReady){
+    throw new Error("排行榜配置尚未读取完成。");
+  }
+
+  applyRankConfigShells();
 
   try{
-    const [rankResult, memberResult] = await Promise.all([
-      client
-        .from("honor_live_rank_entries")
-        .select("rank_key, sort_order, member_id, member_name, score_text, extra_text, project_name, note")
-        .order("sort_order", { ascending:true })
-        .order("member_name", { ascending:true }),
-      client
-        .from("members")
-        .select("id, nickname, avatar_url")
-    ]);
-
-    if(memberResult.error){
-      console.warn("成员头像读取失败，将使用姓名章：", memberResult.error);
-    }else if(Array.isArray(memberResult.data)){
-      memberAvatarMap.clear();
-      memberNicknameMap.clear();
-
-      memberResult.data.forEach(member => {
-        const id = String(member.id || "").trim();
-        const nickname = String(member.nickname || "").trim();
-        const avatarUrl = cleanImageUrl(member.avatar_url);
-        const cleanMember = { id, nickname, avatar_url:avatarUrl };
-
-        if(id) memberAvatarMap.set(id, avatarUrl);
-        if(nickname) memberNicknameMap.set(nickname, cleanMember);
-      });
-    }
-
-    const { data, error } = rankResult;
+    const { data, error } = await client
+      .from("honor_live_rank_entries")
+      .select("rank_key, sort_order, member_id, member_name, score_text, extra_text, project_name")
+      .order("sort_order", { ascending:true })
+      .order("member_name", { ascending:true });
 
     if(error){
       console.warn("荣誉墙实时榜单读取失败：", error);
@@ -3239,6 +3175,35 @@ async function loadTrophyDataFromDatabase(){
 
     if(!Array.isArray(data) || !data.length){
       return;
+    }
+
+    memberAvatarMap.clear();
+    memberNicknameMap.clear();
+
+    const memberIds = [...new Set(data.map(row => String(row.member_id || "").trim()).filter(Boolean))];
+    const nicknames = [...new Set(data.flatMap(row => getMemberNameParts(row.member_name)).filter(Boolean))];
+
+    if(memberIds.length || nicknames.length){
+      const { data:memberRows, error:memberError } = await client.rpc(
+        "get_public_member_profiles",
+        {
+          p_member_ids:memberIds,
+          p_nicknames:nicknames
+        }
+      );
+
+      if(memberError){
+        console.warn("成员头像读取失败，将使用姓名章：", memberError);
+      }else{
+        (memberRows || []).forEach(member => {
+          const id = String(member.member_id || "").trim();
+          const nickname = String(member.nickname || "").trim();
+          const avatarUrl = cleanImageUrl(member.avatar_url);
+          const cleanMember = { id, nickname, avatar_url:avatarUrl };
+          if(id) memberAvatarMap.set(id, avatarUrl);
+          if(nickname) memberNicknameMap.set(nickname, cleanMember);
+        });
+      }
     }
 
     Object.entries(rankConfigs).forEach(([id, config]) => {
@@ -3463,13 +3428,13 @@ function renderRankList(list){
   rankList.innerHTML = "";
 
   if(!list || !list.length){
-    rankList.innerHTML = '<div id="rankEmpty">当前还没有可展示的数据。</div>';
+    rankList.innerHTML = '<div class="rankEmpty">当前还没有可展示的数据。</div>';
     return;
   }
 
   const groups = buildGroupedRanks(list);
   const boardGroups = groups.slice(1);
-  let boardHtml = '<div id="rankEmpty">榜首之后暂无其他名次。</div>';
+  let boardHtml = '<div class="rankEmpty">榜首之后暂无其他名次。</div>';
 
   if(boardGroups.length){
     if(isMobileRankLayout()){
@@ -3512,7 +3477,7 @@ function openRankPanel(){
 }
 
 function showTrophy(id){
-  if(!trophyDataReady) applyFallbackRanks();
+  if(!trophyDataReady) return;
   const data = trophyData[id];
   if(!data) return;
 
@@ -3540,7 +3505,7 @@ function closeRank(){
 }
 
 function getPlaqueText(id){
-  if(!trophyDataReady) applyFallbackRanks();
+  if(!trophyDataReady) return;
   const list = trophyData[id]?.list || [];
   if(!list.length) return "-";
 
@@ -3581,10 +3546,11 @@ function renderPlaqueWinners(){
 
 function readStoredUser(){
   return {
-    nickname: localStorage.getItem("room10User") || "",
-    role: localStorage.getItem("room10Role") || "",
-    memberId: localStorage.getItem("room10MemberId") || "",
-    loggedIn: localStorage.getItem("room10LoggedIn") === "true"
+    nickname:localStorage.getItem("room10User") || "",
+    role:localStorage.getItem("room10Role") || "",
+    memberId:localStorage.getItem("room10MemberId") || "",
+    memberCode:localStorage.getItem("room10MemberCode") || "",
+    loggedIn:localStorage.getItem("room10LoggedIn") === "true"
   };
 }
 
@@ -3593,6 +3559,7 @@ function getRoleLabel(role){
     owner: "维修工",
     admin: "宿管",
     member: "房客",
+    trainee: "练习生",
     applying: "申请中",
     visitor: "参观者"
   };
@@ -3615,6 +3582,7 @@ function updateIdentity(){
     currentUserText.textContent = "参观者";
     loginOpenBtn.classList.remove("hidden");
     logoutBtn.classList.add("hidden");
+    renderNoticeList([]);
   }
 }
 
@@ -3638,10 +3606,30 @@ function setNoticeCount(count){
   siteNoticeBtn.classList.toggle("hasNotice", n > 0);
 }
 
+function formatNoticeTime(value){
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("zh-CN", {
+    month:"2-digit",
+    day:"2-digit",
+    hour:"2-digit",
+    minute:"2-digit",
+    hour12:false
+  });
+}
+
+let currentNoticeIds = [];
+
 function renderNoticeList(items){
   const siteNoticeContent = document.getElementById("siteNoticeContent");
+  const siteNoticeClear = document.getElementById("siteNoticeClear");
   const list = Array.isArray(items) ? items : [];
   if(!siteNoticeContent) return;
+
+  currentNoticeIds = list
+    .map(item => String(item.notice_id || item.id || "").trim())
+    .filter(Boolean);
+  if(siteNoticeClear) siteNoticeClear.disabled = currentNoticeIds.length === 0;
 
   if(!list.length){
     siteNoticeContent.innerHTML = '<div class="siteNoticeEmpty">暂无提醒。</div>';
@@ -3653,14 +3641,67 @@ function renderNoticeList(items){
     <div class="siteNoticeList">
       ${list.map(item => `
         <div class="siteNoticeItem">
-          <div class="siteNoticeItemTitle">${escapeHtml(item.title || "提醒")}</div>
-          <div class="siteNoticeItemDesc">${escapeHtml(item.desc || "")}</div>
+          <div class="siteNoticeItemTitle">${escapeHtml(item.title || "站内通知")}</div>
+          <div class="siteNoticeItemDesc">${escapeHtml(item.message || item.desc || "")}</div>
+          ${item.created_at ? `<div class="siteNoticeItemDesc">${escapeHtml(formatNoticeTime(item.created_at))}</div>` : ""}
         </div>
       `).join("")}
     </div>
   `;
 
   setNoticeCount(list.length);
+}
+
+async function loadMemberNotifications(){
+  const user = readStoredUser();
+  const siteNoticeContent = document.getElementById("siteNoticeContent");
+
+  if(!client || !user.loggedIn || !user.memberId || !user.memberCode){
+    renderNoticeList([]);
+    return;
+  }
+
+  if(siteNoticeContent){
+    siteNoticeContent.innerHTML = '<div class="siteNoticeEmpty">读取中</div>';
+  }
+
+  try{
+    const { data, error } = await client.rpc("get_member_notifications", {
+      p_member_id:user.memberId,
+      p_member_code:user.memberCode,
+      p_channel:"site",
+      p_limit:20
+    });
+    if(error) throw error;
+    renderNoticeList(Array.isArray(data) ? data : []);
+  }catch(error){
+    console.error("读取荣誉墙通知失败：", error);
+    currentNoticeIds = [];
+    setNoticeCount(0);
+    if(siteNoticeContent){
+      siteNoticeContent.innerHTML = '<div class="siteNoticeEmpty">通知读取失败，请稍后再试。</div>';
+    }
+  }
+}
+
+async function markAllNoticesRead(){
+  const user = readStoredUser();
+  const siteNoticeClear = document.getElementById("siteNoticeClear");
+  if(!client || !user.memberId || !user.memberCode || !currentNoticeIds.length) return;
+
+  if(siteNoticeClear) siteNoticeClear.disabled = true;
+  try{
+    const { error } = await client.rpc("mark_member_notifications_read", {
+      p_member_id:user.memberId,
+      p_member_code:user.memberCode,
+      p_notice_ids:currentNoticeIds
+    });
+    if(error) throw error;
+    await loadMemberNotifications();
+  }catch(error){
+    console.error("荣誉墙通知标记已读失败：", error);
+    if(siteNoticeClear) siteNoticeClear.disabled = false;
+  }
 }
 
 function logoutRoom10(){
@@ -3683,8 +3724,6 @@ function logoutRoom10(){
 
 function updateStageScale(){
   const stage = document.getElementById("stageFrame");
-  const topBar = document.getElementById("topBar");
-  const roomNav = document.getElementById("roomNav");
   if(!stage) return;
 
   const rect = stage.getBoundingClientRect();
@@ -3702,20 +3741,11 @@ function updateStageScale(){
   const honorTextScale = Math.max(0.58, Math.min(0.96, rect.width / 2048));
   stage.style.setProperty("--honor-text-scale", honorTextScale.toFixed(3));
 
-  if(topBar && roomNav && rect.width > 540){
-    roomNav.style.transform = "scale(1)";
-
-    requestAnimationFrame(() => {
-      const availableWidth = Math.max(1, topBar.clientWidth || topBar.getBoundingClientRect().width);
-      const requiredWidth = Math.max(1, roomNav.scrollWidth || 1);
-      const fit = Math.min(1, availableWidth / requiredWidth);
-      roomNav.style.transform = fit < 1 ? `scale(${fit.toFixed(5)})` : "scale(1)";
-    });
-  }
 }
 
 
 const siteNoticeBtn = document.getElementById("siteNoticeBtn");
+const siteNoticeClear = document.getElementById("siteNoticeClear");
 const loginOpenBtn = document.getElementById("loginOpenBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const siteNoticePanel = document.getElementById("siteNoticePanel");
@@ -3723,6 +3753,13 @@ if(siteNoticeBtn){
   siteNoticeBtn.addEventListener("click", event => {
     event.stopPropagation();
     toggleSiteNoticePanel();
+  });
+}
+
+if(siteNoticeClear){
+  siteNoticeClear.addEventListener("click", event => {
+    event.stopPropagation();
+    markAllNoticesRead();
   });
 }
 
@@ -3784,6 +3821,7 @@ window.addEventListener("resize", () => {
 
 window.addEventListener("pageshow", () => {
   updateIdentity();
+  loadMemberNotifications();
   updateStageScale();
 });
 
@@ -3796,11 +3834,20 @@ document.getElementById("password").addEventListener("keydown", (e) => {
   if(e.key === "Enter") login();
 });
 
-applyFallbackRanks();
-renderPlaqueWinners();
-loadTrophyDataFromDatabase();
+async function initializeHonorRankings(){
+  try{
+    await loadHonorRankConfiguration();
+    await loadTrophyDataFromDatabase();
+  }catch(error){
+    console.warn("荣誉墙配置或排行榜读取失败：", error);
+    showRankConfigError(error?.message || "荣誉墙配置读取失败。");
+  }
+}
+
+applyHonorConfiguredAssets();
+initializeHonorRankings();
 updateIdentity();
-renderNoticeList([]);
+loadMemberNotifications();
 updateStageScale();
 </script>
 
