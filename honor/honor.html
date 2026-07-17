@@ -549,7 +549,6 @@ button{font-family:inherit;}
 
 .switchBtn{
   appearance:none;
-  border:none;
   cursor:pointer;
   position:absolute;
   width:max(calc(76px * var(--switch-ui-scale)), 24px);
@@ -577,6 +576,9 @@ button{font-family:inherit;}
   transition:transform .18s ease, filter .18s ease, background .18s ease;
   pointer-events:auto;
   white-space:normal;
+  font-size:var(--switch-font-size);
+  word-break:keep-all;
+  overflow-wrap:normal;
 }
 
 .switchBtn:hover{
@@ -993,17 +995,11 @@ button{font-family:inherit;}
 }
 
 
-/* ===== 统一跟随底图缩放：尺寸随底图变化 ===== */
-.switchBtn{
-  font-size:var(--switch-font-size);
-  word-break:keep-all;
-  overflow-wrap:normal;
-}
-
 
 /* ===== 荣誉墙桌面端特殊显示：不遮挡底图，悬停显示，不改变原位置 ===== */
 @media (min-width:541px){
   #topBar{
+    z-index:84;
     pointer-events:auto;
     opacity:0;
     transform:none;
@@ -1016,7 +1012,8 @@ button{font-family:inherit;}
   }
 
   #topActions{
-    pointer-events:auto;
+    z-index:82;
+    pointer-events:none;
     opacity:0;
     transform:none;
     transition:opacity .22s ease;
@@ -1194,7 +1191,6 @@ button{font-family:inherit;}
 
   .mobileTrophyBtn{
     appearance:none;
-    border:none;
     width:100%;
     min-height:42px;
     padding:10px 12px;
@@ -1424,17 +1420,6 @@ button{font-family:inherit;}
   pointer-events:none;
 }
 
-#rankPanel::after{
-  content:"✦";
-  position:absolute;
-  right:calc(21px * var(--ui-scale));
-  bottom:calc(14px * var(--ui-scale));
-  color:rgba(176,119,70,.16);
-  font-size:calc(34px * var(--ui-scale));
-  line-height:1;
-  transform:rotate(8deg);
-  pointer-events:none;
-}
 
 #rankPanelInner{
   overflow:hidden;
@@ -1758,7 +1743,6 @@ button{font-family:inherit;}
 /* ===== 牛马解说员样式已合并到荣誉墙专属细化区，避免重复冲突 ===== */
 
 @media (max-width:540px){
-  #rankPanelInner{overflow:hidden;}
   #rankTitle{font-size:24px;line-height:1.18;margin-bottom:7px;}
   #rankDesc{font-size:14px;line-height:1.48;margin-bottom:6px;}
   #rankSince{font-size:13px;line-height:1.35;margin-bottom:9px;}
@@ -1876,9 +1860,6 @@ button{font-family:inherit;}
     font-size:calc(34px * var(--honor-text-scale));
   }
 
-  #rankDesc{
-    font-size:calc(17.5px * var(--honor-text-scale));
-  }
 
   #rankSince{
     font-size:calc(14px * var(--honor-text-scale));
@@ -1918,9 +1899,6 @@ button{font-family:inherit;}
     font-size:calc(13px * var(--honor-text-scale));
   }
 
-  #rankMascotText{
-    font-size:calc(14px * var(--honor-text-scale));
-  }
 }
 
 
@@ -2131,9 +2109,6 @@ button{font-family:inherit;}
 /* ===== 541px-920px：锁定底图坐标的小屏横屏适配（统一字号版）
    保持排行榜与大屏同一套百分比位置，只压缩内部字号和间距。
    分数/右侧内容不再设置 max-width，避免 541px-760px 被截断。 */
-#rankPanel::after{
-  display:none;
-}
 
 @media (min-width:541px) and (max-width:920px){
   #rankMascotGuide{
@@ -2445,7 +2420,7 @@ button{font-family:inherit;}
 <!-- HONOR_NAV_VARIANT: desktop-hover-hidden; common-nav-style; mobile-common-3x3 -->
 <div id="room">
   <div id="stageFrame">
-    <img id="bg" src="../honor/room-honor.png" data-room10-asset="honor.roomHonor" alt="荣誉墙">
+    <img id="bg" src="../honor/room-honor.png" alt="荣誉墙">
 
     <div id="overlay">
       <div id="bgShade"></div>
@@ -2568,7 +2543,7 @@ button{font-family:inherit;}
           <div id="rankMascotBubble">
             <div id="rankMascotText">我来给你讲讲这些奖杯～</div>
           </div>
-          <img id="rankMascotImg" src="./mascot-niuma(R).png" data-room10-asset="honor.mascotNiumaR" alt="">
+          <img id="rankMascotImg" src="./mascot-niuma(R).png" alt="">
         </div>
       </div>
 
@@ -2606,7 +2581,7 @@ button{font-family:inherit;}
 </div>
 <div id="loginUI">
   <div class="login-panel">
-    <img id="loginPanelBg" src="../login.png" data-room10-asset="root.login" alt="登录框">
+    <img id="loginPanelBg" src="../login.png" alt="登录框">
 
     <input id="username" type="text" autocomplete="username">
     <input id="password" type="password" autocomplete="current-password">
@@ -2853,7 +2828,7 @@ function goManagerRoom(){
     return;
   }
 
-  if(role === "owner" || role === "admin" || role === "creator"){
+  if(role === "owner" || role === "admin"){
     window.location.href = resolveHonorPageUrl("manager-admin.html");
     return;
   }
@@ -3819,9 +3794,14 @@ window.addEventListener("resize", () => {
   }
 });
 
-window.addEventListener("pageshow", () => {
+async function refreshHonorSessionState(){
   updateIdentity();
-  loadMemberNotifications();
+  await loadMemberNotifications();
+}
+
+window.addEventListener("pageshow", event => {
+  if(!event.persisted) return;
+  refreshHonorSessionState();
   updateStageScale();
 });
 
@@ -3846,8 +3826,7 @@ async function initializeHonorRankings(){
 
 applyHonorConfiguredAssets();
 initializeHonorRankings();
-updateIdentity();
-loadMemberNotifications();
+refreshHonorSessionState();
 updateStageScale();
 </script>
 
