@@ -110,7 +110,13 @@ button{
   color:#6a5038;
   font-size:calc(13px * var(--text-scale));
   font-weight:700;
-  letter-spacing:.04em;
+  line-height:1;
+  letter-spacing:0;
+  text-indent:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
   background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(247,235,220,.72));
   border:1px solid rgba(224,202,176,.78);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.72), 0 3px 8px rgba(91,70,50,.08);
@@ -360,7 +366,7 @@ button{
   gap:calc(7px * var(--ui-scale));
   margin-bottom:calc(5px * var(--ui-scale));
 }
-.work-no,.work-type,.info-type,.meta-pill{
+.work-no,.work-type,.info-type{
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -548,9 +554,19 @@ button{
 }
 .detail-card.perform-row{
   display:grid;
-  grid-template-columns:1fr minmax(calc(140px * var(--ui-scale)), .38fr);
-  gap:calc(10px * var(--ui-scale));
-  align-items:start;
+  grid-template-columns:minmax(0,1fr) minmax(calc(116px * var(--ui-scale)), 28%);
+  gap:calc(16px * var(--ui-scale));
+  align-items:stretch;
+}
+.detail-card.perform-row > div{
+  min-width:0;
+}
+.detail-card.perform-row > div:last-child{
+  padding-left:calc(14px * var(--ui-scale));
+  border-left:1px solid rgba(173,132,88,.24);
+}
+.detail-card.perform-row > div:last-child .detail-value{
+  overflow-wrap:anywhere;
 }
 .link-text{
   color:#765638;
@@ -592,6 +608,165 @@ button{
 }
 .hidden{display:none !important;}
 
+/* ===== 全站同款：普通提醒 / 操作确认（非奖励弹窗） ===== */
+body.room10ModalOpen{overflow:hidden!important;}
+
+.room10NoticeMask,
+.room10ConfirmMask{
+  position:fixed;
+  inset:0;
+  z-index:2200;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(60,42,23,.22);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+.room10NoticeMask.show,
+.room10ConfirmMask.show{display:flex;}
+
+.room10NoticeDialog,
+.room10ConfirmDialog{
+  width:min(430px,92vw);
+  max-height:calc(100dvh - 40px);
+  overflow:auto;
+  padding:24px 22px 20px;
+  border:1px solid rgba(203,167,123,.30);
+  border-radius:22px;
+  background:rgba(255,249,241,.98);
+  color:#6a4525;
+  text-align:center;
+  box-shadow:
+    0 18px 45px rgba(85,58,34,.20),
+    inset 0 1px 0 rgba(255,255,255,.94);
+}
+
+.room10NoticeTitle,
+.room10ConfirmTitle{
+  margin:0 0 10px;
+  color:#6f4726;
+  font-size:20px;
+  font-weight:900;
+  line-height:1.25;
+}
+
+.room10NoticeMessage,
+.room10ConfirmMessage{
+  margin:0;
+  color:#6a4525;
+  font-size:14px;
+  font-weight:700;
+  line-height:1.75;
+  white-space:pre-line;
+  overflow-wrap:anywhere;
+}
+
+.room10NoticeDetail{
+  margin-top:12px;
+  padding:10px 12px;
+  border:1px solid rgba(194,151,108,.18);
+  border-radius:12px;
+  background:rgba(246,239,230,.72);
+  color:#7a5231;
+  font-size:12px;
+  line-height:1.55;
+  text-align:left;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+.room10NoticeDetail:empty{display:none;}
+
+.room10NoticeMeta{
+  margin-top:10px;
+  color:#9a7656;
+  font-size:10px;
+  line-height:1.45;
+  white-space:pre-line;
+}
+.room10NoticeMeta:empty{display:none;}
+
+.room10NoticeActions,
+.room10ConfirmActions{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin-top:16px;
+}
+
+.room10NoticeButton,
+.room10ConfirmButton{
+  appearance:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:108px;
+  height:40px;
+  padding:0 18px;
+  border:0;
+  border-radius:12px;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:900;
+  line-height:1;
+  cursor:pointer;
+  transition:transform .18s ease,filter .18s ease;
+}
+
+.room10NoticeButton,
+.room10ConfirmAccept{
+  background:linear-gradient(180deg,#efd5ab 0%,#dfbd8a 100%);
+  color:#6a4120;
+  box-shadow:
+    inset 0 1px 0 rgba(255,247,230,.95),
+    0 4px 12px rgba(112,83,52,.10);
+}
+
+.room10ConfirmCancel{
+  background:rgba(255,253,249,.94);
+  color:#6f5746;
+  border:1px solid rgba(184,146,109,.30);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    0 4px 12px rgba(112,83,52,.07);
+}
+
+.room10ConfirmMask.is-danger .room10ConfirmAccept{
+  background:linear-gradient(180deg,#e7bca7 0%,#cb8d72 100%);
+  color:#fffaf5;
+}
+
+.room10NoticeButton:hover,
+.room10ConfirmButton:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.03);
+}
+
+.room10NoticeButton:focus-visible,
+.room10ConfirmButton:focus-visible{
+  outline:2px solid rgba(151,111,82,.55);
+  outline-offset:3px;
+}
+
+@media(max-width:540px){
+  .room10NoticeMask,
+  .room10ConfirmMask{padding:14px;}
+  .room10NoticeDialog,
+  .room10ConfirmDialog{
+    width:min(360px,92vw);
+    padding:20px 17px 17px;
+    border-radius:18px;
+  }
+  .room10NoticeTitle,
+  .room10ConfirmTitle{font-size:18px;}
+  .room10NoticeMessage,
+  .room10ConfirmMessage{font-size:13px;}
+  .room10NoticeButton{width:100%;height:40px;}
+  .room10ConfirmButton{flex:1 1 0;min-width:0;height:40px;}
+}
+
 /* 登录与编辑弹窗 */
 .modal-mask{
   position:fixed;
@@ -617,7 +792,6 @@ button{
   border:1px solid rgba(224,202,176,.95);
   box-shadow:0 18px 38px rgba(65,45,26,.22);
 }
-.modal.small{width:min(390px, 92vw);}
 .modal-head{
   display:flex;
   align-items:center;
@@ -674,11 +848,6 @@ button{
   font-size:14px;
   outline:none;
   padding:0 11px;
-}
-.form-textarea{
-  min-height:70px;
-  resize:vertical;
-  padding:10px 11px;
 }
 .edit-parts{
   display:flex;
@@ -981,6 +1150,33 @@ button{
     font-size:12px;
     line-height:1.6;
   }
+  .identityNoticeList{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .identityNoticeItem{
+    padding:9px 10px;
+    border-radius:13px;
+    background:rgba(255,253,249,.78);
+    border:1px solid rgba(174,132,94,.14);
+  }
+  .identityNoticeItemTitle{
+    color:#6f4726;
+    font-size:12px;
+    font-weight:850;
+    line-height:1.45;
+  }
+  .identityNoticeItemDesc,
+  .identityNoticeItemTime{
+    margin-top:3px;
+    color:#8a6644;
+    font-size:11px;
+    line-height:1.5;
+  }
+  .identityNoticeItemTime{
+    color:#a08262;
+  }
   .page-switcher{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:7px;padding:8px;border-radius:18px;}
   .page-switch-btn{width:100%;height:34px;padding:0 4px;font-size:12.5px;}
 
@@ -1027,6 +1223,13 @@ button{
   .detail-card{padding:9px 10px;border-radius:13px;}
   .detail-label{font-size:11px;}
   .detail-value,.part-line,.perform-row .detail-value{font-size:13px;line-height:1.48;font-weight:800;}
+  .detail-card.perform-row{gap:8px;}
+  .detail-card.perform-row > div:last-child{
+    padding-left:0;
+    padding-top:8px;
+    border-left:0;
+    border-top:1px dashed rgba(173,132,88,.24);
+  }
   .action-row{justify-content:stretch;}
   .soft-btn{flex:1 1 auto;height:34px;font-size:12px;}
 }
@@ -1576,14 +1779,14 @@ button{
         <section class="right-panel">
           <div class="player-head">
             <h2 class="player-title">播放器</h2>
-            <p class="player-subtitle">点击左侧作品后载入视频。登录成员可纠正作品资料。</p>
+            <p class="player-subtitle" id="playerSubtitle">选择作品后，即可在这里播放。</p>
           </div>
 
           <div class="player-body">
             <div class="video-shell" id="videoShell">
               <div class="placeholder">
                 <div class="placeholder-icon">▶</div>
-                <div>请选择左侧作品开始播放</div>
+                <div>请选择作品开始播放</div>
               </div>
             </div>
 
@@ -1598,7 +1801,7 @@ button{
               <div class="detail-grid">
                 <div class="detail-card wide">
                   <div class="detail-label">原唱</div>
-                  <div class="detail-value">请选择左侧作品后显示</div>
+                  <div class="detail-value">请选择作品后显示</div>
                 </div>
                 <div class="detail-card wide perform-row">
                   <div>
@@ -1706,6 +1909,41 @@ button{
   </div>
 </div>
 
+<div class="room10NoticeMask" id="room10NoticeMask" aria-hidden="true">
+  <section
+    class="room10NoticeDialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="room10NoticeTitle"
+    aria-describedby="room10NoticeMessage room10NoticeDetail"
+  >
+    <h2 class="room10NoticeTitle" id="room10NoticeTitle">提示</h2>
+    <p class="room10NoticeMessage" id="room10NoticeMessage"></p>
+    <div class="room10NoticeDetail" id="room10NoticeDetail"></div>
+    <div class="room10NoticeMeta" id="room10NoticeMeta"></div>
+    <div class="room10NoticeActions">
+      <button class="room10NoticeButton" id="room10NoticeButton" type="button">知道了</button>
+    </div>
+  </section>
+</div>
+
+<div class="room10ConfirmMask" id="room10ConfirmMask" aria-hidden="true">
+  <section
+    class="room10ConfirmDialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="room10ConfirmTitle"
+    aria-describedby="room10ConfirmMessage"
+  >
+    <h2 class="room10ConfirmTitle" id="room10ConfirmTitle">请确认</h2>
+    <p class="room10ConfirmMessage" id="room10ConfirmMessage"></p>
+    <div class="room10ConfirmActions">
+      <button class="room10ConfirmButton room10ConfirmCancel" id="room10ConfirmCancel" type="button">取消</button>
+      <button class="room10ConfirmButton room10ConfirmAccept" id="room10ConfirmAccept" type="button">确定</button>
+    </div>
+  </section>
+</div>
+
 <script>
 const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
@@ -1756,13 +1994,7 @@ function goHonorTitles(){
   window.location.href = room10PageUrl("honorTitles","honor/honor-titles.html");
 }
 
-function goHonorGallery(){
-  window.location.href = room10PageUrl("honorGallery","honor/honor-gallery.html");
-}
-
 const STAGE_RATIO = 2048 / 1143;
-const stageFrame = document.getElementById("stageFrame");
-const overlay = document.getElementById("overlay");
 const workList = document.getElementById("workList");
 const searchInput = document.getElementById("searchInput");
 const filterRow = document.getElementById("filterRow");
@@ -1772,6 +2004,17 @@ const loginMask = document.getElementById("loginMask");
 const editMask = document.getElementById("editMask");
 const logsMask = document.getElementById("logsMask");
 const logsWrap = document.getElementById("logsWrap");
+const room10NoticeMask = document.getElementById("room10NoticeMask");
+const room10NoticeTitle = document.getElementById("room10NoticeTitle");
+const room10NoticeMessage = document.getElementById("room10NoticeMessage");
+const room10NoticeDetail = document.getElementById("room10NoticeDetail");
+const room10NoticeMeta = document.getElementById("room10NoticeMeta");
+const room10NoticeButton = document.getElementById("room10NoticeButton");
+const room10ConfirmMask = document.getElementById("room10ConfirmMask");
+const room10ConfirmTitle = document.getElementById("room10ConfirmTitle");
+const room10ConfirmMessage = document.getElementById("room10ConfirmMessage");
+const room10ConfirmCancel = document.getElementById("room10ConfirmCancel");
+const room10ConfirmAccept = document.getElementById("room10ConfirmAccept");
 const identityName = document.getElementById("identityName");
 const identityRole = document.getElementById("identityRole");
 const identityAction = document.getElementById("identityAction");
@@ -1785,6 +2028,7 @@ const identityNoticeBtn = document.getElementById("identityNoticeBtn");
 const identityNoticePanel = document.getElementById("identityNoticePanel");
 const bgImage = document.getElementById("bg");
 const loginBg = document.getElementById("loginBg");
+const playerSubtitle = document.getElementById("playerSubtitle");
 if (bgImage) bgImage.src = room10AssetUrl("honor.roomGallery", "honor/room-gallery.png");
 if (loginBg) loginBg.src = room10AssetUrl("root.login", "login.png");
 const filterButtons = () => document.querySelectorAll(".filter-btn");
@@ -1796,6 +2040,9 @@ let currentType = "全部";
 let currentKeyword = "";
 let currentSelectedId = null;
 let currentMember = getStoredMember();
+let room10NoticeResolve = null;
+let room10ConfirmResolve = null;
+let room10DialogReturnFocus = null;
 const READ_ERROR = "读取错误";
 
 
@@ -1818,14 +2065,14 @@ function updateStageSize(){
     width = height * STAGE_RATIO;
   }
 
-  const scale = width / 2048;
-  const uiScale = Math.max(.26, Math.min(1.56, scale));
-  const textScale = Math.max(.28, Math.min(1.52, scale * 1.02));
+  // 桌面端内部组件与字体使用全站通用模板的缩放基准。
+  // 舞台仍按 2048 × 1143 底图比例适配，页面专属坐标和布局保持不变。
+  const scale = Math.max(0.45, Math.min(3.2, width / 1440));
 
   document.documentElement.style.setProperty("--stage-width", `${width}px`);
   document.documentElement.style.setProperty("--stage-height", `${height}px`);
-  document.documentElement.style.setProperty("--ui-scale", uiScale.toFixed(4));
-  document.documentElement.style.setProperty("--text-scale", textScale.toFixed(4));
+  document.documentElement.style.setProperty("--ui-scale", scale.toFixed(4));
+  document.documentElement.style.setProperty("--text-scale", scale.toFixed(4));
 }
 
 window.addEventListener("resize", updateStageSize);
@@ -1882,30 +2129,36 @@ function pickText(obj, keys, fallback = ""){
   return fallback;
 }
 
-function pickDate(obj, keys){
-  for (const key of keys) {
-    const value = obj?.[key];
-    if (value !== null && value !== undefined && String(value).trim() !== "") {
-      return value;
-    }
-  }
-  return null;
-}
-
 function normalizeUuidValue(value){
   const raw = String(value || "").trim();
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw) ? raw : "";
 }
 
 function getRoleName(role){
-  if (role === "owner") return "维修工";
-  if (role === "admin") return "宿管";
-  if (role) return "房客";
-  return "参观者";
+  const roleMap = {
+    owner: "维修工",
+    admin: "宿管",
+    member: "房客",
+    trainee: "练习生",
+    applying: "申请中",
+    visitor: "参观者"
+  };
+  return roleMap[String(role || "visitor").toLowerCase()] || "参观者";
 }
 
 function getStoredMember(){
-  const candidates = [
+  const canonical = {
+    id: localStorage.getItem("room10MemberId") || "",
+    nickname: localStorage.getItem("room10User") || localStorage.getItem("room10Nickname") || "",
+    code: localStorage.getItem("room10MemberCode") || "",
+    role: localStorage.getItem("room10Role") || ""
+  };
+
+  if (localStorage.getItem("room10LoggedIn") === "true" && canonical.nickname && canonical.code) {
+    return canonical;
+  }
+
+  const legacyCandidates = [
     {
       id: localStorage.getItem("room10_member_id") || localStorage.getItem("member_id") || "",
       nickname: localStorage.getItem("room10_nickname") || localStorage.getItem("nickname") || "",
@@ -1920,23 +2173,70 @@ function getStoredMember(){
     }
   ];
 
-  return candidates.find(item => item.nickname && item.code) || null;
+  const legacy = legacyCandidates.find(item => item.nickname && item.code) || null;
+  if (!legacy) return null;
+
+  storeMember(legacy);
+  clearLegacyMemberKeys();
+  return legacy;
 }
 
 function storeMember(member){
-  localStorage.setItem("room10_member_id", member.id || "");
-  localStorage.setItem("room10_nickname", member.nickname || "");
-  localStorage.setItem("room10_member_code", member.code || "");
-  localStorage.setItem("room10_role", member.role || "");
+  const id = member.id || "";
+  const nickname = member.nickname || "";
+  const code = member.code || "";
+  const role = member.role || "member";
 
-  localStorage.setItem("member_id", member.id || "");
-  localStorage.setItem("nickname", member.nickname || "");
-  localStorage.setItem("member_code", member.code || "");
-  localStorage.setItem("role", member.role || "");
+  localStorage.setItem("room10LoggedIn", "true");
+  localStorage.setItem("room10User", nickname);
+  localStorage.setItem("room10Nickname", nickname);
+  localStorage.setItem("room10MemberId", id);
+  localStorage.setItem("room10MemberCode", code);
+  localStorage.setItem("room10Role", role);
+}
+
+function clearLegacyMemberKeys(){
+  [
+    "room10_member_id",
+    "room10_nickname",
+    "room10_member_code",
+    "room10_role",
+    "member_id",
+    "nickname",
+    "member_code",
+    "role",
+    "memberId",
+    "memberNickname",
+    "memberCode",
+    "memberRole"
+  ].forEach(key => localStorage.removeItem(key));
 }
 
 function clearStoredMember(){
-  ["room10_member_id","room10_nickname","room10_member_code","room10_role","member_id","nickname","member_code","role","memberId","memberNickname","memberCode","memberRole"].forEach(key => localStorage.removeItem(key));
+  [
+    "room10LoggedIn",
+    "room10User",
+    "room10Nickname",
+    "room10MemberId",
+    "room10MemberCode",
+    "room10Role",
+    "room10CurrentUser",
+    "room10Member",
+    "room10ApplicantSession",
+    "room10ApplicationDraft",
+    "room10_member_id",
+    "room10_nickname",
+    "room10_member_code",
+    "room10_role",
+    "member_id",
+    "nickname",
+    "member_code",
+    "role",
+    "memberId",
+    "memberNickname",
+    "memberCode",
+    "memberRole"
+  ].forEach(key => localStorage.removeItem(key));
 }
 
 function updateIdentity(){
@@ -1959,6 +2259,7 @@ function updateIdentity(){
     }
     if (identitySeparatorMobile) identitySeparatorMobile.classList.remove("hidden");
     if (identityAuthBtn) identityAuthBtn.querySelector(".identityAuthText").textContent = "登出";
+    if (playerSubtitle) playerSubtitle.textContent = "选择作品后即可播放；资料有误时，可在详情中提交修改。";
   } else {
     identityName.textContent = "参观者";
     identityRole.textContent = "";
@@ -1974,6 +2275,7 @@ function updateIdentity(){
     }
     if (identitySeparatorMobile) identitySeparatorMobile.classList.add("hidden");
     if (identityAuthBtn) identityAuthBtn.querySelector(".identityAuthText").textContent = "登录";
+    if (playerSubtitle) playerSubtitle.textContent = "选择作品后，即可在这里播放。";
   }
 
   renderInfoCard(getSelectedWork());
@@ -1983,38 +2285,296 @@ function isLoggedIn(){
   return !!(currentMember && currentMember.nickname && currentMember.code);
 }
 
+let currentNoticeIds = [];
+
+function formatNoticeTime(value){
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+}
+
+function setNoticeCount(count){
+  const noticeCount = document.getElementById("identityNoticeCount");
+  if (!identityNoticeBtn || !noticeCount) return;
+  const value = Math.max(0, Number(count) || 0);
+  noticeCount.textContent = value > 99 ? "99+" : String(value);
+  identityNoticeBtn.classList.toggle("hasNotice", value > 0);
+}
+
+function renderMemberNotifications(items){
+  const content = document.getElementById("identityNoticeContent");
+  const list = Array.isArray(items) ? items : [];
+
+  currentNoticeIds = list
+    .map(item => String(item.notice_id || item.id || "").trim())
+    .filter(Boolean);
+
+  setNoticeCount(list.length);
+  if (!content) return;
+
+  if (!list.length) {
+    content.className = "identityNoticeEmpty";
+    content.textContent = "暂无通知。";
+    return;
+  }
+
+  content.className = "identityNoticeList";
+  content.innerHTML = list.map(item => `
+    <div class="identityNoticeItem">
+      <div class="identityNoticeItemTitle">${escapeHtml(item.title || "站内通知")}</div>
+      ${item.message || item.desc ? `<div class="identityNoticeItemDesc">${escapeHtml(item.message || item.desc || "")}</div>` : ""}
+      ${item.created_at ? `<div class="identityNoticeItemTime">${escapeHtml(formatNoticeTime(item.created_at))}</div>` : ""}
+    </div>
+  `).join("");
+}
+
+async function loadMemberNotifications(){
+  if (!isLoggedIn() || !currentMember?.id || !currentMember?.code) {
+    renderMemberNotifications([]);
+    return;
+  }
+
+  const content = document.getElementById("identityNoticeContent");
+  if (content) {
+    content.className = "identityNoticeEmpty";
+    content.textContent = "正在读取通知...";
+  }
+
+  try {
+    const { data, error } = await supabaseClient.rpc("get_member_notifications", {
+      p_member_id: currentMember.id,
+      p_member_code: currentMember.code,
+      p_channel: "site",
+      p_limit: 20
+    });
+    if (error) throw error;
+    renderMemberNotifications(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error("读取作品展览页通知失败：", err);
+    currentNoticeIds = [];
+    setNoticeCount(0);
+    if (content) {
+      content.className = "identityNoticeEmpty";
+      content.textContent = "通知读取失败，请稍后再试。";
+    }
+  }
+}
+
+async function markCurrentNotificationsRead(){
+  if (!isLoggedIn() || !currentMember?.id || !currentMember?.code || !currentNoticeIds.length) return;
+
+  const noticeIds = [...currentNoticeIds];
+  currentNoticeIds = [];
+  setNoticeCount(0);
+
+  try {
+    const { error } = await supabaseClient.rpc("mark_member_notifications_read", {
+      p_member_id: currentMember.id,
+      p_member_code: currentMember.code,
+      p_notice_ids: noticeIds
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error("作品展览页通知标记已读失败：", err);
+    await loadMemberNotifications();
+  }
+}
+
+function syncRoom10ModalLock(){
+  const open = Boolean(
+    loginMask?.classList.contains("show") ||
+    editMask?.classList.contains("show") ||
+    logsMask?.classList.contains("show") ||
+    room10NoticeMask?.classList.contains("show") ||
+    room10ConfirmMask?.classList.contains("show")
+  );
+  document.body.classList.toggle("room10ModalOpen", open);
+}
+
+function getRoom10ErrorText(error){
+  if (!error) return "";
+  if (typeof error === "string") return error.trim();
+  if (error instanceof Error) return String(error.message || error.name || "").trim();
+
+  const candidates = [
+    error.message,
+    error.error_description,
+    error.details,
+    error.hint,
+    error.code
+  ].filter(value => value !== undefined && value !== null && String(value).trim());
+
+  if (candidates.length) return candidates.map(String).join("｜");
+  try { return JSON.stringify(error); } catch { return String(error); }
+}
+
+function closeRoom10Notice(){
+  if (!room10NoticeMask?.classList.contains("show")) return;
+  room10NoticeMask.classList.remove("show");
+  room10NoticeMask.setAttribute("aria-hidden", "true");
+  syncRoom10ModalLock();
+  const resolve = room10NoticeResolve;
+  room10NoticeResolve = null;
+  if (typeof resolve === "function") resolve();
+  const target = room10DialogReturnFocus;
+  room10DialogReturnFocus = null;
+  if (target?.isConnected) target.focus({ preventScroll:true });
+}
+
+function showRoom10Notice(message, options = {}){
+  if (!room10NoticeMask) return Promise.resolve();
+  if (room10NoticeResolve) room10NoticeResolve();
+
+  room10DialogReturnFocus = document.activeElement instanceof HTMLElement
+    ? document.activeElement
+    : null;
+
+  room10NoticeTitle.textContent = String(options.title || "提示");
+  room10NoticeMessage.textContent = String(message || "");
+  room10NoticeDetail.textContent = String(options.detail || "");
+  room10NoticeMeta.textContent = String(options.meta || "");
+  room10NoticeButton.textContent = String(options.confirmText || "知道了");
+
+  room10NoticeMask.classList.add("show");
+  room10NoticeMask.setAttribute("aria-hidden", "false");
+  syncRoom10ModalLock();
+
+  return new Promise(resolve => {
+    room10NoticeResolve = resolve;
+    requestAnimationFrame(() => room10NoticeButton?.focus());
+  });
+}
+
+function showOperationFailure(error, action = "本次操作"){
+  const actionText = String(action || "本次操作").trim() || "本次操作";
+  const detailText = getRoom10ErrorText(error).slice(0, 500);
+  return showRoom10Notice(`${actionText}未成功。\n请截图此提示，并及时反馈给维修工。`, {
+    title: "操作失败",
+    detail: detailText ? `错误信息：${detailText}` : "",
+    meta: `页面：${document.title || location.pathname}\n时间：${new Date().toLocaleString("zh-CN", { hour12:false })}`
+  });
+}
+
+function closeRoom10Confirm(result){
+  if (!room10ConfirmMask?.classList.contains("show")) return;
+  room10ConfirmMask.classList.remove("show", "is-danger");
+  room10ConfirmMask.setAttribute("aria-hidden", "true");
+  syncRoom10ModalLock();
+  const resolve = room10ConfirmResolve;
+  room10ConfirmResolve = null;
+  if (typeof resolve === "function") resolve(Boolean(result));
+  const target = room10DialogReturnFocus;
+  room10DialogReturnFocus = null;
+  if (target?.isConnected) target.focus({ preventScroll:true });
+}
+
+function room10Confirm(message, options = {}){
+  if (!room10ConfirmMask) return Promise.resolve(false);
+  if (room10ConfirmResolve) room10ConfirmResolve(false);
+
+  room10DialogReturnFocus = document.activeElement instanceof HTMLElement
+    ? document.activeElement
+    : null;
+
+  room10ConfirmTitle.textContent = String(options.title || "请确认");
+  room10ConfirmMessage.textContent = String(message || "");
+  room10ConfirmCancel.textContent = String(options.cancelText || "取消");
+  room10ConfirmAccept.textContent = String(options.confirmText || "确定");
+  room10ConfirmMask.classList.toggle("is-danger", Boolean(options.danger));
+  room10ConfirmMask.classList.add("show");
+  room10ConfirmMask.setAttribute("aria-hidden", "false");
+  syncRoom10ModalLock();
+
+  return new Promise(resolve => {
+    room10ConfirmResolve = resolve;
+    requestAnimationFrame(() => room10ConfirmAccept?.focus());
+  });
+}
+
+window.showRoom10Notice = showRoom10Notice;
+window.showOperationFailure = showOperationFailure;
+
+room10NoticeButton?.addEventListener("click", closeRoom10Notice);
+room10NoticeMask?.addEventListener("click", event => {
+  if (event.target === room10NoticeMask) closeRoom10Notice();
+});
+room10ConfirmCancel?.addEventListener("click", () => closeRoom10Confirm(false));
+room10ConfirmAccept?.addEventListener("click", () => closeRoom10Confirm(true));
+room10ConfirmMask?.addEventListener("click", event => {
+  if (event.target === room10ConfirmMask) closeRoom10Confirm(false);
+});
+document.addEventListener("keydown", event => {
+  if (event.key !== "Escape") return;
+  if (room10NoticeMask?.classList.contains("show")) {
+    event.preventDefault();
+    closeRoom10Notice();
+  } else if (room10ConfirmMask?.classList.contains("show")) {
+    event.preventDefault();
+    closeRoom10Confirm(false);
+  }
+});
+
 function openModal(mask){
   if (mask) mask.classList.add("show");
+  syncRoom10ModalLock();
 }
 
 function closeModal(mask){
   if (mask) mask.classList.remove("show");
+  syncRoom10ModalLock();
 }
 
 function hasEditDirty(){
   const work = getSelectedWork();
   if (!editMask || !editMask.classList.contains("show") || !work) return false;
+
   const valueOf = id => String(document.getElementById(id)?.value || "").trim();
   if (valueOf("editProjectCode") !== (work.no === READ_ERROR ? "" : String(work.no || ""))) return true;
   if (valueOf("editProjectName") !== String(work.title === READ_ERROR ? "" : work.title || "")) return true;
   if (valueOf("editProjectType") !== String(work.type === READ_ERROR ? "" : work.type || "")) return true;
+  if (valueOf("editProducer") !== String(work.producer_member_id || "")) return true;
   if (valueOf("editReleaseDate") !== String(work.releaseRaw || "")) return true;
   if (valueOf("editDisplayLink") !== String(work.rawLink || "")) return true;
   if (valueOf("editUniqueOriginal") !== String(work.unique_original_name || "")) return true;
-  return false;
+
+  const originalParts = new Map((work.parts || []).map(part => [String(part.id || ""), part]));
+  const partRows = Array.from(document.querySelectorAll("#editParts .edit-part-row"));
+  if (partRows.length !== originalParts.size) return true;
+
+  return partRows.some(row => {
+    const part = originalParts.get(String(row.dataset.partId || ""));
+    if (!part) return true;
+    const originalName = String(row.querySelector(".part-original-input")?.value || "").trim();
+    const singerId = String(row.querySelector(".part-singer-select")?.value || "").trim();
+    return originalName !== String(part.original_name || "").trim() ||
+      singerId !== String(part.assigned_member_id || "").trim();
+  });
 }
 
-function closeModalById(id){
+async function closeModalById(id){
   const mask = document.getElementById(id);
   if (!mask) return;
   if (id === "editMask" && hasEditDirty()) {
-    if (!confirm("当前修改还没有保存，确认退出吗？")) return;
+    const shouldClose = await room10Confirm("当前修改还没有保存，确认退出吗？", {
+      title: "退出编辑",
+      confirmText: "确认退出",
+      danger: true
+    });
+    if (!shouldClose) return;
   }
   closeModal(mask);
 }
 
 document.querySelectorAll("[data-close]").forEach(btn => {
-  btn.addEventListener("click", () => closeModalById(btn.dataset.close));
+  btn.addEventListener("click", () => {
+    void closeModalById(btn.dataset.close);
+  });
 });
 
 document.querySelectorAll(".modal-mask").forEach(mask => {
@@ -2024,26 +2584,48 @@ document.querySelectorAll(".modal-mask").forEach(mask => {
   });
 });
 
-function handleIdentityAction(){
+async function handleIdentityAction(){
   if (isLoggedIn()) {
-    if (!confirm("确认登出吗？")) return;
+    const shouldLogout = await room10Confirm("确认登出当前账号吗？", {
+      title: "确认登出",
+      confirmText: "登出",
+      danger: true
+    });
+    if (!shouldLogout) return;
     clearStoredMember();
     MEMBER_OPTIONS = [];
+    currentMember = null;
+    closeModal(editMask);
+    closeModal(logsMask);
+    if (identityNoticePanel) identityNoticePanel.classList.remove("show");
     updateIdentity();
+    renderMemberNotifications([]);
   } else {
-    document.getElementById("loginMsg").textContent = "";
+    const loginMsg = document.getElementById("loginMsg");
+    const loginCode = document.getElementById("loginCode");
+    loginMsg.textContent = "";
+    loginMsg.style.color = "#7a4f2b";
     document.getElementById("loginNickname").value = currentMember?.nickname || "";
-    document.getElementById("loginCode").value = "";
+    loginCode.value = "";
+    loginCode.type = "password";
     openModal(loginMask);
   }
 }
 
-identityAction.addEventListener("click", handleIdentityAction);
-if (identityAuthBtn) identityAuthBtn.addEventListener("click", handleIdentityAction);
+identityAction.addEventListener("click", () => {
+  void handleIdentityAction();
+});
+if (identityAuthBtn) {
+  identityAuthBtn.addEventListener("click", () => {
+    void handleIdentityAction();
+  });
+}
 if (identityNoticeBtn && identityNoticePanel) {
   identityNoticeBtn.addEventListener("click", (event) => {
     event.stopPropagation();
-    identityNoticePanel.classList.toggle("show");
+    const willOpen = !identityNoticePanel.classList.contains("show");
+    identityNoticePanel.classList.toggle("show", willOpen);
+    if (willOpen) markCurrentNotificationsRead();
   });
   document.addEventListener("click", (event) => {
     if (!identityNoticePanel.classList.contains("show")) return;
@@ -2086,8 +2668,9 @@ document.getElementById("loginSubmit").addEventListener("click", async () => {
 
     storeMember(member);
     updateIdentity();
+    await loadMemberNotifications();
     msg.style.color = "#5f7d3a";
-    msg.textContent = row.role === "owner" ? "维修工已上线" : (row.role === "admin" ? "宿管已上线" : "房客已登录");
+    msg.textContent = `${getRoleName(member.role)}已登录`;
     setTimeout(async () => {
       closeModal(loginMask);
       await loadMemberOptions();
@@ -2139,11 +2722,14 @@ document.querySelectorAll(".room-btn").forEach(btn => {
     };
 
     if (room === "manager") {
-      const role = currentMember?.role || "";
-      if (role === "owner") window.location.href = room10PageUrl("managerOwner", "manager/manager-owner.html");
-      else if (role === "admin") window.location.href = room10PageUrl("managerAdmin", "manager/manager-admin.html");
-      else if (role) window.location.href = room10PageUrl("managerMember", "manager/manager-member.html");
-      else window.location.href = room10PageUrl("managerVisitor", "manager/manager-visitor.html");
+      const role = String(currentMember?.role || "").toLowerCase();
+      if (role === "owner" || role === "admin") {
+        window.location.href = room10PageUrl("managerAdmin", "manager/manager-admin.html");
+      } else if (["member", "trainee", "applying"].includes(role)) {
+        window.location.href = room10PageUrl("managerMember", "manager/manager-member.html");
+      } else {
+        window.location.href = room10PageUrl("managerVisitor", "manager/manager-visitor.html");
+      }
       return;
     }
 
@@ -2152,87 +2738,40 @@ document.querySelectorAll(".room-btn").forEach(btn => {
   });
 });
 
-function getUniqueAssignedSingerCount(task){
-  const partIds = uniqueBy(
-    (task.parts || []).map(part => String(part.assigned_member_id || "").trim()).filter(Boolean),
-    v => v
-  );
-  const singerIds = uniqueBy(
-    (task.singers || []).map(singer => String(singer.member_id || "").trim()).filter(Boolean),
-    v => v
-  );
-  return uniqueBy([...partIds, ...singerIds], v => v).length;
-}
-
-function isAllSingersSubmitted(task){
-  const singers = task.singers || [];
-  return singers.length > 0 && singers.every(item => !!item.is_submitted);
-}
-
-function isTaskInfoComplete(task){
-  const rows = task.parts || [];
-  const singerQuota = Math.max(1, Number(task.participant_count) || 1);
-  const assignedSingerCount = getUniqueAssignedSingerCount(task);
-  const hasProducer = !!String(task.producer_member_id || "").trim();
-  const hasTone = !!String(task.project_tone || "").trim();
-
-  const allRowsComplete = rows.length > 0 && rows.every(row => {
-    const partText = String(row.original_name || "").trim();
-    const assignedId = String(row.assigned_member_id || "").trim();
-    return !!partText && !!assignedId;
-  });
-
-  return assignedSingerCount >= singerQuota && hasProducer && hasTone && allRowsComplete;
-}
-
-function isReadyForHonorShow(task){
-  if (!isTaskInfoComplete(task)) return false;
-  if (!isAllSingersSubmitted(task)) return false;
-
-  const releaseDateText = String(task.release_date || "").trim();
-  if (!releaseDateText) return false;
-
-  const releaseDate = new Date(releaseDateText + "T00:00:00");
-  if (Number.isNaN(releaseDate.getTime())) return false;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return today >= releaseDate;
-}
-
-function memberCodeNumber(value){
-  const raw = String(value || "").trim();
-  const digits = raw.replace(/\D/g, "");
-  return digits ? Number(digits) : Number.POSITIVE_INFINITY;
-}
-
 function compareMemberOrder(a, b){
-  const aNum = memberCodeNumber(a.member_code);
-  const bNum = memberCodeNumber(b.member_code);
+  const aSort = Number(a.member_sort_order);
+  const bSort = Number(b.member_sort_order);
+  const aNum = Number.isFinite(aSort) ? aSort : Number.POSITIVE_INFINITY;
+  const bNum = Number.isFinite(bSort) ? bSort : Number.POSITIVE_INFINITY;
   if (aNum !== bNum) return aNum - bNum;
-  return String(a.member_code || "").localeCompare(String(b.member_code || ""), "zh-Hans-CN");
+
+  const aName = String(a.member_name || a.nickname || "");
+  const bName = String(b.member_name || b.nickname || "");
+  return aName.localeCompare(bName, "zh-Hans-CN");
 }
 
 function collectSortedSingerItems(task){
   const items = [];
+
   (task.singers || []).forEach(item => {
     items.push({
       member_id: String(item.member_id || "").trim(),
       member_name: String(item.member_name || "").trim(),
-      member_code: String(item.member_code || "").trim()
+      member_sort_order: item.member_sort_order
     });
   });
+
   (task.parts || []).forEach(item => {
     items.push({
       member_id: String(item.assigned_member_id || "").trim(),
       member_name: String(item.assigned_member_name || "").trim(),
-      member_code: String(item.assigned_member_code || "").trim()
+      member_sort_order: item.member_sort_order
     });
   });
 
   const uniqueItems = uniqueBy(items, item => item.member_id || normalizeName(item.member_name));
   if (!uniqueItems.length) return [];
-  if (uniqueItems.some(item => !item.member_name || !item.member_code)) return null;
+  if (uniqueItems.some(item => !item.member_name)) return null;
   return uniqueItems.sort(compareMemberOrder);
 }
 
@@ -2294,23 +2833,6 @@ function buildOriginalLine(parts, uniqueOriginalName = ""){
   return names.join(" / ");
 }
 
-function buildSingerLine(parts){
-  const sortedItems = collectSortedSingerItems({ parts: parts || [], singers: [] });
-  if (sortedItems === null || !sortedItems.length) return READ_ERROR;
-  return sortedItems.map(item => item.member_name).join(" / ");
-}
-
-function buildPartPairLines(parts){
-  if (!parts || !parts.length) return READ_ERROR;
-  const lines = parts.map(part => {
-    const original = String(part.original_name || "").trim();
-    const singer = String(part.assigned_member_name || "").trim();
-    if (!original || !singer) return READ_ERROR;
-    return `${escapeHtml(original)}：${escapeHtml(singer)}`;
-  });
-  return lines.includes(READ_ERROR) ? READ_ERROR : lines.join("<br>");
-}
-
 function buildWorkRecord(task){
   return {
     id: String(task.id || ""),
@@ -2331,127 +2853,63 @@ function buildWorkRecord(task){
   };
 }
 
-async function loadWorksFromSupabase(){
+async function loadGalleryWorks(){
   workList.innerHTML = '<div class="loading-state">正在读取作品...</div>';
 
   try {
-    const { data: projectsData, error: projectsError } = await supabaseClient
-      .from("projects")
-      .select(`
-        *,
-        producer_member:members!projects_producer_member_id_fkey (
-          id,
-          nickname,
-          name
-        )
-      `);
+    const { data, error } = await supabaseClient.rpc("get_honor_gallery_works");
+    if (error) throw error;
 
-    if (projectsError) throw projectsError;
+    const rows = Array.isArray(data) ? data : [];
+    const projectTasks = rows.map(row => {
+      const parts = Array.isArray(row.parts)
+        ? row.parts.map(part => ({
+            id: part.id,
+            part_order: part.part_order,
+            original_name: part.original_name,
+            assigned_member_id: part.assigned_member_id ? String(part.assigned_member_id) : "",
+            assigned_member_name: String(part.assigned_member_name || "").trim(),
+            member_sort_order: part.member_sort_order
+          })).sort((a, b) => Number(a.part_order || 0) - Number(b.part_order || 0))
+        : [];
 
-    const projectIds = (projectsData || []).map(item => item.id);
-    let partsData = [];
-    let singersData = [];
+      const singers = Array.isArray(row.singers)
+        ? row.singers.map(singer => ({
+            id: singer.id,
+            member_id: singer.member_id ? String(singer.member_id) : "",
+            member_name: String(singer.member_name || "").trim(),
+            member_sort_order: singer.member_sort_order,
+            is_submitted: !!singer.is_submitted,
+            submitted_at: singer.submitted_at || null
+          })).sort(compareMemberOrder)
+        : [];
 
-    if (projectIds.length) {
-      const { data: partRows, error: partsError } = await supabaseClient
-        .from("project_parts")
-        .select(`
-          id,
-          project_id,
-          part_order,
-          original_name,
-          assigned_member_id,
-          members!project_parts_assigned_member_id_fkey (
-            id,
-            member_code,
-            nickname,
-            name
-          )
-        `)
-        .in("project_id", projectIds)
-        .order("part_order", { ascending: true });
-      if (partsError) throw partsError;
-      partsData = partRows || [];
-
-      const { data: singerRows, error: singersError } = await supabaseClient
-        .from("project_singers")
-        .select(`
-          id,
-          project_id,
-          member_id,
-          is_submitted,
-          submitted_at,
-          members!project_singers_member_id_fkey (
-            id,
-            member_code,
-            nickname,
-            name
-          )
-        `)
-        .in("project_id", projectIds);
-      if (singersError) throw singersError;
-      singersData = singerRows || [];
-    }
-
-    const partMap = new Map();
-    const singerMap = new Map();
-
-    partsData.forEach(part => {
-      const key = String(part.project_id);
-      if (!partMap.has(key)) partMap.set(key, []);
-      partMap.get(key).push({
-        id: part.id,
-        part_order: part.part_order,
-        original_name: part.original_name,
-        assigned_member_id: part.assigned_member_id ? String(part.assigned_member_id) : "",
-        assigned_member_code: part.members?.member_code || "",
-        assigned_member_name: part.members?.nickname || part.members?.name || ""
-      });
-    });
-
-    singersData.forEach(singer => {
-      const key = String(singer.project_id);
-      if (!singerMap.has(key)) singerMap.set(key, []);
-      singerMap.get(key).push({
-        id: singer.id,
-        member_id: singer.member_id ? String(singer.member_id) : "",
-        member_code: singer.members?.member_code || "",
-        member_name: singer.members?.nickname || singer.members?.name || "",
-        is_submitted: !!singer.is_submitted,
-        submitted_at: singer.submitted_at || null
-      });
-    });
-
-    const projectTasks = (projectsData || []).map(project => {
-      const id = String(project.id);
       return {
-        ...project,
-        id,
-        project_code: pickText(project, ["project_code"], ""),
-        project_name: pickText(project, ["project_name"], ""),
-        project_type: pickText(project, ["project_type"], ""),
-        participant_count: project.participant_count ?? 1,
-        producer_member_id: project.producer_member_id ? String(project.producer_member_id) : "",
-        producer_name: project.producer_member?.nickname || project.producer_member?.name || "",
-        release_date: pickDate(project, ["release_date","published_at","publish_date","scheduled_release_date"]) || null,
-        display_link: pickText(project, ["display_link","video_link","publish_link","bilibili_link","youtube_link","link"], ""),
-        unique_original_name: pickText(project, ["unique_original_name"], ""),
-        project_tone: project.project_tone || "",
-        created_at: project.created_at || null,
-        parts: (partMap.get(id) || []).sort((a, b) => (a.part_order || 0) - (b.part_order || 0)),
-        singers: (singerMap.get(id) || []).sort(compareMemberOrder)
+        id: String(row.project_id || ""),
+        project_code: String(row.project_code || "").trim(),
+        project_name: String(row.project_name || "").trim(),
+        project_type: String(row.project_type || "").trim(),
+        participant_count: row.participant_count ?? 1,
+        producer_member_id: row.producer_member_id ? String(row.producer_member_id) : "",
+        producer_name: String(row.producer_name || "").trim(),
+        release_date: row.release_date || null,
+        display_link: String(row.display_link || "").trim(),
+        unique_original_name: String(row.unique_original_name || "").trim(),
+        project_tone: String(row.project_tone || "").trim(),
+        created_at: row.created_at || null,
+        parts,
+        singers
       };
     });
 
     PROJECT_TYPE_OPTIONS = uniqueBy(
-      (projectsData || [])
+      projectTasks
         .map(project => normalizeProjectType(project.project_type))
         .filter(Boolean),
       value => value.toLowerCase()
     );
 
     WORKS = projectTasks
-      .filter(isReadyForHonorShow)
       .map(buildWorkRecord)
       .sort((a, b) => {
         const aNo = parseInt(String(a.no).match(/\d+/)?.[0] || "0", 10);
@@ -2493,7 +2951,7 @@ async function loadWorksFromSupabase(){
         <span class="info-type">读取错误</span>
       </div>
       <div class="detail-card wide">
-        <div class="detail-value">读取错误</div>
+        <div class="detail-value">读取错误，请检查 get_honor_gallery_works RPC。</div>
       </div>
     `;
   }
@@ -2554,7 +3012,7 @@ function renderList(){
   });
 }
 
-function renderPlayerUnavailable(work){
+function renderPlayerUnavailable(){
   videoShell.innerHTML = `
     <div class="placeholder">
       <div class="placeholder-icon">!</div>
@@ -2579,7 +3037,7 @@ function renderPlayerStandby(work){
     videoShell.innerHTML = `
       <div class="placeholder">
         <div class="placeholder-icon">▶</div>
-        <div>请选择左侧作品开始播放</div>
+        <div>请选择作品开始播放</div>
       </div>
     `;
     return;
@@ -2599,13 +3057,13 @@ function renderPlayerStandby(work){
       startBtn.addEventListener("click", () => playSelectedWork(work));
     }
   } else {
-    renderPlayerUnavailable(work);
+    renderPlayerUnavailable();
   }
 }
 
 function playSelectedWork(work){
   if (!work || !work.embedUrl || !canEmbed(work.embedUrl)) {
-    renderPlayerUnavailable(work);
+    renderPlayerUnavailable();
     return;
   }
 
@@ -2633,7 +3091,7 @@ function renderInfoCard(work){
       <div class="detail-grid">
         <div class="detail-card wide">
           <div class="detail-label">原唱</div>
-          <div class="detail-value">请选择左侧作品后显示</div>
+          <div class="detail-value">请选择作品后显示</div>
         </div>
         <div class="detail-card wide perform-row">
           <div>
@@ -2667,9 +3125,7 @@ function renderInfoCard(work){
         <button class="soft-btn" type="button" id="openLogsBtn">修改记录</button>
         <button class="soft-btn primary-btn" type="button" id="openEditBtn">编辑资料</button>
       </div>`
-    : `<div class="action-row">
-        <button class="soft-btn" type="button" id="needLoginEditBtn">登录后可纠正资料</button>
-      </div>`;
+    : "";
 
   const originalText = buildOriginalLine(work.parts, work.unique_original_name);
   const singerText = work.singers || READ_ERROR;
@@ -2713,11 +3169,9 @@ function renderInfoCard(work){
 
   const openEditBtn = document.getElementById("openEditBtn");
   const openLogsBtn = document.getElementById("openLogsBtn");
-  const needLoginEditBtn = document.getElementById("needLoginEditBtn");
 
   if (openEditBtn) openEditBtn.addEventListener("click", () => openEditModal(work));
   if (openLogsBtn) openLogsBtn.addEventListener("click", () => openLogsModal(work));
-  if (needLoginEditBtn) needLoginEditBtn.addEventListener("click", () => openModal(loginMask));
 }
 
 async function loadMemberOptions(){
@@ -2734,10 +3188,10 @@ async function loadMemberOptions(){
 
     if (error) throw error;
     MEMBER_OPTIONS = (data || []).sort((a, b) => compareMemberOrder({
-      member_code: a.member_code || a.code || a.member_no || "",
+      member_sort_order: a.member_sort_order,
       member_name: a.nickname || ""
     }, {
-      member_code: b.member_code || b.code || b.member_no || "",
+      member_sort_order: b.member_sort_order,
       member_name: b.nickname || ""
     }));
     return MEMBER_OPTIONS;
@@ -2834,11 +3288,13 @@ document.getElementById("saveEditBtn").addEventListener("click", async () => {
 
   if (!work) {
     msg.textContent = "请先选择作品。";
+    await showRoom10Notice("请先选择作品。", { title:"尚未选择作品" });
     return;
   }
 
   if (!isLoggedIn()) {
     msg.textContent = "请先登录后再修改。";
+    await showRoom10Notice("请先登录后再修改作品资料。", { title:"需要登录" });
     openModal(loginMask);
     return;
   }
@@ -2861,6 +3317,17 @@ document.getElementById("saveEditBtn").addEventListener("click", async () => {
 
   if (!projectPatch.project_code || !projectPatch.project_name || !projectPatch.project_type) {
     msg.textContent = "编号、作品名、分类不能为空。";
+    await showRoom10Notice("编号、作品名、分类不能为空。", {
+      title: "资料未完整"
+    });
+    return;
+  }
+
+  if (!hasEditDirty()) {
+    msg.textContent = "当前没有修改任何作品资料，无需保存。";
+    await showRoom10Notice("当前没有修改任何作品资料，无需保存。", {
+      title: "无需保存"
+    });
     return;
   }
 
@@ -2871,7 +3338,11 @@ document.getElementById("saveEditBtn").addEventListener("click", async () => {
     "如果改错，可以在修改记录里撤回。"
   ].join("\n");
 
-  if (!confirm(confirmText)) return;
+  const shouldSave = await room10Confirm(confirmText, {
+    title: "确认修改作品资料",
+    confirmText: "确认保存"
+  });
+  if (!shouldSave) return;
 
   msg.textContent = "正在保存...";
   try {
@@ -2887,43 +3358,25 @@ document.getElementById("saveEditBtn").addEventListener("click", async () => {
 
     const row = Array.isArray(data) ? data[0] : data;
     if (!row?.success) {
-      msg.textContent = row?.message || "保存失败。";
+      const failureMessage = row?.message || "保存失败。";
+      msg.textContent = failureMessage;
+      await showRoom10Notice(failureMessage, {
+        title: "保存失败"
+      });
       return;
     }
 
-    msg.textContent = row.message || "已保存。";
-    const localWork = getSelectedWork();
-    if (localWork) {
-      localWork.unique_original_name = projectPatch.unique_original_name || "";
-      localWork.no = projectPatch.project_code || READ_ERROR;
-      localWork.title = projectPatch.project_name || READ_ERROR;
-      localWork.type = projectPatch.project_type || READ_ERROR;
-      localWork.rawLink = projectPatch.display_link || "";
-      localWork.embedUrl = transformDisplayLink(projectPatch.display_link || "");
-      localWork.releaseDate = formatDateText(projectPatch.release_date);
-      localWork.releaseRaw = dateInputValue(projectPatch.release_date);
-      localWork.parts = (localWork.parts || []).map(part => {
-        const patch = partsPatch.find(item => item.id === part.id);
-        if (!patch) return part;
-        const member = (MEMBER_OPTIONS || []).find(item => String(item.member_id) === String(patch.assigned_member_id));
-        return {
-          ...part,
-          original_name: patch.original_name,
-          assigned_member_id: patch.assigned_member_id,
-          assigned_member_code: member?.member_code || part.assigned_member_code || "",
-          assigned_member_name: member?.nickname || part.assigned_member_name || ""
-        };
-      });
-      localWork.singers = deriveSingersText(localWork.rawTask ? { ...localWork.rawTask, parts: localWork.parts, singers: localWork.rawTask.singers || [] } : { parts: localWork.parts, singers: [] });
-      renderInfoCard(localWork);
-      renderList();
-    }
+    const successMessage = row.message || "作品资料已保存。";
+    msg.textContent = successMessage;
     closeModal(editMask);
-    await loadWorksFromSupabase();
+    await loadGalleryWorks();
+    await showRoom10Notice(successMessage, {
+      title: "保存成功"
+    });
   } catch (err) {
     console.error("保存作品资料失败：", err);
-    const detail = err?.message || err?.details || err?.hint || "";
-    msg.textContent = detail ? `保存失败：${detail}` : "保存失败，请检查函数 update_gallery_work_info。";
+    msg.textContent = "保存失败，请查看提示。";
+    await showOperationFailure(err, "保存作品资料");
   }
 });
 
@@ -3001,7 +3454,12 @@ async function revertLog(logId){
     "撤回后会把作品资料恢复到这次修改前的状态。"
   ].join("\n");
 
-  if (!confirm(confirmText)) return;
+  const shouldRevert = await room10Confirm(confirmText, {
+    title: "确认撤回修改",
+    confirmText: "确认撤回",
+    danger: true
+  });
+  if (!shouldRevert) return;
 
   try {
     const { data, error } = await supabaseClient.rpc("revert_gallery_edit_log", {
@@ -3013,15 +3471,17 @@ async function revertLog(logId){
     if (error) throw error;
 
     const row = Array.isArray(data) ? data[0] : data;
-    alert(row?.message || "已处理。");
+    await showRoom10Notice(row?.message || "已处理。", {
+      title: row?.success ? "处理完成" : "处理结果"
+    });
 
     if (row?.success) {
       closeModal(logsMask);
-      await loadWorksFromSupabase();
+      await loadGalleryWorks();
     }
   } catch (err) {
     console.error("撤回失败：", err);
-    alert("撤回失败，请检查 revert_gallery_edit_log 函数。");
+    await showOperationFailure(err, "撤回作品资料修改");
   }
 }
 
@@ -3091,11 +3551,26 @@ function initGalleryBgEffects(){
   });
 }
 
-initGalleryBgEffects();
+async function refreshGallerySession(){
+  updateIdentity();
+  await loadMemberNotifications();
+  if (isLoggedIn()) await loadMemberOptions();
+  else MEMBER_OPTIONS = [];
+}
 
-updateIdentity();
-if (isLoggedIn()) loadMemberOptions();
-loadWorksFromSupabase();
+async function initializeGallery(){
+  initGalleryBgEffects();
+  await refreshGallerySession();
+  await loadGalleryWorks();
+}
+
+window.addEventListener("pageshow", event => {
+  if (!event.persisted) return;
+  refreshGallerySession();
+  updateStageSize();
+});
+
+initializeGallery();
 
 
 </script>
