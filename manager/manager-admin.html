@@ -1644,15 +1644,6 @@ function saveStoredMember(member){
   return true;
 }
 
-function extractIdentityMember(data){
-  const payload = data && typeof data === "object" ? data : {};
-  if(payload.member && typeof payload.member === "object") return payload.member;
-  if(payload.data && typeof payload.data === "object") return payload.data;
-  if(payload.found === true && payload.identity && typeof payload.identity === "object") return payload.identity;
-  if(payload.id || payload.member_id) return payload;
-  return null;
-}
-
 function isLoggedIn(){
   return isCompleteStoredUser(getStoredUser());
 }
@@ -2031,29 +2022,40 @@ async function getCurrentMemberRecord(){
     return { identity_error:true };
   }
 
-  const member = extractIdentityMember(data);
-  if(!member){
+  if(data === null){
     clearStoredLogin();
     return null;
   }
 
-  const normalizedRole = String(member.role || "").trim().toLowerCase();
+  const isStandardIdentity = (
+    data &&
+    typeof data === "object" &&
+    !Array.isArray(data) &&
+    String(data.id || "").trim() &&
+    String(data.nickname || "").trim() &&
+    String(data.role || "").trim() &&
+    String(data.member_code || "").trim()
+  );
+
+  if(!isStandardIdentity){
+    showNotice(text("error.identity_read_failed"), "error");
+    return { identity_error:true };
+  }
+
   const normalizedMember = {
-    ...member,
-    id:member.id || member.member_id || stored.member_id,
-    nickname:String(member.nickname || stored.nickname || "").trim(),
-    member_code:String(member.member_code || stored.member_code || "").trim(),
-    role:normalizedRole
+    id:String(data.id).trim(),
+    nickname:String(data.nickname).trim(),
+    member_code:String(data.member_code).trim(),
+    role:String(data.role).trim().toLowerCase()
   };
 
-  if(!VALID_MEMBER_ROLES.has(normalizedRole)){
+  if(!VALID_MEMBER_ROLES.has(normalizedMember.role)){
     return { ...normalizedMember, invalid_role:true };
   }
 
   saveStoredMember(normalizedMember);
   return normalizedMember;
 }
-
 
 
 function setAdminTab(tab){
