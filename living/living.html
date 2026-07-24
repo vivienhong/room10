@@ -78,6 +78,7 @@ html,body{
 
 button,input{font-family:inherit;}
 .hidden{display:none!important;}
+body.room10ModalOpen{overflow:hidden!important;}
 
 #room{
   position:relative;
@@ -1325,6 +1326,9 @@ button,input{font-family:inherit;}
   line-height:1.2;
   white-space:normal;
 }
+#livingLoginMessage.is-success{
+  top:35%;
+}
 .livingLoginClose{
   position:absolute;
   top:4px;
@@ -1580,6 +1584,8 @@ const livingLoginMessage = document.getElementById("livingLoginMessage");
 const livingLoginSubmit = document.getElementById("livingLoginSubmit");
 let pendingLoginTarget = "";
 let currentNoticeIds = [];
+let currentMember = null;
+let loginRequiredForPage = false;
 
 if(livingLoginImage){
   const loginFrame = room10AssetUrl("root.login", "../login.png");
@@ -1664,61 +1670,90 @@ function refreshTemplateLayout(){
   }
 }
 
+function normalizeRole(role){
+  const value = String(role || "").trim().toLowerCase();
+  return value === "roomer" ? "member" : value;
+}
+
 function roleLabel(role){
   const map = {
     owner:"维修工",
     admin:"宿管",
     member:"房客",
     trainee:"练习生",
-    applying:"申请人",
+    applying:"参观者",
     visitor:"参观者"
   };
-  return map[String(role || "visitor").toLowerCase()] || "房客";
+  return map[normalizeRole(role)] || "身份异常";
 }
 
 function getStoredUser(){
-  const oldLoggedIn = localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
-  const oldUser = localStorage.getItem(STORAGE_KEYS.user) || "";
-  const oldRole = localStorage.getItem(STORAGE_KEYS.role) || "";
-  const oldMemberId = localStorage.getItem(STORAGE_KEYS.memberId) || "";
-  const oldMemberCode = localStorage.getItem(STORAGE_KEYS.memberCode) || "";
+  if(localStorage.getItem(STORAGE_KEYS.loggedIn) !== "true") return null;
+  const nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
+  const role = normalizeRole(localStorage.getItem(STORAGE_KEYS.role));
+  const memberId = String(localStorage.getItem(STORAGE_KEYS.memberId) || "").trim();
+  const memberCode = String(localStorage.getItem(STORAGE_KEYS.memberCode) || "").trim();
+  if(!nickname || !memberId || !memberCode) return null;
+  return { nickname, role, member_id:memberId, member_code:memberCode };
+}
 
-  if(oldLoggedIn && oldUser){
-    return {
-      nickname:oldUser,
-      role:oldRole || "member",
-      member_id:oldMemberId,
-      member_code:oldMemberCode
-    };
-  }
+function saveStoredUser(user){
+  localStorage.setItem(STORAGE_KEYS.loggedIn, "true");
+  localStorage.setItem(STORAGE_KEYS.user, user.nickname);
+  localStorage.setItem(STORAGE_KEYS.role, user.role);
+  localStorage.setItem(STORAGE_KEYS.memberId, user.member_id);
+  localStorage.setItem(STORAGE_KEYS.memberCode, user.member_code);
+}
 
-  try{
-    const raw = localStorage.getItem("room10_user") || localStorage.getItem("room10_current_user") || localStorage.getItem("currentUser");
-    if(!raw) return null;
-    const data = JSON.parse(raw);
-    if(!data) return null;
-    return {
-      nickname:data.nickname || data.name || "",
-      role:data.role || "",
-      member_id:data.member_id || data.id || "",
-      member_code:data.member_code || data.memberCode || data.code || ""
-    };
-  }catch(_){
-    return null;
-  }
+function clearStoredLogin(){
+  Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+  ["room10ApplicantSession","room10ApplicationDraft","room10_user","room10_current_user","currentUser"].forEach(key => localStorage.removeItem(key));
+  currentMember = null;
 }
 
 function isLoggedIn(){
-  const user = getStoredUser();
-  return !!(user && user.nickname);
+  return Boolean(currentMember && currentMember.member_id && currentMember.member_code);
+}
+
+async function fetchCurrentMember(){
+  const stored = getStoredUser();
+  if(!stored){
+    clearStoredLogin();
+    return null;
+  }
+  if(!client) throw new Error("Supabase 客户端没有加载成功");
+
+  const { data, error } = await client.rpc("get_index_member_identity", {
+    p_member_id:stored.member_id,
+    p_member_code:stored.member_code
+  });
+  if(error) throw error;
+  if(!data){
+    clearStoredLogin();
+    return null;
+  }
+
+  const row = Array.isArray(data) ? data[0] : data;
+  const member = {
+    nickname:String(row?.nickname || "").trim(),
+    role:normalizeRole(row?.role),
+    member_id:String(row?.id || row?.member_id || "").trim(),
+    member_code:String(row?.member_code || row?.memberCode || row?.code || "").trim()
+  };
+  if(!member.nickname || !member.member_id || !member.member_code){
+    clearStoredLogin();
+    return null;
+  }
+  currentMember = member;
+  saveStoredUser(member);
+  return member;
 }
 
 function updateIdentityUI(){
-  const user = getStoredUser();
-
+  const user = currentMember;
   if(!identityNickname || !identitySeparator || !identityRole || !identityAuthBtn) return;
 
-  if(!user || !user.nickname){
+  if(!user){
     identityNickname.textContent = "参观者";
     identitySeparator.classList.add("hidden");
     identityRole.classList.add("hidden");
@@ -1736,17 +1771,26 @@ function updateIdentityUI(){
   identityNameText?.classList.toggle("isOverflowSafe", String(user.nickname || "").length > 8);
 }
 
+function syncRoom10BodyLock(){
+  const hasOpenModal = Boolean(livingLoginMask?.classList.contains("show"));
+  document.body.classList.toggle("room10ModalOpen", hasOpenModal);
+}
+
+function goHome(){
+  const home = room10PageUrl("index", "../index.html");
+  if(home) window.location.href = home;
+}
+
 function logout(){
-  Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
-  ["room10ApplicantSession","room10ApplicationDraft","room10_user","room10_current_user","currentUser"].forEach(key => localStorage.removeItem(key));
+  clearStoredLogin();
   pendingLoginTarget = "";
   currentNoticeIds = [];
-  closeLogin();
+  closeLogin(false);
   updateIdentityUI();
   renderNoticeList([]);
-  loadLivingBoard();
   refreshTemplateLayout();
   window.dispatchEvent(new CustomEvent("room10:logout"));
+  goHome();
 }
 
 function normalizeLoginInput(value){
@@ -1755,26 +1799,31 @@ function normalizeLoginInput(value){
 
 function setLoginMessage(message, success = false){
   if(!livingLoginMessage) return;
+  livingLoginMessage.classList.toggle("is-success", Boolean(success && message));
   livingLoginMessage.style.color = success ? "#5f7d3a" : "#8b4a2d";
   livingLoginMessage.textContent = String(message || "");
 }
 
-function openLogin(targetPage = ""){
+function openLogin(targetPage = "", requiredForPage = false){
   if(isLoggedIn()){
     if(targetPage) window.location.href = targetPage;
     return;
   }
+  loginRequiredForPage = Boolean(requiredForPage);
   pendingLoginTarget = normalizeInternalLink(targetPage);
   setLoginMessage("");
   livingLoginMask?.classList.add("show");
   livingLoginMask?.setAttribute("aria-hidden", "false");
+  syncRoom10BodyLock();
   setTimeout(() => livingLoginNickname?.focus(), 30);
 }
 
-function closeLogin(){
+function closeLogin(redirectWhenRequired = true){
   livingLoginMask?.classList.remove("show");
   livingLoginMask?.setAttribute("aria-hidden", "true");
   setLoginMessage("");
+  syncRoom10BodyLock();
+  if(redirectWhenRequired && loginRequiredForPage && !isLoggedIn()) goHome();
 }
 
 function toggleLoginCode(){
@@ -1805,11 +1854,13 @@ async function submitLogin(){
       return;
     }
 
-    localStorage.setItem(STORAGE_KEYS.loggedIn, "true");
-    localStorage.setItem(STORAGE_KEYS.user, user.nickname || nickname);
-    localStorage.setItem(STORAGE_KEYS.role, user.role || "member");
-    localStorage.setItem(STORAGE_KEYS.memberId, user.member_id || user.id || "");
-    localStorage.setItem(STORAGE_KEYS.memberCode, user.member_code || user.memberCode || user.code || code);
+    currentMember = {
+      nickname:String(user.nickname || nickname).trim(),
+      role:normalizeRole(user.role || "member"),
+      member_id:String(user.member_id || user.id || "").trim(),
+      member_code:String(user.member_code || user.memberCode || user.code || code).trim()
+    };
+    saveStoredUser(currentMember);
 
     const roleMessages = {
       owner:"维修工已上线",
@@ -1828,7 +1879,8 @@ async function submitLogin(){
     setTimeout(() => {
       livingLoginNickname.value = "";
       livingLoginCode.value = "";
-      closeLogin();
+      loginRequiredForPage = false;
+      closeLogin(false);
       if(target) window.location.href = target;
     }, 450);
   }catch(err){
@@ -1848,8 +1900,7 @@ function goRegisterFromLiving(){
 }
 
 function getCurrentRole(){
-  const user = getStoredUser();
-  return user && user.role ? String(user.role).toLowerCase() : "";
+  return currentMember?.role || "";
 }
 
 function getManagerPageByRole(){
@@ -1868,48 +1919,8 @@ function normalizeInternalLink(url){
   if(!raw) return "";
   if(/^(javascript:|data:|vbscript:|file:|blob:|http:)/i.test(raw)) return "";
   if(/^(https:|mailto:|tel:|#)/i.test(raw)) return raw;
-
-  const clean = raw.replace(/^\.\//, "").replace(/^\//, "");
-  const pageKeyMap = {
-    "index.html":"index",
-    "index/index.html":"index",
-    "living.html":"living",
-    "living/living.html":"living",
-    "honor.html":"honor",
-    "honor/honor.html":"honor",
-    "honor-gallery.html":"honorGallery",
-    "honor/honor-gallery.html":"honorGallery",
-    "honor-titles.html":"honorTitles",
-    "honor/honor-titles.html":"honorTitles",
-    "game.html":"game",
-    "game/game.html":"game",
-    "game-chain.html":"gameChain",
-    "game/chain.html":"gameChain",
-    "studio-todo.html":"studioTodo",
-    "studio/studio-todo.html":"studioTodo",
-    "studio-project.html":"studioProject",
-    "studio/studio-project.html":"studioProject",
-    "studio-submit.html":"studioSubmit",
-    "studio/studio-submit.html":"studioSubmit",
-    "dorm.html":"dorm",
-    "dorm/dorm.html":"dorm",
-    "flower.html":"flower",
-    "flower/flower.html":"flower",
-    "pets.html":"pet",
-    "pet.html":"pet",
-    "pet/pets.html":"pet",
-    "manager-admin.html":"managerAdmin",
-    "manager/manager-admin.html":"managerAdmin",
-    "manager-member.html":"managerMember",
-    "manager/manager-member.html":"managerMember",
-    "manager-visitor.html":"managerVisitor",
-    "manager/manager-visitor.html":"managerVisitor"
-  };
-
-  const key = pageKeyMap[clean];
-  if(key) return room10PageUrl(key, raw);
   if(raw.startsWith("../") || raw.startsWith("./")) return raw;
-  return room10Url(clean);
+  return room10Url(raw.replace(/^\//, ""));
 }
 
 function enterRoom(page, needLogin, room = ""){
@@ -2008,6 +2019,20 @@ const REQUIRED_PAGE_TEXT_KEYS = [
   "database_error_hint"
 ];
 
+const DEFAULT_PAGE_TEXTS = Object.freeze({
+  panel_title:"客厅公告栏",
+  panel_aria_label:"客厅公告栏",
+  today_prefix:"今天",
+  loading_text:"读取中",
+  empty_text:"暂时没有新公告",
+  error_text:"读取错误",
+  notice_title:"通知",
+  notice_empty:"暂时没有新通知",
+  notice_default_title:"站内通知",
+  go_button:"去看看",
+  database_error_hint:"请检查数据库配置或稍后再试。"
+});
+
 let boardCategories = [];
 let boardCategoryMap = new Map();
 let pageTexts = {};
@@ -2037,10 +2062,15 @@ function textValue(key){
 
 function requirePageText(key){
   const value = textValue(key);
-  if(!value){
-    throw new Error(`缺少 page_text_settings 配置：living.${key}`);
+  if(value) return value;
+
+  const fallback = String(DEFAULT_PAGE_TEXTS[key] ?? "").trim();
+  if(fallback){
+    console.warn(`缺少 page_text_settings 配置：living.${key}，已使用页面兜底`);
+    return fallback;
   }
-  return value;
+
+  throw new Error(`缺少 page_text_settings 配置：living.${key}`);
 }
 
 function normalizeCategoryRow(row = {}){
@@ -2087,11 +2117,10 @@ function setBoardCategories(categories){
 async function fetchPageTexts(){
   if(!client) throw new Error("Supabase 客户端没有加载成功");
 
-  const { data, error } = await client
-    .from("page_text_settings")
-    .select("text_key, text_value")
-    .eq("page_key", "living")
-    .eq("is_active", true);
+  const { data, error } = await client.rpc("get_room10_page_texts", {
+    p_page_key:"living",
+    p_include_inactive:false
+  });
 
   if(error) throw error;
 
@@ -2104,10 +2133,13 @@ async function fetchPageTexts(){
 
   const missing = REQUIRED_PAGE_TEXT_KEYS.filter(key => !String(loaded[key] ?? "").trim());
   if(missing.length){
-    throw new Error(`page_text_settings 缺少配置：${missing.join(", ")}`);
+    console.warn(`page_text_settings 缺少 living 配置，已使用页面兜底：${missing.join(", ")}`);
   }
 
-  return loaded;
+  return {
+    ...DEFAULT_PAGE_TEXTS,
+    ...loaded
+  };
 }
 
 async function fetchBoardCategories(){
@@ -2181,23 +2213,29 @@ function parseBoardTimeValue(value){
   return Number.isNaN(time) ? 0 : time;
 }
 
+function localCalendarDayDiff(fromDate, toDate){
+  const from = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+  const to = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+  return Math.round((to - from) / ANNOUNCEMENT_DAY);
+}
+
 function formatBoardTime(value){
   if(!value) return "";
-  const time = new Date(value).getTime();
-  if(Number.isNaN(time)) return "";
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return "";
 
-  const diff = Date.now() - time;
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
   const minute = 60 * 1000;
   const hour = 60 * minute;
-  const day = 24 * hour;
+  const dayDiff = localCalendarDayDiff(date, now);
 
-  if(diff < minute) return textValue("time_just_now") || "刚刚";
-  if(diff < hour) return `${Math.max(1, Math.floor(diff / minute))}分钟前`;
-  if(diff < day) return `${Math.floor(diff / hour)}小时前`;
-  if(diff < day * 2) return textValue("time_yesterday") || "昨天";
-  if(diff < day * 7) return `${Math.floor(diff / day)}天前`;
+  if(diff >= 0 && diff < minute) return textValue("time_just_now") || "刚刚";
+  if(dayDiff === 0 && diff >= 0 && diff < hour) return `${Math.max(1, Math.floor(diff / minute))}分钟前`;
+  if(dayDiff === 0 && diff >= 0) return `${Math.max(1, Math.floor(diff / hour))}小时前`;
+  if(dayDiff === 1) return textValue("time_yesterday") || "昨天";
+  if(dayDiff > 1 && dayDiff < 7) return `${dayDiff}天前`;
 
-  const date = new Date(time);
   return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
@@ -2335,20 +2373,10 @@ async function fetchLivingAnnouncements(){
   return result.data || [];
 }
 
-async function syncLivingAnnouncements(){
-  if(!client) throw new Error("Supabase 客户端没有加载成功");
-  for(const rpc of ["sync_living_daily_member_announcements", "sync_living_release_announcements"]){
-    const { error } = await client.rpc(rpc);
-    if(error) throw error;
-  }
-}
-
 async function loadLivingBoard(){
   if(!livingBoardLayout) return;
   livingBoardLayout.innerHTML = `<div class="boardLoading">${escapeHtml(requirePageText("loading_text"))}</div>`;
   try{
-    await syncLivingAnnouncements();
-
     const rows = await fetchLivingAnnouncements();
     renderLivingBoard(rows);
   }catch(err){
@@ -2409,7 +2437,7 @@ function renderNoticeList(items){
 }
 
 async function loadMemberNotifications(){
-  const user = getStoredUser();
+  const user = currentMember;
   if(!client || !user?.member_id || !user?.member_code){
     renderNoticeList([]);
     return;
@@ -2435,7 +2463,7 @@ async function loadMemberNotifications(){
 }
 
 async function markAllNoticesRead(){
-  const user = getStoredUser();
+  const user = currentMember;
   if(!client || !user?.member_id || !user?.member_code || !currentNoticeIds.length) return;
   if(identityNoticeClear) identityNoticeClear.disabled = true;
   try{
@@ -2454,19 +2482,36 @@ async function markAllNoticesRead(){
 
 async function initLivingPage(){
   setupRoomNav(CURRENT_ROOM);
-  updateIdentityUI();
   refreshTemplateLayout();
 
   try{
     await loadLivingPageConfig();
     updateBoardTodayDate();
-    await Promise.all([loadLivingBoard(), loadMemberNotifications()]);
+    try{
+      await fetchCurrentMember();
+    }catch(identityError){
+      console.error("读取当前身份失败：", identityError);
+      clearStoredLogin();
+    }
+    updateIdentityUI();
+
+    if(!isLoggedIn()){
+      renderNoticeList([]);
+      livingBoardLayout.innerHTML = `<div class="boardEmpty">${escapeHtml(requirePageText("empty_text"))}</div>`;
+      openLogin("", true);
+    }else{
+      await Promise.all([loadLivingBoard(), loadMemberNotifications()]);
+    }
   }catch(err){
     renderLivingConfigError(err);
   }
 
   identityNoticeBtn?.addEventListener("click", event => {
     event.stopPropagation();
+    if(!isLoggedIn()){
+      openLogin("", true);
+      return;
+    }
     const willShow = !identityNoticePanel.classList.contains("show");
     if(willShow){
       positionIdentityNoticePanel();
@@ -2485,10 +2530,10 @@ async function initLivingPage(){
   identityAuthBtn?.addEventListener("click", event => {
     event.stopPropagation();
     if(isLoggedIn()) logout();
-    else openLogin();
+    else openLogin("", true);
   });
 
-  document.getElementById("livingLoginClose")?.addEventListener("click", closeLogin);
+  document.getElementById("livingLoginClose")?.addEventListener("click", () => closeLogin(true));
   document.getElementById("livingLoginToggle")?.addEventListener("click", toggleLoginCode);
   document.getElementById("livingLoginSubmit")?.addEventListener("click", submitLogin);
   document.getElementById("livingRegisterLink")?.addEventListener("click", goRegisterFromLiving);
@@ -2496,7 +2541,7 @@ async function initLivingPage(){
     if(event.key === "Enter") submitLogin();
   }));
   livingLoginMask?.addEventListener("click", event => {
-    if(event.target === livingLoginMask) closeLogin();
+    if(event.target === livingLoginMask) closeLogin(true);
   });
 
   document.addEventListener("click", event => {
@@ -2508,7 +2553,7 @@ async function initLivingPage(){
 
   document.addEventListener("keydown", event => {
     if(event.key === "Escape"){
-      closeLogin();
+      closeLogin(true);
       identityNoticePanel?.classList.remove("show");
     }
   });
@@ -2518,9 +2563,10 @@ document.addEventListener("DOMContentLoaded", initLivingPage);
 
 window.addEventListener("resize", refreshTemplateLayout);
 window.addEventListener("orientationchange", () => setTimeout(refreshTemplateLayout, 80));
-window.addEventListener("pageshow", () => {
+window.addEventListener("pageshow", async () => {
+  try{ await fetchCurrentMember(); }catch(_){ clearStoredLogin(); }
   updateIdentityUI();
-  loadMemberNotifications();
+  if(isLoggedIn()) loadMemberNotifications();
 });
 
 window.addEventListener("storage", event => {
