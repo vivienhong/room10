@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜宿舍</title>
-<!-- dorm clean db-driven v24: 宿舍个人私有数据统一通过 get_dorm_member_private_state 安全读取；前端不直读 members/gold_ledger/member_items/member_titles/member_achievements；最近获得来源完全数据库驱动 -->
+<!-- dorm clean db-driven v25: 宿舍个人私有数据统一通过 get_dorm_member_private_state 安全读取；前端不直读 members/gold_ledger/member_items/member_titles/member_achievements；最近获得来源完全数据库驱动 -->
 
 <script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -4439,6 +4439,23 @@ function setLedgerMessage(message,isError=false){
 }
 
 /* 身份与登录状态 */
+function clearInvalidLocalAuth(){
+  Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+  localStorage.removeItem("room10_user");
+  localStorage.removeItem("room10_current_user");
+
+  authState.loggedIn = false;
+  authState.nickname = "";
+  authState.role = "visitor";
+  authState.memberId = null;
+  authState.memberCode = "";
+}
+
+function redirectToUnifiedLogin(){
+  clearInvalidLocalAuth();
+  window.location.href = requirePageUrl("index");
+}
+
 function readLocalAuth(){
   authState.loggedIn = localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
   authState.nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
@@ -4633,7 +4650,8 @@ function noticeStillUseful(item){
   const desc = String(item.desc || item.description || item.content || item.message || item.body || item.notice_content || "");
   const text = `${title} ${desc}`;
 
-  /* 个人任务类只留在“我的任务”，不重复进入系统通知。 */
+  /* 个人任务类只留在“我的任务”，不重复进入系统通知。
+     宠物区是否开放由数据库通知 RPC 决定，前端不再硬编码过滤。 */
   if(roomKey === "studio"){
     if(dormConfig.noticeStudioTaskTypes.has(type)) return false;
     if(dormConfig.noticeStudioTaskKeywords.some(keyword => keyword && text.includes(keyword))) return false;
@@ -5076,10 +5094,137 @@ function updateDormTaskTabs(rows){
   });
 }
 
+function normalizeDormTaskType(item){
+  const raw = firstTaskText(item,[
+    "task_type",
+    "taskType",
+    "type",
+    "task_kind",
+    "taskKind",
+    "work_type",
+    "workType",
+    "assignment_type",
+    "assignmentType"
+  ]).toLowerCase().replace(/[\s-]+/g,"_");
+
+  const statusText = firstTaskText(item,[
+    "task_status",
+    "taskStatus",
+    "status",
+    "submission_status",
+    "submissionStatus",
+    "my_status",
+    "myStatus"
+  ]).toLowerCase().replace(/[\s-]+/g,"_");
+
+  const roleText = firstTaskText(item,[
+    "task_role",
+    "taskRole",
+    "member_role",
+    "memberRole",
+    "assignment_role",
+    "assignmentRole",
+    "my_role",
+    "myRole"
+  ]).toLowerCase().replace(/[\s-]+/g,"_");
+
+  const truthy = value => value === true || value === 1 || value === "1" || String(value || "").toLowerCase() === "true";
+
+  /*
+   * 先判断当前成员在项目中的真实动作状态。
+   * RPC 可能把多种任务统一返回为 task_type=claim；如果先按 raw 分类，
+   * 待交音和待后期会全部被错误归入“待认领”。
+   */
+  if(
+    truthy(item.can_submit_vocal) ||
+    truthy(item.needs_vocal_submit) ||
+    truthy(item.is_vocal_task) ||
+    truthy(item.pending_vocal_submit) ||
+    truthy(item.has_unsubmitted_vocal) ||
+    ["pending_vocal","pending_vocal_submit","need_vocal","needs_vocal","待交音"].includes(statusText)
+  ) return "vocal_submit";
+
+  if(
+    truthy(item.can_submit_mix) ||
+    truthy(item.needs_mix_submit) ||
+    truthy(item.is_mix_task) ||
+    truthy(item.pending_mix_submit) ||
+    truthy(item.has_unsubmitted_mix) ||
+    ["pending_mix","pending_mix_submit","need_mix","needs_mix","待后期"].includes(statusText)
+  ) return "mix_submit";
+
+  if(
+    truthy(item.my_singer_submitted) ||
+    truthy(item.vocal_submitted) ||
+    truthy(item.has_submitted_vocal) ||
+    ["vocal_submitted","submitted_vocal","已交音"].includes(statusText)
+  ) return "vocal_submitted";
+
+  if(
+    truthy(item.producer_completed) ||
+    truthy(item.mix_submitted) ||
+    truthy(item.has_submitted_mix) ||
+    ["mix_submitted","submitted_mix","已交后期"].includes(statusText)
+  ) return "mix_submitted";
+
+  if(truthy(item.can_claim_singer)) return "singer_claim";
+  if(truthy(item.can_claim_mix)) return "mix_claim";
+
+  const aliases = {
+    vocal:"vocal_submit",
+    vocal_submit:"vocal_submit",
+    vocal_submission:"vocal_submit",
+    submit_vocal:"vocal_submit",
+    singer_submit:"vocal_submit",
+    singer_submission:"vocal_submit",
+    audio_submit:"vocal_submit",
+    pending_vocal:"vocal_submit",
+    pending_vocal_submit:"vocal_submit",
+    待交音:"vocal_submit",
+    交音:"vocal_submit",
+
+    mix:"mix_submit",
+    mix_submit:"mix_submit",
+    mix_submission:"mix_submit",
+    submit_mix:"mix_submit",
+    producer_submit:"mix_submit",
+    post_production:"mix_submit",
+    postproduction:"mix_submit",
+    pending_mix:"mix_submit",
+    pending_mix_submit:"mix_submit",
+    后期:"mix_submit",
+    待后期:"mix_submit",
+
+    vocal_submitted:"vocal_submitted",
+    submitted_vocal:"vocal_submitted",
+    mix_submitted:"mix_submitted",
+    submitted_mix:"mix_submitted",
+
+    singer_claim:"singer_claim",
+    claim_singer:"singer_claim",
+    mix_claim:"mix_claim",
+    claim_mix:"mix_claim",
+    singer_claimed:"singer_claimed",
+    mix_claimed:"mix_claimed"
+  };
+
+  if(aliases[raw]) return aliases[raw];
+
+  /* generic claim 必须结合角色判断，不能直接把所有项目都归入待认领 */
+  if(raw === "claim"){
+    if(["singer","vocal","歌手","演唱"].includes(roleText)) return "singer_claim";
+    if(["mixer","mix","producer","后期","混音"].includes(roleText)) return "mix_claim";
+    return "claim";
+  }
+
+  return raw;
+}
+
 function normalizeDormTaskRows(rows){
   return (Array.isArray(rows) ? rows : []).map(row => {
     const item = { ...row };
 
+    item.task_type = normalizeDormTaskType(item);
     item.project_id = firstTaskText(item,["project_id","id","projectId","project_code"]);
     item.project_code = firstTaskText(item,["project_code","code","project_no","project_number"]);
     item.project_name = firstTaskText(item,["project_name","name","title","song_name","work_name"]);
@@ -5088,7 +5233,19 @@ function normalizeDormTaskRows(rows){
     item.my_original_names = firstTaskText(item,["my_original_names","my_original_name","assigned_original_names","assigned_original_name","original_names","original_name","part_names","part_name","my_part_names","my_part_name"]);
 
     return item;
-  }).filter(item => item.project_id || item.project_code || item.project_name);
+  }).filter(item =>
+    (item.project_id || item.project_code || item.project_name) &&
+    ["vocal_submit","mix_submit","claim","singer_claim","mix_claim","vocal_submitted","mix_submitted","singer_claimed","mix_claimed"].includes(item.task_type)
+  );
+}
+
+function traineeClaimEmptyHtml(){
+  return `
+    <div class="taskCard">
+      <h3 class="taskCardTitle">暂无适合练习生认领的项目</h3>
+      <p class="taskHint">练习生可参与练习项目，以及游戏类的“各唱各”项目。符合条件的新项目发布后，会自动显示在这里。</p>
+    </div>
+  `;
 }
 
 function renderDormTasks(rows){
@@ -5099,11 +5256,15 @@ function renderDormTasks(rows){
   updateDormTaskTabs(allRows);
 
   if(!allRows.length){
-    list.innerHTML = `
-      <div class="taskCard">
-        <h3 class="taskCardTitle">${tHtml("tasks.empty_by_type", { type:t("tasks.title") })}</h3>
-      </div>
-    `;
+    if(String(authState.role || "").toLowerCase() === "trainee" && activeDormTaskTab === "claim"){
+      list.innerHTML = traineeClaimEmptyHtml();
+    }else{
+      list.innerHTML = `
+        <div class="taskCard">
+          <h3 class="taskCardTitle">${tHtml("tasks.empty_by_type", { type:t("tasks.title") })}</h3>
+        </div>
+      `;
+    }
     return;
   }
 
@@ -5113,7 +5274,11 @@ function renderDormTasks(rows){
   );
 
   if(!currentRows.length){
-    list.innerHTML = `<div class="emptyText">${tHtml("tasks.empty_by_type", { type:taskTypeLabel(activeDormTaskTab) })}</div>`;
+    if(String(authState.role || "").toLowerCase() === "trainee" && activeDormTaskTab === "claim"){
+      list.innerHTML = traineeClaimEmptyHtml();
+    }else{
+      list.innerHTML = `<div class="emptyText">${tHtml("tasks.empty_by_type", { type:taskTypeLabel(activeDormTaskTab) })}</div>`;
+    }
     return;
   }
 
@@ -5273,6 +5438,7 @@ async function fetchDormPrivateState(){
 
   const state = data && typeof data === "object" ? data : null;
   if(!state?.member?.id){
+    redirectToUnifiedLogin();
     throw new Error(t("wallet.member_missing"));
   }
 
@@ -5323,12 +5489,11 @@ function applyDormPrivateState(state){
 }
 
 async function loadGoldInfo(){
-  if(!readLocalAuth()) return;
+  if(!readLocalAuth()) return false;
 
-  updateIdentity({
-    nickname:authState.nickname,
-    role:authState.role
-  });
+  if(identityNickname) identityNickname.textContent = dormErrorText("common.loading", "正在验证");
+  if(identitySeparator) identitySeparator.classList.add("hidden");
+  if(identityRole) identityRole.classList.add("hidden");
 
   let state = null;
 
@@ -5339,7 +5504,7 @@ async function loadGoldInfo(){
     setText("walletTitle", t("wallet.title"));
     setText("goldSub", `${t("wallet.read_failed")}：${error.message || "get_dorm_member_private_state"}`);
     setLedgerMessage(t("wallet.ledger_read_failed"), true);
-    return;
+    return false;
   }
 
   const member = applyDormPrivateState(state);
@@ -5348,7 +5513,8 @@ async function loadGoldInfo(){
     setText("walletTitle", t("wallet.title"));
     setText("goldSub", t("wallet.member_missing"));
     setLedgerMessage(t("wallet.no_gold_record"), true);
-    return;
+    redirectToUnifiedLogin();
+    return false;
   }
 
   setText("walletTitle", t("wallet.title"));
@@ -5359,6 +5525,7 @@ async function loadGoldInfo(){
 
   renderGoldLedger(state?.gold_ledger);
   await loadInventory();
+  return true;
 }
 
 function renderGoldLedger(rows){
@@ -6091,6 +6258,27 @@ function formatRecentTime(value){
   return `${month}/${day}`;
 }
 
+function recentSourceDisplayLabel(value){
+  const raw = String(value || "").trim();
+  if(!raw) return "";
+
+  const knownLabels = {
+    flower_daily:"每日花房",
+    flower_first_visit:"首次进入花房",
+    gacha:"扭蛋机",
+    game_2048_end:"2048游戏",
+    holiday_gift:"节日礼包"
+  };
+
+  if(Object.prototype.hasOwnProperty.call(knownLabels, raw)){
+    return knownLabels[raw];
+  }
+
+  // 已经是正常展示文字时原样使用；类似 snake_case 的内部键不直接暴露给用户。
+  if(!/^[a-z0-9]+(?:_[a-z0-9]+)+$/i.test(raw)) return raw;
+  return "";
+}
+
 function renderRecentObtained(rows){
   const wrap = document.getElementById("recentObtainedList");
   if(!wrap) return;
@@ -6104,7 +6292,7 @@ function renderRecentObtained(rows){
   wrap.innerHTML = list.map(item => {
     const name = String(item.item_name || item.item_key || "").trim();
     const qty = Number(item.quantity || 0);
-    const sourceLabel = String(item.source_label || "").trim();
+    const sourceLabel = recentSourceDisplayLabel(item.source_label);
     const meta = [sourceLabel, item.recent_time_label].filter(Boolean).join(" · ");
 
     return `
@@ -6441,6 +6629,19 @@ function validateProfileLocation(value){
   return dormConfig.allowedLocations.includes(text);
 }
 
+function profileBirthdayMaxDay(month){
+  if(month === 2) return 29;
+  if([4,6,9,11].includes(month)) return 30;
+  return 31;
+}
+
+function isValidProfileBirthday(month,day){
+  if(month == null && day == null) return true;
+  if(!Number.isInteger(month) || !Number.isInteger(day)) return false;
+  if(month < 1 || month > 12) return false;
+  return day >= 1 && day <= profileBirthdayMaxDay(month);
+}
+
 function collectProfilePayload(){
   return {
     name:document.getElementById("profileNameInput")?.value.trim() || "",
@@ -6472,8 +6673,14 @@ async function saveProfileEdit(){
     return;
   }
 
-  if((payload.birthday_month && !payload.birthday_day) || (!payload.birthday_month && payload.birthday_day)){
-    setProfileStatus(t("profile.birthday_invalid"),"error");
+  if(!isValidProfileBirthday(payload.birthday_month,payload.birthday_day)){
+    setProfileStatus(t("profile.birthday_invalid") || "请选择有效的生日日期","error");
+    return;
+  }
+
+  if(!payload.mbti){
+    setProfileStatus(t("profile.mbti_required") || "请选择您的 MBTI","error");
+    document.getElementById("profileMbtiInput")?.focus();
     return;
   }
 
@@ -6578,11 +6785,6 @@ async function initDormPage(){
 
   setupRoomNav(CURRENT_ROOM);
 
-  updateIdentity({
-    nickname:authState.nickname,
-    role:authState.role
-  });
-
   bindSideTabs();
   restoreDormView();
   bindDormTaskActions();
@@ -6614,7 +6816,8 @@ async function initDormPage(){
     再读取系统通知和我的任务。
     前端不直接读取成员、金币流水、背包、称号或成就私有表。
   */
-  await loadGoldInfo();
+  const identityVerified = await loadGoldInfo();
+  if(!identityVerified) return;
 
   await Promise.all([
     loadSystemNotices(),
