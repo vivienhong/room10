@@ -591,7 +591,7 @@ textarea{
 
           <div class="form-group">
             <label for="avatar"><span id="labelAvatar"></span><span class="required-mark">*</span></label>
-            <input id="avatar" type="file" accept="image/*">
+            <input id="avatar" type="file" accept="image/jpeg,image/png,image/webp">
             <img id="avatarPreview" class="avatar-preview" alt="">
           </div>
 
@@ -627,7 +627,7 @@ textarea{
           </div>
 
           <div class="form-group full">
-            <label id="labelMbti"></label>
+            <label><span id="labelMbti"></span><span class="required-mark">*</span></label>
             <div id="mbtiGrid" class="mbti-grid"></div>
           </div>
 
@@ -758,6 +758,7 @@ const REQUIRED_TEXT_KEYS = [
   "error.key_application_mismatch",
   "error.name_application_mismatch",
   "error.qq_application_mismatch",
+  "error.application_read_failed",
   "message.submitting",
   "error.avatar_upload_failed",
   "error.registration_failed",
@@ -771,9 +772,22 @@ let resizeTimer = null;
 let registerTexts = new Map();
 let registerOptions = new Map();
 let registerConfigReady = false;
+let registrationBlocked = false;
+let registrationSucceeded = false;
+let avatarPreviewUrl = "";
+const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+const AVATAR_ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 function normalizeText(value){
   return String(value ?? "").trim();
+}
+
+function blockRegistration(){
+  registrationBlocked = true;
+  document.querySelectorAll("#sheetForm input, #sheetForm select, #sheetForm textarea, #submitBtn, #clearBtn")
+    .forEach(el => {
+      el.disabled = true;
+    });
 }
 
 function showConfigError(message, detail = ""){
@@ -781,10 +795,13 @@ function showConfigError(message, detail = ""){
   if(!panel){
     panel = document.createElement("div");
     panel.id = "pageError";
-    panel.style.cssText = "position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9999;max-width:min(520px,86vw);white-space:pre-wrap;padding:18px 20px;border-radius:16px;background:rgba(255,249,241,.98);border:1px solid rgba(190,143,112,.36);box-shadow:0 18px 42px rgba(78,52,28,.18);color:#7a4b2c;font-size:14px;line-height:1.7;text-align:left;";
+    panel.setAttribute("role", "alert");
+    panel.setAttribute("aria-live", "assertive");
     document.body.appendChild(panel);
   }
   panel.textContent = detail ? `${message}\n${detail}` : message;
+  panel.classList.add("show");
+  blockRegistration();
 }
 
 function text(key){
@@ -1007,18 +1024,42 @@ function addSelectPlaceholder(selectEl, label){
   selectEl.appendChild(opt);
 }
 
-function populateBirthdayOptions(){
+function getBirthdayMaxDay(month){
+  if(month === 2) return 29;
+  if([4, 6, 9, 11].includes(month)) return 30;
+  return 31;
+}
+
+function populateBirthdayDays(preserveValue = true){
   const monthSelect = document.getElementById("birthdayMonth");
   const daySelect = document.getElementById("birthdayDay");
-  monthSelect.innerHTML = "";
-  daySelect.innerHTML = "";
-
-  addSelectPlaceholder(monthSelect, text("option.month_placeholder"));
-  addSelectPlaceholder(daySelect, text("option.day_placeholder"));
-
-  const monthSuffix = text("option.month_suffix");
+  const previousValue = preserveValue ? daySelect.value : "";
+  const month = parseInt(monthSelect.value, 10);
+  const maxDay = Number.isInteger(month) ? getBirthdayMaxDay(month) : 31;
   const daySuffix = text("option.day_suffix");
 
+  daySelect.innerHTML = "";
+  addSelectPlaceholder(daySelect, text("option.day_placeholder"));
+
+  for(let d = 1; d <= maxDay; d++){
+    const opt = document.createElement("option");
+    opt.value = String(d);
+    opt.textContent = `${d}${daySuffix}`;
+    daySelect.appendChild(opt);
+  }
+
+  if(previousValue && parseInt(previousValue, 10) <= maxDay){
+    daySelect.value = previousValue;
+  }
+}
+
+function populateBirthdayOptions(){
+  const monthSelect = document.getElementById("birthdayMonth");
+  monthSelect.innerHTML = "";
+
+  addSelectPlaceholder(monthSelect, text("option.month_placeholder"));
+
+  const monthSuffix = text("option.month_suffix");
   for(let m = 1; m <= 12; m++){
     const opt = document.createElement("option");
     opt.value = String(m);
@@ -1026,12 +1067,12 @@ function populateBirthdayOptions(){
     monthSelect.appendChild(opt);
   }
 
-  for(let d = 1; d <= 31; d++){
-    const opt = document.createElement("option");
-    opt.value = String(d);
-    opt.textContent = `${d}${daySuffix}`;
-    daySelect.appendChild(opt);
-  }
+  populateBirthdayDays(false);
+  monthSelect.addEventListener("change", () => {
+    populateBirthdayDays(true);
+    clearError(monthSelect);
+    clearError(document.getElementById("birthdayDay"));
+  });
 }
 
 function renderMbtiOptions(){
@@ -1121,7 +1162,7 @@ async function loadApprovedApplicationContext(){
   if(!applicationId || !applyName || !applyQQ || !memberCode){
     const message = registerTexts.get("error.application_read_failed") || "申请信息读取失败";
     showConfigError(message, "approved application identity incomplete");
-    return;
+    return false;
   }
 
   try{
@@ -1139,27 +1180,67 @@ async function loadApprovedApplicationContext(){
       ? payload.application
       : null;
 
-    if(record){
-      applyApplicationPrefill(record);
+    if(!record){
+      const message = registerTexts.get("error.application_read_failed") || "申请信息读取失败";
+      showConfigError(message, "approved application not found or not approved");
+      return false;
     }
+
+    applyApplicationPrefill(record);
+    return true;
   }catch(err){
     const message = registerTexts.get("error.application_read_failed") || "申请信息读取失败";
     showConfigError(message, err.message || "get_room10_approved_application_prefill");
+    return false;
   }
 }
 
+function clearAvatarPreview(){
+  if(avatarPreviewUrl){
+    URL.revokeObjectURL(avatarPreviewUrl);
+    avatarPreviewUrl = "";
+  }
+  avatarPreview.style.display = "none";
+  avatarPreview.removeAttribute("src");
+}
+
+function validateAvatarFile(file){
+  if(!file) return false;
+
+  if(!AVATAR_ALLOWED_TYPES.has(file.type)){
+    setMessage(registerTexts.get("error.avatar_type_invalid") || "头像仅支持 JPG、PNG 或 WebP 格式。", "error");
+    markError(avatarInput);
+    return false;
+  }
+
+  if(file.size > AVATAR_MAX_BYTES){
+    setMessage(registerTexts.get("error.avatar_too_large") || "头像文件不能超过 5MB。", "error");
+    markError(avatarInput);
+    return false;
+  }
+
+  return true;
+}
+
 avatarInput.addEventListener("change", () => {
+  clearAvatarPreview();
+  clearError(avatarInput);
+
   const file = avatarInput.files[0];
-  if(!file){
-    avatarPreview.style.display = "none";
-    avatarPreview.removeAttribute("src");
+  if(!file) return;
+
+  if(!validateAvatarFile(file)){
+    avatarInput.value = "";
     return;
   }
-  const url = URL.createObjectURL(file);
-  avatarPreview.src = url;
+
+  avatarPreviewUrl = URL.createObjectURL(file);
+  avatarPreview.src = avatarPreviewUrl;
   avatarPreview.style.display = "block";
   requestAnimationFrame(fitFormToSheet);
 });
+
+window.addEventListener("beforeunload", clearAvatarPreview);
 
 function fitFormToSheet(){
   if(window.innerWidth <= 700){
@@ -1361,6 +1442,10 @@ locationInput.addEventListener("blur", () => {
   }
 });
 
+document.getElementById("mbtiGrid").addEventListener("change", () => {
+  clearError(document.getElementById("mbtiGrid"));
+});
+
 document.getElementById("skillsWrap").addEventListener("change", () => {
   clearError(document.getElementById("skillsWrap"));
   clearError(document.getElementById("customSkill"));
@@ -1382,6 +1467,7 @@ function clearForm(){
   document.getElementById("birthdayMonth").value = "";
   document.getElementById("birthdayDay").value = "";
   document.getElementById("joinedAt").value = getToday();
+document.getElementById("joinedAt").max = getToday();
   document.querySelectorAll(".skillCheck").forEach(el => el.checked = false);
   document.getElementById("customSkill").value = "";
   document.getElementById("socialXhs").value = "";
@@ -1400,22 +1486,29 @@ function clearForm(){
   nameInput.readOnly = !!approvedApplicationContext;
   contactQqInput.readOnly = !!approvedApplicationContext;
 
-  avatarPreview.style.display = "none";
-  avatarPreview.removeAttribute("src");
+  clearAvatarPreview();
   clearFieldErrors();
   requestAnimationFrame(fitFormToSheet);
 }
 
 async function uploadAvatar(file, keyCode){
-  const ext = file.name.split(".").pop()?.toLowerCase() || "png";
-  const safeExt = ext.replace(/[^a-z0-9]/g, "") || "png";
+  const extensionByType = {
+    "image/jpeg":"jpg",
+    "image/png":"png",
+    "image/webp":"webp"
+  };
+  const safeExt = extensionByType[file.type];
+  if(!safeExt || !validateAvatarFile(file)){
+    throw new Error(registerTexts.get("error.avatar_type_invalid") || "头像文件不符合要求。");
+  }
+
   const fileName = `${keyCode}-${Date.now()}.${safeExt}`;
 
   const { error } = await client.storage
     .from("avatars")
     .upload(fileName, file, {
       upsert:false,
-      contentType:file.type || "image/png"
+      contentType:file.type
     });
 
   if(error){
@@ -1426,7 +1519,18 @@ async function uploadAvatar(file, keyCode){
     .from("avatars")
     .getPublicUrl(fileName);
 
-  return data.publicUrl;
+  return {
+    path:fileName,
+    publicUrl:data.publicUrl
+  };
+}
+
+async function removeUploadedAvatar(filePath){
+  if(!filePath) return;
+  const { error } = await client.storage.from("avatars").remove([filePath]);
+  if(error){
+    console.warn("Failed to remove unused avatar:", error.message || error);
+  }
 }
 
 function extractRpcRow(result){
@@ -1436,6 +1540,8 @@ function extractRpcRow(result){
 
 async function submitRegistration(){
   const submitBtn = document.getElementById("submitBtn");
+
+  if(registrationBlocked || registrationSucceeded || submitBtn.disabled) return;
 
   if(!registerConfigReady){
     showConfigError("REGISTER_CONFIG_MISSING");
@@ -1488,14 +1594,25 @@ async function submitRegistration(){
     { el:document.getElementById("contactQq"), empty:!qq },
     { el:document.getElementById("birthdayMonth"), empty:!birthdayMonthValue },
     { el:document.getElementById("birthdayDay"), empty:!birthdayDayValue },
-    { el:document.getElementById("joinedAt"), empty:!joinedAt }
+    { el:document.getElementById("joinedAt"), empty:!joinedAt },
+    { el:document.getElementById("mbtiGrid"), empty:!mbti }
   ];
 
   const missingFields = requiredFields.filter(item => item.empty);
   if(missingFields.length > 0){
     missingFields.forEach(item => markError(item.el));
     setMessage(text("error.required_missing"), "error");
-    focusElement(missingFields[0].el);
+    const firstMissing = missingFields[0].el;
+    if(firstMissing?.id === "mbtiGrid"){
+      focusElement(firstMissing.querySelector('input[name="mbti"]'));
+    }else{
+      focusElement(firstMissing);
+    }
+    return;
+  }
+
+  if(!validateAvatarFile(avatarFile)){
+    focusElement(document.getElementById("avatar"));
     return;
   }
 
@@ -1529,14 +1646,23 @@ async function submitRegistration(){
     return;
   }
 
-  if(isNaN(birthdayDay) || birthdayDay < 1 || birthdayDay > 31){
+  const maxBirthdayDay = Number.isInteger(birthdayMonth) ? getBirthdayMaxDay(birthdayMonth) : 31;
+  if(isNaN(birthdayDay) || birthdayDay < 1 || birthdayDay > maxBirthdayDay){
     markError(document.getElementById("birthdayDay"));
-    setMessage(text("error.required_missing"), "error");
+    setMessage(registerTexts.get("error.birthday_invalid") || text("error.required_missing"), "error");
     focusElement(document.getElementById("birthdayDay"));
     return;
   }
 
+  if(joinedAt > getToday()){
+    markError(document.getElementById("joinedAt"));
+    setMessage(registerTexts.get("error.joined_at_future") || text("error.required_missing"), "error");
+    focusElement(document.getElementById("joinedAt"));
+    return;
+  }
+
   submitBtn.disabled = true;
+  let uploadedAvatarPath = "";
 
   try{
     if(!approvedApplicationContext){
@@ -1589,8 +1715,9 @@ async function submitRegistration(){
 
     setMessage(text("message.submitting"), "");
 
-    const cohort = calcCohort(joinedAt);
-    const avatarUrl = await uploadAvatar(avatarFile, inviteKey);
+    const avatarUpload = await uploadAvatar(avatarFile, inviteKey);
+    uploadedAvatarPath = avatarUpload.path;
+    const avatarUrl = avatarUpload.publicUrl;
     const skillsValue = selectedSkills.length ? selectedSkills.join(",") : null;
     const customSkillValue = customSkill || null;
 
@@ -1612,7 +1739,7 @@ async function submitRegistration(){
       p_social_bilibili: socialBilibili || null,
       p_social_weibo: socialWeibo || null,
       p_joined_at: joinedAt,
-      p_cohort: cohort,
+      p_cohort: null, // 由数据库根据 joined_at 计算最终期数
       p_public_message: publicMessage || null
     });
 
@@ -1625,17 +1752,24 @@ async function submitRegistration(){
       throw new Error(row?.message || text("error.registration_failed"));
     }
 
+    if(!normalizeText(row.role)){
+      throw new Error(registerTexts.get("error.role_missing") || "登记结果缺少成员身份，请联系管理员。");
+    }
+
+    uploadedAvatarPath = "";
+
     if(approvedApplicationContext){
       localStorage.removeItem("room10ApplicantSession");
       localStorage.removeItem("room10ApplicationDraft");
     }
 
-    localStorage.setItem("room10Role", row.role || (inviteKey.startsWith("B") ? "trainee" : "member"));
+    localStorage.setItem("room10Role", row.role);
     localStorage.setItem("room10LoggedIn", "true");
     localStorage.setItem("room10User", row.nickname || nickname);
     localStorage.setItem("room10MemberId", row.member_id || "");
     localStorage.setItem("room10MemberCode", row.member_code || inviteKey);
 
+    registrationSucceeded = true;
     setMessage(row.message || formatText("message.registration_success", { member_code:inviteKey }), "success");
 
     const returnPage = getReturnPageUrl();
@@ -1644,6 +1778,7 @@ async function submitRegistration(){
       window.location.href = returnPage;
     }, 1800);
   }catch(err){
+    await removeUploadedAvatar(uploadedAvatarPath);
     const message = err.message || text("error.submit_failed");
     setMessage(message, "error");
 
@@ -1652,7 +1787,9 @@ async function submitRegistration(){
     if(message.includes(text("label.invite_key"))) markError(document.getElementById("inviteKey"));
     if(message.includes(text("label.contact_qq"))) markError(document.getElementById("contactQq"));
   }finally{
-    submitBtn.disabled = false;
+    if(!registrationSucceeded && !registrationBlocked){
+      submitBtn.disabled = false;
+    }
   }
 }
 
@@ -1687,6 +1824,12 @@ window.addEventListener("load", async () => {
 });
 </script>
 
-<!-- register-v3: applications.id UUID 直接传入登记 RPC，不再转换为 Number -->
+<!-- register-v4:
+  1. 申请预填异常时阻断登记；
+  2. 头像限制 JPG/PNG/WebP、最大 5MB，并清理失败上传；
+  3. 生日按月份限制日期，加入日期禁止未来日期；
+  4. 成功后保持提交锁定；
+  5. 身份必须由 RPC 返回，期数由数据库计算。
+-->
 </body>
 </html>
