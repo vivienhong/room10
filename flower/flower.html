@@ -6,7 +6,7 @@
 <title>十号房｜花房</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
-<!-- flower clean db-driven v21: 通用模板导航路径统一；业务展示优先数据库；清减旧备用路径与前端提示兜底；支持 trainee 练习生身份 -->
+<!-- flower clean db-driven v22: 通用模板导航路径统一；业务展示与领取状态统一由数据库驱动；每日首次进入自动领取水与肥料；支持 trainee 练习生身份 -->
 
 <style>
 *{box-sizing:border-box;}
@@ -3739,24 +3739,6 @@ function setFlowerBusy(isBusy){
   refreshMarketActionButtons();
 }
 
-function getFirstVisitRewardPromptKey(){
-  const memberId = authState.memberId || localStorage.getItem(STORAGE_KEYS.memberId) || "guest";
-  return `room10FlowerFirstVisitRewardPrompt:${memberId}`;
-}
-
-function getFirstVisitRewardClaimDateKey(){
-  const memberId = authState.memberId || localStorage.getItem(STORAGE_KEYS.memberId) || "guest";
-  return `room10FlowerFirstVisitRewardClaimDate:${memberId}`;
-}
-
-function markFirstVisitRewardClaimedToday(){
-  localStorage.setItem(getFirstVisitRewardClaimDateKey(), getFlowerLocalDateKey());
-}
-
-function isFirstVisitRewardClaimedToday(){
-  return localStorage.getItem(getFirstVisitRewardClaimDateKey()) === getFlowerLocalDateKey();
-}
-
 const rewardTypeMeta = {
   achievement:{ label:"成就达成", icon:"🏆" },
   title:{ label:"获得称号", icon:"🎖️" },
@@ -5204,48 +5186,41 @@ async function hasClaimedFirstVisitReward(){
   if(!auth) return true;
 
   try{
-    const { data:achievement, error:achievementError } = await supabaseClient
-      .from("achievements")
-      .select("id")
-      .eq("code", "first_visit_flower")
-      .maybeSingle();
+    const { data, error } = await supabaseClient.rpc(
+      "get_flower_first_visit_reward_status",
+      {
+        p_member_id:auth.memberId,
+        p_member_code:auth.memberCode
+      }
+    );
 
-    if(achievementError || !achievement?.id){
-      return false;
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    if(!row || row.success !== true){
+      console.warn("首次花房奖励状态检查未成功：", row?.message || "数据库未返回有效状态");
+      return true;
     }
 
-    const { data:owned, error:ownedError } = await supabaseClient
-      .from("member_achievements")
-      .select("id")
-      .eq("member_id", auth.memberId)
-      .eq("achievement_id", achievement.id)
-      .maybeSingle();
-
-    if(ownedError){
-      return false;
-    }
-
-    return Boolean(owned?.id);
+    return row.already_claimed === true;
   }catch(err){
     console.warn("首次花房奖励状态检查失败：", err);
-    return false;
+    // 状态未知时不显示领取弹窗，避免把权限或网络错误误判为未领取。
+    return true;
   }
 }
 
-async function promptFirstVisitRewardIfNeeded(){
+async function promptFirstVisitRewardIfNeeded(knownClaimed=null){
   const auth = getFlowerAuth();
   if(!auth) return;
 
-  const promptKey = getFirstVisitRewardPromptKey();
-  if(localStorage.getItem(promptKey) === "done") return;
+  const claimed = typeof knownClaimed === "boolean"
+    ? knownClaimed
+    : await hasClaimedFirstVisitReward();
 
-  const claimed = await hasClaimedFirstVisitReward();
-  if(claimed){
-    localStorage.setItem(promptKey, "done");
-    return;
+  if(!claimed){
+    showFirstVisitFlowerRewardModal();
   }
-
-  showFirstVisitFlowerRewardModal();
 }
 
 async function claimFlowerRewardFromModal(){
@@ -5257,9 +5232,6 @@ async function claimFlowerRewardFromModal(){
 
   try{
     const row = await claimFirstVisitFlowerReward();
-    localStorage.setItem(getFirstVisitRewardPromptKey(), "done");
-    markFirstVisitRewardClaimedToday();
-    flowerState.dailyTipMessage = "";
 
     await Promise.all([
       loadMemberGold(),
@@ -5302,15 +5274,17 @@ async function claimDailyFlowerItems(){
   }
 
   const row = Array.isArray(data) ? data[0] : data;
-  if(updateFlowerResourcesFromRow(row)){
-    flowerState.dailyTipMessage = "今日资源已领取：水 ×1、肥料 ×1。";
-  }else{
-    flowerState.dailyTipMessage = "今日资源已领取。";
-  }
+  updateFlowerResourcesFromRow(row);
+
+  flowerState.dailyTipMessage = row?.success && !row?.already_claimed
+    ? "今日首次进入花房，自动获得水 ×1、肥料 ×1。"
+    : "";
+
   return row || null;
 }
 
 function renderLoggedOutFlower(){
+  flowerState.goldBalance = null;
   flowerState.dailyTipMessage = "";
   flowerState.paperTips = [];
   setFlowerResources(0, 0, 0);
@@ -5506,27 +5480,37 @@ function renderPot(row){
 async function loadMemberGold(){
   const auth = getFlowerAuth();
   if(!auth){
+    flowerState.goldBalance = null;
     if(flowerGoldPill) flowerGoldPill.textContent = "金币：--";
+    refreshMarketActionButtons();
     return null;
   }
 
-  const { data, error } = await supabaseClient
-    .from("members")
-    .select("gold_balance")
-    .eq("id", auth.memberId)
-    .eq("member_code", auth.memberCode)
-    .maybeSingle();
+  try{
+    const { data, error } = await supabaseClient.rpc("get_member_gold_balance", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode
+    });
 
-  if(error){
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    if(!row || row.success === false){
+      throw new Error(row?.message || "数据库没有返回金币余额");
+    }
+
+    const gold = Math.max(0, Number(row.gold_balance) || 0);
+    flowerState.goldBalance = gold;
+    if(flowerGoldPill) flowerGoldPill.textContent = `金币：${gold}`;
+    refreshMarketActionButtons();
+    return gold;
+  }catch(error){
     console.warn("读取金币失败：", error);
+    flowerState.goldBalance = null;
     if(flowerGoldPill) flowerGoldPill.textContent = "金币：读取失败";
+    refreshMarketActionButtons();
     return null;
   }
-
-  const gold = Number(data?.gold_balance) || 0;
-  flowerState.goldBalance = gold;
-  if(flowerGoldPill) flowerGoldPill.textContent = `金币：${gold}`;
-  return gold;
 }
 
 async function loadFlowerMarket(){
@@ -5594,13 +5578,9 @@ async function loadFlowerPage(){
   }
 
   const firstVisitClaimed = await hasClaimedFirstVisitReward();
-  const skipDailyForFirstVisitToday = firstVisitClaimed && isFirstVisitRewardClaimedToday();
 
-  if(firstVisitClaimed && !skipDailyForFirstVisitToday){
-    await claimDailyFlowerItems();
-  }else{
-    flowerState.dailyTipMessage = "";
-  }
+  // 每次打开花房都调用；数据库按成员所在时区保证每天只发放一次。
+  await claimDailyFlowerItems();
 
   await loadFlowerPaperTips();
 
@@ -5613,7 +5593,7 @@ async function loadFlowerPage(){
   renderSiteNotifications();
 
   if(!firstVisitClaimed){
-    await promptFirstVisitRewardIfNeeded();
+    await promptFirstVisitRewardIfNeeded(firstVisitClaimed);
   }
 }
 
