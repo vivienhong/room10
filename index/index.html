@@ -545,6 +545,8 @@ button{
 /* =========================
    统一奖励弹窗：首页礼包领取共用
 ========================= */
+body.room10ModalOpen{overflow:hidden!important;}
+
 .reward-mask{
   position:fixed;
   inset:0;
@@ -1024,11 +1026,7 @@ button{
 }
 
 @media (max-width: 540px){
-  .reward-mask{--reward-scale:.82;padding:14px;}
-}
-
-@media (max-width: 380px), (max-height: 590px){
-  .reward-mask{--reward-scale:.74;}
+  .reward-mask{padding:14px;}
 }
 
 @media (max-width: 340px){
@@ -1108,7 +1106,7 @@ button{
   </div>
 </div>
 
-<div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="">
+<div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
   <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
     <div class="reward-petals" aria-hidden="true">
       <span>✿</span>
@@ -1118,7 +1116,7 @@ button{
       <span>❀</span>
     </div>
 
-    <button class="reward-close" id="rewardCloseBtn" type="button" aria-label="">×</button>
+    <button class="reward-close" id="rewardCloseBtn" type="button" aria-label="关闭">×</button>
 
     <div class="reward-content">
       <div class="reward-icon" id="rewardIcon" aria-hidden="true"></div>
@@ -1251,6 +1249,8 @@ let currentMember = null;
 let rewardQueue = [];
 let rewardModalShowing = false;
 let rewardAfterCloseCallback = null;
+let currentRewardClaimAction = null;
+let rewardClaimInFlight = false;
 let holidayGiftCheckInFlight = false;
 let anniversaryCheckInFlight = false;
 let seasonEffectState = { rafId: 0, onResize: null };
@@ -1722,6 +1722,14 @@ function showUpgradeLoginNoticeIfNeeded(loginRow, afterClose = null){
   return true;
 }
 
+function syncRoom10BodyLock(){
+  const hasOpenModal = Boolean(
+    document.getElementById("loginUI")?.classList.contains("show")
+    || rewardMask?.classList.contains("show")
+  );
+  document.body.classList.toggle("room10ModalOpen", hasOpenModal);
+}
+
 function openRewardModal(modal){
   rewardMask.dataset.type = modal.type;
   rewardIconEl.innerHTML = renderRewardIcon(modal.icon, modal.title);
@@ -1733,11 +1741,11 @@ function openRewardModal(modal){
   rewardModalShowing = true;
   rewardMask.classList.add("show");
   rewardMask.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
+  syncRoom10BodyLock();
 }
 
-function showRewardModal(modal, afterClose = null){
-  rewardQueue.push({ modal, afterClose });
+function showRewardModal(modal, afterClose = null, claimAction = null){
+  rewardQueue.push({ modal, afterClose, claimAction });
   if(!rewardModalShowing){
     playNextRewardModal();
   }
@@ -1752,16 +1760,20 @@ function playNextRewardModal(){
   }
 
   rewardAfterCloseCallback = typeof next.afterClose === "function" ? next.afterClose : null;
+  currentRewardClaimAction = next.claimAction || null;
+  rewardConfirmBtn.disabled = false;
   openRewardModal(next.modal);
 }
 
 function closeRewardModal(){
   rewardMask.classList.remove("show");
   rewardMask.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
+  syncRoom10BodyLock();
 
   const callback = rewardAfterCloseCallback;
   rewardAfterCloseCallback = null;
+  currentRewardClaimAction = null;
+  rewardConfirmBtn.disabled = false;
 
   if(rewardQueue.length){
     setTimeout(playNextRewardModal, 120);
@@ -1792,13 +1804,21 @@ async function maybeClaimJoinAnniversaryAchievements(options = {}){
       return false;
     }
 
+
     const claims = Array.isArray(data?.claims) ? data.claims : [];
     if(!data?.claimed_any || claims.length === 0) return false;
 
     claims.forEach((claim, index) => {
       const modal = normalizeRewardModalPayload(claim?.modal, `claim_join_anniversary_achievements.claims[${index}]`);
+      const achievementId = normalizeTextValue(claim?.achievement_id);
       const isLast = index === claims.length - 1;
-      showRewardModal(modal, isLast ? options.afterAllRewards : null);
+      showRewardModal(
+        modal,
+        isLast ? options.afterAllRewards : null,
+        achievementId
+          ? { type:"honor", itemType:"achievement", itemId:achievementId }
+          : null
+      );
     });
 
     return true;
@@ -1826,20 +1846,27 @@ async function maybeClaimLoginHolidayGifts(options = {}){
       p_local_date: getLocalDateString()
     });
 
-    markHolidayGiftCheckedToday(currentMember.id);
-
     if(error){
       showPageError("登录礼包读取失败", error.message || "claim_login_holiday_gifts RPC 失败");
       return false;
     }
+
+    markHolidayGiftCheckedToday(currentMember.id);
 
     const claims = Array.isArray(data?.claims) ? data.claims : [];
     if(!data?.claimed_any || claims.length === 0) return false;
 
     claims.forEach((claim, index) => {
       const modal = normalizeRewardModalPayload(claim?.modal, `claim_login_holiday_gifts.claims[${index}]`);
+      const pendingRewardId = normalizeTextValue(claim?.pending_reward_id);
       const isLast = index === claims.length - 1;
-      showRewardModal(modal, isLast ? options.afterAllRewards : null);
+      showRewardModal(
+        modal,
+        isLast ? options.afterAllRewards : null,
+        pendingRewardId
+          ? { type:"holiday", pendingRewardId }
+          : null
+      );
     });
 
     return true;
@@ -1848,6 +1875,66 @@ async function maybeClaimLoginHolidayGifts(options = {}){
     return false;
   }finally{
     holidayGiftCheckInFlight = false;
+  }
+}
+
+async function claimCurrentReward(){
+  if(rewardClaimInFlight) return;
+
+  const action = currentRewardClaimAction;
+  if(!action){
+    closeRewardModal();
+    return;
+  }
+
+  if(!currentMember){
+    showPageError("领取失败", "登录状态已失效，请重新登录。");
+    return;
+  }
+
+  rewardClaimInFlight = true;
+  rewardConfirmBtn.disabled = true;
+
+  try{
+    let response;
+
+    if(action.type === "honor"){
+      response = await client.rpc("claim_honor_reward", {
+        p_member_id:currentMember.id,
+        p_member_code:currentMember.memberCode,
+        p_item_type:action.itemType,
+        p_item_id:String(action.itemId)
+      });
+    }else if(action.type === "holiday"){
+      response = await client.rpc("claim_pending_holiday_reward", {
+        p_member_id:currentMember.id,
+        p_member_code:currentMember.memberCode,
+        p_pending_reward_id:action.pendingRewardId
+      });
+    }else{
+      closeRewardModal();
+      return;
+    }
+
+    if(response.error){
+      showPageError("领取失败", response.error.message || "奖励领取 RPC 失败");
+      return;
+    }
+
+    const result = response.data || {};
+    if(result.ok === false){
+      showPageError("领取失败", result.message || "奖励领取失败。");
+      return;
+    }
+
+    clearPageError();
+    noticeCache.at = 0;
+    closeRewardModal();
+  }catch(err){
+    showPageError("领取失败", err.message || String(err));
+  }finally{
+    rewardClaimInFlight = false;
+    rewardConfirmBtn.disabled = false;
   }
 }
 
@@ -2066,11 +2153,13 @@ function openLogin(targetPage = ""){
 
   if(targetPage) setPendingRedirect(targetPage);
   document.getElementById("loginUI").classList.add("show");
+  syncRoom10BodyLock();
   loginMessage.innerText = "";
 }
 
 function closeLogin(keepRedirect = true){
   document.getElementById("loginUI").classList.remove("show");
+  syncRoom10BodyLock();
   loginMessage.innerText = "";
   if(!keepRedirect) clearPendingRedirect();
 }
@@ -2577,7 +2666,7 @@ function bindEvents(){
   });
 
   rewardCloseBtn.addEventListener("click", closeRewardModal);
-  rewardConfirmBtn.addEventListener("click", closeRewardModal);
+  rewardConfirmBtn.addEventListener("click", claimCurrentReward);
 
   document.addEventListener("keydown", (event) => {
     if(event.key === "Escape"){
