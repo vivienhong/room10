@@ -1795,24 +1795,24 @@ const TIERS = {
   white: {
     name: "普通扭蛋",
     tokenName: "白金游戏币",
-    tokenCost: 20,
-    coinCost: 5,
+    tokenCost: null,
+    coinCost: null,
     countKey: "white",
     countEl: "whiteCount"
   },
   purple: {
     name: "高级扭蛋",
     tokenName: "紫金游戏币",
-    tokenCost: 20,
-    coinCost: 10,
+    tokenCost: null,
+    coinCost: null,
     countKey: "purple",
     countEl: "purpleCount"
   },
   gold: {
     name: "稀有扭蛋",
     tokenName: "金色游戏币",
-    tokenCost: 20,
-    coinCost: 20,
+    tokenCost: null,
+    coinCost: null,
     countKey: "gold",
     countEl: "goldTokenCount"
   }
@@ -1826,6 +1826,9 @@ const state = {
   confirmResolver: null,
   timers: [],
   handleRaf: null,
+  gachaStateReady: false,
+  gachaCostsReady: false,
+  gachaStateError: "",
   inventory: {
     white: 0,
     purple: 0,
@@ -1835,7 +1838,10 @@ const state = {
   freeDraw: {
     available: false,
     usedToday: false,
-    date: ""
+    date: "",
+    statusKnown: false,
+    loading: false,
+    error: ""
   },
   identity: {
     loggedIn: false,
@@ -1985,6 +1991,7 @@ function roleLabel(role){
     owner:"维修工",
     admin:"宿管",
     member:"房客",
+    trainee:"练习生",
     applying:"申请人",
     visitor:"参观者"
   };
@@ -1996,6 +2003,7 @@ function getRoleLabel(roleValue = state.identity.role){
   if(role === "owner") return "维修工";
   if(role === "admin") return "宿管";
   if(role === "member") return "房客";
+  if(role === "trainee") return "练习生";
   if(role === "applying") return "申请中";
   return state.identity.loggedIn ? "房客" : "参观者";
 }
@@ -2029,14 +2037,29 @@ function renderIdentity(){
 
 function updateGuestAccess(){
   const locked = !state.identity.loggedIn || state.busy;
+  const paidDrawLocked =
+    locked ||
+    !state.gachaStateReady ||
+    !state.gachaCostsReady ||
+    !!state.currentDraw;
   document.querySelectorAll(".pay-btn").forEach(btn=>{
-    btn.disabled = locked;
-    btn.title = state.identity.loggedIn ? "" : "游客只能观看，登录后才能扭蛋";
+    btn.disabled = paidDrawLocked;
+    btn.title = !state.identity.loggedIn
+      ? "游客只能观看，登录后才能扭蛋"
+      : ((!state.gachaStateReady || !state.gachaCostsReady)
+          ? (state.gachaStateError || "扭蛋价格配置尚未加载完成")
+          : "");
   });
   const freeBtn = document.getElementById("freeDrawBtn");
   if(freeBtn){
-    freeBtn.disabled = locked || !state.freeDraw.available || !!state.currentDraw;
-    freeBtn.title = state.identity.loggedIn ? "" : "游客只能观看，登录后才能使用每日免费机会";
+    freeBtn.disabled =
+      locked ||
+      !state.freeDraw.statusKnown ||
+      !state.freeDraw.available ||
+      !!state.currentDraw;
+    freeBtn.title = state.identity.loggedIn
+      ? (state.freeDraw.error || "")
+      : "游客只能观看，登录后才能使用每日免费机会";
   }
   if(!state.identity.loggedIn && !state.currentDraw){
     setStatus("游客可以观看，登录后才能使用扭蛋机。");
@@ -2056,30 +2079,64 @@ async function submitLogin(){
   const submitBtn = document.getElementById("submitLoginBtn");
   const nickname = nicknameInput.value.trim();
   const code = codeInput.value.trim();
-  if(!nickname){ message.textContent="请填写昵称。"; nicknameInput.focus(); return; }
-  if(!code){ message.textContent="请填写钥匙。"; codeInput.focus(); return; }
+
+  if(!nickname){
+    message.textContent = "请填写昵称。";
+    nicknameInput.focus();
+    return;
+  }
+  if(!code){
+    message.textContent = "请填写钥匙。";
+    codeInput.focus();
+    return;
+  }
+
+  submitBtn.disabled = true;
+  message.textContent = "验证中……";
+
   try{
-    submitBtn.disabled = true;
-    message.textContent = "验证中……";
-    const {data,error} = await client.rpc("verify_member_login",{input_nickname:nickname,input_code:code});
-    if(error){ console.error(error); message.textContent="登录失败，请检查昵称和钥匙。"; return; }
+    const {data,error} = await client.rpc("verify_member_login",{
+      input_nickname:nickname,
+      input_code:code
+    });
+
+    if(error){
+      console.error("verify_member_login RPC error:", error);
+      message.textContent = "登录失败，请检查昵称和钥匙。";
+      return;
+    }
+
     const member = normalizeLoginResult(data);
-    if(!member || !member.member_id){ message.textContent="昵称或钥匙不正确。"; return; }
+    if(!member || !member.member_id){
+      message.textContent = "昵称或钥匙不正确。";
+      return;
+    }
+
     localStorage.setItem("room10LoggedIn","true");
     localStorage.setItem("room10User",member.nickname || nickname);
     localStorage.setItem("room10MemberId",member.member_id);
     localStorage.setItem("room10MemberCode",code);
     localStorage.setItem("room10Role",member.role || "member");
-    codeInput.value="";
-    message.textContent="";
+
+    codeInput.value = "";
+    message.textContent = "";
     readIdentity();
     renderIdentity();
-    await loadGachaState();
-    setStatus("登录成功，可以使用扭蛋机了。 ");
+
+    try{
+      await loadGachaState();
+      setStatus("登录成功，可以使用扭蛋机了。");
+    }catch(stateError){
+      console.error("登录成功，但扭蛋状态读取失败：", stateError);
+      message.textContent = "登录成功，但扭蛋数据读取失败。";
+      setStatus(stateError?.message || "登录成功，但扭蛋数据读取失败，请稍后刷新页面。");
+    }
   }catch(err){
     console.error(err);
-    message.textContent="登录失败，请稍后再试。";
-  }finally{ submitBtn.disabled=false; }
+    message.textContent = "登录失败，请稍后再试。";
+  }finally{
+    submitBtn.disabled = false;
+  }
 }
 
 function setupIdentityActions(){
@@ -2108,10 +2165,22 @@ function setStatus(text){
 
 function setBusy(busy){
   state.busy = busy;
-  document.querySelectorAll(".pay-btn").forEach(btn => btn.disabled = busy || !state.identity.loggedIn);
+  document.querySelectorAll(".pay-btn").forEach(btn => {
+    btn.disabled =
+      busy ||
+      !state.identity.loggedIn ||
+      !state.gachaStateReady ||
+      !state.gachaCostsReady ||
+      !!state.currentDraw;
+  });
   const freeBtn = document.getElementById("freeDrawBtn");
   if(freeBtn){
-    freeBtn.disabled = busy || !state.identity.loggedIn || !state.freeDraw.available || !!state.currentDraw;
+    freeBtn.disabled =
+      busy ||
+      !state.identity.loggedIn ||
+      !state.freeDraw.statusKnown ||
+      !state.freeDraw.available ||
+      !!state.currentDraw;
   }
 }
 
@@ -2126,6 +2195,20 @@ function clearTimers(){
 
 function getCurrentMemberId(){
   return localStorage.getItem("room10MemberId") || "";
+}
+
+function getCurrentMemberCode(){
+  return localStorage.getItem("room10MemberCode") || "";
+}
+
+function requireCurrentMemberCredentials(){
+  const memberId = getCurrentMemberId();
+  const memberCode = getCurrentMemberCode();
+
+  if(!memberId) throw new Error("缺少成员 ID，请重新登录。");
+  if(!memberCode) throw new Error("缺少成员钥匙，请重新登录。");
+
+  return {memberId, memberCode};
 }
 
 function unwrapRpcData(data){
@@ -2173,39 +2256,130 @@ function applyGachaState(raw){
     numberFrom(data,["gold","gold_count","gold_token_count","rare_token_count"],0));
   state.inventory.coins = numberFrom(data,["coins","coin_count","gold_balance","member_gold"],0);
 
-  const free = data.free_draw || data.freeDraw || {};
-  state.freeDraw.available = !!(free.available ?? data.free_draw_available ?? false);
-  state.freeDraw.usedToday = !!(free.used_today ?? data.free_draw_used_today ?? !state.freeDraw.available);
-  state.freeDraw.date = String(free.date || data.free_draw_date || "");
+  const free = data.free_draw ?? data.freeDraw ?? {};
+  const availableValue =
+    typeof free.available === "boolean"
+      ? free.available
+      : (typeof data.free_draw_available === "boolean"
+          ? data.free_draw_available
+          : null);
+  const usedTodayValue =
+    typeof free.used_today === "boolean"
+      ? free.used_today
+      : (typeof data.free_draw_used_today === "boolean"
+          ? data.free_draw_used_today
+          : null);
+
+  if(usedTodayValue !== null){
+    state.freeDraw.usedToday = usedTodayValue;
+    state.freeDraw.available = !usedTodayValue;
+  }else if(availableValue !== null){
+    state.freeDraw.available = availableValue;
+    state.freeDraw.usedToday = !availableValue;
+  }else{
+    throw new Error("数据库没有返回今日免费扭蛋状态。");
+  }
+
+  state.freeDraw.date = String(free.date ?? data.free_draw_date ?? "");
+  state.freeDraw.statusKnown = true;
+  state.freeDraw.loading = false;
+  state.freeDraw.error = "";
 
   const costs = data.costs || data.tier_costs || {};
+  const missingCostTiers = [];
+
   for(const key of Object.keys(TIERS)){
     const config = costs[key] || data[key] || {};
-    TIERS[key].tokenCost = numberFrom(config,["token_cost","tokenCost"],TIERS[key].tokenCost);
-    TIERS[key].coinCost = numberFrom(config,["coin_cost","coinCost","gold_cost"],TIERS[key].coinCost);
+    const tokenCost = numberFrom(config,["token_cost","tokenCost"],Number.NaN);
+    const coinCost = numberFrom(config,["coin_cost","coinCost","gold_cost"],Number.NaN);
+
+    if(Number.isFinite(tokenCost) && tokenCost >= 0){
+      TIERS[key].tokenCost = tokenCost;
+    }else{
+      TIERS[key].tokenCost = null;
+      missingCostTiers.push(`${TIERS[key].name}游戏币价格`);
+    }
+
+    if(Number.isFinite(coinCost) && coinCost >= 0){
+      TIERS[key].coinCost = coinCost;
+    }else{
+      TIERS[key].coinCost = null;
+      missingCostTiers.push(`${TIERS[key].name}金币价格`);
+    }
   }
+
+  // 余额和每日免费状态读取成功时，不应因为价格配置缺失而显示“免费次数读取失败”。
+  state.gachaStateReady = true;
+  state.gachaCostsReady = missingCostTiers.length === 0;
+  state.gachaStateError = state.gachaCostsReady
+    ? ""
+    : `数据库未返回完整的扭蛋价格配置：${missingCostTiers.join("、")}。`;
   renderBalances();
   updateGuestAccess();
 }
 
 async function loadGachaState(){
   if(!state.identity.loggedIn){
+    state.gachaStateReady = false;
+    state.gachaCostsReady = false;
+    state.gachaStateError = "";
     state.inventory = {white:0,purple:0,gold:0,coins:0};
-    state.freeDraw = {available:false, usedToday:false, date:""};
+    state.freeDraw = {
+      available:false,
+      usedToday:false,
+      date:"",
+      statusKnown:false,
+      loading:false,
+      error:""
+    };
     renderBalances();
     updateGuestAccess();
     return false;
   }
 
-  const memberId = getCurrentMemberId();
-  if(!memberId) throw new Error("缺少成员 ID，请重新登录。");
+  state.gachaStateReady = false;
+  state.gachaCostsReady = false;
+  state.gachaStateError = "";
+  state.freeDraw.statusKnown = false;
+  state.freeDraw.loading = true;
+  state.freeDraw.error = "";
+  renderFreeDraw();
+  updateGuestAccess();
 
-  const {data,error} = await client.rpc("get_gacha_state",{p_member_id:memberId});
-  if(error) throw error;
-  const result = unwrapRpcData(data);
-  if(rpcFailed(result)) throw new Error(rpcMessage(result,"读取扭蛋机状态失败。"));
-  applyGachaState(result);
-  return true;
+  try{
+    const {memberId, memberCode} = requireCurrentMemberCredentials();
+
+    // 必须调用允许 anon/authenticated 执行的双参数版本：
+    // public.get_gacha_state(uuid, text)
+    const {data,error} = await client.rpc("get_gacha_state",{
+      p_member_id: memberId,
+      p_member_code: memberCode
+    });
+    if(error){
+      console.error("get_gacha_state RPC error:", error);
+      throw new Error(error.message || "读取今日免费扭蛋状态失败。");
+    }
+
+    const result = unwrapRpcData(data);
+    if(rpcFailed(result)){
+      throw new Error(rpcMessage(result,"读取扭蛋机状态失败。"));
+    }
+
+    applyGachaState(result);
+    return true;
+  }catch(err){
+    state.gachaStateReady = false;
+    state.gachaCostsReady = false;
+    state.gachaStateError = err?.message || "读取扭蛋机状态失败。";
+    state.freeDraw.available = false;
+    state.freeDraw.usedToday = false;
+    state.freeDraw.statusKnown = false;
+    state.freeDraw.loading = false;
+    state.freeDraw.error = err?.message || "读取今日免费次数失败。";
+    renderFreeDraw();
+    updateGuestAccess();
+    throw err;
+  }
 }
 
 function normalizeBall(source = {}){
@@ -2252,31 +2426,71 @@ function normalizeResultItem(raw, fallbackImage = ""){
 }
 
 async function requestDraw(tierKey,payType){
+  const {memberId, memberCode} = requireCurrentMemberCredentials();
+
+  // 调用允许前端执行的四参数版本：
+  // public.draw_gacha_once(uuid, text, text, text)
   const {data,error} = await client.rpc("draw_gacha_once",{
-    p_member_id:getCurrentMemberId(),
+    p_member_id:memberId,
+    p_member_code:memberCode,
     p_tier_key:tierKey,
     p_pay_type:payType
   });
-  if(error) throw error;
+
+  if(error){
+    console.error("draw_gacha_once RPC error:", error);
+    throw new Error(error.message || "扭蛋失败，请稍后再试。");
+  }
+
   return normalizeDrawResult(data,tierKey,payType);
 }
 
 async function requestOpenBall(draw){
+  const {memberId, memberCode} = requireCurrentMemberCredentials();
+
+  // 调用允许前端执行的三参数版本：
+  // public.open_gacha_ball(uuid, text, uuid)
   const {data,error} = await client.rpc("open_gacha_ball",{
-    p_member_id:getCurrentMemberId(),
+    p_member_id:memberId,
+    p_member_code:memberCode,
     p_draw_id:draw.id
   });
-  if(error) throw error;
+
+  if(error){
+    console.error("open_gacha_ball RPC error:", error);
+    throw new Error(error.message || "打开扭蛋失败，请稍后再试。");
+  }
+
   return normalizeResultItem(data,draw.ball.openImg);
 }
 
 async function requestStoreBall(draw){
+  const {memberId, memberCode} = requireCurrentMemberCredentials();
+
+  // 调用允许前端执行的三参数版本：
+  // public.store_gacha_ball(uuid, text, uuid)
   const {data,error} = await client.rpc("store_gacha_ball",{
-    p_member_id:getCurrentMemberId(),
+    p_member_id:memberId,
+    p_member_code:memberCode,
     p_draw_id:draw.id
   });
-  if(error) throw error;
+
+  if(error){
+    console.error("store_gacha_ball RPC error:", error);
+    throw new Error(error.message || "放入背包失败，请稍后再试。");
+  }
+
   return normalizeResultItem(data,draw.ball.closedImg);
+}
+
+async function refreshGachaStateAfterWrite(contextLabel){
+  try{
+    await loadGachaState();
+    return true;
+  }catch(err){
+    console.error(`${contextLabel}成功，但状态刷新失败：`, err);
+    return false;
+  }
 }
 
 function renderBalances(){
@@ -2298,12 +2512,26 @@ function renderFreeDraw(){
     return;
   }
 
-  if(state.freeDraw.available){
-    text.textContent = "今日免费普通扭蛋：可使用。";
-    btn.disabled = state.busy || !!state.currentDraw;
-  }else{
+  if(state.freeDraw.loading){
+    text.textContent = "今日免费普通扭蛋：检查中……";
+    btn.disabled = true;
+    return;
+  }
+
+  if(!state.freeDraw.statusKnown){
+    text.textContent = state.freeDraw.error
+      ? "今日免费普通扭蛋：读取失败。"
+      : "今日免费普通扭蛋：等待检查。";
+    btn.disabled = true;
+    return;
+  }
+
+  if(state.freeDraw.usedToday === true){
     text.textContent = "今日免费普通扭蛋：已使用。";
     btn.disabled = true;
+  }else{
+    text.textContent = "今日免费普通扭蛋：可使用。";
+    btn.disabled = state.busy || !!state.currentDraw;
   }
 }
 
@@ -2323,11 +2551,11 @@ function showResultActions(){
 }
 
 /*
-  后续接数据库时：
-  1. get_gacha_state：读取当前三种游戏币数量、金币数量。
-  2. draw_gacha_once：校验并扣除 token 或 gold，只允许扣一种，返回球和奖励。
-  3. open_gacha_ball：打开球并发放奖励。
-  4. store_gacha_ball：关闭球放入背包，并暗中点亮图鉴道具资源。
+  扭蛋数据库接口：
+  1. get_gacha_state：读取游戏币、金币、价格配置和每日免费状态。
+  2. draw_gacha_once：校验身份并完成一次抽取。
+  3. open_gacha_ball：打开扭蛋并发放奖励。
+  4. store_gacha_ball：将关闭的扭蛋放入背包并处理图鉴。
 */
 
 async function handleFreeDraw(){
@@ -2336,7 +2564,11 @@ async function handleFreeDraw(){
     setStatus("登录后才可以使用每日免费扭蛋机会。");
     return;
   }
-  if(!state.freeDraw.available){
+  if(!state.freeDraw.statusKnown){
+    setStatus(state.freeDraw.error || "正在读取今日免费扭蛋状态，请稍后再试。");
+    return;
+  }
+  if(state.freeDraw.usedToday === true || !state.freeDraw.available){
     setStatus("今天的免费普通扭蛋机会已经使用过了。");
     return;
   }
@@ -2348,6 +2580,16 @@ async function handleTierClick(tierKey){
 
   if(!state.identity.loggedIn){
     setStatus("登录后才可以使用扭蛋机哦。");
+    return;
+  }
+
+  if(!state.gachaStateReady){
+    setStatus(state.gachaStateError || "扭蛋数据尚未加载完成，请稍后再试。");
+    return;
+  }
+
+  if(!state.gachaCostsReady){
+    setStatus(state.gachaStateError || "扭蛋价格配置尚未加载完成，请稍后再试。");
     return;
   }
 
@@ -2393,7 +2635,7 @@ async function startDraw(tierKey, payType){
     if(!draw.id) throw new Error("数据库没有返回 draw_id。");
     state.currentDraw = draw;
 
-    await loadGachaState();
+    const stateRefreshed = await refreshGachaStateAfterWrite("抽取");
     await playTokenInsertAnimation(tierKey,payType);
     await playAnimation(draw);
 
@@ -2420,13 +2662,17 @@ async function startDraw(tierKey, payType){
         }
         state.currentDraw = null;
         resetBallView();
-        setStatus("请选择下一次扭蛋。");
+        setStatus(stateRefreshed
+          ? "请选择下一次扭蛋。"
+          : "本次扭蛋已完成，但余额刷新失败，请刷新页面后继续。");
         updateGuestAccess();
       }, 1150);
       return;
     }
 
-    setStatus("掉出了一枚扭蛋。你要怎么处理？");
+    setStatus(stateRefreshed
+      ? "掉出了一枚扭蛋。你要怎么处理？"
+      : "扭蛋已成功掉出；余额刷新失败，处理完后请刷新页面。");
     showResultActions();
   }catch(err){
     console.error(err);
@@ -2721,6 +2967,8 @@ async function openCurrentBall(){
     }, 380);
 
     const result = await resultPromise;
+    const stateRefreshed = await refreshGachaStateAfterWrite("打开扭蛋");
+
     window.setTimeout(() => {
       showReward({
         title:`${result.name} × ${result.quantity || 1}`,
@@ -2729,10 +2977,11 @@ async function openCurrentBall(){
       });
       state.currentDraw = null;
       resetBallView();
-      setStatus("请选择下一次扭蛋。");
+      setStatus(stateRefreshed
+        ? "请选择下一次扭蛋。"
+        : "奖励已发放，但余额刷新失败，请刷新页面后继续。");
+      updateGuestAccess();
     }, 1150);
-
-    await loadGachaState();
   }catch(err){
     console.error(err);
     showResultActions();
@@ -2750,6 +2999,7 @@ async function storeCurrentBall(){
     setBusy(true);
     hideResultActions();
     const result = await requestStoreBall(draw);
+    const stateRefreshed = await refreshGachaStateAfterWrite("放入背包");
 
     showReward({
       title:`${result.name} × ${result.quantity || 1}`,
@@ -2759,8 +3009,10 @@ async function storeCurrentBall(){
 
     state.currentDraw = null;
     resetBallView();
-    setStatus("请选择下一次扭蛋。");
-    await loadGachaState();
+    setStatus(stateRefreshed
+      ? "请选择下一次扭蛋。"
+      : "已放入背包，但余额刷新失败，请刷新页面后继续。");
+    updateGuestAccess();
   }catch(err){
     console.error(err);
     showResultActions();
@@ -2809,7 +3061,11 @@ function setupTooltips(){
     const tier = TIERS[btn.dataset.tier];
 
     btn.addEventListener("mouseenter", () => {
-      tip.textContent = `消耗 ${tier.tokenCost} 个${tier.tokenName}扭一次；\n不足时可确认使用 ${tier.coinCost} 金币抵扣。`;
+      if(!state.gachaStateReady || !state.gachaCostsReady || !Number.isFinite(tier.tokenCost) || !Number.isFinite(tier.coinCost)){
+        tip.textContent = state.gachaStateError || "扭蛋价格正在从数据库读取。";
+      }else{
+        tip.textContent = `消耗 ${tier.tokenCost} 个${tier.tokenName}扭一次；\n不足时可确认使用 ${tier.coinCost} 金币抵扣。`;
+      }
       tip.style.display = "block";
     });
 
@@ -2848,10 +3104,16 @@ async function init(){
   document.getElementById("freeDrawBtn")?.addEventListener("click", handleFreeDraw);
 
   renderBalances();
+  let initialStateError = null;
   if(state.identity.loggedIn){
-    try{ await loadGachaState(); }
-    catch(err){ console.error(err); setStatus(err?.message || "读取扭蛋机数据失败。"); }
+    try{
+      await loadGachaState();
+    }catch(err){
+      console.error(err);
+      initialStateError = err;
+    }
   }
+
   setupTooltips();
   setupMachineAssetLayer();
   resetBallView();
@@ -2864,7 +3126,11 @@ async function init(){
   updateMachineAssetLayer();
 
   if(state.identity.loggedIn){
-    setStatus("准备好了。");
+    setStatus(initialStateError
+      ? (initialStateError.message || "读取扭蛋机数据失败，请刷新页面重试。")
+      : (state.gachaCostsReady
+          ? "准备好了。"
+          : (state.gachaStateError || "每日免费状态已读取，但扭蛋价格配置尚未加载。")));
   }else{
     setStatus("游客可以观看，登录后才能使用扭蛋机。");
   }
