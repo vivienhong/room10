@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜收集图鉴</title>
-<!-- book clean db-driven v2: 固定素材走 room10-paths.js；图鉴分类/页面文案走数据库；个人图鉴状态统一使用 member_id + member_code 安全 RPC；清减旧缓存兼容读取 -->
+<!-- book clean db-driven v3: 固定素材走 room10-paths.js；图鉴分类/页面文案走数据库；个人图鉴状态统一使用 member_id + member_code 安全 RPC；清减旧缓存兼容读取 -->
 <script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -257,7 +257,7 @@ button{ font-family:inherit; }
   min-width:0;
   min-height:calc(92px * var(--book-scale));
   border-radius:calc(16px * var(--book-scale));
-  padding:calc(8px * var(--book-scale)) calc(6px * var(--book-scale));
+  padding:calc(4px * var(--book-scale)) calc(3px * var(--book-scale));
   background:rgba(255,251,244,.62);
   border:1px solid rgba(178,121,64,.14);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.65), 0 6px 12px rgba(106,68,34,.06);
@@ -269,8 +269,8 @@ button{ font-family:inherit; }
   text-align:center;
 }
 .itemIcon{
-  width:calc(42px * var(--book-scale));
-  height:calc(42px * var(--book-scale));
+  width:calc(56px * var(--book-scale));
+  height:calc(56px * var(--book-scale));
   border-radius:calc(14px * var(--book-scale));
   display:grid;
   place-items:center;
@@ -279,8 +279,8 @@ button{ font-family:inherit; }
   box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
 }
 .itemIcon img{
-  width:72%;
-  height:72%;
+  width:92%;
+  height:92%;
   object-fit:contain;
   display:block;
 }
@@ -687,7 +687,8 @@ body.gachaPopupOpen{
   .mobileTab.active{ background:rgba(232,194,135,.72); }
   .itemGrid{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:calc(7px * var(--book-scale)); padding:0 calc(1px * var(--book-scale)) calc(18px * var(--book-scale)) 0; }
   .itemCard{ min-height:calc(78px * var(--book-scale)); border-radius:calc(13px * var(--book-scale)); padding:calc(6px * var(--book-scale)) calc(4px * var(--book-scale)); }
-  .itemIcon{ width:calc(34px * var(--book-scale)); height:calc(34px * var(--book-scale)); border-radius:calc(11px * var(--book-scale)); font-size:calc(22px * var(--book-scale)); }
+  .itemIcon{ width:calc(46px * var(--book-scale)); height:calc(46px * var(--book-scale)); border-radius:calc(11px * var(--book-scale)); font-size:calc(22px * var(--book-scale)); }
+   .itemIcon img{ width:92%; height:92%; }
   .itemName{ font-size:calc(10.5px * var(--book-scale)); }
   .emptySpecial{ min-height:calc(250px * var(--book-scale)); font-size:calc(14px * var(--book-scale)); }
   .bookTags{ display:none; }
@@ -829,13 +830,13 @@ function room10Url(path){
   return `${ROOM10_ROOT_PREFIX}${raw}`;
 }
 
-function room10PageUrl(key, fallbackPath = ""){
+function room10PageUrl(key){
   const pageKey = String(key || "").trim();
   if(pageKey && typeof window.room10Page === "function"){
     const url = window.room10Page(pageKey);
     if(url) return url;
   }
-  return room10Url(fallbackPath || "");
+  throw new Error(`收集图鉴页面路径配置缺失：${pageKey || "empty page key"}`);
 }
 
 function room10AssetUrl(keyPath, fallbackPath = ""){
@@ -1133,9 +1134,26 @@ function renderMobileTabs(){
 
 function getCurrentMemberIdentity(){
   return {
+    loggedIn:localStorage.getItem(STORAGE_KEYS.loggedIn) === "true",
     memberId:String(localStorage.getItem(STORAGE_KEYS.memberId) || "").trim(),
     memberCode:String(localStorage.getItem(STORAGE_KEYS.memberCode) || "").trim()
   };
+}
+
+function clearBookAuthCache(){
+  Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+  localStorage.removeItem("room10_user");
+  localStorage.removeItem("room10_current_user");
+}
+
+function requireBookMemberIdentity(){
+  const identity = getCurrentMemberIdentity();
+  if(!identity.loggedIn || !identity.memberId || !identity.memberCode){
+    clearBookAuthCache();
+    window.location.href = room10PageUrl("index");
+    return null;
+  }
+  return identity;
 }
 
 function normalizeBookItem(row){
@@ -1277,10 +1295,12 @@ async function loadCollectionBookItems(options = {}){
   renderBook();
 
   try{
-    const { memberId, memberCode } = getCurrentMemberIdentity();
+    const identity = requireBookMemberIdentity();
+    if(!identity) return;
+
     const { data, error } = await supabaseClient.rpc("get_collection_book_items", {
-      p_member_id:memberId || null,
-      p_member_code:memberCode || null
+      p_member_id:identity.memberId,
+      p_member_code:identity.memberCode
     });
     if(error) throw error;
 
@@ -1295,8 +1315,7 @@ async function loadCollectionBookItems(options = {}){
     }
   }catch(error){
     console.error("读取图鉴数据失败：", error);
-    bookLoadError = t("book.read_failed");
-    buildCategoriesFromRows([]);
+    bookLoadError = `${t("book.read_failed")}${error?.message ? `：${error.message}` : ""}`;
   }finally{
     isLoadingBookData = false;
     renderBook();
@@ -1378,7 +1397,7 @@ function renderBook(){
 
 function openGachaPopup(){
   if(!gachaPopupModal || !gachaPopupFrame) return;
-  gachaPopupFrame.src = `${room10PageUrl("gameGacha", "game/gacha/gacha.html")}?from=popup&modal=1`;
+  gachaPopupFrame.src = `${room10PageUrl("gameGacha")}?from=popup&modal=1`;
   gachaPopupModal.classList.add("show");
   gachaPopupModal.setAttribute("aria-hidden","false");
   document.body.classList.add("gachaPopupOpen");
@@ -1403,7 +1422,7 @@ function closeBook(){
   }catch(error){
     console.warn("无法写入宿舍当前版块。", error);
   }
-  window.location.href = room10PageUrl("dorm", "dorm/dorm.html");
+  window.location.href = room10PageUrl("dorm");
 }
 function goCategory(index){
   if(!categories.length) return;
@@ -1482,6 +1501,7 @@ window.addEventListener("orientationchange", requestBookRender);
 
 async function initCollectionBookPage(){
   try{
+    if(!requireBookMemberIdentity()) return;
     await loadBookPageTexts();
     buildCategoriesFromRows([]);
     applyBookAssets();
