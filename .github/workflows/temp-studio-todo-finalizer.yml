@@ -1,6 +1,7 @@
 name: Temporary studio todo finalizer
 
 on:
+  workflow_dispatch:
   pull_request_target:
     types: [opened, synchronize, reopened]
 
@@ -10,7 +11,7 @@ permissions:
 
 jobs:
   finalize:
-    if: github.event.pull_request.head.ref == 'agent/studio-todo-final-template71'
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.ref == 'agent/studio-todo-final-template71'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
