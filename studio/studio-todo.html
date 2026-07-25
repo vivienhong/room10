@@ -4232,17 +4232,35 @@ body{
       .replace(/'/g, "&#39;");
   }
 
-  function formatDateForInput(dateString) {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    if (Number.isNaN(date.getTime())) {
-      const text = String(dateString).trim();
-      return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : "";
+  const LEGACY_WORK_CUTOFF_DATE = "2025-05-22";
+
+  function normalizeProjectDate(value) {
+    const match = String(value || "").trim().match(/^(\d{4}-\d{2}-\d{2})/);
+    return match ? match[1] : "";
+  }
+
+  function isLegacyWork(task) {
+    if (
+      task?.is_legacy === true
+      || task?.is_legacy_work === true
+      || String(task?.record_type || "").trim().toLowerCase() === "legacy"
+    ) {
+      return true;
     }
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const d = String(date.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
+
+    const releaseDate = normalizeProjectDate(
+      task?.release_date || task?.published_at || task?.publish_date
+    );
+    return !!releaseDate && releaseDate < LEGACY_WORK_CUTOFF_DATE;
+  }
+
+  function getTaskDisplayStatus(task) {
+    if (isLegacyWork(task)) return "已发布";
+    return String(task?.computedStatus || task?.status || "").trim();
+  }
+
+  function formatDateForInput(dateString) {
+    return normalizeProjectDate(dateString);
   }
 
   function isLoggedIn() {
@@ -5007,6 +5025,7 @@ body{
   }
 
   function shouldRemindCurrentUserForLottery(task) {
+    if (isLegacyWork(task)) return false;
     const state = getCurrentUserUnassignedLotteryState(task);
     if (!state.needsLottery) return false;
     return (state.task?.parts || []).some(row => {
@@ -5415,6 +5434,7 @@ ${names}${suffix}`);
   }
 
   function isTaskInfoComplete(task) {
+    if (isLegacyWork(task)) return true;
     const rows = Array.isArray(task?.parts) ? task.parts : [];
     const singerQuota = Math.max(1, Number(task?.participant_count) || 1);
     const assignedSingerCount = getUniqueAssignedSingerCount(task);
@@ -5432,6 +5452,7 @@ ${names}${suffix}`);
   }
 
   function isTaskPublishedComplete(task) {
+    if (isLegacyWork(task)) return true;
     const hasDisplayLink = !!String(task?.display_link || "").trim();
     if (!hasDisplayLink) return false;
     if (!isTaskInfoComplete(task)) return false;
@@ -5468,6 +5489,7 @@ ${names}${suffix}`);
   }
 
   function getTodoStage(task) {
+    if (isLegacyWork(task)) return null;
     const singerQuota = Math.max(1, Number(task?.participant_count) || 1);
     const assignedSingerCount = getUniqueAssignedSingerCount(task);
     const hasProducer = hasEffectiveProducer(task);
@@ -5513,6 +5535,7 @@ ${names}${suffix}`);
   }
 
   function getSupplementTags(task) {
+    if (isLegacyWork(task)) return [];
     const hasVideoLink = !!String(task?.display_link || "").trim();
 
     // 新增定位标签：项目已经有作品链接，但核心资料仍未完整时，
@@ -5590,6 +5613,11 @@ ${names}${suffix}`);
           producer_completed: !!project.producer_completed,
           producer_completed_at: project.producer_completed_at || null,
           release_date: project.release_date || null,
+          published_at: project.published_at || null,
+          publish_date: project.publish_date || null,
+          is_legacy: project.is_legacy === true,
+          is_legacy_work: project.is_legacy_work === true,
+          record_type: project.record_type || "",
           display_link: project.display_link || "",
           project_tone: project.project_tone || "",
           is_collective_task: !!project.is_collective_task,
@@ -5604,7 +5632,7 @@ ${names}${suffix}`);
         task.supplementTags = getSupplementTags(task);
         task.readyForHonorShow = isReadyForHonorShow(task);
         const todoStage = getTodoStage(task);
-        task.computedStatus = todoStage ? todoStage.statusText : "";
+        task.computedStatus = isLegacyWork(task) ? "已发布" : (todoStage ? todoStage.statusText : "");
         return task;
       })
       .sort((a, b) => {
@@ -5979,6 +6007,11 @@ ${names}${suffix}`);
         publish_status: row.publish_status,
         project_tone: row.project_tone,
         release_date: row.release_date,
+        published_at: row.published_at || null,
+        publish_date: row.publish_date || null,
+        is_legacy: row.is_legacy === true,
+        is_legacy_work: row.is_legacy_work === true,
+        record_type: row.record_type || "",
         participant_count: row.participant_count,
         producer_member_id: row.producer_member_id,
         producer_completed: !!row.producer_completed,
@@ -6507,6 +6540,9 @@ ${names}${suffix}`);
 
 
 function getCrossPageSearchLocation(task) {
+    if (isLegacyWork(task)) {
+      return { area:"gallery", label:"作品展览", pageKey:"honorGallery", page:PAGE_LINKS.honorGallery };
+    }
     const tags = Array.isArray(task?.supplementTags) ? task.supplementTags.filter(Boolean) : [];
     if (tags.length) {
       return { area:"todo", label:`待处理 · ${tags.join(" + ")}`, pageKey:"studioTodo", page:PAGE_LINKS.studioTodo };
@@ -6528,8 +6564,7 @@ function getCrossPageSearchLocation(task) {
       task?.project_name,
       task?.project_code,
       task?.project_type,
-      task?.status,
-      task?.computedStatus,
+      getTaskDisplayStatus(task),
       task?.producer_name,
       task?.project_tone,
       singerText,
@@ -6542,7 +6577,7 @@ function getCrossPageSearchLocation(task) {
     const parts = [];
     if (task?.project_code) parts.push(`编号：${task.project_code}`);
     if (task?.project_type) parts.push(`分类：${task.project_type}`);
-    const status = String(task?.computedStatus || task?.status || "").trim();
+    const status = getTaskDisplayStatus(task);
     if (status) parts.push(`状态：${status}`);
     if (location?.label) parts.push(`位置：${location.label}`);
     return parts.join(" · ");
