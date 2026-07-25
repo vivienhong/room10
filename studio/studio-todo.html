@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>十号房｜工作间任务</title>
+<title>十号房｜工作间任务 v4</title>
 
+<script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -251,6 +252,17 @@ body{
       opacity:0;
     }
   }
+
+.searchLocationBox{padding:12px 10px;border-radius:15px;background:rgba(255,252,247,0.34);color:#7a5231;font-size:12px;line-height:1.6;text-align:left;box-shadow:inset 0 1px 0 rgba(255,255,255,0.52),0 3px 10px rgba(120,92,63,0.05);}
+.searchLocationTitle{font-weight:900;color:#6f4726;margin-bottom:3px;}
+.searchLocationDesc{color:#8b6947;margin-bottom:8px;}
+.searchLocationList{display:flex;flex-direction:column;gap:7px;}
+.searchLocationItem{width:100%;appearance:none;border:1px solid rgba(194,151,108,.2);cursor:pointer;padding:9px 10px;border-radius:11px;background:rgba(255,252,247,.72);text-align:left;display:flex;flex-direction:column;gap:2px;color:#6a4120;box-shadow:inset 0 1px 0 rgba(255,255,255,.85);}
+.searchLocationItem:hover{background:rgba(248,233,202,.78);}
+.searchLocationWhere{font-size:10px;font-weight:900;color:#a06c36;}
+.searchLocationName{font-size:12px;font-weight:900;color:#633d1d;}
+.searchLocationMeta{font-size:10px;font-weight:600;color:#8b6947;line-height:1.45;}
+
 .filterTagsWrap{
     flex:0 0 auto;
     display:flex;
@@ -3829,7 +3841,7 @@ body{
 <body>
   <div id="room">
     <div id="bgFrame" aria-hidden="true">
-      <img id="bg" src="./room-studio.png" alt="十号房工作间背景" />
+      <img id="bg" src="" alt="十号房工作间背景" />
     </div>
     <div id="musicNotesLayer" aria-hidden="true"></div>
 
@@ -3922,9 +3934,9 @@ body{
 
       <section id="taskPanel" aria-label="工作间任务面板">
         <nav id="panelSwitch" aria-label="工作间页面切换">
-          <a class="switchBtn" data-page="studio-todo.html" href="./studio-todo.html">待处理</a>
-          <a class="switchBtn" data-page="studio-project.html" href="./studio-project.html">任务详情</a>
-          <a class="switchBtn" data-page="studio-Submit.html" href="./studio-Submit.html">项目委托</a>
+          <a class="switchBtn" data-page-key="studioTodo" data-page="studio-todo.html" href="#">待处理</a>
+          <a class="switchBtn" data-page-key="studioProject" data-page="studio-project.html" href="#">任务详情</a>
+          <a class="switchBtn" data-page-key="studioSubmit" data-page="studio-Submit.html" href="#">项目委托</a>
         </nav>
 
         <div id="claimView" class="panelView">
@@ -3936,6 +3948,7 @@ body{
                 <button id="filterLyricsBtn" class="filterTagBtn primaryFilterBtn" type="button" data-filter="待分词">待分词</button>
                 <button id="filterToneBtn" class="filterTagBtn primaryFilterBtn" type="button" data-filter="待定调">待定调</button>
                 <button id="filterPublishBtn" class="filterTagBtn primaryFilterBtn" type="button" data-filter="待发布">待发布</button>
+                <button id="filterSupplementBtn" class="filterTagBtn primaryFilterBtn altToggle" type="button" data-filter="资料补充" hidden>资料补充</button>
                 <button id="filterNoMeBtn" class="filterTagBtn altToggle" type="button" data-filter="没有我" hidden>没有我</button>
                 <button id="filterHasMeBtn" class="filterTagBtn altToggle" type="button" data-filter="有我在" hidden>有我在</button>
               </div>
@@ -4026,15 +4039,48 @@ body{
   const SUPABASE_URL = "https://tfevitwoqmxwaguvtyms.supabase.co";
   const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const MEMBER_DIRECTORY_RPC = "get_room10_member_directory";
+  const STUDIO_RPC = Object.freeze({
+    memberDirectory: "get_room10_member_directory",
+    studioItems: "get_studio_project_items",
+    projectMixers: "get_project_mixers",
+    saveBundle: "save_project_bundle",
+    setting: "get_room10_setting",
+    setDisplayLink: "secure_set_project_display_link",
+    setProducerCompleted: "secure_set_project_producer_completed"
+  });
+
+  function getRoom10Page(key) {
+    const path = typeof window.room10Page === "function" ? window.room10Page(key) : "";
+    if (!path) {
+      throw new Error(`room10-paths.js 缺少页面配置：${key}`);
+    }
+    return path;
+  }
+
+  function getRoom10Asset(keyPath) {
+    const path = typeof window.room10Asset === "function" ? window.room10Asset(keyPath) : "";
+    if (!path) {
+      throw new Error(`room10-paths.js 缺少素材配置：${keyPath}`);
+    }
+    return path;
+  }
 
   const STORAGE_KEYS = {
     loggedIn: "room10LoggedIn",
     user: "room10User",
     role: "room10Role",
     memberId: "room10MemberId",
-    memberCode: "room10MemberCode"
+    memberCode: "room10MemberCode",
+    studioJumpIntent: "room10_studio_jump_intent"
   };
+
+  const LOGIN_STORAGE_KEYS = [
+    STORAGE_KEYS.loggedIn,
+    STORAGE_KEYS.user,
+    STORAGE_KEYS.role,
+    STORAGE_KEYS.memberId,
+    STORAGE_KEYS.memberCode
+  ];
 
   const FALLBACK_PROJECT_TYPE_OPTIONS = [
     { value: "披4", label: "披4", sort_order: 10, is_active: true },
@@ -4078,21 +4124,35 @@ body{
   };
 
   const links = {
-    hall: "index.html",
-    honor: "honor.html",
-    studio: "studio-todo.html",
-    game: "game.html",
-    living: "living.html",
-    dorm: "dorm.html",
-    pets: "pets.html",
-    flower: "flower.html"
+    hall: getRoom10Page("index"),
+    honor: getRoom10Page("honor"),
+    studio: getRoom10Page("studioTodo"),
+    studioProject: getRoom10Page("studioProject"),
+    studioSubmit: getRoom10Page("studioSubmit"),
+    studioWheel: getRoom10Page("studioWheel"),
+    game: getRoom10Page("game"),
+    living: getRoom10Page("living"),
+    dorm: getRoom10Page("dorm"),
+    pets: getRoom10Page("pet"),
+    flower: getRoom10Page("flower")
   };
+
+  const PAGE_LINKS = Object.freeze({
+    studioTodo: links.studio,
+    studioProject: links.studioProject,
+    studioSubmit: links.studioSubmit,
+    studioWheel: links.studioWheel,
+    honorGallery: getRoom10Page("honorGallery")
+  });
 
   const IS_FILE_PROTOCOL = window.location.protocol === "file:";
 
   let tasks = [];
-  let membersCache = [];
-  let mixerMembersCache = [];
+  let allProjectSearchItems = [];
+  let room10Members = [];
+  let room10SingerMembers = [];
+  let room10MixerMembers = [];
+  let projectMixersByProjectId = new Map();
   let activeClaimTaskId = "";
   let pendingStudioJumpIntent = null;
   let jumpFlashTimer = null;
@@ -4118,7 +4178,11 @@ body{
 
   const room = document.getElementById("room");
   const bg = document.getElementById("bg");
-  const BG_CANDIDATE_PATHS = ["./room-studio.png", "room-studio.png", "./images/room-studio.png", "images/room-studio.png"];
+  const BG_CANDIDATE_PATHS = [
+    getRoom10Asset("studio.roomStudio"),
+    "./room-studio.png",
+    "room-studio.png"
+  ].filter(Boolean);
   let bgPathIndex = 0;
   let bgLoaded = false;
   if (bg && !IS_FILE_PROTOCOL) bg.crossOrigin = "anonymous";
@@ -4185,13 +4249,18 @@ body{
     return localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
   }
 
+  function normalizeRoleValue(value) {
+    const role = String(value || "visitor").trim().toLowerCase();
+    return role === "roomer" ? "member" : role;
+  }
+
   function getCurrentRole() {
-    const role = String(localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
-    return ["owner", "admin", "member", "visitor", "applying"].includes(role) ? role : "visitor";
+    const role = normalizeRoleValue(authState.role || localStorage.getItem(STORAGE_KEYS.role));
+    return ["owner", "admin", "member", "trainee", "visitor", "applying"].includes(role) ? role : "visitor";
   }
 
   function canEditCurrentPage() {
-    return ["owner", "admin", "member"].includes(getCurrentRole());
+    return ["owner", "admin", "member", "trainee"].includes(getCurrentRole());
   }
 
   function canEditTaskCode() {
@@ -4200,6 +4269,12 @@ body{
 
   function getCurrentMemberId() {
     return String(authState.memberId || localStorage.getItem(STORAGE_KEYS.memberId) || "").trim();
+  }
+
+  function getCurrentUiMemberId() {
+    const currentName = getCurrentMemberName();
+    const matched = findMemberByName(currentName);
+    return String(matched?.member_id || matched?.id || getCurrentMemberId() || "").trim();
   }
 
   function getCurrentMemberName() {
@@ -4211,10 +4286,11 @@ body{
   }
 
   function getCurrentRoleLabel(roleValue = authState.role) {
-    const role = String(roleValue || "").toLowerCase();
+    const role = normalizeRoleValue(roleValue);
     if (role === "owner") return "维修工";
     if (role === "admin") return "宿管";
     if (role === "member") return "房客";
+    if (role === "trainee") return "练习生";
     if (role === "applying") return "申请中";
     return "参观者";
   }
@@ -4253,68 +4329,156 @@ body{
     requestAnimationFrame(fitTopBarIdentityContent);
   }
 
+  function extractIdentityMember(data) {
+    if (Array.isArray(data)) {
+      return data.length ? extractIdentityMember(data[0]) : null;
+    }
+    if (!data || typeof data !== "object") return null;
+
+    for (const key of ["member", "identity", "data", "item", "record"]) {
+      if (data[key] && typeof data[key] === "object") {
+        const found = extractIdentityMember(data[key]);
+        if (found) return found;
+      }
+    }
+
+    if (Array.isArray(data.items) && data.items.length) {
+      const found = extractIdentityMember(data.items[0]);
+      if (found) return found;
+    }
+
+    return (data.id || data.member_id) ? data : null;
+  }
+
+  function identityPayloadExplicitlyMissing(data) {
+    if (!data || typeof data !== "object" || Array.isArray(data)) return false;
+    const status = String(data.status || data.code || "").trim().toLowerCase();
+    return data.found === false || status === "not_found" || status === "member_not_found";
+  }
+
+  function clearStoredLogin() {
+    LOGIN_STORAGE_KEYS.forEach(key => localStorage.removeItem(key));
+    authState.initialized = false;
+    authState.loggedIn = false;
+    authState.nickname = "";
+    authState.role = "visitor";
+    authState.memberId = null;
+    authState.memberCode = "";
+  }
+
+  function redirectToIndex() {
+    window.location.href = getRoom10Page("index");
+  }
+
   async function ensureAuthState() {
     authState.loggedIn = isLoggedIn();
     authState.nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
-    authState.role = getCurrentRole();
-    authState.memberId = localStorage.getItem(STORAGE_KEYS.memberId) || null;
+    authState.role = normalizeRoleValue(localStorage.getItem(STORAGE_KEYS.role));
+    authState.memberId = String(localStorage.getItem(STORAGE_KEYS.memberId) || "").trim() || null;
     authState.memberCode = String(localStorage.getItem(STORAGE_KEYS.memberCode) || "").trim();
 
-    if (!authState.loggedIn || !authState.nickname) {
-      handleLogout();
+    if (!authState.loggedIn || !authState.nickname || !authState.memberId || !authState.memberCode) {
+      clearStoredLogin();
+      redirectToIndex();
       return false;
     }
 
     try {
-      let query = supabaseClient
-        .from("members")
-        .select("id, nickname, role, member_code");
+      let identityPayload = null;
+      let identityError = null;
 
-      if (authState.memberId) {
-        query = query.eq("id", authState.memberId);
-      } else {
-        query = query.eq("nickname", authState.nickname);
+      const identityResult = await supabaseClient.rpc("get_index_member_identity", {
+        p_member_id: authState.memberId,
+        p_member_code: authState.memberCode
+      });
+      identityPayload = identityResult.data;
+      identityError = identityResult.error;
+
+      let verifiedMember = identityError ? null : extractIdentityMember(identityPayload);
+
+      // 兼容尚未部署首页身份 RPC 的环境，但不再直接读取 members 表。
+      if (!verifiedMember && !identityPayloadExplicitlyMissing(identityPayload)) {
+        const directoryResult = await supabaseClient.rpc(STUDIO_RPC.memberDirectory);
+        if (!directoryResult.error && Array.isArray(directoryResult.data)) {
+          verifiedMember = directoryResult.data.find(item => {
+            const itemId = String(item.member_id || item.id || "").trim();
+            const itemName = String(item.nickname || item.display_name || "").trim();
+            return (itemId && itemId === String(authState.memberId))
+              || (itemName && itemName === String(authState.nickname));
+          }) || null;
+          if (!verifiedMember && identityError) identityError = directoryResult.error || identityError;
+        }
       }
 
-      const { data, error } = await query.maybeSingle();
+      if (!verifiedMember) {
+        if (identityPayloadExplicitlyMissing(identityPayload)) {
+          clearStoredLogin();
+          redirectToIndex();
+          return false;
+        }
+        throw identityError || new Error("无法确认当前成员身份，请检查 get_index_member_identity RPC。");
+      }
 
-      if (error || !data) {
-        handleLogout();
+      const nextId = String(verifiedMember.member_id || verifiedMember.id || "").trim();
+      const nextNickname = String(verifiedMember.nickname || verifiedMember.display_name || "").trim();
+      const nextCode = String(
+        verifiedMember.member_code
+        || verifiedMember.memberCode
+        || verifiedMember.key_code
+        || authState.memberCode
+        || ""
+      ).trim();
+      const nextRole = normalizeRoleValue(verifiedMember.role || authState.role);
+
+      if (!nextId || !nextNickname || !nextCode) {
+        throw new Error("成员身份资料不完整，请重新登录。");
+      }
+
+      if (nextRole === "applying") {
+        window.location.href = getRoom10Page("managerMember");
         return false;
       }
 
-      authState.memberId = String(data.id || authState.memberId || "");
-      authState.nickname = String(data.nickname || authState.nickname || "").trim();
-      authState.role = String(data.role || authState.role || "member").toLowerCase();
-      authState.memberCode = String(data.member_code || authState.memberCode || "").trim();
+      if (!["owner", "admin", "member", "trainee"].includes(nextRole)) {
+        clearStoredLogin();
+        redirectToIndex();
+        return false;
+      }
 
+      authState.memberId = nextId;
+      authState.nickname = nextNickname;
+      authState.role = nextRole;
+      authState.memberCode = nextCode;
+      authState.loggedIn = true;
+      authState.initialized = true;
+
+      localStorage.setItem(STORAGE_KEYS.loggedIn, "true");
       localStorage.setItem(STORAGE_KEYS.user, authState.nickname);
       localStorage.setItem(STORAGE_KEYS.memberId, authState.memberId);
       localStorage.setItem(STORAGE_KEYS.role, authState.role);
-      if (authState.memberCode) {
-        localStorage.setItem(STORAGE_KEYS.memberCode, authState.memberCode);
-      }
+      localStorage.setItem(STORAGE_KEYS.memberCode, authState.memberCode);
 
-      authState.initialized = true;
       updateTopBarIdentity();
       return true;
     } catch (err) {
       console.error("同步登录状态失败：", err);
-      handleLogout();
+      updateTopBarIdentity();
+      showToast("身份读取失败", `${String(err?.message || err)}
+登录状态没有被清除，请返回首页后重试。`);
       return false;
     }
   }
 
   async function handleLogout() {
     if (hasPendingLocalChanges) {
-      await saveCurrentTaskEdits("manual");
+      try {
+        await saveCurrentTaskEdits("manual");
+      } catch (err) {
+        console.error("登出前保存失败：", err);
+      }
     }
-    localStorage.removeItem(STORAGE_KEYS.loggedIn);
-    localStorage.removeItem(STORAGE_KEYS.user);
-    localStorage.removeItem(STORAGE_KEYS.role);
-    localStorage.removeItem(STORAGE_KEYS.memberId);
-    localStorage.removeItem(STORAGE_KEYS.memberCode);
-    window.location.href = "index.html";
+    clearStoredLogin();
+    redirectToIndex();
   }
 
   function showToast(title, message) {
@@ -4365,7 +4529,8 @@ body{
     if (getCurrentMemberId()) params.set('member_id', getCurrentMemberId());
     params.set('embed', '1');
     params.set('v', '20260504-wheel-layers');
-    return `studio-wheel.html${params.toString() ? `?${params.toString()}` : ''}`;
+    const wheelPage = links.studioWheel;
+    return `${wheelPage}${params.toString() ? `?${params.toString()}` : ''}`;
   }
 
   function buildWheelToolPayload(taskId = activeClaimTaskId) {
@@ -4546,7 +4711,7 @@ body{
         original: data.item,
         singer: {
           name: data?.member_name || data?.context?.member_name || getCurrentMemberName(),
-          member_id: data?.member_id || data?.context?.member_id || getCurrentMemberId()
+          member_id: data?.member_id || data?.context?.member_id || getCurrentUiMemberId()
         },
         extras: data?.extras || []
       }];
@@ -4708,21 +4873,13 @@ body{
   function findMemberByName(name) {
     const key = normalizeNameForLookup(name);
     if (!key) return null;
-    return membersCache.find(member => {
-      return normalizeNameForLookup(member.display) === key
-        || normalizeNameForLookup(member.nickname) === key
-        || normalizeNameForLookup(member.name) === key;
-    }) || null;
+    return room10Members.find(member => normalizeNameForLookup(member.nickname) === key) || null;
   }
 
   function findMixerByName(name) {
     const key = normalizeNameForLookup(name);
     if (!key) return null;
-    return mixerMembersCache.find(member => {
-      return normalizeNameForLookup(member.display) === key
-        || normalizeNameForLookup(member.nickname) === key
-        || normalizeNameForLookup(member.name) === key;
-    }) || null;
+    return room10MixerMembers.find(member => normalizeNameForLookup(member.nickname) === key) || null;
   }
 
   function uniqueAssignedIds(parts) {
@@ -4740,7 +4897,7 @@ body{
   }
 
   function isCurrentUserInTask(task) {
-    const currentId = getCurrentMemberId();
+    const currentId = getCurrentUiMemberId();
     if (!currentId) return false;
     const isSinger = getParticipantSingerIds(task).includes(currentId);
     const isProducer = String(task.producer_member_id || "").trim() === currentId;
@@ -4748,7 +4905,7 @@ body{
   }
 
   function isCurrentUserSingerInTask(task) {
-    const currentId = getCurrentMemberId();
+    const currentId = getCurrentUiMemberId();
     if (!currentId) return false;
     return (task.singers || []).some(item => String(item.member_id || "").trim() === currentId)
       || (task.parts || []).some(row => String(row.assigned_member_id || "").trim() === currentId);
@@ -4813,7 +4970,7 @@ body{
   }
 
   function getCurrentUserUnassignedLotteryState(task) {
-    const currentId = getCurrentMemberId();
+    const currentId = getCurrentUiMemberId();
     const liveTask = getTaskForLiveUi(task);
     const result = {
       task: liveTask,
@@ -4877,7 +5034,7 @@ async function setLyricsLotteryEnabled(taskId, enabled) {
   }
 
   async function assignRandomRoleToCurrentMember(task) {
-    const currentMemberId = getCurrentMemberId();
+    const currentMemberId = getCurrentUiMemberId();
     const currentMemberName = getCurrentMemberName();
     const currentMemberCode = getCurrentMemberCode();
 
@@ -5003,7 +5160,7 @@ async function setLyricsLotteryEnabled(taskId, enabled) {
       console.error("个人抽签失败：", err);
       setAutoSaveStatus("error", "抽签失败");
       const detail = String(err?.message || err?.details || err?.hint || "").trim();
-      showToast("抽签失败", detail ? `抽签失败：${detail}` : "请检查 projects / project_parts 的更新权限，以及是否有其他人同时抽中了该角色。");
+      showToast("抽签失败", detail ? `抽签失败：${detail}` : "请检查抽签 RPC，以及是否有其他人同时抽中了该角色。");
     } finally {
       personalLotteryInFlight = false;
     }
@@ -5176,7 +5333,7 @@ function renderSiteNotifications() {
   }
 
   function maybeShowLotteryReminder() {
-    const currentMemberId = getCurrentMemberId();
+    const currentMemberId = getCurrentUiMemberId();
     if (!currentMemberId || personalLotteryInFlight) return;
 
     const pendingTasks = getPendingPersonalLotteryTasks().filter(task => {
@@ -5202,7 +5359,7 @@ ${names}${suffix}`);
 
 
   function canCurrentUserJoinTask(task) {
-    const currentId = getCurrentMemberId();
+    const currentId = getCurrentUiMemberId();
     if (!currentId) return false;
     if (isCurrentUserSingerInTask(task)) return true;
 
@@ -5240,8 +5397,20 @@ ${names}${suffix}`);
     return rows.some(row => String(row?.original_name || "").trim() === "各唱各");
   }
 
+  function isRelayGameTask(task) {
+    if (!isGameTask(task)) return false;
+    const text = [
+      task?.game_type,
+      task?.project_name,
+      task?.displayName,
+      ...(Array.isArray(task?.parts) ? task.parts.map(row => row?.original_name) : [])
+    ].map(value => String(value || "").trim()).join(" ");
+    return /接龙/.test(text);
+  }
+
   function doesTaskRequireTone(task) {
     if (!isGameTask(task)) return true;
+    if (isRelayGameTask(task)) return false;
     return isEachSingOwnGameTask(task);
   }
 
@@ -5249,7 +5418,6 @@ ${names}${suffix}`);
     const rows = Array.isArray(task?.parts) ? task.parts : [];
     const singerQuota = Math.max(1, Number(task?.participant_count) || 1);
     const assignedSingerCount = getUniqueAssignedSingerCount(task);
-    const hasProducer = hasEffectiveProducer(task);
     const toneRequired = doesTaskRequireTone(task);
     const hasTone = !!String(task?.project_tone || "").trim();
 
@@ -5259,15 +5427,17 @@ ${names}${suffix}`);
       return !!partText && !!assignedId && partText !== "待分配" && partText !== "未分配";
     });
 
-    return assignedSingerCount >= singerQuota && hasProducer && (!toneRequired || hasTone) && allRowsComplete;
+    // 作品已有链接时，后期可能是早期外部人员，因此不强制要求成员后期负责人。
+    return assignedSingerCount >= singerQuota && (!toneRequired || hasTone) && allRowsComplete;
   }
 
   function isTaskPublishedComplete(task) {
+    const hasDisplayLink = !!String(task?.display_link || "").trim();
+    if (!hasDisplayLink) return false;
     if (!isTaskInfoComplete(task)) return false;
-    if (!isAllSingersSubmitted(task)) return false;
-    if (!task?.producer_completed) return false;
     if (!String(task?.release_date || "").trim()) return false;
-    if (!String(task?.display_link || "").trim()) return false;
+
+    // 已有作品链接即视为演唱已交音、后期已交付；这里只判断作品资料是否完整。
     return true;
   }
 
@@ -5328,7 +5498,7 @@ ${names}${suffix}`);
     }
 
     if (!hasProducer) {
-      return { tag: "待认领", statusText: "缺后期负责人" };
+      return { tag: "待认领", statusText: "缺后期" };
     }
 
     if (!producerCompleted) {
@@ -5343,21 +5513,29 @@ ${names}${suffix}`);
   }
 
   function getSupplementTags(task) {
+    const hasVideoLink = !!String(task?.display_link || "").trim();
+
+    // 新增定位标签：项目已经有作品链接，但核心资料仍未完整时，
+    // 只归入“资料补充”，不再叠加原有待认领/待分词/待定调/待发布标签。
+    if (hasVideoLink && !isTaskPublishedComplete(task)) {
+      return ["资料补充"];
+    }
+
+    // 无作品链接时，完全保留原有待处理分类逻辑。
     const stage = getTodoStage(task);
     return stage ? [stage.tag] : [];
   }
 
   function getSkillText(row) {
-    const keys = [
-      "skill","skills","extra_skill","extra_skills","custom_skill","custom_skills",
-      "other_skill","other_skills","specialty","specialties","ability","abilities"
-    ];
-    return keys.map(key => String(row?.[key] || "")).join(" | ");
+    return String(row?.skills || "").trim();
+  }
+
+  function isSingerMember(row) {
+    return /演唱|唱歌|vocal|singer/i.test(getSkillText(row));
   }
 
   function isMixerMember(row) {
-    const skillText = getSkillText(row);
-    return /混音|后期|mix|mixer|mixing/i.test(skillText);
+    return /混音|后期|mix|mixer|mixing/i.test(getSkillText(row));
   }
 
   function transformProjectsToTasks(projectRows, partsRows, singersRows) {
@@ -5388,7 +5566,7 @@ ${names}${suffix}`);
       });
     });
 
-    return (projectRows || [])
+    const transformed = (projectRows || [])
       .map(project => {
         const id = String(project.id);
         const parts = (partMap.get(id) || []).sort((a, b) => (a.part_order || 0) - (b.part_order || 0));
@@ -5402,10 +5580,11 @@ ${names}${suffix}`);
           project_name: project.project_name || "",
           displayName: makeDisplayTaskName(project.project_code, project.project_name),
           project_type: project.project_type || "",
+          game_type: project.game_type || "",
           status: project.status || "",
           participant_count: project.participant_count ?? 1,
-          singer_bonus: getSingerRewardByRule(project.participant_count, !!project.is_collective_task),
-          producer_bonus: getProducerRewardByRule(project.project_type, project.participant_count, !!project.is_collective_task),
+          singer_bonus: Number.isFinite(Number(project.singer_bonus)) ? Number(project.singer_bonus) : getSingerRewardByRule(project.participant_count, !!project.is_collective_task),
+          producer_bonus: Number.isFinite(Number(project.producer_bonus)) ? Number(project.producer_bonus) : getProducerRewardByRule(project.project_type, project.participant_count, !!project.is_collective_task),
           producer_member_id: project.producer_member_id ? String(project.producer_member_id) : "",
           producer_name: producerName,
           producer_completed: !!project.producer_completed,
@@ -5416,6 +5595,8 @@ ${names}${suffix}`);
           is_collective_task: !!project.is_collective_task,
           created_by: project.created_by || null,
           created_at: project.created_at || null,
+          lyrics_lottery_enabled: !!project.lyrics_lottery_enabled,
+          mixers: Array.isArray(project.mixers) ? project.mixers : [],
           parts,
           singers
         };
@@ -5426,12 +5607,14 @@ ${names}${suffix}`);
         task.computedStatus = todoStage ? todoStage.statusText : "";
         return task;
       })
-      .filter(task => task.supplementTags.length > 0)
       .sort((a, b) => {
         const aCode = parseInt(String(a.project_code).match(/\d+/)?.[0] || "0", 10);
         const bCode = parseInt(String(b.project_code).match(/\d+/)?.[0] || "0", 10);
         return aCode - bCode;
       });
+
+    allProjectSearchItems = transformed;
+    return transformed.filter(task => task.supplementTags.length > 0);
   }
 
   function extractNumberFromValue(value) {
@@ -5527,8 +5710,8 @@ ${names}${suffix}`);
         return keyA.suffix.localeCompare(keyB.suffix, 'en', { numeric: true, sensitivity: 'base' });
       }
 
-      const nameA = String(a?.display || a?.name || a?.nickname || '').trim();
-      const nameB = String(b?.display || b?.name || b?.nickname || '').trim();
+      const nameA = String(a?.nickname || '').trim();
+      const nameB = String(b?.nickname || '').trim();
       return nameA.localeCompare(nameB, 'zh-Hans-CN', { numeric: true, sensitivity: 'base' });
     });
   }
@@ -5573,16 +5756,14 @@ ${names}${suffix}`);
 
   async function loadProjectTypeOptionsFromSettings() {
     try {
-      const { data, error } = await supabaseClient
-        .from("system_settings")
-        .select("setting_value")
-        .eq("setting_key", "project_type_options")
-        .maybeSingle();
-
+      const { data, error } = await supabaseClient.rpc(STUDIO_RPC.setting, {
+        p_setting_key: "project_type_options"
+      });
       if (error) throw error;
-      projectTypeOptions = normalizeProjectTypeOptions(data?.setting_value);
+      const value = data?.setting_value ?? data;
+      projectTypeOptions = normalizeProjectTypeOptions(value);
     } catch (err) {
-      console.warn("读取项目类型配置失败，使用前端兜底选项：", err);
+      console.warn("项目类型配置 RPC 不可用，使用前端兜底选项：", err);
       projectTypeOptions = [...FALLBACK_PROJECT_TYPE_OPTIONS];
     }
   }
@@ -5654,16 +5835,14 @@ ${names}${suffix}`);
 
   async function loadGoldConfigFromSettings() {
     try {
-      const { data, error } = await supabaseClient
-        .from("system_settings")
-        .select("setting_value")
-        .eq("setting_key", "gold_config")
-        .maybeSingle();
-
+      const { data, error } = await supabaseClient.rpc(STUDIO_RPC.setting, {
+        p_setting_key: "gold_config"
+      });
       if (error) throw error;
-      goldConfig = normalizeGoldConfig(data?.setting_value);
+      const value = data?.setting_value ?? data;
+      goldConfig = normalizeGoldConfig(value);
     } catch (err) {
-      console.warn("读取金币配置失败，使用前端兜底配置：", err);
+      console.warn("金币配置 RPC 不可用，使用前端兜底配置：", err);
       goldConfig = normalizeGoldConfig(DEFAULT_GOLD_CONFIG);
     }
   }
@@ -5682,63 +5861,37 @@ ${names}${suffix}`);
 
   async function loadMembersList() {
     try {
-      const [{ data, error }, memberTableResult] = await Promise.all([
-        supabaseClient.rpc(MEMBER_DIRECTORY_RPC),
-        supabaseClient.from("members").select("id, nickname, role, skills, member_code")
-      ]);
-
+      const { data, error } = await supabaseClient.rpc(STUDIO_RPC.memberDirectory);
       if (error) throw error;
 
-      const memberTableMap = new Map(
-        ((memberTableResult && memberTableResult.data) || []).map(row => [String(row.id || "").trim(), row])
-      );
+      room10Members = (Array.isArray(data) ? data : [])
+        .map(item => {
+          const memberId = String(item?.member_id || "").trim();
+          return {
+            id: memberId,
+            member_id: memberId,
+            nickname: String(item?.display_name || item?.nickname || "未命名成员").trim(),
+            avatar_url: String(item?.avatar_url || "").trim(),
+            role: String(item?.role || "").trim(),
+            skills: String(item?.skills || "").trim()
+          };
+        })
+        .filter(member => member.id && member.nickname);
 
-      membersCache = sortMembersByKey(
-        (data || [])
-          .map((item, index) => {
-            const id = String(item.member_id || item.id || "").trim();
-            const extra = memberTableMap.get(id) || {};
-            const nickname = String(item.nickname || extra.nickname || "").trim();
-            const displayName = String(item.display_name || item.nickname || extra.nickname || "未命名成员").trim();
-            const role = String(item.role || extra.role || "").trim();
-            const skills = String(item.skills || extra.skills || "").trim();
-            const memberCode = getMemberPrimaryKeyCode({ ...extra, ...item });
+      room10SingerMembers = room10Members.filter(isSingerMember);
+      room10MixerMembers = room10Members.filter(isMixerMember);
 
-            return {
-              ...extra,
-              ...item,
-              id,
-              nickname,
-              name: displayName,
-              display: displayName,
-              role,
-              skills,
-              member_code: memberCode,
-              memberCode,
-              key_code: String(item.key_code || item.keyCode || extra.key_code || "").trim(),
-              invite_key: String(item.invite_key || item.inviteKey || extra.invite_key || "").trim(),
-              invite_code: String(item.invite_code || item.inviteCode || extra.invite_code || "").trim(),
-              memberOrderNo: (() => {
-                const orderNo = getMemberOrderNumber({ ...extra, ...item, member_code: memberCode, memberCode });
-                return Number.isFinite(orderNo) ? orderNo : index;
-              })()
-            };
-          })
-          .filter(item => item.id && item.display)
-      );
-
-      mixerMembersCache = sortMembersByKey(membersCache.filter(isMixerMember));
-
-      document.getElementById("memberOptionsAll").innerHTML = membersCache
-        .map(member => `<option value="${escapeHtml(member.display)}"></option>`)
+      document.getElementById("memberOptionsAll").innerHTML = room10SingerMembers
+        .map(member => `<option value="${escapeHtml(member.nickname)}"></option>`)
         .join("");
-
     } catch (err) {
       console.error("读取成员目录失败：", err);
-      membersCache = [];
-      mixerMembersCache = [];
+      room10Members = [];
+      room10SingerMembers = [];
+      room10MixerMembers = [];
       document.getElementById("memberOptionsAll").innerHTML = "";
-      showToast("读取失败", "成员目录读取失败，请先执行本页配套 SQL。\n演唱者和混音备选池需要依赖安全目录函数。");
+      const detail = String(err?.message || err?.details || err?.hint || "").trim();
+      showToast("读取失败", detail ? `成员目录读取失败：${detail}` : "成员目录读取失败，请检查 get_room10_member_directory RPC。");
     }
   }
 
@@ -5769,41 +5922,7 @@ ${names}${suffix}`);
     });
   }
 
-  async function fetchProjectRowsPaged(tableName, projectIds, selectClause, orderColumns = []) {
-    const ids = [...new Set((projectIds || []).map(id => String(id || "").trim()).filter(Boolean))];
-    if (!ids.length) return [];
 
-    const allRows = [];
-    const chunkSize = 50;
-    const pageSize = 1000;
-
-    for (let i = 0; i < ids.length; i += chunkSize) {
-      const chunk = ids.slice(i, i + chunkSize);
-      let from = 0;
-      while (true) {
-        let query = supabaseClient
-          .from(tableName)
-          .select(selectClause)
-          .in("project_id", chunk)
-          .range(from, from + pageSize - 1);
-
-        (orderColumns || []).forEach(item => {
-          const column = typeof item === "string" ? item : item.column;
-          const ascending = typeof item === "object" && item.ascending === false ? false : true;
-          if (column) query = query.order(column, { ascending });
-        });
-
-        const { data, error } = await query;
-        if (error) throw error;
-        const rows = data || [];
-        allRows.push(...rows);
-        if (rows.length < pageSize) break;
-        from += pageSize;
-      }
-    }
-
-    return allRows;
-  }
 
   async function loadProjectsFromSupabase({keepSelection = true} = {}) {
     const claimList = document.getElementById("browseList");
@@ -5812,74 +5931,123 @@ ${names}${suffix}`);
     claimList.innerHTML = '<div class="loadingText">正在读取任务...</div>';
 
     try {
-      const { data: projectsData, error: projectsError } = await supabaseClient
-        .from("projects")
-        .select("id, project_code, project_name, project_type, status, participant_count, singer_bonus, producer_bonus, producer_member_id, producer_completed, producer_completed_at, release_date, display_link, project_tone, is_collective_task, created_by, created_at, lyrics_lottery_enabled, lyrics_lottery_opened_at, lyrics_lottery_opened_by");
-
+      const { data: rpcData, error: projectsError } = await supabaseClient.rpc(
+        STUDIO_RPC.studioItems,
+        {
+          p_member_id: getCurrentMemberId(),
+          p_member_code: getCurrentMemberCode()
+        }
+      );
       if (projectsError) throw projectsError;
 
-      const projectIds = (projectsData || []).map(item => item.id);
+      const rpcRows = Array.isArray(rpcData) ? rpcData : [];
+      const mixerEntries = await Promise.all(rpcRows.map(async row => {
+        const projectId = String(row?.project_id || "").trim();
+        if (!projectId) return [projectId, []];
+        try {
+          const { data, error } = await supabaseClient.rpc(STUDIO_RPC.projectMixers, {
+            p_project_id: projectId
+          });
+          if (error) throw error;
+          const rows = (Array.isArray(data) ? data : []).map(item => {
+            const matched = findMemberByName(item?.nickname);
+            const memberId = String(matched?.member_id || matched?.id || item?.member_id || "").trim();
+            return {
+              member_id: memberId,
+              nickname: String(item?.nickname || matched?.nickname || "").trim(),
+              avatar_url: String(item?.avatar_url || matched?.avatar_url || "").trim(),
+              role_name: String(item?.role_name || "混音负责人").trim(),
+              submit_status: String(item?.submit_status || "pending").trim(),
+              submitted_at: item?.submitted_at || null
+            };
+          });
+          return [projectId, rows];
+        } catch (err) {
+          console.warn(`读取项目 ${projectId} 的混音记录失败：`, err);
+          return [projectId, []];
+        }
+      }));
+      projectMixersByProjectId = new Map(mixerEntries);
 
-      let partsData = [];
-      let singersData = [];
-      let memberIds = new Set();
+      const projectsData = rpcRows.map(row => ({
+        id: row.project_id,
+        project_code: row.project_code,
+        project_name: row.project_name,
+        project_type: row.project_type,
+        game_type: row.game_type,
+        status: row.project_status,
+        publish_status: row.publish_status,
+        project_tone: row.project_tone,
+        release_date: row.release_date,
+        participant_count: row.participant_count,
+        producer_member_id: row.producer_member_id,
+        producer_completed: !!row.producer_completed,
+        producer_completed_at: row.producer_completed_at || null,
+        producer_nickname: row.producer_nickname,
+        display_link: row.display_link || "",
+        _rpc_has_display_link: Object.prototype.hasOwnProperty.call(row, "display_link"),
+        is_collective_task: !!row.is_collective_task,
+        is_collective_project: !!row.is_collective_project,
+        singer_bonus: Number(row.singer_bonus || 0),
+        producer_bonus: Number(row.producer_bonus || 0),
+        lyrics_lottery_enabled: !!row.lyrics_lottery_enabled,
+        created_by: row.created_by || null,
+        created_at: row.created_at || null,
+        current_member_is_singer: !!row.current_member_is_singer,
+        current_member_submitted: !!row.current_member_submitted,
+        current_member_is_producer: !!row.current_member_is_producer,
+        singers: Array.isArray(row.singers) ? row.singers : [],
+        parts: Array.isArray(row.parts) ? row.parts : [],
+        mixers: projectMixersByProjectId.get(String(row.project_id)) || []
+      }));
 
-      (projectsData || []).forEach(project => {
-        if (project?.producer_member_id) memberIds.add(String(project.producer_member_id));
-      });
+      const partsData = rpcRows.flatMap(row =>
+        (Array.isArray(row.parts) ? row.parts : []).map(part => ({
+          ...part,
+          project_id: row.project_id
+        }))
+      );
+      const singersData = rpcRows.flatMap(row =>
+        (Array.isArray(row.singers) ? row.singers : []).map(singer => ({
+          ...singer,
+          project_id: row.project_id
+        }))
+      );
 
-      if (projectIds.length) {
-        const partRows = await fetchProjectRowsPaged(
-          "project_parts",
-          projectIds,
-          "id, project_id, part_order, original_name, assigned_member_id",
-          [
-            { column: "project_id", ascending: true },
-            { column: "part_order", ascending: true }
-          ]
-        );
-        partsData = partRows || [];
-        partsData.forEach(row => {
-          if (row?.assigned_member_id) memberIds.add(String(row.assigned_member_id));
-        });
-
-        const singerRows = await fetchProjectRowsPaged(
-          "project_singers",
-          projectIds,
-          "id, project_id, member_id, is_submitted, submitted_at",
-          [
-            { column: "project_id", ascending: true }
-          ]
-        );
-        singersData = singerRows || [];
-        singersData.forEach(row => {
-          if (row?.member_id) memberIds.add(String(row.member_id));
-        });
-      }
-
-      const memberIdList = [...memberIds];
-      let memberMap = new Map();
-      if (memberIdList.length) {
-        const memberRows = membersCache.filter(row => memberIdList.includes(String(row.id || "")));
-        memberMap = new Map((memberRows || []).map(row => [String(row.id), row]));
-      }
-
-      const normalizedProjects = (projectsData || []).map(project => ({
+      const memberMap = new Map(room10Members.map(member => [String(member.id), member]));
+      const normalizedProjects = projectsData.map(project => ({
         ...project,
-        producer_member: project?.producer_member_id ? memberMap.get(String(project.producer_member_id)) || null : null
+        producer_member: project.producer_member_id
+          ? memberMap.get(String(project.producer_member_id)) || {
+              id: project.producer_member_id,
+              nickname: project.producer_nickname
+            }
+          : null
       }));
-
-      const normalizedParts = (partsData || []).map(row => ({
+      const normalizedParts = partsData.map(row => ({
         ...row,
-        members: row?.assigned_member_id ? memberMap.get(String(row.assigned_member_id)) || null : null
+        members: row?.assigned_member_id
+          ? memberMap.get(String(row.assigned_member_id)) || {
+              id: row.assigned_member_id,
+              nickname: row.assigned_nickname
+            }
+          : null
       }));
-
-      const normalizedSingers = (singersData || []).map(row => ({
+      const normalizedSingers = singersData.map(row => ({
         ...row,
-        members: row?.member_id ? memberMap.get(String(row.member_id)) || null : null
+        members: row?.member_id
+          ? memberMap.get(String(row.member_id)) || {
+              id: row.member_id,
+              nickname: row.nickname
+            }
+          : null
       }));
 
-      tasks = transformProjectsToTasks(normalizedProjects, normalizedParts, normalizedSingers);
+      tasks = transformProjectsToTasks(normalizedProjects, normalizedParts, normalizedSingers)
+        .map(task => ({
+          ...task,
+          mixers: projectMixersByProjectId.get(String(task.id)) || []
+        }));
 
       const filtered = getFilteredTasks(claimSearchKeyword);
       if (!keepSelection || !filtered.some(task => task.id === activeClaimTaskId)) {
@@ -5896,12 +6064,12 @@ ${names}${suffix}`);
       applyIncomingStudioJumpIntent();
       maybeShowLotteryReminder();
     } catch (err) {
-      console.error("读取 projects 失败：", err);
-      claimList.innerHTML = '<div class="taskEmpty">任务读取失败，请检查表结构、字段名或 RLS 权限</div>';
+      console.error("读取工作间项目失败：", err);
+      claimList.innerHTML = '<div class="taskEmpty">任务读取失败，请检查工作间 RPC</div>';
       setBrowseDetailEmpty("任务读取失败");
       setAutoSaveStatus("error", "读取失败");
       const detail = String(err?.message || err?.details || err?.hint || "").trim();
-      showToast("读取失败", detail ? `任务读取失败：${detail}` : "任务读取失败，请检查 projects / project_parts / project_singers / members 四张表的读取权限。");
+      showToast("读取失败", detail ? `任务读取失败：${detail}` : "任务读取失败，请检查 get_studio_project_items RPC。");
     }
   }
 
@@ -6227,6 +6395,24 @@ ${names}${suffix}`);
   }
 
   function syncFilterButtons() {
+    const supplementBtn = document.getElementById("filterSupplementBtn");
+    const hasSupplementTasks = tasks.some(task =>
+      Array.isArray(task?.supplementTags)
+      && task.supplementTags.includes("资料补充")
+    );
+
+    if (supplementBtn) {
+      supplementBtn.hidden = !hasSupplementTasks;
+      supplementBtn.style.display = hasSupplementTasks ? "inline-flex" : "none";
+    }
+
+    // 保存后最后一个资料补充项目移出时，解除已失效筛选，
+    // 其余筛选与原页面行为保持不变。
+    if (!hasSupplementTasks && getCurrentMainFilter() === "资料补充") {
+      activeMainFilter = "";
+      activeSecondaryFilter = "";
+    }
+
     document.querySelectorAll(".primaryFilterBtn").forEach(btn => {
       btn.classList.toggle("active", String(btn.dataset.filter || "").trim() === getCurrentMainFilter());
     });
@@ -6319,12 +6505,160 @@ ${names}${suffix}`);
     });
   }
 
+
+function getCrossPageSearchLocation(task) {
+    const tags = Array.isArray(task?.supplementTags) ? task.supplementTags.filter(Boolean) : [];
+    if (tags.length) {
+      return { area:"todo", label:`待处理 · ${tags.join(" + ")}`, pageKey:"studioTodo", page:PAGE_LINKS.studioTodo };
+    }
+
+    const rawStatus = String(task?.status || "").trim();
+    if (rawStatus === "已发布" || task?.readyForHonorShow) {
+      return { area:"gallery", label:"作品展览", pageKey:"honorGallery", page:PAGE_LINKS.honorGallery };
+    }
+
+    return { area:"project", label:"任务详情", pageKey:"studioProject", page:PAGE_LINKS.studioProject };
+  }
+
+  function taskMatchesCrossPageSearch(task, tokens) {
+    const partText = (task?.parts || []).map(item => `${item.original_name || ""} ${item.assigned_member_name || ""}`).join(" ");
+    const singerText = (task?.singers || []).map(item => item.member_name || "").join(" ");
+    const haystack = [
+      task?.displayName,
+      task?.project_name,
+      task?.project_code,
+      task?.project_type,
+      task?.status,
+      task?.computedStatus,
+      task?.producer_name,
+      task?.project_tone,
+      singerText,
+      partText
+    ].join(" ").toLowerCase();
+    return tokens.every(token => haystack.includes(token));
+  }
+
+  function buildCrossPageSearchMeta(task, location) {
+    const parts = [];
+    if (task?.project_code) parts.push(`编号：${task.project_code}`);
+    if (task?.project_type) parts.push(`分类：${task.project_type}`);
+    const status = String(task?.computedStatus || task?.status || "").trim();
+    if (status) parts.push(`状态：${status}`);
+    if (location?.label) parts.push(`位置：${location.label}`);
+    return parts.join(" · ");
+  }
+
+  function getCrossPageSearchResults(keyword) {
+    const tokens = normalizeSearchQuery(keyword);
+    if (!tokens.length) return [];
+    const seen = new Set();
+    return (allProjectSearchItems || [])
+      .filter(task => taskMatchesCrossPageSearch(task, tokens))
+      .map(task => ({ task, location:getCrossPageSearchLocation(task) }))
+      .filter(({ task, location }) => {
+        const id = String(task?.id || "").trim();
+        if (!id || seen.has(id)) return false;
+        if (!location || !["project", "todo", "gallery"].includes(location.area)) return false;
+        seen.add(id);
+        return true;
+      })
+      .sort((a, b) => {
+        const order = { project:0, todo:1, gallery:2 };
+        const areaDiff = (order[a.location.area] ?? 9) - (order[b.location.area] ?? 9);
+        if (areaDiff) return areaDiff;
+        return String(a.task?.project_code || "").localeCompare(String(b.task?.project_code || ""), "zh-CN", { numeric:true });
+      })
+      .slice(0, 50);
+  }
+
+  function buildCrossPageSearchHtml(keyword) {
+    const safeKeyword = escapeHtml(String(keyword || "").trim());
+    const results = getCrossPageSearchResults(keyword);
+    if (!results.length) {
+      return `
+        <div class="searchLocationBox">
+          <div class="searchLocationTitle">没有找到「${safeKeyword}」相关项目</div>
+          <div class="searchLocationDesc">任务详情、待处理和作品展览中都没有匹配结果。</div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="searchLocationBox">
+        <div class="searchLocationTitle">找到 ${results.length} 个相关项目</div>
+        <div class="searchLocationDesc">搜索范围：任务详情、待处理、作品展览。点击结果可直接跳转并定位。</div>
+        <div class="searchLocationList">
+          ${results.map(({ task, location }) => `
+            <button type="button" class="searchLocationItem"
+              data-search-area="${escapeHtml(location.area)}"
+              data-search-page-key="${escapeHtml(location.pageKey)}"
+              data-task-id="${escapeHtml(task.id)}">
+              <span class="searchLocationWhere">${escapeHtml(location.label)}</span>
+              <span class="searchLocationName">${escapeHtml(task.project_name || task.displayName || "未命名项目")}</span>
+              <span class="searchLocationMeta">${escapeHtml(buildCrossPageSearchMeta(task, location))}</span>
+            </button>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  function writeCrossPageSearchJumpIntent(pageKey, taskId, area) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.studioJumpIntent, JSON.stringify({
+        pageKey:String(pageKey || "").trim(),
+        taskId:String(taskId || "").trim(),
+        keyword:String(claimSearchKeyword || "").trim(),
+        sourcePageKey:"studioTodo",
+        targetArea:String(area || "").trim(),
+        createdAt:Date.now()
+      }));
+    } catch (err) {
+      console.error("保存搜索跳转意图失败：", err);
+    }
+  }
+
+  function bindCrossPageSearchActions() {
+    const list = document.getElementById("browseList");
+    if (!list) return;
+    list.querySelectorAll(".searchLocationItem").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const pageKey = String(btn.dataset.searchPageKey || "").trim();
+        const area = String(btn.dataset.searchArea || "").trim();
+        const taskId = String(btn.dataset.taskId || "").trim();
+        if (!taskId) return;
+
+        if (pageKey === "studioTodo") {
+          claimSearchKeyword = "";
+          if (claimSearchInput) claimSearchInput.value = "";
+          focusTaskInTodoView(taskId, { flash:true });
+          return;
+        }
+
+        const targetPage = PAGE_LINKS[pageKey];
+        if (!targetPage) {
+          showToast("无法跳转", "room10-paths.js 中缺少目标页面路径配置。");
+          return;
+        }
+        writeCrossPageSearchJumpIntent(pageKey, taskId, area);
+        await goStudioPage(targetPage);
+      });
+    });
+  }
+
 function renderBrowseList() {
     const list = document.getElementById("browseList");
     const listData = getFilteredTasks(claimSearchKeyword);
     const activeId = activeClaimTaskId;
 
     list.innerHTML = "";
+
+    const keyword = String(claimSearchKeyword || "").trim();
+    if (keyword) {
+      list.innerHTML = buildCrossPageSearchHtml(keyword);
+      bindCrossPageSearchActions();
+      return;
+    }
 
     if (!listData.length) {
       list.innerHTML = `<div class="taskEmpty">暂无待补充项目</div>`;
@@ -6502,9 +6836,12 @@ function renderBrowseList() {
   }
 
   function buildMixerPickerHtml(task, disabledAttr) {
-    const current = String(task?.producer_name || "").trim();
+    const mixerRecords = Array.isArray(task?.mixers)
+      ? task.mixers
+      : (projectMixersByProjectId.get(String(task?.id || "")) || []);
+    const recordedMixer = mixerRecords.find(item => String(item?.nickname || "").trim()) || null;
+    const current = String(recordedMixer?.nickname || task?.producer_name || "").trim();
     const isDisabled = disabledAttr.includes("disabled");
-    const mixerCandidates = mixerMembersCache;
     const withdrawMode = isPendingPublishTask(task) && !!current;
 
     return `
@@ -6521,14 +6858,15 @@ function renderBrowseList() {
               ${isDisabled ? "disabled" : ""}
             >撤回交付</button>
           </div>
-        ` : (mixerCandidates.length ? mixerCandidates.map(member => {
-          const display = String(member.display || "").trim();
+        ` : (room10MixerMembers.length ? room10MixerMembers.map(member => {
+          const display = String(member.nickname || "").trim();
           const active = display === current ? "active" : "";
           return `
             <button
               type="button"
               class="pickerBtn mixerOptionBtn ${active}"
               data-value="${escapeHtml(display)}"
+              data-member-id="${escapeHtml(String(member.member_id || member.id || ""))}"
               data-label="${escapeHtml(display)}"
               ${isDisabled ? "disabled" : ""}
             >${escapeHtml(display)}</button>
@@ -6547,9 +6885,9 @@ function renderBrowseList() {
       <div class="editField">
         <label class="editLabel majorEditLabel">演唱者</label>
         <div class="pickerGroup singerPicker" id="singerPicker">
-          ${membersCache.length ? membersCache.map(member => {
-            const memberId = String(member.id || "").trim();
-            const display = String(member.display || "").trim();
+          ${room10SingerMembers.length ? room10SingerMembers.map(member => {
+            const memberId = String(member.member_id || member.id || "").trim();
+            const display = String(member.nickname || "").trim();
             const active = currentSingerIds.includes(memberId) ? "active" : "";
             return `
               <button
@@ -6560,7 +6898,7 @@ function renderBrowseList() {
                 ${isDisabled ? "disabled" : ""}
               >${escapeHtml(display)}</button>
             `;
-          }).join("") : `<div class="taskEmpty" style="width:100%;margin:0;">未读取到成员列表</div>`}
+          }).join("") : `<div class="taskEmpty" style="width:100%;margin:0;">未读取到具有演唱技能的成员</div>`}
         </div>
       </div>
     `;
@@ -6676,6 +7014,7 @@ function renderBrowseList() {
                 ${buildTaskTypeOptions(task.project_type)}
               </select>
             </div>
+
           </div>
 
           <div style="height:10px;"></div>
@@ -7358,9 +7697,13 @@ function renderBrowseList() {
     const taskCode = String(document.getElementById("editTaskCode")?.value || "").trim();
     const songName = String(document.getElementById("editSongName")?.value || "").trim();
     const releaseDate = String(document.getElementById("editReleaseDate")?.value || "").trim();
-    const videoLink = String(document.getElementById("editVideoLink")?.value || "").trim();
+    const videoLinkInput = document.getElementById("editVideoLink");
+    const videoLink = videoLinkInput
+      ? String(videoLinkInput.value || "").trim()
+      : String(existingTask?.display_link || "").trim();
     const taskType = String(document.getElementById("editTaskType")?.value || "").trim();
-    const gameType = isGameProjectTypeValue(taskType) ? String(document.getElementById("editGameType")?.value || "").trim() : "";
+    // todo 页面不再提供独立“游戏类型”输入框；保存时保留数据库原值，避免旧项目数据被误清空。
+    const gameType = String(existingTask?.game_type || "").trim();
     const isCollectiveTask = String(document.getElementById("editIsCollective")?.value || "") === "1";
     const toneRaw = String(document.getElementById("editTone")?.value || "").trim();
     const producerName = String(document.getElementById("editProducerName")?.value || "").trim();
@@ -7369,6 +7712,7 @@ function renderBrowseList() {
     const toneResult = validateToneInput(toneRaw, true);
     const partResult = collectPartPayload(existingTask);
     const singerPayload = buildSingerPayloadFromParts(existingTask, partResult.payload);
+    const producerMember = findMixerByName(producerName) || findMemberByName(producerName);
 
     const nextTask = {
       ...existingTask,
@@ -7376,13 +7720,14 @@ function renderBrowseList() {
       project_name: songName || null,
       displayName: makeDisplayTaskName(taskCode, songName),
       release_date: releaseDate || null,
-      display_link: videoLink || null,
+      ...(existingTask?._rpc_has_display_link || videoLink ? { display_link: videoLink || null } : {}),
       project_type: taskType || null,
+      game_type: gameType || null,
       is_collective_task: isCollectiveTask,
       project_tone: toneResult.value,
       participant_count: singerQuota,
       producer_name: producerName,
-      producer_member_id: (findMixerByName(producerName) || findMemberByName(producerName) || {}).id ? String((findMixerByName(producerName) || findMemberByName(producerName)).id) : "",
+      producer_member_id: producerMember?.id ? String(producerMember.id) : "",
       singer_bonus: getSingerRewardByRule(singerQuota, isCollectiveTask),
       producer_bonus: getProducerRewardByRule(taskType, singerQuota, isCollectiveTask),
       parts: partResult.payload.map(item => ({
@@ -7393,11 +7738,11 @@ function renderBrowseList() {
         assigned_member_name: item.assigned_member_name || ""
       })),
       singers: singerPayload.map(item => {
-        const matched = membersCache.find(member => String(member.id) === String(item.member_id));
+        const matched = room10Members.find(member => String(member.id) === String(item.member_id));
         return {
           id: item.id || "",
           member_id: String(item.member_id || ""),
-          member_name: matched?.display || "",
+          member_name: matched?.nickname || "",
           is_submitted: !!item.is_submitted,
           submitted_at: item.submitted_at || null
         };
@@ -7411,28 +7756,23 @@ function renderBrowseList() {
     return { task: nextTask, partResult, singerPayload, toneResult, taskCode, songName, releaseDate, videoLink, taskType, gameType, isCollectiveTask, producerName, singerQuota };
   }
 
-
   async function toggleProducerCompleted(projectId, currentValue) {
     const normalizedId = String(projectId || "").trim();
     if (!normalizedId) return;
     try {
       const task = tasks.find(item => String(item.id) === normalizedId);
       const allSingersDone = task && (task.singers || []).length > 0 && (task.singers || []).every(item => !!item.is_submitted);
-
       if (!allSingersDone && !currentValue) {
         showToast("暂不能交付", "演唱尚未全部交音，暂时不能交付混音。");
         return;
       }
 
-      const payload = currentValue
-        ? { producer_completed: false, producer_completed_at: null }
-        : { producer_completed: true, producer_completed_at: new Date().toISOString() };
-
-      const { error } = await supabaseClient
-        .from("projects")
-        .update(payload)
-        .eq("id", normalizedId);
-
+      const { error } = await supabaseClient.rpc(STUDIO_RPC.setProducerCompleted, {
+        p_member_id: getCurrentMemberId(),
+        p_member_code: getCurrentMemberCode(),
+        p_project_id: normalizedId,
+        p_completed: !currentValue
+      });
       if (error) throw error;
 
       await loadProjectsFromSupabase({ keepSelection: true });
@@ -7440,7 +7780,7 @@ function renderBrowseList() {
     } catch (err) {
       console.error("更新混音交付状态失败：", err);
       setAutoSaveStatus("error", "更新交付失败");
-      showToast("操作失败", err?.message || "更新混音交付状态失败");
+      showToast("操作失败", err?.message || "更新混音交付状态失败，请检查 secure_set_project_producer_completed RPC。");
     }
   }
 
@@ -7870,11 +8210,6 @@ function renderBrowseList() {
     if (taskTypeInput && taskTypeInput.dataset.rewardBound !== "1") {
       taskTypeInput.dataset.rewardBound = "1";
       const typeHandler = () => {
-        const gameField = document.getElementById("editGameTypeField");
-        const gameInput = document.getElementById("editGameType");
-        const isGame = isGameProjectTypeValue(taskTypeInput.value);
-        if (gameField) gameField.style.display = isGame ? "" : "none";
-        if (!isGame && gameInput) gameInput.value = "";
         updateToneFieldState();
         updateRewardPreviewFromDom();
         scheduleAutoSave();
@@ -8029,7 +8364,7 @@ function renderBrowseList() {
           unresolved.push(typedName);
         } else {
           assignedMemberId = matched.id;
-          assignedMemberName = matched.display;
+          assignedMemberName = matched.nickname;
         }
       }
 
@@ -8111,255 +8446,76 @@ function renderBrowseList() {
     return !!document.querySelector('.partRow[data-force-unsubmit="1"]');
   }
 
-  async function secureUpdateProjectViaRpc(task, snapshot, projectPayload) {
-    const memberName = getCurrentMemberName();
+  async function saveProjectBundleViaRpc(task, payload = {}) {
+    const memberId = getCurrentMemberId();
     const memberCode = getCurrentMemberCode();
-    if (!memberName || !memberCode) {
+    if (!memberId || !memberCode) {
       throw new Error("当前登录信息不完整，请重新登录后再试。");
     }
 
-    const args = {
-      p_nickname: memberName,
+    const parts = Array.isArray(payload.parts) ? payload.parts : (task.parts || []);
+    const singers = Array.isArray(payload.singers) ? payload.singers : (task.singers || []);
+    const producerMemberId = payload.producer_member_id !== undefined
+      ? payload.producer_member_id
+      : (task.producer_member_id || null);
+
+    const { error } = await supabaseClient.rpc(STUDIO_RPC.saveBundle, {
+      p_member_id: memberId,
       p_member_code: memberCode,
       p_project_id: task.id,
-      p_project_name: snapshot.songName || task.project_name || "",
-      p_project_code: snapshot.taskCode || task.project_code || "",
-      p_project_type: task.project_type || snapshot.taskType || task.project_type || "",
-      p_task_type: snapshot.taskType || task.project_type || "",
-      p_status: task.status || "",
-      p_publish_status: task.publish_status || "",
-      p_original_singer: task.original_singer || "",
-      p_project_tone: projectPayload.project_tone || "",
-      p_participant_count: Array.isArray(snapshot.singerPayload) ? snapshot.singerPayload.length : (task.participant_count || 0),
-      p_singer_quota: projectPayload.participant_count || 1,
-      p_release_date: projectPayload.release_date || null,
-      p_is_collective_project: !!(task.is_collective_project || projectPayload.is_collective_task),
-      p_is_collective_task: !!projectPayload.is_collective_task,
-      p_game_type: snapshot.gameType || task.game_type || ""
-    };
-
-    const { error } = await supabaseClient.rpc("secure_update_project", args);
-    if (error) throw error;
-  }
-
-  async function secureReplaceProjectSingersViaRpc(taskId, memberIds) {
-    const memberName = getCurrentMemberName();
-    const memberCode = getCurrentMemberCode();
-    if (!memberName || !memberCode) {
-      throw new Error("当前登录信息不完整，请重新登录后再试。");
-    }
-
-    const normalizedIds = [...new Set((memberIds || []).map(id => String(id || "").trim()).filter(Boolean))];
-    const { error } = await supabaseClient.rpc("secure_replace_project_singers", {
-      p_nickname: memberName,
-      p_member_code: memberCode,
-      p_project_id: taskId,
-      p_member_ids: normalizedIds
+      p_task_code: payload.project_code ?? task.project_code ?? "",
+      p_task_name: payload.project_name ?? task.project_name ?? "",
+      p_release_date: payload.release_date ?? task.release_date ?? null,
+      p_task_type: payload.project_type ?? task.project_type ?? "",
+      p_game_type: payload.game_type ?? task.game_type ?? "",
+      p_is_collective_task: payload.is_collective_task ?? !!task.is_collective_task,
+      p_project_tone: payload.project_tone ?? task.project_tone ?? null,
+      p_producer_member_id: producerMemberId || null,
+      p_singer_quota: Number(payload.participant_count ?? task.participant_count ?? 1),
+      p_singer_bonus: Number(payload.singer_bonus ?? task.singer_bonus ?? 0),
+      p_producer_bonus: Number(payload.producer_bonus ?? task.producer_bonus ?? 0),
+      p_parts: parts.map((item, index) => ({
+        part_order: Number(item?.part_order || index + 1),
+        original_name: String(item?.original_name || "").trim() || null,
+        assigned_member_id: String(item?.assigned_member_id || "").trim() || null
+      })),
+      p_singers: singers.map(item => ({
+        member_id: String(item?.member_id || "").trim(),
+        is_submitted: !!item?.is_submitted,
+        submitted_at: item?.submitted_at || null
+      })).filter(item => item.member_id)
     });
     if (error) throw error;
-  }
 
-  async function saveProjectSingersDirectly(taskId, singerPayload, existingTask) {
-    const normalizedPayload = [...new Set((singerPayload || []).map(item => String(item.member_id || "").trim()).filter(Boolean))].map(memberId => {
-      const existing = (existingTask?.singers || []).find(row => String(row.member_id || "").trim() === memberId) || {};
-      return {
-        project_id: taskId,
-        member_id: memberId,
-        is_submitted: !!existing.is_submitted,
-        submitted_at: existing.submitted_at || null
-      };
-    });
-
-    const existingRows = (existingTask?.singers || []).map(row => ({
-      id: String(row.id || "").trim(),
-      member_id: String(row.member_id || "").trim(),
-      is_submitted: !!row.is_submitted,
-      submitted_at: row.submitted_at || null
-    })).filter(row => row.member_id);
-
-    const existingIdByMember = new Map(existingRows.map(row => [row.member_id, row]));
-    const nextIds = new Set(normalizedPayload.map(row => row.member_id));
-
-    const removedRowIds = existingRows
-      .filter(row => row.id && !nextIds.has(row.member_id))
-      .map(row => row.id);
-
-    if (removedRowIds.length) {
-      const { error: deleteError } = await supabaseClient
-        .from("project_singers")
-        .delete()
-        .in("id", removedRowIds);
-      if (deleteError) throw deleteError;
+    if (Object.prototype.hasOwnProperty.call(payload, "display_link")) {
+      const { error: linkError } = await supabaseClient.rpc(STUDIO_RPC.setDisplayLink, {
+        p_member_id: memberId,
+        p_member_code: memberCode,
+        p_project_id: task.id,
+        p_display_link: payload.display_link || null
+      });
+      if (linkError) throw linkError;
     }
 
-    const rowsToInsert = normalizedPayload.filter(row => !existingIdByMember.has(row.member_id));
-    if (rowsToInsert.length) {
-      const { error: insertError } = await supabaseClient
-        .from("project_singers")
-        .insert(rowsToInsert);
-      if (insertError) throw insertError;
-    }
-
-    for (const row of normalizedPayload) {
-      const existing = existingIdByMember.get(row.member_id);
-      if (!existing?.id) continue;
-      const { error: updateError } = await supabaseClient
-        .from("project_singers")
-        .update({
-          is_submitted: row.is_submitted,
-          submitted_at: row.submitted_at
-        })
-        .eq("id", existing.id);
-      if (updateError) throw updateError;
+    if (Object.prototype.hasOwnProperty.call(payload, "producer_completed")) {
+      const { error: completedError } = await supabaseClient.rpc(STUDIO_RPC.setProducerCompleted, {
+        p_member_id: memberId,
+        p_member_code: memberCode,
+        p_project_id: task.id,
+        p_completed: !!payload.producer_completed
+      });
+      if (completedError) throw completedError;
     }
   }
 
-  async function saveProjectPartsDirectly(taskId, partResult) {
-    const { error: deletePartError } = await supabaseClient
-      .from("project_parts")
-      .delete()
-      .eq("project_id", taskId);
-    if (deletePartError) throw deletePartError;
-
-    if (partResult.payload.length) {
-      const insertRows = partResult.payload.map(({ assigned_member_name, id, ...rest }) => rest);
-      const { error: insertPartError } = await supabaseClient
-        .from("project_parts")
-        .insert(insertRows);
-      if (insertPartError) throw insertPartError;
-    }
-  }
-
-  function shouldFallbackFromRpcError(err) {
-    const detail = String(err?.message || err?.details || err?.hint || err?.code || "").toLowerCase();
-    return detail.includes("save_project_bundle")
-      || detail.includes("pgrst202")
-      || detail.includes("404")
-      || detail.includes("400")
-      || detail.includes("does not exist")
-      || detail.includes("could not find")
-      || detail.includes("not find");
-  }
-
-  async function saveProjectPayloadDirectly(projectId, projectPayload) {
-    const preferredKeys = [
-      "project_code",
-      "project_name",
-      "release_date",
-      "display_link",
-      "project_type",
-      "is_collective_task",
-      "project_tone",
-      "producer_member_id",
-      "participant_count",
-      "singer_bonus",
-      "producer_bonus",
-      "producer_completed",
-      "producer_completed_at"
-    ];
-
-    const payload = {};
-    preferredKeys.forEach(key => {
-      if (Object.prototype.hasOwnProperty.call(projectPayload, key)) {
-        payload[key] = projectPayload[key];
-      }
-    });
-
-    let { error } = await supabaseClient
-      .from("projects")
-      .update(payload)
-      .eq("id", projectId);
-
-    if (!error) return;
-
-    const detail = String(error?.message || error?.details || error?.hint || "").toLowerCase();
-    const relaxedPayload = { ...payload };
-    delete relaxedPayload.singer_bonus;
-    delete relaxedPayload.producer_bonus;
-    if (detail.includes("is_collective_task")) {
-      delete relaxedPayload.is_collective_task;
-    }
-
-    ({ error } = await supabaseClient
-      .from("projects")
-      .update(relaxedPayload)
-      .eq("id", projectId));
-
-    if (error) throw error;
-  }
-
-  async function syncProjectFieldsAfterRpc(projectId, projectPayload) {
-    const directSyncPayload = {};
-    ["display_link", "producer_member_id", "release_date", "project_tone", "project_type", "project_name", "project_code", "participant_count", "is_collective_task", "producer_completed", "producer_completed_at"].forEach(key => {
-      if (Object.prototype.hasOwnProperty.call(projectPayload, key)) {
-        directSyncPayload[key] = projectPayload[key];
-      }
-    });
-
-    if (!Object.keys(directSyncPayload).length) return;
-
-    const { error } = await supabaseClient
-      .from("projects")
-      .update(directSyncPayload)
-      .eq("id", projectId);
-
-    if (error) throw error;
-  }
-
-  async function reloadCurrentTaskDetailRows(taskId) {
-    const id = String(taskId || "").trim();
-    if (!id) return;
-
-    const [partRows, singerRows] = await Promise.all([
-      supabaseClient
-        .from("project_parts")
-        .select("id, project_id, part_order, original_name, assigned_member_id")
-        .eq("project_id", id)
-        .order("part_order", { ascending: true }),
-      supabaseClient
-        .from("project_singers")
-        .select("id, project_id, member_id, is_submitted, submitted_at")
-        .eq("project_id", id)
-    ]);
-
-    if (partRows.error) throw partRows.error;
-    if (singerRows.error) throw singerRows.error;
-
-    const task = tasks.find(item => String(item.id || "") === id);
-    if (!task) return;
-
-    const memberById = new Map(membersCache.map(member => [String(member.id || ""), member]));
-    task.parts = (partRows.data || []).map(row => {
-      const member = row.assigned_member_id ? memberById.get(String(row.assigned_member_id)) : null;
-      return {
-        ...row,
-        members: member || null,
-        assigned_member_name: member ? getMemberDisplayName(member) : ""
-      };
-    }).sort((a, b) => Number(a.part_order || 0) - Number(b.part_order || 0));
-
-    task.singers = (singerRows.data || []).map(row => {
-      const member = row.member_id ? memberById.get(String(row.member_id)) : null;
-      return {
-        ...row,
-        members: member || null,
-        member_name: member ? getMemberDisplayName(member) : ""
-      };
-    });
-  }
 
   async function saveTaskBundleWithRpc(task, snapshot, projectPayload, partResult, singerPayload) {
-    try {
-      await secureUpdateProjectViaRpc(task, snapshot, projectPayload);
-      await syncProjectFieldsAfterRpc(task.id, projectPayload);
-      await secureReplaceProjectSingersViaRpc(task.id, singerPayload.map(item => item.member_id));
-      await saveProjectPartsDirectly(task.id, partResult);
-    } catch (err) {
-      if (!shouldFallbackFromRpcError(err)) throw err;
-      await saveProjectPayloadDirectly(task.id, projectPayload);
-      await saveProjectSingersDirectly(task.id, singerPayload, task);
-      await saveProjectPartsDirectly(task.id, partResult);
-    }
+    await saveProjectBundleViaRpc(task, {
+      ...projectPayload,
+      game_type: snapshot.gameType || null,
+      parts: partResult.payload,
+      singers: singerPayload
+    });
   }
 
   function scheduleAutoSave(mode = "auto") {
@@ -8390,7 +8546,6 @@ function renderBrowseList() {
 
     const snapshot = buildTaskFromDom(task);
     const { task: nextTask, partResult, singerPayload, toneResult, taskCode, songName, releaseDate, videoLink, taskType, isCollectiveTask, producerName, singerQuota } = snapshot;
-    const currentTaskIsGame = isGameProjectTypeValue(taskType);
     const activeFilterBeforeSave = getCurrentMainFilter();
     const lyricsStateBeforeSave = getLyricsAssignmentState(task);
 
@@ -8452,7 +8607,6 @@ function renderBrowseList() {
       await saveTaskBundleWithRpc(task, snapshot, projectPayload, partResult, singerPayload);
 
       await loadProjectsFromSupabase({ keepSelection: true });
-      await reloadCurrentTaskDetailRows(task.id);
 
       const refreshedTask = tasks.find(item => String(item.id || "") === String(task.id || ""));
       const lyricsStateAfterSave = refreshedTask ? getLyricsAssignmentState(refreshedTask) : null;
@@ -8502,12 +8656,11 @@ function renderBrowseList() {
     const task = tasks.find(item => item.id === taskId);
     if (!task) return;
 
-    const currentMemberId = getCurrentMemberId();
-    if (!currentMemberId) {
+    const currentUiMemberId = getCurrentUiMemberId();
+    if (!currentUiMemberId) {
       showToast("无法退出", "当前登录信息不完整，请重新登录后再试。");
       return;
     }
-
     if (!isCurrentUserSingerInTask(task)) return;
 
     const ok = await showConfirmToast("确认退出", "确定要取消加入这个任务吗？", "确认退出", "取消");
@@ -8515,31 +8668,21 @@ function renderBrowseList() {
 
     try {
       setAutoSaveStatus("saving", "退出中...");
+      const singers = (task.singers || []).filter(row => String(row.member_id || "").trim() !== currentUiMemberId);
+      const parts = (task.parts || []).map(row => {
+        if (String(row.assigned_member_id || "").trim() !== currentUiMemberId) return row;
+        return {
+          ...row,
+          assigned_member_id: "",
+          assigned_member_name: ""
+        };
+      });
 
-      const remainingSingerIds = (task.singers || [])
-        .map(row => String(row.member_id || "").trim())
-        .filter(id => id && id !== currentMemberId);
-      try {
-        await secureReplaceProjectSingersViaRpc(task.id, remainingSingerIds);
-      } catch (err) {
-        if (!shouldFallbackFromRpcError(err)) throw err;
-        await saveProjectSingersDirectly(task.id, remainingSingerIds.map(member_id => ({ member_id })), task);
-      }
-
-      const assignedRows = (task.parts || []).filter(row => String(row.assigned_member_id || "").trim() === currentMemberId);
-      for (const row of assignedRows) {
-        if (!row.id) continue;
-        const keepOriginal = !!String(row.original_name || "").trim();
-        const payload = keepOriginal
-          ? { assigned_member_id: null }
-          : { assigned_member_id: null, original_name: null };
-        const { error: clearPartError } = await supabaseClient
-          .from("project_parts")
-          .update(payload)
-          .eq("id", row.id);
-        if (clearPartError) throw clearPartError;
-      }
-
+      await saveProjectBundleViaRpc(task, {
+        singers,
+        parts,
+        producer_completed: false
+      });
       await loadProjectsFromSupabase({keepSelection:true});
 
       const latestTask = tasks.find(item => item.id === taskId);
@@ -8548,13 +8691,12 @@ function renderBrowseList() {
         renderBrowseList();
         renderBrowseDetail();
       }
-
       setAutoSaveStatus("saved", "已退出");
     } catch (err) {
       console.error("退出任务失败：", err);
       setAutoSaveStatus("error", "退出失败");
       const detail = String(err?.message || err?.details || err?.hint || "").trim();
-      showToast("退出失败", detail ? `退出失败：${detail}` : "退出失败，请检查安全保存函数与 project_parts 权限。");
+      showToast("退出失败", detail ? `退出失败：${detail}` : "退出失败，请检查 save_project_bundle RPC。");
     }
   }
 
@@ -8562,27 +8704,29 @@ function renderBrowseList() {
     const task = tasks.find(item => item.id === taskId);
     if (!task) return;
 
-    const currentMemberId = getCurrentMemberId();
+    const currentUiMemberId = getCurrentUiMemberId();
     const currentMemberName = getCurrentMemberName();
-
-    if (!currentMemberId || !currentMemberName) {
+    if (!currentUiMemberId || !currentMemberName) {
       showToast("无法加入", "当前登录信息不完整，请重新登录后再试。");
       return;
     }
-
     if (!canCurrentUserJoinTask(task)) return;
 
     try {
       setAutoSaveStatus("saving", "加入中...");
-
-      const nextSingerIds = [...new Set([...(task.singers || []).map(row => String(row.member_id || "").trim()).filter(Boolean), currentMemberId])];
-      try {
-        await secureReplaceProjectSingersViaRpc(task.id, nextSingerIds);
-      } catch (err) {
-        if (!shouldFallbackFromRpcError(err)) throw err;
-        await saveProjectSingersDirectly(task.id, nextSingerIds.map(member_id => ({ member_id })), task);
+      const singerMap = new Map((task.singers || []).map(item => [String(item.member_id || "").trim(), item]));
+      if (!singerMap.has(currentUiMemberId)) {
+        singerMap.set(currentUiMemberId, {
+          member_id: currentUiMemberId,
+          is_submitted: false,
+          submitted_at: null
+        });
       }
 
+      await saveProjectBundleViaRpc(task, {
+        singers: [...singerMap.values()],
+        parts: task.parts || []
+      });
       await loadProjectsFromSupabase({keepSelection:true});
 
       const joinedTask = tasks.find(item => item.id === taskId);
@@ -8591,13 +8735,12 @@ function renderBrowseList() {
         renderBrowseList();
         renderBrowseDetail();
       }
-
       setAutoSaveStatus("saved", "已加入");
     } catch (err) {
       console.error("加入任务失败：", err);
       setAutoSaveStatus("error", "加入失败");
       const detail = String(err?.message || err?.details || err?.hint || "").trim();
-      showToast("加入失败", detail ? `加入失败：${detail}` : "加入失败，请检查安全保存函数是否已创建。");
+      showToast("加入失败", detail ? `加入失败：${detail}` : "加入失败，请检查 save_project_bundle RPC。");
     }
   }
 
@@ -8682,16 +8825,22 @@ function renderBrowseList() {
   function syncPanelSwitchActive() {
     const currentPage = normalizeStudioPageName(getCurrentPageFileName());
     document.querySelectorAll("#panelSwitch .switchBtn").forEach(btn => {
+      const pageKey = String(btn.dataset.pageKey || "").trim();
+      const targetPage = pageKey ? getRoom10Page(pageKey) : "";
+      if (targetPage) btn.href = targetPage;
       btn.classList.toggle("active", normalizeStudioPageName(btn.dataset.page) === currentPage);
+      if (btn.classList.contains("active")) btn.setAttribute("aria-current", "page");
+      else btn.removeAttribute("aria-current");
     });
   }
 
   function syncRoomNavActive() {
-    const currentFile = String(window.location.pathname || "").split("/").pop() || CURRENT_STUDIO_PAGE;
+    const currentPath = new URL(window.location.href).pathname;
     document.querySelectorAll(".navBtn").forEach(btn => {
       const key = btn.dataset.room;
-      const target = key === "manager" ? "manager.html" : links[key];
-      const isCurrentRoom = !!target && target === currentFile;
+      const target = links[key];
+      const targetPath = target ? new URL(target, window.location.href).pathname : "";
+      const isCurrentRoom = !!targetPath && targetPath === currentPath;
       btn.classList.toggle("active", isCurrentRoom);
       btn.classList.toggle("is-current", isCurrentRoom);
       if (isCurrentRoom) btn.setAttribute("aria-current", "page");
@@ -8710,7 +8859,8 @@ function renderBrowseList() {
     if (studioPageNavigationInFlight) return;
 
     const currentFile = getCurrentPageFileName();
-    if (targetPage === currentFile) return;
+    const targetFile = new URL(targetPage, window.location.href).pathname.split("/").pop() || "";
+    if (targetFile === currentFile) return;
 
     studioPageNavigationInFlight = true;
     clearPinnedTaskInCurrentView();
@@ -8728,12 +8878,15 @@ function renderBrowseList() {
 
   claimSearchInput.addEventListener("input", (e) => {
     claimSearchKeyword = e.target.value;
-    const filtered = getFilteredTasks(claimSearchKeyword);
-    if (!filtered.some(task => task.id === activeClaimTaskId)) {
-      activeClaimTaskId = filtered.length ? filtered[0].id : "";
+    const keyword = String(claimSearchKeyword || "").trim();
+    if (!keyword) {
+      const filtered = getFilteredTasks("");
+      if (!filtered.some(task => task.id === activeClaimTaskId)) {
+        activeClaimTaskId = filtered.length ? filtered[0].id : "";
+      }
+      renderBrowseDetail();
     }
     renderBrowseList();
-    renderBrowseDetail();
     renderSiteNotifications();
   });
 
@@ -8754,6 +8907,15 @@ function renderBrowseList() {
   });
 
 
+  document.querySelectorAll("#panelSwitch .switchBtn").forEach(btn => {
+    btn.addEventListener("click", async event => {
+      event.preventDefault();
+      const pageKey = String(btn.dataset.pageKey || "").trim();
+      if (!pageKey) return;
+      await goStudioPage(getRoom10Page(pageKey));
+    });
+  });
+
   document.querySelectorAll(".navBtn").forEach(btn => {
     btn.addEventListener("click", async () => {
       const roomKey = btn.dataset.room;
@@ -8761,12 +8923,12 @@ function renderBrowseList() {
       if (roomKey === "manager") {
         const role = getCurrentRole();
         const page = role === "owner"
-          ? "manager-owner.html"
+          ? getRoom10Page("managerOwner")
           : role === "admin"
-            ? "manager-admin.html"
-            : (role === "member" || role === "applying")
-              ? "manager-member.html"
-              : "manager-visitor.html";
+            ? getRoom10Page("managerAdmin")
+            : (role === "member" || role === "trainee" || role === "applying")
+              ? getRoom10Page("managerMember")
+              : getRoom10Page("managerVisitor");
         await goStudioPage(page);
         return;
       }
@@ -8792,6 +8954,7 @@ function renderBrowseList() {
     toggleSiteNoticePanel();
   });
 
+  loginOpenBtn?.addEventListener("click", () => redirectToIndex());
   logoutBtn?.addEventListener("click", async () => { await handleLogout(); });
   if (undoBtn) undoBtn.addEventListener("click", undoLastDetailChange);
 
@@ -8843,7 +9006,7 @@ function renderBrowseList() {
       tryLoadNextBackground();
     });
 
-    if (!bg.getAttribute('src')) {
+    if (!bg.getAttribute('src') && BG_CANDIDATE_PATHS.length) {
       bg.src = BG_CANDIDATE_PATHS[0];
     }
   }
@@ -9060,27 +9223,50 @@ document.addEventListener("keydown", function(event) {
 });
 
 
-    (async function init() {
-    pendingStudioJumpIntent = readStudioJumpIntent();
-    applyDefaultBackgroundBlend();
-    syncOverlayToImage();
-    syncPanelSwitchActive();
-    syncRoomNavActive();
-    syncFilterButtons();
-    startMusicNotes();
+  window.addEventListener("error", event => {
+    const message = String(event?.error?.message || event?.message || "页面运行错误");
+    console.error("工作间页面错误：", event?.error || event);
+    if (toastMask && !toastMask.classList.contains("show")) {
+      showToast("页面运行错误", message);
+    }
+  });
 
-    const ok = await ensureAuthState();
-    if (!ok) return;
+  window.addEventListener("unhandledrejection", event => {
+    const reason = event?.reason;
+    const message = String(reason?.message || reason || "页面操作失败");
+    console.error("工作间未处理的异步错误：", reason);
+    if (toastMask && !toastMask.classList.contains("show")) {
+      showToast("页面操作失败", message);
+    }
+  });
 
-    updateTopBarIdentity();
-    await Promise.all([
-      loadProjectTypeOptionsFromSettings(),
-      loadGoldConfigFromSettings()
-    ]);
-    await loadMembersList();
-    await loadProjectsFromSupabase({keepSelection:false});
-    renderSiteNotifications();
-    setAutoSaveStatus("saved", "已同步");
+  (async function init() {
+    try {
+      pendingStudioJumpIntent = readStudioJumpIntent();
+      applyDefaultBackgroundBlend();
+      syncOverlayToImage();
+      syncPanelSwitchActive();
+      syncRoomNavActive();
+      syncFilterButtons();
+      startMusicNotes();
+
+      const ok = await ensureAuthState();
+      if (!ok) return;
+
+      updateTopBarIdentity();
+      await Promise.all([
+        loadProjectTypeOptionsFromSettings(),
+        loadGoldConfigFromSettings()
+      ]);
+      await loadMembersList();
+      await loadProjectsFromSupabase({keepSelection:false});
+      renderSiteNotifications();
+      setAutoSaveStatus("saved", "已同步");
+    } catch (err) {
+      console.error("工作间初始化失败：", err);
+      setAutoSaveStatus("error", "初始化失败");
+      showToast("工作间初始化失败", String(err?.message || err));
+    }
   })();
 
 
