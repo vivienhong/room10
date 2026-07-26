@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜项目委托</title>
 
+<script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -296,7 +297,7 @@
 
   .producerReleaseRow{
     display:grid;
-    grid-template-columns:1.45fr 0.9fr;
+    grid-template-columns:1fr;
     gap:calc(10px * var(--ui-scale));
     align-items:start;
     margin-bottom:calc(10px * var(--ui-scale));
@@ -344,9 +345,11 @@
     opacity:1;
   }
 
+  #gameTypeSection[hidden]{display:none!important;}
+
   .typeBtnGroup{
     display:grid;
-    grid-template-columns:repeat(5,minmax(0,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(calc(76px * var(--ui-scale)),1fr));
     gap:6px;
     margin-bottom:calc(10px * var(--ui-scale));
   }
@@ -565,6 +568,86 @@
     color:#744d2b;
   }
 
+  #studioWheelModalMask{
+    position:fixed;
+    inset:0;
+    z-index:9980;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(60,42,23,0.24);
+    backdrop-filter:blur(5px);
+    -webkit-backdrop-filter:blur(5px);
+  }
+
+  #studioWheelModalMask.show{
+    display:flex;
+  }
+
+  #studioWheelModalBox{
+    width:min(1180px, calc(100vw - 40px));
+    height:min(860px, calc(100vh - 40px));
+    min-width:0;
+    min-height:0;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    border-radius:26px;
+    background:rgba(255,249,241,0.98);
+    border:1px solid rgba(203,167,123,0.34);
+    box-shadow:0 22px 58px rgba(85,58,34,0.24), inset 0 1px 0 rgba(255,255,255,0.92);
+  }
+
+  #studioWheelModalHeader{
+    flex:0 0 auto;
+    min-height:58px;
+    padding:10px 14px 10px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    border-bottom:1px solid rgba(203,167,123,0.18);
+    background:rgba(255,252,247,0.94);
+  }
+
+  #studioWheelModalTitle{
+    color:#6f4726;
+    font-size:17px;
+    font-weight:900;
+  }
+
+  #studioWheelModalCloseBtn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    min-width:76px;
+    height:36px;
+    padding:0 16px;
+    border-radius:12px;
+    background:rgba(255,252,247,0.94);
+    color:#744d2b;
+    font-size:13px;
+    font-weight:800;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.95),0 2px 8px rgba(112,83,52,0.08);
+  }
+
+  #studioWheelModalFrame{
+    flex:1 1 auto;
+    width:100%;
+    min-width:0;
+    min-height:0;
+    border:0;
+    display:block;
+    background:#f7eddf;
+  }
+
+  @media (max-width:700px){
+    #studioWheelModalMask{padding:8px;}
+    #studioWheelModalBox{width:100%;height:100%;border-radius:18px;}
+    #studioWheelModalHeader{min-height:52px;padding:8px 10px 8px 14px;}
+  }
+
   #toastMask{
     position:fixed;
     inset:0;
@@ -755,6 +838,159 @@
   }
 }
 
+
+/* =========================================================
+   房间通用模板组件一致性修正
+   仅修正房间按钮 / 身份组件；不接入成就称号弹窗，不改业务逻辑
+========================================================= */
+#overlay .roomNavLayer{
+  pointer-events:none!important;
+}
+#overlay .roomNavLayer .navBtn{
+  pointer-events:auto!important;
+}
+#overlay .roomIdentity{
+  pointer-events:none!important;
+  overflow:visible!important;
+}
+#overlay .roomIdentity .roomIdentityBar,
+#overlay .roomIdentity button,
+#overlay .roomIdentity .identityNoticePanel{
+  pointer-events:auto!important;
+}
+.roomNavLayer{
+  position:absolute;
+  inset:0;
+  z-index:55;
+  pointer-events:none;
+  --s:var(--room-nav-scale,var(--ui-scale,1));
+}
+.roomIdentity{
+  --s:var(--identity-scale,var(--ui-scale,1));
+  position:absolute;
+  right:var(--identity-right);
+  top:var(--identity-top);
+  width:calc(var(--identity-base-width,232) * 1px * var(--s));
+  height:calc(var(--identity-base-height,38) * 1px * var(--s));
+  min-width:calc(var(--identity-base-width,232) * 1px * var(--s));
+  min-height:calc(var(--identity-base-height,38) * 1px * var(--s));
+  z-index:70;
+  pointer-events:none;
+  overflow:visible!important;
+}
+.roomIdentityBar{
+  overflow:visible!important;
+}
+.identityNameBox,
+.identityNoticeWrap,
+.identityNoticeBtn,
+.identityAuthBtn{
+  min-width:0;
+}
+.identityNoticePanel{
+  overflow:auto;
+}
+@media(max-width:540px){
+  #overlay{
+    position:relative!important;
+    left:auto!important;
+    top:auto!important;
+    width:100%!important;
+    height:auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:10px!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+    pointer-events:auto!important;
+  }
+  .roomNavLayer{
+    position:relative!important;
+    inset:auto!important;
+    width:100%!important;
+    height:106px!important;
+    min-height:106px!important;
+    max-height:106px!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-template-rows:repeat(3,32px)!important;
+    gap:5px!important;
+    margin:0!important;
+    padding:0!important;
+    align-content:start!important;
+    order:0!important;
+    z-index:20!important;
+    pointer-events:auto!important;
+    --s:1!important;
+  }
+  .roomNavLayer .navBtn{
+    position:relative!important;
+    left:auto!important;
+    top:auto!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:100%!important;
+    height:32px!important;
+    min-width:0!important;
+    min-height:32px!important;
+    max-height:32px!important;
+    margin:0!important;
+    padding:0!important;
+    border-radius:10px!important;
+    font-size:12px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+  }
+  .roomNavLayer .navLabel{
+    height:100%!important;
+    padding-top:.04em!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+  }
+  .roomNavLayer .navEffect{display:none!important;}
+  .roomIdentity{
+    --s:1!important;
+    position:relative!important;
+    right:auto!important;
+    left:auto!important;
+    top:auto!important;
+    width:100%!important;
+    min-width:0!important;
+    height:40px!important;
+    min-height:40px!important;
+    order:1!important;
+    z-index:30!important;
+  }
+  .roomIdentityBar{
+    grid-template-columns:minmax(0,1fr) 34px 42px!important;
+    gap:6px!important;
+    padding:5px 7px!important;
+    border-radius:14px!important;
+  }
+  .identityNameBox{padding:0 9px!important;border-radius:10px!important;}
+  .identityNameText{font-size:12px!important;line-height:1.22!important;}
+  .identityNoticeBtn{font-size:14px!important;border-radius:10px!important;}
+  .identityAuthBtn{font-size:11px!important;border-radius:10px!important;}
+  .identityNoticePanel{
+    position:fixed!important;
+    top:58px!important;
+    left:12px!important;
+    right:12px!important;
+    width:auto!important;
+    max-height:60dvh!important;
+    padding:14px!important;
+    border-radius:18px!important;
+    z-index:999!important;
+  }
+  #taskPanel{
+    order:2!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -764,34 +1000,76 @@
     </div>
 
     <div id="overlay">
-      <nav class="roomNavLayer" aria-label="房间切换">
-        <button class="navBtn" data-room="hall" type="button"><span class="navLabel">大堂</span><span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span></button>
-        <button class="navBtn" data-room="living" type="button"><span class="navLabel">客厅</span><span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">💬</span><span class="navEffect navEffectC">☕</span></button>
-        <button class="navBtn" data-room="manager" type="button"><span class="navLabel">宿管室</span><span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span></button>
-        <button class="navBtn" data-room="honor" type="button"><span class="navLabel">荣誉墙</span><span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span></button>
-        <button class="navBtn is-current" data-room="studio" type="button"><span class="navLabel">工作间</span><span class="navEffect navEffectA">♪</span><span class="navEffect navEffectB">♫</span><span class="navEffect navEffectC">♬</span></button>
-        <button class="navBtn" data-room="game" type="button"><span class="navLabel">游戏房</span><span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span></button>
-        <button class="navBtn" data-room="dorm" type="button"><span class="navLabel">宿舍</span><span class="navEffect navEffectA">☁</span><span class="navEffect navEffectB">◦</span><span class="navEffect navEffectC">☾</span></button>
-        <button class="navBtn" data-room="flower" type="button"><span class="navLabel">花房区</span><span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">✽</span></button>
-        <button class="navBtn" data-room="pets" type="button"><span class="navLabel">宠物区</span><span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐾</span></button>
-      </nav>
+      <nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换">
+      <button class="navBtn" data-room="hall" type="button" data-url="index.html" data-login="false">
+        <span class="navLabel">大堂</span>
+        <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
+      </button>
 
-      <div class="roomIdentity">
+      <button class="navBtn" data-room="living" type="button" data-url="living.html" data-login="true">
+        <span class="navLabel">客厅</span>
+        <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
+      </button>
+
+      <button class="navBtn" data-room="manager" type="button" data-manager="true">
+        <span class="navLabel">宿管室</span>
+        <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
+      </button>
+
+      <button class="navBtn" data-room="honor" type="button" data-url="honor.html" data-login="false">
+        <span class="navLabel">荣誉墙</span>
+        <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
+      </button>
+
+      <button class="navBtn is-current" data-room="studio" type="button" data-url="studio-todo.html" data-login="true" aria-current="page" tabindex="-1">
+        <span class="navLabel">工作间</span>
+        <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
+      </button>
+
+      <button class="navBtn" data-room="game" type="button" data-url="game.html" data-login="false">
+        <span class="navLabel">游戏房</span>
+        <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span>
+      </button>
+
+      <button class="navBtn" data-room="dorm" type="button" data-url="dorm.html" data-login="true">
+        <span class="navLabel">宿舍</span>
+        <span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span>
+      </button>
+
+      <button class="navBtn" data-room="flower" type="button" data-url="flower.html" data-login="false">
+        <span class="navLabel">花房区</span>
+        <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
+      </button>
+
+      <button class="navBtn" data-room="pets" type="button" data-url="pets.html" data-login="false">
+        <span class="navLabel">宠物区</span>
+        <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
+      </button>
+    </nav>
+
+      <section class="roomIdentity" id="roomIdentity" aria-label="当前身份">
         <div class="roomIdentityBar">
-          <div class="identityNameBox"><span class="identityNameText" id="identityNameText">读取中</span></div>
+          <div class="identityNameBox">
+            <span class="identityNameText" id="identityNameText">读取中</span>
+          </div>
+
           <div class="identityNoticeWrap" id="siteNoticeWrap">
             <button class="identityNoticeBtn" id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="查看提醒">
               <span class="identityNoticeIcon" aria-hidden="true">🔔</span>
             </button>
             <span class="identityNoticeCount" id="siteNoticeCount">0</span>
+
             <div class="identityNoticePanel" id="siteNoticePanel" aria-hidden="true">
               <div class="identityNoticeTitle">待处理提醒</div>
               <div id="siteNoticeBody" class="identityNoticeEmpty">暂无提醒</div>
             </div>
           </div>
-          <button class="identityAuthBtn" id="identityAuthBtn" type="button"><span class="identityAuthText">登出</span></button>
+
+          <button class="identityAuthBtn" id="identityAuthBtn" type="button">
+            <span class="identityAuthText">登出</span>
+          </button>
         </div>
-      </div>
+      </section>
 
       <section id="taskPanel" aria-label="项目委托面板">
         <nav id="panelSwitch" aria-label="工作间页面切换">
@@ -826,7 +1104,7 @@
                   </div>
 
                   <div class="colCard">
-                    <div class="colLabel">调（选填）</div>
+                    <div class="colLabel" id="toneLabel">调</div>
                     <input id="projectTone" class="signupInput" type="text" placeholder="如：原调 / -2 / +6" />
                   </div>
                 </div>
@@ -834,11 +1112,19 @@
                 <div class="signupSection">
                   <div class="signupSectionTitle">任务类型</div>
                   <div class="typeBtnGroup" id="typeBtnGroup">
-                    <button type="button" class="typeBtn active" data-type="披4">披4</button>
-                    <button type="button" class="typeBtn" data-type="披哥">披哥</button>
-                    <button type="button" class="typeBtn" data-type="浪姐">浪姐</button>
-                    <button type="button" class="typeBtn" data-type="其他">其他</button>
-                    <button type="button" class="typeBtn" data-type="游戏">游戏</button>
+                    <div class="memberEmpty">正在读取数据库任务类型...</div>
+                  </div>
+                </div>
+
+                <div class="signupSection" id="gameTypeSection" hidden>
+                  <div class="signupSectionTitle">游戏类型</div>
+                  <div class="typeBtnGroup" id="gameTypeBtnGroup">
+                    <button type="button" class="typeBtn" data-game-type="各唱各">各唱各</button>
+                    <button type="button" class="typeBtn" data-game-type="接龙">接龙</button>
+                    <button type="button" class="typeBtn" data-game-type="升调挑战">升调挑战</button>
+                    <button type="button" class="typeBtn" data-game-type="变速挑战">变速挑战</button>
+                    <button type="button" class="typeBtn" data-game-type="接不了龙">接不了龙</button>
+                    <button type="button" class="typeBtn" data-game-type="其他游戏">其他游戏</button>
                   </div>
                 </div>
 
@@ -892,11 +1178,6 @@
                     <div class="memberPickerLabel">混音</div>
                     <div class="memberGrid" id="producerMemberGrid"></div>
                   </div>
-
-                  <div class="colCard">
-                    <div class="colLabel">预计发布（选填）</div>
-                    <input id="releaseDate" class="signupDate" type="date" />
-                  </div>
                 </div>
 
                 <div class="signupSection">
@@ -916,12 +1197,22 @@
 
               <div id="signupFooter">
                 <button class="signupActionBtn signupActionGhost" id="signupResetBtn" type="button">清空</button>
-                <button class="signupActionBtn" id="signupSubmitBtn" type="button">发布任务</button>
+                <button class="signupActionBtn" id="signupSubmitBtn" type="button">确认立项</button>
               </div>
             </div>
           </div>
         </div>
       </section>
+    </div>
+  </div>
+
+  <div id="studioWheelModalMask" aria-hidden="true">
+    <div id="studioWheelModalBox" role="dialog" aria-modal="true" aria-labelledby="studioWheelModalTitle">
+      <div id="studioWheelModalHeader">
+        <div id="studioWheelModalTitle">角色转盘</div>
+        <button id="studioWheelModalCloseBtn" type="button">关闭</button>
+      </div>
+      <iframe id="studioWheelModalFrame" title="角色转盘" src="about:blank"></iframe>
     </div>
   </div>
 
@@ -938,6 +1229,14 @@
   const SUPABASE_KEY = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+  function getRoom10Page(key) {
+    const path = typeof window.room10Page === "function" ? window.room10Page(key) : "";
+    if (!path) {
+      throw new Error(`room10-paths.js 缺少页面配置：${key}`);
+    }
+    return path;
+  }
+
   const STORAGE_KEYS = {
     loggedIn: "room10LoggedIn",
     user: "room10User",
@@ -946,30 +1245,18 @@
     memberCode: "room10MemberCode"
   };
 
-  const TASK_PAYOUT = {
-    onSubmitRatio: 0.7,
-    onPublishRatio: 0.3
+  const submitFormState = {
+    nextProjectCode: "001",
+    currentPublicMemberId: "",
+    toneRequired: false,
+    canCreate: true,
+    permissionMessage: "",
+    rewards: null,
+    projectTypes: [],
+    gameTypes: ["各唱各", "接龙", "升调挑战", "变速挑战", "接不了龙", "其他游戏"]
   };
-
-  const SINGING_REWARD_TABLE = {
-    1: 40,
-    2: 38,
-    3: 35,
-    4: 32,
-    5: 30,
-    6: 28,
-    7: 26,
-    8: 25,
-    9: 24,
-    10: 23,
-    11: 22,
-    12: 21,
-    13: 20,
-    14: 19,
-    15: 18,
-    16: 18,
-    17: 17
-  };
+  let submitFormRefreshTimer = null;
+  let submitFormRequestId = 0;
 
   const authState = {
     initialized: false,
@@ -977,29 +1264,36 @@
     nickname: "",
     role: "visitor",
     memberId: null,
-    memberCode: ""
+    memberCode: "",
+    publicMemberId: ""
   };
 
-  const ALLOWED_STUDIO_SUBMIT_ROLES = new Set(['owner', 'admin', 'member']);
+  const ALLOWED_STUDIO_SUBMIT_ROLES = new Set(['owner', 'admin', 'member', 'trainee']);
 
   const links = {
-    hall: "index.html",
-    honor: "honor.html",
-    game: "game.html",
-    living: "living.html",
-    dorm: "dorm.html",
-    pets: "pets.html",
-    flower: "flower.html"
+    hall: getRoom10Page("index"),
+    honor: getRoom10Page("honor"),
+    game: getRoom10Page("game"),
+    living: getRoom10Page("living"),
+    dorm: getRoom10Page("dorm"),
+    pets: getRoom10Page("pet"),
+    flower: getRoom10Page("flower"),
+    studioWheel: getRoom10Page("studioWheel")
   };
 
   let members = [];
   let tasks = [];
-  let selectedType = "披4";
+  let selectedType = "";
+  let selectedGameType = "";
   let selectedTaskMode = "normal";
   let selectedSingerIds = [];
   let selectedProducerId = "";
   let originalRows = [createRow()];
   let lyricsLotteryEnabled = false;
+  let studioWheelPendingPayload = null;
+  let studioWheelChannelId = "";
+  let studioWheelRetryTimer = null;
+  let studioWheelReady = false;
 
   const room = document.getElementById("room");
   const bg = document.getElementById("bg");
@@ -1016,7 +1310,7 @@
   const songNameInput = document.getElementById("songName");
   const singerQuotaInput = document.getElementById("singerQuota");
   const projectToneInput = document.getElementById("projectTone");
-  const releaseDateInput = document.getElementById("releaseDate");
+  const toneLabel = document.getElementById("toneLabel");
   const projectAutoCodeEl = document.getElementById("projectAutoCode");
   const singerRewardValueEl = document.getElementById("singerRewardValue");
   const producerRewardValueEl = document.getElementById("producerRewardValue");
@@ -1029,12 +1323,17 @@
   const signupSubmitBtn = document.getElementById("signupSubmitBtn");
   const signupResetBtn = document.getElementById("signupResetBtn");
   const typeBtnGroup = document.getElementById("typeBtnGroup");
+  const gameTypeSection = document.getElementById("gameTypeSection");
+  const gameTypeBtnGroup = document.getElementById("gameTypeBtnGroup");
   const submitModeGroup = document.getElementById("submitModeGroup");
   const openWheelBtn = document.getElementById("openWheelBtn");
   const clearWheelAssignBtn = document.getElementById("clearWheelAssignBtn");
   const quickOriginalInput = document.getElementById("quickOriginalInput");
   const applyQuickOriginalBtn = document.getElementById("applyQuickOriginalBtn");
   const clearQuickOriginalBtn = document.getElementById("clearQuickOriginalBtn");
+  const studioWheelModalMask = document.getElementById("studioWheelModalMask");
+  const studioWheelModalFrame = document.getElementById("studioWheelModalFrame");
+  const studioWheelModalCloseBtn = document.getElementById("studioWheelModalCloseBtn");
 
   const toastMask = document.getElementById("toastMask");
   const toastTitle = document.getElementById("toastTitle");
@@ -1076,11 +1375,30 @@
     if (e.target === toastMask) closeToast();
   });
 
-  function splitGold(totalGold) {
-    const total = Math.max(0, Math.floor(Number(totalGold) || 0));
-    const submit = Math.floor(total * TASK_PAYOUT.onSubmitRatio);
-    const publish = total - submit;
-    return { total, submit, publish };
+  function renderRewardValue(target, total, submit, publish) {
+    if (![total, submit, publish].every(Number.isFinite)) {
+      target.textContent = "奖金读取失败";
+      return;
+    }
+    target.innerHTML = total > 0
+      ? `${total} 金币<span class="rewardHint">交音 ${submit} / 发布 ${publish}</span>`
+      : "0 金币";
+  }
+
+  function updateRewardPreview() {
+    const rewards = submitFormState.rewards || {};
+    renderRewardValue(
+      singerRewardValueEl,
+      Number(rewards.singer_total),
+      Number(rewards.singer_submit),
+      Number(rewards.singer_publish)
+    );
+    renderRewardValue(
+      producerRewardValueEl,
+      Number(rewards.producer_total),
+      Number(rewards.producer_submit),
+      Number(rewards.producer_publish)
+    );
   }
 
   function isSingerQuotaBlank() {
@@ -1104,47 +1422,40 @@
     return normalized;
   }
 
-  function getSingerRewardByCount(singerCount) {
-    const count = normalizeSingerCount(singerCount);
+  function isToneRequired() {
+    return false;
+  }
 
-    if (SINGING_REWARD_TABLE[count] != null) {
-      return SINGING_REWARD_TABLE[count];
+  function syncProjectRuleUi() {
+    const isGame = selectedType === "游戏";
+    if (gameTypeSection) gameTypeSection.hidden = !isGame;
+    if (toneLabel) toneLabel.textContent = "调";
+    projectToneInput.required = false;
+    signupSubmitBtn.disabled = !submitFormState.canCreate;
+    if (!submitFormState.canCreate) {
+      signupStatus.textContent = "当前身份不可委托";
+      signupSubmitBtn.title = submitFormState.permissionMessage || "当前身份不能委托此类型项目";
+    } else if (signupStatus.textContent !== "提交中") {
+      signupStatus.textContent = "填写中";
+      signupSubmitBtn.title = "";
     }
-
-    return Math.max(12, Math.floor(17 - 0.5 * (count - 17)));
   }
 
-  function getTaskModeBonus() {
-    return selectedTaskMode === "special" ? 10 : 0;
+  function toChineseDbError(error, fallback = "操作失败，请稍后重试。") {
+    const message = String(error?.message || error || "").trim();
+    if (!message) return fallback;
+    return message
+      .replace(/duplicate key value violates unique constraint/gi, "数据已存在")
+      .replace(/violates row-level security policy/gi, "当前账号没有操作权限")
+      .replace(/invalid input syntax for type uuid/gi, "成员数据格式无效，请刷新页面")
+      .replace(/null value in column/gi, "必填资料不完整");
   }
 
-  function getSingerReward(taskType, singerQuota) {
-    return getSingerRewardByCount(singerQuota) + getTaskModeBonus();
-  }
-
-  function getProducerReward(taskType, singerQuota) {
-    const count = normalizeSingerCount(singerQuota);
-
-    if (taskType === "游戏") return 0;
-
-    return Math.min(48 + Math.min(count - 1, 12), 60) + getTaskModeBonus();
-  }
-
-  function updateRewardPreview() {
-    const previewQuota = getSingerQuota({ write:false });
-    const singerTotal = getSingerReward(selectedType, previewQuota);
-    const producerTotal = getProducerReward(selectedType, previewQuota);
-
-    const singerSplit = splitGold(singerTotal);
-    const producerSplit = splitGold(producerTotal);
-
-    singerRewardValueEl.innerHTML = singerSplit.total > 0
-      ? `${singerSplit.total} 金币<span class="rewardHint">交音 ${singerSplit.submit} / 发布 ${singerSplit.publish}</span>`
-      : `0 金币`;
-
-    producerRewardValueEl.innerHTML = producerSplit.total > 0
-      ? `${producerSplit.total} 金币<span class="rewardHint">交音 ${producerSplit.submit} / 发布 ${producerSplit.publish}</span>`
-      : `0 金币`;
+  function scheduleSubmitFormRefresh(delay = 120) {
+    clearTimeout(submitFormRefreshTimer);
+    submitFormRefreshTimer = setTimeout(() => {
+      refreshSubmitFormData({ preserveSelection: true }).catch(console.error);
+    }, delay);
   }
 
   function isLoggedIn() {
@@ -1153,7 +1464,7 @@
 
   function getCurrentRole() {
     const role = String(localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
-    return ["owner", "admin", "member", "visitor", "applying"].includes(role) ? role : "visitor";
+    return ["owner", "admin", "member", "trainee", "visitor", "applying"].includes(role) ? role : "visitor";
   }
 
 
@@ -1166,6 +1477,7 @@
     if (role === "owner") return "维修工";
     if (role === "admin") return "宿管";
     if (role === "member") return "房客";
+    if (role === "trainee") return "练习生";
     if (role === "applying") return "申请中";
     return "参观者";
   }
@@ -1227,59 +1539,25 @@
     authState.nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
     authState.role = getCurrentRole();
     authState.memberId = localStorage.getItem(STORAGE_KEYS.memberId) || null;
+    authState.memberCode = String(localStorage.getItem(STORAGE_KEYS.memberCode) || "").trim();
 
-    if (!authState.loggedIn || !authState.nickname || !authState.memberId) {
+    if (!authState.loggedIn || !authState.nickname || !authState.memberId || !authState.memberCode) {
       handleLogout();
       return false;
     }
 
     try {
-      let verifiedMember = null;
-
-      const directResult = await supabaseClient
-        .from("members")
-        .select("id, nickname, role")
-        .eq("id", authState.memberId)
-        .maybeSingle();
-
-      if (!directResult.error && directResult.data) {
-        verifiedMember = directResult.data;
-      } else {
-        const rpcResult = await supabaseClient.rpc("get_member_directory_for_app");
-        if (!rpcResult.error && Array.isArray(rpcResult.data)) {
-          verifiedMember = rpcResult.data.find(item => String(item.id || "") === String(authState.memberId || "")) || null;
-        }
-      }
-
-      const verifiedNickname = String(verifiedMember?.nickname || "").trim();
-      const verifiedRole = String(verifiedMember?.role || authState.role || "visitor").toLowerCase();
-
-      if (!verifiedMember || !verifiedNickname || verifiedNickname !== authState.nickname) {
-        handleLogout();
-        return false;
-      }
-
-      authState.nickname = verifiedNickname;
-      authState.role = ["owner", "admin", "member", "visitor", "applying"].includes(verifiedRole)
-        ? verifiedRole
-        : authState.role;
+      await refreshSubmitFormData({ preserveSelection: true, silent: true });
       authState.initialized = true;
-
-      localStorage.setItem(STORAGE_KEYS.user, authState.nickname);
-      localStorage.setItem(STORAGE_KEYS.role, authState.role);
-      localStorage.setItem(STORAGE_KEYS.memberId, String(authState.memberId));
-
       updateTopBarIdentity();
-
       if (!canAccessStudioSubmit(authState.role)) {
         handleLogout();
         return false;
       }
-
       return true;
-    } catch (err) {
-      console.error("登录状态校验失败：", err);
-      handleLogout();
+    } catch (error) {
+      console.error("登录状态校验失败：", error);
+      showToast("读取失败", toChineseDbError(error, "无法验证当前成员身份。"));
       return false;
     }
   }
@@ -1312,12 +1590,14 @@
       authState.nickname = String(user.nickname || safeNickname).trim();
       authState.role = String(user.role || "member").toLowerCase();
       authState.memberId = String(user.member_id || "");
+      authState.memberCode = String(user.member_code || safeKey).trim();
       authState.initialized = true;
 
       localStorage.setItem(STORAGE_KEYS.loggedIn, "true");
       localStorage.setItem(STORAGE_KEYS.user, authState.nickname);
       localStorage.setItem(STORAGE_KEYS.role, authState.role);
       localStorage.setItem(STORAGE_KEYS.memberId, authState.memberId);
+      localStorage.setItem(STORAGE_KEYS.memberCode, authState.memberCode);
 
       return { ok: true, user };
     } catch (err) {
@@ -1335,114 +1615,151 @@
     localStorage.removeItem(STORAGE_KEYS.role);
     localStorage.removeItem(STORAGE_KEYS.memberId);
     localStorage.removeItem(STORAGE_KEYS.memberCode);
-    window.location.href = "index.html";
+    window.location.href = getRoom10Page("index");
   }
 
-  function extractNumberFromValue(value) {
-    const str = String(value ?? "");
-    const match = str.match(/\d+/);
-    return match ? parseInt(match[0], 10) : Number.POSITIVE_INFINITY;
-  }
-
-  function getMemberOrderNumber(memberRaw) {
-    const candidates = [
-      memberRaw.display_order,
-      memberRaw.member_order,
-      memberRaw.order_no,
-      memberRaw.member_no,
-      memberRaw.member_number,
-      memberRaw.no,
-      memberRaw.code,
-      memberRaw.member_code,
-      memberRaw.invite_code,
-      memberRaw.key_code,
-      memberRaw.nickname,
-      memberRaw.name
-    ];
-
-    for (const item of candidates) {
-      const num = extractNumberFromValue(item);
-      if (Number.isFinite(num)) return num;
-    }
-    return Number.POSITIVE_INFINITY;
-  }
-
-  function normalizeMemberName(memberRaw, index) {
-    return memberRaw.nickname || memberRaw.name || `成员${index + 1}`;
-  }
-
-  function hasMixSkill(skills) {
-    return typeof skills === "string" && skills.replace(/\s/g, "").includes("混音");
-  }
 
   function normalizeMembers(data) {
-    return (data || [])
-      .map((item, index) => ({
-        id: String(item.id ?? index),
-        name: normalizeMemberName(item, index),
-        nickname: item.nickname || item.name || "",
-        skills: item.skills || "",
-        orderNumber: getMemberOrderNumber(item)
-      }))
+    return (data || []).map((item, index) => ({
+      id: String(item.id || ""),
+      name: item.nickname || item.name || `成员${index + 1}`,
+      nickname: item.nickname || item.name || "",
+      canSing: item.can_sing === true,
+      canMix: item.can_mix === true
+    })).filter(item => item.id);
+  }
+
+  function normalizeConfiguredTypeOptions(rawOptions) {
+    if (!Array.isArray(rawOptions)) return [];
+    const seen = new Set();
+    return rawOptions
+      .map((item, index) => {
+        if (typeof item === "string") {
+          const value = item.trim();
+          return value ? { value, label: value, sortOrder: 100 + index } : null;
+        }
+        if (!item || typeof item !== "object") return null;
+        const value = String(item.value ?? item.type ?? item.key ?? item.label ?? "").trim();
+        const label = String(item.label ?? item.name ?? value).trim() || value;
+        const sortOrder = Number(item.sort_order ?? item.sortOrder ?? item.order ?? (100 + index));
+        return value ? {
+          value,
+          label,
+          sortOrder: Number.isFinite(sortOrder) ? sortOrder : 100 + index
+        } : null;
+      })
+      .filter(option => {
+        if (!option || seen.has(option.value)) return false;
+        seen.add(option.value);
+        return true;
+      })
       .sort((a, b) => {
-        if (a.orderNumber !== b.orderNumber) return a.orderNumber - b.orderNumber;
-        return a.name.localeCompare(b.name, "zh-CN");
+        if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+        return a.label.localeCompare(b.label, "zh-Hans-CN", { numeric: true, sensitivity: "base" });
       });
   }
 
+  function renderTypeOptions() {
+    const projectTypes = submitFormState.projectTypes || [];
+    typeBtnGroup.innerHTML = projectTypes.length
+      ? projectTypes.map(option => `
+          <button
+            type="button"
+            class="typeBtn ${option.value === selectedType ? "active" : ""}"
+            data-type="${escapeHtml(option.value)}"
+          >${escapeHtml(option.label)}</button>
+        `).join("")
+      : '<div class="memberEmpty">数据库未返回可用任务类型</div>';
+
+    const gameTypes = submitFormState.gameTypes || [];
+    if (gameTypeBtnGroup && gameTypes.length) {
+      gameTypeBtnGroup.innerHTML = gameTypes.map(type => `
+        <button type="button" class="typeBtn ${type === selectedGameType ? "active" : ""}" data-game-type="${escapeHtml(type)}">${escapeHtml(type)}</button>
+      `).join("");
+    }
+  }
+
+  function pruneInvalidSelections() {
+    const singerIds = new Set(members.filter(member => member.canSing).map(member => member.id));
+    const mixerIds = new Set(members.filter(member => member.canMix).map(member => member.id));
+    const removed = selectedSingerIds.filter(id => !singerIds.has(id));
+    selectedSingerIds = selectedSingerIds.filter(id => singerIds.has(id));
+    removed.forEach(removeSingerFromLyricRows);
+    if (selectedProducerId && !mixerIds.has(selectedProducerId)) selectedProducerId = "";
+  }
+
+  async function refreshSubmitFormData({ preserveSelection = true, silent = false } = {}) {
+    const requestId = ++submitFormRequestId;
+    const memberId = String(authState.memberId || localStorage.getItem(STORAGE_KEYS.memberId) || "").trim();
+    const memberCode = String(authState.memberCode || localStorage.getItem(STORAGE_KEYS.memberCode) || "").trim();
+    if (!memberId || !memberCode) throw new Error("请重新登录后再试");
+
+    const { data, error } = await supabaseClient.rpc("get_studio_submit_form_data", {
+      p_member_id: memberId,
+      p_member_code: memberCode,
+      p_project_type: selectedType,
+      p_game_type: selectedType === "游戏" ? (selectedGameType || null) : null,
+      p_participant_count: getSingerQuota({ write: false }),
+      p_is_collective_task: selectedTaskMode === "special"
+    });
+    if (error) throw error;
+    if (requestId !== submitFormRequestId) return false;
+
+    const payload = data && typeof data === "object" ? data : {};
+    submitFormState.nextProjectCode = String(payload.next_project_code || "001");
+    submitFormState.currentPublicMemberId = String(payload.current_member_id || "");
+    submitFormState.toneRequired = payload.tone_required !== false;
+    submitFormState.canCreate = payload.can_create !== false;
+    submitFormState.permissionMessage = String(payload.permission_message || "");
+    submitFormState.rewards = payload.rewards || null;
+    submitFormState.projectTypes = normalizeConfiguredTypeOptions(payload.project_types);
+    if (!submitFormState.projectTypes.length) {
+      throw new Error("数据库项目类型配置缺失，请检查 system_settings.project_type_options。");
+    }
+
+    const configuredTypeValues = new Set(
+      submitFormState.projectTypes.map(option => option.value)
+    );
+    const serverSelectedType = String(payload.selected_project_type || "").trim();
+    if (!configuredTypeValues.has(selectedType)) {
+      selectedType = configuredTypeValues.has(serverSelectedType)
+        ? serverSelectedType
+        : submitFormState.projectTypes[0].value;
+      if (selectedType !== "游戏") selectedGameType = "";
+    }
+
+    submitFormState.gameTypes = Array.isArray(payload.game_types)
+      ? payload.game_types.map(String).map(item => item.trim()).filter(Boolean)
+      : submitFormState.gameTypes;
+
+    authState.publicMemberId = submitFormState.currentPublicMemberId;
+    authState.nickname = String(payload.current_member_nickname || authState.nickname || "").trim();
+    authState.role = String(payload.current_member_role || authState.role || "member").toLowerCase();
+    localStorage.setItem(STORAGE_KEYS.user, authState.nickname);
+    localStorage.setItem(STORAGE_KEYS.role, authState.role);
+
+    members = normalizeMembers(Array.isArray(payload.members) ? payload.members : []);
+    if (!preserveSelection) {
+      selectedSingerIds = [];
+      selectedProducerId = "";
+    }
+    pruneInvalidSelections();
+    projectAutoCodeEl.textContent = submitFormState.nextProjectCode;
+    renderTypeOptions();
+    syncProjectRuleUi();
+    syncOriginalAssignedNames();
+    renderSingerMembers();
+    renderProducerMembers();
+    renderOriginalRows();
+    updateRewardPreview();
+    updateTopBarIdentity();
+    return true;
+  }
+
   function getNextProjectCode() {
-    const numbers = tasks
-      .map(project => String(project.project_code || "").match(/\d+/))
-      .filter(Boolean)
-      .map(match => parseInt(match[0], 10))
-      .filter(num => Number.isFinite(num) && num > 0)
-      .sort((a, b) => a - b);
-
-    if (!numbers.length) return "001";
-
-    const used = new Set(numbers);
-    let candidate = 1;
-    while (used.has(candidate)) candidate += 1;
-    return String(candidate).padStart(3, "0");
+    return submitFormState.nextProjectCode || "001";
   }
 
-  async function loadProjectsFromSupabase() {
-    const { data, error } = await supabaseClient
-      .from("projects")
-      .select("id, project_code, project_name");
-
-    if (error) {
-      console.error("读取 projects 失败：", error);
-      tasks = [];
-      projectAutoCodeEl.textContent = "001";
-      return;
-    }
-
-    tasks = data || [];
-    projectAutoCodeEl.textContent = getNextProjectCode();
-  }
-
-  async function loadMembersFromSupabase() {
-    try {
-      const { data, error } = await supabaseClient.from("members").select("*");
-      if (error) {
-        console.error("读取 members 失败：", error);
-        singerMemberGrid.innerHTML = '<div class="memberEmpty">成员读取失败</div>';
-        producerMemberGrid.innerHTML = '<div class="memberEmpty">混音成员读取失败</div>';
-        return;
-      }
-
-      members = normalizeMembers(data || []);
-      syncOriginalAssignedNames();
-      renderSingerMembers();
-      renderProducerMembers();
-      renderOriginalRows();
-    } catch (err) {
-      console.error("Supabase 连接失败：", err);
-      singerMemberGrid.innerHTML = '<div class="memberEmpty">数据库连接失败</div>';
-      producerMemberGrid.innerHTML = '<div class="memberEmpty">数据库连接失败</div>';
-    }
-  }
 
   function getMemberById(memberId) {
     return members.find(item => item.id === memberId) || null;
@@ -1464,7 +1781,13 @@
       return;
     }
 
-    singerMemberGrid.innerHTML = members.map(member => `
+    const singerMembers = members.filter(member => member.canSing);
+    if (!singerMembers.length) {
+      singerMemberGrid.innerHTML = '<div class="memberEmpty">暂无可选演唱成员</div>';
+      return;
+    }
+
+    singerMemberGrid.innerHTML = singerMembers.map(member => `
       <button
         type="button"
         class="memberBtn ${selectedSingerIds.includes(member.id) ? "active" : ""}"
@@ -1476,7 +1799,7 @@
   }
 
   function renderProducerMembers() {
-    const mixMembers = members.filter(member => hasMixSkill(member.skills));
+    const mixMembers = members.filter(member => member.canMix);
     if (!mixMembers.length) {
       producerMemberGrid.innerHTML = '<div class="memberEmpty">暂无可选混音成员</div>';
       return;
@@ -1536,14 +1859,14 @@
   }
 
   function getCurrentSingerMember() {
-    const currentMemberId = String(authState.memberId || "").trim();
+    const currentMemberId = String(authState.publicMemberId || submitFormState.currentPublicMemberId || "").trim();
     if (!currentMemberId) return null;
     if (!selectedSingerIds.includes(currentMemberId)) return null;
     return getMemberById(currentMemberId);
   }
 
   function getCurrentUserLotteryRow() {
-    const currentMemberId = String(authState.memberId || "").trim();
+    const currentMemberId = String(authState.publicMemberId || submitFormState.currentPublicMemberId || "").trim();
     if (!currentMemberId) return null;
     return originalRows.find(row => String(row.assignedSingerId || "") === currentMemberId) || null;
   }
@@ -1892,6 +2215,79 @@
     updateRewardPreview();
   }
 
+  function makeStudioWheelChannelId() {
+    return `submit-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  function buildStudioWheelPayload() {
+    const quota = getSingerQuota({ write:false });
+    studioWheelChannelId = makeStudioWheelChannelId();
+    return {
+      type: "ROOM10_WHEEL_INIT",
+      mode: "studio_submit",
+      integration_mode: "submit",
+      channel_id: studioWheelChannelId,
+      title: "角色转盘",
+      subtitle: songNameInput.value.trim()
+        ? `项目委托：${songNameInput.value.trim()}`
+        : "用于项目委托立项前的角色分配",
+      singers: selectedSingerIds
+        .map(id => getMemberById(id))
+        .filter(Boolean)
+        .map(member => ({
+          id: member.id,
+          member_id: member.id,
+          name: member.name,
+          label: member.name
+        })),
+      roles: originalRows.slice(0, quota).map((row, index) => ({
+        id: row.id,
+        part_id: row.id,
+        row_index: index,
+        original_name: String(row.original || "").trim(),
+        label: String(row.original || "").trim()
+      })),
+      context: {
+        source: "studio_submit",
+        integration_mode: "submit",
+        channel_id: studioWheelChannelId,
+        task_type: selectedType,
+        game_type: selectedGameType || null,
+        task_mode: selectedTaskMode,
+        singer_quota: quota
+      }
+    };
+  }
+
+  function postStudioWheelPayload() {
+    if (!studioWheelModalFrame?.contentWindow || !studioWheelPendingPayload) return false;
+    try {
+      studioWheelModalFrame.contentWindow.postMessage(studioWheelPendingPayload, "*");
+      return true;
+    } catch (error) {
+      console.warn("转盘资料发送失败：", error);
+      return false;
+    }
+  }
+
+  function closeStudioWheelModal() {
+    if (studioWheelRetryTimer) {
+      clearInterval(studioWheelRetryTimer);
+      studioWheelRetryTimer = null;
+    }
+    if (studioWheelModalFrame) {
+      studioWheelModalFrame.onload = null;
+      studioWheelModalFrame.dataset.pendingPayload = "";
+      studioWheelModalFrame.src = "about:blank";
+    }
+    studioWheelModalMask?.classList.remove("show");
+    studioWheelModalMask?.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    studioWheelPendingPayload = null;
+    studioWheelChannelId = "";
+    studioWheelReady = false;
+  }
+
   function openStudioWheelTool() {
     const state = getWheelReadyState();
     if (!state.ready) {
@@ -1900,46 +2296,128 @@
       return;
     }
 
-    const payload = {
-      source: "studio-Submit",
-      type: "room10-wheel-open",
-      taskType: selectedType,
-      taskMode: selectedTaskMode,
-      singerQuota: getSingerQuota({ write:false }),
-      singers: selectedSingerIds.map(id => getMemberById(id)).filter(Boolean).map(member => ({
-        id: member.id,
-        name: member.name
-      })),
-      rows: originalRows.slice(0, getSingerQuota({ write:false })).map(row => ({
-        id: row.id,
-        original: row.original,
-        assignedSingerId: row.assignedSingerId,
-        assignedSingerName: row.assignedSingerName
-      }))
+    const payload = buildStudioWheelPayload();
+    const wheelPage = String(links.studioWheel || "").trim();
+    if (!wheelPage) {
+      showToast("路径配置错误", "room10-paths.js 中缺少 studioWheel 页面路径。");
+      return;
+    }
+    if (!studioWheelModalMask || !studioWheelModalFrame) {
+      showToast("页面配置错误", "项目委托页缺少转盘弹窗容器。");
+      return;
+    }
+
+    const params = new URLSearchParams({
+      from: "submit",
+      mode: "submit",
+      embed: "1",
+      channel_id: studioWheelChannelId,
+      v: "20260726-inpage-modal"
+    });
+
+    studioWheelPendingPayload = payload;
+    studioWheelReady = false;
+    studioWheelModalFrame.dataset.pendingPayload = JSON.stringify(payload);
+    studioWheelModalFrame.onload = () => {
+      const rawPayload = studioWheelModalFrame.dataset.pendingPayload || "";
+      if (!rawPayload) return;
+      try {
+        studioWheelPendingPayload = JSON.parse(rawPayload);
+        postStudioWheelPayload();
+      } catch (error) {
+        console.warn("转盘资料读取失败：", error);
+      }
     };
 
-    const url = `studio-wheel.html?from=submit&payload=${encodeURIComponent(JSON.stringify(payload))}`;
-    window.open(url, "room10StudioWheel", "width=980,height=720,resizable=yes,scrollbars=yes");
+    studioWheelModalMask.classList.add("show");
+    studioWheelModalMask.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    studioWheelModalFrame.src = `${wheelPage}${wheelPage.includes("?") ? "&" : "?"}${params.toString()}`;
+
+    setTimeout(() => { if (!studioWheelReady) postStudioWheelPayload(); }, 180);
+    setTimeout(() => { if (!studioWheelReady) postStudioWheelPayload(); }, 500);
+
+    studioWheelRetryTimer = setInterval(() => {
+      if (!studioWheelModalMask.classList.contains("show")) {
+        closeStudioWheelModal();
+        return;
+      }
+      if (studioWheelReady) {
+        clearInterval(studioWheelRetryTimer);
+        studioWheelRetryTimer = null;
+        return;
+      }
+      postStudioWheelPayload();
+    }, 900);
+  }
+
+  function getStudioWheelPairings(result) {
+    if (Array.isArray(result?.pairs)) return result.pairs;
+    if (Array.isArray(result?.rows)) return result.rows;
+    if (Array.isArray(result?.assignments)) return result.assignments;
+    if (Array.isArray(result?.results)) return result.results;
+    return [];
   }
 
   function applyWheelResultToRows(result) {
-    const rows = Array.isArray(result?.rows) ? result.rows : Array.isArray(result?.assignments) ? result.assignments : [];
-    if (!rows.length) return;
+    const pairings = getStudioWheelPairings(result);
+    if (!pairings.length) {
+      showToast("转盘结果未写入", "没有收到有效的转盘配对结果。");
+      return;
+    }
 
-    const nextRows = rows.map(item => {
-      const original = String(item.original || item.part || item.role || "").trim();
-      const singerText = String(item.assignedSingerName || item.singerName || item.memberName || item.singer || "").trim();
-      const matched = item.assignedSingerId
-        ? getMemberById(String(item.assignedSingerId))
-        : findSingerMemberByText(singerText, "");
-      return createRow({
+    const existingById = new Map(originalRows.map(row => [String(row.id), row]));
+    const nextRows = [];
+
+    for (const item of pairings) {
+      const role = item?.role || item?.original || item?.part || item;
+      const partId = String(
+        item?.part_id || role?.part_id || role?.id || item?.id || ""
+      ).trim();
+      const existing = partId ? existingById.get(partId) : null;
+      const original = String(
+        item?.final_original_name ||
+        item?.updated_original_name ||
+        item?.original_name ||
+        role?.original_name ||
+        role?.label ||
+        item?.original ||
+        item?.part ||
+        existing?.original ||
+        ""
+      ).trim();
+      const singerId = String(
+        item?.member_id ||
+        item?.singer?.member_id ||
+        item?.singer?.id ||
+        item?.assignedSingerId ||
+        ""
+      ).trim();
+      const singerText = String(
+        item?.member_name ||
+        item?.singer?.name ||
+        item?.singer?.label ||
+        item?.assignedSingerName ||
+        item?.singerName ||
+        item?.memberName ||
+        ""
+      ).trim();
+      const matched = singerId
+        ? getMemberById(singerId)
+        : findSingerMemberByText(singerText, existing?.id || "");
+
+      if (!original || !matched) continue;
+      nextRows.push(createRow({
         original,
-        assignedSingerId: matched ? matched.id : "",
-        assignedSingerName: matched ? matched.name : ""
-      });
-    }).filter(row => String(row.original || "").trim());
+        assignedSingerId: matched.id,
+        assignedSingerName: matched.name
+      }));
+    }
 
-    if (!nextRows.length) return;
+    if (!nextRows.length) {
+      showToast("转盘结果未写入", "结果中的原唱或演唱者无法匹配当前项目委托表单。");
+      return;
+    }
 
     if (nextRows.length > getSingerQuota({ write:false })) {
       singerQuotaInput.value = String(Math.min(99, nextRows.length));
@@ -1953,15 +2431,16 @@
     renderProducerMembers();
     renderOriginalRows();
     updateRewardPreview();
-    showToast("已写入", "转盘结果已写回歌词分配。");
+    closeStudioWheelModal();
+    showToast("已写入", `转盘结果已写回歌词分配，共 ${nextRows.length} 组。`);
   }
 
   function resetSignupForm() {
     songNameInput.value = "";
     singerQuotaInput.value = "1";
     projectToneInput.value = "";
-    releaseDateInput.value = "";
-    selectedType = "披4";
+    selectedType = submitFormState.projectTypes[0]?.value || "";
+    selectedGameType = "";
     selectedTaskMode = "normal";
     selectedSingerIds = [];
     selectedProducerId = "";
@@ -1969,9 +2448,8 @@
     lyricsLotteryEnabled = false;
     signupStatus.textContent = "填写中";
 
-    document.querySelectorAll(".typeBtn").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.type === "披4");
-    });
+    renderTypeOptions();
+    document.querySelectorAll("[data-game-type]").forEach(btn => btn.classList.remove("active"));
     document.querySelectorAll(".submitModeBtn").forEach(btn => {
       btn.classList.toggle("active", btn.dataset.mode === "normal");
     });
@@ -1982,7 +2460,10 @@
     renderProducerMembers();
     renderOriginalRows();
     updateRewardPreview();
-    loadProjectsFromSupabase();
+    refreshSubmitFormData({ preserveSelection: false }).catch(error => {
+      console.error(error);
+      showToast("读取失败", toChineseDbError(error, "无法刷新项目委托资料。"));
+    });
   }
 
   function validateSignupForm() {
@@ -1997,6 +2478,19 @@
 
     const singerQuota = getSingerQuota();
 
+    if (!selectedType || !submitFormState.projectTypes.some(option => option.value === selectedType)) {
+      throw new Error("数据库项目类型配置缺失，请刷新页面后重试。");
+    }
+
+    if (!submitFormState.canCreate) {
+      throw new Error(submitFormState.permissionMessage || "当前身份不能委托此类型项目。");
+    }
+
+    if (selectedType === "游戏" && !selectedGameType) {
+      throw new Error("请先选择游戏类型。");
+    }
+
+
     if (originalRows.length > singerQuota) {
       throw new Error("歌词分配行数不能超过演唱人数。");
     }
@@ -2009,18 +2503,6 @@
       String(row.original || "").trim() || String(row.assignedSingerId || "").trim()
     );
 
-    const lastFilledOriginalIndex = originalRows.reduce((lastIndex, row, index) => {
-      return String(row.original || "").trim() ? index : lastIndex;
-    }, -1);
-
-    if (lastFilledOriginalIndex >= 0) {
-      const hasOriginalGap = originalRows.slice(0, lastFilledOriginalIndex + 1).some(row =>
-        !String(row.original || "").trim()
-      );
-      if (hasOriginalGap) {
-        throw new Error("原唱空行未填写完全，请先补全原唱 / 部分。");
-      }
-    }
 
     const missingOriginalRow = nonEmptyRows.find(row =>
       String(row.assignedSingerId || "").trim() && !String(row.original || "").trim()
@@ -2052,86 +2534,47 @@
   async function submitSignup() {
     try {
       validateSignupForm();
-
       signupSubmitBtn.disabled = true;
       signupStatus.textContent = "提交中";
 
-      const taskName = String(songNameInput.value || "").trim();
-      const singerQuota = getSingerQuota();
-      const taskCode = getNextProjectCode();
-      const singerBonus = getSingerReward(selectedType, singerQuota);
-      const producerBonus = getProducerReward(selectedType, singerQuota);
+      const parts = originalRows.map(row => ({
+        original_name: String(row.original || "").trim() || null,
+        assigned_member_id: String(row.assignedSingerId || "").trim() || null
+      }));
 
-      const payload = {
-        project_code: taskCode,
-        project_name: taskName,
-        project_type: selectedType,
-        participant_count: singerQuota,
-        singer_bonus: singerBonus,
-        producer_bonus: producerBonus,
-        producer_member_id: selectedProducerId || null,
-        release_date: releaseDateInput.value || null,
-        project_tone: String(projectToneInput.value || "").trim() || null,
-        lyrics_lottery_enabled: lyricsLotteryEnabled && getLyricsLotteryReadyState().ready,
-        created_by: authState.memberId || null,
-        status: "待认领"
-      };
+      const { data, error } = await supabaseClient.rpc("create_studio_project_entry", {
+        p_member_id: authState.memberId,
+        p_member_code: authState.memberCode,
+        p_project_name: String(songNameInput.value || "").trim(),
+        p_project_type: selectedType,
+        p_game_type: selectedType === "游戏" ? selectedGameType : null,
+        p_participant_count: getSingerQuota(),
+        p_is_collective_task: selectedTaskMode === "special",
+        p_project_tone: String(projectToneInput.value || "").trim() || null,
+        p_producer_public_member_id: selectedProducerId || null,
+        p_release_date: null,
+        p_lyrics_lottery_enabled: lyricsLotteryEnabled && getLyricsLotteryReadyState().ready,
+        p_singer_public_member_ids: selectedSingerIds,
+        p_parts: parts
+      });
 
-      const { data: insertedProject, error: projectError } = await supabaseClient
-        .from("projects")
-        .insert(payload)
-        .select("id, project_code, project_name")
-        .single();
-
-      if (projectError) throw projectError;
-
-      const projectId = insertedProject.id;
-
-      if (selectedSingerIds.length) {
-        const singerRows = selectedSingerIds.map(memberId => ({
-          project_id: projectId,
-          member_id: memberId,
-          is_submitted: false
-        }));
-
-        const { error: singerError } = await supabaseClient
-          .from("project_singers")
-          .insert(singerRows);
-
-        if (singerError) throw singerError;
-      }
-
-      const validParts = originalRows
-        .map((row, index) => ({
-          project_id: projectId,
-          part_order: index + 1,
-          original_name: String(row.original || "").trim(),
-          assigned_member_id: row.assignedSingerId || null
-        }))
-        .filter(row => row.original_name);
-
-      if (validParts.length) {
-        const { error: partError } = await supabaseClient
-          .from("project_parts")
-          .insert(validParts);
-
-        if (partError) throw partError;
-      }
-
-      signupStatus.textContent = "已发布";
+      if (error) throw error;
+      const result = data && typeof data === "object" ? data : {};
+      signupStatus.textContent = "已立项";
+      const projectCode = String(result.project_code || getNextProjectCode());
+      const projectName = String(result.project_name || songNameInput.value || "").trim();
       const successMessage = lyricsLotteryEnabled
-        ? `任务 ${insertedProject.project_code}.${insertedProject.project_name} 已写入数据库。
+        ? `任务 ${projectCode}.${projectName} 已写入数据库。
 你已抽取本人的部分，请提醒其他演唱者去待处理页自行抽签。`
-        : `任务 ${insertedProject.project_code}.${insertedProject.project_name} 已写入数据库。`;
-      showToast("发布成功", successMessage);
-      await loadProjectsFromSupabase();
+        : `任务 ${projectCode}.${projectName} 已写入数据库。`;
+      showToast("立项成功", successMessage);
       resetSignupForm();
     } catch (error) {
       console.error(error);
-      showToast("发布失败", error.message || "数据库写入失败，请检查表结构、RLS 或字段名。");
+      showToast("立项失败", toChineseDbError(error, "项目创建失败，所有写入已自动回滚。"));
       signupStatus.textContent = "填写中";
     } finally {
-      signupSubmitBtn.disabled = false;
+      signupSubmitBtn.disabled = !submitFormState.canCreate;
       if (signupStatus.textContent === "提交中") signupStatus.textContent = "填写中";
     }
   }
@@ -2166,9 +2609,6 @@
     });
   }
 
-  function fitRoomNavToBar() {
-    // 通用模板的房间按钮外框使用底图百分比绑定，不再进行整组 transform 缩放。
-  }
 
   function syncTopUiLayout() {
     if (!overlay || !panelSwitch) return;
@@ -2265,10 +2705,21 @@
   typeBtnGroup.addEventListener("click", (e) => {
     const btn = e.target.closest(".typeBtn");
     if (!btn) return;
-    selectedType = btn.dataset.type || "披4";
-    document.querySelectorAll(".typeBtn").forEach(item => item.classList.toggle("active", item === btn));
+    selectedType = String(btn.dataset.type || "").trim();
+    if (selectedType !== "游戏") selectedGameType = "";
+    typeBtnGroup.querySelectorAll(".typeBtn").forEach(item => item.classList.toggle("active", item === btn));
+    syncProjectRuleUi();
     syncSubmitToolButtons();
-    updateRewardPreview();
+    scheduleSubmitFormRefresh(0);
+  });
+
+  gameTypeBtnGroup?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-game-type]");
+    if (!btn) return;
+    selectedGameType = String(btn.dataset.gameType || "").trim();
+    gameTypeBtnGroup.querySelectorAll("[data-game-type]").forEach(item => item.classList.toggle("active", item === btn));
+    syncProjectRuleUi();
+    scheduleSubmitFormRefresh(0);
   });
 
   submitModeGroup?.addEventListener("click", (e) => {
@@ -2277,10 +2728,14 @@
     selectedTaskMode = btn.dataset.mode === "special" ? "special" : "normal";
     document.querySelectorAll(".submitModeBtn").forEach(item => item.classList.toggle("active", item === btn));
     syncSubmitToolButtons();
-    updateRewardPreview();
+    scheduleSubmitFormRefresh(0);
   });
 
   openWheelBtn?.addEventListener("click", openStudioWheelTool);
+  studioWheelModalCloseBtn?.addEventListener("click", closeStudioWheelModal);
+  studioWheelModalMask?.addEventListener("click", (event) => {
+    if (event.target === studioWheelModalMask) closeStudioWheelModal();
+  });
   clearWheelAssignBtn?.addEventListener("click", clearOriginalAssignmentsOnly);
   applyQuickOriginalBtn?.addEventListener("click", applyQuickOriginalText);
   clearQuickOriginalBtn?.addEventListener("click", () => {
@@ -2289,6 +2744,28 @@
 
   window.addEventListener("message", (event) => {
     const data = event?.data || {};
+    if (!data || typeof data !== "object") return;
+    if (studioWheelModalFrame?.contentWindow && event.source !== studioWheelModalFrame.contentWindow) return;
+    const incomingChannel = String(data?.context?.channel_id || data?.channel_id || "").trim();
+    if (studioWheelChannelId && incomingChannel && incomingChannel !== studioWheelChannelId) return;
+
+    if (data.type === "ROOM10_WHEEL_READY") {
+      postStudioWheelPayload();
+      studioWheelReady = true;
+      if (studioWheelRetryTimer) {
+        clearInterval(studioWheelRetryTimer);
+        studioWheelRetryTimer = null;
+      }
+      return;
+    }
+    if (data.type === "ROOM10_WHEEL_CLOSE") {
+      closeStudioWheelModal();
+      return;
+    }
+    if (data.type === "ROOM10_WHEEL_CONFIRM") {
+      applyWheelResultToRows(data);
+      return;
+    }
     if (data.type === "room10-wheel-result" || data.type === "studio-wheel-result") {
       applyWheelResultToRows(data);
     }
@@ -2308,16 +2785,18 @@
 
   singerQuotaInput.addEventListener("input", () => {
     if (isSingerQuotaBlank()) {
-      updateRewardPreview();
       syncLyricsLotteryButton();
+      scheduleSubmitFormRefresh();
       return;
     }
     applyQuotaConstraints(true);
+    scheduleSubmitFormRefresh();
   });
 
   singerQuotaInput.addEventListener("blur", () => {
     singerQuotaInput.value = String(getSingerQuota());
     applyQuotaConstraints(false);
+    scheduleSubmitFormRefresh(0);
   });
 
   originalRoleList.addEventListener("input", (e) => {
@@ -2331,6 +2810,7 @@
         row.id === rowId ? { ...row, original: e.target.value } : row
       ));
       syncLyricsLotteryButton();
+      syncSubmitToolButtons();
       return;
     }
 
@@ -2456,12 +2936,12 @@
       if (roomKey === "manager") {
         const role = getCurrentRole();
         const page = role === "owner"
-          ? "manager-owner.html"
+          ? getRoom10Page("managerOwner")
           : role === "admin"
-            ? "manager-admin.html"
-            : role === "member"
-              ? "manager-member.html"
-              : "manager-visitor.html";
+            ? getRoom10Page("managerAdmin")
+            : (role === "member" || role === "trainee")
+              ? getRoom10Page("managerMember")
+              : getRoom10Page("managerVisitor");
         window.location.href = page;
         return;
       }
@@ -2486,7 +2966,7 @@
 
   identityAuthBtn?.addEventListener("click", () => {
     if (identityAuthBtn.dataset.action === "login") {
-      window.location.href = "index.html";
+      window.location.href = getRoom10Page("index");
       return;
     }
     handleLogout();
@@ -2503,13 +2983,11 @@
   }
 
   window.addEventListener("storage", async (e) => {
-    if ([STORAGE_KEYS.loggedIn, STORAGE_KEYS.user, STORAGE_KEYS.role, STORAGE_KEYS.memberId].includes(e.key)) {
+    if ([STORAGE_KEYS.loggedIn, STORAGE_KEYS.user, STORAGE_KEYS.role, STORAGE_KEYS.memberId, STORAGE_KEYS.memberCode].includes(e.key)) {
       const ok = await ensureAuthState();
       if (!ok) return;
       updateTopBarIdentity();
       renderSiteNotifications();
-      await loadMembersFromSupabase();
-      await loadProjectsFromSupabase();
     }
   });
 
@@ -2526,17 +3004,10 @@
     syncOverlayToImage();
     renderSiteNotifications();
 
-    try {
-      await loadMembersFromSupabase();
-      await loadProjectsFromSupabase();
-      projectAutoCodeEl.textContent = getNextProjectCode();
-      singerQuotaInput.value = String(getSingerQuota());
-      syncRowsToQuota();
-      applyQuotaConstraints(false);
-    } catch (error) {
-      console.error(error);
-      showToast("初始化失败", error.message || "页面初始化失败，请检查数据库连接。");
-    }
+    projectAutoCodeEl.textContent = getNextProjectCode();
+    singerQuotaInput.value = String(getSingerQuota());
+    syncRowsToQuota();
+    applyQuotaConstraints(false);
   }
 
   init();
