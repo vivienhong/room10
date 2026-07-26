@@ -424,7 +424,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
 }
 .result-stats{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:10px;
   margin:16px 0 14px;
 }
@@ -539,7 +539,6 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   .controls{gap:8px}
   .btn,.btn-sub{min-height:40px;padding:0 16px;font-size:13px}
   .result-stats{grid-template-columns:1fr 1fr}
-  .result-stats .result-stat:last-child{grid-column:1/-1}
 }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
@@ -601,12 +600,11 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
           <div class="result-box">
             <h2>本局结束</h2>
             <div class="result-number" id="resultScore">0</div>
-            <p>本局已经由服务器完成统一结算。</p>
+            <p id="resultDesc">本局已经由服务器完成统一结算。</p>
 
             <div class="result-stats">
               <div class="result-stat">最高方块<strong id="resultMaxTile">2</strong></div>
               <div class="result-stat">移动步数<strong id="resultMoves">0</strong></div>
-              <div class="result-stat">游戏时长<strong id="resultDuration">0秒</strong></div>
             </div>
 
             <div class="reward-box">
@@ -635,7 +633,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
           <div class="member-line">
             <div>
               <div class="member-name" id="memberName">未登录</div>
-              <div class="member-role" id="memberRole">仅登录成员可正式游玩</div>
+              <div class="member-role" id="memberRole">游客可游玩，但不计入记录榜单</div>
             </div>
           </div>
         </section>
@@ -661,7 +659,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
           <p class="side-label">规则</p>
           <div class="side-note">
             <strong>免费游玩，不消耗金币。</strong><br />
-            完整结束后按数据库奖励配置统一结算；动物偶遇只在整局结束并结算后判定一次。
+            游客可直接游玩，但不写入个人记录或排行榜；登录成员完整结束后按数据库奖励配置统一结算。
           </div>
         </section>
       </aside>
@@ -731,6 +729,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     stats: null,
     rank: null,
     leaderboard: [],
+    guestMode: false,
     toastTimer: null,
     lastBoard: Array(16).fill(0)
   };
@@ -765,7 +764,8 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     resultScore: document.getElementById("resultScore"),
     resultMaxTile: document.getElementById("resultMaxTile"),
     resultMoves: document.getElementById("resultMoves"),
-    resultDuration: document.getElementById("resultDuration"),
+    resultDesc: document.getElementById("resultDesc"),
+    rewardBox: document.querySelector(".reward-box"),
     rewardLine: document.getElementById("rewardLine"),
     encounterBox: document.getElementById("encounterBox"),
     encounterLine: document.getElementById("encounterLine"),
@@ -879,13 +879,6 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     return Number(value || 0).toLocaleString("zh-CN");
   }
 
-  function formatDuration(totalSeconds){
-    const seconds = Math.max(0, Number(totalSeconds || 0));
-    if (seconds < 60) return `${seconds}秒`;
-    const minutes = Math.floor(seconds / 60);
-    const rest = seconds % 60;
-    return `${minutes}分${rest}秒`;
-  }
 
   function getTileStyle(value){
     if (!value) return { background: "", color: "" };
@@ -970,7 +963,9 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   function renderSession(session, previousBoard = []){
     if (!session) return;
     state.session = session;
-    localStorage.setItem(STORAGE_KEYS.game2048Session, session.id);
+    if (!state.guestMode){
+      localStorage.setItem(STORAGE_KEYS.game2048Session, session.id);
+    }
 
     el.scoreValue.textContent = formatNumber(session.score);
     el.maxTileValue.textContent = formatNumber(session.max_tile);
@@ -986,9 +981,9 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   }
 
   function renderMember(){
-    if (!state.user){
-      el.memberName.textContent = "未登录";
-      el.memberRole.textContent = "仅登录成员可正式游玩";
+    if (!state.user || state.guestMode){
+      el.memberName.textContent = state.user?.nickname || "游客";
+      el.memberRole.textContent = "游客模式 · 不计入记录榜单";
       return;
     }
     el.memberName.textContent = state.user.nickname;
@@ -1102,7 +1097,170 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     renderLeaderboard();
   }
 
+  async function loadLeaderboardOnly(){
+    try{
+      const leaderboardResult = await callRpc("get_game_2048_leaderboard", {p_limit:50});
+      if (!leaderboardResult?.ok) throw new Error(leaderboardResult?.message || "排行榜读取失败");
+      state.leaderboard = leaderboardResult.entries || [];
+      renderLeaderboard();
+    }catch(error){
+      console.warn("2048 leaderboard load failed:", error);
+      state.leaderboard = [];
+      renderLeaderboard();
+    }
+  }
+
+  function addGuestRandomTile(board){
+    const emptyIndexes = [];
+    board.forEach((value,index) => {
+      if (!Number(value)) emptyIndexes.push(index);
+    });
+    if (!emptyIndexes.length) return board;
+    const target = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
+    board[target] = Math.random() < 0.9 ? 2 : 4;
+    return board;
+  }
+
+  function createGuestBoard(){
+    const board = Array(16).fill(0);
+    addGuestRandomTile(board);
+    addGuestRandomTile(board);
+    return board;
+  }
+
+  function getGuestLineIndexes(direction,line){
+    if (direction === "left") return [line*4,line*4+1,line*4+2,line*4+3];
+    if (direction === "right") return [line*4+3,line*4+2,line*4+1,line*4];
+    if (direction === "up") return [line,line+4,line+8,line+12];
+    return [line+12,line+8,line+4,line];
+  }
+
+  function mergeGuestLine(values){
+    const compact = values.filter(value => Number(value) > 0);
+    const merged = [];
+    let scoreGain = 0;
+
+    for (let index = 0; index < compact.length; index++){
+      const current = compact[index];
+      if (compact[index + 1] === current){
+        const nextValue = current * 2;
+        merged.push(nextValue);
+        scoreGain += nextValue;
+        index += 1;
+      }else{
+        merged.push(current);
+      }
+    }
+
+    while (merged.length < 4) merged.push(0);
+    return {values: merged, scoreGain};
+  }
+
+  function canGuestMove(board){
+    if (board.some(value => !Number(value))) return true;
+    for (let row = 0; row < 4; row++){
+      for (let col = 0; col < 4; col++){
+        const index = row * 4 + col;
+        if (col < 3 && board[index] === board[index + 1]) return true;
+        if (row < 3 && board[index] === board[index + 4]) return true;
+      }
+    }
+    return false;
+  }
+
+  function calculateGuestMove(board,direction){
+    const nextBoard = board.slice();
+    let scoreGain = 0;
+    let moved = false;
+
+    for (let line = 0; line < 4; line++){
+      const indexes = getGuestLineIndexes(direction,line);
+      const before = indexes.map(index => Number(board[index] || 0));
+      const result = mergeGuestLine(before);
+      scoreGain += result.scoreGain;
+
+      result.values.forEach((value,position) => {
+        nextBoard[indexes[position]] = value;
+        if (value !== before[position]) moved = true;
+      });
+    }
+
+    if (moved) addGuestRandomTile(nextBoard);
+    return {
+      moved,
+      board: nextBoard,
+      scoreGain,
+      gameOver: !canGuestMove(nextBoard)
+    };
+  }
+
+  function startGuestGame(showMessage = true){
+    state.lastBoard = Array(16).fill(0);
+    const board = createGuestBoard();
+    const session = {
+      id: `guest-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+      board,
+      score: 0,
+      max_tile: Math.max(...board),
+      move_count: 0,
+      status: "active"
+    };
+    state.bestScore = 0;
+    renderSession(session,state.lastBoard);
+    setStatus("游客模式", "ok");
+    el.gameHint.textContent = "游客可直接游玩；本局不会写入个人记录或排行榜。";
+    if (showMessage) showToast("游客模式已开始，不计入记录榜单");
+  }
+
+  function finishGuestGame(){
+    if (!state.session) return;
+    const session = state.session;
+    renderResult({
+      score: Number(session.score || 0),
+      max_tile: Number(session.max_tile || 2),
+      move_count: Number(session.move_count || 0),
+      guest_mode: true
+    });
+    setStatus("游客本局结束", "ok");
+  }
+
+  async function moveGuest(direction){
+    if (state.busy || !state.session || state.session.status !== "active") return;
+    const previousBoard = state.session.board.slice();
+    const result = calculateGuestMove(previousBoard,direction);
+
+    if (!result.moved){
+      if (result.gameOver){
+        state.session.status = "finished";
+        finishGuestGame();
+      }else{
+        showToast("这个方向无法移动");
+      }
+      return;
+    }
+
+    state.session = {
+      ...state.session,
+      board: result.board,
+      score: Number(state.session.score || 0) + Number(result.scoreGain || 0),
+      max_tile: Math.max(...result.board),
+      move_count: Number(state.session.move_count || 0) + 1,
+      status: result.gameOver ? "finished" : "active"
+    };
+
+    renderSession(state.session,previousBoard);
+    el.gameHint.textContent = result.scoreGain > 0
+      ? `本次合并 +${formatNumber(result.scoreGain)} 分 · 游客记录不入榜`
+      : "继续滑动，把相同数字合并起来。游客记录不入榜。";
+
+    if (result.gameOver) finishGuestGame();
+  }
+
   async function startOrResume(){
+    if (state.guestMode){
+      startGuestGame();
+      return;
+    }
     setBusy(true,"正在读取游戏状态...");
     try{
       const result = await callRpc("start_game_2048_session", authParams());
@@ -1160,6 +1318,10 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   }
 
   async function move(direction){
+    if (state.guestMode){
+      await moveGuest(direction);
+      return;
+    }
     if (state.busy || !state.session || state.session.status !== "active") return;
 
     const previousBoard = Array.isArray(state.session.board) ? state.session.board.slice() : Array(16).fill(0);
@@ -1209,6 +1371,10 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   }
 
   async function finishGame(sessionId){
+    if (state.guestMode){
+      finishGuestGame();
+      return;
+    }
     setBusy(true,"正在统一结算本局奖励...");
     try{
       await settleSession(sessionId);
@@ -1223,12 +1389,17 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   }
 
   function renderResult(run){
+    const guestResult = Boolean(run?.guest_mode || state.guestMode);
     state.session = null;
     showScreen("result");
+    el.resultDesc.textContent = guestResult
+      ? "游客模式：本局只在当前页面结算，不写入个人记录或排行榜。"
+      : "本局已经由服务器完成统一结算。";
+    el.rewardBox.style.display = guestResult ? "none" : "";
+    el.encounterBox.style.display = guestResult ? "none" : "";
     el.resultScore.textContent = formatNumber(run.score);
     el.resultMaxTile.textContent = formatNumber(run.max_tile);
     el.resultMoves.textContent = formatNumber(run.move_count);
-    el.resultDuration.textContent = formatDuration(run.duration_seconds);
 
     const rewards = [];
     if (Number(run.reward_gold || 0) > 0){
@@ -1281,6 +1452,13 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   async function restartGame(){
     if (state.busy) return;
     closeRestartModal();
+
+    if (state.guestMode){
+      startGuestGame(false);
+      showToast("已开始新的游客对局");
+      return;
+    }
+
     setBusy(true,"正在开始新的 2048 对局...");
 
     try{
@@ -1312,6 +1490,10 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   async function startNewAfterResult(){
     if (state.busy) return;
     state.lastBoard = Array(16).fill(0);
+    if (state.guestMode){
+      startGuestGame();
+      return;
+    }
     try{
       await startOrResume();
     }catch(error){
@@ -1407,18 +1589,23 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     renderBoard(Array(16).fill(0));
 
     state.user = getStoredUser();
+    const role = normalizeText(state.user?.role).toLowerCase();
+    const isRecordEligibleMember = Boolean(
+      state.user?.nickname &&
+      state.user?.member_code &&
+      ALLOWED_ROLES.has(role)
+    );
+    state.guestMode = !isRecordEligibleMember;
     renderMember();
 
-    if (!state.user?.nickname || !state.user?.member_code){
-      setStatus("需要登录","error");
-      showPermission("请先登录", "2048 仅限十号房登录成员正式游玩和结算。", "login");
-      return;
-    }
-
-    const role = normalizeText(state.user.role).toLowerCase();
-    if (!ALLOWED_ROLES.has(role)){
-      setStatus("当前身份不可游玩","error");
-      showPermission("暂时无法进入", "当前身份不能进入 2048 游戏。", "back");
+    if (state.guestMode){
+      setStatus("游客模式", "ok");
+      el.sideBestScore.textContent = "0";
+      el.sideBestTile.textContent = "—";
+      el.sideTotalRuns.textContent = "0";
+      el.sideRank.textContent = "—";
+      startGuestGame(false);
+      loadLeaderboardOnly();
       return;
     }
 
