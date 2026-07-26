@@ -441,7 +441,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   background:rgba(255,249,238,.68);
 }
 .result-stat strong{margin-top:4px;color:var(--ink);font-size:20px;font-weight:950}
-.reward-box,.encounter-box{
+.reward-box{
   margin-top:10px;
   padding:13px 14px;
   border-radius:18px;
@@ -449,12 +449,8 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   background:rgba(255,252,248,.64);
   border:1px solid rgba(255,255,255,.76);
 }
-.reward-box h3,.encounter-box h3{margin:0 0 7px;font-size:13px;font-weight:950}
-.reward-line,.encounter-line{margin:0;color:#755132;font-size:13px;line-height:1.6;font-weight:850}
-.encounter-box.triggered{
-  background:linear-gradient(180deg,rgba(255,247,218,.88),rgba(255,237,203,.76));
-  box-shadow:0 0 0 3px rgba(221,176,86,.10),0 12px 28px rgba(136,91,34,.10);
-}
+.reward-box h3{margin:0 0 7px;font-size:13px;font-weight:950}
+.reward-line{margin:0;color:#755132;font-size:13px;line-height:1.6;font-weight:850}
 .result-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px}
 
 .toast{
@@ -505,6 +501,35 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
 .modal h2{margin:0;font-size:22px;font-weight:950}
 .modal p{margin:9px 0 18px;color:var(--muted);font-size:13px;line-height:1.7;font-weight:850}
 .modal-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+
+.animal-modal-icon{
+  width:72px;
+  height:72px;
+  margin:0 auto 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  font-size:38px;
+  background:rgba(255,247,218,.92);
+  border:1px solid rgba(221,176,86,.24);
+  box-shadow:0 10px 26px rgba(136,91,34,.12);
+}
+.animal-modal-name{
+  margin:0 0 8px;
+  color:#6d4528;
+  font-size:22px;
+  font-weight:950;
+  line-height:1.3;
+}
+.animal-modal-message{
+  margin:0 0 18px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.75;
+  font-weight:850;
+  white-space:pre-line;
+}
 
 @media(max-width:880px){
   .inner{grid-template-columns:1fr}
@@ -612,11 +637,6 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
               <p class="reward-line" id="rewardLine">正在读取结算结果。</p>
             </div>
 
-            <div class="encounter-box" id="encounterBox">
-              <h3>动物偶遇</h3>
-              <p class="encounter-line" id="encounterLine">正在读取判定结果。</p>
-            </div>
-
             <div class="result-actions">
               <button class="btn-sub" type="button" id="resultBackBtn">返回游戏房</button>
               <button class="btn" type="button" id="newGameBtn">再玩一局</button>
@@ -676,6 +696,19 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     <div class="modal-actions">
       <button class="btn-sub" type="button" id="restartCancelBtn">继续当前对局</button>
       <button class="btn" type="button" id="restartConfirmBtn">确认重新开始</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="mask" id="animalEncounterMask" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="animalEncounterTitle">
+    <div class="animal-modal-icon" id="animalEncounterIcon">🐾</div>
+    <h2 id="animalEncounterTitle">遇见小动物</h2>
+    <div class="animal-modal-name" id="animalEncounterName">神秘小动物</div>
+    <p class="animal-modal-message" id="animalEncounterMessage"></p>
+    <div class="modal-actions">
+      <button class="btn" type="button" id="animalEncounterCloseBtn">收下惊喜</button>
     </div>
   </div>
 </div>
@@ -767,8 +800,11 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     resultDesc: document.getElementById("resultDesc"),
     rewardBox: document.querySelector(".reward-box"),
     rewardLine: document.getElementById("rewardLine"),
-    encounterBox: document.getElementById("encounterBox"),
-    encounterLine: document.getElementById("encounterLine"),
+    animalEncounterMask: document.getElementById("animalEncounterMask"),
+    animalEncounterIcon: document.getElementById("animalEncounterIcon"),
+    animalEncounterName: document.getElementById("animalEncounterName"),
+    animalEncounterMessage: document.getElementById("animalEncounterMessage"),
+    animalEncounterCloseBtn: document.getElementById("animalEncounterCloseBtn"),
     toast: document.getElementById("toast"),
     restartMask: document.getElementById("restartMask"),
     restartCancelBtn: document.getElementById("restartCancelBtn"),
@@ -1396,7 +1432,6 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
       ? "游客模式：本局只在当前页面结算，不写入个人记录或排行榜。"
       : "本局已经由服务器完成统一结算。";
     el.rewardBox.style.display = guestResult ? "none" : "";
-    el.encounterBox.style.display = guestResult ? "none" : "";
     el.resultScore.textContent = formatNumber(run.score);
     el.resultMaxTile.textContent = formatNumber(run.max_tile);
     el.resultMoves.textContent = formatNumber(run.move_count);
@@ -1416,24 +1451,32 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
 
     el.rewardLine.textContent = rewards.length ? rewards.join(" · ") : "本局没有额外奖励。";
 
-    const encounter = run.animal_encounter || {};
-    const triggered = Boolean(encounter.triggered);
-    el.encounterBox.classList.toggle("triggered", triggered);
 
-    if (triggered){
+    const encounter = run.animal_encounter || {};
+    if (!guestResult && encounter.triggered){
       const data = encounter.data || {};
-      el.encounterLine.textContent = data.message || `遇到了${data.pet_name || "一只动物"}，获得额外图片1张。`;
-    }else{
-      const reason = encounter.reason || "not_hit";
-      const messages = {
-        not_hit: "这次没有遇到小动物。",
-        cooldown: "这次没有触发动物偶遇。",
-        config_missing: "动物偶遇配置暂时缺失。",
-        chance_disabled: "动物偶遇当前未开启。",
-        member_not_allowed: "当前身份不参与动物偶遇。"
-      };
-      el.encounterLine.textContent = messages[reason] || "这次没有遇到小动物。";
+      const petName = normalizeText(data.pet_name || data.name || "神秘小动物");
+      const message = normalizeText(
+        data.message ||
+        `你在本局结束时遇见了${petName}，获得额外图片 1 张。`
+      );
+
+      el.animalEncounterIcon.textContent = normalizeText(data.icon || "🐾");
+      el.animalEncounterName.textContent = petName;
+      el.animalEncounterMessage.textContent = message;
+
+      setTimeout(() => {
+        el.animalEncounterMask.classList.add("show");
+        el.animalEncounterMask.setAttribute("aria-hidden","false");
+        el.animalEncounterCloseBtn.focus();
+      }, 220);
     }
+  }
+
+
+  function closeAnimalEncounterModal(){
+    el.animalEncounterMask.classList.remove("show");
+    el.animalEncounterMask.setAttribute("aria-hidden","true");
   }
 
   function openRestartModal(){
@@ -1516,6 +1559,11 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     el.restartCancelBtn.addEventListener("click", closeRestartModal);
     el.restartConfirmBtn.addEventListener("click", restartGame);
     el.newGameBtn.addEventListener("click", startNewAfterResult);
+    el.animalEncounterCloseBtn.addEventListener("click", closeAnimalEncounterModal);
+
+    el.animalEncounterMask.addEventListener("click", event => {
+      if (event.target === el.animalEncounterMask) closeAnimalEncounterModal();
+    });
 
     el.restartMask.addEventListener("click", event => {
       if (event.target === el.restartMask) closeRestartModal();
@@ -1526,6 +1574,10 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     });
 
     window.addEventListener("keydown", event => {
+      if (el.animalEncounterMask.classList.contains("show")){
+        if (event.key === "Escape") closeAnimalEncounterModal();
+        return;
+      }
       if (el.restartMask.classList.contains("show")){
         if (event.key === "Escape") closeRestartModal();
         return;
