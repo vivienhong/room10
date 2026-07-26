@@ -347,17 +347,111 @@ body.embedded .closeBtn{display:none;}
 const COLORS=["#ffe5c2","#ffd6a5","#ffcad4","#cdb4db","#bde0fe","#caffbf","#f8edc6","#d8f3dc","#fde2e4","#e2ece9","#fbc4ab","#d0f4de"];
 const DEFAULT_SINGERS=[{id:"demo-a",member_id:"demo-a",name:"扬",label:"扬"},{id:"demo-b",member_id:"demo-b",name:"夏",label:"夏"},{id:"demo-c",member_id:"demo-c",name:"桃",label:"桃"},{id:"demo-d",member_id:"demo-d",name:"罐",label:"罐"},{id:"demo-e",member_id:"demo-e",name:"Lumi",label:"Lumi"}];
 const DEFAULT_ROLES=["1","2","3","4","5"].map((v,i)=>({id:`demo-r-${i}`,part_id:`demo-r-${i}`,original_name:v,label:v}));
-let singers=[];let roles=[];let addonLayers=[];let runMode="default";let runLayers=[];let currentResults=[];let layerRotations=[];let layerReadStarts=[];let specialSegments=[];let spinning=false;let wheelContext={};
+let singers=[];let roles=[];let addonLayers=[];let runMode="default";let runLayers=[];let currentResults=[];let layerRotations=[];let layerReadStarts=[];let specialSegments=[];let spinning=false;let wheelContext={};let integrationMode="standalone";let wheelChannelId="";
 const $=id=>document.getElementById(id);
 function safe(v){return String(v??"").trim();}
 function hasParent(){return window.parent&&window.parent!==window;}
-function post(payload){if(hasParent())window.parent.postMessage(payload,"*");}
+function hasOpener(){try{return !!(window.opener&&!window.opener.closed);}catch(e){return false;}}
+function post(payload){
+  const message={...payload,context:{...(payload?.context||{}),...(wheelContext||{}),integration_mode:integrationMode,channel_id:wheelChannelId||safe(payload?.context?.channel_id)}};
+  if(hasParent())window.parent.postMessage(message,"*");
+  if(hasOpener())window.opener.postMessage(message,"*");
+}
 function showView(id){["addonSetupView","specialSetupView","runView"].forEach(v=>$(v).classList.toggle("active",v===id));}
-function parseJsonParam(v){if(!v)return null;for(const c of [v,decodeURIComponent(v)]){try{return JSON.parse(c)}catch(e){}}return null;}
+function parseJsonParam(v){
+  if(!v)return null;
+  const candidates=[String(v)];
+  try{candidates.push(decodeURIComponent(String(v)));}catch(e){}
+  for(const c of candidates){try{return JSON.parse(c)}catch(e){}}
+  return null;
+}
+function normalizeInboundData(data={}){
+  if(!data||typeof data!=="object")return {};
+
+  /* 新统一协议必须优先保留 roles / singers，不能被旧项目委托协议覆盖。 */
+  if(data.type==="ROOM10_WHEEL_INIT"){
+    return {
+      ...data,
+      singers:Array.isArray(data.singers)?data.singers:[],
+      roles:Array.isArray(data.roles)
+        ? data.roles
+        : (Array.isArray(data.parts)
+          ? data.parts
+          : (Array.isArray(data.items)?data.items:[]))
+    };
+  }
+
+  const source=safe(data.source||data.context?.source||data.from);
+  const isLegacySubmit=
+    data.type==="room10-wheel-open" ||
+    ((source==="studio-Submit"||source==="studio_submit") && Array.isArray(data.rows));
+
+  if(isLegacySubmit){
+    const legacyRows=Array.isArray(data.rows)?data.rows:[];
+    return {
+      type:"ROOM10_WHEEL_INIT",
+      mode:"studio_submit",
+      integration_mode:"submit",
+      title:data.title||"角色转盘",
+      subtitle:data.subtitle||"用于项目委托立项前的角色分配",
+      singers:Array.isArray(data.singers)?data.singers:[],
+      roles:legacyRows.map((row,index)=>({
+        id:safe(row.id)||`submit-row-${index}`,
+        part_id:safe(row.part_id||row.id)||`submit-row-${index}`,
+        row_index:Number.isInteger(Number(row.row_index))?Number(row.row_index):index,
+        original_name:safe(row.original||row.original_name||row.label)||`第 ${index+1} 行`,
+        label:safe(row.original||row.original_name||row.label)||`第 ${index+1} 行`
+      })),
+      context:{
+        ...(data.context||{}),
+        source:"studio_submit",
+        task_type:data.taskType||data.task_type||"",
+        game_type:data.gameType||data.game_type||"",
+        task_mode:data.taskMode||data.task_mode||"",
+        legacy_protocol:true
+      }
+    };
+  }
+
+  return data;
+}
+function showWaitingState(){
+  singers=[];roles=[];runLayers=[];currentResults=[];
+  $("pageTitle").textContent="角色转盘";
+  $("pageSubtitle").textContent="正在等待来源页面发送转盘资料…";
+  showView("");
+}
 function normalizeSinger(item,index){if(typeof item==="string"){const label=safe(item);return label?{id:label,member_id:label,name:label,label}:null;}if(item&&typeof item==="object"){const id=safe(item.member_id||item.memberId||item.id||item.nickname||item.name||`singer-${index}`);const label=safe(item.label||item.nickname||item.name||item.member_name||item.memberName||id);return label?{...item,id,member_id:id,name:label,label}:null;}return null;}
 function normalizeRole(item,index){if(typeof item==="string"){const label=safe(item);return label?{id:label,part_id:label,original_name:label,label}:null;}if(item&&typeof item==="object"){const id=safe(item.part_id||item.project_part_id||item.partId||item.id||item.original_name||`role-${index}`);const label=safe(item.label||item.original_name||item.originalName||item.name||item.title||id);return label?{...item,id,part_id:id,original_name:label,label}:null;}return null;}
 function normalizeList(arr,fn){if(!Array.isArray(arr))return[];const seen=new Set();const out=[];arr.forEach((x,i)=>{const n=fn(x,i);if(!n)return;const key=n.id||n.label;if(seen.has(key))return;seen.add(key);out.push(n);});return out;}
-function setWheelData(data={}){specialSegments=[];wheelContext={project_id:data.project_id||data.projectId||data.task_id||data.taskId||"",project_name:data.project_name||data.projectName||data.task_name||data.taskName||""};singers=normalizeList(data.singers||data.members||data.inner||data.innerItems||[],normalizeSinger);roles=normalizeList(data.roles||data.parts||data.outer||data.outerItems||data.items||[],normalizeRole);if(!singers.length)singers=[...DEFAULT_SINGERS];if(!roles.length)roles=[...DEFAULT_ROLES];startDefaultMode(true);}
+function setWheelData(rawData={}){
+  const data=normalizeInboundData(rawData);
+  specialSegments=[];
+  integrationMode=safe(data.integration_mode||data.context?.integration_mode||data.mode||integrationMode||"standalone");
+  wheelChannelId=safe(data.channel_id||data.context?.channel_id||wheelChannelId);
+  wheelContext={
+    ...(data.context||{}),
+    project_id:data.project_id||data.projectId||data.task_id||data.taskId||data.context?.project_id||data.context?.task_id||"",
+    project_name:data.project_name||data.projectName||data.task_name||data.taskName||data.context?.project_name||data.context?.task_name||"",
+    source:data.source||data.context?.source||integrationMode
+  };
+  singers=normalizeList(data.singers||data.members||data.inner||data.innerItems||[],normalizeSinger);
+  roles=normalizeList(data.roles||data.parts||data.outer||data.outerItems||data.items||[],normalizeRole);
+  if(!singers.length||!roles.length){
+    if(integrationMode==="standalone"){
+      if(!singers.length)singers=[...DEFAULT_SINGERS];
+      if(!roles.length)roles=[...DEFAULT_ROLES];
+    }else{
+      $("pageTitle").textContent=data.title||"角色转盘";
+      $("pageSubtitle").textContent=!singers.length?"来源页面没有提供演唱者资料":"来源页面没有提供原唱或段落资料";
+      showView("");
+      return;
+    }
+  }
+  $("pageTitle").textContent=data.title||"角色转盘";
+  $("pageSubtitle").textContent=data.subtitle||"用于当前任务的角色分配";
+  startDefaultMode(true);
+}
 function chipList(id,items){const el=$(id);el.innerHTML="";items.forEach(i=>{const s=document.createElement("span");s.className="chip";s.textContent=i.label||i.name||i.original_name;s.title=s.textContent;el.appendChild(s);});}
 function validateBase(){if(!singers.length){alert("暂无演唱者");return false;}return true;}
 function makeRegularRunLayers(){
@@ -601,12 +695,48 @@ function ordered(arr,start){if(!arr.length)return[];const s=((start%arr.length)+
 function buildFinalOriginalName(base,addons){base=safe(base);addons=(addons||[]).map(safe).filter(Boolean);if(!addons.length)return base;const m=base.match(/^(.*?)(?:（([^）]*)）)?$/);const main=safe(m?.[1])||base;const existing=safe(m?.[2]);const all=[...(existing?existing.split('｜').map(safe).filter(Boolean):[]),...addons];return `${main}（${all.join('｜')}）`;}
 function renderResults(){const list=$("resultList");list.innerHTML='';if(!currentResults.length){const e=document.createElement('div');e.className='resultEmpty';e.textContent='点击开始配对';list.appendChild(e);return;}currentResults.forEach(p=>{const d=document.createElement('div');d.className='resultItem';d.innerHTML=`<span>${escapeHtml(p.member_name)}</span><span class="resultArrow">→</span><span>${escapeHtml(p.final_original_name||p.original_name)}</span>`;list.appendChild(d);});}
 function resetRun(){layerRotations=[];layerReadStarts=[];currentResults=[];renderWheel();renderRunLayers();renderResults();$("confirmBtn").disabled=true;$("spinBtn").disabled=false;}
-function confirmResult(){if(!currentResults.length)return;post({type:'ROOM10_WHEEL_CONFIRM',mode:runMode,pairs:currentResults,layers:runLayers,context:{...wheelContext}});}
+function confirmResult(){
+  if(!currentResults.length)return;
+  const unified={type:'ROOM10_WHEEL_CONFIRM',mode:runMode,pairs:currentResults,layers:runLayers,context:{...wheelContext}};
+  post(unified);
+  if(wheelContext?.legacy_protocol===true){
+    post({
+      type:'room10-wheel-result',
+      mode:runMode,
+      rows:currentResults.map(pair=>({
+        id:pair.part_id||pair.role?.part_id||pair.role?.id||'',
+        original:pair.final_original_name||pair.original_name||pair.role?.original_name||pair.role?.label||'',
+        assignedSingerId:pair.member_id||pair.singer?.member_id||pair.singer?.id||'',
+        assignedSingerName:pair.member_name||pair.singer?.name||pair.singer?.label||''
+      })),
+      pairs:currentResults,
+      context:{...wheelContext}
+    });
+  }
+}
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
 function escapeHtml(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
-function closeWheel(){post({type:'ROOM10_WHEEL_CLOSE',context:{...wheelContext}});if(!hasParent()&&history.length>1)history.back();}
-window.addEventListener('message',e=>{const d=e.data||{};if(d.type==='ROOM10_WHEEL_INIT')setWheelData(d);});
-window.addEventListener('load',()=>{const params=new URLSearchParams(location.search);if(hasParent()||params.get('embed')==='1')document.body.classList.add('embedded');const data=parseJsonParam(params.get('data'));setWheelData(data||{});$('specialText').addEventListener('input',renderSpecialPreview);post({type:'ROOM10_WHEEL_READY'});});
+function closeWheel(){
+  post({type:'ROOM10_WHEEL_CLOSE',context:{...wheelContext}});
+  if(hasOpener()){window.close();return;}
+  if(!hasParent()&&history.length>1)history.back();
+}
+window.addEventListener('message',e=>{
+  const d=e.data||{};
+  if(d.type==='ROOM10_WHEEL_INIT'||d.type==='room10-wheel-open')setWheelData(d);
+});
+window.addEventListener('load',()=>{
+  const params=new URLSearchParams(location.search);
+  integrationMode=safe(params.get('mode')||params.get('from')||((hasParent()||hasOpener())?'embedded':'standalone'));
+  wheelChannelId=safe(params.get('channel_id'));
+  if(hasParent()||params.get('embed')==='1')document.body.classList.add('embedded');
+  const data=parseJsonParam(params.get('data'))||parseJsonParam(params.get('payload'));
+  if(data)setWheelData(data);
+  else if(integrationMode==='standalone')setWheelData({integration_mode:'standalone'});
+  else showWaitingState();
+  $('specialText').addEventListener('input',renderSpecialPreview);
+  post({type:'ROOM10_WHEEL_READY'});
+});
 </script>
 </body>
 </html>
