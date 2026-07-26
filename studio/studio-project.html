@@ -4967,7 +4967,7 @@ const authState = {
           <span class="assignmentNameText">${escapeHtml(item.member_name || "未命名成员")}</span>
         </div>
         <div class="assignmentPartText">${escapeHtml(partText)}</div>
-        ${isMe
+        ${canEditTaskFromDetail(task)
           ? `<button class="tinyActionBtn ${item.is_submitted ? "done" : ""}" data-singer-record-id="${escapeHtml(item.id)}" data-current="${item.is_submitted ? "1" : "0"}">${item.is_submitted ? "撤回" : "交音"}</button>`
           : `<button class="tinyActionBtn ${item.is_submitted ? "done" : "waiting"}" type="button" disabled>${item.is_submitted ? "已交音" : "待交音"}</button>`}
         ${vocalRangeHtml}
@@ -4984,7 +4984,7 @@ const authState = {
       `;
     }
     const allSingersDone = areAllSingersSubmitted(task);
-    const canOperate = task.current_member_is_producer === true;
+    const canOperate = canEditTaskFromDetail(task);
     let buttonHtml = "";
     if (!canOperate) {
       buttonHtml = `<button class="tinyActionBtn ${task.producer_completed ? "done" : "waiting"}" type="button" disabled>${task.producer_completed ? "已交付" : (allSingersDone ? "待后期" : "等待交音")}</button>`;
@@ -5751,35 +5751,36 @@ const authState = {
       const singer = task?.singers?.find(item => String(item.id) === String(singerRecordId));
       if (!task || !singer) throw new Error("未找到对应的项目演唱记录，请刷新后重试。");
       if (!canEditTaskFromDetail(task)) throw new Error("当前登录状态无效，请重新登录后再试。");
-      const isCurrentSinger = singer.is_current_member === true
-        || String(singer.member_id || "") === getCurrentPublicMemberId();
-      if (!isCurrentSinger || task.current_member_is_singer !== true) {
-        throw new Error("只能修改自己的交音状态。");
-      }
+
       const currentMemberId = String(getCurrentMemberId() || "").trim();
       const currentMemberCode = getCurrentMemberCode();
       if (!currentMemberId || !currentMemberCode) {
         throw new Error("当前成员身份读取失败，请重新登录后再试。");
       }
+
       const { data, error } = await supabaseClient.rpc("submit_project_singer_with_reward", {
         p_member_id: currentMemberId,
         p_member_code: currentMemberCode,
         p_project_id: task.id,
+        p_singer_record_id: singerRecordId,
         p_is_submitted: !currentValue
       });
       if (error) throw error;
       if (!data?.ok) throw new Error(data?.message || "交音状态未更新，请刷新后重试。");
+
+      const targetName = String(data?.target_member_name || singer.member_name || "该成员").trim();
       await loadProjectsFromSupabase();
+
       if (!currentValue) {
         const rewardAmount = Number(data?.reward_amount || 0);
         showToast("交音成功", data?.reward_granted && rewardAmount > 0
-          ? `已记录交音，并发放 ${rewardAmount} 金币。`
-          : "已记录交音。");
+          ? `已为${targetName}记录交音，${rewardAmount} 金币已发放给${targetName}。`
+          : `已为${targetName}记录交音。`);
       } else {
         const retractedAmount = Number(data?.reward_retracted_amount || 0);
         showToast("已撤回交音", data?.reward_retracted && retractedAmount > 0
-          ? `已撤回交音，并扣回 ${retractedAmount} 金币。`
-          : "已撤回交音。当前没有需要扣回的前期奖励。");
+          ? `已撤回${targetName}的交音，并从${targetName}名下扣回 ${retractedAmount} 金币。`
+          : `已撤回${targetName}的交音。当前没有需要扣回的前期奖励。`);
       }
     } catch (err) {
       console.error("更新交音状态失败：", err);
@@ -5791,7 +5792,6 @@ const authState = {
       const task = tasks.find(item => String(item.id) === String(projectId));
       if (!task?.producer_member_id) throw new Error("当前项目没有混音负责人，无法更新交付状态。");
       if (!canEditTaskFromDetail(task)) throw new Error("当前登录状态无效，请重新登录后再试。");
-      if (task.current_member_is_producer !== true) throw new Error("只能修改自己的后期交付状态。");
       const allSingersDone = areAllSingersSubmitted(task);
       if (!allSingersDone && !currentValue) {
         showToast("暂不能交付", "演唱尚未全部交音，暂时不能交付混音。");
@@ -5811,16 +5811,24 @@ const authState = {
       if (error) throw error;
       if (!data?.ok) throw new Error(data?.message || "混音交付状态未更新，请刷新后重试。");
       await loadProjectsFromSupabase();
+      const targetName = String(data?.target_member_name || task.producer_name || "后期负责人").trim();
+      const operatedForOther = data?.operated_for_other === true;
       if (!currentValue) {
         const rewardAmount = Number(data?.reward_amount || 0);
         showToast("交付成功", data?.reward_granted && rewardAmount > 0
-          ? `已记录混音交付，并发放 ${rewardAmount} 金币。`
-          : "已记录混音交付。");
+          ? (operatedForOther
+              ? `已代为记录后期交付，并向 ${targetName} 发放 ${rewardAmount} 金币。`
+              : `已记录后期交付，并发放 ${rewardAmount} 金币。`)
+          : (operatedForOther ? `已代为记录 ${targetName} 的后期交付。` : "已记录混音交付。"));
       } else {
         const retractedAmount = Number(data?.reward_retracted_amount || 0);
         showToast("已撤回交付", data?.reward_retracted && retractedAmount > 0
-          ? `已撤回混音交付，并扣回 ${retractedAmount} 金币。`
-          : "已撤回混音交付。当前没有需要扣回的前期奖励。");
+          ? (operatedForOther
+              ? `已代为撤回 ${targetName} 的后期交付，并从其账户扣回 ${retractedAmount} 金币。`
+              : `已撤回混音交付，并扣回 ${retractedAmount} 金币。`)
+          : (operatedForOther
+              ? `已代为撤回 ${targetName} 的后期交付。当前没有需要扣回的前期奖励。`
+              : "已撤回混音交付。当前没有需要扣回的前期奖励。"));
       }
     } catch (err) {
       console.error("更新混音状态失败：", err);
@@ -5847,13 +5855,21 @@ const authState = {
     const currentHigh = String(singer?.vocal_range?.highest_note_text || "").trim();
     const lowest = field === "lowest" ? value : currentLow;
     const highest = field === "highest" ? value : currentHigh;
-    const { error } = await supabaseClient.rpc("set_honor_vocal_range_entry", {
+    const currentMemberId = String(getCurrentMemberId() || "").trim();
+    const currentMemberCode = getCurrentMemberCode();
+    if (!currentMemberId || !currentMemberCode) {
+      throw new Error("当前成员身份读取失败，请重新登录后再试。");
+    }
+    const { data, error } = await supabaseClient.rpc("update_honor_vocal_range_entry", {
+      p_actor_member_id: currentMemberId,
+      p_actor_member_code: currentMemberCode,
       p_project_id: projectId,
-      p_member_id: memberId,
+      p_target_public_member_id: memberId,
       p_lowest_note_text: lowest || null,
       p_highest_note_text: highest || null
     });
     if (error) throw error;
+    if (data?.ok === false) throw new Error(data?.message || "音域保存失败");
     await loadProjectsFromSupabase();
     activeDetailTaskId = projectId;
     renderBrowseList();
