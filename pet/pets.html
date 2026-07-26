@@ -6,10 +6,7 @@
 <title>十号房｜宠物区</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
-<script src="../room10-supabase.js"></script>
 <script src="../room10-db.js"></script>
-<script src="../supabase-client.js"></script>
-<script src="../db.js"></script>
 <style>
 *{box-sizing:border-box;}
 :root{
@@ -141,6 +138,15 @@ button,input{font-family:inherit;}
 .logList{flex:1;min-height:0;overflow:auto;display:grid;align-content:start;gap:calc(6px * var(--ui-scale));scrollbar-width:thin;}
 .logItem{display:flex;align-items:flex-start;justify-content:space-between;gap:calc(10px * var(--ui-scale));padding:calc(7px * var(--ui-scale)) calc(10px * var(--ui-scale));border-radius:calc(16px * var(--ui-scale));background:rgba(255,253,249,.58);border:calc(1px * var(--ui-scale)) solid rgba(166,126,91,.09);font-size:calc(10.8px * var(--ui-scale));line-height:1.45;color:#715b4c;font-weight:780;}
 .logTime{color:#9c8676;font-size:calc(10px * var(--ui-scale));white-space:nowrap;font-weight:800;}
+.careLogSections{display:grid;gap:calc(10px * var(--ui-scale));align-content:start;}
+.careLogSection{display:grid;gap:calc(6px * var(--ui-scale));}
+.careLogSectionTitle{display:flex;align-items:center;justify-content:space-between;gap:calc(8px * var(--ui-scale));padding:0 calc(2px * var(--ui-scale));color:#745b4a;font-size:calc(10.5px * var(--ui-scale));font-weight:950;}
+.careLogSectionTitle small{color:#a08a7a;font-size:calc(9px * var(--ui-scale));font-weight:800;}
+.todayLogItem{display:grid;gap:calc(4px * var(--ui-scale));}
+.todayLogHead{display:flex;align-items:center;justify-content:space-between;gap:calc(8px * var(--ui-scale));font-weight:950;}
+.todayLogChanges{display:flex;flex-wrap:wrap;gap:calc(4px * var(--ui-scale)) calc(8px * var(--ui-scale));color:#8a6f5d;font-size:calc(9.8px * var(--ui-scale));line-height:1.4;}
+.todayLogChange{white-space:nowrap;}
+.todayLogEmpty{padding:calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));border-radius:calc(14px * var(--ui-scale));background:rgba(255,253,249,.46);border:calc(1px * var(--ui-scale)) dashed rgba(166,126,91,.12);color:#9a8474;font-size:calc(10px * var(--ui-scale));line-height:1.45;text-align:center;}
 .nameMask{position:fixed;inset:0;z-index:1100;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(64,45,30,.30);backdrop-filter:blur(5px);}
 .nameMask.show{display:flex;}
 .nameDialog{width:min(420px,calc(100vw - 28px));padding:24px 22px 20px;border-radius:24px;background:linear-gradient(180deg,rgba(255,253,247,.98),rgba(255,244,226,.96));border:1px solid rgba(190,143,112,.24);box-shadow:0 22px 54px rgba(106,78,55,.20);color:#6b5141;text-align:center;}
@@ -171,10 +177,6 @@ button,input{font-family:inherit;}
 @media(max-width:540px){html,body{overflow-x:hidden;overflow-y:auto;height:auto;min-height:100%;}#room{width:100%;min-height:100vh;height:auto;display:block;overflow:visible;padding:10px 12px 14px;background:linear-gradient(rgba(242,236,229,.74),rgba(238,231,222,.92)),#e7dfd4;}#bgFrame{display:none;}#overlay{position:relative!important;left:auto!important;top:auto!important;width:100%!important;height:auto!important;display:flex;flex-direction:column;gap:10px;pointer-events:auto;}.roomNavLayer{position:relative;inset:auto;width:100%;height:106px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,32px);gap:5px;order:0;--s:1;}.roomNavLayer .navBtn{position:relative;left:auto!important;top:auto!important;width:100%;height:32px;border-radius:10px;font-size:12px;}.roomIdentity{--s:1;position:relative;right:auto;top:auto;width:100%;height:40px;order:1;}.roomIdentityBar{grid-template-columns:minmax(0,1fr) 34px 42px;gap:6px;padding:5px 7px;border-radius:14px;}.petShell{position:relative;left:auto;top:auto;width:100%;height:auto;min-height:560px;order:2;border-radius:20px;}.petShellHeader{height:auto;min-height:52px;flex-wrap:wrap;}.petSub{white-space:normal;}.petTools{flex-wrap:wrap;justify-content:flex-start;} .petView{position:absolute;inset:0 15px 15px;}#adoptView.is-active{display:grid;grid-template-columns:1fr;grid-template-rows:1fr minmax(210px,auto);} .adoptGrid{grid-template-columns:repeat(3,minmax(0,1fr));}.adoptDetailPanel{min-height:210px;}#careView.is-active{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto auto 1fr;grid-template-areas:"main" "actions" "side" "log";overflow:auto;}.careSide{grid-template-rows:auto auto;}.adoptDesc{-webkit-line-clamp:unset;display:block;}.reward-mask{padding:14px;}}
 @media(max-width:360px){.adoptGrid{grid-template-columns:repeat(2,minmax(0,1fr));}.statusGrid{grid-template-columns:1fr;}}
 
-
-/* =========================================================
-   v5：领养页独立主框，抚养页恢复独立浮层；切换按钮独立
-========================================================= */
 .petModeDock{
   position:absolute;
   right:10.4%;
@@ -313,11 +315,6 @@ button,input{font-family:inherit;}
   .petCareFloatView .logList{max-height:none;overflow:visible;}
 }
 
-
-
-/* =========================================================
-   v6 修正：抚养页独立浮层强制覆盖旧 grid 布局；扭蛋改为小弹窗
-========================================================= */
 #careView.petCareFloatView.is-active{
   display:block!important;
   position:absolute!important;
@@ -445,11 +442,6 @@ button,input{font-family:inherit;}
   .gachaDialog{width:min(520px,calc(100vw - 28px));height:min(620px,calc(100dvh - 28px));}
 }
 
-
-
-/* =========================================================
-   v7：数据库接入 + 素材道具图标 + 宠物互动 CSS 动效
-========================================================= */
 .actionIcon img,.supplyIcon img,.reward-item-icon img{width:100%;height:100%;object-fit:contain;display:block;}
 .supplyLine{display:flex;align-items:center;gap:8px;min-height:28px;margin:5px 0;padding:5px 8px;border-radius:12px;background:rgba(255,253,249,.48);border:1px solid rgba(166,126,91,.10);}
 .supplyIcon{width:24px;height:24px;border-radius:999px;display:grid;place-items:center;background:rgba(255,250,242,.76);font-size:15px;flex:0 0 auto;overflow:hidden;}
@@ -476,11 +468,6 @@ button,input{font-family:inherit;}
 .statusFill.health-warn{background:linear-gradient(90deg,#e7cd78,#e5a06f);}
 .statusFill.health-bad{background:linear-gradient(90deg,#d8897f,#e5a06f);}
 
-
-
-/* =========================================================
-   v7 UI 微调：未发现卡片精简、每日小礼自动领取、抚养按钮上移
-========================================================= */
 .petSub:empty{display:none;}
 .adoptCard.is-locked{justify-content:center;gap:calc(8px * var(--ui-scale));}
 .adoptCard.is-locked .adoptImgBox{background:rgba(255,253,249,.48);border-style:dashed;}
@@ -498,14 +485,9 @@ button,input{font-family:inherit;}
 .careTalkCard .careHint{font-weight:850;}
 @media(max-width:540px){.petCareFloatView .careActions,#careView.petCareFloatView.is-active .careActions{top:auto!important;}}
 
-
 .giftResultLine{display:flex;align-items:center;gap:calc(8px * var(--ui-scale));font-weight:900;color:#745b4a;}
 .giftResultLine img{width:calc(28px * var(--ui-scale));height:calc(28px * var(--ui-scale));object-fit:contain;filter:drop-shadow(0 2px 3px rgba(96,65,35,.12));}
 
-
-/* =========================================================
-   v8 UI 修正：未发现详情只显示一次、抚养布局上移、隐藏每日小礼提醒
-========================================================= */
 .adoptDetailPanel.is-locked-detail{
   align-items:center;
   justify-content:center;
@@ -581,11 +563,6 @@ button,input{font-family:inherit;}
   .careAvatar{width:82px;height:82px;}
 }
 
-
-
-/* =========================================================
-   v9 抚养页新版布局：左陪伴记录 / 中主体动画 / 下操作 / 右道具背包
-========================================================= */
 #careView.petCareFloatView.is-active .careTalkCard{
   display:none!important;
 }
@@ -696,12 +673,6 @@ button,input{font-family:inherit;}
   #careView.petCareFloatView.is-active .careLog{order:4;}
 }
 
-
-
-/* =========================================================
-   正式确认版：抚养页最终布局
-   左：亲密度 + 陪伴记录；中：状态 / 纯动画 / 操作；右：当前登录人的宠物道具
-========================================================= */
 #careView.petCareFloatView.is-active{
   display:block!important;
   position:absolute!important;
@@ -857,8 +828,8 @@ button,input{font-family:inherit;}
 }
 .careActionGrid{
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:calc(9px * var(--ui-scale));
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:calc(8px * var(--ui-scale));
 }
 #careView.petCareFloatView.is-active .careActions .actionBtn{
   min-height:calc(73px * var(--ui-scale))!important;
@@ -957,12 +928,6 @@ button,input{font-family:inherit;}
   }
 }
 
-
-
-/* =========================================================
-   v10：宠物互动配置数据库读取版
-   主体 / 道具 / 特效位置由 pet_interaction_configs.config_json 控制
-========================================================= */
 .careAvatar{
   overflow:visible!important;
 }
@@ -1209,11 +1174,6 @@ button,input{font-family:inherit;}
 @keyframes carePetSweat{0%,100%{opacity:.25;transform:translate(-50%,-50%) translateY(0) rotate(12deg) scale(.8);}50%{opacity:1;transform:translate(-50%,-50%) translateY(12px) rotate(12deg) scale(1);}}
 @keyframes carePetDizzy{0%{transform:translate(-50%,-50%) rotate(0deg);}100%{transform:translate(-50%,-50%) rotate(360deg);}}
 
-
-
-/* =========================================================
-   mobile fix：手机版顶部模式按钮居中
-========================================================= */
 @media(max-width:540px){
   .petModeDock{
     width:100%!important;
@@ -1228,6 +1188,742 @@ button,input{font-family:inherit;}
   }
 }
 
+.adoptCard.is-special{
+  border-color:rgba(153,104,62,.28);
+  background:
+    radial-gradient(circle at 18% 14%,rgba(255,255,255,.68),transparent 42%),
+    linear-gradient(180deg,rgba(255,247,230,.84),rgba(241,225,199,.62));
+}
+.adoptCard.is-special .adoptMiniStatus.count{
+  color:#74491f;
+  background:rgba(255,235,190,.94);
+}
+
+@media(min-width:541px){
+  #careView.petCareFloatView.is-active .careMain{
+    z-index:35!important;
+    overflow:visible!important;
+    isolation:isolate;
+  }
+
+  #careView.petCareFloatView.is-active .careMain .careAvatar{
+    position:relative!important;
+    width:100%!important;
+    height:100%!important;
+    min-width:calc(150px * var(--ui-scale))!important;
+    min-height:calc(150px * var(--ui-scale))!important;
+    max-width:calc(320px * var(--ui-scale))!important;
+    max-height:calc(320px * var(--ui-scale))!important;
+    display:block!important;
+    overflow:visible!important;
+    z-index:2!important;
+  }
+
+  #careView.petCareFloatView.is-active .careAvatar .carePetStage{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    display:block!important;
+    overflow:visible!important;
+    z-index:2!important;
+  }
+
+  #careView.petCareFloatView.is-active .careAvatar .carePetScene{
+    position:absolute!important;
+    transform:translateX(-50%)!important;
+    transform-origin:50% 88%!important;
+    overflow:visible!important;
+    z-index:10!important;
+  }
+
+  #careView.petCareFloatView.is-active .careAvatar .carePetBody{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    max-width:100%!important;
+    max-height:100%!important;
+    z-index:10!important;
+  }
+}
+
+.careActions.is-busy .actionBtn,
+.actionBtn:disabled{
+  cursor:wait!important;
+  opacity:.58!important;
+  filter:saturate(.72)!important;
+  pointer-events:none!important;
+}
+.careAvatar .carePetProp{
+  opacity:0;
+  will-change:opacity,translate,scale,rotate,filter;
+}
+.careAvatar.pet-db-eat .carePetProp{
+  opacity:1;
+  animation:carePetFoodPop 1.45s ease-in-out both;
+}
+.careAvatar.pet-db-play .carePetProp{
+  opacity:1;
+  animation:carePetBallBounce 1.62s cubic-bezier(.34,.02,.28,1) both;
+}
+.careAvatar.pet-db-clean .carePetProp{
+  opacity:1;
+  animation:carePetCleanSwipe 1.62s ease-in-out both;
+}
+.careAvatar.pet-db-heal .carePetProp{
+  opacity:1;
+  animation:carePetMedicalPulse 1.82s ease-in-out both;
+}
+.careAvatar.pet-db-eat .carePetFx2::before{
+  content:"♥";
+  color:rgba(239,145,145,.82);
+  font-size:calc(38px * var(--ui-scale));
+  font-weight:950;
+  animation:carePetActionHeart 1.35s ease-out both;
+}
+.careAvatar.pet-db-eat .carePetFx2::after{
+  content:"♥";
+  left:calc(var(--pet-fx2-left,50%) + 24%);
+  top:calc(var(--pet-fx2-top,50%) + 8%);
+  color:rgba(245,183,156,.72);
+  font-size:calc(25px * var(--ui-scale));
+  font-weight:950;
+  animation:carePetActionHeart 1.35s .16s ease-out both;
+}
+.careAvatar.pet-db-play .carePetFx2::before{
+  content:"✦";
+  color:rgba(233,190,73,.82);
+  font-size:calc(34px * var(--ui-scale));
+  font-weight:950;
+  animation:carePetActionSpark 1.25s ease-in-out infinite;
+}
+.careAvatar.pet-db-play .carePetFx2::after{
+  content:"♥";
+  left:calc(var(--pet-fx2-left,50%) + 26%);
+  top:calc(var(--pet-fx2-top,50%) - 12%);
+  color:rgba(239,145,145,.74);
+  font-size:calc(26px * var(--ui-scale));
+  font-weight:950;
+  animation:carePetActionHeart 1.4s .12s ease-out both;
+}
+.careAvatar.pet-db-heal .carePetFx2::before{
+  content:"✦";
+  left:calc(var(--pet-fx2-left,50%) - 24%);
+  top:calc(var(--pet-fx2-top,50%) + 8%);
+  color:rgba(255,221,121,.88);
+  font-size:calc(28px * var(--ui-scale));
+  font-weight:950;
+  animation:carePetHealParticle 1.55s ease-in-out infinite;
+}
+.careAvatar.pet-db-heal .carePetFx2::after{
+  content:"✧";
+  left:calc(var(--pet-fx2-left,50%) + 25%);
+  top:calc(var(--pet-fx2-top,50%) - 10%);
+  color:rgba(164,213,173,.9);
+  font-size:calc(24px * var(--ui-scale));
+  font-weight:950;
+  animation:carePetHealParticle 1.7s .18s ease-in-out infinite;
+}
+.careChangeCloud{
+  position:absolute;
+  left:50%;
+  top:5%;
+  z-index:90;
+  width:min(92%,360px);
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:calc(5px * var(--ui-scale));
+  transform:translateX(-50%);
+  pointer-events:none;
+}
+.careChangeChip{
+  padding:calc(4px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(255,253,249,.94);
+  border:calc(1px * var(--ui-scale)) solid rgba(166,126,91,.15);
+  box-shadow:0 calc(4px * var(--ui-scale)) calc(12px * var(--ui-scale)) rgba(89,62,38,.12);
+  color:#765a47;
+  font-size:calc(10px * var(--ui-scale));
+  line-height:1.2;
+  font-weight:950;
+  white-space:nowrap;
+  opacity:0;
+  animation:careChangeFloat 1.55s ease-out forwards;
+}
+.careChangeChip:nth-child(2){animation-delay:.08s;}
+.careChangeChip:nth-child(3){animation-delay:.16s;}
+.careChangeChip:nth-child(4){animation-delay:.24s;}
+.careChangeChip:nth-child(5){animation-delay:.32s;}
+.careChangeChip.is-positive{color:#6d8b63;background:rgba(247,255,242,.96);}
+.careChangeChip.is-negative{color:#a66f62;background:rgba(255,247,244,.96);}
+
+@keyframes carePetFoodPop{
+  0%{opacity:0;translate:0 0;rotate:0deg;}
+  12%{opacity:1;translate:0 0;rotate:0deg;}
+  30%{opacity:1;translate:-6px 0;rotate:-3deg;}
+  48%{opacity:1;translate:6px 0;rotate:3deg;}
+  66%{opacity:1;translate:-4px 0;rotate:-2deg;}
+  84%{opacity:1;translate:4px 0;rotate:2deg;}
+  100%{opacity:0;translate:0 0;rotate:0deg;}
+}
+@keyframes carePetBallBounce{
+  0%{opacity:0;translate:0 0;}
+  10%{opacity:1;translate:0 0;}
+  32%{opacity:1;translate:0 -18px;}
+  52%{opacity:1;translate:0 0;}
+  70%{opacity:1;translate:0 -10px;}
+  86%{opacity:1;translate:0 0;}
+  100%{opacity:0;translate:0 0;}
+}
+@keyframes carePetCleanSwipe{
+  0%{opacity:0;translate:-45px 8px;rotate:-24deg;scale:.8;}
+  18%{opacity:1;translate:-20px -8px;rotate:-8deg;scale:1;}
+  42%{translate:24px 6px;rotate:15deg;}
+  64%{translate:-10px -12px;rotate:-10deg;}
+  82%{opacity:1;translate:18px 4px;rotate:8deg;}
+  100%{opacity:0;translate:42px -6px;rotate:20deg;scale:.86;}
+}
+@keyframes carePetMedicalPulse{
+  0%{opacity:0;scale:.64;translate:0 12px;filter:drop-shadow(0 0 0 rgba(255,225,144,0));}
+  20%{opacity:1;scale:1.05;translate:0 0;filter:drop-shadow(0 0 10px rgba(255,225,144,.55));}
+  48%{scale:.96;translate:0 -5px;filter:drop-shadow(0 0 18px rgba(255,225,144,.7));}
+  72%{opacity:1;scale:1.04;translate:0 -2px;filter:drop-shadow(0 0 12px rgba(164,213,173,.56));}
+  100%{opacity:0;scale:.78;translate:0 8px;filter:drop-shadow(0 0 0 rgba(255,225,144,0));}
+}
+@keyframes carePetActionHeart{
+  0%{opacity:0;translate:0 14px;scale:.62;}
+  25%{opacity:1;translate:0 0;scale:1.08;}
+  100%{opacity:0;translate:0 -34px;scale:.84;}
+}
+@keyframes carePetActionSpark{
+  0%,100%{opacity:.25;scale:.72;rotate:0deg;}
+  50%{opacity:1;scale:1.12;rotate:24deg;}
+}
+@keyframes carePetHealParticle{
+  0%{opacity:0;translate:0 18px;scale:.6;}
+  35%{opacity:1;translate:0 0;scale:1.08;}
+  100%{opacity:0;translate:0 -32px;scale:.82;}
+}
+@keyframes careChangeFloat{
+  0%{opacity:0;translate:0 10px;scale:.9;}
+  18%{opacity:1;translate:0 0;scale:1;}
+  75%{opacity:1;translate:0 -8px;}
+  100%{opacity:0;translate:0 -20px;scale:.96;}
+}
+@media(max-width:540px){
+  .careChangeCloud{top:2%;width:96%;}
+  .careChangeChip{font-size:10px;}
+}
+
+.petLoginMask{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1400;
+}
+.petLoginMask.show{
+  display:flex;
+}
+.pet-login-panel{
+  position:relative;
+  width:min(720px,94vw);
+}
+.pet-login-panel img{
+  width:100%;
+  display:block;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+#petLoginNickname,
+#petLoginCode{
+  position:absolute;
+  left:36.2%;
+  height:8.1%;
+  border:none;
+  outline:none;
+  padding:0 10px;
+  font-size:18px;
+  color:#5b3e28;
+  background:transparent;
+  line-height:1.1;
+}
+#petLoginNickname{
+  top:40%;
+  width:27.5%;
+}
+#petLoginCode{
+  top:56%;
+  width:20%;
+}
+#petLoginToggleBtn{
+  position:absolute;
+  top:56%;
+  left:56%;
+  width:8%;
+  height:8.1%;
+  border:none;
+  cursor:pointer;
+  background:rgba(255,215,120,.15);
+  border-radius:6px;
+  color:transparent;
+}
+#petLoginToggleBtn:hover{
+  background:rgba(255,215,120,.35);
+  box-shadow:0 0 8px rgba(255,220,120,.6);
+}
+#petLoginSubmitBtn{
+  position:absolute;
+  top:68%;
+  left:40%;
+  width:20%;
+  height:9%;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  color:transparent;
+}
+#petRegisterLink{
+  position:absolute;
+  top:51.2%;
+  left:52%;
+  transform:translateX(-50%);
+  color:#7a4f2b;
+  font-size:14px;
+  font-weight:600;
+  text-decoration:underline;
+  cursor:pointer;
+  background:none;
+  border:none;
+  padding:0;
+  white-space:nowrap;
+}
+#petRegisterLink:hover{
+  color:#9b6334;
+}
+#petLoginHint{
+  position:absolute;
+  top:32.6%;
+  left:53.5%;
+  transform:translateX(-50%);
+  text-align:center;
+  color:#7a4f2b;
+  font-size:13px;
+  font-weight:600;
+  width:42%;
+  max-width:320px;
+  min-height:2.4em;
+  max-height:2.4em;
+  white-space:normal;
+  line-height:1.2;
+  overflow:hidden;
+}
+.petLoginCloseBtn{
+  position:absolute;
+  top:4px;
+  right:6px;
+  border:none;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:white;
+  cursor:pointer;
+  font-size:18px;
+  color:#5b4632;
+}
+@media (max-width:920px){
+  #petLoginHint{
+    top:32.6%;
+    width:44%;
+    max-width:none;
+    font-size:12px;
+    line-height:1.18;
+  }
+  #petRegisterLink{font-size:13px;}
+  #petLoginNickname,
+  #petLoginCode{font-size:17px;}
+}
+@media (max-width:760px){
+  #petLoginHint{
+    top:32.4%;
+    width:48%;
+    font-size:10.5px;
+    line-height:1.16;
+  }
+  #petRegisterLink{
+    top:50.8%;
+    font-size:11px;
+  }
+  #petLoginNickname,
+  #petLoginCode{
+    font-size:16px;
+    padding:0 8px;
+  }
+}
+@media (max-width:520px){
+  #petRegisterLink{
+    top:50.5%;
+    font-size:10px;
+  }
+  #petLoginNickname,
+  #petLoginCode{
+    font-size:15px;
+    padding:0 7px;
+  }
+  #petLoginHint{
+    top:31.8%;
+    width:46%;
+    font-size:8.6px;
+    line-height:1.14;
+  }
+}
+@media (max-width:380px){
+  .pet-login-panel{width:95vw;}
+  #petRegisterLink{
+    top:50%;
+    font-size:8px;
+  }
+  #petLoginNickname,
+  #petLoginCode{
+    font-size:12px;
+    padding:0 5px;
+  }
+  #petLoginNickname{
+    top:40.1%;
+    left:36.25%;
+    width:27.1%;
+    height:7.9%;
+  }
+  #petLoginCode{
+    top:56.05%;
+    left:36.25%;
+    width:19.7%;
+    height:7.9%;
+  }
+  #petLoginToggleBtn{
+    top:56.05%;
+    left:55.9%;
+    width:8.2%;
+    height:7.9%;
+  }
+  #petLoginHint{
+    top:32.2%;
+    left:53.4%;
+    width:44%;
+    font-size:7.4px;
+    line-height:1.12;
+    letter-spacing:0;
+  }
+  .petLoginCloseBtn{
+    width:28px;
+    height:28px;
+    font-size:16px;
+    top:2px;
+    right:2px;
+  }
+}
+@media (max-width:340px){
+  .pet-login-panel{width:96vw;}
+  #petRegisterLink{
+    top:49.8%;
+    font-size:7px;
+  }
+  #petLoginNickname,
+  #petLoginCode{
+    font-size:11px;
+    padding:0 4px;
+  }
+  #petLoginNickname{
+    top:40.15%;
+    left:36.35%;
+    width:26.9%;
+    height:7.8%;
+  }
+  #petLoginCode{
+    top:56.1%;
+    left:36.35%;
+    width:19.5%;
+    height:7.8%;
+  }
+  #petLoginToggleBtn{
+    top:56.1%;
+    left:55.85%;
+    width:8.25%;
+    height:7.8%;
+  }
+  #petLoginHint{
+    top:32.5%;
+    left:53.35%;
+    width:43%;
+    font-size:6.8px;
+    line-height:1.1;
+  }
+  #petLoginSubmitBtn{top:67.8%;}
+}
+</style>
+
+<style id="eatingFxAdjustStyles">
+.eatingFxToggleBtn{
+  position:fixed;
+  right:18px;
+  top:74px;
+  z-index:1700;
+  appearance:none;
+  border:1px solid rgba(166,126,91,.28);
+  border-radius:999px;
+  padding:9px 14px;
+  background:rgba(255,250,244,.96);
+  color:#684526;
+  font:900 13px/1 system-ui,-apple-system,"Segoe UI",sans-serif;
+  box-shadow:0 8px 22px rgba(78,54,36,.16),inset 0 1px 0 rgba(255,255,255,.9);
+  cursor:pointer;
+}
+.eatingFxPanel{
+  position:fixed;
+  right:18px;
+  top:116px;
+  z-index:1701;
+  width:min(370px,calc(100vw - 36px));
+  max-height:calc(100vh - 136px);
+  overflow:auto;
+  display:none;
+  padding:14px;
+  border-radius:18px;
+  background:rgba(255,250,244,.985);
+  border:1px solid rgba(166,126,91,.26);
+  box-shadow:0 18px 42px rgba(78,54,36,.23),inset 0 1px 0 rgba(255,255,255,.92);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  color:#634b3d;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+.eatingFxPanel.show{display:block;}
+.eatingFxHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.eatingFxTitle{font-size:15px;font-weight:950;}
+.eatingFxClose{appearance:none;border:0;background:transparent;color:#8b6a55;font-size:22px;line-height:1;cursor:pointer;padding:0 2px;}
+.eatingFxHint{margin:0 0 12px;color:#8a715f;font-size:11.5px;font-weight:700;line-height:1.55;}
+.eatingFxGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.eatingFxField{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.eatingFxField label{font-size:11px;font-weight:900;color:#795d49;}
+.eatingFxSelect,
+.eatingFxNumber{
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  border:1px solid rgba(166,126,91,.22);
+  border-radius:10px;
+  background:#fffdf9;
+  color:#684526;
+  padding:8px 9px;
+  font-size:12px;
+  font-weight:800;
+  outline:none;
+}
+.eatingFxSection{
+  margin-top:10px;
+  padding:10px;
+  border-radius:14px;
+  background:rgba(255,255,255,.55);
+  border:1px solid rgba(166,126,91,.12);
+}
+.eatingFxSectionTitle{margin-bottom:8px;color:#684526;font-size:12px;font-weight:950;}
+.eatingFxChecks{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.eatingFxCheck{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:850;color:#765c4a;}
+.eatingFxCheck input{width:16px;height:16px;accent-color:#d9a37e;}
+.eatingFxRow{display:grid;grid-template-columns:74px minmax(0,1fr) 72px;gap:8px;align-items:center;margin-top:9px;}
+.eatingFxRow label{font-size:11px;font-weight:900;color:#795d49;}
+.eatingFxRow input[type="range"]{width:100%;accent-color:#d9a37e;}
+.eatingFxActions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px;}
+.eatingFxActions button{
+  appearance:none;
+  border:1px solid rgba(166,126,91,.22);
+  border-radius:11px;
+  padding:8px 6px;
+  background:#fffdf9;
+  color:#684526;
+  font-size:11.5px;
+  font-weight:900;
+  cursor:pointer;
+}
+.eatingFxActions button:hover{background:#fff7ed;}
+.eatingFxOutput{
+  margin-top:10px;
+  padding:9px 10px;
+  min-height:34px;
+  border-radius:12px;
+  background:rgba(111,82,61,.06);
+  color:#765d4d;
+  font-size:11px;
+  line-height:1.55;
+  word-break:break-word;
+  white-space:pre-wrap;
+}
+
+.careAvatar.eating-fx-preview.pet-db-eat .carePetScene{
+  animation:carePetEatNod .88s ease-in-out infinite!important;
+}
+.careAvatar.eating-fx-preview.eat-motion-off .carePetScene{
+  animation:none!important;
+}
+
+.careAvatar.eating-fx-preview.pet-db-eat .carePetProp{
+  display:block!important;
+  opacity:1!important;
+  left:var(--eat-prop-left,50%)!important;
+  top:var(--eat-prop-top,82%)!important;
+  width:var(--eat-prop-width,12%)!important;
+  max-width:none!important;
+  min-width:0!important;
+  animation:room10FeedPropWobble 1.05s ease-in-out infinite!important;
+  transform:translate(-50%,-50%)!important;
+  transform-origin:center center!important;
+}
+.careAvatar.eating-fx-preview.eat-prop-off .carePetProp{
+  display:none!important;
+}
+
+.careAvatar.eating-fx-preview.pet-db-eat .carePetFx{
+  z-index:var(--pet-fx-layer,6)!important;
+}
+.careAvatar.eating-fx-preview.pet-db-eat .carePetFx2{
+  z-index:var(--pet-fx2-layer,7)!important;
+}
+.careAvatar.eating-fx-preview.pet-db-eat .carePetFx::before{
+  left:var(--pet-fx-left,50%)!important;
+  top:var(--pet-fx-top,50%)!important;
+  display:block!important;
+  opacity:1!important;
+  animation:none!important;
+  transform:translate(-50%,-50%) scale(var(--eat-fx-scale,1))!important;
+  transform-origin:center center!important;
+}
+.careAvatar.eating-fx-preview.eat-crumbs-off .carePetFx::before{
+  content:none!important;
+  display:none!important;
+}
+
+.careAvatar.eating-fx-preview.pet-db-eat .carePetFx2::before,
+.careAvatar.eating-fx-preview.pet-db-eat .carePetFx2::after{
+  left:var(--pet-fx2-left,50%)!important;
+  top:var(--pet-fx2-top,50%)!important;
+  display:block!important;
+  opacity:1!important;
+  animation:none!important;
+  transform:translate(-50%,-50%) scale(var(--eat-fx-scale,1))!important;
+  transform-origin:center center!important;
+}
+.careAvatar.eating-fx-preview.eat-hearts-off .carePetFx2::before,
+.careAvatar.eating-fx-preview.eat-hearts-off .carePetFx2::after{
+  content:none!important;
+  display:none!important;
+}
+
+@keyframes room10FeedPropWobble{
+  0%,100%{translate:0 0;rotate:0deg;}
+  25%{translate:-5px 0;rotate:-2deg;}
+  50%{translate:5px 0;rotate:2deg;}
+  75%{translate:-3px 0;rotate:-1deg;}
+}
+
+@media (max-width:540px){
+  .eatingFxToggleBtn{right:10px;top:64px;padding:8px 11px;font-size:12px;}
+  .eatingFxPanel{right:10px;top:104px;width:calc(100vw - 20px);max-height:calc(100vh - 118px);}
+}
+</style>
+
+<style id="playingFxAdjustStyles">
+.playingFxToggleBtn{position:fixed;right:18px;top:74px;z-index:1700;appearance:none;border:1px solid rgba(166,126,91,.28);border-radius:999px;padding:9px 14px;background:rgba(255,250,244,.96);color:#684526;font:900 13px/1 system-ui,-apple-system,"Segoe UI",sans-serif;box-shadow:0 8px 22px rgba(78,54,36,.16),inset 0 1px 0 rgba(255,255,255,.9);cursor:pointer;}
+.playingFxPanel{position:fixed;right:18px;top:116px;z-index:1701;width:min(370px,calc(100vw - 36px));max-height:calc(100vh - 136px);overflow:auto;display:none;padding:14px;border-radius:18px;background:rgba(255,250,244,.985);border:1px solid rgba(166,126,91,.26);box-shadow:0 18px 42px rgba(78,54,36,.23),inset 0 1px 0 rgba(255,255,255,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#634b3d;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
+.playingFxPanel.show{display:block}.playingFxHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.playingFxTitle{font-size:15px;font-weight:950}.playingFxClose{appearance:none;border:0;background:transparent;color:#8b6a55;font-size:22px;line-height:1;cursor:pointer;padding:0 2px}.playingFxHint{margin:0 0 12px;color:#8a715f;font-size:11.5px;font-weight:700;line-height:1.55}.playingFxGrid{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:10px}.playingFxField{display:flex;flex-direction:column;gap:5px;min-width:0}.playingFxField label{font-size:11px;font-weight:900;color:#795d49}.playingFxSelect,.playingFxNumber{width:100%;min-width:0;box-sizing:border-box;border:1px solid rgba(166,126,91,.22);border-radius:10px;background:#fffdf9;color:#684526;padding:8px 9px;font-size:12px;font-weight:800;outline:none}.playingFxSection{margin-top:10px;padding:10px;border-radius:14px;background:rgba(255,255,255,.55);border:1px solid rgba(166,126,91,.12)}.playingFxSectionTitle{margin-bottom:8px;color:#684526;font-size:12px;font-weight:950}.playingFxChecks{display:grid;grid-template-columns:1fr 1fr;gap:8px}.playingFxCheck{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:850;color:#765c4a}.playingFxCheck input{width:16px;height:16px;accent-color:#e7ad56}.playingFxRow{display:grid;grid-template-columns:74px minmax(0,1fr) 72px;gap:8px;align-items:center;margin-top:9px}.playingFxRow label{font-size:11px;font-weight:900;color:#795d49}.playingFxRow input[type="range"]{width:100%;accent-color:#e7ad56}.playingFxActions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}.playingFxActions button{appearance:none;border:1px solid rgba(166,126,91,.22);border-radius:11px;padding:8px 6px;background:#fffdf9;color:#684526;font-size:11.5px;font-weight:900;cursor:pointer}.playingFxOutput{margin-top:10px;padding:9px 10px;min-height:34px;border-radius:12px;background:rgba(111,82,61,.06);color:#765d4d;font-size:11px;line-height:1.55;word-break:break-word;white-space:pre-wrap}
+.careAvatar.playing-fx-preview.pet-db-play .carePetScene{animation:carePetSoftHop .9s ease-in-out infinite!important}.careAvatar.playing-fx-preview.play-motion-off .carePetScene{animation:none!important}.careAvatar.playing-fx-preview.pet-db-play .carePetProp{display:block!important;opacity:1!important;left:var(--play-prop-left,50%)!important;top:var(--play-prop-top,78%)!important;width:var(--play-prop-width,18%)!important;max-width:none!important;min-width:0!important;z-index:var(--play-prop-layer,8)!important;animation:room10PlayBallBounce 1s ease-in-out infinite!important;transform-origin:center center!important}.careAvatar.playing-fx-preview.play-motion-off .carePetProp{animation:none!important;transform:translate(-50%,-50%)!important}.careAvatar.playing-fx-preview.play-prop-off .carePetProp{display:none!important}
+.careAvatar.playing-fx-preview.pet-db-play .carePetFx{z-index:var(--play-stars-layer,12)!important}.careAvatar.playing-fx-preview.pet-db-play .carePetFx::before,.careAvatar.playing-fx-preview.pet-db-play .carePetFx::after{display:block!important;opacity:1!important;background:none!important;width:auto!important;height:auto!important;left:var(--play-stars-left,50%)!important;top:var(--play-stars-top,50%)!important;transform-origin:center center!important;color:rgba(235,181,70,.9)!important;font-weight:950!important;line-height:1!important}.careAvatar.playing-fx-preview.pet-db-play .carePetFx::before{content:"✦"!important;font-size:42px!important;animation:room10PlayStarPulse 1.05s ease-in-out infinite!important;transform:translate(-50%,-50%) scale(var(--play-stars-scale,1.2))!important}.careAvatar.playing-fx-preview.pet-db-play .carePetFx::after{content:"★"!important;font-size:24px!important;margin-left:38px!important;margin-top:-22px!important;animation:room10PlayStarPulse .9s ease-in-out infinite reverse!important;transform:translate(-50%,-50%) scale(var(--play-stars-scale,1.2))!important}.careAvatar.playing-fx-preview.play-stars-off .carePetFx::before,.careAvatar.playing-fx-preview.play-stars-off .carePetFx::after{content:none!important;display:none!important}
+.careAvatar.playing-fx-preview.pet-db-play .carePetFx2{z-index:var(--play-hearts-layer,20)!important}.careAvatar.playing-fx-preview.pet-db-play .carePetFx2::before,.careAvatar.playing-fx-preview.pet-db-play .carePetFx2::after{content:"♥"!important;background:none!important;width:auto!important;height:auto!important;color:rgba(239,145,145,.84)!important;font-weight:950!important;line-height:1!important;display:block!important;opacity:1!important;left:var(--play-hearts-left,15.5%)!important;top:var(--play-hearts-top,22%)!important;transform-origin:center center!important;animation:room10PlayHeartFloat 1.25s ease-in-out infinite!important;transform:translate(-50%,-50%) scale(var(--play-hearts-scale,1.75))!important}.careAvatar.playing-fx-preview.pet-db-play .carePetFx2::before{font-size:38px!important}.careAvatar.playing-fx-preview.pet-db-play .carePetFx2::after{font-size:24px!important;margin-left:34px!important;margin-top:-18px!important;animation-delay:.22s!important}.careAvatar.playing-fx-preview.play-hearts-off .carePetFx2::before,.careAvatar.playing-fx-preview.play-hearts-off .carePetFx2::after{content:none!important;display:none!important}
+@keyframes room10PlayBallBounce{0%,100%{translate:0 0}50%{translate:0 -14px}}@keyframes room10PlayStarPulse{0%,100%{opacity:.28;filter:brightness(.95)}50%{opacity:1;filter:brightness(1.15)}}@keyframes room10PlayHeartFloat{0%{opacity:0;margin-top:12px}35%{opacity:1}100%{opacity:0;margin-top:-24px}}
+@media(max-width:540px){.playingFxToggleBtn{right:10px;top:64px;padding:8px 11px;font-size:12px}.playingFxPanel{right:10px;top:104px;width:calc(100vw - 20px);max-height:calc(100vh - 118px)}}
+</style>
+
+<style id="healingFxRuntimeStyle">
+.careAvatar.healing-fx-preview .carePetBody{animation:room10HealingBodyPulse 1.35s ease-in-out infinite!important;transform-origin:center bottom}.careAvatar.healing-fx-preview.healing-motion-off .carePetBody{animation:none!important}
+.careAvatar.healing-fx-preview .carePetProp{display:block!important;opacity:1!important;left:var(--heal-prop-left,-10%)!important;top:var(--heal-prop-top,65%)!important;width:var(--heal-prop-width,20%)!important;max-width:none!important;min-width:0!important;z-index:var(--heal-prop-layer,25)!important}.careAvatar.healing-fx-preview.healing-prop-off .carePetProp{display:none!important}
+.healingGlowFx,.healingSparkleFx,.healingHeartFx{position:absolute;pointer-events:none;transform:translate(-50%,-50%);z-index:10}
+.healingGlowFx{left:var(--heal-glow-left,50%);top:var(--heal-glow-top,55%);width:calc(110px * var(--heal-glow-scale,1.4));aspect-ratio:1;border-radius:999px;background:radial-gradient(circle,rgba(255,247,174,.75) 0%,rgba(255,222,132,.32) 38%,rgba(255,255,255,0) 72%);filter:blur(2px);z-index:var(--heal-glow-layer,10);animation:room10HealingGlow 1.45s ease-in-out infinite}.careAvatar.healing-fx-preview.healing-glow-off .healingGlowFx{display:none!important}
+.healingSparkleFx{left:var(--heal-sparkles-left,55%);top:var(--heal-sparkles-top,45%);z-index:var(--heal-sparkles-layer,15);width:120px;height:100px;transform:translate(-50%,-50%) scale(var(--heal-sparkles-scale,1.2));transform-origin:center center}.healingSparkleFx span{position:absolute;color:rgba(255,218,104,.95);font-weight:950;line-height:1;text-shadow:0 2px 8px rgba(255,224,130,.35);animation:room10HealingSparkle 1.4s ease-in-out infinite}.healingSparkleFx span:nth-child(1){left:8%;top:54%;font-size:34px}.healingSparkleFx span:nth-child(2){left:57%;top:6%;font-size:23px;animation-delay:.22s}.healingSparkleFx span:nth-child(3){left:78%;top:66%;font-size:28px;animation-delay:.46s}.careAvatar.healing-fx-preview.healing-sparkles-off .healingSparkleFx{display:none!important}
+.healingHeartFx{left:var(--heal-hearts-left,85%);top:var(--heal-hearts-top,20%);z-index:var(--heal-hearts-layer,20);width:100px;height:90px;transform:translate(-50%,-50%) scale(var(--heal-hearts-scale,1.75));transform-origin:center center}.healingHeartFx span{position:absolute;color:rgba(239,145,145,.86);font-weight:950;line-height:1;animation:room10HealingHeart 1.35s ease-in-out infinite}.healingHeartFx span:nth-child(1){left:8%;top:42%;font-size:28px}.healingHeartFx span:nth-child(2){left:52%;top:6%;font-size:20px;animation-delay:.2s}.careAvatar.healing-fx-preview.healing-hearts-off .healingHeartFx{display:none!important}
+@keyframes room10HealingBodyPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.015);filter:brightness(1.035)}}
+@keyframes room10HealingGlow{0%,100%{opacity:.42;transform:translate(-50%,-50%) scale(.92)}50%{opacity:.9;transform:translate(-50%,-50%) scale(1.08)}}
+@keyframes room10HealingSparkle{0%,100%{opacity:.25;transform:translateY(8px) rotate(-8deg)}50%{opacity:1;transform:translateY(-8px) rotate(8deg)}}
+@keyframes room10HealingHeart{0%{opacity:0;transform:translateY(12px)}35%{opacity:1}100%{opacity:0;transform:translateY(-24px)}}
+
+.careAvatar.cleaning-fx-preview.pet-db-clean .carePetScene{
+  animation:carePetWetHappy 1.15s ease-in-out 2!important;
+}
+.careAvatar.cleaning-fx-preview.clean-motion-off .carePetScene{
+  animation:none!important;
+}
+.careAvatar.cleaning-fx-preview.pet-db-clean .carePetProp{
+  display:block!important;
+  opacity:1!important;
+  left:var(--clean-prop-left,50%)!important;
+  top:var(--clean-prop-top,82%)!important;
+  width:var(--clean-prop-width,12%)!important;
+  z-index:var(--clean-prop-layer,25)!important;
+  max-width:none!important;
+  min-width:0!important;
+  animation:carePetMedicalPulse 1.82s ease-in-out both!important;
+  transform:translate(-50%,-50%)!important;
+}
+.careAvatar.cleaning-fx-preview.clean-prop-off .carePetProp{
+  display:none!important;
+}
+.cleaningBubblesFx,
+.cleaningHeartFx{
+  position:absolute;
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+  transform-origin:center center;
+}
+.cleaningBubblesFx{
+  left:var(--clean-bubbles-left,50%);
+  top:var(--clean-bubbles-top,50%);
+  width:38%;
+  height:30%;
+  z-index:var(--clean-bubbles-layer,12);
+  transform:translate(-50%,-50%) scale(var(--clean-bubbles-scale,1));
+  background:
+    radial-gradient(circle at 18% 70%,rgba(156,216,236,.9) 0 10px,rgba(156,216,236,.42) 11px,transparent 12px),
+    radial-gradient(circle at 32% 34%,rgba(186,232,246,.84) 0 13px,rgba(186,232,246,.36) 14px,transparent 15px),
+    radial-gradient(circle at 54% 62%,rgba(144,206,232,.88) 0 9px,rgba(144,206,232,.38) 10px,transparent 11px),
+    radial-gradient(circle at 70% 24%,rgba(175,228,245,.9) 0 11px,rgba(175,228,245,.36) 12px,transparent 13px),
+    radial-gradient(circle at 82% 58%,rgba(152,214,238,.86) 0 8px,rgba(152,214,238,.34) 9px,transparent 10px);
+  animation:carePetBubbles 1.8s ease-in-out infinite;
+}
+.careAvatar.cleaning-fx-preview.clean-bubbles-off .cleaningBubblesFx{
+  display:none!important;
+}
+.cleaningHeartFx{
+  left:var(--clean-hearts-left,15.5%);
+  top:var(--clean-hearts-top,22%);
+  width:100px;
+  height:90px;
+  z-index:var(--clean-hearts-layer,20);
+  transform:translate(-50%,-50%) scale(var(--clean-hearts-scale,1.75));
+}
+.cleaningHeartFx span{
+  position:absolute;
+  color:rgba(239,145,145,.84);
+  font-weight:950;
+  line-height:1;
+  animation:carePetActionHeart 1.4s ease-out both;
+}
+.cleaningHeartFx span:nth-child(1){left:8%;top:42%;font-size:38px;}
+.cleaningHeartFx span:nth-child(2){left:52%;top:6%;font-size:24px;animation-delay:.14s;}
+.careAvatar.cleaning-fx-preview.clean-hearts-off .cleaningHeartFx{
+  display:none!important;
+}
 </style>
 
 </head>
@@ -1301,10 +1997,12 @@ button,input{font-family:inherit;}
       <section class="panel careActions">
         <div class="careActionNotice" id="careSpeechText">正在读取宠物状态。</div>
         <div class="careActionGrid">
-          <button class="actionBtn" type="button" data-care-action="feed_snack"><span class="actionIcon" data-item-icon="pet.snack">🍪</span><span><span class="actionName">零食</span><span class="actionDesc">饱食 +8，心情 +12。</span></span></button>
-          <button class="actionBtn" type="button" data-care-action="feed_can"><span class="actionIcon" data-item-icon="pet.can">🥫</span><span><span class="actionName">罐头</span><span class="actionDesc">饱食 +18，心情 +10。</span></span></button>
-          <button class="actionBtn" type="button" data-care-action="feed_dry"><span class="actionIcon" data-item-icon="pet.kibble">🍖</span><span><span class="actionName">干粮</span><span class="actionDesc">饱食 +28，心情 +3。</span></span></button>
+          <button class="actionBtn" type="button" data-care-action="feed_snack"><span class="actionIcon" data-item-icon="pet.snack">🍪</span><span><span class="actionName">喂零食</span><span class="actionDesc">饱食 +8，心情 +12。</span></span></button>
+          <button class="actionBtn" type="button" data-care-action="feed_can"><span class="actionIcon" data-item-icon="pet.can">🥫</span><span><span class="actionName">喂罐头</span><span class="actionDesc">饱食 +18，心情 +10。</span></span></button>
+          <button class="actionBtn" type="button" data-care-action="feed_dry"><span class="actionIcon" data-item-icon="pet.kibble">🍖</span><span><span class="actionName">喂干粮</span><span class="actionDesc">饱食 +28，心情 +3。</span></span></button>
           <button class="actionBtn" type="button" data-care-action="clean"><span class="actionIcon" data-item-icon="pet.clean">🧼</span><span><span class="actionName">清洁</span><span class="actionDesc">清洁 +25，心情 +3。</span></span></button>
+          <button class="actionBtn" type="button" data-care-action="play"><span class="actionIcon" data-item-icon="pet.ball">⚾</span><span><span class="actionName">玩耍</span><span class="actionDesc">心情、亲密↑，饱食↓。</span></span></button>
+          <button class="actionBtn" type="button" data-care-action="heal"><span class="actionIcon" data-item-icon="pet.medical">🩹</span><span><span class="actionName">治疗</span><span class="actionDesc">健康、心情与亲密度提升。</span></span></button>
         </div>
       </section>
 
@@ -1315,8 +2013,25 @@ button,input{font-family:inherit;}
   </div>
 </div>
 
-<div class="nameMask" id="nameMask" aria-hidden="true"><section class="nameDialog" role="dialog" aria-modal="true"><h2 class="nameTitle" id="nameTitle">为它取名</h2><p class="nameDesc" id="nameDesc">请输入领养后的宠物名字。</p><input class="nameInput" id="nameInput" maxlength="12" autocomplete="off" /><div class="nameActions"><button class="nameCancel" id="nameCancelBtn" type="button">取消</button><button class="nameConfirm" id="nameConfirmBtn" type="button">确认领养</button></div></section></div>
+<div class="petLoginMask" id="petLoginMask" aria-hidden="true">
+  <div class="pet-login-panel">
+    <img id="petLoginImage" src="" alt="">
 
+    <input id="petLoginNickname" type="text" autocomplete="username">
+    <input id="petLoginCode" type="password" autocomplete="current-password">
+
+    <button id="petLoginToggleBtn" type="button" aria-label="显示或隐藏钥匙"></button>
+    <button id="petLoginSubmitBtn" type="button" aria-label="登录"></button>
+
+    <button id="petRegisterLink" type="button">还没有钥匙？去宿管室登记</button>
+
+    <button id="petLoginCloseBtn" class="petLoginCloseBtn" type="button" aria-label="关闭">×</button>
+
+    <div id="petLoginHint"></div>
+  </div>
+</div>
+
+<div class="nameMask" id="nameMask" aria-hidden="true"><section class="nameDialog" role="dialog" aria-modal="true"><h2 class="nameTitle" id="nameTitle">为它取名</h2><p class="nameDesc" id="nameDesc">请输入领养后的宠物名字。</p><input class="nameInput" id="nameInput" maxlength="12" autocomplete="off" /><div class="nameActions"><button class="nameCancel" id="nameCancelBtn" type="button">取消</button><button class="nameConfirm" id="nameConfirmBtn" type="button">确认领养</button></div></section></div>
 
 <div class="gachaMask" id="gachaMask" aria-hidden="true">
   <section class="gachaDialog" role="dialog" aria-modal="true" aria-label="宠物扭蛋机">
@@ -1340,13 +2055,16 @@ if(window.supabase && typeof window.supabase.createClient === "function"){
 }
 const RPC = {
   adoptionState:"get_pet_adoption_page_state",
+  petTypesImages:"get_pet_types_with_images",
   adopt:"adopt_pet_from_card_fragments",
   upgrade:"upgrade_pet_from_card_fragments",
   careState:"get_pet_care_page_state",
   careAction:"care_pet_action",
+  todayCareLogs:"get_pet_today_care_action_logs",
   dailyGift:"claim_pet_daily_gift",
   decay:"process_pet_daily_decay",
-  interactionConfigs:"get_pet_interaction_configs"
+  interactionConfigs:"get_pet_interaction_configs",
+  pageTexts:"get_room10_page_texts"
 };
 let activeMode = "adopt";
 let selectedPetId = null;
@@ -1357,24 +2075,77 @@ let carePets = [];
 let careState = null;
 let lastDailyGift = null;
 let careItems = {};
+let careTodayLogs = [];
 let autoGiftRunning = false;
 let petInteractionConfigs = {};
 let petInteractionConfigSpecies = "";
 let petInteractionConfigLoading = null;
 let petInteractionConfigError = "";
 let careActionReturnTimer = null;
+let careActionBusy = false;
+let petTypeImagesLoaded = false;
+let petTypeImagesLoading = null;
+let petTypeImagesByNo = new Map();
+let petTypeImagesByKey = new Map();
+let pageTexts = {};
+let pageTextsLoaded = false;
+let pageTextsLoading = null;
 
 function room10Url(path){const raw=String(path||"").trim();if(!raw)return"";if(/^(https?:|data:|mailto:|tel:|#|\/)/i.test(raw))return raw;if(raw.startsWith("./")||raw.startsWith("../"))return raw;if(typeof window.room10Path==="function")return window.room10Path(raw);return `${ROOM10_ROOT_PREFIX}${raw}`;}
 function room10PageUrl(key,fallback){if(key&&typeof window.room10Page==="function"){const url=window.room10Page(key);if(url)return url;}return room10Url(fallback||"");}
 function room10AssetUrl(key,fallback){if(key&&typeof window.room10Asset==="function"){const url=window.room10Asset(key);if(url)return url;}return room10Url(fallback||"");}
+function room10RemoteAssetUrl(path){
+  const raw=String(path||"").trim();
+  if(!raw)return"";
+  if(/^(https?:|data:|blob:|\/)/i.test(raw))return raw;
+
+  if(typeof window.room10PetImage==="function"){
+    const url=window.room10PetImage(raw);
+    if(url)return url;
+  }
+
+  if(typeof window.room10R2Asset==="function"){
+    const url=window.room10R2Asset(raw);
+    if(url)return url;
+  }
+
+  return room10Url(raw);
+}
+function legacyPetImagePath(key){const map={germanShepherdFrontSit:"pet/1/1.png",germanShepherdBackSit:"pet/1/1.png",germanShepherdSideSit:"pet/1/1.png",germanShepherdPlayHappy:"pet/1/7.png",germanShepherdWeakSick:"pet/1/2.png",germanShepherdDead:"pet/1/3.png",germanShepherdHealing:"pet/1/4.png",germanShepherdAfterClean:"pet/1/5.png",germanShepherdEat:"pet/1/6.png"};const raw=String(key||"").trim();return map[raw]||map[raw.replace(/^pet\./,"")]||"";}
+function resolveAssetRef(ref,fallback){const raw=String(ref||"").trim();if(!raw)return fallback||"";if(/^(https?:|data:|blob:|\/)/i.test(raw))return raw;if(/\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(raw)&&raw.includes("/"))return room10RemoteAssetUrl(raw);const local=room10AssetUrl(raw,"");if(local)return local;const legacy=legacyPetImagePath(raw);if(legacy)return room10RemoteAssetUrl(legacy);return fallback||"";}
 function escapeHtml(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
 function numberOrZero(v){const n=Number(v);return Number.isFinite(n)?n:0;}
 function bool(v){return v===true||v==="true"||v===1||v==="1";}
 function pct(a,b){const x=numberOrZero(a), y=Math.max(1,numberOrZero(b));return Math.max(0,Math.min(100,Math.round(x/y*100)));}
 function isUuid(v){return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(v||"").trim());}
 function todayKey(){return new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});}
-function petCardAsset(no){return room10AssetUrl(`gacha.pet${no}`,`../game/gacha/pet/${no}.jpg`) || `../game/gacha/pet/${no}.jpg`;}
-function petStateAsset(p,state){if(Number(p?.pet_no)!==1)return petCardAsset(p?.pet_no||p?.id||1);const map={front:"pet.germanShepherdFrontSit",play:"pet.germanShepherdPlayHappy",weak:"pet.germanShepherdWeakSick",sick:"pet.germanShepherdWeakSick",critical:"pet.germanShepherdWeakSick",dead:"pet.germanShepherdDead",healing:"pet.germanShepherdHealing",clean:"pet.germanShepherdAfterClean",eat:"pet.germanShepherdEat"};return room10AssetUrl(map[state]||map.front,`../pet/1/1.png`);}
+function getPetTypeMeta(no){return petTypeImagesByNo.get(Number(no))||null;}
+function normalizePetImageKey(state){const key=String(state||"normal").toLowerCase();if(key==="front"||key==="happy"||key==="normal"||key==="healthy")return"normal";if(key==="sick"||key==="critical")return"weak";if(key==="weak")return"weak";if(key==="dead")return"dead";if(key==="healing"||key==="heal")return"healing";if(key==="clean"||key==="wet")return"wet";if(key==="eat"||key==="eating"||key.startsWith("eat:")||key==="feed_snack"||key==="feed_can"||key==="feed_dry")return"eating";if(key==="play"||key==="playing")return"playing";return"normal";}
+function petStateImageNo(state){const key=normalizePetImageKey(state);return {normal:1,weak:2,dead:3,healing:4,wet:5,eating:6,playing:7}[key]||1;}
+function petDirectStatePath(no,state){const n=Number(no);if(!Number.isFinite(n)||n<=0)return"";return `pet/${n}/${petStateImageNo(state)}.png`;}
+function readImagePathFromAsset(asset){if(!asset)return"";if(typeof asset==="string")return asset;if(typeof asset==="object")return asset.image_path||asset.path||asset.url||"";return"";}
+function getPetImagePath(no,imageKey){
+  const normalized=normalizePetImageKey(imageKey);
+  const imageNo=petStateImageNo(normalized);
+  const meta=getPetTypeMeta(no);
+  if(meta){
+    const assets=meta.image_assets;
+    if(Array.isArray(assets)){
+      const matched=assets.find(a=>String(a?.image_key||"").toLowerCase()===normalized)||assets.find(a=>Number(a?.image_no)===imageNo);
+      const got=readImagePathFromAsset(matched);
+      if(got)return got;
+    }else if(assets&&typeof assets==="object"){
+      const candidates=[assets[normalized],assets[String(imageNo)],assets[`image_${imageNo}`]];
+      for(const c of candidates){const got=readImagePathFromAsset(c);if(got)return got;}
+    }
+    const directCols=[`${normalized}_image_path`,`${normalized}ImagePath`,`image_${imageNo}_path`];
+    for(const col of directCols){if(meta[col])return meta[col];}
+  }
+  // 兜底仍然走已确认的 R2 规则，避免 image_assets JSON 形状变化导致抚养页空白。
+  return petDirectStatePath(no,normalized);
+}
+function petCardAsset(no){const path=getPetImagePath(no,"normal");return path?room10RemoteAssetUrl(path):"";}
+function petStateAsset(p,state){const no=Number(p?.pet_no??p?.folder_no??p?.id);const path=getPetImagePath(no,normalizePetImageKey(state));return path?room10RemoteAssetUrl(path):"";}
 function itemIcon(itemKey){const map={pet_snack:"pet.snack",pet_can_food:"pet.can",pet_dry_food:"pet.kibble",pet_cleaning_tool:"pet.clean",pet_medical_card:"pet.medical",pet_ball:"pet.ball"};return map[itemKey]?room10AssetUrl(map[itemKey],""):"";}
 
 const img=document.getElementById("bg"),bgFrame=document.getElementById("bgFrame"),overlay=document.getElementById("overlay"),root=document.documentElement;
@@ -1382,10 +2153,157 @@ if(img){const bg=room10AssetUrl("pet.pet","pet.png");if(bg)img.src=bg;}
 function isMobileLayout(){return window.innerWidth<=540;}
 function syncOverlayToImage(){if(isMobileLayout()){if(overlay){overlay.style.left="";overlay.style.top="";overlay.style.width="";overlay.style.height="";}root.style.setProperty("--ui-scale","1");root.style.setProperty("--room-nav-scale","1");root.style.setProperty("--identity-scale","1");return;} if(!img||!img.naturalWidth||!img.naturalHeight||!bgFrame||!overlay)return;const frame=bgFrame.getBoundingClientRect();const fr=frame.width/frame.height;const ir=img.naturalWidth/img.naturalHeight;let w,h,l,t;if(fr>ir){h=frame.height;w=h*ir;l=frame.left+(frame.width-w)/2;t=frame.top;}else{w=frame.width;h=w/ir;l=frame.left;t=frame.top+(frame.height-h)/2;}overlay.style.left=`${l}px`;overlay.style.top=`${t}px`;overlay.style.width=`${w}px`;overlay.style.height=`${h}px`;const scale=Math.max(.45,Math.min(3.2,w/1440));root.style.setProperty("--ui-scale",String(scale));root.style.setProperty("--room-nav-scale",String(Math.max(.38,Math.min(3.2,w/1440))));root.style.setProperty("--identity-scale",String(scale));root.style.setProperty("--reward-modal-scale",String(Math.max(.58,Math.min(1.15,w/900))));}
 
+function normalizePetLoginInput(value){
+  return String(value || "").replace(/\u3000/g," ").trim();
+}
+function setPetLoginMessage(message,isSuccess=false){
+  const hint=document.getElementById("petLoginHint");
+  if(!hint)return;
+  hint.style.color=isSuccess?"#5f7d3a":"#8b4a2d";
+  hint.innerText=String(message||"");
+}
+function openPetLoginModal(){
+  const mask=document.getElementById("petLoginMask");
+  const img=document.getElementById("petLoginImage");
+  if(img && !img.getAttribute("src")){
+    img.src=(typeof room10Asset==="function" ? room10Asset("root.login") : "../login.png");
+  }
+  if(!mask)return;
+  setPetLoginMessage("");
+  mask.classList.add("show");
+  mask.setAttribute("aria-hidden","false");
+  setTimeout(()=>{
+    const input=document.getElementById("petLoginNickname");
+    if(input)input.focus();
+  },30);
+}
+function closePetLoginModal(){
+  const mask=document.getElementById("petLoginMask");
+  if(mask){
+    mask.classList.remove("show");
+    mask.setAttribute("aria-hidden","true");
+  }
+  setPetLoginMessage("");
+}
+function togglePetLoginCode(){
+  const input=document.getElementById("petLoginCode");
+  if(input)input.type=input.type==="password"?"text":"password";
+}
+function goRegisterFromPet(){
+  const returnPath=room10PageUrl("pet","pet/pets.html");
+  const registerPath=room10PageUrl("managerRegister","manager/register.html");
+  if(!registerPath)return;
+  sessionStorage.setItem("room10RegisterReturn",returnPath);
+  window.location.href=`${registerPath}?from=${encodeURIComponent(returnPath)}`;
+}
+function clearGuestModeFromUrl(){
+  try{
+    const url=new URL(window.location.href);
+    if(url.searchParams.get("mode")==="guest"){
+      url.searchParams.delete("mode");
+      const next=url.pathname+(url.searchParams.toString()?`?${url.searchParams.toString()}`:"")+url.hash;
+      window.history.replaceState(null,"",next);
+    }
+  }catch(_){}
+}
+async function submitPetLogin(){
+  const nicknameInput=document.getElementById("petLoginNickname");
+  const codeInput=document.getElementById("petLoginCode");
+  const submitBtn=document.getElementById("petLoginSubmitBtn");
+  if(!nicknameInput||!codeInput||!submitBtn)return;
+
+  const nickname=normalizePetLoginInput(nicknameInput.value);
+  const key=normalizePetLoginInput(codeInput.value);
+  setPetLoginMessage("");
+
+  if(!nickname||!key){
+    setPetLoginMessage("请填写昵称和钥匙。");
+    return;
+  }
+
+  submitBtn.disabled=true;
+
+  try{
+    const client=await getDbClientAsync();
+    if(!client||typeof client.rpc!=="function"){
+      throw new Error("数据库未连接，请稍后再试。");
+    }
+
+    const {data,error}=await client.rpc("room10_member_login",{
+      p_nickname:nickname,
+      p_key_code:key
+    });
+
+    if(error){
+      setPetLoginMessage(`登录检查失败：${error.message||"room10_member_login"}`);
+      return;
+    }
+
+    const loginRow=Array.isArray(data)&&data.length?data[0]:null;
+
+    if(!loginRow?.success){
+      setPetLoginMessage(
+        String(loginRow?.message||"").trim() || "没有找到对应的入住记录。"
+      );
+      return;
+    }
+
+    const memberId=String(loginRow.id||loginRow.member_id||"").trim();
+    const memberNickname=String(loginRow.nickname||"").trim();
+    const memberRole=String(loginRow.role||"").trim().toLowerCase();
+    const memberCode=String(
+      loginRow.member_code||loginRow.memberCode||loginRow.code||""
+    ).trim();
+
+    if(!memberId||!memberNickname||!memberRole||!memberCode){
+      throw new Error("登录返回数据不完整。");
+    }
+
+    localStorage.setItem(STORAGE_KEYS.loggedIn,"true");
+    localStorage.setItem(STORAGE_KEYS.user,memberNickname);
+    localStorage.setItem(STORAGE_KEYS.role,memberRole);
+    localStorage.setItem(STORAGE_KEYS.memberId,memberId);
+    localStorage.setItem(STORAGE_KEYS.memberCode,memberCode);
+
+    clearGuestModeFromUrl();
+    setIdentityState();
+    setPetLoginMessage("欢迎回家",true);
+
+    adoptionPets=[];
+    carePets=[];
+    careState=null;
+    selectedCareAdoptionId=null;
+    lastDailyGift=null;
+
+    setTimeout(async()=>{
+      nicknameInput.value="";
+      codeInput.value="";
+      codeInput.type="password";
+      closePetLoginModal();
+
+      if(activeMode==="care"){
+        await loadCareState({skipAutoGift:true});
+      }else{
+        await loadAdoptionState();
+      }
+    },420);
+  }catch(err){
+    console.error("宠物页登录失败：",err);
+    setPetLoginMessage(`登录失败：${err?.message||String(err)}`);
+  }finally{
+    submitBtn.disabled=false;
+  }
+}
+
 function roleLabel(role){return {owner:"维修工",admin:"宿管",member:"房客",trainee:"练习生",applying:"申请人",visitor:"参观者"}[String(role||"visitor").toLowerCase()]||"房客";}
 function readLoggedIn(){return localStorage.getItem(STORAGE_KEYS.loggedIn)==="true";}
+function isGuestView(){
+  const nickname=String(localStorage.getItem(STORAGE_KEYS.user)||"").trim();
+  const urlMode=new URLSearchParams(window.location.search).get("mode");
+  return urlMode==="guest" || !readLoggedIn() || !nickname;
+}
 function readRole(){return String(localStorage.getItem(STORAGE_KEYS.role)||"visitor").toLowerCase();}
-function setIdentityState(){const loggedIn=readLoggedIn();const nickname=localStorage.getItem(STORAGE_KEYS.user)||"";const role=readRole();const n=document.getElementById("identityNickname"),s=document.getElementById("identitySeparator"),r=document.getElementById("identityRole"),b=document.getElementById("identityAuthBtn");if(!loggedIn||!nickname){n.textContent="参观者";s.classList.add("hidden");r.classList.add("hidden");b.querySelector(".identityAuthText").textContent="登录";}else{n.textContent=nickname;s.classList.remove("hidden");r.classList.remove("hidden");r.textContent=roleLabel(role);b.querySelector(".identityAuthText").textContent="登出";}}
+function setIdentityState(){const guest=isGuestView();const nickname=localStorage.getItem(STORAGE_KEYS.user)||"";const role=readRole();const n=document.getElementById("identityNickname"),s=document.getElementById("identitySeparator"),r=document.getElementById("identityRole"),b=document.getElementById("identityAuthBtn");if(guest){n.textContent="参观者";s.classList.add("hidden");r.classList.add("hidden");b.querySelector(".identityAuthText").textContent="登录";}else{n.textContent=nickname;s.classList.remove("hidden");r.classList.remove("hidden");r.textContent=roleLabel(role);b.querySelector(".identityAuthText").textContent="登出";}}
 function getManagerPageByRole(){const role=readRole();if(role==="owner")return room10PageUrl("managerOwner","manager/manager-owner.html");if(role==="admin")return room10PageUrl("managerAdmin","manager/manager-admin.html");if(role==="member"||role==="trainee"||role==="applying")return room10PageUrl("managerMember","manager/manager-member.html");return room10PageUrl("managerVisitor","manager/manager-visitor.html");}
 function enterRoom(page,needLogin,room){if(!page)return;if(needLogin&&!readLoggedIn()){window.location.href=room10PageUrl("index","index/index.html");return;}if(room==="dorm"&&readRole()==="applying"){window.location.href=getManagerPageByRole();return;}if((room==="flower"||room==="pets")&&!readLoggedIn()){window.location.href=`${room10Url(page)}?mode=guest`;return;}window.location.href=room10Url(page);}
 function setupRoomNav(){document.querySelectorAll(".navBtn").forEach(btn=>{const isCurrent=btn.dataset.room===CURRENT_ROOM;btn.classList.toggle("is-current",isCurrent);if(isCurrent){btn.setAttribute("aria-current","page");btn.setAttribute("tabindex","-1");}btn.addEventListener("click",e=>{e.preventDefault();if(btn.classList.contains("is-current"))return;if(btn.dataset.manager==="true"){window.location.href=getManagerPageByRole();return;}enterRoom(room10PageUrl(btn.dataset.page,btn.dataset.url),btn.dataset.login==="true",btn.dataset.room);});});}
@@ -1427,8 +2345,11 @@ async function getDbClientAsync(){
   return null;
 }
 function findUuidDeep(value,depth=0){if(depth>4||value==null)return"";if(typeof value==="string"){if(isUuid(value))return value;try{return findUuidDeep(JSON.parse(value),depth+1)||"";}catch(_){const m=value.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);return m?m[0]:"";}}if(typeof value==="object"){const priority=["member_id","memberId","memberID","id","user_id","userId","auth_user_id","authUserId"];for(const k of priority){if(isUuid(value[k]))return value[k];}for(const k of Object.keys(value)){const got=findUuidDeep(value[k],depth+1);if(got)return got;}}return"";}
-function getCurrentMemberId(){const keys=["room10MemberId","room10_member_id","member_id","memberId","currentMemberId","room10CurrentMemberId","room10UserId","room10_user_id","user_id","room10Member","room10CurrentMember","room10UserData","room10UserInfo","room10Profile","room10AuthMember","room10Session","room10User"];for(const k of keys){const got=findUuidDeep(localStorage.getItem(k));if(got)return got;}for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k)continue;if(/room10|member|user/i.test(k)){const got=findUuidDeep(localStorage.getItem(k));if(got)return got;}}return"";}
-function requireMemberId(){const id=getCurrentMemberId();if(!id)throw new Error("请先登录，或确认本地登录信息中包含成员 ID。当前页面无法调用需要 p_member_id 的宠物数据库函数。");return id;}
+function getCurrentMemberId(){if(isGuestView())return"";const keys=["room10MemberId","room10_member_id","member_id","memberId","currentMemberId","room10CurrentMemberId","room10UserId","room10_user_id","user_id","room10Member","room10CurrentMember","room10UserData","room10UserInfo","room10Profile","room10AuthMember","room10Session","room10User"];for(const k of keys){const got=findUuidDeep(localStorage.getItem(k));if(got)return got;}for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k)continue;if(/room10|member|user/i.test(k)){const got=findUuidDeep(localStorage.getItem(k));if(got)return got;}}return"";}
+function requireMemberId(){if(isGuestView())throw new Error("请先登录。");const id=getCurrentMemberId();if(!id)throw new Error("未找到当前登录成员 ID，请重新登录。");return id;}
+function getCurrentMemberCode(){if(isGuestView())return"";return String(localStorage.getItem(STORAGE_KEYS.memberCode)||"").trim();}
+function requireMemberCode(){const code=getCurrentMemberCode();if(!code)throw new Error("未找到当前登录成员钥匙，请重新登录。");return code;}
+function getPetIdentityRpcParams(){return {p_member_id:requireMemberId(),p_member_code:requireMemberCode()};}
 async function callRpc(name,args){
   const client=await getDbClientAsync();
   if(!client){
@@ -1439,23 +2360,306 @@ async function callRpc(name,args){
   return res?res.data:null;
 }
 
-function normalizePet(row){const id=Number(row.pet_no??row.pet_id??row.id);const owned=numberOrZero(row.card_quantity??row.owned_fragments??row.owned_cards);const required=Math.max(1,numberOrZero(row.required_fragments??row.required_cards));const discovered=bool(row.is_unlocked)||owned>0;const active=bool(row.is_adopted)||!!row.active_adoption_id;const canAdopt=bool(row.can_adopt);const canUpgrade=bool(row.can_upgrade);return {id, pet_no:id, name:row.animal_name||row.pet_name||row.name||"未知宠物", activeName:row.active_pet_name||"", adopterName:row.owner_name||"", owned, required, discovered, active, canAdopt, canUpgrade, image:petCardAsset(id), tier:numberOrZero(row.gacha_tier_level), status:row.active_pet_status||""};}
-function adoptionStatus(p){if(!p.discovered)return {text:"未发现",cls:""};if(p.active)return {text:p.owned>0?"升级":"已领养",cls:"upgrade"};if(p.canAdopt)return {text:"领养",cls:"ready"};return {text:"收集中",cls:""};}
+const PET_TEXT_PAGE_KEY = "pets";
+function configMissingText(key){
+  const base = pageTexts["common.config_missing"] || "配置缺失";
+  return key ? `${base}：${key}` : base;
+}
+function t(key, vars={}){
+  const raw = pageTexts[String(key||"")];
+  if(!raw)return configMissingText(key);
+  return String(raw).replace(/\{([a-zA-Z0-9_]+)\}/g,(m,k)=>vars[k]!==undefined?String(vars[k]):m);
+}
+async function loadPageTexts(){
+  if(pageTextsLoaded)return;
+  if(pageTextsLoading)return pageTextsLoading;
+  pageTextsLoading=(async()=>{
+    const rows=await callRpc(RPC.pageTexts,{p_page_key:PET_TEXT_PAGE_KEY,p_include_inactive:false});
+    const next={};
+    (Array.isArray(rows)?rows:[]).forEach(row=>{
+      if(row&&row.text_key&&row.is_active!==false)next[String(row.text_key)]=String(row.text_value??"");
+    });
+    pageTexts=next;
+    pageTextsLoaded=true;
+  })();
+  try{await pageTextsLoading;}finally{pageTextsLoading=null;}
+}
+function textEl(id,key){const el=document.getElementById(id);if(el)el.textContent=t(key);}
+function hydratePageTexts(){
+  textEl("modeAdoptBtn","tab.adopt");
+  textEl("modeCareBtn","tab.care");
+  textEl("petModeTitle","page.title");
+  textEl("petModeSub","page.subtitle");
+  textEl("nameTitle","adopt.name.title");
+  textEl("nameDesc","adopt.name.desc");
+  const nameInput=document.getElementById("nameInput");
+  if(nameInput)nameInput.placeholder=t("adopt.name.placeholder");
+  textEl("nameCancelBtn","adopt.name.cancel");
+  textEl("nameConfirmBtn","adopt.name.confirm");
+  textEl("rewardSectionTitle","modal.reward.title");
+  const rewardConfirm=document.querySelector(".reward-confirm");
+  if(rewardConfirm)rewardConfirm.textContent=t("modal.reward.confirm");
+  const rewardClose=document.querySelector(".reward-close");
+  if(rewardClose)rewardClose.setAttribute("aria-label",t("common.close"));
+  const gachaClose=document.getElementById("gachaCloseBtn");
+  if(gachaClose)gachaClose.setAttribute("aria-label",t("common.close"));
+  document.querySelectorAll("[data-care-action]").forEach(btn=>{
+    const action=btn.dataset.careAction;
+    const map={feed_snack:"feed",feed_can:"feed",feed_dry:"feed",clean:"clean",play:"play",heal:"heal"};
+    const feedNames={feed_snack:"喂零食",feed_can:"喂罐头",feed_dry:"喂干粮"};
+    const key=map[action]||action;
+    const name=btn.querySelector(".actionName");
+    const desc=btn.querySelector(".actionDesc");
+    if(name)name.textContent=feedNames[action]||t(`care.action.${key}.name`);
+    if(desc)desc.textContent=t(`care.action.${key}.desc`);
+  });
+  const affinity=document.querySelector(".affinityLabel");
+  if(affinity)affinity.textContent=t("care.affinity.title");
+  const logTitle=document.querySelector(".careLog .petTitle");
+  if(logTitle)logTitle.textContent=t("care.log.title");
+  const supplyTitle=document.querySelector(".petBagCard .petTitle");
+  if(supplyTitle)supplyTitle.textContent=t("care.supplies.title");
+}
+
+async function loadPetTypeImages(){
+  if(petTypeImagesLoaded)return;
+  if(petTypeImagesLoading)return petTypeImagesLoading;
+  petTypeImagesLoading=(async()=>{
+    const rows=await callRpc(RPC.petTypesImages,{p_include_inactive:false});
+    if(!Array.isArray(rows))throw new Error("宠物图片配置读取失败：get_pet_types_with_images 没有返回列表。");
+    const byNo=new Map();
+    const byKey=new Map();
+    rows.forEach(row=>{
+      const folderNo=Number(row.folder_no);
+      if(!Number.isFinite(folderNo))return;
+      const meta={
+        ...row,
+        id:folderNo,
+        pet_no:folderNo,
+        image_assets:row.image_assets||{}
+      };
+      byNo.set(folderNo,meta);
+      if(row.pet_key)byKey.set(String(row.pet_key),meta);
+    });
+    petTypeImagesByNo=byNo;
+    petTypeImagesByKey=byKey;
+    petTypeImagesLoaded=true;
+  })();
+  try{
+    await petTypeImagesLoading;
+  }finally{
+    petTypeImagesLoading=null;
+  }
+}
+
+function normalizePet(row){
+  const id=Number(row.pet_no??row.pet_id??row.folder_no??row.id);
+  const meta=getPetTypeMeta(id)||{};
+  const owned=numberOrZero(row.card_quantity??row.owned_fragments??row.owned_cards);
+  const required=Math.max(1,numberOrZero(row.required_fragments??row.required_cards));
+  const discovered=bool(row.is_unlocked)||owned>0;
+  const active=bool(row.is_adopted)||!!row.active_adoption_id;
+  const canAdopt=bool(row.can_adopt);
+  const canUpgrade=bool(row.can_upgrade);
+
+  // 领养页必须展示扭蛋机抽到的宠物图片卡图。
+  // 不使用 normal_image_path / pet/动物编号/1.png，那一套只给抚养页状态图使用。
+  const cardPath=
+    row.image_path||
+    row.card_image_path||
+    row.gacha_image_path||
+    row.item_icon||
+    "";
+
+  const fallbackCardPath=(id>=1&&id<=36)
+    ? (id<=34?`game/gacha/pet/${id}.jpg`:`game/gacha/pet/${id}.png`)
+    : "";
+
+  const finalCardPath=cardPath||fallbackCardPath;
+
+  return {
+    id,
+    pet_no:id,
+    pet_key:row.pet_key||meta.pet_key||"",
+    pet_code:row.pet_code||meta.pet_code||"",
+    card_type:row.card_type||row.rarity||meta.card_type||"normal",
+    name:row.animal_name||row.pet_name||row.name||meta.animal_name||"未知宠物",
+    relatedName:row.related_name||meta.related_name||"",
+    activeName:row.active_pet_name||"",
+    adopterName:row.owner_name||"",
+    owned,
+    required,
+    discovered,
+    active,
+    canAdopt,
+    canUpgrade,
+    image:finalCardPath?room10Url(finalCardPath):"",
+    tier:numberOrZero(row.gacha_tier_level),
+    status:row.active_pet_status||""
+  };
+}
+function adoptionStatus(p){
+  if(!p.discovered)return {text:t("adopt.status.locked"),cls:""};
+  if(p.active)return {text:p.owned>0?t("adopt.status.upgrade"):t("adopt.status.adopted"),cls:"upgrade"};
+  if(p.canAdopt)return {text:t("adopt.status.ready"),cls:"ready"};
+  return {text:t("adopt.status.collecting"),cls:""};
+}
 function imageHtml(p){if(p&&p.discovered&&p.image)return `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onerror="this.remove();">`;return `<span class="unknownMark">?</span>`;}
 function renderAdoptionMessage(msg){document.getElementById("adoptGrid").innerHTML=`<div class="petMessage" style="grid-column:1/-1;">${escapeHtml(msg)}</div>`;renderAdoptDetail(null,msg);}
-function renderAdoptionGrid(){const grid=document.getElementById("adoptGrid");if(!adoptionPets.length){renderAdoptionMessage("暂无图片卡数据。");return;}grid.innerHTML=adoptionPets.map(p=>{const locked=!p.discovered;const badge=locked?"":`<span class="adoptMiniStatus count">${numberOrZero(p.owned)}张</span>`;const img=locked?'<span class="unknownMark">?</span>':imageHtml(p);const name=locked?"未发现":p.name;return `<button class="adoptCard ${locked?"is-locked":""} ${p.id===selectedPetId?"is-active":""}" type="button" data-pet-id="${p.id}">${badge}<span class="adoptImgBox">${img}</span><span class="adoptCardName">${escapeHtml(name)}</span><span class="adoptCardProgress empty"></span></button>`;}).join("");grid.querySelectorAll(".adoptCard").forEach(btn=>btn.addEventListener("click",()=>{selectedPetId=Number(btn.dataset.petId);renderAdoptionGrid();renderAdoptDetail(adoptionPets.find(p=>p.id===selectedPetId));}));}
-function renderAdoptDetail(p,msg){const preview=document.getElementById("adoptPreview"),name=document.getElementById("adoptName"),pill=document.getElementById("adoptStatePill"),prog=document.getElementById("adoptProgressValue"),fill=document.getElementById("adoptProgressFill"),desc=document.getElementById("adoptDesc"),btn=document.getElementById("adoptMainBtn");pill.className="statePill";preview.classList.remove("is-locked");document.getElementById("adoptDetailPanel")?.classList.remove("is-locked-detail");btn.className="mainBtn";btn.disabled=true;btn.dataset.action="";if(!p){preview.innerHTML='<span class="lockedDetail">暂无数据</span>';name.textContent="暂无数据";pill.textContent="不可操作";prog.textContent="- / -";fill.style.width="0%";desc.textContent=msg||"暂无可显示的宠物数据。";btn.textContent="不可操作";return;}if(!p.discovered){document.getElementById("adoptDetailPanel")?.classList.add("is-locked-detail");preview.classList.add("is-locked");preview.innerHTML='<span class="lockedDetail">未发现</span>';name.textContent="";pill.textContent="";prog.textContent="";fill.style.width="0%";desc.textContent="";btn.textContent="";btn.dataset.action="";btn.disabled=true;return;}preview.innerHTML=imageHtml(p);name.textContent=p.name;prog.textContent=`${p.owned} / ${p.required}`;fill.style.width=`${pct(p.owned,p.required)}%`;const st=adoptionStatus(p);pill.textContent=st.text;if(st.cls)pill.classList.add(st.cls);if(p.active){desc.textContent=p.owned>0?"这只宠物已经被领养，可以继续用同款图片卡升级。":"这只宠物已经被领养，抽到同款图片卡后可升级。";btn.textContent=p.owned>0?"升级":"去扭蛋";btn.dataset.action=p.owned>0?"upgrade":"gacha";btn.disabled=false;btn.classList.toggle("upgrade",p.owned>0);return;}if(p.canAdopt){desc.textContent="图片卡数量已满足，可以领养并为它命名。";btn.textContent="领养";btn.dataset.action="adopt";btn.disabled=false;return;}desc.textContent="继续通过扭蛋收集图片卡，集齐后即可领养。";btn.textContent="收集中";btn.disabled=true;}
-async function loadAdoptionState(){document.getElementById("adoptGrid").innerHTML='<div class="petMessage" style="grid-column:1/-1;">正在读取图片卡。</div>';try{const memberId=requireMemberId();const data=await callRpc(RPC.adoptionState,{p_member_id:memberId});const rows=Array.isArray(data)?data:(Array.isArray(data?.pets)?data.pets:[]);adoptionPets=rows.map(normalizePet).filter(p=>Number.isFinite(p.id));selectedPetId=selectedPetId||adoptionPets[0]?.id||null;renderAdoptionGrid();renderAdoptDetail(adoptionPets.find(p=>p.id===selectedPetId));}catch(err){adoptionPets=[];selectedPetId=null;renderAdoptionMessage(err.message||"数据库读取失败。");}}
+function renderAdoptionGrid(){
+  const grid=document.getElementById("adoptGrid");
+  if(!adoptionPets.length){renderAdoptionMessage(t("adopt.detail.no_pet_data"));return;}
+  grid.innerHTML=adoptionPets.map(p=>{
+    const locked=!p.discovered;
+    const isSpecial=p.card_type==="special";
+    const badge=locked?"":`<span class="adoptMiniStatus count">${isSpecial?escapeHtml(t("adopt.detail.special_suffix"))+" · ":""}${numberOrZero(p.owned)} / ${numberOrZero(p.required)}</span>`;
+    const img=locked?'<span class="unknownMark">?</span>':imageHtml(p);
+    const name=locked?t("adopt.locked_text"):p.name;
+    return `<button class="adoptCard ${locked?"is-locked":""} ${isSpecial?"is-special":""} ${p.id===selectedPetId?"is-active":""}" type="button" data-pet-id="${p.id}">${badge}<span class="adoptImgBox">${img}</span><span class="adoptCardName">${escapeHtml(name)}</span><span class="adoptCardProgress empty"></span></button>`;
+  }).join("");
+  grid.querySelectorAll(".adoptCard").forEach(btn=>btn.addEventListener("click",()=>{
+    selectedPetId=Number(btn.dataset.petId);
+    renderAdoptionGrid();
+    renderAdoptDetail(adoptionPets.find(p=>p.id===selectedPetId));
+  }));
+}
+function renderAdoptDetail(p,msg){
+  const preview=document.getElementById("adoptPreview"),name=document.getElementById("adoptName"),pill=document.getElementById("adoptStatePill"),prog=document.getElementById("adoptProgressValue"),fill=document.getElementById("adoptProgressFill"),desc=document.getElementById("adoptDesc"),btn=document.getElementById("adoptMainBtn");
+  pill.className="statePill";
+  preview.classList.remove("is-locked");
+  document.getElementById("adoptDetailPanel")?.classList.remove("is-locked-detail");
+  btn.className="mainBtn";
+  btn.disabled=true;
+  btn.dataset.action="";
+  if(!p){
+    preview.innerHTML=`<span class="lockedDetail">${escapeHtml(t("adopt.detail.no_data"))}</span>`;
+    name.textContent=t("adopt.detail.no_data");
+    pill.textContent=t("adopt.detail.not_available");
+    prog.textContent="- / -";
+    fill.style.width="0%";
+    desc.textContent=msg||t("adopt.detail.no_pet_data");
+    btn.textContent=t("adopt.detail.not_available");
+    return;
+  }
+  if(!p.discovered){
+    document.getElementById("adoptDetailPanel")?.classList.add("is-locked-detail");
+    preview.classList.add("is-locked");
+    preview.innerHTML=`<span class="lockedDetail">${escapeHtml(t("adopt.locked_text"))}</span>`;
+    name.textContent="";
+    pill.textContent="";
+    prog.textContent="";
+    fill.style.width="0%";
+    desc.textContent="";
+    btn.textContent="";
+    btn.dataset.action="";
+    btn.disabled=true;
+    return;
+  }
+  preview.innerHTML=imageHtml(p);
+  name.textContent=p.card_type==="special"?`${p.name} · ${t("adopt.detail.special_suffix")}`:p.name;
+  prog.textContent=`${p.owned} / ${p.required}`;
+  fill.style.width=`${pct(p.owned,p.required)}%`;
+  const st=adoptionStatus(p);
+  pill.textContent=st.text;
+  if(st.cls)pill.classList.add(st.cls);
+  if(p.active){
+    desc.textContent=p.owned>0?t("adopt.detail.adopted_can_upgrade"):t("adopt.detail.adopted_need_card");
+    btn.textContent=p.owned>0?t("adopt.button.upgrade"):t("adopt.button.locked");
+    btn.dataset.action=p.owned>0?"upgrade":"gacha";
+    btn.disabled=false;
+    btn.classList.toggle("upgrade",p.owned>0);
+    return;
+  }
+  if(p.canAdopt){
+    desc.textContent=t("adopt.detail.ready");
+    btn.textContent=t("adopt.button.ready");
+    btn.dataset.action="adopt";
+    btn.disabled=false;
+    return;
+  }
+  desc.textContent=t("adopt.detail.collecting");
+  btn.textContent=t("adopt.button.locked");
+  btn.disabled=true;
+}
+function buildGuestAdoptionPets(){
+  return Array.from(petTypeImagesByNo.values())
+    .sort((a,b)=>Number(a.pet_no||a.id||0)-Number(b.pet_no||b.id||0))
+    .map(meta=>normalizePet({
+      pet_no:meta.pet_no||meta.id,
+      pet_key:meta.pet_key||"",
+      pet_code:meta.pet_code||"",
+      animal_name:meta.animal_name||meta.pet_name||meta.name||"未知宠物",
+      rarity:meta.card_type||meta.rarity||"normal",
+      required_fragments:meta.required_fragments??meta.required_cards??1,
+      card_quantity:0,
+      is_unlocked:false,
+      is_adopted:false,
+      active_adoption_id:null,
+      can_adopt:false,
+      can_upgrade:false
+    }))
+    .filter(p=>Number.isFinite(p.id));
+}
+
+async function loadAdoptionState(){
+  document.getElementById("adoptGrid").innerHTML=`<div class="petMessage" style="grid-column:1/-1;">${escapeHtml(t("adopt.loading"))}</div>`;
+  try{
+    await loadPetTypeImages();
+
+    // 游客只读取公开宠物基础资料，不调用带成员 ID 的个人领养状态 RPC。
+    // 即使浏览器 localStorage 里残留旧成员 UUID，也不能显示任何人的碎片数量。
+    if(isGuestView()){
+      adoptionPets=buildGuestAdoptionPets();
+      selectedPetId=adoptionPets.some(p=>p.id===selectedPetId)?selectedPetId:(adoptionPets[0]?.id||null);
+      renderAdoptionGrid();
+      renderAdoptDetail(adoptionPets.find(p=>p.id===selectedPetId));
+      return;
+    }
+
+    const identityParams=getPetIdentityRpcParams();
+    const data=await callRpc(RPC.adoptionState,identityParams);
+    if(!data||typeof data!=="object")throw new Error("宠物领养状态读取失败：接口没有返回有效数据。");
+    if(data.success!==true)throw new Error(data.message||"宠物领养状态读取失败，请重新登录后再试。");
+    const rows=Array.isArray(data.pets)?data.pets:[];
+    adoptionPets=rows.map(normalizePet).filter(p=>Number.isFinite(p.id));
+    selectedPetId=adoptionPets.some(p=>p.id===selectedPetId)?selectedPetId:(adoptionPets[0]?.id||null);
+    renderAdoptionGrid();
+    renderAdoptDetail(adoptionPets.find(p=>p.id===selectedPetId));
+  }catch(err){
+    adoptionPets=[];
+    selectedPetId=null;
+    renderAdoptionMessage(err.message||t("adopt.error.read_failed"));
+  }
+}
 
 function lifeLabel(status){return {healthy:"健康",normal:"正常",weak:"虚弱",sick:"生病",critical:"危险",dead:"死亡"}[status]||"正常";}
 function careSpeech(p){if(!p)return"暂无有效宠物。";if(p.life_status==="critical")return `${p.name} 非常虚弱，需要大家快点照顾。`;if(p.life_status==="sick")return `${p.name} 生病了，喂食和清洁会帮助它恢复。`;if(p.life_status==="weak")return `${p.name} 有些虚弱，正在等大家陪它。`;return `${p.name} 正在宠物区等大家来陪伴。`;}
 
-function speciesKeyForPet(p){return Number(p?.pet_no)===1?"germanShepherd":`pet${Number(p?.pet_no)||"unknown"}`;}
-function getPetInteractionConfig(variantKey){return petInteractionConfigs[String(variantKey||"")]||null;}
+function speciesKeyForPet(p){
+  const no=Number(p?.pet_no||0);
+  if(!Number.isFinite(no)||no<=0)return "";
+  return no===1?"germanShepherd":`pet${no}`;
+}
+function getPetInteractionConfig(variantKey){
+  const key=String(variantKey||"");
+  if(petInteractionConfigs[key])return petInteractionConfigs[key];
+  const aliases={
+    feed_snack:["eat:snack:side"],
+    feed_can:["eat:can:near-mouth"],
+    feed_dry:["eat:kibble:bowl"],
+    "eat:snack:side":["feed_snack"],
+    "eat:can:near-mouth":["feed_can"],
+    "eat:kibble:bowl":["feed_dry"]
+  };
+  for(const alias of aliases[key]||[]){
+    if(petInteractionConfigs[alias])return petInteractionConfigs[alias];
+  }
+  return null;
+}
 function setPetInteractionConfigError(msg){petInteractionConfigError=String(msg||"").trim();}
 async function ensurePetInteractionConfigs(p){
   const speciesKey=speciesKeyForPet(p);
-  if(!speciesKey||speciesKey==="petunknown")return;
+  if(!speciesKey)return;
   if(petInteractionConfigSpecies===speciesKey&&Object.keys(petInteractionConfigs).length)return;
   if(petInteractionConfigLoading)return petInteractionConfigLoading;
   setPetInteractionConfigError("");
@@ -1466,11 +2670,11 @@ async function ensurePetInteractionConfigs(p){
       (Array.isArray(rows)?rows:[]).forEach(row=>{if(row&&row.variant_key)next[row.variant_key]=row;});
       petInteractionConfigs=next;
       petInteractionConfigSpecies=speciesKey;
-      if(!Object.keys(next).length)setPetInteractionConfigError(`互动配置缺失：${speciesKey}`);
+      if(!Object.keys(next).length)setPetInteractionConfigError(`${t("care.action.config_invalid")} ${speciesKey}`);
     }catch(err){
       petInteractionConfigs={};
       petInteractionConfigSpecies=speciesKey;
-      setPetInteractionConfigError(`互动配置读取失败：${err.message||"数据库返回错误"}`);
+      setPetInteractionConfigError(`${t("care.action.config_invalid")} ${err.message||t("care.action.db_error")}`);
       console.warn("宠物互动配置读取失败：",err);
     }finally{
       petInteractionConfigLoading=null;
@@ -1478,76 +2682,766 @@ async function ensurePetInteractionConfigs(p){
   })();
   return petInteractionConfigLoading;
 }
-function careBaseVariant(p){const status=String(p?.life_status||"").toLowerCase();if(status==="sick"||status==="critical")return "sick";if(status==="weak")return "weak";if(status==="dead")return "dead";return "happy";}
-function careActionVariant(action){return {feed_snack:"eat:snack:side",feed_can:"eat:can:near-mouth",feed_dry:"eat:kibble:bowl",clean:"clean",play:"play",heal:"heal",happy:"happy",weak:"weak",sick:"sick"}[String(action||"")]||"happy";}
-function careActionClassFromVariant(variantKey){if(String(variantKey||"").startsWith("eat:"))return "eat";return String(variantKey||"happy").replace(/[^a-z0-9_-]/gi,"-");}
+function careBaseVariant(p){
+  const status=String(p?.life_status||"").toLowerCase();
+  if(status==="dead")return "dead";
+  if(status==="sick"||status==="critical"||status==="weak")return "weak";
+  return "normal";
+}
+function careActionVariant(action){
+  return {
+    feed_snack:"feed_snack",
+    feed_can:"feed_can",
+    feed_dry:"feed_dry",
+    clean:"clean",
+    play:"play",
+    heal:"heal",
+    normal:"normal",
+    happy:"normal",
+    weak:"weak",
+    sick:"weak",
+    dead:"dead"
+  }[String(action||"")]||"normal";
+}
+function careActionClassFromVariant(variantKey){
+  const raw=String(variantKey||"normal");
+  if(raw.startsWith("feed_")||raw==="eat"||raw==="eating"||raw.startsWith("eat:"))return "eat";
+  return raw.replace(/[^a-z0-9_-]/gi,"-");
+}
 function petConfigNumber(value){const n=Number(value);return Number.isFinite(n)?n:null;}
+function petImageKeyFromCareVariant(variantKey){
+  const key=String(variantKey||"normal").toLowerCase();
+  if(key==="dead")return "dead";
+  if(key==="weak"||key==="sick"||key==="critical")return "weak";
+  if(key==="heal"||key==="healing")return "healing";
+  if(key==="clean"||key==="wet")return "wet";
+  if(key==="play"||key==="playing")return "playing";
+  if(key.startsWith("feed_")||key==="eat"||key==="eating"||key.startsWith("eat:"))return "eating";
+  return "normal";
+}
+function careBodyImageUrl(variantKey,cfg){
+  const stateKey=petImageKeyFromCareVariant(variantKey);
+  const direct=room10RemoteAssetUrl(petDirectStatePath(careState?.pet_no,stateKey));
+  if(direct)return direct;
+  const stateUrl=petStateAsset(careState,stateKey);
+  if(stateUrl)return stateUrl;
+  return resolveAssetRef(cfg?.body_image_key,careState?.image||"");
+}
 function validatePetInteractionConfig(cfg,variantKey){
-  if(petInteractionConfigError)return petInteractionConfigError;
-  if(!cfg||!cfg.config_json)return `互动配置缺失：${variantKey}`;
-  if(!cfg.body_image_key)return `互动配置缺少主体图：${variantKey}`;
-  const values=cfg.config_json;
-  const miss=["bodyLeft","bodyBottom","bodyWidth","bodyLayer"].filter(k=>petConfigNumber(values[k])===null);
-  if(miss.length)return `互动配置字段缺失：${variantKey} / ${miss.join(", ")}`;
+  // 前端只做显示层校验，不再因为动画位置配置缺失阻止 care_pet_action。
+  // 真实互动是否开放、消耗和随机数值由数据库 RPC 统一判断。
   return "";
 }
 function renderPetFallbackNotice(message){
   const avatar=document.getElementById("careAvatar");
   if(!avatar||!careState)return;
-  const img=careState.image?`<img class="carePetFallbackImg" src="${escapeHtml(careState.image)}" alt="${escapeHtml(careState.name)}">`:"🐾";
+  const bodyUrl=careBodyImageUrl("normal",null)||careState.image||"";
+  const img=bodyUrl?`<img class="carePetFallbackImg" src="${escapeHtml(bodyUrl)}" alt="${escapeHtml(careState.name)}">`:"🐾";
   avatar.className="careAvatar";
   avatar.innerHTML=`${img}${message?`<div class="carePetConfigNotice">${escapeHtml(message)}</div>`:""}`;
 }
 function resetCarePetScene(content){const avatar=document.getElementById("careAvatar");if(!avatar)return;clearTimeout(careActionReturnTimer);avatar.className="careAvatar";avatar.innerHTML=content||"🐾";}
-function renderCarePetScene(variantKey,{animate=false}={}){
+
+// 已确认的宠物状态图位置参数，供正式展示与互动动画使用。
+// 已合并用户最新提供的 137 张宠物状态图参数；bodyLeft / bodyBottom / bodyWidth 均以最新数据为准。
+const PET_SCENE_REAL_RATIO_PRESETS={"1:normal":{"bodyLeft":56,"bodyBottom":-25.5,"bodyWidth":201},"1:weak":{"bodyLeft":38,"bodyBottom":-28.5,"bodyWidth":197},"1:dead":{"bodyLeft":45.5,"bodyBottom":-43,"bodyWidth":169},"1:healing":{"bodyLeft":50,"bodyBottom":-27.5,"bodyWidth":213},"1:wet":{"bodyLeft":50,"bodyBottom":-21,"bodyWidth":203},"1:eating":{"bodyLeft":62,"bodyBottom":-27.5,"bodyWidth":182},"1:playing":{"bodyLeft":50,"bodyBottom":-38.5,"bodyWidth":206},"2:normal":{"bodyLeft":49,"bodyBottom":-30.5,"bodyWidth":214.9},"2:weak":{"bodyLeft":52.5,"bodyBottom":-30.5,"bodyWidth":222.5},"2:dead":{"bodyLeft":50,"bodyBottom":-50.5,"bodyWidth":199.8},"2:healing":{"bodyLeft":50,"bodyBottom":-33,"bodyWidth":230},"2:wet":{"bodyLeft":50,"bodyBottom":-30.5,"bodyWidth":225},"2:eating":{"bodyLeft":50,"bodyBottom":-29.5,"bodyWidth":225},"2:playing":{"bodyLeft":49,"bodyBottom":-34,"bodyWidth":230},"3:playing":{"bodyLeft":49.5,"bodyBottom":-29.5,"bodyWidth":203.5},"4:normal":{"bodyLeft":52.5,"bodyBottom":-24,"bodyWidth":141.7},"4:weak":{"bodyLeft":45.5,"bodyBottom":-26,"bodyWidth":152.7},"4:dead":{"bodyLeft":48,"bodyBottom":-22,"bodyWidth":123.3},"4:healing":{"bodyLeft":50,"bodyBottom":-27.5,"bodyWidth":171.1},"4:wet":{"bodyLeft":59.5,"bodyBottom":-32,"bodyWidth":170.2},"4:eating":{"bodyLeft":56,"bodyBottom":-28.5,"bodyWidth":165},"5:normal":{"bodyLeft":52.5,"bodyBottom":-33,"bodyWidth":237.5},"5:dead":{"bodyLeft":48,"bodyBottom":-65,"bodyWidth":309.2},"5:healing":{"bodyLeft":50,"bodyBottom":-32,"bodyWidth":227.9},"5:wet":{"bodyLeft":50,"bodyBottom":-30.5,"bodyWidth":223.6},"5:eating":{"bodyLeft":56,"bodyBottom":-62.5,"bodyWidth":303.9},"5:playing":{"bodyLeft":49.5,"bodyBottom":-50.5,"bodyWidth":280.3},"6:eating":{"bodyLeft":56,"bodyBottom":-48.5,"bodyWidth":236.2},"7:eating":{"bodyLeft":56,"bodyBottom":-50.5,"bodyWidth":191.1},"8:normal":{"bodyLeft":52.5,"bodyBottom":-24,"bodyWidth":112.2},"8:weak":{"bodyLeft":45.5,"bodyBottom":-26,"bodyWidth":114.1},"8:dead":{"bodyLeft":48,"bodyBottom":-47,"bodyWidth":134.3},"8:healing":{"bodyLeft":50,"bodyBottom":-27.5,"bodyWidth":127.9},"8:wet":{"bodyLeft":50,"bodyBottom":-22.5,"bodyWidth":120.5},"8:eating":{"bodyLeft":62,"bodyBottom":-28.5,"bodyWidth":131.6},"8:playing":{"bodyLeft":49.5,"bodyBottom":-36.5,"bodyWidth":161},"9:normal":{"bodyLeft":52.5,"bodyBottom":-24,"bodyWidth":138},"9:weak":{"bodyLeft":45.5,"bodyBottom":-26,"bodyWidth":134.3},"9:healing":{"bodyLeft":50,"bodyBottom":-27.5,"bodyWidth":137.1},"9:wet":{"bodyLeft":50,"bodyBottom":-22.5,"bodyWidth":144.4},"9:eating":{"bodyLeft":56,"bodyBottom":-45,"bodyWidth":152.7},"9:playing":{"bodyLeft":49.5,"bodyBottom":-26.5,"bodyWidth":153.6},"10:normal":{"bodyLeft":52.5,"bodyBottom":-24,"bodyWidth":171.6},"10:weak":{"bodyLeft":45.5,"bodyBottom":-26,"bodyWidth":169.5},"10:dead":{"bodyLeft":48,"bodyBottom":-28.5,"bodyWidth":168.5},"10:healing":{"bodyLeft":50,"bodyBottom":-27.5,"bodyWidth":168.5},"10:wet":{"bodyLeft":50,"bodyBottom":-32,"bodyWidth":173.7},"10:eating":{"bodyLeft":56,"bodyBottom":-59.5,"bodyWidth":211.1},"10:playing":{"bodyLeft":49.5,"bodyBottom":-36,"bodyWidth":184.1},"11:normal":{"bodyLeft":52.5,"bodyBottom":-33,"bodyWidth":181.3},"11:weak":{"bodyLeft":45.5,"bodyBottom":-26,"bodyWidth":184.4},"11:healing":{"bodyLeft":50,"bodyBottom":-33,"bodyWidth":183.4},"11:wet":{"bodyLeft":50,"bodyBottom":-34,"bodyWidth":180.2},"11:eating":{"bodyLeft":56,"bodyBottom":-34,"bodyWidth":200.3},"11:playing":{"bodyLeft":49.5,"bodyBottom":-40.5,"bodyWidth":190},"12:normal":{"bodyLeft":52.5,"bodyBottom":-24,"bodyWidth":166.7},"12:weak":{"bodyLeft":45.5,"bodyBottom":-35,"bodyWidth":171.7},"12:healing":{"bodyLeft":50,"bodyBottom":-35,"bodyWidth":176.8},"12:wet":{"bodyLeft":50,"bodyBottom":-33,"bodyWidth":183},"12:eating":{"bodyLeft":56,"bodyBottom":-44,"bodyWidth":207.1},"12:playing":{"bodyLeft":49.5,"bodyBottom":-35,"bodyWidth":184.8},"13:normal":{"bodyLeft":52.5,"bodyBottom":-45,"bodyWidth":186},"13:weak":{"bodyLeft":45.5,"bodyBottom":-50.5,"bodyWidth":200},"13:healing":{"bodyLeft":50,"bodyBottom":-37.5,"bodyWidth":172.1},"13:wet":{"bodyLeft":50,"bodyBottom":-34,"bodyWidth":169.3},"13:eating":{"bodyLeft":56,"bodyBottom":-38.5,"bodyWidth":183.2},"14:dead":{"bodyLeft":48,"bodyBottom":-47,"bodyWidth":178.6},"15:wet":{"bodyLeft":50,"bodyBottom":-32,"bodyWidth":213.2},"15:playing":{"bodyLeft":51,"bodyBottom":-33,"bodyWidth":214.2},"16:normal":{"bodyLeft":52.5,"bodyBottom":-24,"bodyWidth":102.1},"16:weak":{"bodyLeft":45.5,"bodyBottom":-26,"bodyWidth":72.2},"16:dead":{"bodyLeft":48,"bodyBottom":-47,"bodyWidth":110.9},"16:healing":{"bodyLeft":50,"bodyBottom":-27.5,"bodyWidth":96.8},"16:wet":{"bodyLeft":50,"bodyBottom":-22.5,"bodyWidth":86.2},"16:eating":{"bodyLeft":56,"bodyBottom":-28.5,"bodyWidth":82.7},"16:playing":{"bodyLeft":49.5,"bodyBottom":-36.5,"bodyWidth":95},"17:normal":{"bodyLeft":52.5,"bodyBottom":-37.5,"bodyWidth":216},"17:weak":{"bodyLeft":45.5,"bodyBottom":-44,"bodyWidth":218.2},"17:healing":{"bodyLeft":50,"bodyBottom":-32,"bodyWidth":230},"17:wet":{"bodyLeft":50,"bodyBottom":-35,"bodyWidth":225.7},"17:eating":{"bodyLeft":56,"bodyBottom":-43,"bodyWidth":212.8},"18:eating":{"bodyLeft":56,"bodyBottom":-55,"bodyWidth":202.9},"19:wet":{"bodyLeft":78.5,"bodyBottom":-22.5,"bodyWidth":217.4},"19:eating":{"bodyLeft":56,"bodyBottom":-50.5,"bodyWidth":204.9},"20:normal":{"bodyLeft":52.5,"bodyBottom":-24,"bodyWidth":106.8},"20:weak":{"bodyLeft":45.5,"bodyBottom":-26,"bodyWidth":113.9},"20:dead":{"bodyLeft":53.5,"bodyBottom":-38.5,"bodyWidth":115.7},"20:healing":{"bodyLeft":50,"bodyBottom":-27.5,"bodyWidth":113},"20:wet":{"bodyLeft":50,"bodyBottom":-22.5,"bodyWidth":105.9},"20:eating":{"bodyLeft":53.5,"bodyBottom":-26.5,"bodyWidth":112.1},"20:playing":{"bodyLeft":56,"bodyBottom":-26.5,"bodyWidth":109.5},"21:eating":{"bodyLeft":69,"bodyBottom":-54,"bodyWidth":205.5},"22:normal":{"bodyLeft":52.5,"bodyBottom":-26.5,"bodyWidth":214},"22:weak":{"bodyLeft":45.5,"bodyBottom":-37.5,"bodyWidth":216.1},"22:healing":{"bodyLeft":50,"bodyBottom":-36,"bodyWidth":227.9},"22:wet":{"bodyLeft":50,"bodyBottom":-32,"bodyWidth":223.6},"22:playing":{"bodyLeft":49.5,"bodyBottom":-29.5,"bodyWidth":226.8},"23:normal":{"bodyLeft":52.5,"bodyBottom":-24,"bodyWidth":110.4},"23:weak":{"bodyLeft":45.5,"bodyBottom":-26,"bodyWidth":113.2},"23:dead":{"bodyLeft":48,"bodyBottom":-40.5,"bodyWidth":115.9},"23:healing":{"bodyLeft":50,"bodyBottom":-27.5,"bodyWidth":115.9},"23:wet":{"bodyLeft":50,"bodyBottom":-22.5,"bodyWidth":148.1},"23:eating":{"bodyLeft":56,"bodyBottom":-28.5,"bodyWidth":150},"23:playing":{"bodyLeft":49.5,"bodyBottom":-36.5,"bodyWidth":167.4},"25:dead":{"bodyLeft":48,"bodyBottom":-38.5,"bodyWidth":162.8},"25:playing":{"bodyLeft":49.5,"bodyBottom":-32,"bodyWidth":195},"26:healing":{"bodyLeft":50,"bodyBottom":-32,"bodyWidth":230},"26:wet":{"bodyLeft":50,"bodyBottom":-29.5,"bodyWidth":225.7},"26:eating":{"bodyLeft":56,"bodyBottom":-38.5,"bodyWidth":212.8},"27:eating":{"bodyLeft":56,"bodyBottom":-49.5,"bodyWidth":181.2},"27:playing":{"bodyLeft":72.5,"bodyBottom":-30.5,"bodyWidth":195},"28:wet":{"bodyLeft":50,"bodyBottom":-29.5,"bodyWidth":194.4},"29:normal":{"bodyLeft":52.5,"bodyBottom":-24,"bodyWidth":108},"29:weak":{"bodyLeft":45.5,"bodyBottom":-26,"bodyWidth":96.3},"29:dead":{"bodyLeft":48,"bodyBottom":-36,"bodyWidth":89.1},"29:healing":{"bodyLeft":50,"bodyBottom":-33,"bodyWidth":92.7},"29:wet":{"bodyLeft":50,"bodyBottom":-22.5,"bodyWidth":110.7},"29:eating":{"bodyLeft":56,"bodyBottom":-28.5,"bodyWidth":109.8},"29:playing":{"bodyLeft":49.5,"bodyBottom":-34,"bodyWidth":117.9},"30:normal":{"bodyLeft":52.5,"bodyBottom":-24,"bodyWidth":72.2},"30:weak":{"bodyLeft":45.5,"bodyBottom":-26,"bodyWidth":79.2},"30:dead":{"bodyLeft":48,"bodyBottom":-28.5,"bodyWidth":72.2},"30:healing":{"bodyLeft":50,"bodyBottom":-27.5,"bodyWidth":73.9},"30:wet":{"bodyLeft":50,"bodyBottom":-22.5,"bodyWidth":73.9},"30:eating":{"bodyLeft":56,"bodyBottom":-18.5,"bodyWidth":73.9},"30:playing":{"bodyLeft":49.5,"bodyBottom":-19.5,"bodyWidth":89.8},"31:playing":{"bodyLeft":49.5,"bodyBottom":-26.5,"bodyWidth":199.3},"33:playing":{"bodyLeft":49.5,"bodyBottom":-27.5,"bodyWidth":207.8},"34:dead":{"bodyLeft":48,"bodyBottom":-28.5,"bodyWidth":166.4},"35:normal":{"bodyLeft":52.5,"bodyBottom":-28.5,"bodyWidth":81.7},"35:weak":{"bodyLeft":45.5,"bodyBottom":-34,"bodyWidth":81.7},"35:dead":{"bodyLeft":48,"bodyBottom":-37.5,"bodyWidth":80.8},"35:healing":{"bodyLeft":50,"bodyBottom":-33,"bodyWidth":78.3},"35:wet":{"bodyLeft":50,"bodyBottom":-27.5,"bodyWidth":74.8},"35:eating":{"bodyLeft":56,"bodyBottom":-28.5,"bodyWidth":81.7},"35:playing":{"bodyLeft":49.5,"bodyBottom":-33,"bodyWidth":84.3},"36:dead":{"bodyLeft":48,"bodyBottom":-35,"bodyWidth":159.3}};
+let activePetSceneVariant="normal";
+
+function careActionPropAsset(action,cfg){
+  const actionKey=String(action||"").toLowerCase();
+  const pathKey={
+    feed_snack:"pet.snack",
+    feed_can:"pet.can",
+    feed_dry:"pet.kibble",
+    clean:"pet.clean",
+    play:"pet.ball",
+    heal:"pet.medical"
+  }[actionKey]||"";
+  if(pathKey){
+    const url=room10AssetUrl(pathKey,"");
+    if(url)return url;
+  }
+  return cfg?.prop_image_key?resolveAssetRef(cfg.prop_image_key,""):"";
+}
+function careChangeLabel(key){
+  return {
+    hunger:t("care.status.hunger"),
+    clean:t("care.status.clean"),
+    mood:t("care.status.mood"),
+    health:t("care.status.health"),
+    intimacy:t("care.affinity.title")
+  }[key]||key;
+}
+function renderActualChangesHtml(changes){
+  if(!changes||typeof changes!=="object")return "";
+  const order=["hunger","clean","mood","health","intimacy"];
+  const chips=order.map(key=>{
+    const raw=Number(changes[key]);
+    if(!Number.isFinite(raw)||raw===0)return "";
+    const sign=raw>0?"+":"";
+    const cls=raw>0?"is-positive":"is-negative";
+    return `<span class="careChangeChip ${cls}">${escapeHtml(careChangeLabel(key))} ${sign}${raw}</span>`;
+  }).filter(Boolean).join("");
+  return chips?`<div class="careChangeCloud">${chips}</div>`:"";
+}
+function hydrateCareActionButtonsFromConfigs(){
+  const feedNames={feed_snack:"喂零食",feed_can:"喂罐头",feed_dry:"喂干粮"};
+  document.querySelectorAll("[data-care-action]").forEach(btn=>{
+    const action=String(btn.dataset.careAction||"");
+    const cfg=getPetInteractionConfig(careActionVariant(action));
+    const ui=cfg?.config_json?.ui;
+    const name=btn.querySelector(".actionName");
+    const desc=btn.querySelector(".actionDesc");
+    const dbLabel=String(ui?.label||"").trim();
+    if(name){
+      if(feedNames[action]&&(!dbLabel||dbLabel==="喂食"))name.textContent=feedNames[action];
+      else if(dbLabel)name.textContent=dbLabel;
+    }
+    if(desc&&ui?.desc)desc.textContent=String(ui.desc);
+  });
+}
+function setCareActionButtonsLocked(locked){
+  careActionBusy=!!locked;
+  const wrap=document.querySelector("#careView .careActions");
+  if(wrap)wrap.classList.toggle("is-busy",careActionBusy);
+  document.querySelectorAll("[data-care-action]").forEach(btn=>{btn.disabled=careActionBusy;});
+}
+function careActionAnimationDuration(action){
+  return {feed_snack:1500,feed_can:1500,feed_dry:1500,clean:1700,play:1700,heal:1900}[String(action||"")]||1600;
+}
+
+// 保留既定宠物主体图位置：仅只读恢复已保存的尺寸/位置，不恢复任何调图按钮、面板或编辑功能。
+const PET_SCENE_SAVED_LAYOUT_STORAGE_KEY="room10_pet_scene_adjust_matrix_v6_merged_latest_20260709";
+const PET_SCENE_SAVED_LAYOUT_STATES=["normal","weak","dead","healing","wet","eating","playing"];
+function normalizedSavedPetSceneState(state){
+  const normalized=normalizePetImageKey(state||"normal");
+  return PET_SCENE_SAVED_LAYOUT_STATES.includes(normalized)?normalized:"normal";
+}
+function readSavedPetSceneLayoutStore(){
+  try{
+    const raw=localStorage.getItem(PET_SCENE_SAVED_LAYOUT_STORAGE_KEY);
+    const data=raw?JSON.parse(raw):{};
+    return data&&typeof data==="object"?data:{};
+  }catch(_){return {};}
+}
+function applySavedPetSceneLayoutReadonly(){
+  if(window.innerWidth<=540||!careState)return;
+  const scene=document.querySelector("#careAvatar .carePetScene");
+  if(!scene)return;
+  const petNo=Number(careState?.pet_no||0);
+  const state=normalizedSavedPetSceneState(petImageKeyFromCareVariant(activePetSceneVariant));
+  const key=`${petNo}:${state}`;
+  const store=readSavedPetSceneLayoutStore();
+  const saved=store[key]||PET_SCENE_REAL_RATIO_PRESETS?.[key];
+  if(!saved||typeof saved!=="object")return;
+  const left=Number(saved.bodyLeft);
+  const bottom=Number(saved.bodyBottom);
+  const width=Number(saved.bodyWidth);
+  if(Number.isFinite(left))scene.style.left=`${left}%`;
+  if(Number.isFinite(bottom))scene.style.bottom=`${bottom}%`;
+  if(Number.isFinite(width))scene.style.width=`${width}%`;
+}
+
+function renderCarePetScene(variantKey,{animate=false,action="",changes=null}={}){
+  activePetSceneVariant=String(variantKey||"normal");
   const avatar=document.getElementById("careAvatar");
   if(!avatar||!careState)return;
   clearTimeout(careActionReturnTimer);
+
   const cfg=getPetInteractionConfig(variantKey);
-  const validationMessage=validatePetInteractionConfig(cfg,variantKey);
-  if(validationMessage){renderPetFallbackNotice(validationMessage);return;}
-  const values=cfg.config_json||{};
-  const bodyUrl=room10AssetUrl(cfg.body_image_key,"")||careState.image||"";
-  const propUrl=cfg.prop_image_key?room10AssetUrl(cfg.prop_image_key,""):"";
-  if(!bodyUrl){renderPetFallbackNotice(`互动配置主体图读取失败：${variantKey}`);return;}
+  const values=(cfg&&cfg.config_json&&typeof cfg.config_json==="object")?cfg.config_json:{};
+  const bodyUrl=careBodyImageUrl(variantKey,cfg);
+  const actionKey=String(action||variantKey||"");
+  const propUrl=animate?careActionPropAsset(actionKey,cfg):(cfg?.prop_image_key?resolveAssetRef(cfg.prop_image_key,""):"");
+
+  if(!bodyUrl){
+    renderPetFallbackNotice(`${t("care.action.config_body_missing")} ${variantKey}`);
+    return;
+  }
+
+  const petNo=Number(careState?.pet_no||0);
+  const changeHtml=animate?renderActualChangesHtml(changes):"";
+
+  /* 清洁：恢复已确认的 wet 状态图 + 清洁道具 + 泡泡 + 爱心效果。 */
+  if(animate&&actionKey==="clean"){
+    const visual=values?.visual;
+    const effects=visual?.effects;
+    const prop=visual?.prop;
+    const layout=PET_SCENE_REAL_RATIO_PRESETS?.[`${petNo}:wet`];
+
+    if(!visual||typeof visual!=="object"||!effects||typeof effects!=="object"||!prop||typeof prop!=="object"){
+      renderPetFallbackNotice(`配置缺失：${speciesKeyForPet(careState)} / clean / visual`);
+      return;
+    }
+    if(!layout){
+      renderPetFallbackNotice(`配置缺失：pet_scene_state_configs / ${petNo} / wet`);
+      return;
+    }
+
+    const classes=["careAvatar","pet-db-clean","pet-db-animate","cleaning-fx-preview"];
+    if(!Boolean(visual.motion))classes.push("clean-motion-off");
+    if(!Boolean(prop.enabled))classes.push("clean-prop-off");
+    if(!Boolean(effects.bubbles))classes.push("clean-bubbles-off");
+    if(!Boolean(effects.hearts))classes.push("clean-hearts-off");
+
+    avatar.className=classes.join(" ");
+    avatar.dataset.activeAction="clean";
+
+    const bubblesLayout=effects.bubblesLayout||{};
+    const heartsLayout=effects.heartsLayout||{};
+    const vars=[
+      `--clean-prop-width:${petConfigNumber(prop.width) ?? 12}%`,
+      `--clean-prop-left:${petConfigNumber(prop.left) ?? 50}%`,
+      `--clean-prop-top:${petConfigNumber(prop.top) ?? 82}%`,
+      `--clean-prop-layer:${petConfigNumber(prop.layer) ?? 25}`,
+      `--clean-bubbles-left:${petConfigNumber(bubblesLayout.left) ?? 50}%`,
+      `--clean-bubbles-top:${petConfigNumber(bubblesLayout.top) ?? 50}%`,
+      `--clean-bubbles-layer:${petConfigNumber(bubblesLayout.layer) ?? 12}`,
+      `--clean-bubbles-scale:${petConfigNumber(effects.bubbleScale) ?? 1}`,
+      `--clean-hearts-left:${petConfigNumber(heartsLayout.left) ?? 15.5}%`,
+      `--clean-hearts-top:${petConfigNumber(heartsLayout.top) ?? 22}%`,
+      `--clean-hearts-layer:${petConfigNumber(heartsLayout.layer) ?? 20}`,
+      `--clean-hearts-scale:${petConfigNumber(effects.heartScale) ?? 1.75}`
+    ].join(";");
+
+    const propLeft=petConfigNumber(prop.left) ?? 50;
+    const propTop=petConfigNumber(prop.top) ?? 82;
+    const propWidth=petConfigNumber(prop.width) ?? 12;
+    const propLayer=petConfigNumber(prop.layer) ?? 25;
+
+    avatar.innerHTML=`<div class="carePetStage" style="${vars}"><div class="carePetScene" style="left:${Number(layout.bodyLeft)}%;bottom:${Number(layout.bodyBottom)}%;width:${Number(layout.bodyWidth)}%;${vars}"><img class="carePetBody" src="${escapeHtml(bodyUrl)}" alt="${escapeHtml(careState.name)} wet">${propUrl?`<img class="carePetProp" src="${escapeHtml(propUrl)}" alt="" style="left:${propLeft}% !important;top:${propTop}% !important;width:${propWidth}% !important;z-index:${propLayer} !important;max-width:none !important;min-width:0 !important;">`:`<img class="carePetProp is-empty" alt="">`}<div class="cleaningBubblesFx"></div><div class="cleaningHeartFx"><span>♥</span><span>♥</span></div></div>${changeHtml}</div>`;
+
+    const p=avatar.querySelector(".carePetProp");
+    if(p){
+      p.style.setProperty("left",`${propLeft}%`,"important");
+      p.style.setProperty("top",`${propTop}%`,"important");
+      p.style.setProperty("width",`${propWidth}%`,"important");
+      p.style.setProperty("z-index",String(propLayer),"important");
+      p.style.setProperty("max-width","none","important");
+      p.style.setProperty("min-width","0","important");
+    }
+    return;
+  }
+
+  /* 治疗：正式互动直接读取数据库 visual，并使用与确认预览完全相同的 DOM / CSS 结构。 */
+  if(animate&&actionKey==="heal"){
+    const visual=values?.visual;
+    const effects=visual?.effects;
+    const prop=visual?.prop;
+    const layout=PET_SCENE_REAL_RATIO_PRESETS?.[`${petNo}:healing`];
+
+    if(!visual||typeof visual!=="object"||!effects||typeof effects!=="object"||!prop||typeof prop!=="object"){
+      renderPetFallbackNotice(`配置缺失：${speciesKeyForPet(careState)} / heal / visual`);
+      return;
+    }
+    if(!layout){
+      renderPetFallbackNotice(`配置缺失：pet_scene_state_configs / ${petNo} / healing`);
+      return;
+    }
+
+    const classes=["careAvatar","pet-db-heal","pet-db-animate","healing-fx-preview"];
+    if(!Boolean(visual.motion))classes.push("healing-motion-off");
+    if(!Boolean(prop.enabled))classes.push("healing-prop-off");
+    if(!Boolean(effects.glow))classes.push("healing-glow-off");
+    if(!Boolean(effects.sparkles))classes.push("healing-sparkles-off");
+    if(!Boolean(effects.hearts))classes.push("healing-hearts-off");
+
+    avatar.className=classes.join(" ");
+    avatar.dataset.activeAction="heal";
+
+    const glowLayout=effects.glowLayout||{};
+    const sparklesLayout=effects.sparklesLayout||{};
+    const heartsLayout=effects.heartsLayout||{};
+
+    const vars=[
+      `--heal-prop-width:${petConfigNumber(prop.width) ?? 20}%`,
+      `--heal-prop-left:${petConfigNumber(prop.left) ?? 50}%`,
+      `--heal-prop-top:${petConfigNumber(prop.top) ?? 50}%`,
+      `--heal-prop-layer:${petConfigNumber(prop.layer) ?? 25}`,
+      `--heal-glow-left:${petConfigNumber(glowLayout.left) ?? 50}%`,
+      `--heal-glow-top:${petConfigNumber(glowLayout.top) ?? 55}%`,
+      `--heal-glow-layer:${petConfigNumber(glowLayout.layer) ?? 10}`,
+      `--heal-glow-scale:${petConfigNumber(effects.glowScale) ?? 1.4}`,
+      `--heal-sparkles-left:${petConfigNumber(sparklesLayout.left) ?? 55}%`,
+      `--heal-sparkles-top:${petConfigNumber(sparklesLayout.top) ?? 45}%`,
+      `--heal-sparkles-layer:${petConfigNumber(sparklesLayout.layer) ?? 15}`,
+      `--heal-sparkles-scale:${petConfigNumber(effects.sparkleScale) ?? 1.2}`,
+      `--heal-hearts-left:${petConfigNumber(heartsLayout.left) ?? 85}%`,
+      `--heal-hearts-top:${petConfigNumber(heartsLayout.top) ?? 20}%`,
+      `--heal-hearts-layer:${petConfigNumber(heartsLayout.layer) ?? 20}`,
+      `--heal-hearts-scale:${petConfigNumber(effects.heartScale) ?? 1.75}`
+    ].join(";");
+
+    const propLeft=petConfigNumber(prop.left) ?? 50;
+    const propTop=petConfigNumber(prop.top) ?? 50;
+    const propWidth=petConfigNumber(prop.width) ?? 20;
+    const propLayer=petConfigNumber(prop.layer) ?? 25;
+
+    avatar.innerHTML=`<div class="carePetStage" style="${vars}"><div class="carePetScene" style="left:${Number(layout.bodyLeft)}%;bottom:${Number(layout.bodyBottom)}%;width:${Number(layout.bodyWidth)}%;${vars}"><img class="carePetBody" src="${escapeHtml(bodyUrl)}" alt="${escapeHtml(careState.name)} healing">${propUrl?`<img class="carePetProp" src="${escapeHtml(propUrl)}" alt="" style="left:${propLeft}% !important;top:${propTop}% !important;width:${propWidth}% !important;z-index:${propLayer} !important;max-width:none !important;min-width:0 !important;">`:`<img class="carePetProp is-empty" alt="">`}<div class="healingGlowFx"></div><div class="healingSparkleFx"><span>✦</span><span>✧</span><span>✦</span></div><div class="healingHeartFx"><span>♥</span><span>♥</span></div></div>${changeHtml}</div>`;
+
+    const p=avatar.querySelector(".carePetProp");
+    if(p){
+      p.style.setProperty("left",`${propLeft}%`,"important");
+      p.style.setProperty("top",`${propTop}%`,"important");
+      p.style.setProperty("width",`${propWidth}%`,"important");
+      p.style.setProperty("z-index",String(propLayer),"important");
+      p.style.setProperty("max-width","none","important");
+      p.style.setProperty("min-width","0","important");
+    }
+    return;
+  }
+
+  /* 玩耍：正式互动直接读取数据库 visual，并使用确认版玩耍预览布局。 */
+  if(animate&&actionKey==="play"){
+    const visual=values?.visual;
+    const effects=visual?.effects;
+    const prop=visual?.prop;
+    const layout=PET_SCENE_REAL_RATIO_PRESETS?.[`${petNo}:playing`];
+
+    if(!visual||typeof visual!=="object"||!effects||typeof effects!=="object"||!prop||typeof prop!=="object"){
+      renderPetFallbackNotice(`配置缺失：${speciesKeyForPet(careState)} / play / visual`);
+      return;
+    }
+    if(!layout){
+      renderPetFallbackNotice(`配置缺失：pet_scene_state_configs / ${petNo} / playing`);
+      return;
+    }
+
+    const classes=["careAvatar","pet-db-play","pet-db-animate","playing-fx-preview"];
+    if(!Boolean(visual.motion))classes.push("play-motion-off");
+    if(!Boolean(prop.enabled))classes.push("play-prop-off");
+    if(!Boolean(effects.stars))classes.push("play-stars-off");
+    if(!Boolean(effects.hearts))classes.push("play-hearts-off");
+
+    avatar.className=classes.join(" ");
+    avatar.dataset.activeAction="play";
+
+    const starsLayout=effects.starsLayout||{};
+    const heartsLayout=effects.heartsLayout||{};
+    const vars=[
+      `--play-prop-left:${petConfigNumber(prop.left) ?? 50}%`,
+      `--play-prop-top:${petConfigNumber(prop.top) ?? 78}%`,
+      `--play-prop-width:${petConfigNumber(prop.width) ?? 18}%`,
+      `--play-prop-layer:${petConfigNumber(prop.layer) ?? 8}`,
+      `--play-stars-left:${petConfigNumber(starsLayout.left) ?? 50}%`,
+      `--play-stars-top:${petConfigNumber(starsLayout.top) ?? 50}%`,
+      `--play-stars-layer:${petConfigNumber(starsLayout.layer) ?? 12}`,
+      `--play-stars-scale:${petConfigNumber(effects.starScale) ?? 1.2}`,
+      `--play-hearts-left:${petConfigNumber(heartsLayout.left) ?? 15.5}%`,
+      `--play-hearts-top:${petConfigNumber(heartsLayout.top) ?? 22}%`,
+      `--play-hearts-layer:${petConfigNumber(heartsLayout.layer) ?? 20}`,
+      `--play-hearts-scale:${petConfigNumber(effects.heartScale) ?? 1.75}`
+    ].join(";");
+
+    const propLeft=petConfigNumber(prop.left) ?? 50;
+    const propTop=petConfigNumber(prop.top) ?? 78;
+    const propWidth=petConfigNumber(prop.width) ?? 18;
+    const propLayer=petConfigNumber(prop.layer) ?? 8;
+
+    avatar.innerHTML=`<div class="carePetStage" style="${vars}"><div class="carePetScene" style="left:${Number(layout.bodyLeft)}%;bottom:${Number(layout.bodyBottom)}%;width:${Number(layout.bodyWidth)}%;${vars}"><img class="carePetBody" src="${escapeHtml(bodyUrl)}" alt="${escapeHtml(careState.name)} playing">${propUrl?`<img class="carePetProp" src="${escapeHtml(propUrl)}" alt="" style="left:${propLeft}% !important;top:${propTop}% !important;width:${propWidth}% !important;z-index:${propLayer} !important;max-width:none !important;min-width:0 !important;">`:`<img class="carePetProp is-empty" alt="">`}<div class="carePetFx"></div><div class="carePetFx2"></div></div>${changeHtml}</div>`;
+    return;
+  }
+
+  /* 喂食：三个食物分别读取数据库确认的 visual，避免错误共用旧 eat:* 特效。 */
+  if(animate&&["feed_snack","feed_can","feed_dry"].includes(actionKey)){
+    const visual=values?.visual;
+    const effects=visual?.effects;
+    const prop=visual?.prop;
+    const layout=PET_SCENE_REAL_RATIO_PRESETS?.[`${petNo}:eating`];
+
+    if(!visual||typeof visual!=="object"||!effects||typeof effects!=="object"||!prop||typeof prop!=="object"){
+      renderPetFallbackNotice(`配置缺失：${speciesKeyForPet(careState)} / ${actionKey} / visual`);
+      return;
+    }
+    if(!layout){
+      renderPetFallbackNotice(`配置缺失：pet_scene_state_configs / ${petNo} / eating`);
+      return;
+    }
+
+    const classes=["careAvatar","pet-db-eat","pet-db-animate","eating-fx-preview"];
+    if(!Boolean(visual.motion))classes.push("eat-motion-off");
+    if(!Boolean(prop.enabled))classes.push("eat-prop-off");
+    if(!Boolean(effects.crumbs))classes.push("eat-crumbs-off");
+    if(!Boolean(effects.hearts))classes.push("eat-hearts-off");
+
+    avatar.className=classes.join(" ");
+    avatar.dataset.activeAction=actionKey;
+
+    const crumbsLayout=effects.crumbsLayout||{};
+    const heartsLayout=effects.heartsLayout||{};
+    const vars=[
+      `--eat-fx-scale:${petConfigNumber(effects.scale) ?? 1}`,
+      `--pet-fx-left:${petConfigNumber(crumbsLayout.left) ?? 50}%`,
+      `--pet-fx-top:${petConfigNumber(crumbsLayout.top) ?? 50}%`,
+      `--pet-fx-layer:${petConfigNumber(crumbsLayout.layer) ?? 6}`,
+      `--pet-fx2-left:${petConfigNumber(heartsLayout.left) ?? 50}%`,
+      `--pet-fx2-top:${petConfigNumber(heartsLayout.top) ?? 50}%`,
+      `--pet-fx2-layer:${petConfigNumber(heartsLayout.layer) ?? 7}`,
+      `--eat-prop-width:${petConfigNumber(prop.width) ?? 12}%`,
+      `--eat-prop-left:${petConfigNumber(prop.left) ?? 50}%`,
+      `--eat-prop-top:${petConfigNumber(prop.top) ?? 82}%`
+    ].join(";");
+
+    const propLeft=petConfigNumber(prop.left) ?? 50;
+    const propTop=petConfigNumber(prop.top) ?? 82;
+    const propWidth=petConfigNumber(prop.width) ?? 12;
+    const propLayer=petConfigNumber(prop.layer) ?? 5;
+
+    avatar.innerHTML=`<div class="carePetStage" style="${vars}"><div class="carePetScene" style="left:${Number(layout.bodyLeft)}%;bottom:${Number(layout.bodyBottom)}%;width:${Number(layout.bodyWidth)}%;${vars}"><img class="carePetBody" src="${escapeHtml(bodyUrl)}" alt="${escapeHtml(careState.name)} eating">${propUrl?`<img class="carePetProp" src="${escapeHtml(propUrl)}" alt="" style="left:${propLeft}% !important;top:${propTop}% !important;width:${propWidth}% !important;z-index:${propLayer} !important;max-width:none !important;min-width:0 !important;">`:`<img class="carePetProp is-empty" alt="">`}<div class="carePetFx"></div><div class="carePetFx2"></div></div>${changeHtml}</div>`;
+    return;
+  }
+
   const actionClass=careActionClassFromVariant(variantKey);
   avatar.className=`careAvatar pet-db-${escapeHtml(actionClass)}${animate?" pet-db-animate":""}`;
-  const style=[`left:${petConfigNumber(values.bodyLeft) ?? 50}%`,`bottom:${petConfigNumber(values.bodyBottom) ?? 9}%`,`width:${petConfigNumber(values.bodyWidth) ?? 58}%`].join(";");
-  const vars=[`--pet-body-layer:${petConfigNumber(values.bodyLayer) ?? 3}`,`--pet-prop-left:${petConfigNumber(values.propLeft) ?? 50}%`,`--pet-prop-top:${petConfigNumber(values.propTop) ?? 82}%`,`--pet-prop-width:${petConfigNumber(values.propWidth) ?? 12}%`,`--pet-prop-scale:${petConfigNumber(values.propScale) ?? 1}`,`--pet-prop-layer:${petConfigNumber(values.propLayer) ?? 5}`,`--pet-fx-left:${petConfigNumber(values.fxLeft) ?? 50}%`,`--pet-fx-top:${petConfigNumber(values.fxTop) ?? 50}%`,`--pet-fx-layer:${petConfigNumber(values.fxLayer) ?? 6}`,`--pet-fx2-left:${petConfigNumber(values.fx2Left) ?? petConfigNumber(values.fxLeft) ?? 50}%`,`--pet-fx2-top:${petConfigNumber(values.fx2Top) ?? petConfigNumber(values.fxTop) ?? 50}%`,`--pet-fx2-layer:${petConfigNumber(values.fx2Layer) ?? 7}`].join(";");
-  avatar.innerHTML=`<div class="carePetStage" style="${vars}"><div class="carePetScene" style="${style}"><img class="carePetBody" src="${escapeHtml(bodyUrl)}" alt="${escapeHtml(careState.name)}">${propUrl?`<img class="carePetProp" src="${escapeHtml(propUrl)}" alt="">`:`<img class="carePetProp is-empty" alt="">`}<div class="carePetFx"></div><div class="carePetFx2"></div></div></div>`;
+  avatar.dataset.activeAction=actionKey;
+
+  const style=[
+    `left:${petConfigNumber(values.bodyLeft) ?? 50}%`,
+    `bottom:${petConfigNumber(values.bodyBottom) ?? 0}%`,
+    `width:${petConfigNumber(values.bodyWidth) ?? 86}%`
+  ].join(";");
+
+  const vars=[
+    `--pet-body-layer:${petConfigNumber(values.bodyLayer) ?? 3}`,
+    `--pet-prop-left:${petConfigNumber(values.propLeft) ?? 50}%`,
+    `--pet-prop-top:${petConfigNumber(values.propTop) ?? 82}%`,
+    `--pet-prop-width:${petConfigNumber(values.propWidth) ?? 12}%`,
+    `--pet-prop-scale:${petConfigNumber(values.propScale) ?? 1}`,
+    `--pet-prop-layer:${petConfigNumber(values.propLayer) ?? 5}`,
+    `--pet-fx-left:${petConfigNumber(values.fxLeft) ?? 50}%`,
+    `--pet-fx-top:${petConfigNumber(values.fxTop) ?? 50}%`,
+    `--pet-fx-layer:${petConfigNumber(values.fxLayer) ?? 6}`,
+    `--pet-fx2-left:${petConfigNumber(values.fx2Left) ?? petConfigNumber(values.fxLeft) ?? 50}%`,
+    `--pet-fx2-top:${petConfigNumber(values.fx2Top) ?? petConfigNumber(values.fxTop) ?? 50}%`,
+    `--pet-fx2-layer:${petConfigNumber(values.fx2Layer) ?? 7}`
+  ].join(";");
+
+  const fallbackBodyUrl=room10RemoteAssetUrl(petDirectStatePath(careState?.pet_no,petImageKeyFromCareVariant(variantKey)));
+  avatar.innerHTML=`<div class="carePetStage" style="${vars}"><div class="carePetScene" style="${style}"><img class="carePetBody" src="${escapeHtml(bodyUrl)}" alt="${escapeHtml(careState.name)}" data-r2-src="${escapeHtml(bodyUrl)}" onerror="this.onerror=null;this.src='${escapeHtml(fallbackBodyUrl)}';">${propUrl?`<img class="carePetProp" src="${escapeHtml(propUrl)}" alt="">`:`<img class="carePetProp is-empty" alt="">`}<div class="carePetFx"></div><div class="carePetFx2"></div></div>${changeHtml}</div>`;
+  applySavedPetSceneLayoutReadonly();
 }
-function normalizeCarePet(row){const no=Number(row.pet_no);const state=row.life_status==="dead"?"dead":row.life_status==="critical"?"critical":row.life_status==="sick"?"sick":row.life_status==="weak"?"weak":"front";return {id:row.adoption_id||row.id, pet_no:no, name:row.pet_name||row.animal_name||"宠物", animal_name:row.animal_name||"", image:petStateAsset({pet_no:no},state), cardImage:petCardAsset(no), owner_name:row.owner_name||"", is_owner_me:bool(row.is_owner_me), hunger:numberOrZero(row.hunger), clean:numberOrZero(row.clean), mood:numberOrZero(row.mood), health:numberOrZero(row.health), intimacy:numberOrZero(row.my_intimacy), level:numberOrZero(row.level)||1, life_status:row.life_status||"healthy", status:row.status||"很活泼", feed_count:numberOrZero(row.feed_count), clean_count:numberOrZero(row.clean_count), play_count:numberOrZero(row.play_count), updated_at:row.updated_at||""};}
-function setCareMessage(msg){setPetInteractionConfigError("");const text=msg||"这里还没有小动物在等你。先去领养页收集图片卡，集齐后再来领养吧。";resetCarePetScene("🐾");document.getElementById("careName").textContent="还没有宠物";document.getElementById("careHint").textContent="去领养页收集图片卡，集齐后再来领养吧。";document.getElementById("careSpeechText").textContent=text;document.getElementById("statusGrid").innerHTML="";const av=document.getElementById("careAffinityValue");if(av)av.textContent="0 / 1000";const af=document.getElementById("careAffinityFill");if(af)af.style.width="0%";document.getElementById("careSupplyList").innerHTML=`<div class="dailyText">暂无可显示的宠物道具。</div>`;document.getElementById("careLogList").innerHTML=`<div class="petMessage">${escapeHtml(text)}</div>`;}
+
+function normalizeCarePet(row){const no=Number(row.pet_no??row.folder_no);const meta=getPetTypeMeta(no)||{};const state=row.life_status==="dead"?"dead":row.life_status==="critical"?"critical":row.life_status==="sick"?"sick":row.life_status==="weak"?"weak":"front";return {id:row.adoption_id||row.id, pet_no:no, pet_key:row.pet_key||meta.pet_key||"", pet_code:row.pet_code||meta.pet_code||"", card_type:row.card_type||meta.card_type||"normal", name:row.pet_name||row.animal_name||meta.animal_name||"宠物", animal_name:row.animal_name||meta.animal_name||"", related_name:row.related_name||meta.related_name||"", image:petStateAsset({pet_no:no},state), cardImage:petCardAsset(no), owner_name:row.owner_name||"", is_owner_me:bool(row.is_owner_me), hunger:numberOrZero(row.hunger), clean:numberOrZero(row.clean), mood:numberOrZero(row.mood), health:numberOrZero(row.health), intimacy:numberOrZero(row.my_intimacy??row.intimacy), level:numberOrZero(row.level)||1, life_status:row.life_status||"healthy", status:row.status||"很活泼", feed_count:numberOrZero(row.feed_count), clean_count:numberOrZero(row.clean_count), play_count:numberOrZero(row.play_count), heal_count:numberOrZero(row.heal_count), updated_at:row.updated_at||row.last_interacted_at||""};}
+function setCareMessage(msg){
+  setPetInteractionConfigError("");
+  const mainText=msg||t("care.no_pet.speech");
+  resetCarePetScene("🐾");
+  document.getElementById("careName").textContent=t("care.no_pet.name");
+  document.getElementById("careHint").textContent=t("care.no_pet.hint");
+  document.getElementById("careSpeechText").textContent=mainText;
+  document.getElementById("statusGrid").innerHTML="";
+  const av=document.getElementById("careAffinityValue");
+  if(av)av.textContent="0 / 1000";
+  const af=document.getElementById("careAffinityFill");
+  if(af)af.style.width="0%";
+  renderSupplies();
+  document.getElementById("careLogList").innerHTML=`<div class="petMessage">${escapeHtml(t("care.no_pet.log_empty"))}</div>`;
+}
 function statusBar(label,val,max=100,type=""){const n=Math.max(0,Math.min(max,numberOrZero(val)));const width=Math.round(n/max*100);const cls=type==="health"?(n<=35?"health-bad":n<=65?"health-warn":"health-good"):"";const display=max===100?`${Math.round(n)}%`:`${Math.round(n)} / ${max}`;return `<div class="statusItem"><div class="statusTop"><span>${escapeHtml(label)}</span><span class="statusValue">${display}</span></div><div class="statusTrack"><div class="statusFill ${cls}" style="width:${width}%"></div></div></div>`;}
-function renderCare(){if(!careState){setCareMessage("这里还没有小动物在等你。先去领养页收集图片卡，集齐后再来领养吧。");return;}const c=careState;renderCarePetScene(careBaseVariant(c));document.getElementById("careName").innerHTML=`${escapeHtml(c.name)} <span class="lifePill ${escapeHtml(c.life_status)}">${escapeHtml(lifeLabel(c.life_status))}</span>`;document.getElementById("careHint").textContent=`${c.animal_name?c.animal_name+" · ":""}等级 ${c.level} · ${c.is_owner_me?"我的领养宠物":"可共同照顾"}`;document.getElementById("careSpeechText").textContent=petInteractionConfigError||c.status||careSpeech(c);document.getElementById("statusGrid").innerHTML=[statusBar("饱食",c.hunger),statusBar("清洁",c.clean),statusBar("心情",c.mood),statusBar("健康",c.health,100,"health")].join("");const intimacy=Math.max(0,Math.min(1000,numberOrZero(c.intimacy)));const valueEl=document.getElementById("careAffinityValue");if(valueEl)valueEl.textContent=`${Math.round(intimacy)} / 1000`;const fillEl=document.getElementById("careAffinityFill");if(fillEl)fillEl.style.width=`${Math.round(intimacy/1000*100)}%`;renderSupplies();renderCareLog();}
+function renderCare(){
+  if(!careState){setCareMessage();return;}
+  const c=careState;
+  renderCarePetScene(careBaseVariant(c));
+  document.getElementById("careName").innerHTML=`${escapeHtml(c.name)} <span class="lifePill ${escapeHtml(c.life_status)}">${escapeHtml(lifeLabel(c.life_status))}</span>`;
+  document.getElementById("careHint").textContent=`${c.animal_name?c.animal_name+" · ":""}Lv.${c.level} · ${t("care.level.effect_hint")}`;
+  document.getElementById("careSpeechText").textContent=petInteractionConfigError||c.status||careSpeech(c);
+  document.getElementById("statusGrid").innerHTML=[
+    statusBar(t("care.status.hunger"),c.hunger),
+    statusBar(t("care.status.clean"),c.clean),
+    statusBar(t("care.status.mood"),c.mood),
+    statusBar(t("care.status.health"),c.health,100,"health")
+  ].join("");
+  const intimacy=Math.max(0,Math.min(1000,numberOrZero(c.intimacy)));
+  const valueEl=document.getElementById("careAffinityValue");
+  if(valueEl)valueEl.textContent=`${Math.round(intimacy)} / 1000`;
+  const fillEl=document.getElementById("careAffinityFill");
+  if(fillEl)fillEl.style.width=`${Math.round(intimacy/1000*100)}%`;
+  renderSupplies();
+  renderCareLog();
+}
 function getCareItemQty(key){if(Array.isArray(careItems)){const row=careItems.find(x=>String(x.item_key||x.key||"")===String(key));return numberOrZero(row?.quantity??row?.count??row?.amount);}if(careItems&&typeof careItems==="object"){const v=careItems[key];if(v&&typeof v==="object")return numberOrZero(v.quantity??v.count??v.amount);return numberOrZero(v);}return 0;}
-function renderSupplies(){const names={pet_snack:"宠物零食",pet_can_food:"宠物罐头",pet_dry_food:"宠物干粮",pet_cleaning_tool:"宠物清洁用具",pet_medical_card:"宠物医疗卡"};const keys=Object.keys(names);document.getElementById("careSupplyList").innerHTML=keys.map(k=>{const icon=itemIcon(k);return `<div class="supplyLine"><span class="supplyIcon">${icon?`<img src="${escapeHtml(icon)}" alt="">`:"🐾"}</span><span class="supplyName">${names[k]}</span><span class="supplyQty">× ${getCareItemQty(k)}</span></div>`;}).join("");}
-function renderCareLog(){const list=document.getElementById("careLogList");const selector=carePets.length>1?`<div class="petSelector">${carePets.map(p=>`<button class="petSelectBtn ${p.id===selectedCareAdoptionId?"is-active":""}" type="button" data-adoption-id="${escapeHtml(p.id)}">${escapeHtml(p.name)}</button>`).join("")}</div>`:"";const rows=[careState.status||`${careState.name} 正在这里等你。`,`${careState.name} 当前由大家共同照顾。`,`今日互动次数会按这只宠物全服共享限制计算。`];list.innerHTML=selector+rows.map(t=>`<div class="logItem"><span>${escapeHtml(t)}</span><span class="logTime">🐾</span></div>`).join("");list.querySelectorAll(".petSelectBtn").forEach(btn=>btn.addEventListener("click",()=>{selectedCareAdoptionId=btn.dataset.adoptionId;careState=carePets.find(p=>String(p.id)===String(selectedCareAdoptionId))||carePets[0]||null;renderCare();}));}
+function renderSupplies(){
+  const keys=["pet_snack","pet_can_food","pet_dry_food","pet_cleaning_tool","pet_medical_card","pet_ball"];
+  const list=document.getElementById("careSupplyList");
+  if(!list)return;
+  list.innerHTML=keys.map(k=>{
+    const icon=itemIcon(k);
+    return `<div class="supplyLine"><span class="supplyIcon">${icon?`<img src="${escapeHtml(icon)}" alt="">`:"🐾"}</span><span class="supplyName">${escapeHtml(t(`care.item.${k}`))}</span><span class="supplyQty">× ${getCareItemQty(k)}</span></div>`;
+  }).join("")||`<div class="petMessage">${escapeHtml(t("care.supplies.empty"))}</div>`;
+}
+function formatCareLogTime(v){if(!v)return"🐾";const d=new Date(v);if(Number.isNaN(d.getTime()))return"🐾";return d.toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit",hour12:false});}
+function careActionLogLabel(action){
+  return {
+    feed_snack:"喂零食",
+    feed_can:"喂罐头",
+    feed_dry:"喂干粮",
+    clean:"清洁",
+    play:"玩耍",
+    heal:"治疗"
+  }[String(action||"")]||String(action||"互动");
+}
+function careChangeLabel(key){
+  return {
+    hunger:"饱食",
+    clean:"清洁",
+    mood:"心情",
+    health:"健康",
+    intimacy:"亲密度"
+  }[String(key||"")]||String(key||"");
+}
+function normalizeTodayCareLog(row){
+  return {
+    id:String(row?.id||""),
+    action_type:String(row?.action_type||""),
+    hunger_change:numberOrZero(row?.hunger_change),
+    clean_change:numberOrZero(row?.clean_change),
+    mood_change:numberOrZero(row?.mood_change),
+    health_change:numberOrZero(row?.health_change),
+    intimacy_change:numberOrZero(row?.intimacy_change),
+    server_action_time:String(row?.server_action_time||""),
+    created_at:row?.created_at||""
+  };
+}
+async function loadTodayCareLogs(adoptionId){
+  if(!adoptionId){careTodayLogs=[];return;}
+  try{
+    const data=await callRpc(RPC.todayCareLogs,{p_adoption_id:adoptionId});
+    careTodayLogs=(Array.isArray(data)?data:[]).map(normalizeTodayCareLog);
+  }catch(err){
+    console.warn("宠物今日互动记录读取失败：",err?.message||err);
+    careTodayLogs=[];
+  }
+}
+function renderTodayCareLogItem(row){
+  const changes=[];
+  const map=[
+    ["hunger",row.hunger_change],
+    ["clean",row.clean_change],
+    ["mood",row.mood_change],
+    ["health",row.health_change],
+    ["intimacy",row.intimacy_change]
+  ];
+  map.forEach(([key,value])=>{
+    const n=Number(value)||0;
+    if(n!==0)changes.push(`<span class="todayLogChange">${escapeHtml(careChangeLabel(key))} ${n>0?"+":""}${escapeHtml(String(n))}</span>`);
+  });
+  if(!changes.length)changes.push('<span class="todayLogChange">状态无变化</span>');
+  const time=row.server_action_time||formatCareLogTime(row.created_at);
+  return `<div class="logItem todayLogItem"><div class="todayLogHead"><span>${escapeHtml(careActionLogLabel(row.action_type))}</span><span class="logTime">${escapeHtml(time||"🐾")}</span></div><div class="todayLogChanges">${changes.join("")}</div></div>`;
+}
+function renderCareLog(){
+  const list=document.getElementById("careLogList");
+  if(!list)return;
+  const selector=carePets.length>1?`<div class="petSelector">${carePets.map(p=>`<button class="petSelectBtn ${p.id===selectedCareAdoptionId?"is-active":""}" type="button" data-adoption-id="${escapeHtml(p.id)}">${escapeHtml(p.name)}</button>`).join("")}</div>`:"";
+
+  const totalRows=[];
+  if(careState?.status)totalRows.push({text:careState.status,time:formatCareLogTime(careState.updated_at)});
+  if(numberOrZero(careState?.feed_count)>0)totalRows.push({text:`累计喂食 ${numberOrZero(careState.feed_count)} 次`,time:"🍽"});
+  if(numberOrZero(careState?.clean_count)>0)totalRows.push({text:`累计清洁 ${numberOrZero(careState.clean_count)} 次`,time:"🧼"});
+  if(numberOrZero(careState?.play_count)>0)totalRows.push({text:`累计玩耍 ${numberOrZero(careState.play_count)} 次`,time:"🎾"});
+  if(numberOrZero(careState?.heal_count)>0)totalRows.push({text:`累计治疗 ${numberOrZero(careState.heal_count)} 次`,time:"💊"});
+  if(!totalRows.length)totalRows.push({text:t("care.log.empty_hint"),time:"🐾"});
+
+  const totalHtml=totalRows.map(x=>`<div class="logItem"><span>${escapeHtml(x.text)}</span><span class="logTime">${escapeHtml(x.time)}</span></div>`).join("");
+  const todayHtml=careTodayLogs.length
+    ? careTodayLogs.map(renderTodayCareLogItem).join("")
+    : '<div class="todayLogEmpty">今天还没有互动记录。</div>';
+
+  list.innerHTML=selector+`<div class="careLogSections"><section class="careLogSection"><div class="careLogSectionTitle"><span>总行为统计</span></div>${totalHtml}</section><section class="careLogSection"><div class="careLogSectionTitle"><span>今日互动记录</span><small>服务器当天</small></div>${todayHtml}</section></div>`;
+
+  list.querySelectorAll(".petSelectBtn").forEach(btn=>btn.addEventListener("click",async()=>{
+    selectedCareAdoptionId=btn.dataset.adoptionId;
+    careState=carePets.find(p=>String(p.id)===String(selectedCareAdoptionId))||carePets[0]||null;
+    await loadTodayCareLogs(careState?.id);
+    renderCare();
+  }));
+}
 async function maybeRunDecay(){try{await callRpc(RPC.decay,{});}catch(err){console.warn("宠物每日衰减结算失败：",err.message||err);}}
 function setDailyGiftTextFromReward(reward, already=false){const box=document.getElementById("dailyGiftText");if(reward&&reward.item_name){lastDailyGift={item_key:reward.item_key,item_name:reward.item_name,quantity:reward.quantity||1};}if(box)box.textContent="";if(careState)renderSupplies();}
-async function autoClaimDailyGift(){if(autoGiftRunning||!readLoggedIn())return;const memberId=requireMemberId();const key=`room10PetDailyGiftAuto:${memberId}:${todayKey()}`;if(sessionStorage.getItem(key)==="done")return;autoGiftRunning=true;try{const data=await callRpc(RPC.dailyGift,{p_member_id:memberId});sessionStorage.setItem(key,"done");const reward=data?.reward||{};if(data?.success){setDailyGiftTextFromReward(reward,false);await loadCareState({skipAutoGift:true,skipDecay:true});}else{setDailyGiftTextFromReward(reward,true);}}catch(err){sessionStorage.setItem(key,"done");}finally{autoGiftRunning=false;}}
-async function loadCareState(options={}){try{const memberId=requireMemberId();if(!options.skipDecay)await maybeRunDecay();const data=await callRpc(RPC.careState,{p_member_id:memberId});careItems=data?.items||{};const pets=Array.isArray(data?.pets)?data.pets:[];carePets=pets.map(normalizeCarePet);if(!carePets.length){careState=null;setCareMessage("这里还没有小动物在等你。先去领养页收集图片卡，集齐后再来领养吧。");if(!options.skipAutoGift)await autoClaimDailyGift();return;}selectedCareAdoptionId=selectedCareAdoptionId||carePets[0].id;careState=carePets.find(p=>String(p.id)===String(selectedCareAdoptionId))||carePets[0];selectedCareAdoptionId=careState.id;await ensurePetInteractionConfigs(careState);renderCare();if(!options.skipAutoGift)await autoClaimDailyGift();}catch(err){careState=null;carePets=[];setCareMessage(err.message||"数据库读取失败。");}}
+async function autoClaimDailyGift(){if(autoGiftRunning||isGuestView())return;const memberId=requireMemberId();const key=`room10PetDailyGiftAuto:${memberId}:${todayKey()}`;if(sessionStorage.getItem(key)==="done")return;autoGiftRunning=true;try{const data=await callRpc(RPC.dailyGift,{p_member_id:memberId});sessionStorage.setItem(key,"done");const reward=data?.reward||{};if(data?.success){setDailyGiftTextFromReward(reward,false);await loadCareState({skipAutoGift:true,skipDecay:true});}else{setDailyGiftTextFromReward(reward,true);}}catch(err){sessionStorage.setItem(key,"done");}finally{autoGiftRunning=false;}}
+async function loadCareState(options={}){
+  try{
+    const identityParams=getPetIdentityRpcParams();
+    await loadPetTypeImages();
+    if(!options.skipDecay)await maybeRunDecay();
+    const data=await callRpc(RPC.careState,identityParams);
+    if(!data||typeof data!=="object")throw new Error("宠物抚养状态读取失败：接口没有返回有效数据。");
+    if(data.success!==true)throw new Error(data.message||"宠物抚养状态读取失败，请重新登录后再试。");
+    careItems=data.items||{};
+    const pets=Array.isArray(data.pets)?data.pets:[];
+    carePets=pets.map(normalizeCarePet);
+    if(!carePets.length){
+      careState=null;
+      careTodayLogs=[];
+      setCareMessage(t("care.no_pet.speech"));
+      if(!options.skipAutoGift)await autoClaimDailyGift();
+      return;
+    }
+    selectedCareAdoptionId=selectedCareAdoptionId||carePets[0].id;
+    careState=carePets.find(p=>String(p.id)===String(selectedCareAdoptionId))||carePets[0];
+    selectedCareAdoptionId=careState.id;
+    await ensurePetInteractionConfigs(careState);
+    hydrateCareActionButtonsFromConfigs();
+    await loadTodayCareLogs(careState.id);
+    renderCare();
+    if(!options.skipAutoGift)await autoClaimDailyGift();
+  }catch(err){
+    careState=null;
+    carePets=[];
+    careTodayLogs=[];
+    setCareMessage(err.message||t("care.read_error"));
+  }
+}
 
-function setMode(mode){activeMode=mode;const isAdopt=mode==="adopt";document.getElementById("modeAdoptBtn").classList.toggle("is-current",isAdopt);document.getElementById("modeCareBtn").classList.toggle("is-current",!isAdopt);document.getElementById("petShell").classList.toggle("is-active",isAdopt);document.getElementById("adoptView").classList.toggle("is-active",isAdopt);document.getElementById("careView").classList.toggle("is-active",!isAdopt);document.getElementById("petModeTitle").textContent="图片卡";document.getElementById("petModeSub").textContent="";if(isAdopt) loadAdoptionState(); else loadCareState();}
+function setMode(mode){
+  activeMode=mode;
+  const isAdopt=mode==="adopt";
+  document.getElementById("modeAdoptBtn").classList.toggle("is-current",isAdopt);
+  document.getElementById("modeCareBtn").classList.toggle("is-current",!isAdopt);
+  document.getElementById("petShell").classList.toggle("is-active",isAdopt);
+  document.getElementById("adoptView").classList.toggle("is-active",isAdopt);
+  document.getElementById("careView").classList.toggle("is-active",!isAdopt);
+  document.getElementById("petModeTitle").textContent=isAdopt?t("adopt.title"):t("page.title");
+  document.getElementById("petModeSub").textContent=isAdopt?t("adopt.subtitle"):t("page.subtitle");
+  if(isAdopt) loadAdoptionState(); else loadCareState();
+}
 function openGachaPopup(){const mask=document.getElementById("gachaMask");const frame=document.getElementById("gachaFrame");if(frame){const base=room10PageUrl("gameGacha","game/gacha/gacha.html");const guest=!readLoggedIn();const query=`petModal=1&fresh=${Date.now()}${guest?"&mode=guest":""}`;frame.src=`${base}${base.includes("?")?"&":"?"}${query}`;}mask.classList.add("show");mask.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";}
 function closeGachaPopup(){const mask=document.getElementById("gachaMask");mask.classList.remove("show");mask.setAttribute("aria-hidden","true");document.body.style.overflow="";}
 function goGacha(){openGachaPopup();}
-function openAdoptNameDialog(p){pendingAdoptPet=p;document.getElementById("nameTitle").textContent=`领养 ${p.name}`;document.getElementById("nameDesc").textContent="请为它取一个名字。";document.getElementById("nameInput").value="";document.getElementById("nameMask").classList.add("show");document.getElementById("nameMask").setAttribute("aria-hidden","false");setTimeout(()=>document.getElementById("nameInput").focus(),30);}
+function openAdoptNameDialog(p){
+  pendingAdoptPet=p;
+  document.getElementById("nameTitle").textContent=t("adopt.name.title");
+  document.getElementById("nameDesc").textContent=t("adopt.name.desc");
+  const input=document.getElementById("nameInput");
+  input.value="";
+  input.placeholder=t("adopt.name.placeholder");
+  document.getElementById("nameMask").classList.add("show");
+  document.getElementById("nameMask").setAttribute("aria-hidden","false");
+  setTimeout(()=>input.focus(),30);
+}
 function closeAdoptNameDialog(){pendingAdoptPet=null;document.getElementById("nameMask").classList.remove("show");document.getElementById("nameMask").setAttribute("aria-hidden","true");}
-async function confirmAdoption(){const p=pendingAdoptPet;if(!p)return;const name=document.getElementById("nameInput").value.trim();if(!name){showRewardModal({icon:"🐾",label:"需要取名",title:"请先输入名字",desc:"领养时需要为宠物取一个名字。"});return;}try{const memberId=requireMemberId();await callRpc(RPC.adopt,{p_member_id:memberId,p_pet_no:p.id,p_custom_name:name});closeAdoptNameDialog();showRewardModal({type:"gift",icon:"🐾",label:"领养成功",title:`${name} 来到十号房啦`,desc:"领养记录已经写入数据库。"});await loadAdoptionState();}catch(err){showRewardModal({icon:"⚠️",label:"领养失败",title:"无法领养",desc:err.message||"数据库操作失败。"});}}
-async function upgradePet(p){try{const memberId=requireMemberId();await callRpc(RPC.upgrade,{p_member_id:memberId,p_pet_no:p.id});showRewardModal({icon:"⬆️",label:"升级成功",title:"升级已记录",desc:"宠物升级已写入数据库。"});await loadAdoptionState();}catch(err){showRewardModal({icon:"⚠️",label:"升级失败",title:"无法升级",desc:err.message||"数据库操作失败。"});}}
-function animatePet(action){if(!careState)return;const variant=careActionVariant(action);renderCarePetScene(variant,{animate:true});careActionReturnTimer=setTimeout(()=>{if(careState)renderCarePetScene(careBaseVariant(careState));},1800);}
-function isCareActionOverflow(action){if(!careState)return false;if(action==="clean")return numberOrZero(careState.clean)>=100;if(action==="feed_snack"||action==="feed_can"||action==="feed_dry")return numberOrZero(careState.hunger)>=100;return false;}
-function careActionFullMessage(action){if(action==="clean")return "清洁度已经满了，现在使用清洁道具会溢出，先不用啦。";if(action==="feed_snack")return "饱食度已经满了，现在喂零食会溢出，先不用啦。";if(action==="feed_can")return "饱食度已经满了，现在喂罐头会溢出，先不用啦。";if(action==="feed_dry")return "饱食度已经满了，现在喂干粮会溢出，先不用啦。";return "宠物当前状态已经满了，暂时不需要使用道具。";}
-async function doCareAction(action){const notice=document.getElementById("careSpeechText");if(!careState?.id){if(notice)notice.textContent="这里还没有小动物在等你。先去领养页收集图片卡，集齐后再来领养吧。";return;}const variant=careActionVariant(action);const cfg=getPetInteractionConfig(variant);const validationMessage=validatePetInteractionConfig(cfg,variant);if(validationMessage){renderPetFallbackNotice(validationMessage);if(notice)notice.textContent=validationMessage;return;}if(isCareActionOverflow(action)){if(notice)notice.textContent=careActionFullMessage(action);return;}try{const memberId=requireMemberId();const data=await callRpc(RPC.careAction,{p_member_id:memberId,p_adoption_id:careState.id,p_action_type:action});await loadCareState({skipAutoGift:true,skipDecay:true});animatePet(action);const pet=data?.pet||{};if(notice)notice.textContent=pet.status||data?.message||"宠物状态已更新。";}catch(err){if(notice)notice.textContent=err.message||"数据库操作失败。";}}
-async function claimDailyGift(){try{const memberId=requireMemberId();const data=await callRpc(RPC.dailyGift,{p_member_id:memberId});const reward=data?.reward||{};setDailyGiftTextFromReward(reward,!data?.success);await loadCareState({skipAutoGift:true,skipDecay:true});animatePet("happy");}catch(err){const notice=document.getElementById("careSpeechText");if(notice)notice.textContent=err.message||"数据库操作失败。";}}
-function normalizeRewardItem(item){if(typeof item==="string")return {name:item,amount:"",unit:"",icon:"✨",img:""};return {name:item.name||"奖励",amount:item.amount??item.qty??"",unit:item.unit||"",icon:item.icon||"✨",img:item.img||""};}
+async function confirmAdoption(){
+  const p=pendingAdoptPet;
+  if(!p)return;
+  const name=document.getElementById("nameInput").value.trim();
+  if(!name){
+    showRewardModal({icon:"🐾",label:t("adopt.name.title"),title:t("adopt.name.placeholder"),desc:t("adopt.name.desc")});
+    return;
+  }
+  try{
+    const memberId=requireMemberId();
+    await callRpc(RPC.adopt,{p_member_id:memberId,p_pet_no:p.id,p_custom_name:name});
+    closeAdoptNameDialog();
+    showRewardModal({type:"gift",icon:"🐾",label:t("adopt.success"),title:t("adopt.success"),desc:""});
+    await loadAdoptionState();
+  }catch(err){
+    showRewardModal({icon:"⚠️",label:t("adopt.error.db_error"),title:t("adopt.error.db_error"),desc:err.message||t("adopt.error.db_error")});
+  }
+}
+async function upgradePet(p){
+  try{
+    const memberId=requireMemberId();
+    await callRpc(RPC.upgrade,{p_member_id:memberId,p_pet_no:p.id});
+    showRewardModal({icon:"⬆️",label:t("adopt.upgrade.success"),title:t("adopt.upgrade.success"),desc:t("adopt.upgrade.effect_hint")});
+    await loadAdoptionState();
+  }catch(err){
+    showRewardModal({icon:"⚠️",label:t("adopt.error.db_error"),title:t("adopt.error.db_error"),desc:err.message||t("adopt.error.db_error")});
+  }
+}
+async function animatePet(action,changes={}){
+  if(!careState)return;
+  const variant=careActionVariant(action);
+  const duration=careActionAnimationDuration(action);
+  renderCarePetScene(variant,{animate:true,action,changes});
+  await new Promise(resolve=>{
+    careActionReturnTimer=setTimeout(()=>{
+      if(careState)renderCarePetScene(careBaseVariant(careState));
+      resolve();
+    },duration);
+  });
+}
+function isCareActionOverflow(action){if(!careState)return false;if(action==="clean")return numberOrZero(careState.clean)>=100;if(action==="feed_snack"||action==="feed_can"||action==="feed_dry")return numberOrZero(careState.hunger)>=100;if(action==="play")return numberOrZero(careState.hunger)<=8;return false;}
+function careActionFullMessage(action){
+  const messages={
+    feed_snack:"他现在已经吃饱啦，暂时不用再喂零食。",
+    feed_can:"他现在已经吃饱啦，暂时不用再喂罐头。",
+    feed_dry:"他现在已经吃饱啦，暂时不用再喂干粮。",
+    clean:"他现在已经很干净啦，暂时不用再清洁。",
+    play:"他现在太饿了，先喂点东西再玩吧。"
+  };
+  return messages[String(action||"")]||"当前状态不适合进行这项互动。";
+}
+async function doCareAction(action){
+  const notice=document.getElementById("careSpeechText");
+  if(careActionBusy)return;
+  if(!careState?.id){setCareMessage(t("care.action.no_pet"));return;}
+  const variant=careActionVariant(action);
+  const cfg=getPetInteractionConfig(variant);
+  const validationMessage=validatePetInteractionConfig(cfg,variant);
+  if(validationMessage){renderPetFallbackNotice(validationMessage);if(notice)notice.textContent=validationMessage;return;}
+  if(isCareActionOverflow(action)){if(notice)notice.textContent=careActionFullMessage(action);return;}
+  setCareActionButtonsLocked(true);
+  try{
+    const memberId=requireMemberId();
+    const data=await callRpc(RPC.careAction,{p_member_id:memberId,p_adoption_id:careState.id,p_action_type:action});
+    if(data?.success===false){
+      if(notice)notice.textContent=data?.message||t("care.action.db_error");
+      return;
+    }
+    const changes=(data?.actual_changes&&typeof data.actual_changes==="object")?data.actual_changes:{};
+    await loadCareState({skipAutoGift:true,skipDecay:true});
+    const pet=data?.pet||{};
+    if(notice)notice.textContent=pet.status||data?.message||t("care.action.updated");
+    await animatePet(action,changes);
+  }catch(err){
+    if(notice)notice.textContent=err.message||t("care.action.db_error");
+  }finally{
+    setCareActionButtonsLocked(false);
+  }
+}
+async function claimDailyGift(){
+  try{
+    const memberId=requireMemberId();
+    const data=await callRpc(RPC.dailyGift,{p_member_id:memberId});
+    const reward=data?.reward||{};
+    setDailyGiftTextFromReward(reward,!data?.success);
+    await loadCareState({skipAutoGift:true,skipDecay:true});
+    animatePet("happy");
+  }catch(err){
+    const notice=document.getElementById("careSpeechText");
+    if(notice)notice.textContent=err.message||t("care.action.db_error");
+  }
+}
+function normalizeRewardItem(item){
+  if(typeof item==="string")return {name:item,amount:"",unit:"",icon:"✨",img:""};
+  return {name:item.name||t("modal.reward.title"),amount:item.amount??item.qty??"",unit:item.unit||"",icon:item.icon||"✨",img:item.img||""};
+}
 function renderRewards(rewards){const list=document.getElementById("rewardList"),title=document.getElementById("rewardSectionTitle");list.innerHTML="";list.className="reward-list";title.className="reward-section-title";if(!rewards.length){list.classList.add("empty");title.classList.add("empty");return;}list.classList.add(`count-${Math.min(rewards.length,3)}`);rewards.forEach(r=>{const item=document.createElement("div");item.className="reward-item";const iconHtml=r.img?`<img class="reward-item-img" src="${escapeHtml(r.img)}" alt="">`:`<div class="reward-item-icon">${escapeHtml(r.icon)}</div>`;item.innerHTML=`${iconHtml}<div class="reward-item-name">${escapeHtml(r.name)}</div><div class="reward-item-amount">${escapeHtml(r.amount!==""?`+${r.amount}${r.unit||""}`:"")}</div>`;list.appendChild(item);});}
-function showRewardModal(options={}){document.getElementById("rewardIcon").textContent=options.icon||"✨";document.getElementById("rewardLabel").textContent=options.label||"提示";document.getElementById("rewardTitle").textContent=options.title||"完成";const descEl=document.getElementById("rewardDesc");const desc=options.desc===undefined?"操作已完成。":String(options.desc||"");descEl.textContent=desc;descEl.classList.toggle("empty",!desc);renderRewards(Array.isArray(options.rewards)?options.rewards.map(normalizeRewardItem):[]);if(options.hideSectionTitle){document.getElementById("rewardSectionTitle")?.classList.add("empty");}const mask=document.getElementById("rewardMask");mask.classList.add("show");mask.style.display="flex";mask.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";}
+function showRewardModal(options={}){
+  document.getElementById("rewardIcon").textContent=options.icon||"✨";
+  document.getElementById("rewardLabel").textContent=options.label||t("modal.reward.title");
+  document.getElementById("rewardTitle").textContent=options.title||t("modal.reward.title");
+  const descEl=document.getElementById("rewardDesc");
+  const desc=options.desc===undefined?"":String(options.desc||"");
+  descEl.textContent=desc;
+  descEl.classList.toggle("empty",!desc);
+  renderRewards(Array.isArray(options.rewards)?options.rewards.map(normalizeRewardItem):[]);
+  if(options.hideSectionTitle){document.getElementById("rewardSectionTitle")?.classList.add("empty");}
+  const mask=document.getElementById("rewardMask");
+  mask.classList.add("show");
+  mask.style.display="flex";
+  mask.setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
+}
 function closeRewardModal(){const mask=document.getElementById("rewardMask");mask.classList.remove("show");mask.style.display="";mask.setAttribute("aria-hidden","true");document.body.style.overflow="";}
 function hydrateActionIcons(){document.querySelectorAll("[data-item-icon]").forEach(el=>{const url=room10AssetUrl(el.dataset.itemIcon,"");if(url)el.innerHTML=`<img src="${escapeHtml(url)}" alt="">`;});}
 
-window.addEventListener("resize",syncOverlayToImage);if(img){img.addEventListener("load",syncOverlayToImage);}document.addEventListener("DOMContentLoaded",()=>{setIdentityState();setupRoomNav();syncOverlayToImage();hydrateActionIcons();document.getElementById("identityNoticeBtn").addEventListener("click",()=>document.getElementById("identityNoticePanel").classList.toggle("show"));document.getElementById("identityAuthBtn").addEventListener("click",()=>{if(readLoggedIn()){localStorage.setItem(STORAGE_KEYS.loggedIn,"false");[STORAGE_KEYS.user,STORAGE_KEYS.role,STORAGE_KEYS.memberId,STORAGE_KEYS.memberCode,"room10_user","room10_current_user","currentUser","room10ApplicantSession","room10ApplicationDraft"].forEach(k=>localStorage.removeItem(k));sessionStorage.clear();adoptionPets=[];carePets=[];careState=null;selectedCareAdoptionId=null;lastDailyGift=null;const frame=document.getElementById("gachaFrame");if(frame)frame.src="about:blank";closeGachaPopup();setIdentityState();setMode("adopt");}else{window.location.href=room10PageUrl("index","index/index.html");}});document.getElementById("modeAdoptBtn").addEventListener("click",()=>setMode("adopt"));document.getElementById("modeCareBtn").addEventListener("click",()=>setMode("care"));document.getElementById("goGachaBtn").addEventListener("click",goGacha);document.getElementById("gachaCloseBtn").addEventListener("click",closeGachaPopup);document.getElementById("gachaMask").addEventListener("click",e=>{if(e.target.id==="gachaMask")closeGachaPopup();});document.getElementById("refreshBtn").addEventListener("click",()=>activeMode==="adopt"?loadAdoptionState():loadCareState({skipAutoGift:true}));document.getElementById("adoptMainBtn").addEventListener("click",()=>{const p=adoptionPets.find(x=>x.id===selectedPetId);const action=document.getElementById("adoptMainBtn").dataset.action;if(action==="gacha")goGacha();else if(action==="adopt"&&p)openAdoptNameDialog(p);else if(action==="upgrade"&&p)upgradePet(p);});document.getElementById("nameCancelBtn").addEventListener("click",closeAdoptNameDialog);document.getElementById("nameConfirmBtn").addEventListener("click",confirmAdoption);document.getElementById("nameMask").addEventListener("click",e=>{if(e.target.id==="nameMask")closeAdoptNameDialog();});document.querySelectorAll("[data-care-action]").forEach(btn=>btn.addEventListener("click",()=>doCareAction(btn.dataset.careAction)));{const dailyBtn=document.getElementById("dailyGiftBtn");if(dailyBtn)dailyBtn.addEventListener("click",claimDailyGift);}document.getElementById("rewardMask").addEventListener("click",e=>{if(e.target.id==="rewardMask")closeRewardModal();});document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeRewardModal();closeAdoptNameDialog();closeGachaPopup();}});setMode("adopt");});
+window.addEventListener("resize",syncOverlayToImage);if(img){img.addEventListener("load",syncOverlayToImage);}document.addEventListener("DOMContentLoaded",async()=>{setIdentityState();setupRoomNav();syncOverlayToImage();hydrateActionIcons();try{await loadPageTexts();}catch(err){pageTexts={};pageTextsLoaded=true;console.warn("宠物区文案配置读取失败：",err);}hydratePageTexts();document.getElementById("identityNoticeBtn").addEventListener("click",()=>document.getElementById("identityNoticePanel").classList.toggle("show"));const petLoginMask=document.getElementById("petLoginMask");if(petLoginMask)petLoginMask.addEventListener("click",e=>{if(e.target===petLoginMask)closePetLoginModal();});const petLoginCloseBtn=document.getElementById("petLoginCloseBtn");if(petLoginCloseBtn)petLoginCloseBtn.addEventListener("click",closePetLoginModal);const petLoginToggleBtn=document.getElementById("petLoginToggleBtn");if(petLoginToggleBtn)petLoginToggleBtn.addEventListener("click",togglePetLoginCode);const petLoginSubmitBtn=document.getElementById("petLoginSubmitBtn");if(petLoginSubmitBtn)petLoginSubmitBtn.addEventListener("click",submitPetLogin);const petRegisterLink=document.getElementById("petRegisterLink");if(petRegisterLink)petRegisterLink.addEventListener("click",goRegisterFromPet);["petLoginNickname","petLoginCode"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("keydown",e=>{if(e.key==="Enter")submitPetLogin();});});document.getElementById("identityAuthBtn").addEventListener("click",()=>{if(!isGuestView()){localStorage.setItem(STORAGE_KEYS.loggedIn,"false");[STORAGE_KEYS.user,STORAGE_KEYS.role,STORAGE_KEYS.memberId,STORAGE_KEYS.memberCode,"room10_user","room10_current_user","currentUser","room10ApplicantSession","room10ApplicationDraft"].forEach(k=>localStorage.removeItem(k));sessionStorage.clear();adoptionPets=[];carePets=[];careState=null;selectedCareAdoptionId=null;lastDailyGift=null;const frame=document.getElementById("gachaFrame");if(frame)frame.src="about:blank";closeGachaPopup();setIdentityState();setMode("adopt");}else{openPetLoginModal();}});document.getElementById("modeAdoptBtn").addEventListener("click",()=>setMode("adopt"));document.getElementById("modeCareBtn").addEventListener("click",()=>setMode("care"));document.getElementById("goGachaBtn").addEventListener("click",goGacha);document.getElementById("gachaCloseBtn").addEventListener("click",closeGachaPopup);document.getElementById("gachaMask").addEventListener("click",e=>{if(e.target.id==="gachaMask")closeGachaPopup();});document.getElementById("refreshBtn").addEventListener("click",()=>activeMode==="adopt"?loadAdoptionState():loadCareState({skipAutoGift:true}));document.getElementById("adoptMainBtn").addEventListener("click",()=>{const p=adoptionPets.find(x=>x.id===selectedPetId);const action=document.getElementById("adoptMainBtn").dataset.action;if(action==="gacha")goGacha();else if(action==="adopt"&&p)openAdoptNameDialog(p);else if(action==="upgrade"&&p)upgradePet(p);});document.getElementById("nameCancelBtn").addEventListener("click",closeAdoptNameDialog);document.getElementById("nameConfirmBtn").addEventListener("click",confirmAdoption);document.getElementById("nameMask").addEventListener("click",e=>{if(e.target.id==="nameMask")closeAdoptNameDialog();});document.querySelectorAll("[data-care-action]").forEach(btn=>btn.addEventListener("click",()=>doCareAction(btn.dataset.careAction)));{const dailyBtn=document.getElementById("dailyGiftBtn");if(dailyBtn)dailyBtn.addEventListener("click",claimDailyGift);}document.getElementById("rewardMask").addEventListener("click",e=>{if(e.target.id==="rewardMask")closeRewardModal();});document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeRewardModal();closeAdoptNameDialog();closeGachaPopup();closePetLoginModal();}});setMode("adopt");});
+</script>
+
+<script id="room10FinalPlayingPresets">
+window.ROOM10_PET_INTERACTION_FINAL_CONFIGS = window.ROOM10_PET_INTERACTION_FINAL_CONFIGS || {};
+window.ROOM10_PET_INTERACTION_FINAL_CONFIGS.playing = {"rules":{"moodIncreaseDefaultHearts":true},"playing":{"1":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.5,"starsLayout":{"left":59,"top":50,"layer":12},"heartsLayout":{"left":15.5,"top":11,"layer":20}},"prop":{"enabled":true,"width":18,"left":-8.5,"top":78,"layer":30}},"2":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":47.5,"top":54,"layer":12},"heartsLayout":{"left":15.5,"top":22,"layer":20}},"prop":{"enabled":true,"width":18,"left":55.5,"top":78,"layer":30}},"3":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":55.5,"top":47.5,"layer":12},"heartsLayout":{"left":15.5,"top":22,"layer":20}},"prop":{"enabled":true,"width":18,"left":86,"top":78,"layer":30}},"4":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":44.5,"top":62,"layer":12},"heartsLayout":{"left":7.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"5":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":20.5,"top":71.5,"layer":12},"heartsLayout":{"left":1,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"6":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":59,"top":50,"layer":12},"heartsLayout":{"left":15.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"7":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":59,"top":55.5,"layer":12},"heartsLayout":{"left":15.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"8":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":0.9,"heartScale":1.75,"starsLayout":{"left":50,"top":57,"layer":12},"heartsLayout":{"left":78,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"9":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":51,"top":41,"layer":12},"heartsLayout":{"left":15.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"10":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":46,"top":39.5,"layer":12},"heartsLayout":{"left":84.5,"top":12.5,"layer":20}},"prop":{"enabled":true,"width":15.5,"left":35,"top":49,"layer":30}},"11":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":50,"top":50,"layer":12},"heartsLayout":{"left":15.5,"top":22,"layer":20}},"prop":{"enabled":true,"width":18,"left":31.5,"top":63.5,"layer":30}},"12":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":102,"top":70,"layer":12},"heartsLayout":{"left":-2,"top":22,"layer":20}},"prop":{"enabled":true,"width":26,"left":87.5,"top":78,"layer":30}},"13":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":27,"top":75,"layer":12},"heartsLayout":{"left":65,"top":1,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"14":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":30,"top":83,"layer":12},"heartsLayout":{"left":15.5,"top":22,"layer":20}},"prop":{"enabled":true,"width":18,"left":50,"top":78,"layer":8}},"15":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":49,"top":44.5,"layer":12},"heartsLayout":{"left":15.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"16":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":50,"top":33,"layer":12},"heartsLayout":{"left":-11.5,"top":-7,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"17":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.75,"heartScale":1.75,"starsLayout":{"left":62,"top":60.5,"layer":12},"heartsLayout":{"left":15.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":57,"layer":8}},"18":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":28.5,"top":68.5,"layer":12},"heartsLayout":{"left":57,"top":12.5,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"19":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":100.5,"top":78,"layer":12},"heartsLayout":{"left":89,"top":39.5,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"20":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":94,"top":55.5,"layer":12},"heartsLayout":{"left":-15,"top":6,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"21":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":1,"top":73,"layer":12},"heartsLayout":{"left":41,"top":27,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"22":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":38,"top":70,"layer":12},"heartsLayout":{"left":4.5,"top":22,"layer":20}},"prop":{"enabled":true,"width":18,"left":50,"top":78,"layer":8}},"23":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":59,"top":27,"layer":12},"heartsLayout":{"left":-11.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"24":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":92.5,"top":50,"layer":12},"heartsLayout":{"left":4.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"25":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":46,"top":55.5,"layer":12},"heartsLayout":{"left":97,"top":22,"layer":20}},"prop":{"enabled":true,"width":18,"left":50,"top":78,"layer":8}},"26":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":63.5,"top":59,"layer":12},"heartsLayout":{"left":105,"top":11,"layer":20}},"prop":{"enabled":true,"width":18,"left":50,"top":70,"layer":30}},"27":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":81,"top":73,"layer":12},"heartsLayout":{"left":94,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"28":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":-0.5,"top":76.5,"layer":12},"heartsLayout":{"left":-3.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"29":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":-0.5,"top":71.5,"layer":12},"heartsLayout":{"left":99,"top":30,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"30":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":107,"top":59,"layer":12},"heartsLayout":{"left":94,"top":1,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"31":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":46,"top":55.5,"layer":12},"heartsLayout":{"left":15.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"32":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":31.5,"top":73,"layer":12},"heartsLayout":{"left":-0.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"33":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":59,"top":50,"layer":12},"heartsLayout":{"left":15.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"34":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":39.5,"top":62,"layer":12},"heartsLayout":{"left":1,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"35":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":-27.5,"top":70,"layer":12},"heartsLayout":{"left":119.5,"top":22,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}},"36":{"motion":true,"effects":{"stars":true,"hearts":true,"starScale":1.2,"heartScale":1.75,"starsLayout":{"left":46,"top":67,"layer":12},"heartsLayout":{"left":65,"top":1,"layer":20}},"prop":{"enabled":false,"width":18,"left":50,"top":78,"layer":8}}}};
 </script>
 </body>
 </html>
