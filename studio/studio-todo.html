@@ -657,7 +657,9 @@ const params = new URLSearchParams();
 if (taskId) params.set('task_id', String(taskId));
 if (getCurrentMemberId()) params.set('member_id', getCurrentMemberId());
 params.set('embed', '1');
-params.set('v', '20260504-wheel-layers');
+params.set('from', 'todo');
+params.set('mode', 'todo');
+params.set('v', '20260726-multimode-wheel');
 const wheelPage = links.studioWheel;
 return `${wheelPage}${params.toString() ? `?${params.toString()}` : ''}`;
 }
@@ -690,6 +692,7 @@ index
 return {
 type: 'ROOM10_WHEEL_INIT',
 mode: 'multi_layer_assignment',
+integration_mode: 'todo',
 title: '角色转盘',
 subtitle: task?.task_name ? `当前任务：${task.task_name}` : '用于当前任务的角色分配',
 layers: [
@@ -710,6 +713,8 @@ singers,
 roles,
 items: roles,
 context: {
+source: 'studio_todo',
+integration_mode: 'todo',
 project_id: String(task?.id || taskId || ''),
 task_id: String(task?.id || taskId || ''),
 task_name: String(task?.task_name || ''),
@@ -927,6 +932,14 @@ if (e.target === wheelModalMask) closeWheelToolModal();
 window.addEventListener('message', (event) => {
 const data = event.data || {};
 if (!data || typeof data !== 'object') return;
+if (event.source !== wheelModalFrame?.contentWindow) return;
+if (data.type === 'ROOM10_WHEEL_READY') {
+  const rawPayload = wheelModalFrame?.dataset?.pendingPayload || '';
+  if (rawPayload) {
+    try { postWheelInitToFrame(JSON.parse(rawPayload)); } catch (err) { console.warn('转盘资料重发失败：', err); }
+  }
+  return;
+}
 if (data.type === 'ROOM10_WHEEL_CLOSE') {
 closeWheelToolModal();
 return;
