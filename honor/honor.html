@@ -2429,14 +2429,14 @@ button{font-family:inherit;}
         <div id="navOuter">
           <div id="navScroll">
             <nav id="roomNav">
-              <button class="navBtn" data-room="hall" type="button" onclick="goRoom('index.html', false)">
+              <button class="navBtn" data-room="hall" type="button" onclick="goRoomByKey('index', false)">
                 <span class="navLabel">大堂</span>
                 <span class="navEffect navEffectA">✦</span>
                 <span class="navEffect navEffectB">✧</span>
                 <span class="navEffect navEffectC">★</span>
               </button>
 
-              <button class="navBtn" data-room="living" type="button" onclick="goRoom('living.html', false)">
+              <button class="navBtn" data-room="living" type="button" onclick="goRoomByKey('living', false)">
                 <span class="navLabel">客厅</span>
                 <span class="navEffect navEffectA">☕</span>
                 <span class="navEffect navEffectB">✦</span>
@@ -2457,35 +2457,35 @@ button{font-family:inherit;}
                 <span class="navEffect navEffectC">✦</span>
               </button>
 
-              <button class="navBtn" data-room="studio" type="button" onclick="goRoom('studio-todo.html', true)">
+              <button class="navBtn" data-room="studio" type="button" onclick="goRoomByKey('studioTodo', true)">
                 <span class="navLabel">工作间</span>
                 <span class="navEffect navEffectA">🎙</span>
                 <span class="navEffect navEffectB">🎧</span>
                 <span class="navEffect navEffectC">◇</span>
               </button>
 
-              <button class="navBtn" data-room="game" type="button" onclick="goRoom('game.html', false)">
+              <button class="navBtn" data-room="game" type="button" onclick="goRoomByKey('game', false)">
                 <span class="navLabel">游戏房</span>
                 <span class="navEffect navEffectA">🎮</span>
                 <span class="navEffect navEffectB">◆</span>
                 <span class="navEffect navEffectC">🕹</span>
               </button>
 
-              <button class="navBtn" data-room="dorm" type="button" onclick="goRoom('dorm.html', true)">
+              <button class="navBtn" data-room="dorm" type="button" onclick="goRoomByKey('dorm', true)">
                 <span class="navLabel">宿舍</span>
                 <span class="navEffect navEffectA">☁</span>
                 <span class="navEffect navEffectB">☾</span>
                 <span class="navEffect navEffectC">🛏</span>
               </button>
 
-              <button class="navBtn" data-room="flower" type="button" onclick="goRoom('flower.html', false)">
+              <button class="navBtn" data-room="flower" type="button" onclick="goRoomByKey('flower', false, true)">
                 <span class="navLabel">花房区</span>
                 <span class="navEffect navEffectA">✿</span>
                 <span class="navEffect navEffectB">❀</span>
                 <span class="navEffect navEffectC">🌸</span>
               </button>
 
-              <button class="navBtn" data-room="pets" type="button" onclick="goRoom('pets.html', false)">
+              <button class="navBtn" data-room="pets" type="button" onclick="goRoomByKey('pet', false, true)">
                 <span class="navLabel">宠物区</span>
                 <span class="navEffect navEffectA">🐾</span>
                 <span class="navEffect navEffectB">♡</span>
@@ -2525,8 +2525,8 @@ button{font-family:inherit;}
       </div>
 
       <div id="panelSwitch" aria-label="荣誉墙页面切换">
-        <button id="switchTitles" class="switchBtn" type="button" onclick="goRoom('honor-titles.html')">荣誉<br>图鉴</button>
-        <button id="switchGallery" class="switchBtn" type="button" onclick="goRoom('honor-gallery.html')">作品<br>展览</button>
+        <button id="switchTitles" class="switchBtn" type="button" onclick="goRoomByKey('honorTitles')">荣誉<br>图鉴</button>
+        <button id="switchGallery" class="switchBtn" type="button" onclick="goRoomByKey('honorGallery')">作品<br>展览</button>
       </div>
 
       <div id="rankPanel">
@@ -2543,7 +2543,7 @@ button{font-family:inherit;}
           <div id="rankMascotBubble">
             <div id="rankMascotText">我来给你讲讲这些奖杯～</div>
           </div>
-          <img id="rankMascotImg" src="./mascot-niuma(R).png" alt="">
+          <img id="rankMascotImg" src="" alt="">
         </div>
       </div>
 
@@ -2581,7 +2581,7 @@ button{font-family:inherit;}
 </div>
 <div id="loginUI">
   <div class="login-panel">
-    <img id="loginPanelBg" src="../login.png" alt="登录框">
+    <img id="loginPanelBg" src="" alt="登录框">
 
     <input id="username" type="text" autocomplete="username">
     <input id="password" type="password" autocomplete="current-password">
@@ -2603,87 +2603,65 @@ const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 
-function room10Url(path){
-  const raw = String(path || "").trim();
-  if(!raw) return "";
-  if(/^(https?:|data:|blob:|mailto:|tel:|#|\/)/i.test(raw)) return raw;
-  if(raw.startsWith("./") || raw.startsWith("../")) return raw;
-
-  if(typeof window.room10Path === "function"){
-    return window.room10Path(raw);
+function requireRoom10Page(key){
+  const cleanKey = String(key || "").trim();
+  if(!cleanKey) throw new Error("页面路径键为空。");
+  if(typeof window.room10Page !== "function"){
+    throw new Error("room10-paths.js 未提供 room10Page()。");
   }
-
-  return `../${raw}`;
+  const url = String(window.room10Page(cleanKey) || "").trim();
+  if(!url) throw new Error(`room10-paths.js 缺少页面配置：${cleanKey}`);
+  return url;
 }
 
-function room10PageUrl(key, fallbackPath){
-  if(key && typeof window.room10Page === "function"){
-    const url = window.room10Page(key);
-    if(url) return url;
+function requireRoom10Asset(key){
+  const cleanKey = String(key || "").trim();
+  if(!cleanKey) throw new Error("素材路径键为空。");
+  if(typeof window.room10Asset !== "function"){
+    throw new Error("room10-paths.js 未提供 room10Asset()。");
   }
-  return room10Url(fallbackPath || "");
+  const url = String(window.room10Asset(cleanKey) || "").trim();
+  if(!url) throw new Error(`room10-paths.js 缺少素材配置：${cleanKey}`);
+  return url;
 }
 
-function room10AssetUrl(key, fallbackPath){
-  if(key && typeof window.room10Asset === "function"){
-    const url = window.room10Asset(key);
-    if(url) return url;
-  }
-  return room10Url(fallbackPath || "");
+function appendQuery(url, params){
+  const cleanUrl = String(url || "").trim();
+  if(!cleanUrl) return "";
+  const [base, hash = ""] = cleanUrl.split("#", 2);
+  const separator = base.includes("?") ? "&" : "?";
+  const query = new URLSearchParams(params || {}).toString();
+  return `${base}${query ? separator + query : ""}${hash ? "#" + hash : ""}`;
 }
 
-const HONOR_PAGE_MAP = {
-  "index.html":"index",
-  "living.html":"living",
-  "manager-visitor.html":"managerVisitor",
-  "manager-admin.html":"managerAdmin",
-  "manager-member.html":"managerMember",
-  "studio-todo.html":"studioTodo",
-  "game.html":"game",
-  "dorm.html":"dorm",
-  "flower.html":"flower",
-  "pets.html":"pet",
-  "honor.html":"honor",
-  "honor-titles.html":"honorTitles",
-  "honor-gallery.html":"honorGallery",
-  "register.html":"managerRegister"
-};
-
-function resolveHonorPageUrl(target){
-  const raw = String(target || "").trim();
-  if(!raw) return "";
-  if(/^(https?:|data:|blob:|mailto:|tel:|#|\/)/i.test(raw)) return raw;
-
-  const hashIndex = raw.indexOf("#");
-  const queryIndex = raw.indexOf("?");
-  const splitIndex = [hashIndex, queryIndex].filter(i => i >= 0).sort((a,b) => a-b)[0];
-  const base = splitIndex >= 0 ? raw.slice(0, splitIndex) : raw;
-  const suffix = splitIndex >= 0 ? raw.slice(splitIndex) : "";
-  const key = HONOR_PAGE_MAP[base] || "";
-
-  if(key){
-    return room10PageUrl(key, base) + suffix;
-  }
-
-  return room10Url(raw);
+function showHonorPageConfigurationError(message){
+  const text = String(message || "荣誉墙页面配置读取失败。");
+  console.error(text);
+  const mobileList = document.getElementById("mobileTrophyList");
+  if(mobileList) mobileList.innerHTML = `<div class="rankEmpty">${escapeHtml(text)}</div>`;
+  const title = document.getElementById("rankTitle");
+  const desc = document.getElementById("rankDesc");
+  const since = document.getElementById("rankSince");
+  const list = document.getElementById("rankList");
+  if(title) title.textContent = "页面配置错误";
+  if(desc) desc.textContent = text;
+  if(since) since.textContent = "请检查 room10-paths.js。";
+  if(list) list.innerHTML = '<div class="rankEmpty">荣誉墙暂时无法完整显示。</div>';
 }
 
 function applyHonorConfiguredAssets(){
-  const bg = document.getElementById("bg");
-  if(bg){
-    const url = room10AssetUrl("honor.roomHonor", "honor/room-honor.png");
-    if(url) bg.src = url;
-  }
+  try{
+    const bg = document.getElementById("bg");
+    if(bg) bg.src = requireRoom10Asset("honor.roomHonor");
 
-  const loginBg = document.getElementById("loginPanelBg");
-  if(loginBg){
-    const url = room10AssetUrl("root.login", "login.png");
-    if(url) loginBg.src = url;
-  }
+    const loginBg = document.getElementById("loginPanelBg");
+    if(loginBg) loginBg.src = requireRoom10Asset("root.login");
 
-  const mascot = document.getElementById("rankMascotImg");
-  if(mascot){
-    mascot.src = room10AssetUrl("honor.mascotNiumaR", "honor/mascot-niuma(R).png");
+    const mascot = document.getElementById("rankMascotImg");
+    if(mascot) mascot.src = requireRoom10Asset("honor.mascotNiumaR");
+  }catch(error){
+    showHonorPageConfigurationError(error?.message || String(error));
+    throw error;
   }
 }
 
@@ -2719,8 +2697,12 @@ function closeLogin(){
 }
 
 function goRegisterFromHonor(){
-  sessionStorage.setItem("room10RegisterReturn", "honor.html");
-  window.location.href = resolveHonorPageUrl("register.html?from=honor.html");
+  try{
+    sessionStorage.setItem("room10RegisterReturn", requireRoom10Page("honor"));
+    window.location.href = appendQuery(requireRoom10Page("managerRegister"), { from:"honor" });
+  }catch(error){
+    showHonorPageConfigurationError(error?.message || String(error));
+  }
 }
 
 function togglePassword(){
@@ -2799,24 +2781,23 @@ async function login(){
   }
 }
 
-function goRoom(url, needLogin = false){
-  const target = String(url || "").trim();
-  if(!target) return;
+function goRoomByKey(pageKey, needLogin = false, allowGuestMode = false){
+  try{
+    const targetUrl = requireRoom10Page(pageKey);
+    const user = readStoredUser();
 
-  const user = readStoredUser();
+    if(needLogin && !user.loggedIn){
+      sessionStorage.setItem("room10_pending_redirect", targetUrl);
+      openLogin();
+      return;
+    }
 
-  if(needLogin && !user.loggedIn){
-    sessionStorage.setItem("room10_pending_redirect", resolveHonorPageUrl(target));
-    openLogin();
-    return;
+    window.location.href = allowGuestMode && !user.loggedIn
+      ? appendQuery(targetUrl, { mode:"guest" })
+      : targetUrl;
+  }catch(error){
+    showHonorPageConfigurationError(error?.message || String(error));
   }
-
-  if((target === "flower.html" || target === "pets.html") && !user.loggedIn){
-    window.location.href = resolveHonorPageUrl(target) + "?mode=guest";
-    return;
-  }
-
-  window.location.href = resolveHonorPageUrl(target);
 }
 
 function goManagerRoom(){
@@ -2824,16 +2805,16 @@ function goManagerRoom(){
   const role = String(user.role || "").trim().toLowerCase();
 
   if(!user.loggedIn){
-    window.location.href = resolveHonorPageUrl("manager-visitor.html");
+    goRoomByKey("managerVisitor");
     return;
   }
 
   if(role === "owner" || role === "admin"){
-    window.location.href = resolveHonorPageUrl("manager-admin.html");
+    goRoomByKey("managerAdmin");
     return;
   }
 
-  window.location.href = resolveHonorPageUrl("manager-member.html");
+  goRoomByKey("managerMember");
 }
 
 /* =========================================================
@@ -2851,13 +2832,25 @@ function parseLocalDate(dateText){
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function addMonthsClamped(date, months){
+  const source = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const targetMonthStart = new Date(source.getFullYear(), source.getMonth() + months, 1);
+  const lastDay = new Date(targetMonthStart.getFullYear(), targetMonthStart.getMonth() + 1, 0).getDate();
+  return new Date(targetMonthStart.getFullYear(), targetMonthStart.getMonth(), Math.min(source.getDate(), lastDay));
+}
+
+function formatSeasonDate(date){
+  return `${date.getFullYear()} 年 ${date.getMonth() + 1} 月 ${date.getDate()} 日`;
+}
+
 function getHonorSeasonInfo(date = new Date()){
   const officialStart = parseLocalDate(honorRankSettings?.official_start_date);
-  const seasonMonths = Math.max(1, Number(honorRankSettings?.season_months || 3));
+  const configuredMonths = Number(honorRankSettings?.season_months);
+  const seasonMonths = Number.isFinite(configuredMonths) && configuredMonths >= 1
+    ? Math.floor(configuredMonths)
+    : null;
 
-  if(!officialStart){
-    return null;
-  }
+  if(!officialStart || !seasonMonths) return null;
 
   const current = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   if(current < officialStart){
@@ -2871,17 +2864,24 @@ function getHonorSeasonInfo(date = new Date()){
     };
   }
 
-  const year = current.getFullYear();
-  const month = current.getMonth();
-  const startMonth = Math.floor(month / seasonMonths) * seasonMonths;
-  const startDate = new Date(year, startMonth, 1);
-  const endDate = new Date(year, startMonth + seasonMonths, 0);
-  const seasonNo = Math.floor(startMonth / seasonMonths) + 1;
+  let seasonIndex = Math.max(0, Math.floor(
+    ((current.getFullYear() - officialStart.getFullYear()) * 12 + current.getMonth() - officialStart.getMonth()) / seasonMonths
+  ));
+  let startDate = addMonthsClamped(officialStart, seasonIndex * seasonMonths);
+
+  if(current < startDate){
+    seasonIndex = Math.max(0, seasonIndex - 1);
+    startDate = addMonthsClamped(officialStart, seasonIndex * seasonMonths);
+  }
+
+  const nextStartDate = addMonthsClamped(officialStart, (seasonIndex + 1) * seasonMonths);
+  const endDate = new Date(nextStartDate);
+  endDate.setDate(endDate.getDate() - 1);
 
   return {
     isOfficial:true,
-    label:`${year} 年第 ${seasonNo} 赛季`,
-    rangeText:`${year} 年 ${startMonth + 1} 月 – ${endDate.getMonth() + 1} 月`,
+    label:`${startDate.getFullYear()} 年第 ${seasonIndex + 1} 赛季`,
+    rangeText:`${formatSeasonDate(startDate)} – ${formatSeasonDate(endDate)}`,
     seasonMonths,
     startDate,
     endDate
@@ -2945,6 +2945,17 @@ function showRankConfigError(message){
   rankDesc.textContent = message;
   rankSince.textContent = "请检查 honor_rank_configs 与 honor_rank_settings。";
   rankList.innerHTML = '<div class="rankEmpty">排行榜暂时无法显示。</div>';
+}
+
+function showRankDataError(message){
+  const text = String(message || "排行榜数据读取失败。");
+  trophyDataReady = false;
+  const mobileList = document.getElementById("mobileTrophyList");
+  if(mobileList) mobileList.innerHTML = `<div class="rankEmpty">${escapeHtml(text)}</div>`;
+  rankTitle.textContent = "排行榜读取失败";
+  rankDesc.textContent = text;
+  rankSince.textContent = "数据库连接或榜单视图异常。";
+  rankList.innerHTML = '<div class="rankEmpty">排行榜暂时无法显示，请稍后重试。</div>';
 }
 
 async function loadHonorRankConfiguration(){
@@ -3144,11 +3155,12 @@ async function loadTrophyDataFromDatabase(){
       .order("member_name", { ascending:true });
 
     if(error){
-      console.warn("荣誉墙实时榜单读取失败：", error);
-      return;
+      throw new Error(`排行榜数据读取失败：${error.message || "未知错误"}`);
     }
 
     if(!Array.isArray(data) || !data.length){
+      trophyDataReady = true;
+      renderPlaqueWinners();
       return;
     }
 
@@ -3196,7 +3208,7 @@ async function loadTrophyDataFromDatabase(){
     trophyDataReady = true;
     renderPlaqueWinners();
   }catch(e){
-    console.warn("荣誉墙实时榜单读取异常：", e);
+    throw new Error(e?.message || "荣誉墙实时榜单读取异常。");
   }
 }
 
@@ -3694,7 +3706,7 @@ function logoutRoom10(){
   ].forEach(key => localStorage.removeItem(key));
 
   updateIdentity();
-  window.location.href = resolveHonorPageUrl("index.html");
+  goRoomByKey("index");
 }
 
 function updateStageScale(){
@@ -3817,14 +3829,25 @@ document.getElementById("password").addEventListener("keydown", (e) => {
 async function initializeHonorRankings(){
   try{
     await loadHonorRankConfiguration();
+  }catch(error){
+    console.error("荣誉墙配置读取失败：", error);
+    showRankConfigError(error?.message || "荣誉墙配置读取失败。");
+    return;
+  }
+
+  try{
     await loadTrophyDataFromDatabase();
   }catch(error){
-    console.warn("荣誉墙配置或排行榜读取失败：", error);
-    showRankConfigError(error?.message || "荣誉墙配置读取失败。");
+    console.error("荣誉墙排行榜读取失败：", error);
+    showRankDataError(error?.message || "排行榜数据读取失败。");
   }
 }
 
-applyHonorConfiguredAssets();
+try{
+  applyHonorConfiguredAssets();
+}catch(error){
+  console.error("荣誉墙素材配置失败：", error);
+}
 initializeHonorRankings();
 refreshHonorSessionState();
 updateStageScale();
