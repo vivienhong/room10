@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light" />
 <title>2048｜十号房</title>
+<!-- 玩法页面：由游戏房弹窗/iframe加载；动物偶遇交由外层统一弹窗显示 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
 <style>
@@ -395,9 +396,9 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
 .rank-list li{
   min-height:34px;
   display:grid;
-  grid-template-columns:24px minmax(0,1fr) auto;
+  grid-template-columns:28px minmax(0,1fr);
   align-items:center;
-  gap:7px;
+  gap:8px;
   color:#755132;
   font-size:12px;
   font-weight:850;
@@ -409,8 +410,10 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   background:rgba(255,239,203,.76);
 }
 .rank-list b{color:#b9782e;font-weight:950}
-.rank-list .rank-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rank-list .rank-score{font-weight:950}
+.rank-list .rank-main{min-width:0;display:flex;flex-direction:column;gap:2px}
+.rank-list .rank-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:950}
+.rank-list .rank-detail{color:var(--muted);font-size:10px;font-weight:850;line-height:1.35;white-space:normal}
+.rank-list .rank-score{color:var(--ink);font-weight:950}
 .side-note{color:var(--muted);font-size:12px;line-height:1.65;font-weight:800}
 .side-note strong{color:var(--ink)}
 .loading-line{color:var(--muted);font-size:12px;font-weight:850}
@@ -502,35 +505,6 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
 .modal p{margin:9px 0 18px;color:var(--muted);font-size:13px;line-height:1.7;font-weight:850}
 .modal-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 
-.animal-modal-icon{
-  width:72px;
-  height:72px;
-  margin:0 auto 12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:999px;
-  font-size:38px;
-  background:rgba(255,247,218,.92);
-  border:1px solid rgba(221,176,86,.24);
-  box-shadow:0 10px 26px rgba(136,91,34,.12);
-}
-.animal-modal-name{
-  margin:0 0 8px;
-  color:#6d4528;
-  font-size:22px;
-  font-weight:950;
-  line-height:1.3;
-}
-.animal-modal-message{
-  margin:0 0 18px;
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.75;
-  font-weight:850;
-  white-space:pre-line;
-}
-
 @media(max-width:880px){
   .inner{grid-template-columns:1fr}
   .main-card{min-height:auto;padding:18px 14px 16px}
@@ -578,15 +552,15 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
         <div class="topbar">
           <div class="title-wrap">
             <h1 class="title">2048</h1>
-            <p class="desc">上下左右滑动，相同数字会合并。棋盘、分数、步数与结算结果均由服务器计算。</p>
+            <p class="desc">上下左右滑动方块，让相同数字合并。</p>
           </div>
-          <div class="badge" id="statusBadge">正在连接</div>
+          <div class="badge" id="statusBadge">正在准备</div>
         </div>
 
         <section class="screen permission-screen active" id="permissionScreen">
           <div class="permission-box">
             <h2 id="permissionTitle">正在进入 2048</h2>
-            <p id="permissionBody">正在读取成员身份和游戏状态。</p>
+            <p id="permissionBody">正在为你准备游戏。</p>
             <button class="btn" type="button" id="permissionActionBtn">返回游戏房</button>
           </div>
         </section>
@@ -602,7 +576,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
           <div class="board-area">
             <div class="board-frame" id="boardFrame" aria-label="2048 游戏棋盘" tabindex="0">
               <div class="board" id="board"></div>
-              <div class="board-loading" id="boardLoading">服务器正在计算...</div>
+              <div class="board-loading" id="boardLoading">正在移动方块…</div>
             </div>
           </div>
 
@@ -625,7 +599,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
           <div class="result-box">
             <h2>本局结束</h2>
             <div class="result-number" id="resultScore">0</div>
-            <p id="resultDesc">本局已经由服务器完成统一结算。</p>
+            <p id="resultDesc">本局成绩已经记录。</p>
 
             <div class="result-stats">
               <div class="result-stat">最高方块<strong id="resultMaxTile">2</strong></div>
@@ -634,7 +608,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
 
             <div class="reward-box">
               <h3>本局奖励</h3>
-              <p class="reward-line" id="rewardLine">正在读取结算结果。</p>
+              <p class="reward-line" id="rewardLine">正在整理本局奖励。</p>
             </div>
 
             <div class="result-actions">
@@ -679,7 +653,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
           <p class="side-label">规则</p>
           <div class="side-note">
             <strong>免费游玩，不消耗金币。</strong><br />
-            游客可直接游玩，但不写入个人记录或排行榜；登录成员完整结束后按数据库奖励配置统一结算。
+            游客可以直接游玩，但成绩不会计入个人记录和排行榜；登录成员完整结束一局后，可记录成绩并按规则获得奖励。
           </div>
         </section>
       </aside>
@@ -696,19 +670,6 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     <div class="modal-actions">
       <button class="btn-sub" type="button" id="restartCancelBtn">继续当前对局</button>
       <button class="btn" type="button" id="restartConfirmBtn">确认重新开始</button>
-    </div>
-  </div>
-</div>
-
-
-<div class="mask" id="animalEncounterMask" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="animalEncounterTitle">
-    <div class="animal-modal-icon" id="animalEncounterIcon">🐾</div>
-    <h2 id="animalEncounterTitle">遇见小动物</h2>
-    <div class="animal-modal-name" id="animalEncounterName">神秘小动物</div>
-    <p class="animal-modal-message" id="animalEncounterMessage"></p>
-    <div class="modal-actions">
-      <button class="btn" type="button" id="animalEncounterCloseBtn">收下惊喜</button>
     </div>
   </div>
 </div>
@@ -740,6 +701,30 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     trainee: "练习生"
   };
 
+  const UI_TEXT = Object.freeze({
+    preparing: "正在准备",
+    preparingGame: "正在为你准备游戏。",
+    moving: "正在移动方块…",
+    settling: "正在结算本局奖励…",
+    resultRecorded: "本局成绩已经记录。",
+    guestResult: "游客模式：本局成绩只在当前页面显示，不会计入个人记录和排行榜。",
+    noReward: "本局没有额外奖励。",
+    playHint: "继续滑动，把相同数字合并起来。",
+    guestHint: "游客可直接游玩；本局不会写入个人记录或排行榜。",
+    guestRule: "游客可以直接游玩，但成绩不会计入个人记录和排行榜；登录成员完整结束一局后，可记录成绩并按规则获得奖励。",
+    encounterUnavailable: "动物偶遇已记录，但暂时无法显示。",
+    gameUnavailable: "游戏暂时没有准备好，请稍后再试。"
+  });
+
+  const ERROR_TEXT = Object.freeze({
+    session_not_found: "没有找到这局游戏，请重新开始。",
+    missing_session: "没有找到这局游戏，请重新开始。",
+    session_not_finished: "本局还没有结束。",
+    stale_state: "游戏状态已经更新，请继续操作。",
+    stale_session: "游戏状态已经更新，请继续操作。",
+    default: "操作没有成功，请稍后再试。"
+  });
+
   const TILE_COLORS = {
     2: "#eee4da",
     4: "#ede0c8",
@@ -755,16 +740,16 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   };
 
   const state = {
-    user: null,
-    session: null,
-    busy: false,
-    bestScore: 0,
-    stats: null,
-    rank: null,
-    leaderboard: [],
-    guestMode: false,
-    toastTimer: null,
-    lastBoard: Array(16).fill(0)
+    user:null,
+    session:null,
+    busy:false,
+    bestScore:0,
+    stats:null,
+    rank:null,
+    leaderboard:[],
+    guestMode:false,
+    toastTimer:null,
+    lastBoard:Array(16).fill(0)
   };
 
   const el = {
@@ -800,11 +785,6 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     resultDesc: document.getElementById("resultDesc"),
     rewardBox: document.querySelector(".reward-box"),
     rewardLine: document.getElementById("rewardLine"),
-    animalEncounterMask: document.getElementById("animalEncounterMask"),
-    animalEncounterIcon: document.getElementById("animalEncounterIcon"),
-    animalEncounterName: document.getElementById("animalEncounterName"),
-    animalEncounterMessage: document.getElementById("animalEncounterMessage"),
-    animalEncounterCloseBtn: document.getElementById("animalEncounterCloseBtn"),
     toast: document.getElementById("toast"),
     restartMask: document.getElementById("restartMask"),
     restartCancelBtn: document.getElementById("restartCancelBtn"),
@@ -812,49 +792,27 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     dpadButtons: Array.from(document.querySelectorAll("[data-direction]"))
   };
 
-  function wait(ms){
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   function normalizeText(value){
     return String(value ?? "").trim();
   }
 
+  function getFriendlyError(error, fallback = ERROR_TEXT.default){
+    const code = normalizeText(error?.code);
+    return ERROR_TEXT[code] || normalizeText(error?.message) || fallback;
+  }
+
   function getStoredUser(){
-    const loggedIn = localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
-    const nickname = localStorage.getItem(STORAGE_KEYS.user) || "";
-    const role = localStorage.getItem(STORAGE_KEYS.role) || "";
-    const memberId = localStorage.getItem(STORAGE_KEYS.memberId) || "";
-    const memberCode = localStorage.getItem(STORAGE_KEYS.memberCode) || "";
+    if(localStorage.getItem(STORAGE_KEYS.loggedIn) !== "true") return null;
 
-    if (loggedIn && nickname){
-      return {
-        nickname,
-        role: role || "member",
-        member_id: memberId,
-        member_code: memberCode
-      };
-    }
+    const nickname = normalizeText(localStorage.getItem(STORAGE_KEYS.user));
+    if(!nickname) return null;
 
-    try{
-      const raw =
-        localStorage.getItem("room10_user") ||
-        localStorage.getItem("room10_current_user") ||
-        localStorage.getItem("currentUser");
-
-      if (!raw) return null;
-      const data = JSON.parse(raw);
-      if (!data) return null;
-
-      return {
-        nickname: data.nickname || data.name || "",
-        role: data.role || "",
-        member_id: data.member_id || data.id || "",
-        member_code: data.member_code || data.memberCode || ""
-      };
-    }catch{
-      return null;
-    }
+    return {
+      nickname,
+      role: normalizeText(localStorage.getItem(STORAGE_KEYS.role)) || "member",
+      member_id: normalizeText(localStorage.getItem(STORAGE_KEYS.memberId)),
+      member_code: normalizeText(localStorage.getItem(STORAGE_KEYS.memberCode))
+    };
   }
 
   function getRoleLabel(role){
@@ -894,7 +852,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     el.statusBadge.classList.toggle("ok", type === "ok");
   }
 
-  function setBusy(value, message = "服务器正在计算...", showOverlay = true){
+  function setBusy(value, message = "正在移动方块…", showOverlay = true){
     state.busy = Boolean(value);
     el.boardLoading.textContent = message;
     el.boardLoading.classList.toggle("show", state.busy && showOverlay);
@@ -914,7 +872,6 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   function formatNumber(value){
     return Number(value || 0).toLocaleString("zh-CN");
   }
-
 
   function getTileStyle(value){
     if (!value) return { background: "", color: "" };
@@ -1042,7 +999,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
 
     if (!entries.length){
       const li = document.createElement("li");
-      li.innerHTML = `<span>—</span><span class="loading-line">还没有正式结算记录</span><span></span>`;
+      li.innerHTML = `<span>—</span><span class="loading-line">还没有正式结算记录</span>`;
       el.rankList.appendChild(li);
       return;
     }
@@ -1054,58 +1011,49 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
       const rank = document.createElement("b");
       rank.textContent = `#${entry.rank}`;
 
+      const main = document.createElement("span");
+      main.className = "rank-main";
+
       const name = document.createElement("span");
       name.className = "rank-name";
       name.textContent = entry.nickname || "成员";
 
+      const detail = document.createElement("span");
+      detail.className = "rank-detail";
+
       const score = document.createElement("span");
       score.className = "rank-score";
-      score.textContent = formatNumber(entry.score);
+      score.textContent = `最高分 ${formatNumber(entry.score)}`;
 
-      li.append(rank,name,score);
+      const maxTile = `方块 ${formatNumber(entry.max_tile || 2)}`;
+      const moveCount = `步数 ${formatNumber(entry.move_count || 0)}`;
+      detail.append(score, document.createTextNode(` · ${maxTile} · ${moveCount}`));
+
+      main.append(name, detail);
+      li.append(rank, main);
       el.rankList.appendChild(li);
     });
   }
 
   function getSupabaseClient(){
-    if (window.room10SupabaseClient?.rpc) return window.room10SupabaseClient;
-    if (window.room10Supabase?.rpc) return window.room10Supabase;
-    if (window.supabaseClient?.rpc) return window.supabaseClient;
-    if (window.supabaseClientPublic?.rpc) return window.supabaseClientPublic;
-    if (window.supabaseClientAnon?.rpc) return window.supabaseClientAnon;
-    if (window.sb?.rpc) return window.sb;
-    if (window.ROOM10_DB?.client?.rpc) return window.ROOM10_DB.client;
-    if (window.Room10DB?.client?.rpc) return window.Room10DB.client;
+    if(window.room10Supabase?.rpc) return window.room10Supabase;
 
-    if (window.supabase?.createClient && SUPABASE_CONFIG.url && SUPABASE_CONFIG.key){
-      window.room10SupabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
-      window.room10Supabase = window.room10SupabaseClient;
-      window.supabaseClient = window.room10SupabaseClient;
-      return window.room10SupabaseClient;
+    if(!window.supabase?.createClient){
+      throw new Error("游戏服务未加载。");
     }
 
-    throw new Error("Supabase 客户端未加载");
-  }
+    window.room10Supabase = window.supabase.createClient(
+      SUPABASE_CONFIG.url,
+      SUPABASE_CONFIG.key
+    );
 
-  async function getSupabaseClientAsync(){
-    let lastError = null;
-    for (let i = 0; i < 30; i++){
-      try{
-        const client = getSupabaseClient();
-        if (client?.rpc) return client;
-      }catch(error){
-        lastError = error;
-      }
-      await wait(100);
-    }
-    throw lastError || new Error("Supabase 客户端未加载");
+    return window.room10Supabase;
   }
 
   async function callRpc(name, params = {}){
-    const client = await getSupabaseClientAsync();
-    const result = await client.rpc(name, params);
-    if (result.error) throw new Error(result.error.message);
-    return result.data;
+    const { data, error } = await getSupabaseClient().rpc(name, params);
+    if(error) throw error;
+    return data;
   }
 
   function authParams(){
@@ -1244,14 +1192,14 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     state.bestScore = 0;
     renderSession(session,state.lastBoard);
     setStatus("游客模式", "ok");
-    el.gameHint.textContent = "游客可直接游玩；本局不会写入个人记录或排行榜。";
+    el.gameHint.textContent = UI_TEXT.guestHint;
     if (showMessage) showToast("游客模式已开始，不计入记录榜单");
   }
 
-  function finishGuestGame(){
+  async function finishGuestGame(){
     if (!state.session) return;
     const session = state.session;
-    renderResult({
+    await renderResult({
       score: Number(session.score || 0),
       max_tile: Number(session.max_tile || 2),
       move_count: Number(session.move_count || 0),
@@ -1268,7 +1216,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     if (!result.moved){
       if (result.gameOver){
         state.session.status = "finished";
-        finishGuestGame();
+        await finishGuestGame();
       }else{
         showToast("这个方向无法移动");
       }
@@ -1289,7 +1237,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
       ? `本次合并 +${formatNumber(result.scoreGain)} 分 · 游客记录不入榜`
       : "继续滑动，把相同数字合并起来。游客记录不入榜。";
 
-    if (result.gameOver) finishGuestGame();
+    if (result.gameOver) await finishGuestGame();
   }
 
   async function startOrResume(){
@@ -1297,7 +1245,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
       startGuestGame();
       return;
     }
-    setBusy(true,"正在读取游戏状态...");
+    setBusy(true, UI_TEXT.preparingGame);
     try{
       const result = await callRpc("start_game_2048_session", authParams());
       if (!result?.ok) throw new Error(result?.message || "无法开始 2048");
@@ -1316,7 +1264,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
 
     if (result?.ok && result?.run){
       localStorage.removeItem(STORAGE_KEYS.game2048Session);
-      renderResult(result.run);
+      await renderResult(result.run);
       await loadStatsAndRanking();
       return { settled:true, result };
     }
@@ -1361,7 +1309,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     if (state.busy || !state.session || state.session.status !== "active") return;
 
     const previousBoard = Array.isArray(state.session.board) ? state.session.board.slice() : Array(16).fill(0);
-    setBusy(true,"服务器正在计算本次移动...",false);
+    setBusy(true, UI_TEXT.moving, false);
 
     try{
       const result = await callRpc("move_game_2048_session", {
@@ -1393,14 +1341,14 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
       if (Number(result.score_gain || 0) > 0){
         el.gameHint.textContent = `本次合并 +${formatNumber(result.score_gain)} 分`;
       }else{
-        el.gameHint.textContent = "继续滑动，把相同数字合并起来。";
+        el.gameHint.textContent = UI_TEXT.playHint;
       }
 
       if (result.game_over || result.session?.status === "finished"){
         await finishGame(result.session.id);
       }
     }catch(error){
-      showToast(error.message || "移动失败","error");
+      showToast(getFriendlyError(error, "移动失败，请稍后再试。"), "error");
     }finally{
       setBusy(false);
     }
@@ -1408,29 +1356,27 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
 
   async function finishGame(sessionId){
     if (state.guestMode){
-      finishGuestGame();
+      await finishGuestGame();
       return;
     }
-    setBusy(true,"正在统一结算本局奖励...");
+    setBusy(true, UI_TEXT.settling);
     try{
       await settleSession(sessionId);
       setStatus("本局已结算","ok");
     }catch(error){
       setStatus("结算失败","error");
-      showToast(error.message || "本局结算失败","error");
+      showToast(getFriendlyError(error, "本局结算失败，请稍后再试。"), "error");
       throw error;
     }finally{
       setBusy(false);
     }
   }
 
-  function renderResult(run){
+  async function renderResult(run){
     const guestResult = Boolean(run?.guest_mode || state.guestMode);
     state.session = null;
     showScreen("result");
-    el.resultDesc.textContent = guestResult
-      ? "游客模式：本局只在当前页面结算，不写入个人记录或排行榜。"
-      : "本局已经由服务器完成统一结算。";
+    el.resultDesc.textContent = guestResult ? UI_TEXT.guestResult : UI_TEXT.resultRecorded;
     el.rewardBox.style.display = guestResult ? "none" : "";
     el.resultScore.textContent = formatNumber(run.score);
     el.resultMaxTile.textContent = formatNumber(run.max_tile);
@@ -1449,34 +1395,32 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
       });
     }
 
-    el.rewardLine.textContent = rewards.length ? rewards.join(" · ") : "本局没有额外奖励。";
+    el.rewardLine.textContent = rewards.length ? rewards.join(" · ") : UI_TEXT.noReward;
 
-
-    const encounter = run.animal_encounter || {};
-    if (!guestResult && encounter.triggered){
-      const data = encounter.data || {};
-      const petName = normalizeText(data.pet_name || data.name || "神秘小动物");
-      const message = normalizeText(
-        data.message ||
-        `你在本局结束时遇见了${petName}，获得额外图片 1 张。`
-      );
-
-      el.animalEncounterIcon.textContent = normalizeText(data.icon || "🐾");
-      el.animalEncounterName.textContent = petName;
-      el.animalEncounterMessage.textContent = message;
-
-      setTimeout(() => {
-        el.animalEncounterMask.classList.add("show");
-        el.animalEncounterMask.setAttribute("aria-hidden","false");
-        el.animalEncounterCloseBtn.focus();
-      }, 220);
+    if (!guestResult){
+      await show2048AnimalEncounter(run?.animal_encounter);
     }
   }
 
+  async function show2048AnimalEncounter(encounter){
+    if (!encounter || encounter.triggered !== true) return false;
 
-  function closeAnimalEncounterModal(){
-    el.animalEncounterMask.classList.remove("show");
-    el.animalEncounterMask.setAttribute("aria-hidden","true");
+    const host = window.parent !== window ? window.parent : window;
+    const showEncounter = host?.showAnimalEncounterModal;
+
+    if (typeof showEncounter !== "function"){
+      showToast(UI_TEXT.encounterUnavailable, "error");
+      console.error("统一动物偶遇弹窗未找到", encounter);
+      return false;
+    }
+
+    try{
+      return await showEncounter(encounter);
+    }catch(error){
+      console.error("显示动物偶遇失败：", error);
+      showToast(getFriendlyError(error, UI_TEXT.encounterUnavailable), "error");
+      return false;
+    }
   }
 
   function openRestartModal(){
@@ -1524,7 +1468,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
       el.gameHint.textContent = "新的一局开始了。电脑可用方向键或 WASD，手机可直接滑动。";
       showToast("已开始新的 2048 对局");
     }catch(error){
-      showToast(error.message || "重新开始失败","error");
+      showToast(getFriendlyError(error, "重新开始失败，请稍后再试。"), "error");
     }finally{
       setBusy(false);
     }
@@ -1540,7 +1484,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     try{
       await startOrResume();
     }catch(error){
-      showToast(error.message || "新对局创建失败","error");
+      showToast(getFriendlyError(error, "新对局创建失败，请稍后再试。"), "error");
     }
   }
 
@@ -1559,12 +1503,6 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     el.restartCancelBtn.addEventListener("click", closeRestartModal);
     el.restartConfirmBtn.addEventListener("click", restartGame);
     el.newGameBtn.addEventListener("click", startNewAfterResult);
-    el.animalEncounterCloseBtn.addEventListener("click", closeAnimalEncounterModal);
-
-    el.animalEncounterMask.addEventListener("click", event => {
-      if (event.target === el.animalEncounterMask) closeAnimalEncounterModal();
-    });
-
     el.restartMask.addEventListener("click", event => {
       if (event.target === el.restartMask) closeRestartModal();
     });
@@ -1574,10 +1512,6 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     });
 
     window.addEventListener("keydown", event => {
-      if (el.animalEncounterMask.classList.contains("show")){
-        if (event.key === "Escape") closeAnimalEncounterModal();
-        return;
-      }
       if (el.restartMask.classList.contains("show")){
         if (event.key === "Escape") closeRestartModal();
         return;
@@ -1661,10 +1595,9 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
       return;
     }
 
-    setStatus("正在连接");
+    setStatus("正在准备");
 
     try{
-      await getSupabaseClientAsync();
       await loadStatsAndRanking();
 
       const recoveredResult = await recoverStoredSession();
@@ -1677,7 +1610,7 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     }catch(error){
       console.error(error);
       setStatus("读取失败","error");
-      showPermission("暂时无法进入 2048", error.message || "数据库读取失败，请稍后重试。", "back");
+      showPermission("暂时无法进入 2048", getFriendlyError(error, UI_TEXT.gameUnavailable), "back");
     }
   }
 
