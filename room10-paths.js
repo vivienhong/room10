@@ -61,6 +61,12 @@ window.ROOM10_PATHS = {
       badge4: "badges/4.png",
       badge5: "badges/5.png",
 
+      B1: "badges/B1.png",
+      B2: "badges/B2.png",
+      B3: "badges/B3.png",
+      B4: "badges/B4.png",
+      B5: "badges/B5.png",
+
       newyear: "badges/newyear.png",
       spring: "badges/spring.png",
       lantern: "badges/lantern.png",
@@ -275,6 +281,13 @@ window.ROOM10_PATHS = {
       badge3: "入室 3 年",
       badge4: "入室 4 年",
       badge5: "入室 5 年",
+
+      birthdayFileNameRule: "badges/B1.png 至 badges/B5.png 分别代表成员进入十号房后共同度过第 1 至第 5 次生日的礼包徽章。",
+      B1: "第一次共同度过生日",
+      B2: "第二次共同度过生日",
+      B3: "第三次共同度过生日",
+      B4: "第四次共同度过生日",
+      B5: "第五次共同度过生日",
 
       holidayFileNameRule: "badges/newyear.png 至 badges/christmas.png 分别代表节日礼包或节日徽章图案。",
       newyear: "元旦：新年烟花",
