@@ -351,15 +351,33 @@ button{
 }
 
 .siteNoticeItem{
+  width:100%;
   display:flex;
   gap:calc(8px * var(--s));
   align-items:flex-start;
   padding:calc(10px * var(--s));
   border-radius:calc(12px * var(--s));
   background:rgba(255,252,247,0.82);
+  border:none;
+  color:inherit;
+  font:inherit;
+  text-align:left;
   box-shadow:
     inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.92),
     0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(120,92,63,0.05);
+}
+
+button.siteNoticeItem{
+  cursor:pointer;
+  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+button.siteNoticeItem:hover{
+  transform:translateY(calc(-1px * var(--s)));
+  background:rgba(255,248,235,0.98);
+  box-shadow:
+    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.96),
+    0 calc(5px * var(--s)) calc(14px * var(--s)) rgba(120,92,63,0.09);
 }
 
 .siteNoticeItemIcon{
@@ -391,6 +409,22 @@ button{
   font-size:calc(11px * var(--s));
   line-height:1.55;
   word-break:break-word;
+}
+
+.siteNoticeActionLabel{
+  flex:0 0 auto;
+  align-self:center;
+  min-height:calc(26px * var(--s));
+  padding:0 calc(9px * var(--s));
+  border-radius:calc(9px * var(--s));
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg, rgba(239,213,171,.96), rgba(223,189,138,.94));
+  color:#6a4120;
+  font-size:calc(10px * var(--s));
+  font-weight:900;
+  white-space:nowrap;
 }
 
 /* ===== SVG 热区 ===== */
@@ -861,6 +895,19 @@ body.room10ModalOpen{overflow:hidden!important;}
   background:radial-gradient(circle at 12% 16%, rgba(224,244,216,.70), transparent 30%), radial-gradient(circle at 86% 18%, rgba(255,239,181,.50), transparent 32%), linear-gradient(180deg, rgba(255,253,247,.98), rgba(241,248,229,.96));
 }
 
+.reward-mask[data-type="daily"] .reward-label,
+.reward-mask[data-type="daily"] .reward-section-title{
+  display:none!important;
+}
+
+.reward-mask[data-type="daily"] .reward-title{
+  margin-top:calc(4px * var(--reward-scale));
+}
+
+.reward-mask[data-type="daily"] .reward-desc{
+  margin-bottom:calc(12px * var(--reward-scale));
+}
+
 .reward-mask[data-type="gift"] .reward-card{
   background:radial-gradient(circle at 12% 16%, rgba(255,226,235,.74), transparent 30%), radial-gradient(circle at 86% 18%, rgba(223,235,255,.58), transparent 32%), linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,240,231,.96));
 }
@@ -1251,6 +1298,7 @@ let rewardModalShowing = false;
 let rewardAfterCloseCallback = null;
 let currentRewardClaimAction = null;
 let rewardClaimInFlight = false;
+let dailyLoginCheckInFlight = false;
 let holidayGiftCheckInFlight = false;
 let anniversaryCheckInFlight = false;
 let seasonEffectState = { rafId: 0, onResize: null };
@@ -1429,6 +1477,37 @@ function validateMember(row, sourceLabel){
   };
 }
 
+function extractIdentityMember(data){
+  if(Array.isArray(data)){
+    return data.length ? extractIdentityMember(data[0]) : null;
+  }
+
+  const payload = data && typeof data === "object" ? data : null;
+  if(!payload) return null;
+
+  for(const key of ["member", "identity", "data", "item", "record"]){
+    const value = payload[key];
+    if(value && typeof value === "object"){
+      const extracted = extractIdentityMember(value);
+      if(extracted) return extracted;
+    }
+  }
+
+  if(Array.isArray(payload.items) && payload.items.length){
+    const extracted = extractIdentityMember(payload.items[0]);
+    if(extracted) return extracted;
+  }
+
+  if(payload.id || payload.member_id) return payload;
+  return null;
+}
+
+function identityPayloadExplicitlyMissing(data){
+  if(!data || typeof data !== "object" || Array.isArray(data)) return false;
+  const status = normalizeTextValue(data.status || data.code).toLowerCase();
+  return data.found === false || status === "not_found" || status === "member_not_found";
+}
+
 async function fetchCurrentMember(){
   if(!isLoggedIn()){
     currentMember = null;
@@ -1455,13 +1534,19 @@ async function fetchCurrentMember(){
     return null;
   }
 
-  if(!data){
-    clearStoredLogin();
-    clearPageError();
+  const identityRow = extractIdentityMember(data);
+  if(!identityRow){
+    currentMember = null;
+    if(identityPayloadExplicitlyMissing(data)){
+      clearStoredLogin();
+      clearPageError();
+    }else{
+      showPageError(text("error.member_read_failed"), "get_index_member_identity 返回结构无法识别");
+    }
     return null;
   }
 
-  currentMember = validateMember(data, "get_index_member_identity 返回值");
+  currentMember = validateMember(identityRow, "get_index_member_identity 返回值");
   saveStoredMember(currentMember);
   return currentMember;
 }
@@ -1787,6 +1872,81 @@ function closeRewardModal(){
   }
 }
 
+function buildDailyLoginRewardModal(result){
+  const gold = result?.gold_reward || {};
+  const encounter = result?.encounter_triggered ? result?.encounter : null;
+  const goldAmount = Number(gold.amount) || 1;
+  const encounterMessage = normalizeTextValue(encounter?.message);
+
+  return normalizeRewardModalPayload({
+    type:"daily",
+    icon:encounter?.image_path || gold.icon || "🪙",
+    label:"今日签到",
+    title:`今日登录 +${goldAmount}金币`,
+    desc:["每日登录奖励已到账。", encounterMessage].filter(Boolean).join("\n"),
+    rewards:encounter
+      ? [{
+          name:normalizeTextValue(encounter.pet_name) || "动物图片卡",
+          icon:encounter.image_path || "🐾",
+          amount:Number(encounter.quantity) || 1,
+          unit:"张"
+        }]
+      : []
+  }, "claim_index_daily_login_reward");
+}
+
+async function maybeClaimIndexDailyLoginReward(options = {}){
+  if(!isLoggedIn() || dailyLoginCheckInFlight || !currentMember) return false;
+
+  dailyLoginCheckInFlight = true;
+
+  try{
+    const { data, error } = await client.rpc("claim_index_daily_login_reward", {
+      p_member_id:currentMember.id,
+      p_member_code:currentMember.memberCode,
+      p_timezone_offset_minutes:new Date().getTimezoneOffset()
+    });
+
+    if(error){
+      showPageError("每日登录奖励处理失败", error.message || "claim_index_daily_login_reward RPC 失败");
+      return false;
+    }
+
+    if(data?.success === false){
+      if(data?.reason !== "role_not_allowed"){
+        showPageError("每日登录奖励处理失败", data?.message || data?.reason || "未知错误");
+      }
+      return false;
+    }
+
+    if(!data?.show_modal) return false;
+
+    showRewardModal(buildDailyLoginRewardModal(data), options.afterClose);
+    return true;
+  }catch(err){
+    showPageError("每日登录奖励处理失败", err.message || String(err));
+    return false;
+  }finally{
+    dailyLoginCheckInFlight = false;
+  }
+}
+
+function runAfterRewardQueue(callback, hasRewards){
+  if(!hasRewards){
+    callback();
+    return;
+  }
+
+  const lastQueued = rewardQueue.at(-1);
+  if(lastQueued){
+    lastQueued.afterClose = callback;
+  }else if(rewardModalShowing){
+    rewardAfterCloseCallback = callback;
+  }else{
+    callback();
+  }
+}
+
 async function maybeClaimJoinAnniversaryAchievements(options = {}){
   if(!isLoggedIn() || anniversaryCheckInFlight || !currentMember) return false;
 
@@ -1938,12 +2098,17 @@ async function claimCurrentReward(){
   }
 }
 
+function getNoticeAckStorageKey(){
+  const memberId = normalizeTextValue(currentMember?.id || getStoredMemberId());
+  return memberId ? `${NOTICE_ACK_KEY}:${memberId}` : NOTICE_ACK_KEY;
+}
+
 function getAckSignature(){
-  return localStorage.getItem(NOTICE_ACK_KEY) || "";
+  return localStorage.getItem(getNoticeAckStorageKey()) || "";
 }
 
 function setAckSignature(signature){
-  localStorage.setItem(NOTICE_ACK_KEY, String(signature || ""));
+  localStorage.setItem(getNoticeAckStorageKey(), String(signature || ""));
 }
 
 function setNoticeCount(count){
@@ -1953,15 +2118,29 @@ function setNoticeCount(count){
 }
 
 function validateNoticeItem(item, index){
+  const noticeKey = normalizeTextValue(item?.notice_key || item?.id);
+  const noticeType = normalizeTextValue(item?.notice_type || item?.type);
   const icon = normalizeTextValue(item?.icon);
   const main = normalizeTextValue(item?.main || item?.title);
   const sub = normalizeTextValue(item?.sub || item?.description);
+  const targetPage = normalizeTextValue(item?.target_page);
+  const targetId = normalizeTextValue(item?.target_id);
+  const actionLabel = normalizeTextValue(item?.action_label);
 
   if(!main){
     fail(text("error.notice_config_invalid"), `items[${index}].main`);
   }
 
-  return { icon, main, sub };
+  return {
+    noticeKey,
+    noticeType,
+    icon,
+    main,
+    sub,
+    targetPage,
+    targetId,
+    actionLabel
+  };
 }
 
 async function loadNoticeItems(){
@@ -2031,15 +2210,26 @@ async function renderNotices(){
 
     siteNoticeContent.innerHTML = `
       <div class="siteNoticeList">
-        ${items.map(item => `
-          <div class="siteNoticeItem">
-            <div class="siteNoticeItemIcon">${escapeHtml(item.icon)}</div>
-            <div class="siteNoticeItemText">
-              <div class="siteNoticeItemTitle">${escapeHtml(item.main)}</div>
-              <div class="siteNoticeItemDesc">${escapeHtml(item.sub)}</div>
-            </div>
-          </div>
-        `).join("")}
+        ${items.map((item, index) => {
+          const tagName = item.targetPage ? "button" : "div";
+          const actionText = item.targetPage
+            ? `<span class="siteNoticeActionLabel">${escapeHtml(item.actionLabel || "前往处理")}</span>`
+            : "";
+          return `
+            <${tagName}
+              ${item.targetPage ? 'type="button"' : ''}
+              class="siteNoticeItem"
+              ${item.targetPage ? `data-notice-index="${index}"` : ''}
+            >
+              <div class="siteNoticeItemIcon">${escapeHtml(item.icon)}</div>
+              <div class="siteNoticeItemText">
+                <div class="siteNoticeItemTitle">${escapeHtml(item.main)}</div>
+                <div class="siteNoticeItemDesc">${escapeHtml(item.sub)}</div>
+              </div>
+              ${actionText}
+            </${tagName}>
+          `;
+        }).join("")}
       </div>
     `;
   }catch(err){
@@ -2059,6 +2249,30 @@ function markAllNoticesRead(){
 
 function openNoticePanel(){
   siteNoticePanel.classList.add("show");
+  if(noticeState.signature){
+    setAckSignature(noticeState.signature);
+    setNoticeCount(0);
+  }
+}
+
+function openNoticeTarget(item){
+  if(!item?.targetPage) return;
+
+  const page = requirePage(item.targetPage);
+  const url = new URL(page, window.location.href);
+
+  if(item.targetId){
+    url.searchParams.set("studio_jump", "1");
+    url.searchParams.set("project_id", item.targetId);
+    url.searchParams.set("target_area", item.noticeType || "lottery");
+  }
+
+  if(noticeState.signature){
+    setAckSignature(noticeState.signature);
+  }
+
+  closeNoticePanel();
+  window.location.href = url.href;
 }
 
 function closeNoticePanel(){
@@ -2112,11 +2326,13 @@ async function enterManagerRoom(){
 
   if(isLoggedIn()){
     try{
-      await fetchCurrentMember();
+      const verifiedMember = await fetchCurrentMember();
       updateIdentityDisplay();
+      if(!verifiedMember && isLoggedIn()) return;
     }catch(err){
       currentMember = null;
       showPageError(text("error.member_read_failed"), err.message || String(err));
+      return;
     }
   }
 
@@ -2203,12 +2419,12 @@ async function login(){
 
     if(member.invalidRole){
       setLoginMessage(text("role.invalid"));
-      await safeSyncHomeUI({ skipHolidayGiftCheck:true, skipAnniversaryCheck:true });
+      await safeSyncHomeUI({ skipDailyLoginCheck:true, skipHolidayGiftCheck:true, skipAnniversaryCheck:true });
       return;
     }
 
     setLoginMessage(text(`login.success.${member.role}`), true);
-    await safeSyncHomeUI({ skipHolidayGiftCheck:true, skipAnniversaryCheck:true });
+    await safeSyncHomeUI({ skipDailyLoginCheck:true, skipHolidayGiftCheck:true, skipAnniversaryCheck:true });
 
     setTimeout(async () => {
       const targetPage = getPendingRedirect();
@@ -2224,21 +2440,10 @@ async function login(){
       closeLogin(true);
 
       const continueAfterUpgradeNotice = async () => {
+        const claimedDaily = await maybeClaimIndexDailyLoginReward();
         const claimedAnniversary = await maybeClaimJoinAnniversaryAchievements({ force:true });
-        const claimedGift = await maybeClaimLoginHolidayGifts({ force:true, afterAllRewards:goTarget });
-
-        if(!claimedAnniversary && !claimedGift){
-          goTarget();
-        }else if(claimedAnniversary && !claimedGift){
-          const lastIndex = rewardQueue.length - 1;
-          if(lastIndex >= 0){
-            rewardQueue[lastIndex].afterClose = goTarget;
-          }else if(!rewardModalShowing){
-            goTarget();
-          }else{
-            rewardAfterCloseCallback = goTarget;
-          }
-        }
+        const claimedGift = await maybeClaimLoginHolidayGifts({ force:true });
+        runAfterRewardQueue(goTarget, claimedDaily || claimedAnniversary || claimedGift);
       };
 
       if(showUpgradeLoginNoticeIfNeeded(loginRow, continueAfterUpgradeNotice)){
@@ -2589,6 +2794,9 @@ async function safeSyncHomeUI(options = {}){
 
     if(currentMember?.invalidRole) return;
 
+    if(!options.skipDailyLoginCheck){
+      await maybeClaimIndexDailyLoginReward();
+    }
     if(!options.skipAnniversaryCheck){
       await maybeClaimJoinAnniversaryAchievements();
     }
@@ -2609,6 +2817,11 @@ function bindEvents(){
 
   siteNoticePanel.addEventListener("click", (event) => {
     event.stopPropagation();
+    const target = event.target.closest("[data-notice-index]");
+    if(!target) return;
+    const index = Number(target.dataset.noticeIndex);
+    const item = noticeState.items[index];
+    if(item) openNoticeTarget(item);
   });
 
   noticeClearBtn.addEventListener("click", markAllNoticesRead);
@@ -2676,12 +2889,13 @@ function bindEvents(){
 
   window.addEventListener("pageshow", () => safeSyncHomeUI());
   window.addEventListener("resize", () => syncHomeTopbarScale());
-  window.addEventListener("focus", () => safeSyncHomeUI());
   document.addEventListener("visibilitychange", () => {
     if(!document.hidden) safeSyncHomeUI();
   });
   window.addEventListener("storage", (event) => {
-    if(SYNC_STORAGE_KEYS.has(event.key)){
+    const isNoticeAckKey = event.key === NOTICE_ACK_KEY
+      || String(event.key || "").startsWith(`${NOTICE_ACK_KEY}:`);
+    if(SYNC_STORAGE_KEYS.has(event.key) || isNoticeAckKey){
       noticeCache.at = 0;
       safeSyncHomeUI();
     }
