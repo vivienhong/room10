@@ -111,6 +111,13 @@ body.embedded .closeBtn{display:none;}
   font-weight:750;
   line-height:1.7;
 }
+/* 直接打开：手动输入资料 */
+.standaloneTextareas{display:grid;grid-template-columns:1fr 1fr;gap:14px;min-height:0;flex:1 1 auto;}
+.standaloneTextareas .field{min-height:0;}
+.standaloneTextareas .textarea{height:100%;min-height:260px;resize:none;}
+.standaloneActions{display:flex;flex-direction:column;gap:10px;}
+@media (max-width:860px){.standaloneTextareas{grid-template-columns:1fr}.standaloneTextareas .textarea{min-height:180px;}}
+
 /* 模式切换 */
 .modeSwitch{
   display:flex;
@@ -249,6 +256,37 @@ body.embedded .closeBtn{display:none;}
       <button class="closeBtn" type="button" onclick="closeWheel()">关闭</button>
     </div>
 
+    <section class="view setupView" id="standaloneSetupView">
+      <aside class="setupLeft">
+        <div class="card sectionCard">
+          <div class="cardTitle">直接使用转盘</div>
+          <div class="hint">分别输入演唱者和原唱／段落，每行一项，也可以使用中英文逗号分隔。默认转盘和附加转盘要求两边数量一致；特殊转盘允许段落多于演唱者。</div>
+        </div>
+        <div class="noticeBox">从项目委托页或待处理页打开时，名单会由来源页面自动传入，不需要手动填写。</div>
+      </aside>
+      <main class="setupMain">
+        <div class="standaloneTextareas">
+          <label class="field card sectionCard">演唱者<textarea class="textarea" id="standaloneSingerText" placeholder="扬
+夏
+桃"></textarea></label>
+          <label class="field card sectionCard">原唱／段落<textarea class="textarea" id="standaloneRoleText" placeholder="原唱A
+原唱B
+原唱C"></textarea></label>
+        </div>
+      </main>
+      <aside class="setupRight">
+        <div class="card sectionCard">
+          <div class="cardTitle">资料预览</div>
+          <div class="previewList" id="standalonePreviewList"></div>
+        </div>
+        <div class="standaloneActions">
+          <button class="primaryBtn" type="button" onclick="startStandaloneDefault()">生成默认转盘</button>
+          <button class="softBtn" type="button" onclick="startStandaloneAddon()">设置附加转盘</button>
+          <button class="softBtn" type="button" onclick="startStandaloneSpecial()">生成特殊转盘</button>
+        </div>
+      </aside>
+    </section>
+
     <section class="view setupView" id="addonSetupView">
       <aside class="setupLeft">
         <div class="card navCard"><div class="modeSwitch"><button class="modeSwitchBtn" onclick="startDefaultMode()">默认转盘</button><button class="modeSwitchBtn active" onclick="openAddonSetup()">附加转盘</button><button class="modeSwitchBtn" onclick="openSpecialSetup()">特殊转盘</button></div></div>
@@ -345,19 +383,28 @@ body.embedded .closeBtn{display:none;}
 </div>
 <script>
 const COLORS=["#ffe5c2","#ffd6a5","#ffcad4","#cdb4db","#bde0fe","#caffbf","#f8edc6","#d8f3dc","#fde2e4","#e2ece9","#fbc4ab","#d0f4de"];
-const DEFAULT_SINGERS=[{id:"demo-a",member_id:"demo-a",name:"扬",label:"扬"},{id:"demo-b",member_id:"demo-b",name:"夏",label:"夏"},{id:"demo-c",member_id:"demo-c",name:"桃",label:"桃"},{id:"demo-d",member_id:"demo-d",name:"罐",label:"罐"},{id:"demo-e",member_id:"demo-e",name:"Lumi",label:"Lumi"}];
-const DEFAULT_ROLES=["1","2","3","4","5"].map((v,i)=>({id:`demo-r-${i}`,part_id:`demo-r-${i}`,original_name:v,label:v}));
 let singers=[];let roles=[];let addonLayers=[];let runMode="default";let runLayers=[];let currentResults=[];let layerRotations=[];let layerReadStarts=[];let specialSegments=[];let spinning=false;let wheelContext={};let integrationMode="standalone";let wheelChannelId="";
 const $=id=>document.getElementById(id);
 function safe(v){return String(v??"").trim();}
 function hasParent(){return window.parent&&window.parent!==window;}
 function hasOpener(){try{return !!(window.opener&&!window.opener.closed);}catch(e){return false;}}
-function post(payload){
-  const message={...payload,context:{...(payload?.context||{}),...(wheelContext||{}),integration_mode:integrationMode,channel_id:wheelChannelId||safe(payload?.context?.channel_id)}};
-  if(hasParent())window.parent.postMessage(message,"*");
-  if(hasOpener())window.opener.postMessage(message,"*");
+function integrationTarget(){if(hasParent())return window.parent;if(hasOpener())return window.opener;return null;}
+function targetOrigin(){return /^https?:$/.test(location.protocol)?location.origin:"*";}
+function isTrustedMessageEvent(event){
+  const target=integrationTarget();
+  if(!target||event.source!==target)return false;
+  if(/^https?:$/.test(location.protocol))return event.origin===location.origin;
+  return event.origin==="null"||event.origin==="";
 }
-function showView(id){["addonSetupView","specialSetupView","runView"].forEach(v=>$(v).classList.toggle("active",v===id));}
+function post(payload){
+  const target=integrationTarget();
+  if(!target)return false;
+  const message={...payload,context:{...(payload?.context||{}),...(wheelContext||{}),integration_mode:integrationMode,channel_id:wheelChannelId||safe(payload?.context?.channel_id)}};
+  target.postMessage(message,targetOrigin());
+  return true;
+}
+
+function showView(id){["standaloneSetupView","addonSetupView","specialSetupView","runView"].forEach(v=>$(v).classList.toggle("active",v===id));}
 function parseJsonParam(v){
   if(!v)return null;
   const candidates=[String(v)];
@@ -421,37 +468,106 @@ function showWaitingState(){
   $("pageSubtitle").textContent="正在等待来源页面发送转盘资料…";
   showView("");
 }
+function splitStandaloneValues(text){
+  return String(text||"").split(/[\n,，]+/).map(safe).filter(Boolean);
+}
+function uniqueLabels(values){
+  const seen=new Set();
+  return values.filter(value=>{const key=value.toLocaleLowerCase();if(seen.has(key))return false;seen.add(key);return true;});
+}
+function renderStandalonePreview(){
+  const singerCount=uniqueLabels(splitStandaloneValues($("standaloneSingerText")?.value)).length;
+  const roleCount=splitStandaloneValues($("standaloneRoleText")?.value).length;
+  const list=$("standalonePreviewList");
+  if(list)list.innerHTML=`<div class="previewItem">演唱者：${singerCount} 人</div><div class="previewItem">原唱／段落：${roleCount} 项</div>`;
+}
+function loadStandaloneData(){
+  const singerLabels=uniqueLabels(splitStandaloneValues($("standaloneSingerText")?.value));
+  const roleLabels=splitStandaloneValues($("standaloneRoleText")?.value);
+  if(!singerLabels.length){alert("请先输入演唱者");return false;}
+  if(!roleLabels.length){alert("请先输入原唱或段落");return false;}
+  singers=singerLabels.map((label,index)=>({id:`manual-singer-${index}`,member_id:`manual-singer-${index}`,name:label,label}));
+  roles=roleLabels.map((label,index)=>({id:`manual-role-${index}`,part_id:`manual-role-${index}`,original_name:label,label,row_index:index}));
+  integrationMode="standalone";
+  wheelContext={source:"standalone",integration_mode:"standalone"};
+  return true;
+}
+function openStandaloneSetup(){
+  integrationMode="standalone";
+  wheelContext={source:"standalone",integration_mode:"standalone"};
+  $("pageTitle").textContent="角色转盘";
+  $("pageSubtitle").textContent="手动输入名单，或从项目委托／待处理页打开";
+  $("closeBtn")?.removeAttribute("hidden");
+  renderStandalonePreview();
+  showView("standaloneSetupView");
+}
+function startStandaloneDefault(){
+  if(!loadStandaloneData())return;
+  if(singers.length!==roles.length){alert(`默认转盘需要数量一致。\n演唱者：${singers.length} 人\n原唱／段落：${roles.length} 项`);return;}
+  startDefaultMode();
+}
+function startStandaloneAddon(){
+  if(!loadStandaloneData())return;
+  if(singers.length!==roles.length){alert(`附加转盘需要数量一致。\n演唱者：${singers.length} 人\n原唱／段落：${roles.length} 项`);return;}
+  openAddonSetup();
+}
+function startStandaloneSpecial(){
+  if(!loadStandaloneData())return;
+  $("specialText").value=roles.map(item=>item.label).join("\n");
+  openSpecialSetup();
+}
+
 function normalizeSinger(item,index){if(typeof item==="string"){const label=safe(item);return label?{id:label,member_id:label,name:label,label}:null;}if(item&&typeof item==="object"){const id=safe(item.member_id||item.memberId||item.id||item.nickname||item.name||`singer-${index}`);const label=safe(item.label||item.nickname||item.name||item.member_name||item.memberName||id);return label?{...item,id,member_id:id,name:label,label}:null;}return null;}
 function normalizeRole(item,index){if(typeof item==="string"){const label=safe(item);return label?{id:label,part_id:label,original_name:label,label}:null;}if(item&&typeof item==="object"){const id=safe(item.part_id||item.project_part_id||item.partId||item.id||item.original_name||`role-${index}`);const label=safe(item.label||item.original_name||item.originalName||item.name||item.title||id);return label?{...item,id,part_id:id,original_name:label,label}:null;}return null;}
 function normalizeList(arr,fn){if(!Array.isArray(arr))return[];const seen=new Set();const out=[];arr.forEach((x,i)=>{const n=fn(x,i);if(!n)return;const key=n.id||n.label;if(seen.has(key))return;seen.add(key);out.push(n);});return out;}
+function memberIdOf(item){return safe(item?.member_id||item?.memberId||item?.assigned_member_id||item?.assignedSingerId||item?.singer_id||item?.singerId||item?.singer?.member_id||item?.singer?.id);}
+function isExplicitlyLocked(item){return item?.locked===true||item?.is_locked===true||item?.fixed===true||item?.is_fixed===true;}
+function filterWheelInput(data){
+  const singerSource=data.singers||data.members||data.inner||data.innerItems||[];
+  const roleSource=data.roles||data.parts||data.outer||data.outerItems||data.items||[];
+  const rawSingers=Array.isArray(singerSource)?singerSource:[];
+  const rawRoles=Array.isArray(roleSource)?roleSource:[];
+  const preserve=data.preserve_existing_assignments===true||data.context?.preserve_existing_assignments===true;
+  const fixedPairs=[...(Array.isArray(data.fixed_pairs)?data.fixed_pairs:[]),...(Array.isArray(data.context?.fixed_pairs)?data.context.fixed_pairs:[])];
+  const lockedMemberIds=new Set(fixedPairs.map(memberIdOf).filter(Boolean));
+  rawRoles.forEach(role=>{if(isExplicitlyLocked(role)||(preserve&&memberIdOf(role)))lockedMemberIds.add(memberIdOf(role));});
+  const rolesForWheel=rawRoles.filter(item=>!(isExplicitlyLocked(item)||(preserve&&memberIdOf(item))));
+  return {
+    singers:rawSingers.filter(item=>!isExplicitlyLocked(item)&&!lockedMemberIds.has(memberIdOf(item))),
+    roles:rolesForWheel,
+    excludedCount:rawRoles.length-rolesForWheel.length
+  };
+}
 function setWheelData(rawData={}){
   const data=normalizeInboundData(rawData);
   specialSegments=[];
-  integrationMode=safe(data.integration_mode||data.context?.integration_mode||data.mode||integrationMode||"standalone");
+  integrationMode=safe(data.integration_mode||data.context?.integration_mode||data.mode||integrationMode||"embedded");
   wheelChannelId=safe(data.channel_id||data.context?.channel_id||wheelChannelId);
+  const filtered=filterWheelInput(data);
   wheelContext={
     ...(data.context||{}),
     project_id:data.project_id||data.projectId||data.task_id||data.taskId||data.context?.project_id||data.context?.task_id||"",
     project_name:data.project_name||data.projectName||data.task_name||data.taskName||data.context?.project_name||data.context?.task_name||"",
-    source:data.source||data.context?.source||integrationMode
+    source:data.source||data.context?.source||integrationMode,
+    excluded_fixed_count:filtered.excludedCount
   };
-  singers=normalizeList(data.singers||data.members||data.inner||data.innerItems||[],normalizeSinger);
-  roles=normalizeList(data.roles||data.parts||data.outer||data.outerItems||data.items||[],normalizeRole);
-  if(!singers.length||!roles.length){
-    if(integrationMode==="standalone"){
-      if(!singers.length)singers=[...DEFAULT_SINGERS];
-      if(!roles.length)roles=[...DEFAULT_ROLES];
-    }else{
-      $("pageTitle").textContent=data.title||"角色转盘";
-      $("pageSubtitle").textContent=!singers.length?"来源页面没有提供演唱者资料":"来源页面没有提供原唱或段落资料";
-      showView("");
-      return;
-    }
-  }
+  singers=normalizeList(filtered.singers,normalizeSinger);
+  roles=normalizeList(filtered.roles,normalizeRole);
   $("pageTitle").textContent=data.title||"角色转盘";
+  if(!singers.length||!roles.length){
+    $("pageSubtitle").textContent=!singers.length?"没有可参与本次转盘的演唱者":"没有可参与本次转盘的原唱或段落";
+    showView("");
+    return;
+  }
+  if((integrationMode==="submit"||integrationMode==="todo")&&singers.length!==roles.length){
+    $("pageSubtitle").textContent=`剩余演唱者 ${singers.length} 人、剩余原唱 ${roles.length} 项，数量不一致，不能开始分配。`;
+    showView("");
+    return;
+  }
   $("pageSubtitle").textContent=data.subtitle||"用于当前任务的角色分配";
   startDefaultMode(true);
 }
+
 function chipList(id,items){const el=$(id);el.innerHTML="";items.forEach(i=>{const s=document.createElement("span");s.className="chip";s.textContent=i.label||i.name||i.original_name;s.title=s.textContent;el.appendChild(s);});}
 function validateBase(){if(!singers.length){alert("暂无演唱者");return false;}return true;}
 function makeRegularRunLayers(){
@@ -538,7 +654,7 @@ function setActiveModeButton(mode){
     if(btn) btn.classList.toggle('active', key===mode);
   });
 }
-function openRun(title){currentResults=[];layerRotations=[];layerReadStarts=[];spinning=false;$("pageTitle").textContent=title;$("pageSubtitle").textContent=runMode==='special'?'内层显示演唱者，外层显示原唱/段落，转完后按指针顺序分配':'每一层都会独立随机排列，指针位置作为读取起点';showView('runView');setActiveModeButton(runMode);renderRunLayers();renderWheel();renderResults();$("confirmBtn").disabled=true;$("spinBtn").disabled=false;}
+function openRun(title){currentResults=[];layerRotations=[];layerReadStarts=[];spinning=false;$("pageTitle").textContent=title;$("pageSubtitle").textContent=runMode==='special'?'内层显示演唱者，外层显示原唱/段落，转完后按指针顺序分配':'每一层都会独立随机排列，指针位置作为读取起点';showView('runView');setActiveModeButton(runMode);renderRunLayers();renderWheel();renderResults();$("confirmBtn").textContent=integrationTarget()?"确认写入":"复制结果";$("confirmBtn").disabled=true;$("spinBtn").disabled=false;}
 function renderRunLayers(){
   $("runLayerCount").textContent=`${runLayers.length}层`;
   $("runLayerList").innerHTML=runLayers.map((l,i)=>{
@@ -614,9 +730,14 @@ function prepareLayersForSpin(){
   }
 }
 
+function pointerIndexForRotation(rotation,length){
+  if(!length)return 0;
+  const slice=360/length;
+  const pointerAngle=(((-rotation)%360)+360)%360;
+  return Math.floor(pointerAngle/slice)%length;
+}
 function spinWheel(){
-  if(spinning)return;
-  if(!runLayers.length)return;
+  if(spinning||!runLayers.length)return;
   spinning=true;
   currentResults=[];
   renderResults();
@@ -632,23 +753,23 @@ function spinWheel(){
   runLayers.forEach((layer,li)=>{
     const len=layer.items.length||1;
     const slice=360/len;
-    const startIndex=Math.floor(Math.random()*len);
-    const fineTune=Math.random()*slice*.38;
+    const targetIndex=Math.floor(Math.random()*len);
+    const jitter=(Math.random()-.5)*slice*.5;
     const direction=li%2===0?1:-1;
-    layerReadStarts[li]=startIndex;
-    layerRotations[li]=direction*((4+li)*360) - startIndex*slice + fineTune;
+    layerRotations[li]=direction*((4+li)*360)-(targetIndex+.5)*slice+jitter;
   });
 
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
       runLayers.forEach((layer,li)=>{
         const g=$(`wheelLayerGroup-${li}`);
-        if(g) g.style.transform=`rotate(${layerRotations[li]}deg)`;
+        if(g)g.style.transform=`rotate(${layerRotations[li]}deg)`;
       });
     });
   });
 
   setTimeout(()=>{
+    layerReadStarts=runLayers.map((layer,li)=>pointerIndexForRotation(layerRotations[li],layer.items.length));
     currentResults=buildResults(layerReadStarts);
     spinning=false;
     $("spinBtn").disabled=false;
@@ -657,6 +778,7 @@ function spinWheel(){
     post({type:'ROOM10_WHEEL_SPUN',mode:runMode,pairs:currentResults,layers:runLayers,context:{...wheelContext}});
   },2850);
 }
+
 function buildResults(starts){
   const readStarts=Array.isArray(starts)?starts:[starts||0];
   if(runMode==='special'){
@@ -695,47 +817,62 @@ function ordered(arr,start){if(!arr.length)return[];const s=((start%arr.length)+
 function buildFinalOriginalName(base,addons){base=safe(base);addons=(addons||[]).map(safe).filter(Boolean);if(!addons.length)return base;const m=base.match(/^(.*?)(?:（([^）]*)）)?$/);const main=safe(m?.[1])||base;const existing=safe(m?.[2]);const all=[...(existing?existing.split('｜').map(safe).filter(Boolean):[]),...addons];return `${main}（${all.join('｜')}）`;}
 function renderResults(){const list=$("resultList");list.innerHTML='';if(!currentResults.length){const e=document.createElement('div');e.className='resultEmpty';e.textContent='点击开始配对';list.appendChild(e);return;}currentResults.forEach(p=>{const d=document.createElement('div');d.className='resultItem';d.innerHTML=`<span>${escapeHtml(p.member_name)}</span><span class="resultArrow">→</span><span>${escapeHtml(p.final_original_name||p.original_name)}</span>`;list.appendChild(d);});}
 function resetRun(){layerRotations=[];layerReadStarts=[];currentResults=[];renderWheel();renderRunLayers();renderResults();$("confirmBtn").disabled=true;$("spinBtn").disabled=false;}
-function confirmResult(){
-  if(!currentResults.length)return;
-  const unified={type:'ROOM10_WHEEL_CONFIRM',mode:runMode,pairs:currentResults,layers:runLayers,context:{...wheelContext}};
-  post(unified);
-  if(wheelContext?.legacy_protocol===true){
-    post({
-      type:'room10-wheel-result',
-      mode:runMode,
-      rows:currentResults.map(pair=>({
-        id:pair.part_id||pair.role?.part_id||pair.role?.id||'',
-        original:pair.final_original_name||pair.original_name||pair.role?.original_name||pair.role?.label||'',
-        assignedSingerId:pair.member_id||pair.singer?.member_id||pair.singer?.id||'',
-        assignedSingerName:pair.member_name||pair.singer?.name||pair.singer?.label||''
-      })),
-      pairs:currentResults,
-      context:{...wheelContext}
-    });
+async function confirmResult(){
+  if(!currentResults.length||spinning)return;
+  const target=integrationTarget();
+  if(target){
+    $("confirmBtn").disabled=true;
+    post({type:'ROOM10_WHEEL_CONFIRM',mode:runMode,pairs:currentResults,layers:runLayers,context:{...wheelContext}});
+    return;
+  }
+  const text=currentResults.map(pair=>`${pair.member_name} → ${pair.final_original_name||pair.original_name}`).join("\n");
+  try{
+    await navigator.clipboard.writeText(text);
+    alert("配对结果已复制");
+  }catch(error){
+    const box=document.createElement("textarea");
+    box.value=text;box.style.position="fixed";box.style.opacity="0";document.body.appendChild(box);box.select();
+    const copied=document.execCommand("copy");
+    box.remove();
+    alert(copied?"配对结果已复制":"无法自动复制，请从右侧结果中查看");
   }
 }
+
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
 function escapeHtml(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 function closeWheel(){
-  post({type:'ROOM10_WHEEL_CLOSE',context:{...wheelContext}});
-  if(hasOpener()){window.close();return;}
-  if(!hasParent()&&history.length>1)history.back();
+  if(integrationTarget()){
+    post({type:'ROOM10_WHEEL_CLOSE',context:{...wheelContext}});
+    if(hasOpener())window.close();
+    return;
+  }
+  if($("runView")?.classList.contains("active")||$("addonSetupView")?.classList.contains("active")||$("specialSetupView")?.classList.contains("active")){
+    openStandaloneSetup();
+    return;
+  }
+  if(history.length>1)history.back();
 }
-window.addEventListener('message',e=>{
-  const d=e.data||{};
-  if(d.type==='ROOM10_WHEEL_INIT'||d.type==='room10-wheel-open')setWheelData(d);
+window.addEventListener('message',event=>{
+  if(!isTrustedMessageEvent(event))return;
+  const data=event.data||{};
+  const incomingChannel=safe(data.channel_id||data.context?.channel_id);
+  if(wheelChannelId&&incomingChannel&&incomingChannel!==wheelChannelId)return;
+  if(data.type==='ROOM10_WHEEL_INIT'||data.type==='room10-wheel-open')setWheelData(data);
 });
 window.addEventListener('load',()=>{
   const params=new URLSearchParams(location.search);
-  integrationMode=safe(params.get('mode')||params.get('from')||((hasParent()||hasOpener())?'embedded':'standalone'));
+  const embedded=hasParent()||hasOpener()||params.get('embed')==='1';
+  integrationMode=safe(params.get('mode')||params.get('from')||(embedded?'embedded':'standalone'));
   wheelChannelId=safe(params.get('channel_id'));
-  if(hasParent()||params.get('embed')==='1')document.body.classList.add('embedded');
+  if(embedded)document.body.classList.add('embedded');
   const data=parseJsonParam(params.get('data'))||parseJsonParam(params.get('payload'));
   if(data)setWheelData(data);
-  else if(integrationMode==='standalone')setWheelData({integration_mode:'standalone'});
-  else showWaitingState();
+  else if(embedded)showWaitingState();
+  else openStandaloneSetup();
   $('specialText').addEventListener('input',renderSpecialPreview);
-  post({type:'ROOM10_WHEEL_READY'});
+  $('standaloneSingerText').addEventListener('input',renderStandalonePreview);
+  $('standaloneRoleText').addEventListener('input',renderStandalonePreview);
+  if(embedded)post({type:'ROOM10_WHEEL_READY',channel_id:wheelChannelId});
 });
 </script>
 </body>
