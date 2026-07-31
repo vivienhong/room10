@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>骑士精神｜十号房</title>
+<!-- 2026-07-31: secure RPC identity patch; bootstrap/start/continue all send member_id + member_code -->
 <style>
 *{box-sizing:border-box}
 :root{
@@ -1666,10 +1667,19 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 
   async function loadBootstrap(){
     try{
+      const memberId = getCurrentMemberId();
+      const memberCode = getCurrentMemberCode();
+
+      if (!memberId || !memberCode){
+        showMemberLoginRequired();
+        return;
+      }
+
       const response = await callRpc(RPC.bootstrap, {
         p_game_key: GAME_KEY,
         p_text_keys: UI_TEXT_KEYS,
-        p_member_id: getCurrentMemberId()
+        p_member_id: memberId,
+        p_member_code: memberCode
       });
 
       const payload = unwrapPayload(response);
@@ -1910,7 +1920,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       const response = await callRpc(RPC.start, {
         p_game_key: GAME_KEY,
         p_knight_member_id: state.selectedKnight.id,
-        p_member_id: getCurrentMemberId()
+        p_member_id: getCurrentMemberId(),
+        p_member_code: getCurrentMemberCode()
       });
 
       const payload = unwrapPayload(response);
@@ -1983,7 +1994,9 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     try{
       const response = await callRpc(RPC.continueGame, {
         p_game_key: GAME_KEY,
-        p_record_id: state.game.recordId
+        p_record_id: state.game.recordId,
+        p_member_id: getCurrentMemberId(),
+        p_member_code: getCurrentMemberCode()
       });
 
       const payload = unwrapPayload(response);
@@ -3066,6 +3079,17 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     el.resultScreen.classList.toggle("active", name === "result");
   }
 
+  function showMemberLoginRequired(){
+    state.autoPlay = false;
+    clearAutoTimer();
+    showScreen("permission");
+    pageTitle.textContent = fallbackText("page.title");
+    permissionTitle.textContent = "请先重新登录";
+    permissionBody.textContent = "骑士精神需要同时验证成员 ID 和钥匙。请返回游戏房重新登录后再进入。";
+    el.statusBadge.textContent = "成员验证未完成";
+    el.permissionBackBtn.textContent = fallbackText("button.back_game");
+  }
+
   function showFatalError(error){
     state.autoPlay = false;
     clearAutoTimer();
@@ -3366,6 +3390,10 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   function getCurrentMemberId(){
     const raw = localStorage.getItem("room10MemberId") || "";
     return isUuid(raw) ? raw : null;
+  }
+
+  function getCurrentMemberCode(){
+    return String(localStorage.getItem("room10MemberCode") || "").trim();
   }
 
   function isUuid(value){
