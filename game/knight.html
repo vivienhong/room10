@@ -1417,6 +1417,33 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     align-content:start;
   }
 }
+
+
+/* ===== 动物偶遇弹窗 ===== */
+.animal-encounter-modal{width:min(430px,100%);text-align:center;}
+.animal-encounter-icon{font-size:34px;line-height:1;margin-bottom:6px;}
+.animal-encounter-label{color:#9a7047;font-size:12px;font-weight:950;letter-spacing:.08em;}
+.animal-encounter-title{margin:6px 0 8px;font-size:24px;font-weight:950;color:#68452b;}
+.animal-encounter-desc{margin:0 0 14px!important;line-height:1.65!important;}
+.animal-encounter-reward{
+  margin:0 auto 16px;
+  width:min(270px,100%);
+  padding:14px 12px;
+  border-radius:20px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+  background:rgba(255,252,248,.70);
+  border:1px solid rgba(255,255,255,.82);
+}
+.animal-encounter-reward img{
+  width:92px;height:92px;object-fit:contain;border-radius:18px;
+  background:rgba(255,248,232,.72);
+}
+.animal-encounter-reward-name{font-size:14px;font-weight:950;color:#68452b;}
+.animal-encounter-reward-note{font-size:11px;font-weight:850;color:var(--muted);}
+
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -1574,6 +1601,21 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     </div>
   </div>
 </div>
+
+<div class="mask" id="animalEncounterMask" aria-hidden="true">
+  <div class="modal animal-encounter-modal" role="dialog" aria-modal="true" aria-labelledby="animalEncounterTitle">
+    <div class="animal-encounter-icon" aria-hidden="true">🐾</div>
+    <div class="animal-encounter-label">动物偶遇</div>
+    <h2 class="animal-encounter-title" id="animalEncounterTitle">遇见了一只小动物！</h2>
+    <p class="animal-encounter-desc" id="animalEncounterDesc">获得额外宠物图片卡 1 张。</p>
+    <div class="animal-encounter-reward">
+      <img id="animalEncounterImage" alt="动物图片卡" hidden>
+      <div class="animal-encounter-reward-name" id="animalEncounterRewardName">宠物图片卡 ×1</div>
+      <div class="animal-encounter-reward-note">已放入你的背包</div>
+    </div>
+    <button class="btn" type="button" id="animalEncounterCloseBtn">收下图片卡</button>
+  </div>
+</div>
 <script>
 (() => {
   "use strict";
@@ -1676,7 +1718,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     autoTimer: null,
     deckPreviewRemaining: null,
     busy: false,
-    event: { type: "", indices: [], dim: false }
+    event: { type: "", indices: [], dim: false },
+    pendingAnimalEncounter: null
   };
   const el = {};
   [
@@ -1687,7 +1730,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     "sideFlip","savedTip","resultAvatar","resultMain","resultGuard","resultPair","resultTriple",
     "resultX9","resultClear","resultFlip","resultGold","rewardList","againBtn","backBtn",
     "permissionBackBtn","rewardMask","modalRewards","closeRewardBtn","leaderMask","leaderTabs",
-    "leaderContent","closeLeaderBtn","sideRankList"
+    "leaderContent","closeLeaderBtn","sideRankList","animalEncounterMask","animalEncounterTitle",
+    "animalEncounterDesc","animalEncounterImage","animalEncounterRewardName","animalEncounterCloseBtn"
   ].forEach(id => {
     el[id] = document.getElementById(id);
   });
@@ -1714,6 +1758,10 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     el.backBtn.addEventListener("click", backToGameRoom);
     el.permissionBackBtn.addEventListener("click", backToGameRoom);
     el.closeRewardBtn.addEventListener("click", closeUnlockModal);
+    el.animalEncounterCloseBtn.addEventListener("click", closeAnimalEncounterModal);
+    el.animalEncounterMask.addEventListener("click", event => {
+      if (event.target === el.animalEncounterMask) closeAnimalEncounterModal();
+    });
     el.rewardMask.addEventListener("click", event => {
       if (event.target === el.rewardMask) closeUnlockModal();
     });
@@ -2070,7 +2118,13 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       updateAutoButton();
       await waitBeforeResultAfterFinalBoard(events, game);
       showResult(game);
-      if (unlocks.length) showUnlocks(unlocks);
+      const encounter = normalizeAnimalEncounter(payload.animal_encounter);
+      if (unlocks.length){
+        state.pendingAnimalEncounter = encounter;
+        showUnlocks(unlocks);
+      }else if (encounter){
+        showAnimalEncounterModal(encounter);
+      }
       return;
     }
     el.roundBtn.disabled = false;
@@ -2689,6 +2743,58 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   }
   function closeUnlockModal(){
     el.rewardMask.classList.remove("show");
+    if (state.pendingAnimalEncounter){
+      const encounter = state.pendingAnimalEncounter;
+      state.pendingAnimalEncounter = null;
+      showAnimalEncounterModal(encounter);
+    }
+  }
+  function normalizeAnimalEncounter(payload){
+    if (!payload || payload.triggered !== true) return null;
+    const data = payload.data && typeof payload.data === "object" ? payload.data : {};
+    const petName = String(data.pet_name || data.animal_name || data.name || "").trim();
+    const message = String(data.message || "").trim();
+    const image = String(data.image_url || data.image_path || data.image || data.icon || "").trim();
+    const quantity = Math.max(1, Number(data.quantity || data.amount || data.count || 1));
+    if (!petName) return null;
+    return {
+      petName,
+      message: message || `${petName}好奇地过来围观。`,
+      image,
+      quantity
+    };
+  }
+  function resolveAnimalEncounterImage(value){
+    const image = String(value || "").trim();
+    if (!image) return "";
+    if (/^(https?:|data:|blob:|\/)/i.test(image)) return image;
+    if (typeof window.room10AssetUrl === "function"){
+      try { return window.room10AssetUrl(image, image); } catch (_) {}
+    }
+    return image;
+  }
+  function showAnimalEncounterModal(encounter){
+    if (!encounter || !el.animalEncounterMask) return false;
+    el.animalEncounterTitle.textContent = `遇见了${encounter.petName}！`;
+    el.animalEncounterDesc.textContent = encounter.message;
+    el.animalEncounterRewardName.textContent = `${encounter.petName}图片卡 ×${encounter.quantity}`;
+    const src = resolveAnimalEncounterImage(encounter.image);
+    if (src){
+      el.animalEncounterImage.src = src;
+      el.animalEncounterImage.alt = `${encounter.petName}图片卡`;
+      el.animalEncounterImage.hidden = false;
+    }else{
+      el.animalEncounterImage.removeAttribute("src");
+      el.animalEncounterImage.hidden = true;
+    }
+    el.animalEncounterMask.classList.add("show");
+    el.animalEncounterMask.setAttribute("aria-hidden", "false");
+    return true;
+  }
+  function closeAnimalEncounterModal(){
+    if (!el.animalEncounterMask) return;
+    el.animalEncounterMask.classList.remove("show");
+    el.animalEncounterMask.setAttribute("aria-hidden", "true");
   }
   async function loadLeaderboards(showFatal = true){
     try{
