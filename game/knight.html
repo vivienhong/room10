@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>骑士精神｜十号房</title>
-<!-- 2026-07-31: secure RPC identity patch; bootstrap/start/continue all send member_id + member_code -->
 <style>
 *{box-sizing:border-box}
 :root{
@@ -23,7 +22,6 @@
   --ice2:#77d7ff;
   --shadow:0 24px 60px rgba(82,58,35,.18);
 }
-
 html,body{
   margin:0;
   min-height:100%;
@@ -36,7 +34,6 @@ html,body{
 }
 body{overflow-x:hidden;overflow-y:auto}
 button{font-family:inherit;-webkit-tap-highlight-color:transparent}
-
 .page{
   width:100%;
   min-height:100dvh;
@@ -45,7 +42,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   justify-content:center;
   align-items:flex-start;
 }
-
 .shell{
   width:min(1140px,100%);
   padding:10px;
@@ -57,13 +53,11 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     rgba(255,247,232,.55);
   box-shadow:var(--shadow);
 }
-
 .inner{
   display:grid;
   grid-template-columns:minmax(0,1fr) 290px;
   gap:14px;
 }
-
 .main-card,.side-card{
   min-width:0;
   border-radius:28px;
@@ -73,7 +67,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     linear-gradient(180deg,var(--paper),var(--paper2));
   box-shadow:inset 0 1px 0 rgba(255,255,255,.88);
 }
-
 .main-card{
   position:relative;
   min-height:640px;
@@ -81,14 +74,12 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   display:flex;
   flex-direction:column;
 }
-
 .side-card{
   padding:18px;
   display:flex;
   flex-direction:column;
   gap:12px;
 }
-
 .topbar{
   display:flex;
   justify-content:space-between;
@@ -96,7 +87,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   gap:14px;
   margin-bottom:14px;
 }
-
 .title{
   margin:0;
   color:#664024;
@@ -106,7 +96,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   letter-spacing:.06em;
   text-shadow:0 1px 0 rgba(255,255,255,.72);
 }
-
 .desc{
   margin:7px 0 0;
   color:var(--muted);
@@ -114,7 +103,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   font-weight:800;
   line-height:1.5;
 }
-
 .badge{
   flex:0 0 auto;
   min-height:32px;
@@ -130,16 +118,12 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   background:rgba(255,249,236,.82);
   border:1px solid rgba(170,126,88,.16);
 }
-
 .screen{display:none;flex:1 1 auto;min-height:0}
 .screen.active{display:flex}
-
-/* select */
 .select-screen{flex-direction:column}
 .select-head{text-align:center;padding:0 8px 12px}
 .select-head h2{margin:0;font-size:22px;font-weight:950}
 .select-head p{margin:6px 0 0;color:var(--muted);font-size:13px;font-weight:800}
-
 .knight-grid{
   flex:1 1 auto;
   display:grid;
@@ -149,7 +133,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   gap:12px;
   padding:6px 4px 14px;
 }
-
 .option{
   appearance:none;
   width:104px;
@@ -187,7 +170,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     0 0 0 3px rgba(213,158,71,.13),
     0 12px 28px rgba(155,101,32,.12);
 }
-
 .avatar{
   width:62px;
   height:62px;
@@ -203,7 +185,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 }
 .avatar.small{width:42px;height:42px;font-size:16px}
 .avatar.big{width:104px;height:104px;font-size:38px}
-
 .option-name{
   width:100%;
   text-align:center;
@@ -230,7 +211,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   background:rgba(255,248,232,.82);
   border:1px solid rgba(174,132,94,.18);
 }
-
 .action-row{
   display:flex;
   justify-content:center;
@@ -288,7 +268,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   background:rgba(237,248,218,.92);
   border-color:rgba(255,255,255,.9);
 }
-
 .btn,.btn-sub{
   appearance:none;
   min-width:168px;
@@ -325,8 +304,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   transform:none;
   box-shadow:none;
 }
-
-/* permission */
 .permission-screen{align-items:center;justify-content:center;text-align:center}
 .permission-box{
   width:min(520px,100%);
@@ -343,16 +320,12 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   line-height:1.7;
   font-weight:800;
 }
-
-/* play */
 .play-screen{flex-direction:column;gap:12px}
-
 .stats{
   display:grid;
   grid-template-columns:1.55fr repeat(5,minmax(0,1fr));
   gap:10px;
 }
-
 .stat{
   min-height:58px;
   padding:8px 10px;
@@ -389,7 +362,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   overflow:hidden;
   text-overflow:ellipsis;
 }
-
 .board-area{
   flex:1 1 auto;
   display:flex;
@@ -515,7 +487,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   40%{transform:var(--deck-transform) translate(4px,-5px) rotate(8deg) scale(1.03); opacity:1;}
   100%{transform:var(--deck-transform) scale(1); opacity:var(--deck-opacity);}
 }
-
 .board-frame{
   position:relative;
   width:min(100%,455px,calc(100dvw - 80px));
@@ -539,7 +510,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   border:1px dashed rgba(128,88,52,.22);
   pointer-events:none;
 }
-
 .board{
   position:relative;
   z-index:2;
@@ -550,7 +520,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   grid-template-rows:repeat(3,1fr);
   gap:9px;
 }
-
 .slot{
   position:relative;
   border-radius:20px;
@@ -570,7 +539,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   border-radius:50%;
   border:1px dashed rgba(107,73,50,.18);
 }
-
 .card{
   position:absolute;
   inset:0;
@@ -600,7 +568,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   overflow:hidden;
   text-overflow:ellipsis;
 }
-
 .card.dim{filter:brightness(.72) saturate(.72);opacity:.50}
 .card.enter{animation:cardIn .32s ease both}
 .card.remove{animation:cardOut .28s ease both}
@@ -610,7 +577,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     0 0 0 2px rgba(255,209,108,.18),
     0 0 16px rgba(213,158,71,.22);
 }
-
 .card.event-guard{
   transform:scale(1.08);
   box-shadow:
@@ -640,7 +606,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     0 0 0 4px rgba(255,216,114,.30),
     0 0 40px rgba(217,164,65,.56);
 }
-
 @keyframes cardIn{
   0%{opacity:0;transform:scale(.86) rotateY(68deg)}
   100%{opacity:1;transform:scale(1) rotateY(0)}
@@ -649,14 +614,12 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   0%{opacity:1;transform:scale(1)}
   100%{opacity:0;transform:scale(.72)}
 }
-
 .effect-layer{
   position:absolute;
   inset:0;
   z-index:4;
   pointer-events:none;
 }
-
 .fx-guard-ring{
   position:absolute;
   width:124px;
@@ -699,7 +662,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     -18px 30px 0 rgba(255,235,172,.48),
     24px 26px 0 rgba(255,235,172,.45);
 }
-
 .fx-triple-band{
   position:absolute;
   height:34px;
@@ -726,7 +688,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   background:linear-gradient(90deg,transparent,rgba(255,255,255,1),transparent);
   animation:tripleSweep .62s ease-in-out infinite;
 }
-
 .fx-pair-heart{
   position:absolute;
   transform:translate(-50%,-50%);
@@ -756,7 +717,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     18px 18px 0 rgba(255,214,234,.42);
   transform:translate(-50%,-50%);
 }
-
 .fx-x9-star{
   position:absolute;
   transform:translate(-50%,-50%);
@@ -808,7 +768,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     168px 76px 0 rgba(255,236,166,.70);
   animation:sparkle .78s ease-in-out infinite;
 }
-
 .fx-clear-burst{
   position:absolute;
   left:50%;
@@ -824,7 +783,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     inset 0 0 36px rgba(233,248,255,.34);
   animation:clearBurst .82s ease-in-out infinite;
 }
-
 @keyframes guardRing{
   0%{transform:scale(.82);opacity:.95}
   100%{transform:scale(1.24);opacity:.16}
@@ -854,13 +812,10 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   0%,100%{opacity:.35;transform:translate(-50%,-50%) scale(.8)}
   50%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
 }
-
 @keyframes clearBurst{
   0%{transform:translate(-50%,-50%) scale(.84);opacity:.96}
   100%{transform:translate(-50%,-50%) scale(1.16);opacity:.20}
 }
-
-
 .play-footer{
   display:flex;
   flex-direction:column;
@@ -945,8 +900,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   76%{opacity:1;transform:translate(-50%,-50%) scale(1)}
   100%{opacity:0;transform:translate(-50%,-60%) scale(1)}
 }
-
-/* result */
 .result-screen{
   flex-direction:column;
   align-items:center;
@@ -998,8 +951,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   background:rgba(255,248,232,.74);
   border:1px solid rgba(174,132,94,.18);
 }
-
-/* side */
 .side-title{margin:0;font-size:18px;font-weight:950}
 .side-section{
   padding:12px;
@@ -1052,8 +1003,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 }
 .saved-tip{display:none;color:var(--muted);font-size:12px;line-height:1.6;font-weight:800}
 .saved-tip.show{display:block}
-
-/* modal */
 .mask{
   position:fixed;
   inset:0;
@@ -1129,7 +1078,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   font-weight:950;
 }
 .table tr.current td{background:rgba(255,239,203,.86);color:#70492a}
-
 .leader-shell{
   display:grid;
   grid-template-columns:190px minmax(0,1fr);
@@ -1231,8 +1179,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   }
 }
 .modal-bottom{padding-top:14px;display:flex;justify-content:center}
-
-
 .fx-clear-label{
   position:absolute;
   left:50%;
@@ -1273,7 +1219,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   50%{opacity:1;transform:translateY(-50%) scaleX(1)}
   100%{opacity:.18;transform:translateY(-50%) scaleX(.72)}
 }
-
 @media(max-width:860px){
   .inner{grid-template-columns:1fr}
   .main-card{min-height:auto;padding:18px 14px 16px}
@@ -1306,6 +1251,172 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   .knight-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .side-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+@media(max-width:540px){
+  .page{
+    min-height:100dvh;
+    padding:6px 5px 14px;
+  }
+  .shell{
+    padding:4px;
+    border-radius:24px;
+  }
+  .inner{gap:8px;}
+  .main-card{
+    min-height:0;
+    padding:10px 8px 12px;
+    border-radius:22px;
+  }
+  .topbar{
+    align-items:center;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .title{font-size:23px;}
+  .badge{flex-shrink:1;max-width:48%;overflow:hidden;text-overflow:ellipsis;}
+  .play-screen{gap:8px;}
+  .stats{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+  }
+  .stat{
+    min-height:46px;
+    padding:5px 4px;
+    border-radius:14px;
+    font-size:10px;
+  }
+  .stat strong{
+    margin-top:1px;
+    font-size:16px;
+  }
+  .stats .stat.knight{
+    grid-column:auto;
+    min-width:0;
+    justify-content:center;
+    gap:5px;
+    padding:4px;
+  }
+  .stats .stat.knight #miniAvatar{display:none;}
+  .stat.knight .knight-name{
+    max-width:100%;
+    font-size:14px;
+    text-align:center;
+  }
+  .board-area{
+    flex:0 0 auto;
+    min-height:0;
+  }
+  .deal-stage{
+    gap:7px;
+  }
+  .board-frame{
+    width:min(100%,calc(100dvw - 34px));
+    padding:8px;
+    border-radius:21px;
+  }
+  .board-frame::before{
+    inset:5px;
+    border-radius:17px;
+  }
+  .board{gap:5px;}
+  .slot,.card{border-radius:13px;}
+  .card{gap:4px;}
+  .card .avatar{width:38px;height:38px;font-size:15px;}
+  .card-name{font-size:10px;}
+  .deck-side{
+    min-height:52px;
+    gap:7px;
+  }
+  .deck-stack{
+    width:38px;
+    height:50px;
+  }
+  .deck-card,
+  .deal-fly-inner{border-radius:11px;}
+  .deck-card::before,
+  .deal-fly-inner::before{
+    inset:6px;
+    border-radius:8px;
+  }
+  .deck-card::after,
+  .deal-fly-inner::after{font-size:16px;}
+  .deck-meta{
+    min-width:74px;
+    padding:4px 8px;
+    border-radius:13px;
+  }
+  .deck-label{font-size:10px;}
+  .deck-count{font-size:19px;}
+  .play-footer{
+    gap:6px;
+    padding-top:0;
+  }
+  .hint{
+    min-height:16px;
+    font-size:11px;
+    line-height:1.35;
+  }
+  .play-actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+  }
+  .play-actions .btn,
+  .play-actions .btn-sub{
+    width:100%;
+    min-height:38px;
+    padding:0 8px;
+    font-size:13px;
+  }
+  .side-card{
+    padding:11px;
+    border-radius:22px;
+  }
+}
+@media (min-width:861px) and (max-height:820px){
+  html,
+  body{
+    height:auto !important;
+    min-height:100% !important;
+    overflow-x:hidden !important;
+    overflow-y:auto !important;
+  }
+  .page{
+    display:block;
+    width:100%;
+    height:auto !important;
+    min-height:100dvh;
+    overflow:visible;
+    padding-top:18px;
+    padding-bottom:28px;
+  }
+  .shell{
+    width:min(1140px,calc(100% - 28px));
+    margin:0 auto;
+    height:auto !important;
+    min-height:0;
+    overflow:visible;
+  }
+  .inner,
+  .main-card,
+  .select-screen,
+  .knight-grid{
+    height:auto !important;
+    max-height:none !important;
+    overflow:visible !important;
+  }
+  .main-card{
+    min-height:640px;
+  }
+  .select-screen.active{
+    display:flex;
+    flex:none;
+  }
+  .knight-grid{
+    flex:none;
+    align-content:start;
+  }
+}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -1315,7 +1426,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   </script>
   <script src="../room10-paths.js"></script>
 </head>
-
 <body>
 <div class="page">
   <div class="shell">
@@ -1328,7 +1438,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
           </div>
           <div class="badge" id="statusBadge">今日首局免费</div>
         </div>
-
         <section class="screen permission-screen" id="permissionScreen">
           <div class="permission-box">
             <h2>暂时无法开始旅程</h2>
@@ -1336,11 +1445,9 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
             <button class="btn" type="button" id="permissionBackBtn">返回游戏房</button>
           </div>
         </section>
-
         <section class="screen select-screen active" id="selectScreen">
           <div class="select-head">
             <h2>请选择一位骑士</h2>
-            
           </div>
           <div class="knight-grid" id="knightGrid"></div>
           <div class="action-row start-action">
@@ -1351,7 +1458,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
             <button class="btn" type="button" id="startBtn" disabled>开始旅程</button>
           </div>
         </section>
-
         <section class="screen play-screen" id="playScreen">
           <div class="stats">
             <div class="stat knight">
@@ -1367,7 +1473,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
             <div class="stat">全家福<strong id="x9Num">0</strong></div>
             <div class="stat">清台<strong id="clearNum">0</strong></div>
           </div>
-
           <div class="board-area">
             <div class="deal-stage">
               <div class="board-frame" id="boardFrame">
@@ -1384,7 +1489,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
               </div>
             </div>
           </div>
-
           <div class="play-footer">
             <div class="hint" id="hint">第一轮会一次翻开 9 张。</div>
             <div class="play-actions">
@@ -1393,13 +1497,11 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
             </div>
           </div>
         </section>
-
         <section class="screen result-screen" id="resultScreen">
           <div class="result-box">
             <h2 class="result-title">旅程结束</h2>
             <div id="resultAvatar"></div>
             <div class="result-main" id="resultMain">--</div>
-
             <div class="result-stats">
               <div class="stat">守护<strong id="resultGuard">0</strong></div>
               <div class="stat">对碰<strong id="resultPair">0</strong></div>
@@ -1409,12 +1511,10 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
               <div class="stat">总翻牌<strong id="resultFlip">0</strong></div>
               <div class="stat" style="grid-column:1/-1">返还金币<strong id="resultGold">0</strong></div>
             </div>
-
             <div class="reward-summary">
               <h3>获得奖励</h3>
               <ul class="reward-list" id="rewardList"></ul>
             </div>
-
             <div class="action-row">
               <button class="btn" type="button" id="againBtn">再来一局</button>
               <button class="btn-sub" type="button" id="backBtn">返回游戏房</button>
@@ -1422,10 +1522,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
           </div>
         </section>
       </main>
-
       <aside class="side-card">
         <h2 class="side-title">本局旅程</h2>
-
         <section class="side-section">
           <p class="side-label">骑士</p>
           <div class="side-knight">
@@ -1437,7 +1535,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
           </div>
           <div class="saved-tip" id="savedTip">已恢复未完成的旅程。</div>
         </section>
-
         <section class="side-section">
           <p class="side-label">本局数据</p>
           <div class="side-grid">
@@ -1449,7 +1546,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
             <div class="side-num">翻牌<strong id="sideFlip">0</strong></div>
           </div>
         </section>
-
         <section class="side-section">
           <p class="side-label">风云榜</p>
           <ol class="rank-list" id="sideRankList"></ol>
@@ -1458,7 +1554,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     </div>
   </div>
 </div>
-
 <div class="mask" id="rewardMask">
   <div class="modal">
     <h2>荣誉解锁</h2>
@@ -1467,7 +1562,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     <button class="btn" type="button" id="closeRewardBtn">确认</button>
   </div>
 </div>
-
 <div class="mask" id="leaderMask">
   <div class="modal board-modal">
     <h2>骑士风云榜</h2>
@@ -1480,20 +1574,16 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     </div>
   </div>
 </div>
-
 <script>
 (() => {
   "use strict";
-
   const GAME_KEY = "knight_spirit";
-
   const RPC = {
     bootstrap: "get_knight_spirit_bootstrap",
     start: "start_knight_spirit_game",
     continueGame: "continue_knight_spirit_game",
     leaderboards: "get_knight_spirit_leaderboards"
   };
-
   const EMERGENCY_TEXTS = {
     "page.title": "骑士精神",
     "status.loading": "读取中",
@@ -1503,7 +1593,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     "error.no_supabase": "没有找到 Supabase 连接配置。请确认当前页面已创建 window.room10SupabaseClient。",
     "error.missing_config": "配置缺失：{{key}}"
   };
-
   const UI_TEXT_KEYS = [
     "page.title",
     "page.desc.select",
@@ -1552,6 +1641,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     "leaderboard.lucky_x9.value_label",
     "leaderboard.clear_board.description",
     "leaderboard.clear_board.value_label",
+    "leaderboard.popular_knight_all.description",
+    "leaderboard.popular_knight_all.value_label",
     "leaderboard.popular_knight_month.description",
     "leaderboard.popular_knight_month.value_label",
     "leaderboard.reliable_knight_month.description",
@@ -1569,7 +1660,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     "empty.leaderboard",
     "empty.knight"
   ];
-
   const state = {
     texts: {},
     currentMember: null,
@@ -1588,7 +1678,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     busy: false,
     event: { type: "", indices: [], dim: false }
   };
-
   const el = {};
   [
     "permissionScreen","selectScreen","playScreen","resultScreen","gameDesc","statusBadge",
@@ -1602,7 +1691,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   ].forEach(id => {
     el[id] = document.getElementById(id);
   });
-
   const pageTitle = document.querySelector(".title");
   const sideTitle = document.querySelector(".side-title");
   const selectTitle = document.querySelector(".select-head h2");
@@ -1611,15 +1699,12 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   const modalTitle = document.querySelector("#rewardMask .modal h2");
   const modalBody = document.querySelector("#rewardMask .modal p");
   const leaderboardTitle = document.querySelector("#leaderMask .modal h2");
-
   init();
-
   function init(){
     bindEvents();
     setLoadingState();
     loadBootstrap();
   }
-
   function bindEvents(){
     el.startBtn.addEventListener("click", startJourney);
     el.costConfirmBtn.addEventListener("click", confirmJourneyCost);
@@ -1643,7 +1728,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       });
     }
   }
-
   function setLoadingState(){
     const loading = fallbackText("status.loading");
     pageTitle.textContent = fallbackText("page.title");
@@ -1664,31 +1748,26 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     el.sideKey.textContent = "--";
     renderEmptyBoard();
   }
-
   async function loadBootstrap(){
     try{
       const memberId = getCurrentMemberId();
       const memberCode = getCurrentMemberCode();
-
       if (!memberId || !memberCode){
         showMemberLoginRequired();
         return;
       }
-
       const response = await callRpc(RPC.bootstrap, {
         p_game_key: GAME_KEY,
         p_text_keys: UI_TEXT_KEYS,
         p_member_id: memberId,
         p_member_code: memberCode
       });
-
       const payload = unwrapPayload(response);
       applyBootstrap(payload);
     } catch (error){
       showFatalError(error);
     }
   }
-
   function applyBootstrap(payload){
     state.texts = normalizeTexts(payload.texts || payload.page_texts || {});
     state.currentMember = payload.current_member || null;
@@ -1704,15 +1783,12 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     state.dailyFreeAvailable = Boolean(payload.daily_free_available);
     state.costConfirmed = false;
     state.game = normalizeGame(payload.active_game || payload.game || null);
-
     applyTexts();
-
     if (!state.canPlay){
       showScreen("permission");
       el.statusBadge.textContent = payload.permission_status_text || t("status.no_permission");
       return;
     }
-
     if (state.game && state.game.recordId && state.game.phase !== "finished"){
       showScreen("play");
       setupKnightHeader(state.game.knight);
@@ -1725,7 +1801,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       renderGame();
       return;
     }
-
     showScreen("select");
     el.statusBadge.textContent = state.costText || payload.status_text || t("status.ready");
     updateCostNotice(state.goldCost, state.costText || payload.status_text || t("status.ready"), state.dailyFreeAvailable);
@@ -1733,7 +1808,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     renderKnightOptions();
     renderGame();
   }
-
   function applyTexts(){
     pageTitle.textContent = t("page.title");
     selectTitle.textContent = t("select.title");
@@ -1744,7 +1818,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     modalBody.textContent = t("unlock.body");
     leaderboardTitle.textContent = t("leaderboard.title");
     el.savedTip.textContent = t("status.restored");
-
     el.startBtn.textContent = t("button.start");
     el.roundBtn.textContent = t("button.start");
     el.againBtn.textContent = t("button.again");
@@ -1752,13 +1825,11 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     el.permissionBackBtn.textContent = t("button.back_game");
     el.closeRewardBtn.textContent = t("button.close");
     el.closeLeaderBtn.textContent = t("button.close");
-
     setStatLabel(el.guardNum, "stat.guard");
     setStatLabel(el.flipNum, "stat.flip");
     setStatLabel(el.remainNum, "stat.remaining");
     setStatLabel(el.x9Num, "stat.lucky_x9");
     setStatLabel(el.clearNum, "stat.clear");
-
     setStatLabel(el.resultGuard, "stat.guard");
     setStatLabel(el.resultPair, "stat.pair");
     setStatLabel(el.resultTriple, "stat.triple");
@@ -1766,26 +1837,21 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     setStatLabel(el.resultClear, "stat.clear");
     setStatLabel(el.resultFlip, "stat.flip");
     setStatLabel(el.resultGold, "result.gold_refund");
-
     const sideLabels = document.querySelectorAll(".side-label");
     if (sideLabels[0]) sideLabels[0].textContent = t("side.knight");
     if (sideLabels[1]) sideLabels[1].textContent = t("side.current_stats");
     if (sideLabels[2]) sideLabels[2].textContent = t("side.leaderboards");
-
     setSideNumLabel(el.sideGuard, "stat.guard");
     setSideNumLabel(el.sidePair, "stat.pair");
     setSideNumLabel(el.sideTriple, "stat.triple");
     setSideNumLabel(el.sideX9, "stat.lucky_x9");
     setSideNumLabel(el.sideClear, "stat.clear");
     setSideNumLabel(el.sideFlip, "stat.flip");
-
     const resultTitle = document.querySelector(".result-title");
     if (resultTitle) resultTitle.textContent = t("result.title");
-
     const rewardTitle = document.querySelector(".reward-summary h3");
     if (rewardTitle) rewardTitle.textContent = t("result.reward_title");
   }
-
   function setStatLabel(strongElement, key){
     if (!strongElement || !strongElement.parentNode) return;
     const parent = strongElement.parentNode;
@@ -1794,7 +1860,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       parent.childNodes[0].nodeValue = label;
     }
   }
-
   function setSideNumLabel(strongElement, key){
     if (!strongElement || !strongElement.parentNode) return;
     const parent = strongElement.parentNode;
@@ -1802,41 +1867,31 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       parent.childNodes[0].nodeValue = t(key);
     }
   }
-
   function updateStartButtonState(){
     if (!el.startBtn) return;
-
     const hasKnight = Boolean(state.selectedKnight);
-
     if (!hasKnight){
       el.startBtn.disabled = true;
       el.startBtn.textContent = t("button.select_knight");
       return;
     }
-
     const requiresConfirm = Number(state.goldCost || 0) > 0;
     const canStart = !requiresConfirm || state.costConfirmed;
-
     el.startBtn.disabled = !canStart;
     el.startBtn.textContent = t("button.start_with_knight", { knight: state.selectedKnight.name });
   }
-
   function updateCostNotice(cost, text, isFree){
     if (!el.costNotice) return;
-
     const amount = Number(cost || 0);
     const paidStarted = /已消耗/.test(text || "");
     let displayText = text || (amount > 0 ? `本局将消耗 ${amount} 金币` : "今日首局免费");
-
     if (amount > 0 && state.costConfirmed && !paidStarted){
       displayText = `已确认扣除 ${amount} 金币`;
     }
-
     el.costNotice.textContent = displayText;
     el.costNotice.classList.toggle("paid", amount > 0 && !paidStarted);
     el.costNotice.classList.toggle("free", amount <= 0 && Boolean(isFree));
     el.costNotice.classList.toggle("done", paidStarted || (amount > 0 && state.costConfirmed));
-
     if (el.costConfirmBtn){
       const showConfirmBtn = amount > 0 && !paidStarted;
       el.costConfirmBtn.hidden = !showConfirmBtn;
@@ -1845,16 +1900,13 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       el.costConfirmBtn.disabled = !state.selectedKnight || state.busy || state.costConfirmed;
     }
   }
-
   function confirmJourneyCost(){
     if (state.busy || !state.selectedKnight || Number(state.goldCost || 0) <= 0) return;
-
     state.costConfirmed = true;
     updateCostNotice(state.goldCost, state.costText || `本局将消耗 ${state.goldCost} 金币`, false);
     updateStartButtonState();
     el.hint.textContent = `已确认扣除 ${state.goldCost} 金币，可开始旅程。`;
   }
-
   function renderKnightOptions(){
     el.knightGrid.innerHTML = "";
     state.selectedKnight = null;
@@ -1862,7 +1914,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     updateStartButtonState();
     updateCostNotice(state.goldCost, state.costText || (state.goldCost > 0 ? `本局将消耗 ${state.goldCost} 金币` : "今日首局免费"), state.dailyFreeAvailable);
     el.hint.textContent = t("hint.select_knight");
-
     if (!state.candidates.length){
       const empty = document.createElement("div");
       empty.className = "hint";
@@ -1870,24 +1921,19 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       el.knightGrid.appendChild(empty);
       return;
     }
-
     state.candidates.forEach(member => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "option";
-
       button.appendChild(createAvatar(member));
-
       const name = document.createElement("div");
       name.className = "option-name";
       name.textContent = member.name;
       button.appendChild(name);
-
       const code = document.createElement("div");
       code.className = "option-key";
       code.textContent = member.cohort || "";
       button.appendChild(code);
-
       button.addEventListener("click", () => {
         document.querySelectorAll(".option").forEach(item => item.classList.remove("selected"));
         button.classList.add("selected");
@@ -1897,25 +1943,20 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
         updateCostNotice(state.goldCost, state.costText || (state.goldCost > 0 ? `本局将消耗 ${state.goldCost} 金币` : "今日首局免费"), state.dailyFreeAvailable);
         updateSideKnight(member);
       });
-
       el.knightGrid.appendChild(button);
     });
   }
-
   async function startJourney(){
     if (!state.selectedKnight || state.busy) return;
-
     if (Number(state.goldCost || 0) > 0 && !state.costConfirmed){
       el.hint.textContent = `请先在上方确认扣除 ${state.goldCost} 金币。`;
       updateCostNotice(state.goldCost, state.costText || `本局将消耗 ${state.goldCost} 金币`, false);
       return;
     }
-
     state.busy = true;
     updateStartButtonState();
     updateAutoButton();
     updateCostNotice(state.goldCost, state.costText || (state.goldCost > 0 ? `本局将消耗 ${state.goldCost} 金币` : "今日首局免费"), state.dailyFreeAvailable);
-
     try{
       const response = await callRpc(RPC.start, {
         p_game_key: GAME_KEY,
@@ -1923,7 +1964,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
         p_member_id: getCurrentMemberId(),
         p_member_code: getCurrentMemberCode()
       });
-
       const payload = unwrapPayload(response);
       if (typeof payload.gold_cost !== "undefined"){
         state.goldCost = Number(payload.gold_cost || 0);
@@ -1937,29 +1977,23 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       updateAutoButton();
     }
   }
-
   function clearAutoTimer(){
     if (state.autoTimer){
       clearTimeout(state.autoTimer);
       state.autoTimer = null;
     }
   }
-
   function updateAutoButton(){
     if (!el.autoBtn) return;
-
     const playable = Boolean(state.game && state.game.recordId && state.game.phase !== "finished");
     el.autoBtn.disabled = !playable || state.busy;
     el.autoBtn.classList.toggle("active", Boolean(state.autoPlay));
     el.autoBtn.textContent = state.autoPlay ? "停止自动" : "自动翻牌";
   }
-
   function queueAutoContinue(delay = 420){
     clearAutoTimer();
-
     if (!state.autoPlay || state.busy) return;
     if (!state.game || !state.game.recordId || state.game.phase === "finished") return;
-
     updateAutoButton();
     state.autoTimer = setTimeout(() => {
       state.autoTimer = null;
@@ -1968,12 +2002,10 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       }
     }, delay);
   }
-
   function toggleAutoPlay(){
     state.autoPlay = !state.autoPlay;
     clearAutoTimer();
     updateAutoButton();
-
     if (state.autoPlay){
       el.hint.textContent = "已开启自动翻牌。";
       queueAutoContinue(260);
@@ -1981,16 +2013,13 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       el.hint.textContent = "已关闭自动翻牌。";
     }
   }
-
   async function continueJourney(){
     if (!state.game || !state.game.recordId || state.busy) return;
-
     clearAutoTimer();
     state.busy = true;
     el.roundBtn.disabled = true;
     updateAutoButton();
     el.hint.textContent = t("hint.wait");
-
     try{
       const response = await callRpc(RPC.continueGame, {
         p_game_key: GAME_KEY,
@@ -1998,7 +2027,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
         p_member_id: getCurrentMemberId(),
         p_member_code: getCurrentMemberCode()
       });
-
       const payload = unwrapPayload(response);
       await applyGamePayload(payload, false);
     } catch (error){
@@ -2007,24 +2035,19 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       showFatalError(error);
     } finally {
       state.busy = false;
-
       if (state.game && state.game.phase !== "finished"){
         el.roundBtn.disabled = false;
       }
-
       updateAutoButton();
-
       if (state.autoPlay && state.game && state.game.phase !== "finished"){
         queueAutoContinue(360);
       }
     }
   }
-
   async function applyGamePayload(payload, fromStart){
     const game = normalizeGame(payload.game || payload.active_game || payload);
     const events = Array.isArray(payload.events) ? payload.events : [];
     const unlocks = Array.isArray(payload.unlocks) ? payload.unlocks : [];
-
     if (fromStart){
       showScreen("play");
       el.savedTip.classList.remove("show");
@@ -2033,17 +2056,14 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       if (payload.cost_text) el.hint.textContent = payload.cost_text;
       updateCostNotice(state.goldCost, startCostText, state.goldCost === 0);
     }
-
     if (state.game && events.length){
       await playServerEvents(events);
     } else if (state.game && boardHasVisibleChange(state.game.board, game.board)){
       await animateBoardToBeforeEvent(game.board, game.stats);
     }
-
     state.game = game;
     setupKnightHeader(game.knight);
     renderGame();
-
     if (game.phase === "finished"){
       state.autoPlay = false;
       clearAutoTimer();
@@ -2053,91 +2073,72 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       if (unlocks.length) showUnlocks(unlocks);
       return;
     }
-
     el.roundBtn.disabled = false;
     el.roundBtn.textContent = game.buttonText || t(game.hasStarted ? "button.continue" : "button.start");
     el.hint.textContent = game.hint || t(game.hasStarted ? "hint.continue" : "hint.start");
     updateAutoButton();
     queueAutoContinue(fromStart ? 340 : 520);
   }
-
   async function waitBeforeResultAfterFinalBoard(events, game){
     el.hint.textContent = game.hint || t("hint.finished");
-
     if (!Array.isArray(events) || !events.length){
       await wait(920);
       return;
     }
-
     await wait(520);
   }
-
   function boardHasVisibleChange(beforeBoard, afterBoard){
     const before = normalizeBoard(beforeBoard || []);
     const after = normalizeBoard(afterBoard || []);
-
     for (let i = 0; i < 9; i++){
       const beforeCard = before[i];
       const afterCard = after[i];
-
       if (!beforeCard && afterCard) return true;
       if (beforeCard && !afterCard) return true;
-
       if (beforeCard && afterCard){
         const beforeId = beforeCard.memberId || beforeCard.member_id || beforeCard.id || "";
         const afterId = afterCard.memberId || afterCard.member_id || afterCard.id || "";
         if (String(beforeId) !== String(afterId)) return true;
       }
     }
-
     return false;
   }
-
   async function playServerEvents(events){
     for (const rawEvent of events){
       const event = normalizeEvent(rawEvent);
-
       if (event.beforeBoard){
         await animateBoardToBeforeEvent(event.beforeBoard, event.statsBefore);
       } else if (event.statsBefore) {
         state.game.stats = event.statsBefore;
         renderGame();
       }
-
       state.event = {
         type: event.type,
         indices: event.indices,
         dim: true
       };
-
       renderGame();
-
       el.hint.textContent = event.hint || missingConfigText(`event.${event.type}.hint`);
       await wait(event.type === "clear" ? 720 : 660);
       await showToast(formatEventToast(event));
       await wait(80);
-
       if (event.afterBoard){
         await animateBoardAfterEvent(event, event.afterBoard, event.statsAfter);
       } else if (event.statsAfter) {
         state.game.stats = event.statsAfter;
       }
-
       clearEvent();
       renderGame();
       await wait(120);
     }
   }
-
   async function animateBoardToBeforeEvent(targetBoard, statsBefore){
     const current = normalizeBoard(state.game.board || []);
     const target = normalizeBoard(targetBoard || []);
     const drawIndices = [];
-
     for (let i = 0; i < 9; i++){
       if (!current[i] && target[i]) drawIndices.push(i);
     }
-
     if (!drawIndices.length){
       state.deckPreviewRemaining = null;
       state.game.board = cleanBoardRuntimeFlags(target);
@@ -2146,7 +2147,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       await wait(120);
       return;
     }
-
     const next = cloneBoard(current);
     const baseRemaining = Math.max(
       0,
@@ -2154,20 +2154,15 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       Number(statsBefore?.remaining || 0),
       drawIndices.length
     );
-
     let dealtCount = 0;
-
     for (const index of drawIndices){
       const remainingBeforeDeal = Math.max(0, baseRemaining - dealtCount);
       const remainingAfterDeal = Math.max(0, remainingBeforeDeal - 1);
-
       state.deckPreviewRemaining = remainingBeforeDeal;
       state.game.board = cloneBoard(next);
       if (statsBefore) state.game.stats = statsBefore;
       renderGame();
-
       await animateDealCardToSlot(index, remainingAfterDeal);
-
       next[index] = {
         ...target[index],
         entering: true,
@@ -2177,31 +2172,25 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       if (statsBefore) state.game.stats = statsBefore;
       renderGame();
       await wait(70);
-
       next[index] = {
         ...target[index],
         entering: false,
         removing: false
       };
-
       dealtCount += 1;
     }
-
     state.deckPreviewRemaining = null;
     state.game.board = cleanBoardRuntimeFlags(target);
     if (statsBefore) state.game.stats = statsBefore;
     renderGame();
     await wait(120);
   }
-
   async function animateBoardAfterEvent(event, targetBoard, statsAfter){
     const current = normalizeBoard(state.game.board || []);
     const target = cleanBoardRuntimeFlags(normalizeBoard(targetBoard || []));
     const indices = Array.isArray(event.indices) ? event.indices : [];
-
     if (["pair", "triple", "x9"].includes(event.type)){
       const removing = cloneBoard(current);
-
       indices.forEach(index => {
         if (removing[index]){
           removing[index] = {
@@ -2211,19 +2200,16 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
           };
         }
       });
-
       state.game.board = removing;
       if (statsAfter) state.game.stats = statsAfter;
       renderGame();
       await wait(300);
     }
-
     state.game.board = target;
     if (statsAfter) state.game.stats = statsAfter;
     renderGame();
     await wait(160);
   }
-
   function cleanBoardRuntimeFlags(board){
     return normalizeBoard(board).map(card => {
       if (!card) return null;
@@ -2234,26 +2220,20 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       };
     });
   }
-
   function cloneBoard(board){
     return normalizeBoard(board).map(card => card ? { ...card } : null);
   }
-
-
   function showResult(game){
     showScreen("result");
     el.statusBadge.textContent = t("status.finished");
     el.gameDesc.textContent = t("hint.finished");
     el.roundBtn.disabled = false;
-
     el.resultAvatar.innerHTML = "";
     el.resultAvatar.appendChild(createAvatar(game.knight, "avatar big"));
-
     el.resultMain.textContent = t("result.guard_sentence", {
       knight: game.knight.name,
       count: game.stats.guard
     });
-
     el.resultGuard.textContent = formatCount(game.stats.guard, "次");
     el.resultPair.textContent = formatCount(game.stats.pair, "次");
     el.resultTriple.textContent = formatCount(game.stats.triple, "次");
@@ -2261,44 +2241,35 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     el.resultClear.textContent = formatCount(game.stats.clear, "次");
     el.resultFlip.textContent = formatCount(game.stats.totalFlips, "张");
     el.resultGold.textContent = formatCount(game.stats.goldRefund, "枚");
-
     renderRewardList(game.rewards);
   }
-
   function renderGame(){
     renderBoard();
     renderEffects();
     updateStats();
     updateSide();
   }
-
   function updateDeckStack(remaining){
     const count = Math.max(0, Math.floor(Number(remaining || 0)));
     const maxVisualCards = 5;
     const visibleCount = Math.min(count, maxVisualCards);
     const previousCount = Number(el.deckStack?.dataset.remainingCount ?? count);
     const previousVisibleCount = Math.min(previousCount, maxVisualCards);
-
     if (el.deckCount){
       el.deckCount.textContent = String(count);
     }
-
     if (!el.deckStack) return;
-
     el.deckStack.classList.toggle("empty", count <= 0);
     el.deckStack.dataset.remainingCount = String(count);
-
     const countDecreased = count < previousCount;
     const shouldFlash =
       countDecreased &&
       visibleCount === maxVisualCards &&
       previousVisibleCount === maxVisualCards;
-
     if (shouldFlash){
       el.deckStack.classList.remove("count-flash");
       void el.deckStack.offsetWidth;
       el.deckStack.classList.add("count-flash");
-
       const topCard = el.deckStack.lastElementChild;
       if (topCard){
         topCard.classList.remove("peel");
@@ -2306,53 +2277,43 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
         topCard.classList.add("peel");
       }
     }
-
     const currentVisibleCount = el.deckStack.children.length;
     if (currentVisibleCount !== visibleCount){
       el.deckStack.innerHTML = "";
-
       for (let i = 0; i < visibleCount; i++){
         const card = document.createElement("span");
         card.className = "deck-card";
-
         const progress = visibleCount <= 1 ? 1 : i / (visibleCount - 1);
         const spreadX =
           visibleCount <= 1 ? 0 :
           visibleCount === 2 ? 6 :
           visibleCount === 3 ? 10 :
           visibleCount === 4 ? 14 : 18;
-
         const spreadY =
           visibleCount <= 1 ? 0 :
           visibleCount === 2 ? 3 :
           visibleCount === 3 ? 6 :
           visibleCount === 4 ? 8 : 10;
-
         const x = progress * spreadX;
         const y = -progress * spreadY;
         const rotate =
           visibleCount <= 1 ? 0 :
           visibleCount === 2 ? (-3 + progress * 6) :
           (-6 + progress * 12);
-
         const opacity = Math.max(.40, .38 + progress * .62);
         const transformValue = `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
-
         card.style.setProperty("--deck-transform", transformValue);
         card.style.setProperty("--deck-opacity", String(opacity));
         card.style.transform = transformValue;
         card.style.opacity = String(opacity);
         card.style.zIndex = String(i + 1);
-
         el.deckStack.appendChild(card);
       }
     }
   }
-
   async function animateDealCardToSlot(index, remainingAfterDeal = null){
     const deck = el.deckStack;
     const target = el.board.querySelector(`.slot[data-slot-index="${index}"]`);
-
     if (!deck || !target){
       if (remainingAfterDeal != null){
         state.deckPreviewRemaining = remainingAfterDeal;
@@ -2361,7 +2322,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       await wait(120);
       return;
     }
-
     const sourceCard = deck.lastElementChild || deck;
     const sourceRect = sourceCard.getBoundingClientRect();
     const targetRect = target.getBoundingClientRect();
@@ -2373,48 +2333,38 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       await wait(120);
       return;
     }
-
     deck.classList.remove("dealing");
     void deck.offsetWidth;
     deck.classList.add("dealing");
-
     if (sourceCard.classList && sourceCard.classList.contains("deck-card")){
       sourceCard.classList.remove("peel");
       void sourceCard.offsetWidth;
       sourceCard.classList.add("peel");
     }
-
     const fly = document.createElement("div");
     fly.className = "deal-fly-card";
     fly.style.width = `${sourceRect.width}px`;
     fly.style.height = `${sourceRect.height}px`;
     fly.style.left = `${sourceRect.left}px`;
     fly.style.top = `${sourceRect.top}px`;
-
     const inner = document.createElement("div");
     inner.className = "deal-fly-inner";
     fly.appendChild(inner);
     document.body.appendChild(fly);
-
     const left = targetRect.left + (targetRect.width - sourceRect.width) / 2;
     const top = targetRect.top + (targetRect.height - sourceRect.height) / 2;
-
     await wait(22);
-
     if (remainingAfterDeal != null){
       state.deckPreviewRemaining = remainingAfterDeal;
       updateDeckStack(remainingAfterDeal);
     }
-
     await wait(18);
     fly.classList.add("active");
     fly.style.left = `${left}px`;
     fly.style.top = `${top}px`;
-
     await wait(220);
     fly.remove();
   }
-
   function renderEmptyBoard(){
     el.board.innerHTML = "";
     for (let i = 0; i < 9; i++){
@@ -2425,80 +2375,61 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     }
     updateDeckStack(0);
   }
-
   function renderBoard(){
     if (!state.game){
       renderEmptyBoard();
       return;
     }
-
     el.board.innerHTML = "";
     const board = normalizeBoard(state.game.board);
-
     for (let i = 0; i < 9; i++){
       const slot = document.createElement("div");
       const card = board[i];
-
       slot.className = "slot" + (card ? "" : " empty");
       slot.dataset.slotIndex = String(i);
-
       if (card){
         const node = document.createElement("div");
         node.className = "card";
-
         if (card.entering) node.classList.add("enter");
         if (card.removing) node.classList.add("remove");
         if (card.guardClaimed) node.classList.add("guard-claimed");
-
         const isEventCard = state.event.indices.includes(i);
         if (state.event.dim && !isEventCard) node.classList.add("dim");
         if (isEventCard) node.classList.add(`event-${state.event.type}`);
-
         node.appendChild(createAvatar(card));
-
         const name = document.createElement("div");
         name.className = "card-name";
         name.textContent = card.name;
         node.appendChild(name);
-
         slot.appendChild(node);
       }
-
       el.board.appendChild(slot);
     }
-
     updateDeckStack(
       state.deckPreviewRemaining != null
         ? state.deckPreviewRemaining
         : (state.game && state.game.stats ? state.game.stats.remaining : 0)
     );
   }
-
   function renderEffects(){
     el.effectLayer.innerHTML = "";
     if (!state.event.type) return;
-
     if (state.event.type === "clear"){
       addBurst("fx-clear-burst");
-
       const sweep = document.createElement("div");
       sweep.className = "fx-clear-sweep";
       el.effectLayer.appendChild(sweep);
-
       const label = document.createElement("div");
       label.className = "fx-clear-label";
       label.textContent = t("stat.clear");
       el.effectLayer.appendChild(label);
       return;
     }
-
     const centers = getEventCenters();
-
     if (state.event.type === "x9"){
       drawX9Stars(centers);
       return;
     }
-
     if (state.event.type === "guard" && centers[0]){
       const ring = document.createElement("div");
       ring.className = "fx-guard-ring";
@@ -2507,31 +2438,25 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       el.effectLayer.appendChild(ring);
       return;
     }
-
     if (state.event.type === "pair" && centers.length === 2){
       drawPairHearts(centers);
       return;
     }
-
     if (state.event.type === "triple" && centers.length === 3){
       const sorted = sortLineCenters(centers);
       drawTripleLine(sorted[0], sorted[2]);
     }
   }
-
   function addBurst(className){
     const burst = document.createElement("div");
     burst.className = className;
     el.effectLayer.appendChild(burst);
   }
-
   function getEventCenters(){
     const frame = el.boardFrame.getBoundingClientRect();
-
     return state.event.indices.map(index => {
       const slot = el.board.children[index];
       if (!slot) return null;
-
       const rect = slot.getBoundingClientRect();
       return {
         x: rect.left - frame.left + rect.width / 2,
@@ -2539,7 +2464,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       };
     }).filter(Boolean);
   }
-
   function drawX9Stars(centers){
     centers.forEach(center => {
       const star = document.createElement("div");
@@ -2549,17 +2473,14 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       star.style.top = `${center.y - 34}px`;
       el.effectLayer.appendChild(star);
     });
-
     const dust = document.createElement("div");
     dust.className = "fx-x9-dust";
     el.effectLayer.appendChild(dust);
-
     const label = document.createElement("div");
     label.className = "fx-x9-label";
     label.textContent = t("stat.lucky_x9");
     el.effectLayer.appendChild(label);
   }
-
   function drawPairHearts(centers){
     centers.forEach(center => {
       const heart = document.createElement("div");
@@ -2570,7 +2491,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       el.effectLayer.appendChild(heart);
     });
   }
-
   function drawTripleLine(a, b){
     const dx = b.x - a.x;
     const dy = b.y - a.y;
@@ -2582,7 +2502,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     const x = a.x - ux * expand;
     const y = a.y - uy * expand;
     const length = baseLength + expand * 2;
-
     const line = document.createElement("div");
     line.className = "fx-triple-band";
     line.style.width = `${length}px`;
@@ -2591,16 +2510,13 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     line.style.transform = `translateY(-50%) rotate(${angle}deg)`;
     el.effectLayer.appendChild(line);
   }
-
   function sortLineCenters(centers){
     const xSpread = Math.max(...centers.map(item => item.x)) - Math.min(...centers.map(item => item.x));
     const ySpread = Math.max(...centers.map(item => item.y)) - Math.min(...centers.map(item => item.y));
-
     return centers.slice().sort((a, b) => {
       return xSpread >= ySpread ? a.x - b.x : a.y - b.y;
     });
   }
-
   function updateStats(){
     if (!state.game){
       el.guardNum.textContent = "0";
@@ -2611,7 +2527,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       updateDeckStack(0);
       return;
     }
-
     el.guardNum.textContent = state.game.stats.guard;
     el.flipNum.textContent = state.game.stats.totalFlips;
     el.remainNum.textContent = state.game.stats.remaining;
@@ -2623,11 +2538,9 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
         : state.game.stats.remaining
     );
   }
-
   function updateSide(){
     const knight = state.game && state.game.knight ? state.game.knight : state.selectedKnight;
     updateSideKnight(knight);
-
     if (!state.game){
       el.sideGuard.textContent = "0";
       el.sidePair.textContent = "0";
@@ -2637,7 +2550,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       el.sideFlip.textContent = "0";
       return;
     }
-
     el.sideGuard.textContent = state.game.stats.guard;
     el.sidePair.textContent = state.game.stats.pair;
     el.sideTriple.textContent = state.game.stats.triple;
@@ -2645,10 +2557,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     el.sideClear.textContent = state.game.stats.clear;
     el.sideFlip.textContent = state.game.stats.totalFlips;
   }
-
   function updateSideKnight(knight){
     el.sideAvatar.innerHTML = "";
-
     if (knight){
       el.sideAvatar.appendChild(createAvatar(knight, "avatar small"));
       el.sideName.textContent = knight.name;
@@ -2659,124 +2569,96 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       el.sideKey.textContent = "";
     }
   }
-
   function setupKnightHeader(knight){
     el.miniAvatar.innerHTML = "";
     el.miniAvatar.appendChild(createAvatar(knight, "avatar small"));
     el.miniName.textContent = knight.name;
   }
-
   async function showToast(content){
     el.eventToast.innerHTML = "";
-
     const data = typeof content === "object" && content
       ? content
       : { reason: String(content || ""), reward: "" };
-
     const wrap = document.createElement("div");
     wrap.className = "toast-inner";
-
     const reason = document.createElement("div");
     reason.className = "toast-reason";
     reason.textContent = data.reason || "";
-
     wrap.appendChild(reason);
-
     if (data.reward){
       const reward = document.createElement("div");
       reward.className = "toast-reward";
       reward.textContent = data.reward;
       wrap.appendChild(reward);
     }
-
     el.eventToast.appendChild(wrap);
     el.eventToast.classList.remove("show");
     void el.eventToast.offsetWidth;
     el.eventToast.classList.add("show");
-
     await wait(980);
-
     el.eventToast.classList.remove("show");
     await wait(80);
   }
-
   function formatEventToast(event){
     const rawText = String(event.text || missingConfigText(`event.${event.type}.text`)).trim();
     const cleanedText = rawText
       .replace(/，?\s*待翻牌\s*\+\s*\d+\s*$/u, "")
       .replace(/,?\s*待翻牌\s*\+\s*\d+\s*$/iu, "")
       .trim();
-
     const reason = cleanedText || rawText;
-
     const delta = getRemainingDelta(event);
     const rewardParts = [];
-
     if (delta > 0){
       rewardParts.push(`待翻牌 +${delta}`);
     }
-
     return {
       reason,
       reward: rewardParts.join("｜")
     };
   }
-
   function getRemainingDelta(event){
     const before = Number(event.statsBefore?.remaining ?? event.stats_before?.remaining ?? NaN);
     const after = Number(event.statsAfter?.remaining ?? event.stats_after?.remaining ?? NaN);
-
     if (Number.isFinite(before) && Number.isFinite(after)){
       const delta = after - before;
       return delta > 0 ? delta : 0;
     }
-
     return 0;
   }
-
   function renderRewardList(rewards){
     el.rewardList.innerHTML = "";
-
     if (!Array.isArray(rewards) || !rewards.length){
       const li = document.createElement("li");
       li.textContent = t("result.no_reward");
       el.rewardList.appendChild(li);
       return;
     }
-
     const grouped = groupRewards(rewards);
-
     grouped.forEach(reward => {
       const li = document.createElement("li");
       li.textContent = reward.displayText;
       el.rewardList.appendChild(li);
     });
   }
-
   function groupRewards(rewards){
     const map = new Map();
-
     rewards.forEach(raw => {
       const reward = typeof raw === "string" ? { displayText: raw, quantity: 1 } : raw;
       const baseText = normalizeRewardBaseText(reward);
       const quantity = Number(reward.quantity ?? reward.count ?? 1) || 1;
       const key = reward.id || reward.item_key || reward.itemKey || baseText;
-
       if (!map.has(key)){
         map.set(key, {
           baseText,
           quantity: 0
         });
       }
-
       map.get(key).quantity += quantity;
     });
-
     return Array.from(map.values()).map(item => ({
       displayText: `${item.baseText} ×${item.quantity}`
     }));
   }
-
   function normalizeRewardBaseText(reward){
     const explicit =
       reward.displayText ||
@@ -2784,7 +2666,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       reward.text ||
       reward.label ||
       "";
-
     const name =
       reward.name ||
       reward.display_name ||
@@ -2792,29 +2673,23 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       reward.item_name ||
       reward.itemName ||
       "";
-
     const source = explicit || name || "奖励配置缺失";
     return String(source)
       .replace(/\s*[×xX]\s*\d+\s*$/u, "")
       .trim() || "奖励配置缺失";
   }
-
   function showUnlocks(unlocks){
     el.modalRewards.innerHTML = "";
-
     unlocks.forEach(unlock => {
       const li = document.createElement("li");
       li.textContent = unlock.displayText || unlock.name || String(unlock);
       el.modalRewards.appendChild(li);
     });
-
     el.rewardMask.classList.add("show");
   }
-
   function closeUnlockModal(){
     el.rewardMask.classList.remove("show");
   }
-
   async function loadLeaderboards(showFatal = true){
     try{
       const response = await callRpc(RPC.leaderboards, { p_game_key: GAME_KEY });
@@ -2831,33 +2706,27 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       return false;
     }
   }
-
   async function openLeaderModal(defaultKey){
     if (!state.leaderboards || !Object.keys(state.leaderboards).length){
       const loaded = await loadLeaderboards(true);
       if (!loaded) return;
     }
-
     const key = resolveLeaderKey(defaultKey);
     if (!key) return;
     renderLeaderTabs(key);
     renderLeaderContent(key);
     el.leaderMask.classList.add("show");
   }
-
   function closeLeaderModal(){
     el.leaderMask.classList.remove("show");
   }
-
   function resolveLeaderKey(key){
     if (key && state.leaderboards[key]) return key;
     return orderedLeaderboardKeys()[0] || "";
   }
-
   function renderSideLeaderboards(){
     if (!el.sideRankList) return;
     el.sideRankList.innerHTML = "";
-
     const keys = orderedLeaderboardKeys();
     if (!keys.length){
       const li = document.createElement("li");
@@ -2865,52 +2734,41 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       el.sideRankList.appendChild(li);
       return;
     }
-
     keys.forEach((key, index) => {
       const board = state.leaderboards[key];
       const meta = getLeaderboardMeta(key, board);
       const li = document.createElement("li");
-
       const rank = document.createElement("b");
       rank.textContent = String(index + 1);
-
       const title = document.createElement("span");
       title.textContent = meta.title;
-
       const button = document.createElement("button");
       button.type = "button";
       button.dataset.board = key;
       button.textContent = "查看";
-
       li.appendChild(rank);
       li.appendChild(title);
       li.appendChild(button);
       el.sideRankList.appendChild(li);
     });
   }
-
   function renderLeaderTabs(activeKey){
     el.leaderTabs.innerHTML = "";
     const keys = orderedLeaderboardKeys();
-
     keys.forEach(key => {
       const board = state.leaderboards[key];
       const meta = getLeaderboardMeta(key, board);
       const button = document.createElement("button");
       button.type = "button";
       button.className = "tab" + (key === activeKey ? " active" : "");
-
       const title = document.createElement("span");
       title.className = "leader-tab-title";
       title.textContent = meta.title;
-
       const desc = document.createElement("span");
       desc.className = "leader-tab-desc";
       desc.textContent = meta.shortDesc || meta.valueLabel || "";
-
       button.appendChild(title);
       button.appendChild(desc);
-
       button.addEventListener("click", () => {
         renderLeaderTabs(key);
         renderLeaderContent(key);
@@ -2918,38 +2776,28 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       el.leaderTabs.appendChild(button);
     });
   }
-
   function renderLeaderContent(key){
     const board = state.leaderboards[key];
     const meta = getLeaderboardMeta(key, board);
     el.leaderContent.innerHTML = "";
-
     const explain = document.createElement("div");
     explain.className = "leader-explain";
-
     const title = document.createElement("h3");
     title.textContent = meta.title;
-
     const desc = document.createElement("p");
     desc.textContent = meta.description;
-
     const metaRow = document.createElement("div");
     metaRow.className = "leader-meta";
-
     const valueChip = document.createElement("span");
     valueChip.textContent = "成绩：" + meta.valueLabel;
-
     const unitChip = document.createElement("span");
     unitChip.textContent = "单位：" + (meta.unit || "无");
-
     metaRow.appendChild(valueChip);
     metaRow.appendChild(unitChip);
-
     explain.appendChild(title);
     explain.appendChild(desc);
     explain.appendChild(metaRow);
     el.leaderContent.appendChild(explain);
-
     if (!board || !board.rows.length){
       const empty = document.createElement("p");
       empty.className = "leader-empty";
@@ -2957,10 +2805,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       el.leaderContent.appendChild(empty);
       return;
     }
-
     const table = document.createElement("table");
     table.className = "table";
-
     const thead = document.createElement("thead");
     const headRow = document.createElement("tr");
     ["排名","成员", meta.valueLabel].forEach(text => {
@@ -2970,31 +2816,24 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     });
     thead.appendChild(headRow);
     table.appendChild(thead);
-
     const tbody = document.createElement("tbody");
     board.rows.forEach((row, index) => {
       const tr = document.createElement("tr");
       if (row.isCurrent) tr.className = "current";
-
       const rank = document.createElement("td");
       rank.textContent = String(row.rank || index + 1);
-
       const name = document.createElement("td");
       name.textContent = row.name;
-
       const score = document.createElement("td");
       score.textContent = `${formatLeaderboardValue(row.value)}${meta.unit || ""}`;
-
       tr.appendChild(rank);
       tr.appendChild(name);
       tr.appendChild(score);
       tbody.appendChild(tr);
     });
-
     table.appendChild(tbody);
     el.leaderContent.appendChild(table);
   }
-
   function orderedLeaderboardKeys(){
     return Object.keys(state.leaderboards || {}).sort((a, b) => {
       const aRawOrder = state.leaderboards[a]?.sortOrder;
@@ -3003,20 +2842,16 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       const bHasOrder = bRawOrder !== null && bRawOrder !== undefined && bRawOrder !== "" && Number.isFinite(Number(bRawOrder));
       const aOrder = aHasOrder ? Number(aRawOrder) : null;
       const bOrder = bHasOrder ? Number(bRawOrder) : null;
-
       if (aHasOrder && bHasOrder && aOrder !== bOrder) return aOrder - bOrder;
       if (aHasOrder !== bHasOrder) return aHasOrder ? -1 : 1;
       return 0;
     });
   }
-
   function getLeaderboardMeta(key, board){
     const descriptionKey = `leaderboard.${key}.description`;
     const valueLabelKey = `leaderboard.${key}.value_label`;
-
     const description = state.texts[descriptionKey] || "";
     const valueLabel = state.texts[valueLabelKey] || "";
-
     return {
       title: board?.title || missingConfigText(`leaderboard.${key}.title`),
       shortDesc: valueLabel || missingConfigText(valueLabelKey),
@@ -3025,18 +2860,15 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       unit: board?.unit || ""
     };
   }
-
   function formatLeaderboardValue(value){
     const numberValue = Number(value || 0);
     if (!Number.isFinite(numberValue)) return String(value || 0);
     if (Math.abs(numberValue % 1) > 0) return numberValue.toFixed(2).replace(/\.00$/, "");
     return String(numberValue);
   }
-
   async function reloadForNewJourney(){
     closeUnlockModal();
     closeLeaderModal();
-
     state.game = null;
     state.selectedKnight = null;
     state.costConfirmed = false;
@@ -3044,41 +2876,33 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     clearAutoTimer();
     state.deckPreviewRemaining = null;
     state.event = { type:"", indices:[], dim:false };
-
     el.startBtn.disabled = true;
     el.startBtn.textContent = t("button.select_knight");
     el.roundBtn.disabled = false;
     el.savedTip.classList.remove("show");
-
     showScreen("select");
     el.statusBadge.textContent = t("status.loading");
     el.gameDesc.textContent = t("status.loading");
     updateCostNotice(0, t("status.loading"), false);
     renderEmptyBoard();
-
     await loadBootstrap();
   }
-
   function backToGameRoom(){
     const path = typeof window.room10Page === "function"
       ? window.room10Page("game")
       : "";
-
     if (!path){
       showFatalError(new Error(missingConfigText("room10Page(game)")));
       return;
     }
-
     window.location.href = path;
   }
-
   function showScreen(name){
     el.permissionScreen.classList.toggle("active", name === "permission");
     el.selectScreen.classList.toggle("active", name === "select");
     el.playScreen.classList.toggle("active", name === "play");
     el.resultScreen.classList.toggle("active", name === "result");
   }
-
   function showMemberLoginRequired(){
     state.autoPlay = false;
     clearAutoTimer();
@@ -3089,7 +2913,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     el.statusBadge.textContent = "成员验证未完成";
     el.permissionBackBtn.textContent = fallbackText("button.back_game");
   }
-
   function showFatalError(error){
     state.autoPlay = false;
     clearAutoTimer();
@@ -3097,7 +2920,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     const title = fallbackText("page.title");
     const errorTitle = fallbackText("error.database");
     const backText = fallbackText("button.back_game");
-
     showScreen("permission");
     pageTitle.textContent = title;
     permissionTitle.textContent = errorTitle;
@@ -3105,21 +2927,18 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     el.statusBadge.textContent = errorTitle;
     el.permissionBackBtn.textContent = backText;
   }
-
   async function callRpc(name, params){
     const client = getSupabaseClient();
     const result = await client.rpc(name, params || {});
     if (result.error) throw new Error(result.error.message);
     return result.data;
   }
-
   function getSupabaseClient(){
     if (window.room10SupabaseClient?.rpc){
       return window.room10SupabaseClient;
     }
     throw new Error(fallbackText("error.no_supabase"));
   }
-
   function unwrapPayload(payload){
     if (!payload) return {};
     if (payload.ok === false){
@@ -3128,10 +2947,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     if (payload.data && typeof payload.data === "object") return payload.data;
     return payload;
   }
-
   function normalizeTexts(source){
     const texts = {};
-
     if (Array.isArray(source)){
       source.forEach(item => {
         const key = item.text_key || item.key || item.name;
@@ -3140,7 +2957,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       });
       return texts;
     }
-
     Object.keys(source || {}).forEach(key => {
       const value = source[key];
       if (value && typeof value === "object"){
@@ -3149,17 +2965,13 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
         texts[key] = value;
       }
     });
-
     return texts;
   }
-
   function normalizeCandidates(list){
     return list.map(normalizeMember).filter(member => member.id);
   }
-
   function normalizeMember(member){
     if (!member) return null;
-
     return {
       id: member.member_id || member.memberId || member.id || member.knight_member_id || member.knightMemberId || "",
       name: member.display_name || member.displayName || member.member_name || member.memberName || member.nickname || member.name || "",
@@ -3172,10 +2984,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       role: member.role || ""
     };
   }
-
   function normalizeGame(rawGame){
     if (!rawGame) return null;
-
     const stats = rawGame.stats || rawGame.game_stats || rawGame;
     const knight = normalizeMember(rawGame.knight || rawGame.knight_member || {
       member_id: rawGame.knight_member_id,
@@ -3184,7 +2994,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       cohort: rawGame.knight_cohort,
       avatar_url: rawGame.knight_avatar_url
     });
-
     return {
       recordId: rawGame.record_id || rawGame.id || "",
       phase: rawGame.phase || rawGame.status || "waiting",
@@ -3206,23 +3015,17 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       hint: rawGame.hint || rawGame.hint_text || ""
     };
   }
-
   function normalizeBoard(board){
     const normalized = Array(9).fill(null);
     if (!Array.isArray(board)) return normalized;
-
     board.forEach((item, index) => {
       if (!item) return;
-
       const slotIndex = Number.isInteger(item.slot_index) ? item.slot_index : index;
       if (slotIndex < 0 || slotIndex > 8) return;
-
       normalized[slotIndex] = normalizeCard(item);
     });
-
     return normalized;
   }
-
   function normalizeCard(card){
     const member = normalizeMember(card.member || card);
     return {
@@ -3240,10 +3043,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       removing: Boolean(card.removing)
     };
   }
-
   function normalizeRewards(list){
     if (!Array.isArray(list)) return [];
-
     return list.map(item => {
       if (typeof item === "string") return {
         id: "",
@@ -3251,7 +3052,6 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
         quantity: 1,
         displayText: item
       };
-
       const quantity = Number(item.quantity ?? item.count ?? item.qty ?? 1) || 1;
       const name =
         item.display_name ||
@@ -3261,14 +3061,12 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
         item.name ||
         item.title ||
         "";
-
       const displayText =
         item.display_text ||
         item.displayText ||
         item.text ||
         item.label ||
         (name ? `${name} ×${quantity}` : "");
-
       return {
         id: item.item_type_id || item.itemTypeId || item.item_id || item.itemId || item.item_key || item.itemKey || item.id || "",
         name,
@@ -3277,15 +3075,12 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       };
     });
   }
-
-
   function normalizeEvent(rawEvent){
     const typeMap = {
       lucky_x9:"x9",
       clear_board:"clear",
       knight_guard:"guard"
     };
-
     return {
       type: typeMap[rawEvent.type] || rawEvent.type || "",
       indices: rawEvent.indices || rawEvent.card_indices || rawEvent.slots || [],
@@ -3297,10 +3092,8 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       statsAfter: rawEvent.stats_after ? normalizeGame({ stats:rawEvent.stats_after }).stats : null
     };
   }
-
   function normalizeLeaderboards(source){
     const boards = {};
-
     if (Array.isArray(source)){
       source.forEach(board => {
         const key = board.board_key || board.key || board.type;
@@ -3309,14 +3102,11 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       });
       return boards;
     }
-
     Object.keys(source || {}).forEach(key => {
       boards[key] = normalizeLeaderboard({ key, ...source[key] });
     });
-
     return boards;
   }
-
   function normalizeLeaderboard(board){
     const key = board.key || board.board_key || board.type || "";
     const rows = Array.isArray(board.rows) ? board.rows : (Array.isArray(board.entries) ? board.entries : []);
@@ -3336,11 +3126,9 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       }))
     };
   }
-
   function createAvatar(member, className = "avatar"){
     const node = document.createElement("div");
     node.className = className;
-
     if (member && member.avatarUrl){
       node.style.backgroundImage = `url("${member.avatarUrl}")`;
       node.style.backgroundSize = "cover";
@@ -3348,62 +3136,50 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       node.textContent = "";
       return node;
     }
-
     node.style.setProperty("--a", member && member.colorA ? member.colorA : "#c7aa80");
     node.style.setProperty("--b", member && member.colorB ? member.colorB : "#92704b");
     node.textContent = getAvatarText(member);
     return node;
   }
-
   function getAvatarText(member){
     if (!member) return "";
     if (member.avatarText) return String(member.avatarText).slice(0, 2);
     if (member.name) return String(member.name).slice(0, 1);
     return "";
   }
-
   function missingConfigText(key){
     return applyTemplate(EMERGENCY_TEXTS["error.missing_config"], { key });
   }
-
   function t(key, params){
     const raw = state.texts[key];
     const text = raw || EMERGENCY_TEXTS[key] || `配置缺失：${key}`;
     return applyTemplate(text, params || {});
   }
-
   function fallbackText(key, params){
     const raw = state.texts[key] || EMERGENCY_TEXTS[key] || `配置缺失：${key}`;
     return applyTemplate(raw, params || {});
   }
-
   function applyTemplate(text, params){
     return String(text).replace(/\{\{\s*([\w.]+)\s*\}\}/g, (match, key) => {
       return Object.prototype.hasOwnProperty.call(params, key) ? String(params[key]) : "";
     });
   }
-
   function formatCount(value, suffix){
     return `${Number(value || 0)}${suffix}`;
   }
-
   function getCurrentMemberId(){
     const raw = localStorage.getItem("room10MemberId") || "";
     return isUuid(raw) ? raw : null;
   }
-
   function getCurrentMemberCode(){
     return String(localStorage.getItem("room10MemberCode") || "").trim();
   }
-
   function isUuid(value){
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ""));
   }
-
   function wait(ms){
     return new Promise(resolve => setTimeout(resolve, ms));
   }
-
   function clearEvent(){
     state.event = { type:"", indices:[], dim:false };
   }
