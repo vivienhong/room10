@@ -6,11 +6,8 @@
 <title>游戏房｜十号房</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
-<!-- game clean db-driven v2: 游戏入口完全读取 game_room_entries；页面/素材路径走 room10-paths.js；删除前端固定游戏入口与旧施工兜底 -->
-
 <style>
 *{box-sizing:border-box;}
-
 html,body{
   margin:0;
   width:100%;
@@ -18,7 +15,6 @@ html,body{
   overflow:hidden;
   font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
 }
-
 :root{
   --bg-left:#fff3e7;
   --bg-right:#f4dfc8;
@@ -31,10 +27,7 @@ html,body{
   --btn-bg:rgba(255,252,248,0.82);
   --btn-border:rgba(255,255,255,0.92);
   --btn-shadow:rgba(129,90,54,0.16);
-
   --bg-ui-scale:1;
-
-  /* 当前页面坐标：游戏房页只改这里 */
   --ui-scale:var(--bg-ui-scale,1);
   --room-nav-scale:var(--bg-ui-scale,1);
   --identity-scale:var(--bg-ui-scale,1);
@@ -53,11 +46,9 @@ html,body{
   --identity-mobile-notice-y:0em;
   --identity-mobile-button-y:0em;
   --identity-notice-mobile-top:58px;
-
   --room-nav-left:27.2%;
   --room-nav-top:6.35%;
   --room-nav-width:45.5%;
-
   --game-panel-left:55%;
   --game-panel-top:49.5%;
   --game-panel-width:48%;
@@ -79,24 +70,19 @@ html,body{
   --game-icon-font-size:18px;
   --game-name-size:17px;
   --game-status-size:10px;
-
   --gacha-entry-left:26%;
   --gacha-entry-top:49.6%;
   --gacha-entry-width:280px;
   --gacha-entry-image-size:250px;
   --gacha-entry-scale:0.62;
-
-  /* 页面可改颜色，不改结构尺寸 */
   --identity-bg:rgba(255,248,239,0.92);
   --identity-inner-bg:rgba(255,252,247,0.96);
   --identity-border:rgba(186,146,103,0.24);
   --identity-text:#6c4523;
   --identity-shadow:rgba(116,86,54,0.12);
-
   --nav-text:#6e4827;
   --nav-border:rgba(145,98,56,.34);
 }
-
 body{
   position:relative;
   min-height:100vh;
@@ -109,15 +95,12 @@ body{
   align-items:center;
   color:var(--text-main);
 }
-
 button{
   font-family:inherit;
 }
-
 .hidden{
   display:none !important;
 }
-
 #bgColorFill{
   position:fixed;
   inset:0;
@@ -126,7 +109,6 @@ button{
     linear-gradient(180deg, var(--bg-top) 0%, rgba(255,255,255,0) 18%, rgba(255,255,255,0) 82%, var(--bg-bottom) 100%),
     linear-gradient(90deg, var(--bg-left) 0%, var(--bg-right) 100%);
 }
-
 #bgBleed{
   position:fixed;
   inset:-8vh -8vw;
@@ -137,7 +119,6 @@ button{
   opacity:.72;
   pointer-events:none;
 }
-
 #bgLight{
   position:fixed;
   inset:0;
@@ -147,7 +128,6 @@ button{
     radial-gradient(circle at 50% 35%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0) 58%),
     linear-gradient(180deg, rgba(255,248,240,0.08), rgba(255,248,240,0.08));
 }
-
 #room{
   position:relative;
   z-index:3;
@@ -157,14 +137,12 @@ button{
   overflow:hidden;
   background:transparent;
 }
-
 #bgFrame{
   position:absolute;
   inset:0;
   z-index:0;
   overflow:hidden;
 }
-
 #bg{
   position:absolute;
   inset:0;
@@ -177,7 +155,6 @@ button{
   -webkit-user-drag:none;
   pointer-events:none;
 }
-
 #overlay{
   position:absolute;
   left:0;
@@ -189,11 +166,9 @@ button{
   pointer-events:none;
   --ui-scale:var(--bg-ui-scale, 1);
 }
-
 #overlay *{
   pointer-events:auto;
 }
-
 .panel{
   position:absolute;
   left:var(--game-panel-left);
@@ -223,12 +198,10 @@ button{
   overflow:hidden;
   animation:gamePanelFloat 5.8s ease-in-out infinite;
 }
-
 @keyframes gamePanelFloat{
   0%,100%{filter:drop-shadow(0 0 0 rgba(255,240,210,0));}
   50%{filter:drop-shadow(0 8px 16px rgba(255,222,172,0.14));}
 }
-
 .game-section{
   min-height:0;
   display:flex;
@@ -236,26 +209,10 @@ button{
   gap:0;
   height:100%;
 }
-
 .game-section-main{
   flex:1 1 auto;
   min-height:0;
 }
-
-.game-section-head{
-  display:none;
-}
-
-.game-section-title{
-  color:#71482a;
-  font-size:calc(24px * var(--game-panel-scale));
-  font-weight:950;
-  line-height:1.18;
-  letter-spacing:.10em;
-  white-space:nowrap;
-  text-shadow:0 1px 0 rgba(255,255,255,.54);
-}
-
 .menu{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
@@ -267,11 +224,9 @@ button{
   padding:0 4px 0 0;
   scrollbar-width:thin;
 }
-
 .menu::-webkit-scrollbar{width:6px;}
 .menu::-webkit-scrollbar-thumb{background:rgba(143,101,66,.22);border-radius:999px;}
 .menu::-webkit-scrollbar-track{background:rgba(255,255,255,.18);border-radius:999px;}
-
 .game-btn{
   appearance:none;
   cursor:pointer;
@@ -304,7 +259,6 @@ button{
   font-family:inherit;
   overflow:hidden;
 }
-
 .game-btn::before{
   content:"";
   position:absolute;
@@ -315,7 +269,6 @@ button{
   opacity:0;
   pointer-events:none;
 }
-
 .game-btn:hover{
   transform:translateY(-4px) scale(1.012);
   background:
@@ -326,22 +279,17 @@ button{
     inset 0 1px 0 rgba(255,255,255,0.88);
   border-color:rgba(188,159,127,.42);
 }
-
 .game-btn:hover::before{
   opacity:1;
   animation:gameCardSweep .72s ease both;
 }
-
 .game-btn:active{transform:translateY(-1px) scale(.995);}
-
 @keyframes gameCardSweep{
   0%{left:-55%;}
   100%{left:116%;}
 }
-
 .game-btn.is-coming-soon{opacity:.82;filter:saturate(.86);}
 .game-btn.is-coming-soon:hover{opacity:.95;}
-
 .game-icon{
   position:relative;
   z-index:2;
@@ -359,11 +307,9 @@ button{
   box-shadow:inset 0 1px 0 rgba(255,255,255,.84), 0 4px 10px rgba(112,78,45,.08);
   filter:drop-shadow(0 2px 3px rgba(112,78,45,.10));
 }
-
 .game-btn:hover .game-icon{
   transform:rotate(-4deg) scale(1.05);
 }
-
 .game-name{
   position:relative;
   z-index:2;
@@ -378,7 +324,6 @@ button{
   letter-spacing:.01em;
   padding:.08em 0 .12em;
 }
-
 .game-status{
   display:inline-flex;
   align-items:center;
@@ -393,12 +338,10 @@ button{
   font-size:clamp(9px, var(--game-status-size), 14px);
   font-weight:900;
 }
-
 .game-status.ready{
   color:#75451f;
   background:rgba(248,216,161,.58);
 }
-
 .game-list-message{
   grid-column:1 / -1;
   min-height:calc(var(--game-card-height) * 2 + var(--game-menu-gap));
@@ -415,10 +358,6 @@ button{
   background:rgba(255,252,248,0.70);
   border:1px solid rgba(255,255,255,0.72);
 }
-
-/* =========================================================
-   扭蛋机：独立小入口卡片，不作为房间摆件
-========================================================= */
 .gacha-standalone-btn{
   appearance:none;
   border:none;
@@ -456,7 +395,6 @@ button{
     box-shadow .22s ease,
     border-color .22s ease;
 }
-
 .gacha-standalone-btn:hover{
   transform:translate(-50%,-54%) scale(calc(var(--bg-ui-scale) * var(--game-panel-scale) * var(--gacha-entry-scale) * 1.04));
   background:
@@ -467,7 +405,6 @@ button{
     0 16px 30px rgba(112,78,45,.18),
     inset 0 1px 0 rgba(255,255,255,.88);
 }
-
 .gacha-standalone-img{
   width:var(--gacha-entry-image-size);
   height:var(--gacha-entry-image-size);
@@ -476,12 +413,10 @@ button{
   filter:drop-shadow(0 8px 12px rgba(119,77,43,.20));
   transition:filter .22s ease, transform .22s ease;
 }
-
 .gacha-standalone-btn:hover .gacha-standalone-img{
   transform:rotate(-3deg) scale(1.05);
   filter:drop-shadow(0 11px 15px rgba(119,77,43,.28));
 }
-
 .gacha-standalone-label{
   display:inline-flex;
   align-items:center;
@@ -508,7 +443,6 @@ button{
   z-index:32;
   overflow:visible;
 }
-
 .gacha-standalone-wrap .gacha-standalone-btn{
   position:relative;
   left:auto;
@@ -517,26 +451,17 @@ button{
   transform:none;
   z-index:1;
 }
-
 .gacha-standalone-wrap .gacha-standalone-btn:hover{
   transform:translateY(-6px) scale(1.04);
 }
-
-
-
-/* =========================================================
-   身份组件：全站统一 roomIdentity 结构
-========================================================= */
 #overlay .roomIdentity{
   pointer-events:none!important;
 }
-
 #overlay .roomIdentity .roomIdentityBar,
 #overlay .roomIdentity button,
 #overlay .roomIdentity .identityNoticePanel{
   pointer-events:auto!important;
 }
-
 .roomIdentity{
   --s:var(--identity-scale,1);
   position:absolute;
@@ -550,7 +475,6 @@ button{
   pointer-events:none;
   overflow:visible;
 }
-
 .roomIdentityBar{
   width:100%;
   height:100%;
@@ -570,7 +494,6 @@ button{
   overflow:visible;
   white-space:nowrap;
 }
-
 .identityNameBox,
 .identityNoticeBtn,
 .identityAuthBtn{
@@ -585,7 +508,6 @@ button{
     inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.95),
     0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,0.05);
 }
-
 .identityNameBox{
   display:flex;
   align-items:center;
@@ -593,7 +515,6 @@ button{
   padding:0 calc(8px * var(--s));
   overflow:visible;
 }
-
 .identityNameText{
   display:inline-flex;
   align-items:center;
@@ -609,9 +530,7 @@ button{
   overflow:visible;
   text-overflow:clip;
 }
-
 .identityNameText.isOverflowSafe{overflow:hidden;text-overflow:ellipsis;}
-
 .identityNamePart{
   display:inline-flex;
   align-items:center;
@@ -621,7 +540,6 @@ button{
   white-space:nowrap;
   font:inherit;
 }
-
 .identityNickname{transform:translateY(var(--identity-name-y));}
 .identitySeparator{
   margin:0 .08em;
@@ -630,14 +548,12 @@ button{
   transform:translateY(var(--identity-separator-y));
 }
 .identityRole{transform:translateY(var(--identity-role-y));}
-
 .identityNoticeWrap{
   position:relative;
   width:100%;
   height:100%;
   overflow:visible;
 }
-
 .identityNoticeBtn,
 .identityAuthBtn{
   appearance:none;
@@ -649,13 +565,11 @@ button{
   line-height:1;
   transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
 }
-
 .identityNoticeBtn{
   width:100%;
   height:100%;
   font-size:calc(14px * var(--s));
 }
-
 .identityNoticeIcon{
   display:flex;
   width:100%;
@@ -666,7 +580,6 @@ button{
   transform:translateY(var(--identity-notice-y));
   filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,0.55));
 }
-
 .identityNoticeCount{
   position:absolute;
   right:calc(-6px * var(--s));
@@ -687,9 +600,7 @@ button{
   box-shadow:0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(116,86,54,0.16);
   z-index:3;
 }
-
 .identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex;}
-
 .identityAuthBtn{
   width:100%;
   height:100%;
@@ -700,7 +611,6 @@ button{
   white-space:nowrap;
   overflow:visible;
 }
-
 .identityAuthText{
   display:inline-flex;
   align-items:center;
@@ -708,13 +618,11 @@ button{
   line-height:1.18;
   transform:translateY(var(--identity-button-y));
 }
-
 .identityNoticeBtn:hover,
 .identityAuthBtn:hover{
   transform:translateY(calc(-1px * var(--s)));
   background:rgba(255,255,255,0.94);
 }
-
 .identityNoticePanel{
   position:absolute;
   top:calc(100% + 10px * var(--s));
@@ -731,29 +639,24 @@ button{
   z-index:950;
   text-align:left;
 }
-
 .identityNoticePanel.show{display:block;}
-
 .identityNoticeTitle{
   color:#6f4726;
   font-size:calc(13px * var(--s));
   font-weight:900;
   margin-bottom:calc(10px * var(--s));
 }
-
 .identityNoticeEmpty{
   color:#8a6644;
   font-size:calc(12px * var(--s));
   line-height:1.6;
   padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s));
 }
-
 .identityNoticeList{
   display:flex;
   flex-direction:column;
   gap:calc(8px * var(--s));
 }
-
 .identityNoticeItem{
   padding:calc(10px * var(--s));
   border-radius:calc(12px * var(--s));
@@ -762,14 +665,12 @@ button{
     inset 0 1px 0 rgba(255,255,255,0.92),
     0 2px 8px rgba(120,92,63,0.05);
 }
-
 .identityNoticeItemTitle{
   color:#6f4726;
   font-size:calc(12px * var(--s));
   font-weight:800;
   line-height:1.5;
 }
-
 .identityNoticeReadBtn{
   appearance:none;
   width:100%;
@@ -786,63 +687,9 @@ button{
     inset 0 1px 0 rgba(255,247,230,0.95),
     0 3px 9px rgba(112,83,52,0.08);
 }
-
 .identityNoticeReadBtn:hover{
   background:rgba(239,213,171,0.96);
 }
-
-/* =========================================================
-   房间切换按钮：游戏房页不显示“游戏房”按钮
-========================================================= */
-#topBar{
-  position:absolute;
-  left:var(--room-nav-left);
-  top:var(--room-nav-top);
-  width:var(--room-nav-width);
-  display:flex;
-  align-items:flex-start;
-  justify-content:flex-start;
-  z-index:55;
-  overflow:visible;
-  pointer-events:none;
-
-  --nav-btn-height:calc(40px * var(--ui-scale));
-  --nav-btn-px:calc(16px * var(--ui-scale));
-  --nav-btn-radius:calc(13px * var(--ui-scale));
-  --nav-btn-font:calc(14px * var(--ui-scale));
-  --nav-gap:calc(8px * var(--ui-scale));
-}
-
-#navOuter,
-#navScroll{
-  overflow:visible;
-}
-
-#navOuter{
-  flex:0 0 auto;
-  min-width:0;
-  width:100%;
-  pointer-events:auto;
-}
-
-#navScroll{
-  width:100%;
-  white-space:nowrap;
-  padding:0;
-  margin:0;
-}
-
-#roomNav{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:var(--nav-gap);
-  transform-origin:left center;
-}
-
 .navBtn{
   appearance:none;
   border:none;
@@ -876,7 +723,6 @@ button{
     filter .18s ease;
   font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
 }
-
 .navBtn:hover,
 .navBtn:focus-visible{
   color:#5f3d22;
@@ -888,7 +734,6 @@ button{
     0 3px 7px rgba(91,68,45,.15);
   filter:brightness(1.015);
 }
-
 .navLabel{
   position:relative;
   z-index:5;
@@ -902,7 +747,6 @@ button{
   line-height:normal;
   padding-top:.06em;
 }
-
 .navEffect{
   position:absolute;
   pointer-events:none;
@@ -916,105 +760,82 @@ button{
     0 0 8px rgba(255,246,210,.52);
   filter:saturate(.95);
 }
-
 .navEffectA{
   left:8%;
   top:-54%;
   font-size:calc(var(--nav-btn-font) * .92);
 }
-
 .navEffectB{
   right:8%;
   top:-62%;
   font-size:calc(var(--nav-btn-font) * .86);
 }
-
 .navEffectC{
   left:50%;
   top:-72%;
   transform:translateX(-50%);
   font-size:calc(var(--nav-btn-font) * 1.02);
 }
-
 @keyframes navFloatA{
   0%,100%{ transform:translateY(4px) rotate(-8deg) scale(.82); opacity:0; }
   20%,72%{ opacity:.86; }
   50%{ transform:translateY(-5px) rotate(6deg) scale(1); opacity:.76; }
 }
-
 @keyframes navFloatB{
   0%,100%{ transform:translateY(5px) rotate(9deg) scale(.78); opacity:0; }
   24%,70%{ opacity:.78; }
   52%{ transform:translateY(-6px) rotate(-7deg) scale(1); opacity:.68; }
 }
-
 @keyframes navFloatC{
   0%,100%{ transform:translateX(-50%) translateY(6px) rotate(0deg) scale(.76); opacity:0; }
   24%,70%{ opacity:.88; }
   50%{ transform:translateX(-50%) translateY(-6px) rotate(2deg) scale(1); opacity:.78; }
 }
-
 .navBtn:hover .navEffectA,
 .navBtn:focus-visible .navEffectA{
   animation:navFloatA 2.2s ease-in-out infinite;
 }
-
 .navBtn:hover .navEffectB,
 .navBtn:focus-visible .navEffectB{
   animation:navFloatB 2.5s ease-in-out infinite;
 }
-
 .navBtn:hover .navEffectC,
 .navBtn:focus-visible .navEffectC{
   animation:navFloatC 2.35s ease-in-out infinite;
 }
-
-/* 各房间特效颜色 */
 .navBtn[data-room="hall"] .navEffect{
   color:rgba(255,205,96,.86);
   text-shadow:
     0 1px 2px rgba(255,250,232,.95),
     0 0 10px rgba(255,215,105,.62);
 }
-
 .navBtn[data-room="manager"] .navEffect{
   color:rgba(128,91,58,.82);
 }
-
 .navBtn[data-room="honor"] .navEffect{
   color:rgba(205,143,45,.86);
   text-shadow:
     0 1px 2px rgba(255,250,232,.92),
     0 0 8px rgba(255,220,130,.52);
 }
-
 .navBtn[data-room="game"] .navEffect{
   color:rgba(117,91,150,.82);
 }
-
 .navBtn[data-room="studio"] .navEffect{
   color:rgba(96,112,145,.84);
 }
-
 .navBtn[data-room="living"] .navEffect{
   color:rgba(202,132,70,.82);
 }
-
 .navBtn[data-room="dorm"] .navEffect{
   color:rgba(143,111,168,.76);
 }
-
 .navBtn[data-room="pets"] .navEffect{
   color:rgba(131,111,78,.82);
 }
-
 .navBtn[data-room="flower"] .navEffect{
   color:rgba(198,119,145,.82);
 }
-
-/* =========================================================
-   登录弹窗：引用首页登录框
-========================================================= */
 .login-mask,
 .game-modal-mask{
   position:fixed;
@@ -1028,12 +849,10 @@ button{
   backdrop-filter:blur(6px);
   -webkit-backdrop-filter:blur(6px);
 }
-
 .login-panel{
   position:relative;
   width:min(720px, 94vw);
 }
-
 .login-panel img{
   width:100%;
   display:block;
@@ -1041,7 +860,6 @@ button{
   user-select:none;
   -webkit-user-drag:none;
 }
-
 #loginNickname{
   position:absolute;
   top:40%;
@@ -1056,7 +874,6 @@ button{
   background:transparent;
   line-height:1.1;
 }
-
 #loginCode{
   position:absolute;
   top:56%;
@@ -1071,7 +888,6 @@ button{
   background:transparent;
   line-height:1.1;
 }
-
 #toggleLoginCode{
   position:absolute;
   top:56%;
@@ -1083,12 +899,10 @@ button{
   background:rgba(255,215,120,.15);
   border-radius:6px;
 }
-
 #toggleLoginCode:hover{
   background:rgba(255,215,120,.35);
   box-shadow:0 0 8px rgba(255,220,120,.6);
 }
-
 #loginSubmitBtn{
   position:absolute;
   top:68%;
@@ -1099,7 +913,6 @@ button{
   background:transparent;
   cursor:pointer;
 }
-
 #registerLink{
   position:absolute;
   top:50%;
@@ -1115,11 +928,9 @@ button{
   padding:0;
   white-space:nowrap;
 }
-
 #registerLink:hover{
   color:#9b6334;
 }
-
 #loginHint{
   position:absolute;
   top:34.8%;
@@ -1134,7 +945,6 @@ button{
   white-space:normal;
   line-height:1.25;
 }
-
 #loginCancelBtn{
   position:absolute;
   top:4px;
@@ -1148,12 +958,10 @@ button{
   font-size:18px;
   color:#5b4632;
 }
-
 .game-modal-mask{
   z-index:95;
   background:rgba(60,42,23,0.28);
 }
-
 .game-modal-box{
   position:relative;
   width:min(1180px, 96vw);
@@ -1165,7 +973,6 @@ button{
   border:1px solid rgba(203,167,123,0.28);
   box-shadow:0 20px 48px rgba(85,58,34,0.22);
 }
-
 .game-modal-close{
   position:absolute;
   top:10px;
@@ -1182,16 +989,16 @@ button{
   cursor:pointer;
   box-shadow:inset 0 1px 0 rgba(255,247,230,0.95), 0 4px 12px rgba(112,83,52,0.10);
 }
-
 #gameModalFrame{
   width:100%;
   height:100%;
   border:none;
   background:#fffaf4;
   display:block;
-  overflow:hidden;
+  overflow:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
 }
-
 .fallback-tip{
   position:absolute;
   left:50%;
@@ -1210,11 +1017,9 @@ button{
   pointer-events:none;
   transition:opacity .25s ease;
 }
-
 .fallback-tip.show{
   opacity:1;
 }
-
 @media (max-height:700px) and (min-width:761px){
   :root{
     --game-panel-left:55%;
@@ -1222,7 +1027,6 @@ button{
     --game-panel-width:45.5%;
   }
 }
-
 @media (max-width:920px){
   #loginHint{
     top:35.6%;
@@ -1231,44 +1035,32 @@ button{
     font-size:13px;
     line-height:1.22;
   }
-
   #registerLink{font-size:13px;}
-
   #loginNickname,
   #loginCode{font-size:17px;}
 }
-
 @media (max-width:760px) and (min-width:541px){
   :root{
     --game-panel-left:55%;
     --game-panel-top:49.5%;
     --game-panel-width:44.5%;
   }
-
   #loginHint{
     top:35.2%;
     width:48%;
     font-size:11px;
     line-height:1.2;
   }
-
   #registerLink{
     top:49.5%;
     font-size:11px;
   }
-
   #loginNickname,
   #loginCode{
     font-size:16px;
     padding:0 8px;
   }
 }
-
-
-
-/* =========================================================
-   全站通用模板导航覆盖：游戏房页使用统一 9 宫房间按钮
-========================================================= */
 :root{
   --ui-scale:var(--bg-ui-scale,1);
   --room-nav-scale:var(--bg-ui-scale,1);
@@ -1295,10 +1087,8 @@ button{
   --room-nav-wash:rgba(214,185,157,.20);
   --room-nav-current-bg:rgba(239,224,205,.86);
 }
-
 #overlay .roomNavLayer{pointer-events:none!important;}
 #overlay .roomNavLayer .navBtn{pointer-events:auto!important;}
-
 .roomNavLayer{
   position:absolute;
   inset:0;
@@ -1309,7 +1099,6 @@ button{
   --nav-btn-font:calc(15px * var(--s));
   --nav-btn-border:calc(1px * var(--s));
 }
-
 .roomNavLayer .navBtn{
   appearance:none;
   border:none;
@@ -1371,7 +1160,6 @@ button{
 .roomNavLayer .navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite;}
 .roomNavLayer .navBtn:not(.is-current):hover .navEffectC,
 .roomNavLayer .navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite;}
-
 @media (max-width:540px){
   html,body{
     overflow-x:hidden;
@@ -1379,21 +1167,18 @@ button{
     height:auto;
     min-height:100%;
   }
-
   body{
     display:block;
     background:
       linear-gradient(rgba(243,236,223,.72), rgba(243,236,223,.92)),
       var(--game-room-bg-url, none) center center / cover no-repeat fixed;
   }
-
   #bgColorFill,
   #bgBleed,
   #bgLight,
   #bgFrame{
     display:none;
   }
-
   #room{
     width:100%;
     height:auto;
@@ -1403,7 +1188,6 @@ button{
     overflow:visible;
     padding:10px 12px 14px;
   }
-
   #overlay{
     position:relative;
     left:auto;
@@ -1420,9 +1204,6 @@ button{
     --ui-scale:1;
     pointer-events:auto;
   }
-
-
-
   .roomNavLayer{
     position:relative;
     inset:auto;
@@ -1442,7 +1223,6 @@ button{
     pointer-events:auto;
     --s:1;
   }
-
   .roomNavLayer .navBtn{
     position:relative;
     left:auto!important;
@@ -1463,7 +1243,6 @@ button{
     white-space:nowrap;
     overflow:hidden;
   }
-
   .roomNavLayer .navLabel{
     height:100%;
     padding-top:.04em;
@@ -1471,7 +1250,6 @@ button{
     white-space:nowrap;
     overflow:hidden;
   }
-
   .roomNavLayer .navEffect{display:none;}
   .roomIdentity{
     --s:1;
@@ -1485,20 +1263,17 @@ button{
     order:1;
     z-index:90;
   }
-
   .roomIdentityBar{
     grid-template-columns:minmax(0,1fr) 34px 42px;
     gap:6px;
     padding:5px 7px;
     border-radius:14px;
   }
-
   .identityNameBox{
     padding:0 9px;
     border-radius:10px;
     overflow:visible;
   }
-
   .identityNameText{
     font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
     font-size:12px;
@@ -1508,12 +1283,10 @@ button{
     white-space:nowrap;
     overflow:visible;
   }
-
   .identityNamePart{
     line-height:1;
     white-space:nowrap;
   }
-
   .identityNickname{transform:translateY(var(--identity-mobile-name-y));}
   .identitySeparator{
     margin:0 .08em;
@@ -1523,15 +1296,12 @@ button{
     transform:translateY(var(--identity-mobile-separator-y));
   }
   .identityRole{transform:translateY(var(--identity-mobile-role-y));}
-
   .identityNoticeBtn{
     font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
     font-size:14px;
     border-radius:10px;
   }
-
   .identityNoticeIcon{transform:translateY(var(--identity-mobile-notice-y));}
-
   .identityAuthBtn{
     font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
     font-size:11px;
@@ -1539,12 +1309,10 @@ button{
     line-height:1;
     border-radius:10px;
   }
-
   .identityAuthText{
     line-height:1;
     transform:translateY(var(--identity-mobile-button-y));
   }
-
   .identityNoticePanel{
     position:fixed!important;
     top:var(--identity-notice-mobile-top,58px)!important;
@@ -1571,7 +1339,6 @@ button{
     -webkit-backdrop-filter:blur(10px);
     transform-origin:top right;
   }
-
   .identityNoticePanel::before{
     content:"";
     position:absolute;
@@ -1585,51 +1352,24 @@ button{
     border-top:1px solid rgba(174,132,94,.24);
     box-shadow:-2px -2px 5px rgba(86,61,39,.03);
   }
-
   .identityNoticeTitle{
     position:relative;
     padding:0 0 9px;
     margin-bottom:10px;
     border-bottom:1px solid rgba(174,132,94,.16);
   }
-
   .identityNoticePanel *,
   .identityNoticePanel *::before,
   .identityNoticePanel *::after{
     max-width:100%;
     box-sizing:border-box;
   }
-
   .identityNoticePanel button,
   .identityNoticePanel a{
     max-width:100%;
     white-space:normal;
     overflow-wrap:anywhere;
   }
-
-  #topBar{
-    position:relative;
-    left:auto;
-    top:auto;
-    width:100%;
-    order:0;
-    z-index:20;
-
-    --nav-btn-height:34px;
-    --nav-btn-px:8px;
-    --nav-btn-radius:10px;
-    --nav-btn-font:12px;
-    --nav-gap:7px;
-  }
-
-  #roomNav{
-    width:100%;
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-    gap:7px;
-    transform:none;
-  }
-
   .navBtn{
     width:100%;
     min-width:0;
@@ -1639,11 +1379,9 @@ button{
     border-radius:10px;
     overflow:hidden;
   }
-
   .navEffect{
     display:none;
   }
-
   .panel{
     position:relative;
     left:auto;
@@ -1658,71 +1396,40 @@ button{
     order:2;
     overflow:visible;
   }
-
   .menu{
     grid-template-columns:repeat(2, minmax(0, 1fr));
     gap:10px;
   }
-
   .game-btn.is-wide{
     grid-column:1 / -1;
     width:100%;
   }
-
   .game-btn{
     min-height:58px;
     padding:9px 10px;
     border-radius:15px;
     gap:8px;
   }
-
   .game-icon{
     width:32px;
     height:32px;
     border-radius:12px;
     font-size:18px;
   }
-
   .game-name{
     font-size:16px;
     margin:0;
     line-height:1.12;
   }
-
   .game-status{
     min-height:18px;
     margin-top:3px;
     font-size:10px;
     padding:0 7px;
   }
-
-  .game-section-head{
-    display:none;
-  }
-
-  .game-section-title{
-    display:none;
-  }
-
-  .game-section-desc{
-    font-size:10px;
-    text-align:left;
-  }
-
-  .extra-btn{
-    min-height:76px;
-    padding:10px 12px;
-  }
-
-  .gacha-icon{
-    width:50px;
-    height:50px;
-  }
-
   .extra-note{
     font-size:10px;
   }
-
   .gacha-standalone-btn{
     position:relative;
     left:auto;
@@ -1735,34 +1442,27 @@ button{
     padding:10px 12px 12px;
     border-radius:20px;
   }
-
   .gacha-standalone-btn:hover{
     transform:translateY(-3px);
   }
-
   .gacha-standalone-img{
     width:86px;
     height:86px;
   }
-
   .gacha-standalone-label{
     min-height:28px;
     padding:0 16px;
     font-size:17px;
   }
-
-
   .game-modal-mask{
     padding:12px;
   }
-
   .game-modal-box{
     width:96vw;
     height:86vh;
     border-radius:18px;
     padding-top:34px;
   }
-
   .game-modal-close{
     top:7px;
     right:8px;
@@ -1770,24 +1470,19 @@ button{
     height:24px;
     z-index:5;
   }
-
   #gameModalFrame{
     height:calc(100% - 0px);
   }
-
   .login-panel{width:95vw;}
-
   #registerLink{
     top:49.2%;
     font-size:10px;
   }
-
   #loginNickname,
   #loginCode{
     font-size:15px;
     padding:0 7px;
   }
-
   #loginHint{
     top:34.1%;
     width:46%;
@@ -1795,40 +1490,34 @@ button{
     line-height:1.18;
   }
 }
-
 @media (max-width:380px){
   #registerLink{
     top:48.8%;
     font-size:8px;
   }
-
   #loginNickname,
   #loginCode{
     font-size:12px;
     padding:0 5px;
   }
-
   #loginNickname{
     top:40.1%;
     left:36.25%;
     width:27.1%;
     height:7.9%;
   }
-
   #loginCode{
     top:56.05%;
     left:36.25%;
     width:19.7%;
     height:7.9%;
   }
-
   #toggleLoginCode{
     top:56.05%;
     left:55.9%;
     width:8.2%;
     height:7.9%;
   }
-
   #loginHint{
     top:34.8%;
     left:53.4%;
@@ -1837,7 +1526,6 @@ button{
     line-height:1.16;
     letter-spacing:0;
   }
-
   #loginCancelBtn{
     width:28px;
     height:28px;
@@ -1846,42 +1534,35 @@ button{
     right:2px;
   }
 }
-
 @media (max-width:340px){
   .login-panel{width:96vw;}
-
   #registerLink{
     top:48.5%;
     font-size:7px;
   }
-
   #loginNickname,
   #loginCode{
     font-size:11px;
     padding:0 4px;
   }
-
   #loginNickname{
     top:40.15%;
     left:36.35%;
     width:26.9%;
     height:7.8%;
   }
-
   #loginCode{
     top:56.1%;
     left:36.35%;
     width:19.5%;
     height:7.8%;
   }
-
   #toggleLoginCode{
     top:56.1%;
     left:55.85%;
     width:8.25%;
     height:7.8%;
   }
-
   #loginHint{
     top:35.5%;
     left:53.35%;
@@ -1889,14 +1570,8 @@ button{
     font-size:7px;
     line-height:1.12;
   }
-
   #loginSubmitBtn{top:67.8%;}
 }
-
-
-/* =========================================================
-   统一奖励 / 成就称号弹窗
-========================================================= */
 .reward-mask{
   position:fixed;
   inset:0;
@@ -1910,9 +1585,7 @@ button{
   -webkit-backdrop-filter:blur(5px);
   --reward-scale:1;
 }
-
 .reward-mask.show{display:flex;}
-
 .reward-card{
   position:relative;
   width:min(calc(430px * var(--reward-scale)), calc(100vw - 28px));
@@ -1932,7 +1605,6 @@ button{
     inset 0 1px 0 rgba(255,255,255,.9);
   animation:rewardPop .42s cubic-bezier(.2,1.12,.34,1) both;
 }
-
 .reward-card::before,
 .reward-card::after{
   position:absolute;
@@ -1944,25 +1616,21 @@ button{
   overflow:hidden;
   pointer-events:none;
 }
-
 .reward-card::before{
   content:"✿  ❀  ✽  ✿  ❀  ✽  ✿";
   top:calc(9px * var(--reward-scale));
   color:rgba(209,120,148,.52);
 }
-
 .reward-card::after{
   content:"✿  ❀  ✽  ✿  ❀  ✽  ✿";
   bottom:calc(8px * var(--reward-scale));
   color:rgba(199,145,75,.44);
 }
-
 @keyframes rewardPop{
   0%{opacity:0; transform:translateY(calc(12px * var(--reward-scale))) scale(.9);}
   64%{opacity:1; transform:translateY(0) scale(1.025);}
   100%{opacity:1; transform:translateY(0) scale(1);}
 }
-
 .reward-close{
   position:absolute;
   z-index:6;
@@ -1980,7 +1648,6 @@ button{
   cursor:pointer;
   box-shadow:0 calc(2px * var(--reward-scale)) calc(8px * var(--reward-scale)) rgba(105,75,43,.10), inset 0 1px 0 rgba(255,255,255,.9);
 }
-
 .reward-petals{
   position:absolute;
   inset:0;
@@ -1988,7 +1655,6 @@ button{
   pointer-events:none;
   overflow:hidden;
 }
-
 .reward-petals span{
   position:absolute;
   top:calc(-18px * var(--reward-scale));
@@ -1998,19 +1664,16 @@ button{
   text-shadow:0 calc(2px * var(--reward-scale)) calc(4px * var(--reward-scale)) rgba(255,255,255,.76);
   animation:rewardPetalFall 1.35s ease-in-out both;
 }
-
 .reward-petals span:nth-child(1){left:12%; animation-delay:.05s;}
 .reward-petals span:nth-child(2){left:28%; animation-delay:.18s;}
 .reward-petals span:nth-child(3){left:48%; animation-delay:.02s;}
 .reward-petals span:nth-child(4){left:66%; animation-delay:.22s;}
 .reward-petals span:nth-child(5){left:82%; animation-delay:.10s;}
-
 @keyframes rewardPetalFall{
   0%{opacity:0; transform:translateY(calc(-14px * var(--reward-scale))) rotate(0deg) scale(.78);}
   20%{opacity:.85;}
   100%{opacity:0; transform:translateY(calc(145px * var(--reward-scale))) rotate(160deg) scale(1);}
 }
-
 .reward-content{
   position:relative;
   z-index:2;
@@ -2018,7 +1681,6 @@ button{
   flex-direction:column;
   align-items:center;
 }
-
 .reward-icon{
   width:calc(62px * var(--reward-scale));
   height:calc(62px * var(--reward-scale));
@@ -2032,7 +1694,6 @@ button{
   box-shadow:0 calc(8px * var(--reward-scale)) calc(20px * var(--reward-scale)) rgba(126,92,51,.10), inset 0 1px 0 rgba(255,255,255,.85);
   font-size:calc(34px * var(--reward-scale));
 }
-
 .reward-label{
   min-height:calc(25px * var(--reward-scale));
   padding:0 calc(13px * var(--reward-scale));
@@ -2049,7 +1710,6 @@ button{
   letter-spacing:.06em;
   animation:rewardStamp .42s ease both;
 }
-
 .reward-title{
   position:relative;
   max-width:100%;
@@ -2065,7 +1725,6 @@ button{
   box-shadow:0 calc(5px * var(--reward-scale)) calc(14px * var(--reward-scale)) rgba(126,92,51,.08), inset 0 1px 0 rgba(255,255,255,.82);
   overflow:hidden;
 }
-
 .reward-title::after{
   content:"";
   position:absolute;
@@ -2075,18 +1734,15 @@ button{
   transform:skewX(-18deg);
   animation:rewardSweep 1.25s ease .22s both;
 }
-
 @keyframes rewardStamp{
   0%{opacity:0; transform:scale(1.12);}
   72%{opacity:1; transform:scale(.97);}
   100%{opacity:1; transform:scale(1);}
 }
-
 @keyframes rewardSweep{
   0%{left:-42%;}
   100%{left:118%;}
 }
-
 .reward-desc{
   width:100%;
   max-width:calc(330px * var(--reward-scale));
@@ -2097,7 +1753,6 @@ button{
   text-align:center;
   white-space:pre-line;
 }
-
 .reward-section-title{
   margin:0 0 calc(10px * var(--reward-scale));
   color:#8a5c33;
@@ -2106,7 +1761,6 @@ button{
   line-height:1;
   letter-spacing:.08em;
 }
-
 .reward-list{
   width:100%;
   display:grid;
@@ -2115,12 +1769,10 @@ button{
   gap:calc(8px * var(--reward-scale));
   margin:0 0 calc(16px * var(--reward-scale));
 }
-
 .reward-list.count-1{grid-template-columns:minmax(0, calc(120px * var(--reward-scale)));}
 .reward-list.count-2{grid-template-columns:repeat(2, minmax(0, calc(120px * var(--reward-scale))));}
 .reward-list.empty,
 .reward-section-title.empty{display:none;}
-
 .reward-item{
   min-width:0;
   min-height:calc(84px * var(--reward-scale));
@@ -2135,23 +1787,19 @@ button{
   box-shadow:inset 0 1px 0 rgba(255,255,255,.82), 0 calc(3px * var(--reward-scale)) calc(10px * var(--reward-scale)) rgba(116,86,54,.06);
   animation:rewardItemIn .38s ease both;
 }
-
 .reward-item:nth-child(1){animation-delay:.14s;}
 .reward-item:nth-child(2){animation-delay:.24s;}
 .reward-item:nth-child(3){animation-delay:.34s;}
 .reward-item:nth-child(4){animation-delay:.44s;}
-
 @keyframes rewardItemIn{
   0%{opacity:0; transform:translateY(calc(8px * var(--reward-scale))) scale(.96);}
   100%{opacity:1; transform:translateY(0) scale(1);}
 }
-
 .reward-item-icon{
   font-size:calc(28px * var(--reward-scale));
   line-height:1;
   margin-bottom:calc(7px * var(--reward-scale));
 }
-
 .reward-item-name{
   width:100%;
   color:#7b593b;
@@ -2162,7 +1810,6 @@ button{
   text-overflow:ellipsis;
   white-space:nowrap;
 }
-
 .reward-item-amount{
   margin-top:calc(3px * var(--reward-scale));
   color:#6a4223;
@@ -2171,7 +1818,6 @@ button{
   line-height:1.2;
   white-space:nowrap;
 }
-
 .reward-confirm{
   min-width:calc(132px * var(--reward-scale));
   height:calc(36px * var(--reward-scale));
@@ -2184,28 +1830,24 @@ button{
   cursor:pointer;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.72), 0 calc(4px * var(--reward-scale)) calc(12px * var(--reward-scale)) rgba(112,80,42,.10);
 }
-
 .reward-mask[data-type="title"] .reward-card{
   background:
     radial-gradient(circle at 12% 16%, rgba(255,235,204,.72), transparent 30%),
     radial-gradient(circle at 86% 18%, rgba(255,229,154,.58), transparent 32%),
     linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,242,219,.96));
 }
-
 .reward-mask[data-type="daily"] .reward-card{
   background:
     radial-gradient(circle at 12% 16%, rgba(224,244,216,.70), transparent 30%),
     radial-gradient(circle at 86% 18%, rgba(255,239,181,.50), transparent 32%),
     linear-gradient(180deg, rgba(255,253,247,.98), rgba(241,248,229,.96));
 }
-
 .reward-mask[data-type="gift"] .reward-card{
   background:
     radial-gradient(circle at 12% 16%, rgba(255,226,235,.74), transparent 30%),
     radial-gradient(circle at 86% 18%, rgba(223,235,255,.58), transparent 32%),
     linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,240,231,.96));
 }
-
 .reward-mask[data-type="item"] .reward-card,
 .reward-mask[data-type="gold"] .reward-card{
   background:
@@ -2213,23 +1855,17 @@ button{
     radial-gradient(circle at 86% 18%, rgba(255,240,181,.52), transparent 32%),
     linear-gradient(180deg, rgba(255,253,247,.98), rgba(235,246,252,.94));
 }
-
 @media (max-width:540px){
   .reward-mask{--reward-scale:.82; padding:14px;}
 }
-
 @media (max-width:380px), (max-height:590px){
   .reward-mask{--reward-scale:.74;}
 }
-
 @media (max-width:340px){
   .reward-list,
   .reward-list.count-1,
   .reward-list.count-2{grid-template-columns:1fr;}
 }
-
-
-
 @media (max-width:540px){
   .gacha-standalone-wrap{
     position:relative;
@@ -2240,26 +1876,15 @@ button{
     order:3;
     margin-top:2px;
   }
-
   .gacha-standalone-wrap .gacha-standalone-btn{
     width:100%;
     min-height:148px;
     transform:none;
   }
-
   .gacha-standalone-wrap .gacha-standalone-btn:hover{
     transform:translateY(-3px);
   }
-
 }
-
-
-/* =========================================================
-   手机竖屏流式布局修正（540px 及以下）
-   - 不再绑定底图坐标
-   - 从上到下：导航 / 身份 / 游戏列表 / 扭蛋机
-   - 游戏列表单列流式排列
-========================================================= */
 @media (max-width:540px){
   html,
   body{
@@ -2270,21 +1895,18 @@ button{
     overflow-x:hidden!important;
     overflow-y:auto!important;
   }
-
   body{
     display:block!important;
     background:
       linear-gradient(rgba(243,236,223,.72), rgba(243,236,223,.92)),
       var(--game-room-bg-url, none) center center / cover no-repeat fixed!important;
   }
-
   #bgColorFill,
   #bgBleed,
   #bgLight,
   #bgFrame{
     display:none!important;
   }
-
   #room{
     position:relative!important;
     width:100%!important;
@@ -2297,7 +1919,6 @@ button{
     padding:10px 12px 14px!important;
     box-sizing:border-box!important;
   }
-
   #overlay{
     position:relative!important;
     left:auto!important;
@@ -2321,7 +1942,6 @@ button{
     --room-nav-scale:1!important;
     --identity-scale:1!important;
   }
-
   .roomNavLayer{
     position:relative!important;
     inset:auto!important;
@@ -2345,7 +1965,6 @@ button{
     box-sizing:border-box!important;
     --s:1!important;
   }
-
   .roomNavLayer .navBtn{
     position:relative!important;
     left:auto!important;
@@ -2369,12 +1988,10 @@ button{
     transform:none!important;
     box-sizing:border-box!important;
   }
-
   .roomNavLayer .navBtn.is-current{
     display:flex!important;
     visibility:visible!important;
   }
-
   .roomNavLayer .navLabel{
     width:100%!important;
     height:100%!important;
@@ -2383,11 +2000,9 @@ button{
     white-space:nowrap!important;
     overflow:hidden!important;
   }
-
   .roomNavLayer .navEffect{
     display:none!important;
   }
-
   .roomIdentity{
     --s:1!important;
     position:relative!important;
@@ -2403,33 +2018,28 @@ button{
     transform:none!important;
     box-sizing:border-box!important;
   }
-
   .roomIdentityBar{
     grid-template-columns:minmax(0,1fr) 34px 42px!important;
     gap:6px!important;
     padding:5px 7px!important;
     border-radius:14px!important;
   }
-
   .identityNameBox{
     padding:0 9px!important;
     border-radius:10px!important;
     overflow:visible!important;
   }
-
   .identityNameText{
     font-size:12px!important;
     line-height:1!important;
     white-space:nowrap!important;
     overflow:visible!important;
   }
-
   .identityNickname{transform:translateY(var(--identity-mobile-name-y))!important;}
   .identitySeparator{font-size:12px!important;transform:translateY(var(--identity-mobile-separator-y))!important;}
   .identityRole{transform:translateY(var(--identity-mobile-role-y))!important;}
   .identityNoticeIcon{transform:translateY(var(--identity-mobile-notice-y))!important;}
   .identityAuthText{transform:translateY(var(--identity-mobile-button-y))!important;}
-
   .identityNoticePanel{
     position:fixed!important;
     top:var(--identity-notice-mobile-top,58px)!important;
@@ -2445,11 +2055,9 @@ button{
     overflow-x:hidden!important;
     overflow-y:auto!important;
   }
-
   .identityNoticePanel::before{
     display:block!important;
   }
-
   .panel{
     position:relative!important;
     left:auto!important;
@@ -2464,14 +2072,12 @@ button{
     order:2!important;
     overflow:visible!important;
   }
-
   .game-section,
   .game-section-main{
     height:auto!important;
     min-height:0!important;
     overflow:visible!important;
   }
-
   .menu{
     display:flex!important;
     flex-direction:column!important;
@@ -2484,11 +2090,9 @@ button{
     padding:0!important;
     scrollbar-width:none!important;
   }
-
   .menu::-webkit-scrollbar{
     display:none!important;
   }
-
   .game-btn,
   .game-btn.is-wide{
     width:100%!important;
@@ -2498,28 +2102,23 @@ button{
     gap:10px!important;
     flex:0 0 auto!important;
   }
-
   .game-btn:hover{
     transform:translateY(-2px)!important;
   }
-
   .game-icon{
     width:34px!important;
     height:34px!important;
     border-radius:12px!important;
     font-size:18px!important;
   }
-
   .game-name{
     font-size:17px!important;
     line-height:1.15!important;
     white-space:nowrap!important;
   }
-
   .game-status{
     font-size:10px!important;
   }
-
   .gacha-standalone-wrap{
     position:relative!important;
     left:auto!important;
@@ -2530,7 +2129,6 @@ button{
     margin:0!important;
     z-index:32!important;
   }
-
   .gacha-standalone-wrap .gacha-standalone-btn,
   .gacha-standalone-btn{
     position:relative!important;
@@ -2544,29 +2142,24 @@ button{
     padding:12px!important;
     border-radius:20px!important;
   }
-
   .gacha-standalone-wrap .gacha-standalone-btn:hover,
   .gacha-standalone-btn:hover{
     transform:translateY(-3px)!important;
   }
-
   .gacha-standalone-img{
     width:88px!important;
     height:88px!important;
   }
-
   .gacha-standalone-label{
     min-height:30px!important;
     padding:0 16px!important;
     font-size:17px!important;
   }
-
   .game-modal-mask{
     padding:10px!important;
     align-items:stretch!important;
     justify-content:center!important;
   }
-
   .game-modal-box{
     width:100%!important;
     height:calc(100dvh - 20px)!important;
@@ -2575,7 +2168,6 @@ button{
     padding-top:34px!important;
     overflow:hidden!important;
   }
-
   .game-modal-close{
     top:7px!important;
     right:8px!important;
@@ -2583,32 +2175,25 @@ button{
     height:24px!important;
     z-index:5!important;
   }
-
   #gameModalFrame{
     width:100%!important;
     height:100%!important;
-    overflow:hidden!important;
+    overflow:auto!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch;
   }
 }
-
 </style>
-
-
 </head>
-
 <body>
 <div id="bgColorFill"></div>
 <div id="bgBleed"></div>
 <div id="bgLight"></div>
-
-<!-- TEMPLATE_VERSION: game-room-db-driven-clean-v3-common-mobile-nav -->
 <div id="room">
   <div id="bgFrame">
     <img id="bg" data-room10-asset="game.roomGame" alt="十号房游戏房背景" />
   </div>
-
   <div id="overlay">
-    <!-- 身份组件：使用全站通用 roomIdentity 结构 -->
     <section class="roomIdentity" id="roomIdentity" aria-label="当前身份">
       <div class="roomIdentityBar">
         <div class="identityNameBox">
@@ -2618,13 +2203,11 @@ button{
             <span class="identityNamePart identityRole hidden" id="identityRole">参观者</span>
           </span>
         </div>
-
         <div class="identityNoticeWrap">
           <button class="identityNoticeBtn" id="identityNoticeBtn" type="button" aria-label="游戏记录提醒">
             <span class="identityNoticeIcon">🔔</span>
           </button>
           <span class="identityNoticeCount" id="identityNoticeCount">0</span>
-
           <div class="identityNoticePanel" id="identityNoticePanel" aria-live="polite">
             <div class="identityNoticeTitle">游戏记录提醒</div>
             <div id="identityNoticeContent">
@@ -2632,61 +2215,49 @@ button{
             </div>
           </div>
         </div>
-
         <button class="identityAuthBtn" id="identityAuthBtn" type="button">
           <span class="identityAuthText">登录</span>
         </button>
       </div>
     </section>
-
-    <!-- 房间切换按钮：使用全站通用模板结构，游戏房按钮保留并标记当前页 -->
     <nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换">
       <button class="navBtn" data-room="hall" type="button" data-page="index" data-login="false">
         <span class="navLabel">大堂</span>
         <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
       </button>
-
       <button class="navBtn" data-room="living" type="button" data-page="living" data-login="false">
         <span class="navLabel">客厅</span>
         <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
       </button>
-
       <button class="navBtn" data-room="manager" type="button" data-manager="true">
         <span class="navLabel">宿管室</span>
         <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
       </button>
-
       <button class="navBtn" data-room="honor" type="button" data-page="honor" data-login="false">
         <span class="navLabel">荣誉墙</span>
         <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
       </button>
-
       <button class="navBtn" data-room="studio" type="button" data-page="studioTodo" data-login="true">
         <span class="navLabel">工作间</span>
         <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
       </button>
-
       <button class="navBtn is-current" data-room="game" type="button" data-page="game" data-login="false" aria-current="page" tabindex="-1">
         <span class="navLabel">游戏房</span>
         <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🕹</span>
       </button>
-
       <button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-login="true">
         <span class="navLabel">宿舍</span>
         <span class="navEffect navEffectA">☁</span><span class="navEffect navEffectB">☾</span><span class="navEffect navEffectC">💤</span>
       </button>
-
       <button class="navBtn" data-room="flower" type="button" data-page="flower" data-login="false">
         <span class="navLabel">花房区</span>
         <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
       </button>
-
       <button class="navBtn" data-room="pets" type="button" data-page="pet" data-login="false">
         <span class="navLabel">宠物区</span>
         <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
       </button>
     </nav>
-
     <div class="panel">
       <section class="game-section game-section-main" aria-label="小游戏">
         <div class="menu game-list" id="gameList" aria-live="polite">
@@ -2694,36 +2265,27 @@ button{
         </div>
       </section>
     </div>
-
     <div class="gacha-standalone-wrap hidden" id="gachaEntryWrap"></div>
   </div>
 </div>
-
 <div id="loginMask" class="login-mask hidden" aria-hidden="true">
   <div class="login-panel" role="dialog" aria-modal="true" aria-label="钥匙验证">
     <img data-room10-asset="root.login" alt="登录框">
-
     <input id="loginNickname" type="text" autocomplete="username">
     <input id="loginCode" type="password" autocomplete="current-password">
-
     <button id="toggleLoginCode" type="button" onclick="toggleLoginCode()"></button>
     <button id="loginSubmitBtn" type="button" onclick="submitLogin()"></button>
     <button id="registerLink" type="button" onclick="goRegisterFromGame()">新成员先登记哦</button>
     <button id="loginCancelBtn" type="button" onclick="closeLogin(false)">×</button>
-
     <div id="loginHint"></div>
   </div>
 </div>
-
 <div id="gameModalMask" class="game-modal-mask hidden" aria-hidden="true">
   <div id="gameModalBox" class="game-modal-box" role="dialog" aria-modal="true" aria-label="小游戏">
     <button class="game-modal-close" type="button" onclick="closeGameModal()">关闭</button>
-    <iframe id="gameModalFrame" title="小游戏" scrolling="no"></iframe>
+    <iframe id="gameModalFrame" title="小游戏" scrolling="auto"></iframe>
   </div>
 </div>
-
-
-
 <div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
   <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
     <div class="reward-petals" aria-hidden="true">
@@ -2733,9 +2295,7 @@ button{
       <span>✿</span>
       <span>❀</span>
     </div>
-
     <button class="reward-close" type="button" aria-label="关闭" onclick="closeRewardModal()">×</button>
-
     <div class="reward-content">
       <div class="reward-icon" id="rewardIcon" aria-hidden="true">🏆</div>
       <div class="reward-label" id="rewardLabel">成就达成</div>
@@ -2747,14 +2307,11 @@ button{
     </div>
   </section>
 </div>
-
 <div id="fallbackTip" class="fallback-tip">未能读取图片边缘颜色，已使用默认柔和背景。</div>
-
 <script>
 const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
-
 const img = document.getElementById("bg");
 const bgFrame = document.getElementById("bgFrame");
 const overlay = document.getElementById("overlay");
@@ -2769,8 +2326,7 @@ const siteNoticeBtn = document.getElementById("identityNoticeBtn");
 const siteNoticePanel = document.getElementById("identityNoticePanel");
 const siteNoticeCount = document.getElementById("identityNoticeCount");
 const siteNoticeContent = document.getElementById("identityNoticeContent");
-const roomNav = document.getElementById("roomNavLayer") || document.getElementById("roomNav");
-const topBar = document.getElementById("topBar");
+const roomNav = document.getElementById("roomNavLayer");
 const loginMask = document.getElementById("loginMask");
 const loginNicknameInput = document.getElementById("loginNickname");
 const loginCodeInput = document.getElementById("loginCode");
@@ -2780,10 +2336,7 @@ const gameModalBox = document.getElementById("gameModalBox");
 const gameModalFrame = document.getElementById("gameModalFrame");
 const gameList = document.getElementById("gameList");
 const gachaEntryWrap = document.getElementById("gachaEntryWrap");
-
 const PENDING_REDIRECT_KEY = "room10_pending_redirect";
-
-
 function resolveRoom10Page(pageKey, fallback = ""){
   const key = String(pageKey || "").trim();
   if(key && typeof window.room10Page === "function"){
@@ -2792,7 +2345,6 @@ function resolveRoom10Page(pageKey, fallback = ""){
   }
   return String(fallback || "").trim();
 }
-
 function resolveRoom10Asset(assetKey, fallback = ""){
   const key = String(assetKey || "").trim();
   if(key && typeof window.room10Asset === "function"){
@@ -2801,16 +2353,13 @@ function resolveRoom10Asset(assetKey, fallback = ""){
   }
   return String(fallback || "").trim();
 }
-
 function cssUrl(value){
   const safe = String(value || "").replace(/\\/g, "/").replace(/"/g, '\\"');
   return `url("${safe}")`;
 }
-
 function applyConfiguredAssets(){
   const roomBg = resolveRoom10Asset("game.roomGame");
   root.style.setProperty("--game-room-bg-url", cssUrl(roomBg));
-
   document.querySelectorAll("[data-room10-asset]").forEach(el => {
     const assetKey = el.getAttribute("data-room10-asset") || "";
     const fallback = el.getAttribute("src") || "";
@@ -2820,9 +2369,6 @@ function applyConfiguredAssets(){
     }
   });
 }
-
-
-
 /* =========================================================
    统一奖励 / 成就称号弹窗接口
    可供 iframe 小游戏或本页数据库返回 awards 后调用
@@ -2835,7 +2381,6 @@ const rewardTypeMeta = {
   item:{label:"道具获得", icon:"🧺"},
   gold:{label:"金币奖励", icon:"🪙"}
 };
-
 const rewardIconMap = {
   金币:"🪙",
   种子:"🌱",
@@ -2846,14 +2391,11 @@ const rewardIconMap = {
   成就:"🏆",
   称号:"🎖️"
 };
-
 let pendingAwardModals = [];
-
 function normalizeRewardItem(item){
   if(typeof item === "string"){
     return {name:item, amount:"", unit:"", icon:rewardIconMap[item] || "✨"};
   }
-
   return {
     name:item?.name || "奖励",
     amount:item?.amount ?? "",
@@ -2862,7 +2404,6 @@ function normalizeRewardItem(item){
     prefix:item?.prefix || ""
   };
 }
-
 function formatRewardAmount(item){
   if(item.amount === "" || item.amount === null || item.amount === undefined) return "";
   if(typeof item.amount === "number"){
@@ -2871,24 +2412,19 @@ function formatRewardAmount(item){
   }
   return `${item.prefix || ""}${item.amount}${item.unit || ""}`;
 }
-
 function renderRewards(rewards){
   const list = document.getElementById("rewardList");
   const sectionTitle = document.getElementById("rewardSectionTitle");
   if(!list || !sectionTitle) return;
-
   list.innerHTML = "";
   list.className = "reward-list";
   sectionTitle.className = "reward-section-title";
-
   if(!rewards.length){
     list.classList.add("empty");
     sectionTitle.classList.add("empty");
     return;
   }
-
   list.classList.add(`count-${Math.min(rewards.length, 3)}`);
-
   rewards.forEach(reward => {
     const item = document.createElement("div");
     item.className = "reward-item";
@@ -2900,29 +2436,24 @@ function renderRewards(rewards){
     list.appendChild(item);
   });
 }
-
 function showRewardModal(options = {}){
   const mask = document.getElementById("rewardMask");
   if(!mask) return;
-
   const type = options.type || options.award_type || "achievement";
   const meta = rewardTypeMeta[type] || rewardTypeMeta.achievement;
   const rewards = Array.isArray(options.rewards || options.reward_items)
     ? (options.rewards || options.reward_items).map(normalizeRewardItem)
     : [];
-
   mask.dataset.type = type;
   document.getElementById("rewardIcon").textContent = options.icon || meta.icon;
   document.getElementById("rewardLabel").textContent = options.label || meta.label;
   document.getElementById("rewardTitle").textContent = options.title || options.award_name || options.name || "奖励已领取";
   document.getElementById("rewardDesc").textContent = options.desc || options.award_desc || options.description || "奖励已经记录完成。";
-
   renderRewards(rewards);
   mask.classList.add("show");
   mask.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
 }
-
 function closeRewardModal(){
   const mask = document.getElementById("rewardMask");
   if(!mask) return;
@@ -2931,34 +2462,25 @@ function closeRewardModal(){
   document.body.style.overflow = "";
   playNextAwardModal();
 }
-
 function playAwardModals(awards = []){
   pendingAwardModals = Array.isArray(awards) ? awards.slice() : [];
   playNextAwardModal();
 }
-
 function playNextAwardModal(){
   if(!pendingAwardModals.length) return;
   showRewardModal(pendingAwardModals.shift());
 }
-
 function handleGameAwardMessage(event){
   const data = event?.data || {};
   if(!data || typeof data !== "object") return;
-
   if(data.type === "room10:award"){
     showRewardModal(data.payload || {});
   }
-
   if(data.type === "room10:awards"){
     playAwardModals(data.payload || data.awards || []);
   }
 }
-
 window.addEventListener("message", handleGameAwardMessage);
-
-
-
 function escapeHtml(value){
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -2967,12 +2489,10 @@ function escapeHtml(value){
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
-
 function showGameListMessage(message){
   if(!gameList) return;
   gameList.innerHTML = `<div class="game-list-message">${escapeHtml(message)}</div>`;
 }
-
 function normalizeGameEntry(row){
   return {
     gameKey:String(row?.game_key || "").trim(),
@@ -2984,17 +2504,16 @@ function normalizeGameEntry(row){
     imageAssetKey:String(row?.image_asset_key || "").trim(),
     imageUrl:String(row?.image_url || "").trim(),
     isEnabled:row?.is_enabled !== false,
+    memberOnly:row?.member_only === true,
     disabledMessage:String(row?.disabled_message || "").trim(),
     statusText:String(row?.status_text || "").trim()
   };
 }
-
 function validateGameEntry(entry){
   if(!entry.gameKey || !entry.displayName) return false;
   if(entry.isEnabled && !entry.pageKey && !entry.fallbackUrl) return false;
   return true;
 }
-
 function renderGameButton(entry){
   const statusClass = entry.isEnabled ? "ready" : "";
   const statusText = entry.statusText;
@@ -3008,7 +2527,6 @@ function renderGameButton(entry){
     </button>
   `;
 }
-
 function renderStandaloneGame(entry){
   if(!gachaEntryWrap) return;
   const imageSrc = entry.imageAssetKey ? resolveRoom10Asset(entry.imageAssetKey, entry.imageUrl) : entry.imageUrl;
@@ -3020,48 +2538,44 @@ function renderStandaloneGame(entry){
     </button>
   `;
 }
-
 let gameEntryMap = new Map();
-
 async function loadGameEntries(){
   showGameListMessage("正在读取游戏列表...");
   if(gachaEntryWrap){
     gachaEntryWrap.classList.add("hidden");
     gachaEntryWrap.innerHTML = "";
   }
-
   const { data, error } = await client
     .from("game_room_entries")
-    .select("game_key,display_name,icon_text,page_key,fallback_url,entry_type,image_asset_key,image_url,is_active,is_enabled,disabled_message,status_text,sort_order")
+    .select("game_key,display_name,icon_text,page_key,fallback_url,entry_type,image_asset_key,image_url,is_active,is_enabled,member_only,disabled_message,status_text,sort_order")
     .eq("is_active", true)
     .order("sort_order", { ascending:true })
     .order("created_at", { ascending:true });
-
   if(error){
     console.error("loadGameEntries() 读取失败：", error);
     showGameListMessage(`游戏列表读取失败：${error.message || "请检查 game_room_entries 表"}`);
     return;
   }
-
   const entries = (Array.isArray(data) ? data : []).map(normalizeGameEntry).filter(validateGameEntry);
   if(!entries.length){
     showGameListMessage("游戏列表配置缺失，请先在 game_room_entries 表中添加游戏。 ");
     return;
   }
-
   gameEntryMap = new Map(entries.map(entry => [entry.gameKey, entry]));
   const panelEntries = entries.filter(entry => entry.entryType !== "standalone" && entry.entryType !== "standalone_gacha");
   const standaloneEntries = entries.filter(entry => entry.entryType === "standalone" || entry.entryType === "standalone_gacha");
-
   if(panelEntries.length){
     gameList.innerHTML = panelEntries.map(renderGameButton).join("");
   }else{
     showGameListMessage("游戏列表配置缺失：没有可显示在主面板的游戏。 ");
   }
-
   standaloneEntries.slice(0, 1).forEach(renderStandaloneGame);
 }
-
+function isRoom10GameMember(){
+  if(!isLoggedIn()) return false;
+  const role = String(getRole() || "").trim().toLowerCase();
+  return ["owner", "admin", "manager", "member", "trainee"].includes(role);
+}
 function openDbGame(gameKey){
   const key = String(gameKey || "").trim();
   const entry = gameEntryMap.get(key);
@@ -3069,21 +2583,22 @@ function openDbGame(gameKey){
     showTip("游戏配置缺失，请刷新后重试。");
     return;
   }
-
   if(!entry.isEnabled){
     showTip(entry.disabledMessage || `《${entry.displayName}》当前不可用。`);
     return;
   }
-
+  const isPublicGuestGame = entry.gameKey === "2048";
+  if(entry.memberOnly && !isPublicGuestGame && !isRoom10GameMember()){
+    showTip(`《${entry.displayName}》仅限十号房成员进入。`);
+    return;
+  }
   const targetUrl = resolveRoom10Page(entry.pageKey, entry.fallbackUrl);
   if(!targetUrl){
     showTip(`《${entry.displayName}》页面路径配置缺失。`);
     return;
   }
-
   openGameModal(targetUrl, entry.displayName);
 }
-
 if(gameList){
   gameList.addEventListener("click", (event) => {
     const btn = event.target.closest("[data-game-key]");
@@ -3091,7 +2606,6 @@ if(gameList){
     openDbGame(btn.getAttribute("data-game-key"));
   });
 }
-
 if(gachaEntryWrap){
   gachaEntryWrap.addEventListener("click", (event) => {
     const btn = event.target.closest("[data-game-key]");
@@ -3099,11 +2613,9 @@ if(gachaEntryWrap){
     openDbGame(btn.getAttribute("data-game-key"));
   });
 }
-
 function isTinyScreen(){
   return window.innerWidth <= 540;
 }
-
 function clearDesktopOverlayStyles(){
   if(overlay){
     overlay.style.left = "";
@@ -3111,31 +2623,24 @@ function clearDesktopOverlayStyles(){
     overlay.style.width = "";
     overlay.style.height = "";
   }
-
   if(roomNav){
     roomNav.style.transform = "";
   }
-
   root.style.setProperty("--bg-ui-scale", "1");
 }
-
 function syncOverlayToImage(){
   if(isTinyScreen()){
     clearDesktopOverlayStyles();
     return;
   }
-
   if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
-
   const frame = bgFrame.getBoundingClientRect();
   const frameRatio = frame.width / frame.height;
   const imageRatio = img.naturalWidth / img.naturalHeight;
-
   let displayWidth;
   let displayHeight;
   let displayLeft;
   let displayTop;
-
   if(frameRatio > imageRatio){
     displayHeight = frame.height;
     displayWidth = displayHeight * imageRatio;
@@ -3147,7 +2652,6 @@ function syncOverlayToImage(){
     displayLeft = frame.left;
     displayTop = frame.top + (frame.height - displayHeight) / 2;
   }
-
   overlay.style.left = `${displayLeft}px`;
   overlay.style.top = `${displayTop}px`;
   overlay.style.width = `${displayWidth}px`;
@@ -3160,63 +2664,38 @@ function syncOverlayToImage(){
   */
   const scale = Math.max(0.34, Math.min(3.2, displayWidth / 1440));
   root.style.setProperty("--bg-ui-scale", String(scale));
-
   /*
     游戏房主内容框使用页面变量 --game-panel-scale 手动控制。
     不在这里自动覆盖，否则页面确认尺寸会失效。
   */
-
-  requestAnimationFrame(fitRoomNavToBar);
 }
-
-function fitRoomNavToBar(){
-  if(!roomNav || !topBar || isTinyScreen()) return;
-
-  roomNav.style.transform = "scale(1)";
-
-  const availableWidth = topBar.clientWidth;
-  const neededWidth = roomNav.scrollWidth;
-
-  if(!availableWidth || !neededWidth) return;
-
-  const fitScale = Math.min(1, availableWidth / neededWidth);
-  roomNav.style.transform = `scale(${fitScale})`;
-}
-
 function isLoggedIn(){
   return localStorage.getItem("room10LoggedIn") === "true";
 }
-
 function getRole(){
   return localStorage.getItem("room10Role") || "";
 }
-
 function getCurrentUser(){
   return localStorage.getItem("room10User") || "";
 }
-
 function getCurrentMemberId(){
   return localStorage.getItem("room10MemberId") || "";
 }
-
 function getCurrentMemberCode(){
   return localStorage.getItem("room10MemberCode") || "";
 }
-
-
 function getRoleLabel(roleValue = getRole()){
   const role = String(roleValue || "").toLowerCase();
   if(role === "owner") return "维修工";
   if(role === "admin") return "宿管";
   if(role === "member") return "房客";
-  if(role === "applying") return "申请中";
+  if(role === "trainee") return "练习生";
+  if(role === "applying") return "申请人";
   if(isLoggedIn()) return "房客";
   return "参观者";
 }
-
 function updateIdentityUI(){
   if(!identityNickname || !identitySeparator || !identityRole || !identityAuthText || !identityAuthBtn) return;
-
   if(isLoggedIn()){
     const user = getCurrentUser() || "已登录";
     const roleLabel = getRoleLabel();
@@ -3228,7 +2707,6 @@ function updateIdentityUI(){
     identityAuthBtn.dataset.authMode = "logout";
     return;
   }
-
   identityNickname.textContent = "参观者";
   identitySeparator.classList.add("hidden");
   identityRole.classList.add("hidden");
@@ -3236,7 +2714,6 @@ function updateIdentityUI(){
   identityAuthText.textContent = "登录";
   identityAuthBtn.dataset.authMode = "login";
 }
-
 function logout(){
   localStorage.removeItem("room10LoggedIn");
   localStorage.removeItem("room10User");
@@ -3245,92 +2722,75 @@ function logout(){
   localStorage.removeItem("room10MemberCode");
   localStorage.removeItem("room10ApplicantSession");
   localStorage.removeItem("room10ApplicationDraft");
-
   localStorage.removeItem("room10_user");
   localStorage.removeItem("room10_current_user");
   localStorage.removeItem("currentUser");
-
   clearPendingRedirect();
   closeLogin(false);
   updateIdentityUI();
 }
-
 function normalizeLoginInput(value){
   return String(value || "")
     .replace(/\u3000/g, " ")
     .trim();
 }
-
 function getPendingRedirect(){
   return sessionStorage.getItem(PENDING_REDIRECT_KEY) || "";
 }
-
 function setPendingRedirect(page){
   const safePage = String(page || "").trim();
   if(!safePage) return;
   sessionStorage.setItem(PENDING_REDIRECT_KEY, safePage);
 }
-
 function clearPendingRedirect(){
   sessionStorage.removeItem(PENDING_REDIRECT_KEY);
 }
-
 function goRegisterFromGame(){
   const returnPage = resolveRoom10Page("game");
   const registerPage = resolveRoom10Page("managerRegister");
   sessionStorage.setItem("room10RegisterReturn", returnPage);
   window.location.href = `${registerPage}?from=${encodeURIComponent(returnPage)}`;
 }
-
 function toggleLoginCode(){
   loginCodeInput.type = loginCodeInput.type === "password" ? "text" : "password";
 }
-
 function getManagerPageByRole(roleValue = getRole()){
   const role = String(roleValue || "").toLowerCase();
   if(role === "owner") return resolveRoom10Page("managerOwner");
   if(role === "admin") return resolveRoom10Page("managerAdmin");
-  if(role === "member" || role === "applying") return resolveRoom10Page("managerMember");
+  if(role === "member" || role === "trainee" || role === "applying") return resolveRoom10Page("managerMember");
   return resolveRoom10Page("managerVisitor");
 }
-
 function enterManagerRoom(){
   clearPendingRedirect();
   window.location.href = getManagerPageByRole();
 }
-
 function enterRoom(page, needLogin, room = ""){
   const targetPage = String(page || "").trim();
   const targetRoom = String(room || "").trim();
   if(!targetPage) return;
-
   if(needLogin && !isLoggedIn()){
     openLogin(targetPage);
     return;
   }
-
   if(targetRoom === "dorm" && getRole() === "applying"){
     clearPendingRedirect();
     window.location.href = getManagerPageByRole();
     return;
   }
-
   if((targetRoom === "flower" || targetRoom === "pets" || targetRoom === "pet") && !isLoggedIn()){
     clearPendingRedirect();
     window.location.href = `${targetPage}?mode=guest`;
     return;
   }
-
   clearPendingRedirect();
   window.location.href = targetPage;
 }
-
 function setupRoomNav(currentRoom = "game"){
   document.querySelectorAll(".roomNavLayer .navBtn").forEach(btn => {
     const room = btn.dataset.room || "";
     const isCurrent = room === currentRoom;
     btn.classList.toggle("is-current", isCurrent);
-
     if(isCurrent){
       btn.setAttribute("aria-current", "page");
       btn.setAttribute("tabindex", "-1");
@@ -3338,28 +2798,21 @@ function setupRoomNav(currentRoom = "game"){
       btn.removeAttribute("aria-current");
       btn.removeAttribute("tabindex");
     }
-
     if(btn.dataset.boundRoomNav === "true") return;
     btn.dataset.boundRoomNav = "true";
-
     btn.addEventListener("click", event => {
       event.preventDefault();
       event.stopPropagation();
-
       if(btn.classList.contains("is-current")) return;
-
       if(btn.dataset.manager === "true"){
         enterManagerRoom();
         return;
       }
-
       const targetPage = resolveRoom10Page(btn.dataset.page);
       enterRoom(targetPage, btn.dataset.login === "true", btn.dataset.room);
     });
   });
 }
-
-
 function openLogin(targetPage = ""){
   if(isLoggedIn()){
     if(targetPage){
@@ -3367,67 +2820,54 @@ function openLogin(targetPage = ""){
     }
     return;
   }
-
   if(targetPage){
     setPendingRedirect(targetPage);
   }
-
   loginMask.classList.remove("hidden");
   loginMask.setAttribute("aria-hidden", "false");
   loginHint.textContent = "";
   loginHint.style.color = "#8b4a2d";
   setTimeout(() => loginNicknameInput.focus(), 0);
 }
-
 function closeLogin(keepRedirect = true){
   loginMask.classList.add("hidden");
   loginMask.setAttribute("aria-hidden", "true");
   loginHint.textContent = "";
   loginNicknameInput.value = "";
   loginCodeInput.value = "";
-
   if(!keepRedirect){
     clearPendingRedirect();
   }
 }
-
 async function submitLogin(){
   const nickname = normalizeLoginInput(loginNicknameInput.value);
   const code = normalizeLoginInput(loginCodeInput.value);
-
   loginHint.textContent = "";
   loginHint.style.color = "#8b4a2d";
-
   if(!nickname || !code){
     loginHint.textContent = "还没填写完整呢";
     return;
   }
-
   try{
     const { data, error } = await client.rpc("verify_member_login", {
       input_nickname: nickname,
       input_code: code
     });
-
     if(error){
       console.error("KEY 登录失败：", error);
       loginHint.textContent = `登录检查失败：${error.message || "请稍后再试"}`;
       return;
     }
-
     if(!Array.isArray(data) || data.length === 0){
       loginHint.textContent = "没有找到你的记录哎";
       return;
     }
-
     const user = data[0] || {};
-
     localStorage.setItem("room10LoggedIn", "true");
     localStorage.setItem("room10User", user.nickname || nickname);
     localStorage.setItem("room10Role", user.role || "member");
     localStorage.setItem("room10MemberId", user.member_id || user.id || "");
     localStorage.setItem("room10MemberCode", code);
-
     let roleMessage = "登录成功";
     if(user.role === "owner"){
       roleMessage = "维修工已上线";
@@ -3435,19 +2875,18 @@ async function submitLogin(){
       roleMessage = "宿管已上线";
     }else if(user.role === "member"){
       roleMessage = "房客已登录";
+    }else if(user.role === "trainee"){
+      roleMessage = "练习生已登录";
     }else if(user.role === "applying"){
       roleMessage = "当前身份为申请中";
     }
-
     loginHint.style.color = "#5f7d3a";
     loginHint.textContent = roleMessage;
     updateIdentityUI();
     refreshGameNotice();
-
     setTimeout(() => {
       const targetPage = getPendingRedirect();
       closeLogin(true);
-
       if(targetPage){
         clearPendingRedirect();
         window.location.href = targetPage;
@@ -3459,89 +2898,68 @@ async function submitLogin(){
     loginHint.textContent = `登录失败：${err?.message || "请稍后再试"}`;
   }
 }
-
 function normalizeGameUrl(url){
   const safeUrl = String(url || "").trim();
   return safeUrl && !/^(javascript|data):/i.test(safeUrl) ? safeUrl : "";
 }
-
 function openGameModal(url, title = "小游戏"){
   const safeUrl = normalizeGameUrl(url);
   if(!safeUrl) return;
-
   closeSiteNoticePanel();
-
   const safeTitle = String(title || "小游戏").trim() || "小游戏";
-
   if(isTinyScreen()){
     window.location.href = safeUrl;
     return;
   }
-
   const currentUrl = gameModalFrame.getAttribute("data-current-src") || "";
   const modalAlreadyOpen = !gameModalMask.classList.contains("hidden");
-
   if(modalAlreadyOpen && currentUrl === safeUrl){
     return;
   }
-
   if(gameModalBox){
     gameModalBox.setAttribute("aria-label", safeTitle);
   }
-
   gameModalFrame.title = safeTitle;
-  gameModalFrame.setAttribute("scrolling", "no");
+  gameModalFrame.setAttribute("scrolling", "auto");
   gameModalFrame.setAttribute("data-current-src", safeUrl);
   gameModalFrame.src = safeUrl;
   gameModalMask.classList.remove("hidden");
   gameModalMask.setAttribute("aria-hidden", "false");
 }
-
-
-
-
 function closeGameModal(){
   gameModalMask.classList.add("hidden");
   gameModalMask.setAttribute("aria-hidden", "true");
   gameModalFrame.removeAttribute("data-current-src");
-  gameModalFrame.setAttribute("scrolling", "no");
+  gameModalFrame.setAttribute("scrolling", "auto");
   gameModalFrame.src = "about:blank";
 }
-
 let latestGameNoticeIds = [];
-
 function getNoticeEmptyText(){
   if(!isLoggedIn()){
     return "登录后会显示属于你的游戏记录提醒。";
   }
   return "目前没有新的游戏记录提醒。";
 }
-
 function setNoticeCount(count){
   const n = Number(count) || 0;
   siteNoticeCount.textContent = n > 99 ? "99+" : String(n);
   siteNoticeBtn.classList.toggle("hasNotice", n > 0);
 }
-
 function renderNoticeLoading(){
   siteNoticeContent.innerHTML = '<div class="identityNoticeEmpty">正在读取通知……</div>';
 }
-
 function renderNoticeError(message){
   siteNoticeContent.innerHTML = `<div class="identityNoticeEmpty">${escapeHtml(message || "通知读取失败，请稍后再试。")}</div>`;
   setNoticeCount(0);
 }
-
 function renderNoticeList(items){
   const list = Array.isArray(items) ? items : [];
   latestGameNoticeIds = list.map(item => item.id).filter(Boolean);
-
   if(!list.length){
     siteNoticeContent.innerHTML = `<div class="identityNoticeEmpty">${escapeHtml(getNoticeEmptyText())}</div>`;
     setNoticeCount(0);
     return;
   }
-
   siteNoticeContent.innerHTML = `
     <div class="identityNoticeList">
       ${list.map(item => {
@@ -3555,30 +2973,24 @@ function renderNoticeList(items){
     </div>
     <button class="identityNoticeReadBtn" type="button" onclick="markAllGameNoticesRead()">全部已读</button>
   `;
-
   setNoticeCount(list.length);
 }
-
 async function fetchGameNoticeItems(){
   const memberId = getCurrentMemberId().trim();
   const memberCode = getCurrentMemberCode().trim();
-
   if(!isLoggedIn() || !memberId || !memberCode){
     return [];
   }
-
   const { data, error } = await client.rpc("get_member_notifications", {
     p_member_id: memberId,
     p_member_code: memberCode,
     p_channel: "game",
     p_limit: 20
   });
-
   if(error){
     console.error("读取游戏通知失败：", error);
     throw error;
   }
-
   return (Array.isArray(data) ? data : []).map(item => ({
     id:item.notice_id || item.id,
     title:item.title || "游戏记录提醒",
@@ -3586,10 +2998,8 @@ async function fetchGameNoticeItems(){
     createdAt:item.created_at || ""
   }));
 }
-
 async function refreshGameNotice(){
   if(!siteNoticeContent || !siteNoticeBtn) return;
-
   try{
     renderNoticeLoading();
     const items = await fetchGameNoticeItems();
@@ -3598,29 +3008,24 @@ async function refreshGameNotice(){
     renderNoticeError(err?.message || "通知读取失败，请稍后再试。");
   }
 }
-
 async function markAllGameNoticesRead(){
   const memberId = getCurrentMemberId().trim();
   const memberCode = getCurrentMemberCode().trim();
-
   if(!isLoggedIn() || !memberId || !memberCode || !latestGameNoticeIds.length){
     renderNoticeList([]);
     return;
   }
-
   try{
     const { error } = await client.rpc("mark_member_notifications_read", {
       p_member_id: memberId,
       p_member_code: memberCode,
       p_notice_ids: latestGameNoticeIds
     });
-
     if(error){
       console.error("标记游戏通知已读失败：", error);
       renderNoticeError(error.message || "标记已读失败，请稍后再试。");
       return;
     }
-
     latestGameNoticeIds = [];
     renderNoticeList([]);
   }catch(err){
@@ -3628,7 +3033,6 @@ async function markAllGameNoticesRead(){
     renderNoticeError(err?.message || "标记已读失败，请稍后再试。");
   }
 }
-
 async function toggleSiteNoticePanel(){
   if(!siteNoticePanel) return;
   const willShow = !siteNoticePanel.classList.contains("show");
@@ -3637,22 +3041,18 @@ async function toggleSiteNoticePanel(){
     await refreshGameNotice();
   }
 }
-
 function closeSiteNoticePanel(){
   if(siteNoticePanel) siteNoticePanel.classList.remove("show");
 }
-
 function showTip(message){
   fallbackTip.textContent = message || "操作提示";
   fallbackTip.classList.add("show");
   clearTimeout(showTip._timer);
   showTip._timer = setTimeout(() => fallbackTip.classList.remove("show"), 2600);
 }
-
 function clamp(v,min,max){
   return Math.max(min, Math.min(max, v));
 }
-
 function avgColor(data){
   let r = 0, g = 0, b = 0, count = 0;
   for(let i=0;i<data.length;i+=4){
@@ -3670,7 +3070,6 @@ function avgColor(data){
     Math.round(b / count)
   ];
 }
-
 function mix(color, target, ratio){
   return [
     Math.round(color[0] * (1 - ratio) + target[0] * ratio),
@@ -3678,47 +3077,37 @@ function mix(color, target, ratio){
     Math.round(color[2] * (1 - ratio) + target[2] * ratio)
   ];
 }
-
 function rgbToCss(arr){
   return `rgb(${arr[0]}, ${arr[1]}, ${arr[2]})`;
 }
-
 function applyEdgeColors(){
   try{
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d", { willReadFrequently:true });
     const w = img.naturalWidth;
     const h = img.naturalHeight;
-
     if(!w || !h || !ctx) throw new Error("图片尺寸或画布无效");
-
     canvas.width = w;
     canvas.height = h;
     ctx.drawImage(img, 0, 0, w, h);
-
     const bandX = Math.max(8, Math.floor(w * 0.03));
     const bandY = Math.max(8, Math.floor(h * 0.03));
-
     const leftData = ctx.getImageData(0, 0, bandX, h).data;
     const rightData = ctx.getImageData(w - bandX, 0, bandX, h).data;
     const topData = ctx.getImageData(0, 0, w, bandY).data;
     const bottomData = ctx.getImageData(0, h - bandY, w, bandY).data;
-
     let left = avgColor(leftData);
     let right = avgColor(rightData);
     let top = avgColor(topData);
     let bottom = avgColor(bottomData);
-
     left = mix(left, [255,255,255], 0.14);
     right = mix(right, [255,255,255], 0.12);
     top = mix(top, [255,255,255], 0.16);
     bottom = mix(bottom, [255,255,255], 0.10);
-
     left = left.map(v => clamp(v, 120, 255));
     right = right.map(v => clamp(v, 120, 255));
     top = top.map(v => clamp(v, 130, 255));
     bottom = bottom.map(v => clamp(v, 110, 255));
-
     root.style.setProperty("--bg-left", rgbToCss(left));
     root.style.setProperty("--bg-right", rgbToCss(right));
     root.style.setProperty("--bg-top", rgbToCss(top));
@@ -3728,26 +3117,21 @@ function applyEdgeColors(){
     console.warn("读取底图边缘颜色失败：", err);
   }
 }
-
 loginNicknameInput.addEventListener("keydown", (e) => {
   if(e.key === "Enter") submitLogin();
 });
-
 loginCodeInput.addEventListener("keydown", (e) => {
   if(e.key === "Enter") submitLogin();
 });
-
 loginMask.addEventListener("click", (e) => {
   if(e.target === loginMask) closeLogin(false);
 });
-
 const rewardMask = document.getElementById("rewardMask");
 if(rewardMask){
   rewardMask.addEventListener("click", (e) => {
     if(e.target === rewardMask) closeRewardModal();
   });
 }
-
 gameModalMask.addEventListener("click", (e) => {
   if(e.target === gameModalMask){
     e.preventDefault();
@@ -3755,28 +3139,23 @@ gameModalMask.addEventListener("click", (e) => {
     showTip("请点击右上角“关闭”退出游戏。");
   }
 });
-
 document.addEventListener("keydown", (e) => {
   if(e.key !== "Escape") return;
-
   const rewardMask = document.getElementById("rewardMask");
   if(rewardMask && rewardMask.classList.contains("show")){
     closeRewardModal();
     return;
   }
-
   if(!gameModalMask.classList.contains("hidden")){
     closeGameModal();
   }
 });
-
 if(siteNoticeBtn){
   siteNoticeBtn.addEventListener("click", event => {
     event.stopPropagation();
     toggleSiteNoticePanel();
   });
 }
-
 if(identityAuthBtn){
   identityAuthBtn.addEventListener("click", event => {
     event.stopPropagation();
@@ -3787,13 +3166,11 @@ if(identityAuthBtn){
     }
   });
 }
-
 document.addEventListener("click", (e) => {
   if(!siteNoticePanel || !siteNoticeBtn) return;
   if(siteNoticePanel.contains(e.target) || siteNoticeBtn.contains(e.target)) return;
   closeSiteNoticePanel();
 });
-
 window.addEventListener("storage", (e) => {
   if(
     e.key === "room10LoggedIn" ||
@@ -3804,16 +3181,12 @@ window.addEventListener("storage", (e) => {
   ){
     updateIdentityUI();
   }
-
   if(e.key === "room10GameRecordNotices"){
     refreshGameNotice();
   }
 });
-
 window.addEventListener("resize", syncOverlayToImage);
-
 applyConfiguredAssets();
-
 if(img && img.complete && img.naturalWidth){
   syncOverlayToImage();
   applyEdgeColors();
@@ -3826,15 +3199,11 @@ if(img && img.complete && img.naturalWidth){
     showTip("未能读取图片边缘颜色，已使用默认柔和背景。");
   }, { once:true });
 }
-
 setTimeout(syncOverlayToImage, 120);
 setupRoomNav("game");
 loadGameEntries();
 updateIdentityUI();
 refreshGameNotice();
 </script>
-
-
-<!-- GAME_PAGE_VERSION: game-room-db-driven-clean-v2 -->
 </body>
 </html>
