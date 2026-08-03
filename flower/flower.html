@@ -6,7 +6,7 @@
 <title>十号房｜花房</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
-<!-- flower clean db-driven v22: 通用模板导航路径统一；业务展示与领取状态统一由数据库驱动；每日首次进入自动领取水与肥料；支持 trainee 练习生身份 -->
+<!-- flower clean db-driven v22-market-limit-fix: 通用模板导航路径统一；业务展示与领取状态统一由数据库驱动；每日首次进入自动领取水与肥料；支持 trainee 练习生身份 -->
 
 <style>
 *{box-sizing:border-box;}
@@ -4085,60 +4085,20 @@ function getMarketRow(flowerKey){
   return (flowerState.marketRows || []).find(row => String(row.flower_key || "") === key) || null;
 }
 
-function getMarketFreshHoldingQuantity(row){
-  if(!row || typeof row !== "object") return 0;
-
-  /*
-    这里用于判断“市场新鲜花最多持有 5 朵”的买入上限。
-    不能使用 market_fresh_quantity：它在当前 RPC 中表示“新鲜且已过可卖轮次的数量”，
-    刚买入本轮的市场花会是 owned_quantity > 0，但 market_fresh_quantity = 0。
-    如果用 market_fresh_quantity，会把已经持有的花误判成 0，导致按钮仍可点，最后被数据库拦截失败。
-  */
-  const marketSpecificCandidates = [
-    row?.market_active_quantity,
-    row?.market_holding_quantity,
-    row?.market_owned_quantity,
-    row?.current_market_quantity,
-    row?.active_market_quantity,
-    row?.market_fresh_total_quantity,
-    row?.market_fresh_holding_quantity,
-    row?.current_market_fresh_quantity,
-    row?.fresh_market_quantity,
-    row?.market_fresh_owned_quantity
-  ];
-
-  for(const value of marketSpecificCandidates){
-    const n = Number(value);
-    if(Number.isFinite(n) && n >= 0) return Math.floor(n);
-  }
-
-  const owned = Number(row?.owned_quantity);
-  return Number.isFinite(owned) && owned >= 0 ? Math.floor(owned) : 0;
-}
-
-function getRoundBoughtQuantity(row){
-  const candidates = [
-    row?.round_bought_quantity,
-    row?.round_buy_quantity,
-    row?.current_round_bought_quantity,
-    row?.current_round_buy_quantity,
-    row?.bought_quantity,
-    row?.buy_quantity,
-    row?.purchased_quantity,
-    row?.round_purchased_quantity
-  ];
-
-  for(const value of candidates){
-    const n = Number(value);
-    if(Number.isFinite(n) && n >= 0) return Math.floor(n);
-  }
-
-  /* 5 朵限制只针对市场新鲜花；优先使用数据库返回的市场新鲜持有量。 */
-  return getMarketFreshHoldingQuantity(row);
+/*
+  花市同种最多持有 5 朵，只使用 get_flower_market RPC 返回的
+  market_active_quantity。该字段只统计 source=market 的有效花束，
+  source=harvest 的自种收获花不会占用购买额度。
+*/
+function getMarketActiveHoldingQuantity(row){
+  const quantity = Number(row?.market_active_quantity);
+  return Number.isFinite(quantity) && quantity >= 0
+    ? Math.floor(quantity)
+    : 0;
 }
 
 function getRemainingBuyQuantity(row){
-  return Math.max(0, 5 - getRoundBoughtQuantity(row || {}));
+  return Math.max(0, 5 - getMarketActiveHoldingQuantity(row || {}));
 }
 
 function getSellableQuantity(row){
@@ -4537,15 +4497,48 @@ function getMerchantBouquetImg(row){
   return getFreshBouquetImg(getMerchantFlowerMeta(row));
 }
 
-function isMerchantEligibleHolding(row){
-  if(!row || typeof row !== "object") return false;
-  if(String(row.source || "") !== "harvest") return false;
-  if(!["planted_fresh", "low_quality", "wilting"].includes(String(row.quality || ""))) return false;
-  if(!row.is_sellable) return false;
-  if(!Number.isFinite(Number(row.quantity)) || Number(row.quantity) <= 0) return false;
-  if(!["fresh", "withering"].includes(String(row.status || ""))) return false;
+function normalizeMerchantBoolean(value){
+  if(value === true || value === 1) return true;
+  if(value === false || value === 0) return false;
+  const text = String(value ?? "").trim().toLowerCase();
+  if(["true", "t", "1", "yes"].includes(text)) return true;
+  if(["false", "f", "0", "no"].includes(text)) return false;
+  return null;
+}
 
-  const witherAt = new Date(row.wither_at || "");
+function normalizeMerchantHolding(row){
+  if(!row || typeof row !== "object") return null;
+
+  const normalized = { ...row };
+  normalized.source = String(row.source || "").trim().toLowerCase();
+  normalized.status = String(row.status || "").trim().toLowerCase();
+  normalized.quality = String(row.quality || "").trim().toLowerCase();
+  normalized.quantity = Math.max(0, Math.floor(Number(row.quantity) || 0));
+  normalized.sell_multiplier = Number.isFinite(Number(row.sell_multiplier))
+    ? Number(row.sell_multiplier)
+    : 1;
+
+  const sellable = normalizeMerchantBoolean(row.is_sellable);
+  normalized.is_sellable = sellable === null
+    ? !["sold", "cleared", "discarded", "withered"].includes(normalized.status)
+    : sellable;
+
+  const marketRow = getMarketRow(normalized.flower_key);
+  if(!String(normalized.flower_name || "").trim() && marketRow){
+    normalized.flower_name = getFlowerDisplayName(marketRow);
+  }
+
+  return normalized;
+}
+
+function isMerchantEligibleHolding(row){
+  const holding = normalizeMerchantHolding(row);
+  if(!holding) return false;
+  if(holding.source !== "harvest") return false;
+  if(!holding.is_sellable || holding.quantity <= 0) return false;
+  if(["sold", "cleared", "discarded", "withered"].includes(holding.status)) return false;
+
+  const witherAt = new Date(holding.wither_at || "");
   if(!Number.isNaN(witherAt.getTime()) && witherAt.getTime() <= Date.now()) return false;
 
   return true;
@@ -4607,6 +4600,13 @@ function buildMerchantGroups(rows=[]){
   return groups;
 }
 
+function normalizeMerchantRows(rows=[]){
+  return (Array.isArray(rows) ? rows : [])
+    .map(normalizeMerchantHolding)
+    .filter(Boolean)
+    .filter(isMerchantEligibleHolding);
+}
+
 async function loadFlowerMerchantRows(){
   const auth = getFlowerAuth();
   flowerState.merchantRows = [];
@@ -4618,16 +4618,15 @@ async function loadFlowerMerchantRows(){
     ? Number(auth.timezoneOffset)
     : new Date().getTimezoneOffset();
 
-  const args = {
+  const { data, error } = await supabaseClient.rpc("get_flower_merchant_inventory", {
     p_member_id:auth.memberId,
     p_member_code:auth.memberCode,
     p_timezone_offset_minutes:timezoneOffset
-  };
+  });
 
-  const { data, error } = await supabaseClient.rpc("get_flower_merchant_inventory", args);
   if(error) throw error;
 
-  const rows = (Array.isArray(data) ? data : []).filter(isMerchantEligibleHolding);
+  const rows = normalizeMerchantRows(data);
   flowerState.merchantRows = rows;
   flowerState.merchantGroups = buildMerchantGroups(rows);
   return rows;
@@ -4879,7 +4878,12 @@ async function openFlowerMerchant(){
     renderFlowerMerchantInventory(rows);
     scrollFlowerMerchantIntoView();
   }catch(err){
-    console.error("读取花房商人库存失败：", err);
+    console.error("读取花房商人库存失败：", {
+      code:err?.code || "",
+      message:err?.message || String(err || ""),
+      details:err?.details || "",
+      hint:err?.hint || ""
+    });
     setFlowerMerchantInventoryHtml(`<div class="flowerMerchantEmpty">花房商人库存读取失败，请稍后再试。</div>`);
     scrollFlowerMerchantIntoView();
   }
@@ -4985,6 +4989,7 @@ async function sellMerchantHolding(holdingId, quantity){
   });
 
   if(error) throw error;
+
   const row = Array.isArray(data) ? data[0] : data;
   if(row && row.success === false){
     throw new Error(row.message || "花房商人交易失败");
