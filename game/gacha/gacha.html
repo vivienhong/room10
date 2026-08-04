@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-room10-version="gacha-13-machine-frame-animation-fixed">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1779,7 +1779,11 @@ function room10PageUrl(key, fallbackPath = ""){
 }
 
 const ASSETS = {
-  machineFrames: [room10AssetUrl("gacha.gachaMachine", "gacha-machine.png")],
+  machineFrames: [
+    room10AssetUrl("gacha.gachaMachine", "gacha-machine.png"),
+    room10AssetUrl("gacha.gachaMachine2", "gacha-machine2.png"),
+    room10AssetUrl("gacha.gachaMachine3", "gacha-machine3.png")
+  ],
   handleIdle: room10AssetUrl("gacha.gachaHandleSpin", "gacha-handle-spin.png"),
   ballPink: room10AssetUrl("gacha.gachaBallPink", "gacha-ball-pink.png"),
   tokenWhite: room10AssetUrl("gacha.gachaTokenWhite", "gacha-token-white.png"),
@@ -1927,7 +1931,15 @@ function setAssetImage(selector, src){
   img.dataset.imgPath = src;
 }
 
+function preloadMachineFrames(){
+  ASSETS.machineFrames.filter(Boolean).forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
+}
+
 function applyConfiguredAssetPaths(){
+  preloadMachineFrames();
   setAssetImage('#machineImg', ASSETS.machineFrames[0]);
   setAssetImage('#flyingToken', ASSETS.tokenWhite2);
   setAssetImage('#handleImg', ASSETS.handleIdle);
@@ -2898,7 +2910,17 @@ function playAnimation(drawResult){
     const machineWrap = document.getElementById("machineWrap");
     const machineImg = document.getElementById("machineImg");
     const handleImg = document.getElementById("handleImg");
+    const machineFrames = ASSETS.machineFrames.filter(Boolean);
+    let machineFrameIndex = 0;
 
+    const showMachineFrame = index => {
+      if(!machineImg || !machineFrames.length) return;
+      const src = machineFrames[index] || machineFrames[0];
+      machineImg.src = src;
+      machineImg.dataset.imgPath = src;
+    };
+
+    showMachineFrame(0);
     handleImg.src = ASSETS.handleIdle;
 
     setStatus("旋钮正在转动中……");
@@ -2906,13 +2928,24 @@ function playAnimation(drawResult){
       setStatus("扭蛋机正在转动中……");
       machineWrap.classList.add("shaking");
 
-      /* 机器主体不再重新赋值图片，也不做旋转，只进行轻微位移震动。 */
+      /*
+       * 在 gacha-machine / gacha-machine2 / gacha-machine3 之间循环切帧，
+       * 配合轻微震动，让机器内部的扭蛋看起来正在滚动。
+       */
+      if(machineFrames.length > 1){
+        const machineFrameTimer = window.setInterval(() => {
+          machineFrameIndex = (machineFrameIndex + 1) % machineFrames.length;
+          showMachineFrame(machineFrameIndex);
+        }, 120);
+        state.timers.push(machineFrameTimer);
+      }
     });
 
     window.setTimeout(() => {
       clearTimers();
 
       machineWrap.classList.remove("shaking");
+      showMachineFrame(0);
       handleImg.src = ASSETS.handleIdle;
       handleImg.style.transform = handleTurnTransform(0);
 
