@@ -4,1064 +4,338 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title data-text-key="page.title"></title>
-<!-- manager-admin-common-template-v29; based-on-common-template-v45; admin-reviewer-no-transition-notice; key-storage-a-b-columns -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
 <style>
-
-*{box-sizing:border-box;}
-
-:root{
-    --ui-scale:1;
-  --room-nav-scale:var(--ui-scale);
-  --identity-scale:var(--ui-scale);
-
-    --identity-right:7.35%;
-  --identity-top:6.46%;
-  --identity-base-width:232;
-  --identity-base-height:38;
-  --identity-bg:rgba(255,250,244,0.88);
-  --identity-inner-bg:rgba(255,253,249,0.92);
-  --identity-border:rgba(170,132,101,0.20);
-  --identity-text:#6f5746;
-  --identity-shadow:rgba(106,78,55,0.08);
-  --identity-name-y:0em;
-  --identity-separator-y:0em;
-  --identity-role-y:0em;
-  --identity-notice-y:0em;
-  --identity-button-y:0em;
-
-  /* 手机版身份文字独立校准：昵称 / 分隔符 / 身份 / 铃铛 / 登录按钮 */
-  --identity-mobile-name-y:0em;
-  --identity-mobile-separator-y:0em;
-  --identity-mobile-role-y:0em;
-  --identity-mobile-notice-y:0em;
-  --identity-mobile-button-y:0em;
-  --identity-notice-mobile-top:58px;
-
-    /*
-     外框位置改为底图百分比绑定，不再使用 px × scale。
-     原来的 px × scale 在 541px–650px 会被最小缩放值卡住，导致整排按钮相对底图向右漂移。
-     百分比只控制按钮外框位置和尺寸；--room-nav-scale 只控制内部文字、圆角、阴影和特效。
-  */
-  --room-nav-top:6.35%;
-  --room-nav-start-left:25.83%;
-  --room-nav-btn-width:4.72%;
-  --room-nav-btn-height:5.10%;
-  --room-nav-gap:0.486%;
-
-  --room-nav-hall-left:var(--room-nav-start-left);
-  --room-nav-living-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 1);
-  --room-nav-manager-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 2);
-  --room-nav-honor-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 3);
-  --room-nav-studio-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 4);
-  --room-nav-game-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 5);
-  --room-nav-dorm-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 6);
-  --room-nav-flower-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 7);
-  --room-nav-pets-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 8);
-
-  --room-nav-text:#6f5746;
-  --room-nav-border:rgba(158,122,93,.26);
-  --room-nav-current-text:#5d4738;
-  --room-nav-current-border:rgba(151,111,82,.42);
-  --room-nav-paper:rgba(255,250,242,.78);
-  --room-nav-paper-2:rgba(246,235,219,.74);
-  --room-nav-wash:rgba(214,185,157,.20);
-  --room-nav-current-bg:rgba(239,224,205,.86);
-}
-
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
-  color:#5b4632;
-  background:#e7dfd4;
-}
-
-button{font-family:inherit;}
-.hidden{display:none!important;}
-
-#room{
-  position:relative;
-  width:100vw;
-  height:100vh;
-  height:100dvh;
-  overflow:hidden;
-  background:
-    radial-gradient(circle at 16% 12%,rgba(255,246,238,.72),transparent 34%),
-    radial-gradient(circle at 86% 18%,rgba(226,215,201,.42),transparent 38%),
-    linear-gradient(180deg,#efe7dc 0%,#e5d8c8 100%);
-}
-
-#bgFrame{
-  position:absolute;
-  inset:0;
-  z-index:0;
-  overflow:hidden;
-}
-
-#bg{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  object-position:center center;
-  display:block;
-  user-select:none;
-  pointer-events:none;
-  -webkit-user-drag:none;
-}
-
-#overlay{
-  position:absolute;
-  left:0;
-  top:0;
-  width:100%;
-  height:100%;
-  z-index:2;
-  overflow:visible;
-  pointer-events:none;
-}
-
-#overlay *{pointer-events:auto;}
-
-/* 修复：#overlay * 的 pointer-events:auto 会把整层 roomNavLayer 变成透明遮罩，挡住主面板按钮 */
-#overlay .roomNavLayer{
-  pointer-events:none!important;
-}
-
-#overlay .roomNavLayer .navBtn{
-  pointer-events:auto!important;
-}
-
-#overlay .roomIdentity{
-  pointer-events:none!important;
-}
-
-#overlay .roomIdentity .roomIdentityBar,
-#overlay .roomIdentity button,
-#overlay .roomIdentity .identityNoticePanel{
-  pointer-events:auto!important;
-}
-
-.roomNavLayer{
-  position:absolute;
-  inset:0;
-  z-index:55;
-  pointer-events:none;
-  --s:var(--room-nav-scale,1);
-  --nav-btn-radius:calc(15px * var(--s));
-  --nav-btn-font:calc(15px * var(--s));
-  --nav-btn-border:calc(1px * var(--s));
-  --nav-btn-shadow-y:calc(3px * var(--s));
-  --nav-btn-shadow-blur:calc(8px * var(--s));
-}
-
-.navBtn{
-  appearance:none;
-  border:none;
-  cursor:pointer;
-  position:absolute;
-  top:var(--room-nav-top);
-  width:var(--room-nav-btn-width);
-  height:var(--room-nav-btn-height);
-  min-width:0;
-  min-height:0;
-  padding:0;
-  border-radius:var(--nav-btn-radius);
-  color:var(--room-nav-text);
-  font-size:var(--nav-btn-font);
-  font-weight:900;
-  white-space:nowrap;
-  overflow:visible;
-  isolation:isolate;
-  background:
-    radial-gradient(circle at 18% 22%, rgba(255,255,255,.56), transparent 40%),
-    radial-gradient(circle at 78% 74%, var(--room-nav-wash), transparent 48%),
-    linear-gradient(180deg, var(--room-nav-paper) 0%, var(--room-nav-paper-2) 100%);
-  border:var(--nav-btn-border) solid var(--room-nav-border);
-  box-shadow:
-    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.64),
-    0 calc(2px * var(--s)) calc(7px * var(--s)) rgba(96,70,48,.10);
-  text-shadow:0 calc(1px * var(--s)) 0 rgba(255,255,255,.38);
-  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-  pointer-events:auto;
-}
-
-.navBtn[data-room="hall"]{left:var(--room-nav-hall-left);}
-.navBtn[data-room="living"]{left:var(--room-nav-living-left);}
-.navBtn[data-room="manager"]{left:var(--room-nav-manager-left);}
-.navBtn[data-room="honor"]{left:var(--room-nav-honor-left);}
-.navBtn[data-room="studio"]{left:var(--room-nav-studio-left);}
-.navBtn[data-room="game"]{left:var(--room-nav-game-left);}
-.navBtn[data-room="dorm"]{left:var(--room-nav-dorm-left);}
-.navBtn[data-room="flower"]{left:var(--room-nav-flower-left);}
-.navBtn[data-room="pets"]{left:var(--room-nav-pets-left);}
-
-.navBtn:not(.is-current):hover,
-.navBtn:not(.is-current):focus-visible{
-  color:#5f3d22;
-  background:
-    radial-gradient(circle at 20% 24%, rgba(255,255,255,.66), transparent 42%),
-    radial-gradient(circle at 80% 78%, rgba(207,170,143,.24), transparent 50%),
-    linear-gradient(180deg, rgba(255,252,246,.88) 0%, rgba(239,226,210,.82) 100%);
-  border-color:rgba(151,112,84,.36);
-  box-shadow:
-    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.70),
-    0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.12);
-  filter:saturate(1.02);
-}
-
-.navBtn.is-current{
-  cursor:default;
-  color:var(--room-nav-current-text);
-  background:
-    radial-gradient(circle at 22% 22%, rgba(255,255,255,.62), transparent 42%),
-    radial-gradient(circle at 80% 80%, rgba(190,151,126,.26), transparent 50%),
-    linear-gradient(180deg, rgba(246,235,222,.94) 0%, var(--room-nav-current-bg) 100%);
-  border-color:var(--room-nav-current-border);
-  box-shadow:
-    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.68),
-    0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.13),
-    0 0 0 calc(2px * var(--s)) rgba(255,253,248,.46);
-  filter:none;
-}
-
-.navLabel{
-  position:relative;
-  z-index:5;
-  width:100%;
-  height:100%;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  overflow:visible;
-  white-space:nowrap;
-  line-height:normal;
-  padding-top:.06em;
-}
-
-.navEffect{
-  position:absolute;
-  pointer-events:none;
-  opacity:0;
-  z-index:4;
-  display:block;
-  font-weight:900;
-  line-height:1;
-  text-shadow:
-    0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.82),
-    0 0 calc(8px * var(--s)) rgba(255,246,210,.52);
-  filter:saturate(.95);
-}
-
-.navEffectA{left:8%;top:-54%;font-size:calc(var(--nav-btn-font) * .92);}
-.navEffectB{right:8%;top:-62%;font-size:calc(var(--nav-btn-font) * .86);}
-.navEffectC{left:50%;top:-72%;transform:translateX(-50%);font-size:calc(var(--nav-btn-font) * 1.02);}
-
+*{box-sizing:border-box}
+:root{--ui-scale:1;--room-nav-scale:var(--ui-scale);--identity-scale:var(--ui-scale);--identity-right:7.35%;--identity-top:6.46%;--identity-base-width:232;--identity-base-height:38;--identity-bg:rgba(255,250,244,0.88);--identity-inner-bg:rgba(255,253,249,0.92);--identity-border:rgba(170,132,101,0.20);--identity-text:#6f5746;--identity-shadow:rgba(106,78,55,0.08);--identity-name-y:0em;--identity-separator-y:0em;--identity-role-y:0em;--identity-notice-y:0em;--identity-button-y:0em;--identity-mobile-name-y:0em;--identity-mobile-separator-y:0em;--identity-mobile-role-y:0em;--identity-mobile-notice-y:0em;--identity-mobile-button-y:0em;--identity-notice-mobile-top:58px;--room-nav-top:6.35%;--room-nav-start-left:25.83%;--room-nav-btn-width:4.72%;--room-nav-btn-height:5.10%;--room-nav-gap:0.486%;--room-nav-hall-left:var(--room-nav-start-left);--room-nav-living-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 1);--room-nav-manager-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 2);--room-nav-honor-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 3);--room-nav-studio-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 4);--room-nav-game-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 5);--room-nav-dorm-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 6);--room-nav-flower-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 7);--room-nav-pets-left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap)) * 8);--room-nav-text:#6f5746;--room-nav-border:rgba(158,122,93,.26);--room-nav-current-text:#5d4738;--room-nav-current-border:rgba(151,111,82,.42);--room-nav-paper:rgba(255,250,242,.78);--room-nav-paper-2:rgba(246,235,219,.74);--room-nav-wash:rgba(214,185,157,.20);--room-nav-current-bg:rgba(239,224,205,.86)}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;color:#5b4632;background:#e7dfd4}
+button{font-family:inherit}
+.hidden{display:none!important}
+#room{position:relative;width:100vw;height:100vh;height:100dvh;overflow:hidden;background:radial-gradient(circle at 16% 12%,rgba(255,246,238,.72),transparent 34%),radial-gradient(circle at 86% 18%,rgba(226,215,201,.42),transparent 38%),linear-gradient(180deg,#efe7dc 0%,#e5d8c8 100%)}
+#bgFrame{position:absolute;inset:0;z-index:0;overflow:hidden}
+#bg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;display:block;user-select:none;pointer-events:none;-webkit-user-drag:none}
+#overlay{position:absolute;left:0;top:0;width:100%;height:100%;z-index:2;overflow:visible;pointer-events:none}
+#overlay *{pointer-events:auto}
+#overlay .roomNavLayer{pointer-events:none!important}
+#overlay .roomNavLayer .navBtn{pointer-events:auto!important}
+#overlay .roomIdentity{pointer-events:none!important}
+#overlay .roomIdentity .roomIdentityBar,#overlay .roomIdentity button,#overlay .roomIdentity .identityNoticePanel{pointer-events:auto!important}
+.roomNavLayer{position:absolute;inset:0;z-index:55;pointer-events:none;--s:var(--room-nav-scale,1);--nav-btn-radius:calc(15px * var(--s));--nav-btn-font:calc(15px * var(--s));--nav-btn-border:calc(1px * var(--s));--nav-btn-shadow-y:calc(3px * var(--s));--nav-btn-shadow-blur:calc(8px * var(--s))}
+.navBtn{appearance:none;border:none;cursor:pointer;position:absolute;top:var(--room-nav-top);width:var(--room-nav-btn-width);height:var(--room-nav-btn-height);min-width:0;min-height:0;padding:0;border-radius:var(--nav-btn-radius);color:var(--room-nav-text);font-size:var(--nav-btn-font);font-weight:900;white-space:nowrap;overflow:visible;isolation:isolate;background:radial-gradient(circle at 18% 22%,rgba(255,255,255,.56),transparent 40%),radial-gradient(circle at 78% 74%,var(--room-nav-wash),transparent 48%),linear-gradient(180deg,var(--room-nav-paper) 0%,var(--room-nav-paper-2) 100%);border:var(--nav-btn-border) solid var(--room-nav-border);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.64),0 calc(2px * var(--s)) calc(7px * var(--s)) rgba(96,70,48,.10);text-shadow:0 calc(1px * var(--s)) 0 rgba(255,255,255,.38);transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;pointer-events:auto}
+.navBtn[data-room="hall"]{left:var(--room-nav-hall-left)}
+.navBtn[data-room="living"]{left:var(--room-nav-living-left)}
+.navBtn[data-room="manager"]{left:var(--room-nav-manager-left)}
+.navBtn[data-room="honor"]{left:var(--room-nav-honor-left)}
+.navBtn[data-room="studio"]{left:var(--room-nav-studio-left)}
+.navBtn[data-room="game"]{left:var(--room-nav-game-left)}
+.navBtn[data-room="dorm"]{left:var(--room-nav-dorm-left)}
+.navBtn[data-room="flower"]{left:var(--room-nav-flower-left)}
+.navBtn[data-room="pets"]{left:var(--room-nav-pets-left)}
+.navBtn:not(.is-current):hover,.navBtn:not(.is-current):focus-visible{color:#5f3d22;background:radial-gradient(circle at 20% 24%,rgba(255,255,255,.66),transparent 42%),radial-gradient(circle at 80% 78%,rgba(207,170,143,.24),transparent 50%),linear-gradient(180deg,rgba(255,252,246,.88) 0%,rgba(239,226,210,.82) 100%);border-color:rgba(151,112,84,.36);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.70),0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.12);filter:saturate(1.02)}
+.navBtn.is-current{cursor:default;color:var(--room-nav-current-text);background:radial-gradient(circle at 22% 22%,rgba(255,255,255,.62),transparent 42%),radial-gradient(circle at 80% 80%,rgba(190,151,126,.26),transparent 50%),linear-gradient(180deg,rgba(246,235,222,.94) 0%,var(--room-nav-current-bg) 100%);border-color:var(--room-nav-current-border);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.68),0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.13),0 0 0 calc(2px * var(--s)) rgba(255,253,248,.46);filter:none}
+.navLabel{position:relative;z-index:5;width:100%;height:100%;display:inline-flex;align-items:center;justify-content:center;overflow:visible;white-space:nowrap;line-height:normal;padding-top:.06em}
+.navEffect{position:absolute;pointer-events:none;opacity:0;z-index:4;display:block;font-weight:900;line-height:1;text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.82),0 0 calc(8px * var(--s)) rgba(255,246,210,.52);filter:saturate(.95)}
+.navEffectA{left:8%;top:-54%;font-size:calc(var(--nav-btn-font) * .92)}
+.navEffectB{right:8%;top:-62%;font-size:calc(var(--nav-btn-font) * .86)}
+.navEffectC{left:50%;top:-72%;transform:translateX(-50%);font-size:calc(var(--nav-btn-font) * 1.02)}
 @keyframes navFloatA{
-  0%,100%{ transform:translateY(calc(4px * var(--s))) rotate(-8deg) scale(.82); opacity:0; }
-  20%,72%{ opacity:.86; }
-  50%{ transform:translateY(calc(-5px * var(--s))) rotate(6deg) scale(1); opacity:.76; }
+  0%,100%{transform:translateY(calc(4px * var(--s))) rotate(-8deg) scale(.82);opacity:0}
+  20%,72%{opacity:.86}
+  50%{transform:translateY(calc(-5px * var(--s))) rotate(6deg) scale(1);opacity:.76}
 }
 @keyframes navFloatB{
-  0%,100%{ transform:translateY(calc(5px * var(--s))) rotate(9deg) scale(.78); opacity:0; }
-  24%,70%{ opacity:.78; }
-  52%{ transform:translateY(calc(-6px * var(--s))) rotate(-7deg) scale(1); opacity:.68; }
+  0%,100%{transform:translateY(calc(5px * var(--s))) rotate(9deg) scale(.78);opacity:0}
+  24%,70%{opacity:.78}
+  52%{transform:translateY(calc(-6px * var(--s))) rotate(-7deg) scale(1);opacity:.68}
 }
 @keyframes navFloatC{
-  0%,100%{ transform:translateX(-50%) translateY(calc(6px * var(--s))) rotate(0deg) scale(.76); opacity:0; }
-  24%,70%{ opacity:.88; }
-  50%{ transform:translateX(-50%) translateY(calc(-6px * var(--s))) rotate(2deg) scale(1); opacity:.78; }
+  0%,100%{transform:translateX(-50%) translateY(calc(6px * var(--s))) rotate(0deg) scale(.76);opacity:0}
+  24%,70%{opacity:.88}
+  50%{transform:translateX(-50%) translateY(calc(-6px * var(--s))) rotate(2deg) scale(1);opacity:.78}
 }
-
-.navBtn:not(.is-current):hover .navEffectA,
-.navBtn:not(.is-current):focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite;}
-.navBtn:not(.is-current):hover .navEffectB,
-.navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite;}
-.navBtn:not(.is-current):hover .navEffectC,
-.navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite;}
-.navBtn.is-current .navEffect{display:none;}
-
-.navBtn[data-room="hall"] .navEffect{color:rgba(255,205,96,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.95),0 0 calc(10px * var(--s)) rgba(255,215,105,.62);}
-.navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82);}
-.navBtn[data-room="honor"] .navEffect{color:rgba(205,143,45,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.92),0 0 calc(8px * var(--s)) rgba(255,220,130,.52);}
-.navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82);}
-.navBtn[data-room="studio"] .navEffect{color:rgba(96,112,145,.84);}
-.navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82);}
-.navBtn[data-room="dorm"] .navEffect{color:rgba(148,112,171,.78);}
-.navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82);}
-.navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82);}
-
-.roomIdentity{
-  --s:var(--identity-scale,1);
-  position:absolute;
-  right:var(--identity-right);
-  top:var(--identity-top);
-  width:calc(var(--identity-base-width) * 1px * var(--s));
-  height:calc(var(--identity-base-height) * 1px * var(--s));
-  min-width:calc(var(--identity-base-width) * 1px * var(--s));
-  min-height:calc(var(--identity-base-height) * 1px * var(--s));
-  z-index:70;
-  pointer-events:none;
-  overflow:visible;
-}
-
-.roomIdentityBar{
-  width:100%;
-  height:100%;
-  display:grid;
-  grid-template-columns:minmax(calc(130px * var(--s)),1fr) calc(30px * var(--s)) calc(42px * var(--s));
-  gap:calc(5px * var(--s));
-  padding:calc(4px * var(--s)) calc(5px * var(--s));
-  border-radius:calc(13px * var(--s));
-  background:var(--identity-bg);
-  border:calc(1px * var(--s)) solid var(--identity-border);
-  box-shadow:
-    0 calc(10px * var(--s)) calc(24px * var(--s)) var(--identity-shadow),
-    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.9);
-  backdrop-filter:blur(calc(8px * var(--s)));
-  -webkit-backdrop-filter:blur(calc(8px * var(--s)));
-  pointer-events:auto;
-  overflow:visible;
-  white-space:nowrap;
-}
-
-.identityNameBox,
-.identityNoticeBtn,
-.identityAuthBtn{
-  min-width:0;
-  min-height:0;
-  height:100%;
-  border-radius:calc(9px * var(--s));
-  background:var(--identity-inner-bg);
-  color:var(--identity-text);
-  border:calc(1px * var(--s)) solid rgba(160,116,78,0.12);
-  box-shadow:
-    inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.95),
-    0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,0.05);
-}
-
-.identityNameBox{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:0 calc(8px * var(--s));
-  overflow:visible;
-}
-
-.identityNameText{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  max-width:100%;
-  color:var(--identity-text);
-  font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;
-  font-size:calc(13px * var(--s));
-  font-weight:850;
-  line-height:1;
-  letter-spacing:0;
-  white-space:nowrap;
-  overflow:visible;
-  text-overflow:clip;
-}
-
-.identityNameText.isOverflowSafe{overflow:hidden;text-overflow:ellipsis;}
-
-.identityNamePart{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  flex:0 0 auto;
-  line-height:1;
-  white-space:nowrap;
-  font:inherit;
-}
-
-.identityNickname{transform:translateY(var(--identity-name-y));}
-.identitySeparator{
-  margin:0 .08em;
-  color:rgba(111,87,70,.78);
-  font-weight:800;
-  transform:translateY(var(--identity-separator-y));
-}
-.identityRole{transform:translateY(var(--identity-role-y));}
-
-.identityNoticeWrap{
-  position:relative;
-  width:100%;
-  height:100%;
-  overflow:visible;
-}
-
-.identityNoticeBtn,
-.identityAuthBtn{
-  appearance:none;
-  cursor:pointer;
-  padding:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  line-height:1;
-  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
-}
-
-.identityNoticeBtn{
-  width:100%;
-  height:100%;
-  font-size:calc(14px * var(--s));
-}
-
-.identityNoticeIcon{
-  display:flex;
-  width:100%;
-  height:100%;
-  align-items:center;
-  justify-content:center;
-  line-height:1;
-  transform:translateY(var(--identity-notice-y));
-  filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,0.55));
-}
-
-.identityNoticeCount{
-  position:absolute;
-  right:calc(-6px * var(--s));
-  top:calc(-6px * var(--s));
-  min-width:calc(18px * var(--s));
-  height:calc(18px * var(--s));
-  padding:0 calc(5px * var(--s));
-  border-radius:999px;
-  background:#b98f72;
-  color:#fffaf6;
-  font-size:calc(9px * var(--s));
-  font-weight:900;
-  line-height:1;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  border:calc(2px * var(--s)) solid rgba(255,248,239,0.98);
-  box-shadow:0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(116,86,54,0.16);
-  z-index:3;
-}
-
-.identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex;}
-
-.identityAuthBtn{
-  width:100%;
-  height:100%;
-  color:#6f5746;
-  font-size:calc(12px * var(--s));
-  font-weight:850;
-  line-height:1.18;
-  white-space:nowrap;
-  overflow:visible;
-}
-
-.identityAuthText{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  line-height:1.18;
-  transform:translateY(var(--identity-button-y));
-}
-
-.identityNoticeBtn:hover,
-.identityAuthBtn:hover{
-  transform:translateY(calc(-1px * var(--s)));
-  background:rgba(255,255,255,0.94);
-}
-
-.identityNoticePanel{
-  position:absolute;
-  top:calc(100% + 10px * var(--s));
-  right:0;
-  width:min(calc(360px * var(--s)),72vw);
-  max-height:min(calc(540px * var(--s)),70vh);
-  overflow:auto;
-  padding:calc(12px * var(--s));
-  border-radius:calc(16px * var(--s));
-  background:rgba(255,249,241,0.98);
-  border:calc(1px * var(--s)) solid rgba(203,167,123,0.28);
-  box-shadow:0 calc(16px * var(--s)) calc(36px * var(--s)) rgba(85,58,34,0.16);
-  display:none;
-  z-index:950;
-  text-align:left;
-}
-
-.identityNoticePanel.show{display:block;}
-
-.identityNoticeTitle{
-  color:#6f4726;
-  font-size:calc(13px * var(--s));
-  font-weight:900;
-  margin-bottom:calc(10px * var(--s));
-}
-
-.identityNoticeEmpty{
-  color:#8a6644;
-  font-size:calc(12px * var(--s));
-  line-height:1.6;
-  padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s));
-}
-
-.templateMainPanel{
-  position:absolute;
-  left:8.8%;
-  top:22.2%;
-  width:60.8%;
-  height:58.5%;
-  z-index:20;
-  border-radius:calc(24px * var(--ui-scale));
-  background:rgba(255,250,240,.58);
-  border:calc(1px * var(--ui-scale)) dashed rgba(170,122,82,.24);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:calc(12px * var(--ui-scale));
-  color:#8a6544;
-  font-weight:900;
-  font-size:calc(18px * var(--ui-scale));
-  text-align:center;
-  padding:calc(20px * var(--ui-scale));
-}
-
-.templateMainPanel p{
-  margin:0;
-  max-width:calc(620px * var(--ui-scale));
-  font-size:calc(13px * var(--ui-scale));
-  line-height:1.7;
-  font-weight:800;
-  color:#9a7656;
-}
-
-
+.navBtn:not(.is-current):hover .navEffectA,.navBtn:not(.is-current):focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite}
+.navBtn:not(.is-current):hover .navEffectB,.navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite}
+.navBtn:not(.is-current):hover .navEffectC,.navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite}
+.navBtn.is-current .navEffect{display:none}
+.navBtn[data-room="hall"] .navEffect{color:rgba(255,205,96,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.95),0 0 calc(10px * var(--s)) rgba(255,215,105,.62)}
+.navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82)}
+.navBtn[data-room="honor"] .navEffect{color:rgba(205,143,45,.86);text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.92),0 0 calc(8px * var(--s)) rgba(255,220,130,.52)}
+.navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82)}
+.navBtn[data-room="studio"] .navEffect{color:rgba(96,112,145,.84)}
+.navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82)}
+.navBtn[data-room="dorm"] .navEffect{color:rgba(148,112,171,.78)}
+.navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82)}
+.navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82)}
+.roomIdentity{--s:var(--identity-scale,1);position:absolute;right:var(--identity-right);top:var(--identity-top);width:calc(var(--identity-base-width) * 1px * var(--s));height:calc(var(--identity-base-height) * 1px * var(--s));min-width:calc(var(--identity-base-width) * 1px * var(--s));min-height:calc(var(--identity-base-height) * 1px * var(--s));z-index:70;pointer-events:none;overflow:visible}
+.roomIdentityBar{width:100%;height:100%;display:grid;grid-template-columns:minmax(calc(130px * var(--s)),1fr) calc(30px * var(--s)) calc(42px * var(--s));gap:calc(5px * var(--s));padding:calc(4px * var(--s)) calc(5px * var(--s));border-radius:calc(13px * var(--s));background:var(--identity-bg);border:calc(1px * var(--s)) solid var(--identity-border);box-shadow:0 calc(10px * var(--s)) calc(24px * var(--s)) var(--identity-shadow),inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.9);backdrop-filter:blur(calc(8px * var(--s)));-webkit-backdrop-filter:blur(calc(8px * var(--s)));pointer-events:auto;overflow:visible;white-space:nowrap}
+.identityNameBox,.identityNoticeBtn,.identityAuthBtn{min-width:0;min-height:0;height:100%;border-radius:calc(9px * var(--s));background:var(--identity-inner-bg);color:var(--identity-text);border:calc(1px * var(--s)) solid rgba(160,116,78,0.12);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.95),0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,0.05)}
+.identityNameBox{display:flex;align-items:center;justify-content:center;padding:0 calc(8px * var(--s));overflow:visible}
+.identityNameText{display:inline-flex;align-items:center;justify-content:center;max-width:100%;color:var(--identity-text);font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;font-size:calc(13px * var(--s));font-weight:850;line-height:1;letter-spacing:0;white-space:nowrap;overflow:visible;text-overflow:clip}
+.identityNameText.isOverflowSafe{overflow:hidden;text-overflow:ellipsis}
+.identityNamePart{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;line-height:1;white-space:nowrap;font:inherit}
+.identityNickname{transform:translateY(var(--identity-name-y))}
+.identitySeparator{margin:0 .08em;color:rgba(111,87,70,.78);font-weight:800;transform:translateY(var(--identity-separator-y))}
+.identityRole{transform:translateY(var(--identity-role-y))}
+.identityNoticeWrap{position:relative;width:100%;height:100%;overflow:visible}
+.identityNoticeBtn,.identityAuthBtn{appearance:none;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;line-height:1;transition:transform .18s ease,background .18s ease,box-shadow .18s ease}
+.identityNoticeBtn{width:100%;height:100%;font-size:calc(14px * var(--s))}
+.identityNoticeIcon{display:flex;width:100%;height:100%;align-items:center;justify-content:center;line-height:1;transform:translateY(var(--identity-notice-y));filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,0.55))}
+.identityNoticeCount{position:absolute;right:calc(-6px * var(--s));top:calc(-6px * var(--s));min-width:calc(18px * var(--s));height:calc(18px * var(--s));padding:0 calc(5px * var(--s));border-radius:999px;background:#b98f72;color:#fffaf6;font-size:calc(9px * var(--s));font-weight:900;line-height:1;display:none;align-items:center;justify-content:center;border:calc(2px * var(--s)) solid rgba(255,248,239,0.98);box-shadow:0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(116,86,54,0.16);z-index:3}
+.identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex}
+.identityAuthBtn{width:100%;height:100%;color:#6f5746;font-size:calc(12px * var(--s));font-weight:850;line-height:1.18;white-space:nowrap;overflow:visible}
+.identityAuthText{display:inline-flex;align-items:center;justify-content:center;line-height:1.18;transform:translateY(var(--identity-button-y))}
+.identityNoticeBtn:hover,.identityAuthBtn:hover{transform:translateY(calc(-1px * var(--s)));background:rgba(255,255,255,0.94)}
+.identityNoticePanel{position:absolute;top:calc(100% + 10px * var(--s));right:0;width:min(calc(360px * var(--s)),72vw);max-height:min(calc(540px * var(--s)),70vh);overflow:auto;padding:calc(12px * var(--s));border-radius:calc(16px * var(--s));background:rgba(255,249,241,0.98);border:calc(1px * var(--s)) solid rgba(203,167,123,0.28);box-shadow:0 calc(16px * var(--s)) calc(36px * var(--s)) rgba(85,58,34,0.16);display:none;z-index:950;text-align:left}
+.identityNoticePanel.show{display:block}
+.identityNoticeTitle{color:#6f4726;font-size:calc(13px * var(--s));font-weight:900;margin-bottom:calc(10px * var(--s))}
+.identityNoticeEmpty{color:#8a6644;font-size:calc(12px * var(--s));line-height:1.6;padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s))}
+.templateMainPanel{position:absolute;left:8.8%;top:22.2%;width:60.8%;height:58.5%;z-index:20;border-radius:calc(24px * var(--ui-scale));background:rgba(255,250,240,.58);border:calc(1px * var(--ui-scale)) dashed rgba(170,122,82,.24);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(12px * var(--ui-scale));color:#8a6544;font-weight:900;font-size:calc(18px * var(--ui-scale));text-align:center;padding:calc(20px * var(--ui-scale))}
+.templateMainPanel p{margin:0;max-width:calc(620px * var(--ui-scale));font-size:calc(13px * var(--ui-scale));line-height:1.7;font-weight:800;color:#9a7656}
 @media(max-width:540px){
-  html,body{
-    overflow-x:hidden;
-    overflow-y:auto;
-    height:auto;
-    min-height:100%;
-  }
-
-  #room{
-    width:100%;
-    min-height:100vh;
-    min-height:100dvh;
-    height:auto;
-    display:block;
-    overflow:visible;
-    padding:10px 12px 14px;
-    background:
-      linear-gradient(rgba(242,236,229,.74), rgba(238,231,222,.92)),
-      #e7dfd4;
-  }
-
-  #bgFrame{display:none;}
-
-  #overlay{
-    position:relative;
-    left:auto!important;
-    top:auto!important;
-    width:100%!important;
-    height:auto!important;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    margin:0!important;
-    padding:0!important;
-    overflow:visible;
-    pointer-events:auto;
-  }
-
-  .roomNavLayer{
-    position:relative;
-    inset:auto;
-    width:100%;
-    height:106px;
-    min-height:106px;
-    max-height:106px;
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    grid-template-rows:repeat(3,32px);
-    gap:5px;
-    margin:0!important;
-    padding:0!important;
-    align-content:start;
-    order:0;
-    z-index:20;
-    pointer-events:auto;
-    --s:1;
-  }
-
-  .roomNavLayer .navBtn{
-    position:relative;
-    left:auto!important;
-    top:auto!important;
-    display:flex!important;
-    align-items:center;
-    justify-content:center;
-    width:100%;
-    height:32px;
-    min-width:0;
-    min-height:32px;
-    max-height:32px;
-    margin:0!important;
-    padding:0!important;
-    border-radius:10px;
-    font-size:12px;
-    line-height:1;
-    white-space:nowrap;
-    overflow:hidden;
-  }
-
-  .roomNavLayer .navBtn.is-current{
-    display:flex!important;
-    visibility:visible!important;
-  }
-
-  .roomNavLayer .navLabel{
-    height:100%;
-    padding-top:.04em;
-    line-height:1;
-    white-space:nowrap;
-    overflow:hidden;
-  }
-
-  .roomNavLayer .navEffect{display:none;}
-
-  .roomIdentity{
-    --s:1;
-    position:relative;
-    right:auto;
-    top:auto;
-    width:100%;
-    min-width:0;
-    height:40px;
-    min-height:40px;
-    order:1;
-    z-index:90;
-  }
-
-  .roomIdentityBar{
-    grid-template-columns:minmax(0,1fr) 34px 42px;
-    gap:6px;
-    padding:5px 7px;
-    border-radius:14px;
-  }
-
-  .identityNameBox{
-    padding:0 9px;
-    border-radius:10px;
-    overflow:visible;
-  }
-
-  .identityNameText{
-    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
-    font-size:12px;
-    font-weight:850;
-    line-height:1;
-    letter-spacing:0;
-    white-space:nowrap;
-    overflow:visible;
-  }
-
-  .identityNamePart{
-    line-height:1;
-    white-space:nowrap;
-  }
-
-  .identityNickname{transform:translateY(var(--identity-mobile-name-y));}
-  .identitySeparator{
-    margin:0 .08em;
-    color:rgba(111,87,70,.78);
-    font-size:12px;
-    font-weight:800;
-    transform:translateY(var(--identity-mobile-separator-y));
-  }
-  .identityRole{transform:translateY(var(--identity-mobile-role-y));}
-
-  .identityNoticeBtn{
-    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
-    font-size:14px;
-    border-radius:10px;
-  }
-
-  .identityNoticeIcon{transform:translateY(var(--identity-mobile-notice-y));}
-
-  .identityAuthBtn{
-    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;
-    font-size:11px;
-    font-weight:850;
-    line-height:1;
-    border-radius:10px;
-  }
-
-  .identityAuthText{
-    line-height:1;
-    transform:translateY(var(--identity-mobile-button-y));
-  }
-
-  .identityNoticePanel{
-    position:fixed!important;
-    top:var(--identity-notice-mobile-top,58px)!important;
-    left:auto!important;
-    right:max(20px, env(safe-area-inset-right))!important;
-    width:min(320px, calc(100% - 40px))!important;
-    min-width:0!important;
-    max-width:320px!important;
-    max-height:calc(100dvh - var(--identity-notice-mobile-top,58px) - 14px)!important;
-    padding:14px;
-    border-radius:18px;
-    z-index:990;
-    box-sizing:border-box;
-    overflow-x:hidden;
-    overflow-y:auto;
-    background:
-      radial-gradient(circle at 14% 12%, rgba(255,255,255,.82), transparent 38%),
-      linear-gradient(180deg, rgba(255,250,242,.98), rgba(250,238,224,.98));
-    border:1px solid rgba(174,132,94,.30);
-    box-shadow:
-      0 14px 34px rgba(86,61,39,.18),
-      inset 0 1px 0 rgba(255,255,255,.92);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    transform-origin:top right;
-  }
-
-  .identityNoticePanel::before{
-    content:"";
-    position:absolute;
-    right:42px;
-    top:-7px;
-    width:14px;
-    height:14px;
-    transform:rotate(45deg);
-    background:rgba(255,250,242,.98);
-    border-left:1px solid rgba(174,132,94,.24);
-    border-top:1px solid rgba(174,132,94,.24);
-    box-shadow:-2px -2px 5px rgba(86,61,39,.03);
-  }
-
-  .identityNoticeTitle{
-    position:relative;
-    padding:0 0 9px;
-    margin-bottom:10px;
-    border-bottom:1px solid rgba(174,132,94,.16);
-  }
-
-  .identityNoticePanel *,
-  .identityNoticePanel *::before,
-  .identityNoticePanel *::after{
-    max-width:100%;
-    box-sizing:border-box;
-  }
-
-  .identityNoticePanel button,
-  .identityNoticePanel a{
-    max-width:100%;
-    white-space:normal;
-    overflow-wrap:anywhere;
-  }
-
-  .templateMainPanel{
-    position:relative;
-    left:auto;
-    top:auto;
-    width:100%;
-    height:360px;
-    order:2;
-    border-radius:22px;
-    font-size:16px;
-    padding:18px 14px;
-  }
+  html,body{overflow-x:hidden;overflow-y:auto;height:auto;min-height:100%}
+  #room{width:100%;min-height:100vh;min-height:100dvh;height:auto;display:block;overflow:visible;padding:10px 12px 14px;background:linear-gradient(rgba(242,236,229,.74),rgba(238,231,222,.92)),#e7dfd4}
+  #bgFrame{display:none}
+  #overlay{position:relative;left:auto!important;top:auto!important;width:100%!important;height:auto!important;display:flex;flex-direction:column;gap:10px;margin:0!important;padding:0!important;overflow:visible;pointer-events:auto}
+  .roomNavLayer{position:relative;inset:auto;width:100%;height:106px;min-height:106px;max-height:106px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,32px);gap:5px;margin:0!important;padding:0!important;align-content:start;order:0;z-index:20;pointer-events:auto;--s:1}
+  .roomNavLayer .navBtn{position:relative;left:auto!important;top:auto!important;display:flex!important;align-items:center;justify-content:center;width:100%;height:32px;min-width:0;min-height:32px;max-height:32px;margin:0!important;padding:0!important;border-radius:10px;font-size:12px;line-height:1;white-space:nowrap;overflow:hidden}
+  .roomNavLayer .navBtn.is-current{display:flex!important;visibility:visible!important}
+  .roomNavLayer .navLabel{height:100%;padding-top:.04em;line-height:1;white-space:nowrap;overflow:hidden}
+  .roomNavLayer .navEffect{display:none}
+  .roomIdentity{--s:1;position:relative;right:auto;top:auto;width:100%;min-width:0;height:40px;min-height:40px;order:1;z-index:90}
+  .roomIdentityBar{grid-template-columns:minmax(0,1fr) 34px 42px;gap:6px;padding:5px 7px;border-radius:14px}
+  .identityNameBox{padding:0 9px;border-radius:10px;overflow:visible}
+  .identityNameText{font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;font-size:12px;font-weight:850;line-height:1;letter-spacing:0;white-space:nowrap;overflow:visible}
+  .identityNamePart{line-height:1;white-space:nowrap}
+  .identityNickname{transform:translateY(var(--identity-mobile-name-y))}
+  .identitySeparator{margin:0 .08em;color:rgba(111,87,70,.78);font-size:12px;font-weight:800;transform:translateY(var(--identity-mobile-separator-y))}
+  .identityRole{transform:translateY(var(--identity-mobile-role-y))}
+  .identityNoticeBtn{font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;font-size:14px;border-radius:10px}
+  .identityNoticeIcon{transform:translateY(var(--identity-mobile-notice-y))}
+  .identityAuthBtn{font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif!important;font-size:11px;font-weight:850;line-height:1;border-radius:10px}
+  .identityAuthText{line-height:1;transform:translateY(var(--identity-mobile-button-y))}
+  .identityNoticePanel{position:fixed!important;top:var(--identity-notice-mobile-top,58px)!important;left:auto!important;right:max(20px,env(safe-area-inset-right))!important;width:min(320px,calc(100% - 40px))!important;min-width:0!important;max-width:320px!important;max-height:calc(100dvh - var(--identity-notice-mobile-top,58px) - 14px)!important;padding:14px;border-radius:18px;z-index:990;box-sizing:border-box;overflow-x:hidden;overflow-y:auto;background:radial-gradient(circle at 14% 12%,rgba(255,255,255,.82),transparent 38%),linear-gradient(180deg,rgba(255,250,242,.98),rgba(250,238,224,.98));border:1px solid rgba(174,132,94,.30);box-shadow:0 14px 34px rgba(86,61,39,.18),inset 0 1px 0 rgba(255,255,255,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transform-origin:top right}
+  .identityNoticePanel::before{content:"";position:absolute;right:42px;top:-7px;width:14px;height:14px;transform:rotate(45deg);background:rgba(255,250,242,.98);border-left:1px solid rgba(174,132,94,.24);border-top:1px solid rgba(174,132,94,.24);box-shadow:-2px -2px 5px rgba(86,61,39,.03)}
+  .identityNoticeTitle{position:relative;padding:0 0 9px;margin-bottom:10px;border-bottom:1px solid rgba(174,132,94,.16)}
+  .identityNoticePanel *,.identityNoticePanel *::before,.identityNoticePanel *::after{max-width:100%;box-sizing:border-box}
+  .identityNoticePanel button,.identityNoticePanel a{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+  .templateMainPanel{position:relative;left:auto;top:auto;width:100%;height:360px;order:2;border-radius:22px;font-size:16px;padding:18px 14px}
 }
-
-
-
-/* ===== 宿管室管理页：通用模板内容区 ===== */
-:root{
-  --manager-text:#5b4632;
-  --manager-title:#6a5038;
-  --manager-line:#d8c2a3;
-  --manager-line2:#e3d0b4;
-  --manager-panel:rgba(255,249,240,.88);
-  --manager-card:rgba(255,252,247,.92);
-  --manager-btn:#c98e56;
-  --manager-btn-hover:#b97d45;
-  --manager-sub:#e7d3b7;
-  --manager-sub-hover:#dcc29e;
-  --manager-green:#5f7d3a;
-  --manager-red:#a14f3f;
-  --manager-muted:#8e7c68;
-}
-
-#pageMainPanel.managerMainPanel{
-  left:5.65%;
-  top:18.6%;
-  width:86.5%;
-  height:72.5%;
-  padding:0;
-  border:none;
-  background:transparent;
-  border-radius:0;
-  display:grid;
-  grid-template-columns:minmax(180px, 18%) minmax(0, 1fr) minmax(130px, 14.8%);
-  gap:calc(14px * var(--ui-scale));
-  align-items:stretch;
-  justify-content:normal;
-  color:var(--manager-text);
-  font-size:calc(13px * var(--ui-scale));
-  font-weight:400;
-  text-align:left;
-  pointer-events:auto;
-}
-
-#pageMainPanel.managerMainPanel *{pointer-events:auto;}
-
-.panel{
-  background:var(--manager-panel);
-  border:1px solid var(--manager-line);
-  border-radius:calc(16px * var(--ui-scale));
-  box-shadow:0 10px 24px rgba(116,86,54,.08);
-  backdrop-filter:blur(5px);
-  -webkit-backdrop-filter:blur(5px);
-}
-
-
-
-
-#pageNotice{
-  position:fixed;
-  left:50%;
-  top:50%;
-  width:min(420px, calc(100vw - 40px));
-  padding:14px 16px;
-  border-radius:16px;
-  border:1px solid rgba(216,194,163,.86);
-  background:rgba(247,238,225,.98);
-  color:#7b654f;
-  z-index:3000;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  box-shadow:0 18px 42px rgba(85,58,34,.18);
-  font-size:14px;
-  line-height:1.5;
-  transform:translate(-50%, -50%);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  pointer-events:auto;
-}
-#pageNotice.notice-success{background:rgba(238,246,232,.98);color:var(--manager-green);}
-#pageNotice.notice-error{background:rgba(251,236,235,.98);color:var(--manager-red);}
-.notice-text{flex:1 1 auto;text-align:center;font-weight:800;}
-.notice-close{flex:0 0 auto;width:24px;height:24px;border:none;border-radius:999px;background:rgba(234,217,188,.56);color:inherit;cursor:pointer;font-size:16px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;}
-
-#managerBriefCard{
-  min-width:0;
-  height:fit-content;
-  max-height:100%;
-  padding:calc(13px * var(--ui-scale)) calc(14px * var(--ui-scale));
-  overflow:auto;
-}
-.brief-title{margin:0 0 calc(7px * var(--ui-scale));font-size:calc(14px * var(--ui-scale));line-height:1.25;font-weight:900;color:#6b4524;}
-.brief-text{margin:0;font-size:calc(12px * var(--ui-scale));line-height:1.55;color:#765a40;}
-.brief-list{margin:calc(8px * var(--ui-scale)) 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:calc(5px * var(--ui-scale));}
-.brief-list li{position:relative;padding-left:calc(14px * var(--ui-scale));font-size:calc(11px * var(--ui-scale));line-height:1.45;color:#84664a;}
-.brief-list li::before{content:"•";position:absolute;left:0;top:0;color:#c98e56;font-weight:900;}
-.brief-sign{margin-top:calc(9px * var(--ui-scale));padding-top:calc(7px * var(--ui-scale));border-top:1px dashed rgba(180,139,94,.32);font-size:calc(10px * var(--ui-scale));line-height:1.35;color:#9a795b;text-align:right;}
-
-#contentArea{min-width:0;min-height:0;height:100%;overflow:hidden;}
-.card{position:relative;padding:calc(14px * var(--ui-scale)) calc(16px * var(--ui-scale));}
-.section-title{margin:0 0 calc(10px * var(--ui-scale));font-size:calc(18px * var(--ui-scale));font-weight:900;color:var(--manager-title);line-height:1.2;}
-
-#adminSwitchPanel{min-width:0;height:fit-content;padding:calc(10px * var(--ui-scale));}
-.switch-title{margin:0 0 calc(8px * var(--ui-scale));font-size:calc(13px * var(--ui-scale));font-weight:900;color:var(--manager-title);text-align:center;}
-.switch-group{display:flex;flex-direction:column;gap:calc(7px * var(--ui-scale));}
-.switch-btn{border:none;border-radius:calc(11px * var(--ui-scale));padding:calc(8px * var(--ui-scale)) calc(6px * var(--ui-scale));font-size:calc(12px * var(--ui-scale));background:var(--manager-sub);cursor:pointer;text-align:center;color:var(--manager-text);font-weight:800;line-height:1.2;}
-.switch-btn:hover{background:var(--manager-sub-hover);}
-.switch-btn.active{background:var(--manager-btn);color:#fff;}
-
-.admin-view-card{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden;margin:0;}
-.admin-block{background:rgba(255,255,255,.72);padding:calc(14px * var(--ui-scale));border-radius:calc(12px * var(--ui-scale));border:1px solid var(--manager-line2);margin-top:calc(10px * var(--ui-scale));display:flex;flex-direction:column;min-height:0;}
-.admin-block:first-of-type{margin-top:0;}
-.admin-view-card>.admin-block{flex:1 1 auto;}
-.admin-block h3{margin:0 0 calc(8px * var(--ui-scale));font-size:calc(15px * var(--ui-scale));color:var(--manager-title);}
-.module-note{margin:0;font-size:calc(12px * var(--ui-scale));line-height:1.45;color:#7a6755;}
-.module-scroll{flex:1 1 auto;min-height:0;overflow:auto;overflow-x:hidden;padding-right:calc(4px * var(--ui-scale));scrollbar-width:thin;scrollbar-color:#cfad82 rgba(255,255,255,.35);}
-.module-scroll::-webkit-scrollbar,.key-card-list::-webkit-scrollbar,.key-list-wrap::-webkit-scrollbar,.activity-detail-content::-webkit-scrollbar{width:calc(7px * var(--ui-scale));}
-.module-scroll::-webkit-scrollbar-thumb,.key-card-list::-webkit-scrollbar-thumb,.key-list-wrap::-webkit-scrollbar-thumb,.activity-detail-content::-webkit-scrollbar-thumb{background:#cfad82;border-radius:999px;}
-
-.apply-list{display:flex;flex-direction:column;gap:calc(8px * var(--ui-scale));}
-.apply-item{background:rgba(255,252,246,.92);border:1px solid var(--manager-line2);border-radius:calc(12px * var(--ui-scale));padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));}
-.apply-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
-.apply-head strong{font-size:calc(13px * var(--ui-scale));color:var(--manager-title);}
-.apply-time,.apply-meta{font-size:calc(11px * var(--ui-scale));color:var(--manager-muted);}
-.apply-body{display:flex;flex-direction:column;gap:4px;font-size:calc(12px * var(--ui-scale));line-height:1.45;color:#6b5a45;}
-.apply-actions-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
-.inline-btn,.sub-btn{height:calc(34px * var(--ui-scale));min-width:calc(82px * var(--ui-scale));padding:0 calc(12px * var(--ui-scale));border:none;border-radius:calc(10px * var(--ui-scale));font-size:calc(12px * var(--ui-scale));cursor:pointer;font-weight:800;white-space:nowrap;}
-.inline-btn{background:var(--manager-btn);color:#fff;}
-.inline-btn:hover{background:var(--manager-btn-hover);}
-.sub-btn{background:var(--manager-sub);color:var(--manager-text);}
-.sub-btn:hover{background:var(--manager-sub-hover);}
-.inline-btn:disabled,.sub-btn:disabled{opacity:.65;cursor:not-allowed;}
-.vote-summary{margin-top:6px;font-size:calc(11px * var(--ui-scale));color:#7b654f;line-height:1.4;}
-.vote-wait{color:#8b5b34;}.vote-pass{color:var(--manager-green);}.vote-reject{color:var(--manager-red);}
-
-.key-storage-box{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;}
-.key-list-wrap{margin-top:6px;overflow:auto;overflow-x:hidden;flex:1 1 auto;min-height:0;border:1px solid var(--manager-line2);border-radius:10px;background:rgba(255,252,246,.75);scrollbar-width:thin;scrollbar-color:#cfad82 rgba(255,255,255,.35);}
-.key-empty,.key-loading,.key-error{padding:10px 12px;font-size:calc(12px * var(--ui-scale));line-height:1.45;}
-.key-loading,.key-empty{color:#7a6755;}.key-error{color:var(--manager-red);}
-.key-list-columns-wrap{padding:calc(10px * var(--ui-scale));}
-.key-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(10px * var(--ui-scale));min-height:100%;}
-.key-column{min-width:0;display:flex;flex-direction:column;border:1px solid rgba(216,194,163,.72);border-radius:calc(13px * var(--ui-scale));background:rgba(255,252,247,.74);overflow:hidden;}
-.key-column-head{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(9px * var(--ui-scale)) calc(10px * var(--ui-scale));background:rgba(245,230,204,.78);border-bottom:1px solid rgba(216,194,163,.65);}
-.key-column-title{color:var(--manager-title);font-size:calc(13px * var(--ui-scale));font-weight:900;line-height:1.25;white-space:nowrap;}
-.key-column-desc{color:#92765c;font-size:calc(10px * var(--ui-scale));font-weight:800;line-height:1.25;white-space:nowrap;}
-.key-card-list{flex:1 1 auto;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:calc(7px * var(--ui-scale));padding:calc(9px * var(--ui-scale));scrollbar-width:thin;scrollbar-color:#cfad82 rgba(255,255,255,.35);}
-.key-card{min-width:0;border:1px solid rgba(226,208,180,.82);border-radius:calc(12px * var(--ui-scale));background:rgba(255,252,246,.94);padding:calc(9px * var(--ui-scale)) calc(10px * var(--ui-scale));box-shadow:0 1px 4px rgba(116,86,54,.04);}
-.key-card-main{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;}
-.key-card-code{color:#6b4524;font-size:calc(14px * var(--ui-scale));font-weight:950;line-height:1.2;letter-spacing:.02em;}
-.key-card-user{min-width:0;color:#74583f;font-size:calc(12px * var(--ui-scale));font-weight:850;line-height:1.3;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.key-card-meta{display:flex;align-items:flex-start;gap:6px;color:#8a7158;font-size:calc(11px * var(--ui-scale));font-weight:800;line-height:1.45;}
-.key-card-status{flex:0 0 auto;display:inline-flex;align-items:center;min-height:20px;padding:0 7px;border-radius:999px;border:1px solid rgba(180,139,94,.24);background:#fff5e7;color:#8b5b34;font-size:10px;font-weight:900;white-space:nowrap;}
-.key-card-status.is-active{color:var(--manager-green);background:#eef6e8;}.key-card-status.is-stopped{color:var(--manager-red);background:#fbeceb;}
-.key-card-desc{min-width:0;word-break:break-word;}
-.key-card-empty{padding:10px;color:#8d755d;font-size:11px;font-weight:800;line-height:1.55;text-align:center;border:1px dashed rgba(216,194,163,.72);border-radius:12px;background:rgba(255,252,246,.62);}
-
-
-.activity-block{gap:calc(10px * var(--ui-scale));}
-.activity-toolbar{display:flex;flex-direction:column;gap:calc(8px * var(--ui-scale));flex:0 0 auto;}
-.activity-filter-row{display:flex;align-items:center;gap:calc(7px * var(--ui-scale));flex-wrap:wrap;}
-.activity-filter-btn{appearance:none;border:1px solid rgba(216,194,163,.72);border-radius:999px;min-height:calc(30px * var(--ui-scale));padding:0 calc(11px * var(--ui-scale));background:rgba(255,252,246,.92);color:#74583f;font-size:calc(11px * var(--ui-scale));font-weight:900;cursor:pointer;white-space:nowrap;}
-.activity-filter-btn:hover{background:#f3e2ca;}
-.activity-filter-btn.active{background:var(--manager-btn);border-color:var(--manager-btn);color:#fff;}
-.activity-query-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:calc(8px * var(--ui-scale));align-items:center;}
-.activity-search,.activity-days{height:calc(36px * var(--ui-scale));min-width:0;border:1px solid rgba(216,194,163,.72);border-radius:calc(11px * var(--ui-scale));background:rgba(255,252,246,.94);color:#624a34;font:inherit;font-size:calc(12px * var(--ui-scale));outline:none;}
-.activity-search{padding:0 calc(12px * var(--ui-scale));}
-.activity-days{padding:0 calc(9px * var(--ui-scale));font-weight:800;cursor:pointer;}
-.activity-refresh{height:calc(36px * var(--ui-scale));min-width:calc(72px * var(--ui-scale));padding:0 calc(12px * var(--ui-scale));border:none;border-radius:calc(11px * var(--ui-scale));background:var(--manager-sub);color:var(--manager-text);font-size:calc(12px * var(--ui-scale));font-weight:900;cursor:pointer;}
-.activity-refresh:hover{background:var(--manager-sub-hover);}
-.activity-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:20px;color:#8b735b;font-size:calc(11px * var(--ui-scale));line-height:1.4;}
-.activity-feed{display:flex;flex-direction:column;gap:calc(8px * var(--ui-scale));min-height:0;}
-.activity-card{width:100%;appearance:none;border:1px solid rgba(216,194,163,.76);border-radius:calc(13px * var(--ui-scale));background:rgba(255,252,246,.94);padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));color:#6b5a45;text-align:left;cursor:pointer;box-shadow:0 1px 4px rgba(116,86,54,.045);transition:transform .16s ease,background .16s ease,border-color .16s ease;}
-.activity-card:hover{transform:translateY(-1px);background:#fffaf2;border-color:#cfad82;}
-.activity-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-.activity-card-title-wrap{min-width:0;display:flex;align-items:flex-start;gap:8px;}
-.activity-category-badge{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:22px;padding:0 8px;border-radius:999px;border:1px solid rgba(180,139,94,.24);background:#fff5e7;color:#8b5b34;font-size:10px;font-weight:950;white-space:nowrap;}
-.activity-category-badge[data-category="工作"]{background:#eef4fb;color:#456985;}
-.activity-category-badge[data-category="项目"]{background:#fff3e4;color:#8a5a2b;}
-.activity-category-badge[data-category="档案"]{background:#f4eef9;color:#735584;}
-.activity-category-badge[data-category="资产"]{background:#eef6e8;color:#58743b;}
-.activity-category-badge[data-category="身份"]{background:#fbeef1;color:#8a4f5d;}
-.activity-category-badge[data-category="系统"]{background:#f0f0ee;color:#66645d;}
-.activity-card-title{min-width:0;color:var(--manager-title);font-size:calc(13px * var(--ui-scale));font-weight:950;line-height:1.4;word-break:break-word;}
-.activity-card-time{flex:0 0 auto;color:#9a8067;font-size:calc(10px * var(--ui-scale));font-weight:800;line-height:1.35;white-space:nowrap;}
-.activity-card-content{margin-top:6px;color:#6f5b47;font-size:calc(12px * var(--ui-scale));line-height:1.55;word-break:break-word;white-space:pre-wrap;}
-.activity-card-meta{margin-top:6px;color:#92775e;font-size:calc(10px * var(--ui-scale));font-weight:800;line-height:1.45;word-break:break-word;}
-.activity-load-wrap{flex:0 0 auto;display:flex;justify-content:center;padding-top:2px;}
-.activity-load-more{min-width:120px;height:calc(34px * var(--ui-scale));padding:0 calc(14px * var(--ui-scale));border:none;border-radius:calc(11px * var(--ui-scale));background:var(--manager-sub);color:var(--manager-text);font-size:calc(11px * var(--ui-scale));font-weight:900;cursor:pointer;}
-.activity-load-more:hover{background:var(--manager-sub-hover);}
-.activity-load-more:disabled{opacity:.6;cursor:not-allowed;}
-.activity-detail-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(76,54,34,.28);pointer-events:auto;}
-.activity-detail-dialog{width:min(760px, calc(100vw - 36px));max-height:min(82vh,760px);display:flex;flex-direction:column;overflow:hidden;background:rgba(255,249,240,.98);}
-.activity-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px 10px;border-bottom:1px solid rgba(216,194,163,.72);}
-.activity-detail-head h3{margin:0;color:var(--manager-title);font-size:16px;line-height:1.3;}
-.activity-detail-close{appearance:none;border:none;background:rgba(234,217,188,.72);color:#6b4524;border-radius:999px;width:30px;height:30px;cursor:pointer;font-size:18px;line-height:1;font-weight:900;}
-.activity-detail-content{flex:1 1 auto;min-height:0;overflow:auto;padding:12px 16px;scrollbar-width:thin;scrollbar-color:#cfad82 rgba(255,255,255,.35);}
-.activity-detail-meta{color:#7a6755;font-size:13px;line-height:1.65;margin-bottom:10px;}
-.activity-detail-description{border:1px solid rgba(216,194,163,.75);border-radius:12px;background:rgba(255,255,255,.56);padding:11px;color:#6b5a45;font-size:13px;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
-.activity-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px;}
-.activity-detail-field{border:1px solid rgba(216,194,163,.68);border-radius:12px;background:rgba(255,252,247,.7);padding:10px;min-width:0;}
-.activity-detail-label{color:#8d755d;font-size:11px;font-weight:950;margin-bottom:5px;}
-.activity-detail-value{color:#6b5a45;font-size:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word;}
-.activity-detail-actions{display:flex;justify-content:flex-end;gap:8px;padding:10px 16px 14px;border-top:1px solid rgba(216,194,163,.72);}
-
-
-.siteNoticeList{display:flex;flex-direction:column;gap:8px;}.siteNoticeItem{padding:10px;border-radius:12px;background:rgba(255,252,247,.82);box-shadow:inset 0 1px 0 rgba(255,255,255,.92),0 2px 8px rgba(120,92,63,.05);}.siteNoticeItemTitle{color:#6f4726;font-size:12px;font-weight:800;line-height:1.5;margin-bottom:4px;}.siteNoticeItemDesc{color:#8a6644;font-size:11px;line-height:1.55;}.siteNoticeEmpty{color:#8a6644;font-size:12px;line-height:1.6;padding:6px 2px 2px;}
-
+:root{--manager-text:#5b4632;--manager-title:#6a5038;--manager-line:#d8c2a3;--manager-line2:#e3d0b4;--manager-panel:rgba(255,249,240,.88);--manager-card:rgba(255,252,247,.92);--manager-btn:#c98e56;--manager-btn-hover:#b97d45;--manager-sub:#e7d3b7;--manager-sub-hover:#dcc29e;--manager-green:#5f7d3a;--manager-red:#a14f3f;--manager-muted:#8e7c68}
+#pageMainPanel.managerMainPanel{left:5.65%;top:18.6%;width:86.5%;height:72.5%;padding:0;border:none;background:transparent;border-radius:0;display:grid;grid-template-columns:minmax(180px,18%) minmax(0,1fr) minmax(130px,14.8%);gap:calc(14px * var(--ui-scale));align-items:stretch;justify-content:normal;color:var(--manager-text);font-size:calc(13px * var(--ui-scale));font-weight:400;text-align:left;pointer-events:auto}
+#pageMainPanel.managerMainPanel *{pointer-events:auto}
+.panel{background:var(--manager-panel);border:1px solid var(--manager-line);border-radius:calc(16px * var(--ui-scale));box-shadow:0 10px 24px rgba(116,86,54,.08);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#pageNotice{position:fixed;left:50%;top:50%;width:min(420px,calc(100vw - 40px));padding:14px 16px;border-radius:16px;border:1px solid rgba(216,194,163,.86);background:rgba(247,238,225,.98);color:#7b654f;z-index:3000;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 18px 42px rgba(85,58,34,.18);font-size:14px;line-height:1.5;transform:translate(-50%,-50%);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);pointer-events:auto}
+#pageNotice.notice-success{background:rgba(238,246,232,.98);color:var(--manager-green)}
+#pageNotice.notice-error{background:rgba(251,236,235,.98);color:var(--manager-red)}
+.notice-text{flex:1 1 auto;text-align:center;font-weight:800}
+.notice-close{flex:0 0 auto;width:24px;height:24px;border:none;border-radius:999px;background:rgba(234,217,188,.56);color:inherit;cursor:pointer;font-size:16px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center}
+#managerBriefCard{min-width:0;height:fit-content;max-height:100%;padding:calc(13px * var(--ui-scale)) calc(14px * var(--ui-scale));overflow:auto}
+.brief-title{margin:0 0 calc(7px * var(--ui-scale));font-size:calc(14px * var(--ui-scale));line-height:1.25;font-weight:900;color:#6b4524}
+.brief-text{margin:0;font-size:calc(12px * var(--ui-scale));line-height:1.55;color:#765a40}
+.brief-list{margin:calc(8px * var(--ui-scale)) 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:calc(5px * var(--ui-scale))}
+.brief-list li{position:relative;padding-left:calc(14px * var(--ui-scale));font-size:calc(11px * var(--ui-scale));line-height:1.45;color:#84664a}
+.brief-list li::before{content:"•";position:absolute;left:0;top:0;color:#c98e56;font-weight:900}
+.brief-sign{margin-top:calc(9px * var(--ui-scale));padding-top:calc(7px * var(--ui-scale));border-top:1px dashed rgba(180,139,94,.32);font-size:calc(10px * var(--ui-scale));line-height:1.35;color:#9a795b;text-align:right}
+#contentArea{min-width:0;min-height:0;height:100%;overflow:hidden}
+.card{position:relative;padding:calc(14px * var(--ui-scale)) calc(16px * var(--ui-scale))}
+.section-title{margin:0 0 calc(10px * var(--ui-scale));font-size:calc(18px * var(--ui-scale));font-weight:900;color:var(--manager-title);line-height:1.2}
+#adminSwitchPanel{min-width:0;height:fit-content;padding:calc(10px * var(--ui-scale))}
+.switch-title{margin:0 0 calc(8px * var(--ui-scale));font-size:calc(13px * var(--ui-scale));font-weight:900;color:var(--manager-title);text-align:center}
+.switch-group{display:flex;flex-direction:column;gap:calc(7px * var(--ui-scale))}
+.switch-btn{border:none;border-radius:calc(11px * var(--ui-scale));padding:calc(8px * var(--ui-scale)) calc(6px * var(--ui-scale));font-size:calc(12px * var(--ui-scale));background:var(--manager-sub);cursor:pointer;text-align:center;color:var(--manager-text);font-weight:800;line-height:1.2}
+.switch-btn:hover{background:var(--manager-sub-hover)}
+.switch-btn.active{background:var(--manager-btn);color:#fff}
+.admin-view-card{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden;margin:0}
+.admin-block{background:rgba(255,255,255,.72);padding:calc(14px * var(--ui-scale));border-radius:calc(12px * var(--ui-scale));border:1px solid var(--manager-line2);margin-top:calc(10px * var(--ui-scale));display:flex;flex-direction:column;min-height:0}
+.admin-block:first-of-type{margin-top:0}
+.admin-view-card>.admin-block{flex:1 1 auto}
+.admin-block h3{margin:0 0 calc(8px * var(--ui-scale));font-size:calc(15px * var(--ui-scale));color:var(--manager-title)}
+.module-note{margin:0;font-size:calc(12px * var(--ui-scale));line-height:1.45;color:#7a6755}
+.module-scroll{flex:1 1 auto;min-height:0;overflow:auto;overflow-x:hidden;padding-right:calc(4px * var(--ui-scale));scrollbar-width:thin;scrollbar-color:#cfad82 rgba(255,255,255,.35)}
+.module-scroll::-webkit-scrollbar,.key-card-list::-webkit-scrollbar,.key-list-wrap::-webkit-scrollbar,.activity-detail-content::-webkit-scrollbar{width:calc(7px * var(--ui-scale))}
+.module-scroll::-webkit-scrollbar-thumb,.key-card-list::-webkit-scrollbar-thumb,.key-list-wrap::-webkit-scrollbar-thumb,.activity-detail-content::-webkit-scrollbar-thumb{background:#cfad82;border-radius:999px}
+.apply-list{display:flex;flex-direction:column;gap:calc(8px * var(--ui-scale))}
+.apply-item{background:rgba(255,252,246,.92);border:1px solid var(--manager-line2);border-radius:calc(12px * var(--ui-scale));padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale))}
+.apply-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.apply-head strong{font-size:calc(13px * var(--ui-scale));color:var(--manager-title)}
+.apply-time,.apply-meta{font-size:calc(11px * var(--ui-scale));color:var(--manager-muted)}
+.apply-body{display:flex;flex-direction:column;gap:4px;font-size:calc(12px * var(--ui-scale));line-height:1.45;color:#6b5a45}
+.apply-actions-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.inline-btn,.sub-btn{height:calc(34px * var(--ui-scale));min-width:calc(82px * var(--ui-scale));padding:0 calc(12px * var(--ui-scale));border:none;border-radius:calc(10px * var(--ui-scale));font-size:calc(12px * var(--ui-scale));cursor:pointer;font-weight:800;white-space:nowrap}
+.inline-btn{background:var(--manager-btn);color:#fff}
+.inline-btn:hover{background:var(--manager-btn-hover)}
+.sub-btn{background:var(--manager-sub);color:var(--manager-text)}
+.sub-btn:hover{background:var(--manager-sub-hover)}
+.inline-btn:disabled,.sub-btn:disabled{opacity:.65;cursor:not-allowed}
+.vote-summary{margin-top:6px;font-size:calc(11px * var(--ui-scale));color:#7b654f;line-height:1.4}
+.vote-wait{color:#8b5b34}
+.vote-pass{color:var(--manager-green)}
+.vote-reject{color:var(--manager-red)}
+.key-storage-box{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+.key-filter-bar{display:grid;grid-template-columns:minmax(120px,1fr) auto auto auto;align-items:center;gap:5px;margin-bottom:6px;flex:0 0 auto}
+.key-filter-input,.key-filter-select{height:29px;min-width:0;border:1px solid rgba(216,194,163,.82);border-radius:9px;background:rgba(255,252,246,.94);color:#624a34;font:inherit;font-size:10px;outline:none}
+.key-filter-input{width:100%;padding:0 9px}
+.key-filter-select{padding:0 7px;font-weight:800;cursor:pointer}
+.key-filter-input:focus,.key-filter-select:focus{border-color:#b98f72;box-shadow:0 0 0 2px rgba(185,143,114,.12)}
+.key-filter-summary{color:#92765c;font-size:9px;font-weight:850;line-height:1;white-space:nowrap}
+.key-filter-clear{height:29px;min-width:40px;padding:0 7px;border:none;border-radius:9px;background:var(--manager-sub);color:var(--manager-text);font-size:9px;font-weight:900;cursor:pointer;white-space:nowrap}
+.key-filter-clear:hover{background:var(--manager-sub-hover)}
+.key-filter-clear:disabled{opacity:.5;cursor:default}
+.key-list-wrap{margin-top:6px;overflow:auto;overflow-x:hidden;flex:1 1 auto;min-height:0;border:1px solid var(--manager-line2);border-radius:10px;background:rgba(255,252,246,.75);scrollbar-width:thin;scrollbar-color:#cfad82 rgba(255,255,255,.35)}
+.key-empty,.key-loading,.key-error{padding:10px 12px;font-size:calc(12px * var(--ui-scale));line-height:1.45}
+.key-loading,.key-empty{color:#7a6755}
+.key-error{color:var(--manager-red)}
+.key-list-columns-wrap{padding:calc(10px * var(--ui-scale))}
+.key-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(10px * var(--ui-scale));min-height:100%}
+.key-column{min-width:0;display:flex;flex-direction:column;border:1px solid rgba(216,194,163,.72);border-radius:calc(13px * var(--ui-scale));background:rgba(255,252,247,.74);overflow:hidden}
+.key-column-head{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(9px * var(--ui-scale)) calc(10px * var(--ui-scale));background:rgba(245,230,204,.78);border-bottom:1px solid rgba(216,194,163,.65)}
+.key-column-title{color:var(--manager-title);font-size:calc(13px * var(--ui-scale));font-weight:900;line-height:1.25;white-space:nowrap}
+.key-column-desc{color:#92765c;font-size:calc(10px * var(--ui-scale));font-weight:800;line-height:1.25;white-space:nowrap}
+.key-card-list{flex:1 1 auto;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:calc(7px * var(--ui-scale));padding:calc(9px * var(--ui-scale));scrollbar-width:thin;scrollbar-color:#cfad82 rgba(255,255,255,.35)}
+.key-card{min-width:0;border:1px solid rgba(226,208,180,.82);border-radius:calc(11px * var(--ui-scale));background:rgba(255,252,246,.94);padding:calc(7px * var(--ui-scale)) calc(9px * var(--ui-scale));box-shadow:0 1px 4px rgba(116,86,54,.04)}
+.key-card-main{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:3px}
+.key-card-code{color:#6b4524;font-size:calc(13px * var(--ui-scale));font-weight:950;line-height:1.15;letter-spacing:.02em}
+.key-card-user{min-width:0;color:#74583f;font-size:calc(11px * var(--ui-scale));font-weight:850;line-height:1.2;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.key-card-meta{display:flex;align-items:center;gap:5px;min-width:0;color:#8a7158;font-size:calc(10px * var(--ui-scale));font-weight:800;line-height:1.25}
+.key-card-status{flex:0 0 auto;display:inline-flex;align-items:center;min-height:19px;padding:0 6px;border-radius:999px;border:1px solid rgba(180,139,94,.24);background:#fff5e7;color:#8b5b34;font-size:9px;font-weight:900;white-space:nowrap}
+.key-card-status.is-active{color:var(--manager-green);background:#eef6e8}
+.key-card-status.is-prepared{color:#735584;background:#f4eef9;border-color:rgba(132,96,151,.24)}
+.key-card-status.is-stopped{color:var(--manager-red);background:#fbeceb}
+.key-card-desc{min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.key-card-empty{padding:10px;color:#8d755d;font-size:11px;font-weight:800;line-height:1.55;text-align:center;border:1px dashed rgba(216,194,163,.72);border-radius:12px;background:rgba(255,252,246,.62)}
+.key-prepared-toggle{flex:0 0 auto;height:22px;min-width:38px;padding:0 7px;border:1px solid rgba(180,139,94,.24);border-radius:8px;background:rgba(239,224,205,.78);color:#76583f;font-size:9px;font-weight:900;cursor:pointer;white-space:nowrap}
+.key-prepared-toggle:hover{background:#e7d3b7}
+.key-card-editor{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:5px;margin-top:6px;padding-top:6px;border-top:1px dashed rgba(180,139,94,.24);align-items:center}
+.key-card-editor.hidden{display:none!important}
+.key-prepared-input{width:100%;min-width:0;height:27px;border:1px solid rgba(216,194,163,.82);border-radius:8px;background:rgba(255,255,255,.9);color:#624a34;padding:0 8px;font:inherit;font-size:10px;outline:none}
+.key-prepared-input:focus{border-color:#b98f72;box-shadow:0 0 0 2px rgba(185,143,114,.12)}
+.key-prepared-btn{height:27px;min-width:42px;padding:0 8px;border:none;border-radius:8px;font-size:9px;font-weight:900;cursor:pointer;white-space:nowrap}
+.key-prepared-save{background:var(--manager-btn);color:#fff}
+.key-prepared-save:hover{background:var(--manager-btn-hover)}
+.key-prepared-close{background:var(--manager-sub);color:var(--manager-text)}
+.key-prepared-close:hover{background:var(--manager-sub-hover)}
+.key-prepared-clear{grid-column:1/-1;justify-self:end;height:20px;min-width:0;padding:0 2px;background:transparent;color:#9a6658;text-decoration:underline;text-underline-offset:2px}
+.key-prepared-clear:hover{background:transparent;color:var(--manager-red)}
+.key-prepared-btn:disabled,.key-prepared-input:disabled,.key-prepared-toggle:disabled{opacity:.62;cursor:not-allowed}
+.activity-block{gap:calc(10px * var(--ui-scale))}
+.activity-toolbar{display:flex;flex-direction:column;gap:calc(8px * var(--ui-scale));flex:0 0 auto}
+.activity-filter-row{display:flex;align-items:center;gap:calc(7px * var(--ui-scale));flex-wrap:wrap}
+.activity-filter-btn{appearance:none;border:1px solid rgba(216,194,163,.72);border-radius:999px;min-height:calc(30px * var(--ui-scale));padding:0 calc(11px * var(--ui-scale));background:rgba(255,252,246,.92);color:#74583f;font-size:calc(11px * var(--ui-scale));font-weight:900;cursor:pointer;white-space:nowrap}
+.activity-filter-btn:hover{background:#f3e2ca}
+.activity-filter-btn.active{background:var(--manager-btn);border-color:var(--manager-btn);color:#fff}
+.activity-query-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:calc(8px * var(--ui-scale));align-items:center}
+.activity-search,.activity-days{height:calc(36px * var(--ui-scale));min-width:0;border:1px solid rgba(216,194,163,.72);border-radius:calc(11px * var(--ui-scale));background:rgba(255,252,246,.94);color:#624a34;font:inherit;font-size:calc(12px * var(--ui-scale));outline:none}
+.activity-search{padding:0 calc(12px * var(--ui-scale))}
+.activity-days{padding:0 calc(9px * var(--ui-scale));font-weight:800;cursor:pointer}
+.activity-refresh{height:calc(36px * var(--ui-scale));min-width:calc(72px * var(--ui-scale));padding:0 calc(12px * var(--ui-scale));border:none;border-radius:calc(11px * var(--ui-scale));background:var(--manager-sub);color:var(--manager-text);font-size:calc(12px * var(--ui-scale));font-weight:900;cursor:pointer}
+.activity-refresh:hover{background:var(--manager-sub-hover)}
+.activity-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:20px;color:#8b735b;font-size:calc(11px * var(--ui-scale));line-height:1.4}
+.activity-feed{display:flex;flex-direction:column;gap:calc(8px * var(--ui-scale));min-height:0}
+.activity-card{width:100%;appearance:none;border:1px solid rgba(216,194,163,.76);border-radius:calc(13px * var(--ui-scale));background:rgba(255,252,246,.94);padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));color:#6b5a45;text-align:left;cursor:pointer;box-shadow:0 1px 4px rgba(116,86,54,.045);transition:transform .16s ease,background .16s ease,border-color .16s ease}
+.activity-card:hover{transform:translateY(-1px);background:#fffaf2;border-color:#cfad82}
+.activity-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.activity-card-title-wrap{min-width:0;display:flex;align-items:flex-start;gap:8px}
+.activity-category-badge{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:22px;padding:0 8px;border-radius:999px;border:1px solid rgba(180,139,94,.24);background:#fff5e7;color:#8b5b34;font-size:10px;font-weight:950;white-space:nowrap}
+.activity-category-badge[data-category="工作"]{background:#eef4fb;color:#456985}
+.activity-category-badge[data-category="项目"]{background:#fff3e4;color:#8a5a2b}
+.activity-category-badge[data-category="档案"]{background:#f4eef9;color:#735584}
+.activity-category-badge[data-category="资产"]{background:#eef6e8;color:#58743b}
+.activity-category-badge[data-category="身份"]{background:#fbeef1;color:#8a4f5d}
+.activity-category-badge[data-category="系统"]{background:#f0f0ee;color:#66645d}
+.activity-card-title{min-width:0;color:var(--manager-title);font-size:calc(13px * var(--ui-scale));font-weight:950;line-height:1.4;word-break:break-word}
+.activity-card-time{flex:0 0 auto;color:#9a8067;font-size:calc(10px * var(--ui-scale));font-weight:800;line-height:1.35;white-space:nowrap}
+.activity-card-content{margin-top:6px;color:#6f5b47;font-size:calc(12px * var(--ui-scale));line-height:1.55;word-break:break-word;white-space:pre-wrap}
+.activity-card-meta{margin-top:6px;color:#92775e;font-size:calc(10px * var(--ui-scale));font-weight:800;line-height:1.45;word-break:break-word}
+.activity-load-wrap{flex:0 0 auto;display:flex;justify-content:center;padding-top:2px}
+.activity-load-more{min-width:120px;height:calc(34px * var(--ui-scale));padding:0 calc(14px * var(--ui-scale));border:none;border-radius:calc(11px * var(--ui-scale));background:var(--manager-sub);color:var(--manager-text);font-size:calc(11px * var(--ui-scale));font-weight:900;cursor:pointer}
+.activity-load-more:hover{background:var(--manager-sub-hover)}
+.activity-load-more:disabled{opacity:.6;cursor:not-allowed}
+.activity-detail-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(76,54,34,.28);pointer-events:auto}
+.activity-detail-dialog{width:min(760px,calc(100vw - 36px));max-height:min(82vh,760px);display:flex;flex-direction:column;overflow:hidden;background:rgba(255,249,240,.98)}
+.activity-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px 10px;border-bottom:1px solid rgba(216,194,163,.72)}
+.activity-detail-head h3{margin:0;color:var(--manager-title);font-size:16px;line-height:1.3}
+.activity-detail-close{appearance:none;border:none;background:rgba(234,217,188,.72);color:#6b4524;border-radius:999px;width:30px;height:30px;cursor:pointer;font-size:18px;line-height:1;font-weight:900}
+.activity-detail-content{flex:1 1 auto;min-height:0;overflow:auto;padding:12px 16px;scrollbar-width:thin;scrollbar-color:#cfad82 rgba(255,255,255,.35)}
+.activity-detail-meta{color:#7a6755;font-size:13px;line-height:1.65;margin-bottom:10px}
+.activity-detail-description{border:1px solid rgba(216,194,163,.75);border-radius:12px;background:rgba(255,255,255,.56);padding:11px;color:#6b5a45;font-size:13px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.activity-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.activity-detail-field{border:1px solid rgba(216,194,163,.68);border-radius:12px;background:rgba(255,252,247,.7);padding:10px;min-width:0}
+.activity-detail-label{color:#8d755d;font-size:11px;font-weight:950;margin-bottom:5px}
+.activity-detail-value{color:#6b5a45;font-size:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.activity-detail-actions{display:flex;justify-content:flex-end;gap:8px;padding:10px 16px 14px;border-top:1px solid rgba(216,194,163,.72)}
+.siteNoticeList{display:flex;flex-direction:column;gap:8px}
+.siteNoticeItem{padding:10px;border-radius:12px;background:rgba(255,252,247,.82);box-shadow:inset 0 1px 0 rgba(255,255,255,.92),0 2px 8px rgba(120,92,63,.05)}
+.siteNoticeItemTitle{color:#6f4726;font-size:12px;font-weight:800;line-height:1.5;margin-bottom:4px}
+.siteNoticeItemDesc{color:#8a6644;font-size:11px;line-height:1.55}
+.siteNoticeEmpty{color:#8a6644;font-size:12px;line-height:1.6;padding:6px 2px 2px}
 @media(max-width:900px){
-  #pageMainPanel.managerMainPanel{grid-template-columns:1fr 130px;left:4%;top:18%;width:92%;height:74%;}
-  #managerBriefCard{display:none;}
+  #pageMainPanel.managerMainPanel{grid-template-columns:1fr 130px;left:4%;top:18%;width:92%;height:74%}
+  #managerBriefCard{display:none}
 }
-
 @media(max-width:540px){
-  #pageMainPanel.managerMainPanel{position:relative;left:auto;top:auto;width:100%;height:auto;order:2;display:flex;flex-direction:column;gap:10px;border-radius:22px;background:rgba(255,250,240,.58);padding:12px;}
-  #managerBriefCard{display:block;width:100%;max-height:none;order:0;}
-  #adminSwitchPanel{width:100%;order:1;}
-  .switch-group{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));}
-  #contentArea{width:100%;height:auto;min-height:420px;order:2;}
-  .admin-view-card{min-height:420px;}
-  .key-columns{grid-template-columns:1fr;}
-  .activity-query-row{grid-template-columns:1fr 1fr;}
-  .activity-search{grid-column:1/-1;}
-  .activity-detail-grid{grid-template-columns:1fr;}
+  #pageMainPanel.managerMainPanel{position:relative;left:auto;top:auto;width:100%;height:auto;order:2;display:flex;flex-direction:column;gap:10px;border-radius:22px;background:rgba(255,250,240,.58);padding:12px}
+  #managerBriefCard{display:block;width:100%;max-height:none;order:0}
+  #adminSwitchPanel{width:100%;order:1}
+  .switch-group{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  #contentArea{width:100%;height:auto;min-height:420px;order:2}
+  .admin-view-card{min-height:420px}
+  .key-columns{grid-template-columns:1fr}
+  .key-filter-bar{grid-template-columns:minmax(0,1fr) 88px 40px;gap:5px;margin-bottom:5px}
+  .key-filter-summary{display:none}
+  .key-filter-input,.key-filter-select,.key-filter-clear{height:30px;font-size:10px}
+  .key-card-editor{grid-template-columns:minmax(0,1fr) auto auto}
+  .activity-query-row{grid-template-columns:1fr 1fr}
+  .activity-search{grid-column:1/-1}
+  .activity-detail-grid{grid-template-columns:1fr}
 }
-
 </style>
 </head>
 <body>
-<!-- PAGE_VERSION: manager-admin-activity-center-v2; display-link-means-published; read-only-work-ledger-feed; desktop-mobile -->
+<!-- PAGE_VERSION: manager-admin-activity-center-v7-clean; compact-prepared-key; key-search-status-filter; desktop-mobile -->
 <div id="room">
   <div id="bgFrame">
     <img id="bg" data-alt-key="manager.bg_alt" alt="" src="" />
   </div>
   <div id="overlay">
-
     <nav class="roomNavLayer" id="roomNavLayer" data-aria-label-key="nav.aria_label" aria-label="">
       <button class="navBtn" data-room="hall" type="button" data-page="index" data-login="false">
         <span class="navLabel" data-text-key="nav.hall"></span>
         <span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span>
       </button>
-
       <button class="navBtn" data-room="living" type="button" data-page="living" data-login="true">
         <span class="navLabel" data-text-key="nav.living"></span>
         <span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span>
       </button>
-
       <button class="navBtn" data-room="manager" type="button" data-manager="true">
         <span class="navLabel" data-text-key="nav.manager"></span>
         <span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span>
       </button>
-
       <button class="navBtn" data-room="honor" type="button" data-page="honor" data-login="false">
         <span class="navLabel" data-text-key="nav.honor"></span>
         <span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span>
       </button>
-
       <button class="navBtn" data-room="studio" type="button" data-page="studioTodo" data-login="true">
         <span class="navLabel" data-text-key="nav.studio"></span>
         <span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span>
       </button>
-
       <button class="navBtn" data-room="game" type="button" data-page="game" data-login="false">
         <span class="navLabel" data-text-key="nav.game"></span>
         <span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span>
       </button>
-
       <button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-login="true">
         <span class="navLabel" data-text-key="nav.dorm"></span>
         <span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span>
       </button>
-
       <button class="navBtn" data-room="flower" type="button" data-page="flower" data-login="false">
         <span class="navLabel" data-text-key="nav.flower"></span>
         <span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span>
       </button>
-
       <button class="navBtn" data-room="pets" type="button" data-page="pet" data-login="false">
         <span class="navLabel" data-text-key="nav.pets"></span>
         <span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span>
       </button>
     </nav>
-
-
     <section class="roomIdentity" id="roomIdentity" data-aria-label-key="identity.aria_label" aria-label="">
       <div class="roomIdentityBar">
         <div class="identityNameBox">
@@ -1071,26 +345,21 @@ button{font-family:inherit;}
             <span class="identityNamePart identityRole hidden" id="identityRole"></span>
           </span>
         </div>
-
         <div class="identityNoticeWrap">
           <button class="identityNoticeBtn" id="identityNoticeBtn" type="button" data-aria-label-key="notice.aria_label" aria-label="">
             <span class="identityNoticeIcon" data-text-key="notice.icon"></span>
           </button>
           <span class="identityNoticeCount" id="identityNoticeCount">0</span>
-
           <div class="identityNoticePanel" id="identityNoticePanel" aria-live="polite">
             <div class="identityNoticeTitle" data-text-key="notice.title"></div>
             <div class="identityNoticeEmpty" id="identityNoticeContent" data-text-key="notice.empty"></div>
           </div>
         </div>
-
         <button class="identityAuthBtn" id="identityAuthBtn" type="button">
           <span class="identityAuthText"></span>
         </button>
       </div>
     </section>
-
-
     <main class="templateMainPanel managerMainPanel" id="pageMainPanel">
       <aside id="managerBriefCard" class="panel" data-aria-label-key="brief.aria_label" aria-label="">
         <h3 class="brief-title" data-text-key="brief.title"></h3>
@@ -1103,7 +372,6 @@ button{font-family:inherit;}
         </ul>
         <div class="brief-sign" data-text-key="brief.sign"></div>
       </aside>
-
       <section id="contentArea">
         <section class="card panel admin-view-card" id="adminArchiveCard">
           <h2 class="section-title" data-text-key="tab.archive"></h2>
@@ -1116,11 +384,22 @@ button{font-family:inherit;}
             <div id="adminApplyList" class="apply-list module-scroll"><div class="module-note" data-text-key="list.loading"></div></div>
           </div>
         </section>
-
         <section class="card panel hidden admin-view-card" id="adminKeysCard">
           <h2 class="section-title" data-text-key="tab.keys"></h2>
           <div class="admin-block">
             <div id="keyStorageBox" class="key-storage-box">
+              <div id="keyFilterBar" class="key-filter-bar hidden" aria-label="钥匙筛选">
+                <input id="keySearchInput" class="key-filter-input" type="search" autocomplete="off" placeholder="搜索钥匙或名字" aria-label="搜索钥匙编号或名字" />
+                <select id="keyStatusFilter" class="key-filter-select" aria-label="筛选钥匙状态">
+                  <option value="">全部状态</option>
+                  <option value="prepared">预备</option>
+                  <option value="active">使用中</option>
+                  <option value="unused">未领取</option>
+                  <option value="stopped">已停用</option>
+                </select>
+                <span id="keyFilterSummary" class="key-filter-summary"></span>
+                <button id="keyFilterClear" class="key-filter-clear" type="button">清除</button>
+              </div>
               <div id="keyStorageLoading" class="key-loading" data-text-key="keys.loading"></div>
               <div id="keyStorageError" class="key-error hidden"></div>
               <div id="keyStorageEmpty" class="key-empty hidden" data-text-key="keys.empty"></div>
@@ -1139,7 +418,6 @@ button{font-family:inherit;}
             </div>
           </div>
         </section>
-
         <section class="card panel hidden admin-view-card" id="adminLogsCard">
           <h2 class="section-title">维修记录</h2>
           <div class="admin-block activity-block">
@@ -1177,7 +455,6 @@ button{font-family:inherit;}
           </div>
         </section>
       </section>
-
       <aside id="adminSwitchPanel" class="panel" data-aria-label-key="switch.aria_label" aria-label="">
         <h3 class="switch-title" data-text-key="switch.title"></h3>
         <div class="switch-group">
@@ -1187,11 +464,8 @@ button{font-family:inherit;}
         </div>
       </aside>
     </main>
-
   </div>
 </div>
-
-
 <div id="activityDetailOverlay" class="activity-detail-overlay hidden" aria-hidden="true">
   <div class="activity-detail-dialog panel" role="dialog" aria-modal="true" aria-labelledby="activityDetailTitle">
     <div class="activity-detail-head">
@@ -1204,21 +478,16 @@ button{font-family:inherit;}
     </div>
   </div>
 </div>
-
 <div id="pageNotice" class="hidden">
   <div class="notice-text" id="pageNoticeText"></div>
   <button class="notice-close" type="button" onclick="hideNotice()">×</button>
 </div>
-
 <script>
-
 const CURRENT_ROOM = "manager";
 const PAGE_KEY = "managerAdmin";
 const supabaseUrl = "https://tfevitwoqmxwaguvtyms.supabase.co";
 const supabaseKey = "sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI";
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-/* ===== 通用模板组件：路径、底图缩放、房间导航、身份栏 ===== */
 const STORAGE_KEYS = {
   loggedIn:"room10LoggedIn",
   user:"room10User",
@@ -1226,13 +495,9 @@ const STORAGE_KEYS = {
   memberId:"room10MemberId",
   memberCode:"room10MemberCode"
 };
-
 const VALID_MEMBER_ROLES = new Set(["owner", "admin", "member", "roomer", "trainee", "applying"]);
-
-
 let pageTexts = new Map();
 let pageTextReady = false;
-
 const REQUIRED_DYNAMIC_TEXT_KEYS = [
   "role.owner","role.admin","role.member","role.trainee","role.visitor","role.invalid",
   "identity.login_button","identity.logout_button",
@@ -1316,7 +581,6 @@ function applyPageTexts(){
   document.querySelectorAll("[data-alt-key]").forEach(el => { el.alt = text(el.dataset.altKey); });
 }
 
-
 function showRoom10ConfigError(kind, key){
   const messageKey = kind === "asset" ? "error.asset_missing" : "error.path_missing";
   showPageError(text(messageKey), key || "missing");
@@ -1324,33 +588,27 @@ function showRoom10ConfigError(kind, key){
 
 function room10PageUrl(key){
   const pageKey = String(key || "").trim();
-
   if(pageKey && typeof window.room10Page === "function"){
     const url = window.room10Page(pageKey);
     if(url) return url;
   }
-
   showRoom10ConfigError("page", pageKey);
   return "";
 }
 
 function room10AssetUrl(keyPath){
   const assetKey = String(keyPath || "").trim();
-
   if(assetKey && typeof window.room10Asset === "function"){
     const url = window.room10Asset(assetKey);
     if(url) return url;
   }
-
   showRoom10ConfigError("asset", assetKey);
   return "";
 }
-
 const img = document.getElementById("bg");
 const bgFrame = document.getElementById("bgFrame");
 const overlay = document.getElementById("overlay");
 const root = document.documentElement;
-
 const identityNickname = document.getElementById("identityNickname");
 const identitySeparator = document.getElementById("identitySeparator");
 const identityRole = document.getElementById("identityRole");
@@ -1362,40 +620,25 @@ const identityAuthBtn = document.getElementById("identityAuthBtn");
 const identityNoticeCount = document.getElementById("identityNoticeCount");
 const identityNoticeContent = document.getElementById("identityNoticeContent");
 const identityAuthText = identityAuthBtn ? identityAuthBtn.querySelector(".identityAuthText") : null;
-
-/*
-  兼容原宿管页业务逻辑的旧变量名。
-  页面组件已经使用通用模板的 roomIdentity / identityNotice 结构，
-  但档案、钥匙、维修日志等旧业务函数仍调用 siteNotice* 名称。
-*/
-const siteNoticeBtn = identityNoticeBtn;
-const siteNoticePanel = identityNoticePanel;
-const siteNoticeCount = identityNoticeCount;
-const siteNoticeContent = identityNoticeContent;
-
-/*
-  旧管理功能从 owner 页面迁移过来后，不能再依赖浏览器把 id 自动挂到 window。
-  这里统一显式获取页面元素和状态，避免 loadAllApplications() 在 archiveLoaded / 按钮元素等未定义时直接中断，
-  造成页面一直停在“正在读取入住申请 / 身份申请”。
-*/
 const pageNotice = document.getElementById("pageNotice");
 const pageNoticeText = document.getElementById("pageNoticeText");
-
 const switchArchiveBtn = document.getElementById("switchArchiveBtn");
 const switchKeysBtn = document.getElementById("switchKeysBtn");
 const switchLogsBtn = document.getElementById("switchLogsBtn");
-
 const adminArchiveCard = document.getElementById("adminArchiveCard");
 const adminKeysCard = document.getElementById("adminKeysCard");
 const adminLogsCard = document.getElementById("adminLogsCard");
-
 const keyStorageLoading = document.getElementById("keyStorageLoading");
 const keyStorageError = document.getElementById("keyStorageError");
 const keyStorageEmpty = document.getElementById("keyStorageEmpty");
+const keyFilterBar = document.getElementById("keyFilterBar");
+const keySearchInput = document.getElementById("keySearchInput");
+const keyStatusFilter = document.getElementById("keyStatusFilter");
+const keyFilterSummary = document.getElementById("keyFilterSummary");
+const keyFilterClear = document.getElementById("keyFilterClear");
 const keyListWrap = document.getElementById("keyListWrap");
 const keyListA = document.getElementById("keyListA");
 const keyListB = document.getElementById("keyListB");
-
 const activityCategoryFilters = document.getElementById("activityCategoryFilters");
 const activitySearchInput = document.getElementById("activitySearchInput");
 const activityDaysSelect = document.getElementById("activityDaysSelect");
@@ -1403,10 +646,12 @@ const activityRefreshBtn = document.getElementById("activityRefreshBtn");
 const activityFeedList = document.getElementById("activityFeedList");
 const activityLoadMoreBtn = document.getElementById("activityLoadMoreBtn");
 const activityLoadedCount = document.getElementById("activityLoadedCount");
-
 let activeAdminTab = "archive";
 let archiveLoaded = false;
 let keyListLoaded = false;
+let keyStorageRows = [];
+let keyFilterKeyword = "";
+let keyFilterStatus = "";
 let logsLoaded = false;
 let activityRows = [];
 let activityCategory = "";
@@ -1416,20 +661,18 @@ let activityHasMore = false;
 let activityLoading = false;
 let activitySearchTimer = null;
 const actionBusyMap = Object.create(null);
+const keyPreparedBusy = new Set();
 
 function isMobileLayout(){
   return window.innerWidth <= 540;
 }
 
-
 function clearDesktopOverlayStyles(){
   if(!overlay) return;
-
   overlay.style.left = "";
   overlay.style.top = "";
   overlay.style.width = "";
   overlay.style.height = "";
-
   root.style.setProperty("--ui-scale","1");
   root.style.setProperty("--room-nav-scale","1");
   root.style.setProperty("--identity-scale","1");
@@ -1440,18 +683,14 @@ function syncOverlayToImage(){
     clearDesktopOverlayStyles();
     return;
   }
-
   if(!img || !img.naturalWidth || !img.naturalHeight || !bgFrame || !overlay) return;
-
   const frame = bgFrame.getBoundingClientRect();
   const frameRatio = frame.width / frame.height;
   const imageRatio = img.naturalWidth / img.naturalHeight;
-
   let displayWidth;
   let displayHeight;
   let displayLeft;
   let displayTop;
-
   if(frameRatio > imageRatio){
     displayHeight = frame.height;
     displayWidth = displayHeight * imageRatio;
@@ -1463,12 +702,10 @@ function syncOverlayToImage(){
     displayLeft = frame.left;
     displayTop = frame.top + (frame.height - displayHeight) / 2;
   }
-
   overlay.style.left = `${displayLeft}px`;
   overlay.style.top = `${displayTop}px`;
   overlay.style.width = `${displayWidth}px`;
   overlay.style.height = `${displayHeight}px`;
-
   const scale = Math.max(0.45, Math.min(3.2, displayWidth / 1440));
   const navScale = Math.max(0.38, Math.min(3.2, displayWidth / 1440));
   root.style.setProperty("--ui-scale", String(scale));
@@ -1487,9 +724,7 @@ function roleLabel(role){
 
 function setIdentityState({nickname="",role="visitor",loggedIn=false,noticeCount=0}={}){
   if(!identityNickname || !identitySeparator || !identityRole || !identityAuthText) return;
-
   const roleText = roleLabel(role);
-
   if(!loggedIn || !nickname){
     identityNickname.textContent = text("identity.visitor");
     identitySeparator.classList.add("hidden");
@@ -1503,13 +738,11 @@ function setIdentityState({nickname="",role="visitor",loggedIn=false,noticeCount
     identityRole.textContent = roleText;
     identityAuthText.textContent = text("identity.logout_button");
   }
-
   const count = Number(noticeCount || 0);
   if(identityNoticeBtn && identityNoticeCount){
     identityNoticeBtn.classList.toggle("hasNotice", count > 0);
     identityNoticeCount.textContent = count > 99 ? "99+" : String(count);
   }
-
   requestAnimationFrame(() => {
     if(identityNameText){
       identityNameText.classList.toggle("isOverflowSafe", identityNameText.scrollWidth > identityNameText.clientWidth);
@@ -1517,71 +750,38 @@ function setIdentityState({nickname="",role="visitor",loggedIn=false,noticeCount
   });
 }
 
-function readLoggedIn(){
-  return isLoggedIn();
-}
-
-function readRole(){
-  return String(getRole() || "visitor").toLowerCase();
-}
-
-function readLocalIdentity(){
-  const user = getStoredUser();
-  const loggedIn = !!(user && user.nickname);
-  const nickname = user?.nickname || "";
-  const role = user?.role || "visitor";
-  setIdentityState({nickname,role,loggedIn,noticeCount:0});
-}
-
-function getManagerPageByRole(){
-  const role = readRole();
-
-  if(role === "owner") return room10PageUrl("managerOwner");
-  if(role === "admin") return room10PageUrl("managerAdmin");
-  if(role === "member" || role === "roomer" || role === "trainee") return room10PageUrl("managerMember");
-  return room10PageUrl("managerVisitor");
-}
-
 function enterManagerRoom(){
-  window.location.href = getManagerPageByRole();
+  goPage(getManagerPageKeyByRole());
 }
 
 function enterRoom(page, needLogin, room){
   const targetPage = String(page || "").trim();
   const targetRoom = String(room || "").trim();
   if(!targetPage) return;
-
-  const loggedIn = readLoggedIn();
-  const role = readRole();
-
+  const loggedIn = isLoggedIn();
+  const role = (getRole() || "visitor");
   if(needLogin && !loggedIn){
     openLogin(targetPage);
     return;
   }
-
   if(targetRoom === "dorm" && role === "applying"){
-    window.location.href = getManagerPageByRole();
+    goPage(getManagerPageKeyByRole());
     return;
   }
-
   if((targetRoom === "flower" || targetRoom === "pets") && !loggedIn){
     window.location.href = `${targetPage}${targetPage.includes("?") ? "&" : "?"}mode=guest`;
     return;
   }
-
   window.location.href = targetPage;
 }
 
 function setupRoomNav(currentRoom){
   const buttons = document.querySelectorAll(".navBtn");
   const current = String(currentRoom || "").trim();
-
   buttons.forEach(btn => {
     const room = btn.dataset.room || "";
     const isCurrent = room === current;
-
     btn.classList.toggle("is-current", isCurrent);
-
     if(isCurrent){
       btn.setAttribute("aria-current","page");
       btn.setAttribute("tabindex","-1");
@@ -1589,18 +789,14 @@ function setupRoomNav(currentRoom){
       btn.removeAttribute("aria-current");
       btn.removeAttribute("tabindex");
     }
-
     btn.addEventListener("click", event => {
       event.preventDefault();
       event.stopPropagation();
-
       if(btn.classList.contains("is-current")) return;
-
       if(btn.dataset.manager === "true"){
         enterManagerRoom();
         return;
       }
-
       const targetUrl = room10PageUrl(btn.dataset.page);
       enterRoom(targetUrl, btn.dataset.login === "true", btn.dataset.room);
     });
@@ -1609,33 +805,17 @@ function setupRoomNav(currentRoom){
 
 function positionIdentityNoticePanel(){
   if(!identityNoticePanel || !identityNoticeBtn) return;
-
   if(!isMobileLayout()){
     root.style.setProperty("--identity-notice-mobile-top", "58px");
     return;
   }
-
   const bar = document.querySelector(".roomIdentityBar") || document.getElementById("roomIdentity") || identityNoticeBtn;
   const rect = bar ? bar.getBoundingClientRect() : { bottom: 50 };
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 640;
   const gap = 8;
   const safeTop = Math.max(8, Math.round(rect.bottom + gap));
   const top = Math.min(safeTop, Math.max(58, viewportHeight - 120));
-
   root.style.setProperty("--identity-notice-mobile-top", `${top}px`);
-}
-
-/* ===== 管理页兼容函数：保留旧调用名，但底层走通用模板函数 ===== */
-function getRoom10Page(pageKey){
-  return room10PageUrl(pageKey);
-}
-
-function getRoom10Asset(assetKey){
-  return room10AssetUrl(assetKey);
-}
-
-function cssUrl(value){
-  return `url("${String(value || "").replace(/"/g, "\\\"")}")`;
 }
 
 function getManagerPageKeyByRole(roleValue = getRole()){
@@ -1651,30 +831,14 @@ function goPage(pageKey){
   if(page) window.location.href = page;
 }
 
-function goNeedLoginPage(pageKey){
-  const page = room10PageUrl(pageKey);
-  if(!isLoggedIn()){
-    openLogin(page);
-    return;
-  }
-  if(page) window.location.href = page;
-}
-
-function goManagerRoom(){
-  enterManagerRoom();
-}
-
 function applyManagerAssets(){
   const managerBgUrl = room10AssetUrl("manager.roomManager");
   if(!managerBgUrl || !img) return;
-
   const syncAfterLoad = () => requestAnimationFrame(syncOverlayToImage);
   img.addEventListener("load", syncAfterLoad, { once:true });
-
   if(img.getAttribute("src") !== managerBgUrl){
     img.src = managerBgUrl;
   }
-
   if(img.complete && img.naturalWidth){
     syncAfterLoad();
   }
@@ -1682,7 +846,6 @@ function applyManagerAssets(){
 
 function getStoredUser(){
   if(localStorage.getItem(STORAGE_KEYS.loggedIn) !== "true") return null;
-
   return {
     nickname:String(localStorage.getItem(STORAGE_KEYS.user) || "").trim(),
     role:String(localStorage.getItem(STORAGE_KEYS.role) || "").trim().toLowerCase(),
@@ -1705,7 +868,6 @@ function saveStoredMember(member){
   const role = String(member?.role || "").trim().toLowerCase();
   const memberCode = String(member?.member_code || "").trim();
   if(!id || !nickname || !role || !memberCode) return false;
-
   localStorage.setItem(STORAGE_KEYS.loggedIn, "true");
   localStorage.setItem(STORAGE_KEYS.user, nickname);
   localStorage.setItem(STORAGE_KEYS.role, role);
@@ -1720,10 +882,6 @@ function isLoggedIn(){
 
 function getRole(){
   return getStoredUser()?.role || "";
-}
-
-function getCurrentUser(){
-  return getStoredUser()?.nickname || "";
 }
 
 function isAdminRole(role){
@@ -1743,37 +901,12 @@ function formatTime(input){
   if(!input) return text("common.unknown_time");
   const d = new Date(input);
   if(Number.isNaN(d.getTime())) return text("common.unknown_time");
-
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   const h = String(d.getHours()).padStart(2, "0");
   const min = String(d.getMinutes()).padStart(2, "0");
-
   return `${y}-${m}-${day} ${h}:${min}`;
-}
-
-function parseKeySortValue(raw){
-  const s = String(raw || "").trim();
-  if(!s) return { num: Number.MAX_SAFE_INTEGER, text: s };
-
-  const match = s.match(/^([A-Za-z]*)(\d+)$/);
-  if(match){
-    const prefix = match[1] || "";
-    const num = Number(match[2]);
-    return { num, text: prefix + String(num).padStart(20, "0") };
-  }
-
-  const digit = s.match(/(\d+)/);
-  if(digit){
-    return { num: Number(digit[1]), text: s };
-  }
-
-  return { num: Number.MAX_SAFE_INTEGER, text: s };
-}
-
-function getRoleLabel(roleValue = getRole()){
-  return roleLabel(roleValue);
 }
 
 function updateStatusUserUI(){
@@ -1783,37 +916,34 @@ function updateStatusUserUI(){
     nickname: loggedIn ? user.nickname : "",
     role: loggedIn ? user.role : "visitor",
     loggedIn,
-    noticeCount: siteNoticeCount ? Number(siteNoticeCount.textContent || 0) : 0
+    noticeCount: identityNoticeCount ? Number(identityNoticeCount.textContent || 0) : 0
   });
 }
 
 function openLogin(targetPage = ""){
   const detail = { targetPage };
   window.dispatchEvent(new CustomEvent("room10:open-login", { detail }));
-
-  const loginPage = getRoom10Page("index");
+  const loginPage = room10PageUrl("index");
   const targetParam = targetPage ? `&target=${encodeURIComponent(targetPage)}` : "";
   window.location.href = `${loginPage}?login=1${targetParam}`;
 }
 
 function setSiteNoticeCount(count){
   const n = Number(count) || 0;
-  if(!siteNoticeCount || !siteNoticeBtn) return;
-  siteNoticeCount.textContent = n > 99 ? "99+" : String(n);
-  siteNoticeBtn.classList.toggle("hasNotice", n > 0);
+  if(!identityNoticeCount || !identityNoticeBtn) return;
+  identityNoticeCount.textContent = n > 99 ? "99+" : String(n);
+  identityNoticeBtn.classList.toggle("hasNotice", n > 0);
 }
 
 function renderSiteNoticeList(items){
-  if(!siteNoticeContent) return;
+  if(!identityNoticeContent) return;
   const list = Array.isArray(items) ? items : [];
-
   if(!list.length){
-    siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">${escapeHtml(text("notice.empty"))}</div>`;
+    identityNoticeContent.innerHTML = `<div class="siteNoticeEmpty">${escapeHtml(text("notice.empty"))}</div>`;
     setSiteNoticeCount(0);
     return;
   }
-
-  siteNoticeContent.innerHTML = `
+  identityNoticeContent.innerHTML = `
     <div class="siteNoticeList">
       ${list.map(item => `
         <div class="siteNoticeItem">
@@ -1826,12 +956,8 @@ function renderSiteNoticeList(items){
   setSiteNoticeCount(list.length);
 }
 
-function toggleSiteNoticePanel(){
-  siteNoticePanel?.classList.toggle("show");
-}
-
 function closeSiteNoticePanel(){
-  siteNoticePanel?.classList.remove("show");
+  identityNoticePanel?.classList.remove("show");
 }
 
 function showNotice(message, type = "info", autoHideMs = 2600){
@@ -1845,7 +971,6 @@ function showNotice(message, type = "info", autoHideMs = 2600){
     pageNotice.classList.add("notice-error");
   }
   pageNotice.classList.remove("hidden");
-
   if(showNotice._timer){
     clearTimeout(showNotice._timer);
   }
@@ -1860,8 +985,6 @@ function hideNotice(){
   if(pageNotice) pageNotice.classList.add("hidden");
 }
 
-
-
 function makeActionKey(kind, id){
   return `${kind}:${id}`;
 }
@@ -1874,21 +997,14 @@ function setActionBusy(kind, id, busy){
   actionBusyMap[makeActionKey(kind, id)] = !!busy;
 }
 
-function goNeedLogin(pageKey){
-  goNeedLoginPage(pageKey);
-}
-
 function logout(){
   clearStoredLogin();
   goPage("managerVisitor");
 }
 
-
 function getCurrentMemberCode(){
   return getStoredUser()?.member_code || "";
 }
-
-
 const ACTIVITY_DETAIL_LABELS = {
   old_value:"修改前",
   new_value:"修改后",
@@ -1949,7 +1065,6 @@ function renderActivityCard(item, index){
   const actor = getActivityActorText(item);
   const source = normalizeText(item.source_type);
   const meta = [actor, source && `来源：${source}`].filter(Boolean).join("｜");
-
   return `
     <button class="activity-card" type="button" onclick="openActivityDetail(${index})">
       <span class="activity-card-head">
@@ -1967,7 +1082,6 @@ function renderActivityCard(item, index){
 
 function renderActivityFeed({errorMessage = ""} = {}){
   if(!activityFeedList) return;
-
   if(errorMessage){
     activityRows = [];
     activityFeedList.innerHTML = `<div class="module-note">${escapeHtml(errorMessage)}</div>`;
@@ -1975,7 +1089,6 @@ function renderActivityFeed({errorMessage = ""} = {}){
     if(activityLoadedCount) activityLoadedCount.textContent = "";
     return;
   }
-
   if(!activityRows.length){
     activityFeedList.innerHTML = '<div class="module-note">当前范围内没有工作或流水结果。</div>';
   }else{
@@ -1983,11 +1096,9 @@ function renderActivityFeed({errorMessage = ""} = {}){
       .map((item, index) => renderActivityCard(item, index))
       .join("");
   }
-
   if(activityLoadedCount){
     activityLoadedCount.textContent = activityRows.length ? `已读取 ${activityRows.length} 条` : "";
   }
-
   if(activityLoadMoreBtn){
     activityLoadMoreBtn.classList.toggle("hidden", !activityHasMore);
     activityLoadMoreBtn.disabled = activityLoading;
@@ -1998,16 +1109,13 @@ function renderActivityFeed({errorMessage = ""} = {}){
 function openActivityDetail(index){
   const item = activityRows[index];
   if(!item) return;
-
   const overlayEl = document.getElementById("activityDetailOverlay");
   const titleEl = document.getElementById("activityDetailTitle");
   const contentEl = document.getElementById("activityDetailContent");
   if(!overlayEl || !titleEl || !contentEl) return;
-
   const details = item.details && typeof item.details === "object" ? item.details : {};
   const detailEntries = Object.entries(details)
     .filter(([, value]) => value != null && value !== "" && !(Array.isArray(value) && !value.length));
-
   titleEl.textContent = item.title || "维修记录详情";
   contentEl.innerHTML = `
     <div class="activity-detail-meta">
@@ -2028,7 +1136,6 @@ function openActivityDetail(index){
       </div>
     ` : ""}
   `;
-
   overlayEl.classList.remove("hidden");
   overlayEl.setAttribute("aria-hidden", "false");
 }
@@ -2054,17 +1161,14 @@ function bindActivityControls(){
     if(!btn) return;
     setActivityCategory(btn.dataset.activityCategory || "");
   });
-
   activityRefreshBtn?.addEventListener("click", () => {
     logsLoaded = false;
     void loadActivityFeed({reset:true, force:true});
   });
-
   activityDaysSelect?.addEventListener("change", () => {
     logsLoaded = false;
     void loadActivityFeed({reset:true, force:true});
   });
-
   activitySearchInput?.addEventListener("input", () => {
     clearTimeout(activitySearchTimer);
     activitySearchTimer = setTimeout(() => {
@@ -2072,7 +1176,6 @@ function bindActivityControls(){
       void loadActivityFeed({reset:true, force:true});
     }, 320);
   });
-
   activityLoadMoreBtn?.addEventListener("click", () => {
     void loadActivityFeed({reset:false, force:true});
   });
@@ -2080,28 +1183,23 @@ function bindActivityControls(){
 
 async function getCurrentMemberRecord(){
   const stored = getStoredUser();
-
   if(!stored || !isCompleteStoredUser(stored)){
     if(localStorage.getItem(STORAGE_KEYS.loggedIn) === "true") clearStoredLogin();
     return null;
   }
-
   const { data, error } = await client.rpc("get_manager_member_identity", {
     p_member_id:stored.member_id,
     p_member_code:stored.member_code
   });
-
   if(error){
     console.error("读取当前成员身份失败：", error);
     showNotice(text("error.identity_read_failed"), "error");
     return { identity_error:true };
   }
-
   if(data === null){
     clearStoredLogin();
     return null;
   }
-
   const isStandardIdentity = (
     data &&
     typeof data === "object" &&
@@ -2111,41 +1209,32 @@ async function getCurrentMemberRecord(){
     String(data.role || "").trim() &&
     String(data.member_code || "").trim()
   );
-
   if(!isStandardIdentity){
     showNotice(text("error.identity_read_failed"), "error");
     return { identity_error:true };
   }
-
   const normalizedMember = {
     id:String(data.id).trim(),
     nickname:String(data.nickname).trim(),
     member_code:String(data.member_code).trim(),
     role:String(data.role).trim().toLowerCase()
   };
-
   if(!VALID_MEMBER_ROLES.has(normalizedMember.role)){
     return { ...normalizedMember, invalid_role:true };
   }
-
   saveStoredMember(normalizedMember);
   return normalizedMember;
 }
 
-
 function setAdminTab(tab){
   activeAdminTab = tab;
-
   switchArchiveBtn.classList.remove("active");
   switchKeysBtn.classList.remove("active");
   switchLogsBtn.classList.remove("active");
-
   adminArchiveCard.classList.add("hidden");
   adminKeysCard.classList.add("hidden");
   adminLogsCard.classList.add("hidden");
-
   let activeCard = null;
-
   if(tab === "archive"){
     switchArchiveBtn.classList.add("active");
     adminArchiveCard.classList.remove("hidden");
@@ -2162,7 +1251,6 @@ function setAdminTab(tab){
     activeCard = adminLogsCard;
     loadActivityFeed({reset:true, force:true});
   }
-
   if(activeCard){
     activeCard.classList.remove("tab-enter");
     void activeCard.offsetWidth;
@@ -2175,9 +1263,10 @@ function resetKeyStorageUI(){
   keyStorageError.classList.add("hidden");
   keyStorageError.textContent = "";
   keyStorageEmpty.classList.add("hidden");
+  keyFilterBar?.classList.add("hidden");
   keyListWrap.classList.add("hidden");
-  if(window.keyListA) keyListA.innerHTML = "";
-  if(window.keyListB) keyListB.innerHTML = "";
+  if(keyListA) keyListA.innerHTML = "";
+  if(keyListB) keyListB.innerHTML = "";
 }
 
 function getKeyPrefix(item){
@@ -2189,22 +1278,66 @@ function getKeyPrefix(item){
 function getKeyStatusClass(item){
   const status = String(item?.status || "").toLowerCase();
   const statusLabel = String(item?.status_label || "");
+  if(status === "prepared" || statusLabel.includes("预备")) return "is-prepared";
   if(status === "active" && item?.is_current === true) return "is-active";
   if(status === "retired" || status === "promoted" || statusLabel.includes("停用")) return "is-stopped";
   if(item?.is_used === true) return "is-active";
   return "";
 }
 
+function closeAllPreparedEditors(exceptCard = null){
+  document.querySelectorAll(".key-card-editor").forEach(editor => {
+    const card = editor.closest(".key-card");
+    if(exceptCard && card === exceptCard) return;
+    editor.classList.add("hidden");
+    editor.setAttribute("aria-hidden", "true");
+    card?.querySelector(".key-prepared-toggle")?.setAttribute("aria-expanded", "false");
+  });
+}
+
+function setPreparedEditorOpen(card, open){
+  if(!card) return;
+  const editor = card.querySelector(".key-card-editor");
+  const toggleBtn = card.querySelector(".key-prepared-toggle");
+  if(!editor) return;
+  const shouldOpen = !!open;
+  if(shouldOpen) closeAllPreparedEditors(card);
+  editor.classList.toggle("hidden", !shouldOpen);
+  editor.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+  toggleBtn?.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+  if(shouldOpen){
+    requestAnimationFrame(() => {
+      const input = editor.querySelector(".key-prepared-input");
+      input?.focus();
+      input?.select();
+    });
+  }
+}
+
+function getCompactKeyDescription(item, canEditPrepared, hasManualPreparedName){
+  const status = String(item?.status || "").trim().toLowerCase();
+  const statusLabel = String(item?.status_label || "").trim();
+  if(status === "prepared" || statusLabel.includes("预备") || hasManualPreparedName) return "等待本人登记";
+  if(canEditPrepared) return "可填写临时名字";
+  return String(item?.desc || "—").trim() || "—";
+}
+
 function buildKeyCard(item){
   const card = document.createElement("article");
   card.className = "key-card";
-
-  const code = escapeHtml(item.key_code || "—");
+  const rawCode = String(item.key_code || "").trim().toUpperCase();
+  const code = escapeHtml(rawCode || "—");
   const user = escapeHtml(item.display_user || "—");
   const status = escapeHtml(item.status_label || "—");
-  const desc = escapeHtml(item.desc || "—");
   const statusClass = getKeyStatusClass(item);
-
+  const canEditPrepared = item?.can_edit_prepared_name === true && !!rawCode;
+  const manualPreparedName = String(item?.manual_prepared_name || "").trim();
+  const suggestedName = String(item?.suggested_name || "").trim();
+  const inputValue = manualPreparedName || suggestedName;
+  const hasManualPreparedName = !!manualPreparedName;
+  const compactDesc = escapeHtml(getCompactKeyDescription(item, canEditPrepared, hasManualPreparedName));
+  const toggleLabel = hasManualPreparedName ? "修改" : "预备";
+  const safeDomKey = rawCode.replace(/[^A-Z0-9_-]/g, "_") || Math.random().toString(36).slice(2);
   card.innerHTML = `
     <div class="key-card-main">
       <div class="key-card-code">${code}</div>
@@ -2212,11 +1345,183 @@ function buildKeyCard(item){
     </div>
     <div class="key-card-meta">
       <span class="key-card-status ${statusClass}">${status}</span>
-      <span class="key-card-desc">${desc}</span>
+      <span class="key-card-desc" title="${compactDesc}">${compactDesc}</span>
+      ${canEditPrepared ? `<button class="key-prepared-toggle" type="button" aria-expanded="false" aria-controls="keyPreparedEditor_${safeDomKey}">${toggleLabel}</button>` : ""}
     </div>
+    ${canEditPrepared ? `
+      <div class="key-card-editor hidden" id="keyPreparedEditor_${safeDomKey}" aria-hidden="true">
+        <input class="key-prepared-input" id="keyPreparedInput_${safeDomKey}" type="text" maxlength="40" autocomplete="off" placeholder="临时名字" aria-label="${code} 的预备名字" />
+        <button class="key-prepared-btn key-prepared-save" type="button">保存</button>
+        <button class="key-prepared-btn key-prepared-close" type="button">收起</button>
+        <button class="key-prepared-btn key-prepared-clear${hasManualPreparedName ? "" : " hidden"}" type="button">取消预备</button>
+      </div>
+    ` : ""}
   `;
-
+  if(canEditPrepared){
+    const input = card.querySelector(".key-prepared-input");
+    const toggleBtn = card.querySelector(".key-prepared-toggle");
+    const saveBtn = card.querySelector(".key-prepared-save");
+    const closeBtn = card.querySelector(".key-prepared-close");
+    const clearBtn = card.querySelector(".key-prepared-clear");
+    if(input) input.value = inputValue;
+    toggleBtn?.addEventListener("click", () => {
+      const editor = card.querySelector(".key-card-editor");
+      setPreparedEditorOpen(card, editor?.classList.contains("hidden"));
+    });
+    closeBtn?.addEventListener("click", () => setPreparedEditorOpen(card, false));
+    saveBtn?.addEventListener("click", () => savePreparedKeyName(rawCode, input, saveBtn, clearBtn));
+    clearBtn?.addEventListener("click", () => clearPreparedKeyName(rawCode, input, saveBtn, clearBtn));
+    input?.addEventListener("keydown", event => {
+      if(event.key === "Enter"){
+        event.preventDefault();
+        savePreparedKeyName(rawCode, input, saveBtn, clearBtn);
+      }else if(event.key === "Escape"){
+        event.preventDefault();
+        setPreparedEditorOpen(card, false);
+      }
+    });
+  }
   return card;
+}
+
+function setPreparedEditorBusy(keyCode, busy, input, saveBtn, clearBtn){
+  const normalized = String(keyCode || "").trim().toUpperCase();
+  if(busy) keyPreparedBusy.add(normalized);
+  else keyPreparedBusy.delete(normalized);
+  if(input) input.disabled = !!busy;
+  if(saveBtn){
+    saveBtn.disabled = !!busy;
+    saveBtn.textContent = busy ? "保存中…" : "保存预备";
+  }
+  if(clearBtn) clearBtn.disabled = !!busy;
+}
+
+async function updatePreparedKeyName(keyCode, preparedName, input, saveBtn, clearBtn){
+  const normalizedCode = String(keyCode || "").trim().toUpperCase();
+  if(!normalizedCode || keyPreparedBusy.has(normalizedCode)) return;
+  const normalizedName = String(preparedName || "").trim();
+  if(normalizedName.length > 40){
+    showNotice("预备名字不能超过 40 个字符。", "error");
+    input?.focus();
+    return;
+  }
+  setPreparedEditorBusy(normalizedCode, true, input, saveBtn, clearBtn);
+  try{
+    const currentMember = await getCurrentMemberRecord();
+    const currentMemberCode = currentMember?.member_code || getCurrentMemberCode();
+    if(!currentMember?.id || !currentMemberCode){
+      throw new Error("当前登录信息无效，请重新登录。")
+    }
+    const result = await client.rpc("set_manager_key_prepared_name", {
+      p_manager_member_id: currentMember.id,
+      p_manager_member_code: currentMemberCode,
+      p_key_code: normalizedCode,
+      p_prepared_name: normalizedName || null
+    });
+    const payload = result.data && typeof result.data === "object" ? result.data : {};
+    if(result.error || payload.success !== true){
+      throw result.error || new Error(payload.message || "预备名字保存失败。")
+    }
+    const editor = input?.closest(".key-card-editor");
+    const card = editor?.closest(".key-card");
+    if(card) setPreparedEditorOpen(card, false);
+    showNotice(payload.message || (normalizedName ? "已保存预备名字。" : "已取消预备分配。"), "success");
+    keyListLoaded = false;
+    await loadKeyStorage(true);
+  }catch(err){
+    console.error("更新钥匙预备名字失败：", err);
+    showNotice(err?.message || "预备名字保存失败。", "error", 0);
+    setPreparedEditorBusy(normalizedCode, false, input, saveBtn, clearBtn);
+  }
+}
+
+async function savePreparedKeyName(keyCode, input, saveBtn, clearBtn){
+  const value = String(input?.value || "").trim();
+  if(!value){
+    showNotice("请先填写要预备给谁。", "error");
+    input?.focus();
+    return;
+  }
+  await updatePreparedKeyName(keyCode, value, input, saveBtn, clearBtn);
+}
+
+async function clearPreparedKeyName(keyCode, input, saveBtn, clearBtn){
+  await updatePreparedKeyName(keyCode, "", input, saveBtn, clearBtn);
+}
+
+function getKeyFilterStatus(item){
+  const status = String(item?.status || "").trim().toLowerCase();
+  const statusLabel = String(item?.status_label || "").trim();
+  const hasPreparedName = !!String(item?.manual_prepared_name || "").trim();
+  if(status === "prepared" || statusLabel.includes("预备") || hasPreparedName) return "prepared";
+  if(status === "retired" || status === "promoted" || status === "disabled" || statusLabel.includes("停用")) return "stopped";
+  if((status === "active" && item?.is_current === true) || item?.is_used === true || status === "used" || statusLabel.includes("使用中") || statusLabel.includes("已使用")) return "active";
+  return "unused";
+}
+
+function keyMatchesFilter(item){
+  if(keyFilterStatus && getKeyFilterStatus(item) !== keyFilterStatus) return false;
+  const tokens = String(keyFilterKeyword || "")
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+  if(!tokens.length) return true;
+  const haystack = [
+    item?.key_code,
+    item?.display_user,
+    item?.manual_prepared_name,
+    item?.suggested_name,
+    item?.status_label,
+    item?.desc,
+    item?.member_role,
+    item?.key_type
+  ].map(value => String(value || "").toLowerCase()).join(" ");
+  return tokens.every(token => haystack.includes(token));
+}
+
+function applyKeyStorageFilters(){
+  const filteredRows = keyStorageRows.filter(keyMatchesFilter);
+  renderKeyList(filteredRows, keyStorageRows.length > 0);
+  const hasFilter = !!keyFilterKeyword || !!keyFilterStatus;
+  if(keyFilterSummary){
+    keyFilterSummary.textContent = hasFilter
+      ? `${filteredRows.length}/${keyStorageRows.length}`
+      : `共 ${keyStorageRows.length} 把`;
+  }
+  if(keyFilterClear){
+    keyFilterClear.disabled = !hasFilter;
+  }
+}
+
+function bindKeyFilterControls(){
+  keySearchInput?.addEventListener("input", () => {
+    keyFilterKeyword = String(keySearchInput.value || "").trim();
+    closeAllPreparedEditors();
+    applyKeyStorageFilters();
+  });
+  keySearchInput?.addEventListener("keydown", event => {
+    if(event.key === "Escape" && keySearchInput.value){
+      event.preventDefault();
+      keySearchInput.value = "";
+      keyFilterKeyword = "";
+      applyKeyStorageFilters();
+    }
+  });
+  keyStatusFilter?.addEventListener("change", () => {
+    keyFilterStatus = String(keyStatusFilter.value || "");
+    closeAllPreparedEditors();
+    applyKeyStorageFilters();
+  });
+  keyFilterClear?.addEventListener("click", () => {
+    if(keySearchInput) keySearchInput.value = "";
+    if(keyStatusFilter) keyStatusFilter.value = "";
+    keyFilterKeyword = "";
+    keyFilterStatus = "";
+    closeAllPreparedEditors();
+    applyKeyStorageFilters();
+    keySearchInput?.focus();
+  });
 }
 
 function appendKeyEmpty(target, text){
@@ -2226,13 +1531,11 @@ function appendKeyEmpty(target, text){
   target.appendChild(empty);
 }
 
-function renderKeyList(rows){
+function renderKeyList(rows, isFilteredSource = false){
   keyListA.innerHTML = "";
   keyListB.innerHTML = "";
-
   const aRows = [];
   const bRows = [];
-
   rows.forEach(item => {
     if(getKeyPrefix(item) === "B"){
       bRows.push(item);
@@ -2240,35 +1543,29 @@ function renderKeyList(rows){
       aRows.push(item);
     }
   });
-
   aRows.forEach(item => keyListA.appendChild(buildKeyCard(item)));
   bRows.forEach(item => keyListB.appendChild(buildKeyCard(item)));
-
-  if(!aRows.length) appendKeyEmpty(keyListA, text("keys.a_empty"));
-  if(!bRows.length) appendKeyEmpty(keyListB, text("keys.b_empty"));
+  const hasActiveFilter = !!keyFilterKeyword || !!keyFilterStatus;
+  if(!aRows.length) appendKeyEmpty(keyListA, hasActiveFilter && isFilteredSource ? "没有符合筛选的 A 系列钥匙" : text("keys.a_empty"));
+  if(!bRows.length) appendKeyEmpty(keyListB, hasActiveFilter && isFilteredSource ? "没有符合筛选的 B 系列钥匙" : text("keys.b_empty"));
 }
 
 async function loadKeyStorage(force = false){
   if(keyListLoaded && !force) return;
-
   resetKeyStorageUI();
-
   try{
     const currentMember = await getCurrentMemberRecord();
     const currentMemberCode = currentMember?.member_code || getCurrentMemberCode();
-
     if(!currentMember?.id || !currentMemberCode){
       keyStorageLoading.classList.add("hidden");
       keyStorageError.classList.remove("hidden");
       keyStorageError.textContent = text("keys.login_required");
       return;
     }
-
     const result = await client.rpc("get_manager_key_storage", {
       p_manager_member_id: currentMember.id,
       p_manager_member_code: currentMemberCode
     });
-
     if(result.error || !result.data?.success){
       console.error("读取钥匙保管处失败：", result.error || result.data);
       keyStorageLoading.classList.add("hidden");
@@ -2276,22 +1573,20 @@ async function loadKeyStorage(force = false){
       keyStorageError.textContent = result.data?.message || text("keys.read_failed");
       return;
     }
-
     const rows = Array.isArray(result.data.items) ? result.data.items : [];
-
+    keyStorageRows = rows;
     keyStorageLoading.classList.add("hidden");
-
     if(!rows.length){
+      keyFilterBar?.classList.add("hidden");
       keyStorageEmpty.classList.remove("hidden");
       keyListWrap.classList.add("hidden");
       keyListLoaded = true;
       return;
     }
-
-    renderKeyList(rows);
+    keyFilterBar?.classList.remove("hidden");
+    applyKeyStorageFilters();
     keyListWrap.classList.remove("hidden");
     keyListLoaded = true;
-
   }catch(err){
     console.error("loadKeyStorage() 异常：", err);
     keyStorageLoading.classList.add("hidden");
@@ -2304,23 +1599,19 @@ function buildVoteSummaryText(approveCount, rejectCount, requiredCount){
   if(approveCount >= requiredCount){
     return `<div class="vote-summary vote-pass">${escapeHtml(formatText("vote.pass_summary", {approve:approveCount,reject:rejectCount,required:requiredCount}))}</div>`;
   }
-
   if(rejectCount >= requiredCount){
     return `<div class="vote-summary vote-reject">${escapeHtml(formatText("vote.reject_summary", {approve:approveCount,reject:rejectCount,required:requiredCount}))}</div>`;
   }
-
   return `<div class="vote-summary vote-wait">${escapeHtml(formatText("vote.wait_summary", {approve:approveCount,reject:rejectCount,required:requiredCount}))}</div>`;
 }
 
 function renderMemberApplications(rows, currentVoterId){
   const box = document.getElementById("memberApplyList");
   if(!box) return;
-
   if(!rows.length){
     box.innerHTML = `<div class="module-note">${escapeHtml(text("archive.member_empty"))}</div>`;
     return;
   }
-
   box.innerHTML = rows.map(item => {
     const votes = Array.isArray(item.votes) ? item.votes : [];
     const requiredCount = Math.max(1, Number(item.required_count || 1));
@@ -2333,7 +1624,6 @@ function renderMemberApplications(rows, currentVoterId){
     const myVoteText = myVote
       ? `<div class="apply-meta">${escapeHtml(formatText("vote.my_current", {vote:myVote.vote === "approve" ? text("button.approve") : text("button.reject")}))}</div>`
       : `<div class="apply-meta">${escapeHtml(text("vote.not_voted"))}</div>`;
-
     return `
       <div class="apply-item">
         <div class="apply-head">
@@ -2370,19 +1660,17 @@ function voteLabel(vote){
 }
 
 function roleLabelForApplication(role){
-  return getRoleLabel(role || "");
+  return roleLabel(role || "");
 }
 
 function renderIdentityApplications(items){
   const box = document.getElementById("adminApplyList");
   if(!box) return;
-
   const rows = Array.isArray(items) ? items : [];
   if(!rows.length){
     box.innerHTML = `<div class="module-note">${escapeHtml(text("archive.identity_empty"))}</div>`;
     return;
   }
-
   box.innerHTML = rows.map(item => {
     const id = item.id;
     const status = String(item.status || "pending").toLowerCase();
@@ -2407,7 +1695,6 @@ function renderIdentityApplications(items){
           <button class="sub-btn" type="button" ${busy ? "disabled" : ""} onclick="voteAdminApplication('${escapeHtml(id)}', 'reject')">${rejectLabel}</button>
         </div>`
       : `<div class="apply-meta">${status === "pending" ? text("application.self_blocked") : text("application.finished")}</div>`;
-
     return `
       <div class="apply-item">
         <div class="apply-head">
@@ -2439,21 +1726,17 @@ function withTimeout(promise, ms, label){
 
 async function loadAllApplications(force = false){
   if(archiveLoaded && !force) return;
-
   const memberApplyList = document.getElementById("memberApplyList");
   const adminApplyList = document.getElementById("adminApplyList");
   if(!memberApplyList || !adminApplyList) return;
-
   memberApplyList.innerHTML = `<div class="module-note">${escapeHtml(text("archive.member_loading"))}</div>`;
   adminApplyList.innerHTML = `<div class="module-note">${escapeHtml(text("list.loading"))}</div>`;
-
   let currentMember = null;
   try{
     currentMember = await withTimeout(getCurrentMemberRecord(), 8000, "当前登录信息读取");
   }catch(err){
     console.error("读取当前登录信息失败：", err);
   }
-
   if(!currentMember?.id || !currentMember?.member_code || currentMember.identity_error || currentMember.invalid_role){
     const message = currentMember?.identity_error
       ? text("error.identity_read_failed")
@@ -2463,10 +1746,8 @@ async function loadAllApplications(force = false){
     archiveLoaded = false;
     return;
   }
-
   let memberDone = false;
   let identityDone = false;
-
   try{
     const memberResult = await withTimeout(
       client.rpc("get_manager_room10_applications", {
@@ -2476,7 +1757,6 @@ async function loadAllApplications(force = false){
       10000,
       "入住申请读取"
     );
-
     const payload = memberResult.data && typeof memberResult.data === "object" ? memberResult.data : {};
     if(memberResult.error || payload.success !== true){
       console.error("读取入住申请失败：", memberResult.error || payload);
@@ -2493,7 +1773,6 @@ async function loadAllApplications(force = false){
     console.error("loadAllApplications() 入住申请异常：", err);
     memberApplyList.innerHTML = `<div class="module-note">${escapeHtml(text("archive.member_timeout"))}</div>`;
   }
-
   try{
     const identityResult = await withTimeout(
       client.rpc("get_manager_identity_applications", {
@@ -2503,7 +1782,6 @@ async function loadAllApplications(force = false){
       10000,
       "身份申请读取"
     );
-
     if(identityResult.error || !identityResult.data?.success){
       console.error("读取身份申请失败：", identityResult.error || identityResult.data);
       adminApplyList.innerHTML = `<div class="module-note">${escapeHtml(identityResult.data?.message || text("archive.identity_read_failed"))}</div>`;
@@ -2515,16 +1793,13 @@ async function loadAllApplications(force = false){
     console.error("loadAllApplications() 身份申请异常：", err);
     adminApplyList.innerHTML = `<div class="module-note">${escapeHtml(text("archive.identity_timeout"))}</div>`;
   }
-
   archiveLoaded = memberDone && identityDone;
 }
-
 
 async function loadActivityFeed({reset = false, force = false} = {}){
   if(activityLoading) return;
   if(logsLoaded && !force && !reset) return;
   if(!activityFeedList) return;
-
   if(reset){
     activityRows = [];
     activityBefore = null;
@@ -2532,21 +1807,18 @@ async function loadActivityFeed({reset = false, force = false} = {}){
     activityHasMore = false;
     activityFeedList.innerHTML = '<div class="module-note">正在读取维修记录……</div>';
   }
-
   activityLoading = true;
   if(activityRefreshBtn) activityRefreshBtn.disabled = true;
   if(activityLoadMoreBtn){
     activityLoadMoreBtn.disabled = true;
     activityLoadMoreBtn.textContent = "读取中……";
   }
-
   try{
     const reviewer = await getCurrentMemberRecord();
     if(!reviewer?.id){
       renderActivityFeed({errorMessage:"无法确认当前宿管身份，请重新登录。"});
       return;
     }
-
     const limit = 40;
     const { data, error } = await client.rpc("get_manager_room_activity_feed", {
       p_reviewer_member_id: reviewer.id,
@@ -2558,7 +1830,6 @@ async function loadActivityFeed({reset = false, force = false} = {}){
       p_before_event_id: activityBeforeId,
       p_limit: limit + 1
     });
-
     if(error){
       console.error("读取维修记录失败：", error);
       renderActivityFeed({
@@ -2566,18 +1837,15 @@ async function loadActivityFeed({reset = false, force = false} = {}){
       });
       return;
     }
-
     const rows = Array.isArray(data) ? data : [];
     activityHasMore = rows.length > limit;
     const visibleRows = rows.slice(0, limit);
-
     if(reset){
       activityRows = visibleRows;
     }else{
       const knownIds = new Set(activityRows.map(item => String(item.event_id || "")));
       activityRows.push(...visibleRows.filter(item => !knownIds.has(String(item.event_id || ""))));
     }
-
     const last = visibleRows[visibleRows.length - 1];
     activityBefore = last?.occurred_at || activityBefore;
     activityBeforeId = last?.event_id || activityBeforeId;
@@ -2596,45 +1864,36 @@ async function loadActivityFeed({reset = false, force = false} = {}){
   }
 }
 
-
-
-
 async function voteMemberApplication(applicationId, voteValue){
   if(!isAdminRole(getRole())){
     showNotice(text("error.action_permission"), "error");
     return;
   }
-
   if(isActionBusy("member", applicationId)) return;
   setActionBusy("member", applicationId, true);
-
   try{
     const voter = await getCurrentMemberRecord();
     if(!voter?.id || !voter?.member_code || voter.identity_error || voter.invalid_role){
       showNotice(text("error.login_required"), "error");
       return;
     }
-
     const reviewResult = await client.rpc("review_manager_room10_application", {
       p_manager_member_id:voter.id,
       p_manager_member_code:voter.member_code,
       p_application_id:String(applicationId || "").trim(),
       p_vote:voteValue
     });
-
     const payload = reviewResult.data && typeof reviewResult.data === "object" ? reviewResult.data : {};
     if(reviewResult.error || payload.success !== true){
       console.error("审核入住申请失败：", reviewResult.error || payload);
       showNotice(payload.message || text("action.failed"), "error");
       return;
     }
-
     archiveLoaded = false;
     logsLoaded = false;
     keyListLoaded = false;
     await loadAllApplications(true);
     if(activeAdminTab === "keys") await loadKeyStorage(true);
-
     showNotice(
       payload.message || (payload.finalized ? text("member_review.finalized") : text("member_review.saved")),
       payload.finalized ? "success" : "info"
@@ -2649,42 +1908,33 @@ async function voteMemberApplication(applicationId, voteValue){
   }
 }
 
-
-
 async function voteAdminApplication(applicationId, voteValue){
   if(isActionBusy("admin", applicationId)) return;
   setActionBusy("admin", applicationId, true);
   archiveLoaded = false;
   await loadAllApplications(true);
-
   try{
     const voter = await getCurrentMemberRecord();
     const voterCode = voter?.member_code || getCurrentMemberCode();
-
     if(!voter?.id || !voterCode){
       showNotice(text("error.login_required"), "error");
       return;
     }
-
     const reviewResult = await client.rpc("review_manager_identity_application", {
       p_manager_member_id: voter.id,
       p_manager_member_code: voterCode,
       p_application_id: Number(applicationId),
       p_vote: voteValue
     });
-
     if(reviewResult.error || !reviewResult.data?.success){
       console.error("审核身份申请失败：", reviewResult.error || reviewResult.data);
       showNotice(reviewResult.data?.message || text("action.failed"), "error");
       return;
     }
-
     archiveLoaded = false;
     logsLoaded = false;
     await loadAllApplications(true);
-
     showNotice(reviewResult.data.message || text("action.success"), "success");
-
   }catch(err){
     console.error("voteAdminApplication() 异常：", err);
     showNotice(text("action.failed"), "error");
@@ -2697,15 +1947,12 @@ async function voteAdminApplication(applicationId, voteValue){
 
 async function ensureAdminPage(){
   const stored = getStoredUser();
-
   if(!stored || !isCompleteStoredUser(stored)){
     if(localStorage.getItem(STORAGE_KEYS.loggedIn) === "true") clearStoredLogin();
     goPage("managerVisitor");
     return;
   }
-
   const member = await getCurrentMemberRecord();
-
   if(member?.identity_error){
     setIdentityState({
       nickname:stored.nickname,
@@ -2715,12 +1962,10 @@ async function ensureAdminPage(){
     });
     return;
   }
-
   if(!member){
     goPage("managerVisitor");
     return;
   }
-
   if(member.invalid_role){
     setIdentityState({
       nickname:member.nickname || stored.nickname,
@@ -2731,13 +1976,11 @@ async function ensureAdminPage(){
     showNotice(text("error.identity_invalid"), "error");
     return;
   }
-
   const role = String(member.role || "").trim().toLowerCase();
   if(!isAdminRole(role)){
     goPage(getManagerPageKeyByRole(role));
     return;
   }
-
   updateStatusUserUI();
   setAdminTab(activeAdminTab);
 }
@@ -2751,18 +1994,16 @@ async function initManagerAdminPage(){
     syncOverlayToImage();
     setupRoomNav(CURRENT_ROOM);
     bindActivityControls();
+    bindKeyFilterControls();
     await ensureAdminPage();
   }catch(err){
     showPageError(pageTexts.get("error.page_text_read_failed") || "MANAGER_ADMIN_INIT_FAILED", err.message || String(err));
   }
 }
-
-
 if(identityNoticeBtn){
   identityNoticeBtn.addEventListener("click", event => {
     event.stopPropagation();
     const willShow = !identityNoticePanel.classList.contains("show");
-
     if(willShow){
       positionIdentityNoticePanel();
       identityNoticePanel.classList.add("show");
@@ -2771,7 +2012,6 @@ if(identityNoticeBtn){
     }
   });
 }
-
 if(identityAuthBtn){
   identityAuthBtn.addEventListener("click", event => {
     event.stopPropagation();
@@ -2782,14 +2022,12 @@ if(identityAuthBtn){
     }
   });
 }
-
 window.addEventListener("resize", () => {
   syncOverlayToImage();
   if(identityNoticePanel && (identityNoticePanel.classList.contains("show") || !isMobileLayout())){
     positionIdentityNoticePanel();
   }
 });
-
 window.addEventListener("orientationchange", () => {
   setTimeout(() => {
     syncOverlayToImage();
@@ -2798,23 +2036,18 @@ window.addEventListener("orientationchange", () => {
     }
   }, 80);
 });
-
 setTimeout(syncOverlayToImage, 80);
-
 document.addEventListener("click", event => {
-  if(siteNoticePanel && siteNoticeBtn){
-    if(siteNoticePanel.contains(event.target) || siteNoticeBtn.contains(event.target)) return;
+  if(identityNoticePanel && identityNoticeBtn){
+    if(identityNoticePanel.contains(event.target) || identityNoticeBtn.contains(event.target)) return;
     closeSiteNoticePanel();
   }
 });
-
 document.addEventListener("keydown", event => {
   if(event.key === "Escape"){
     closeActivityDetail();
   }
 });
-
-
 const activityDetailOverlay = document.getElementById("activityDetailOverlay");
 if(activityDetailOverlay){
   activityDetailOverlay.addEventListener("click", event => {
@@ -2823,9 +2056,7 @@ if(activityDetailOverlay){
     }
   });
 }
-
 void initManagerAdminPage();
-
 window.addEventListener("storage", async (e) => {
   if(
     e.key === "room10LoggedIn" ||
@@ -2840,10 +2071,6 @@ window.addEventListener("storage", async (e) => {
     await ensureAdminPage();
   }
 });
-
-
-
-
 </script>
 </body>
 </html>
