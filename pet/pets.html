@@ -109,6 +109,17 @@ button,input{font-family:inherit;}
 .progressTrack{height:calc(8px * var(--ui-scale));border-radius:999px;background:rgba(211,195,178,.38);overflow:hidden;}
 .progressFill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#e7a2b1,#e7cd78);transition:width .28s ease;}
 .adoptDesc{min-height:calc(38px * var(--ui-scale));margin:0 0 calc(10px * var(--ui-scale));padding:0 calc(3px * var(--ui-scale));color:#806b5d;font-size:calc(11.5px * var(--ui-scale));line-height:1.55;font-weight:820;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.adoptSourceBox{flex:1 1 auto;min-height:calc(190px * var(--ui-scale));max-height:none;margin:0 0 calc(9px * var(--ui-scale));padding:calc(10px * var(--ui-scale)) calc(11px * var(--ui-scale));border-radius:calc(17px * var(--ui-scale));background:rgba(255,253,249,.62);border:calc(1px * var(--ui-scale)) solid rgba(166,126,91,.11);display:flex;flex-direction:column;overflow:hidden;}
+.adoptSourceHead{display:flex;align-items:center;justify-content:space-between;gap:calc(8px * var(--ui-scale));margin-bottom:calc(6px * var(--ui-scale));color:#715949;font-size:calc(11px * var(--ui-scale));font-weight:950;line-height:1.25;}
+.adoptSourceSummary{min-width:0;color:#9a806e;font-size:calc(9.5px * var(--ui-scale));font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;}
+.adoptSourceList{flex:1 1 auto;min-height:0;overflow:auto;display:grid;align-content:start;gap:calc(6px * var(--ui-scale));padding-right:calc(3px * var(--ui-scale));scrollbar-width:thin;}
+.adoptSourceEmpty{padding:calc(8px * var(--ui-scale));border-radius:calc(12px * var(--ui-scale));background:rgba(255,253,249,.46);border:calc(1px * var(--ui-scale)) dashed rgba(166,126,91,.12);color:#9a8474;font-size:calc(10px * var(--ui-scale));font-weight:800;line-height:1.45;text-align:center;}
+.adoptSourceItem{padding:calc(7px * var(--ui-scale)) calc(8px * var(--ui-scale));border-radius:calc(12px * var(--ui-scale));background:rgba(255,253,249,.72);border:calc(1px * var(--ui-scale)) solid rgba(166,126,91,.09);}
+.adoptSourceMain{display:flex;align-items:flex-start;justify-content:space-between;gap:calc(8px * var(--ui-scale));color:#6f5544;font-size:calc(10.5px * var(--ui-scale));font-weight:930;line-height:1.35;}
+.adoptSourceQty{flex:0 0 auto;color:#684526;font-weight:950;white-space:nowrap;}
+.adoptSourceMeta{margin-top:calc(3px * var(--ui-scale));display:flex;align-items:flex-start;justify-content:space-between;gap:calc(8px * var(--ui-scale));color:#9a8271;font-size:calc(9px * var(--ui-scale));font-weight:780;line-height:1.35;}
+.adoptSourceNote{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.adoptSourceTime{flex:0 0 auto;white-space:nowrap;}
 .mainBtn{appearance:none;border:none;cursor:pointer;width:100%;min-height:calc(38px * var(--ui-scale));margin-top:auto;border-radius:999px;background:linear-gradient(180deg,rgba(255,239,205,.96),rgba(226,190,137,.92));border:calc(1px * var(--ui-scale)) solid rgba(153,104,62,.20);color:#684526;font-size:calc(12.5px * var(--ui-scale));font-weight:950;box-shadow:0 calc(5px * var(--ui-scale)) calc(13px * var(--ui-scale)) rgba(129,94,53,.12),inset 0 calc(1px * var(--ui-scale)) 0 rgba(255,255,255,.72);}
 .mainBtn:disabled{cursor:default;opacity:.62;filter:saturate(.75);}
 .mainBtn.upgrade{background:linear-gradient(180deg,rgba(236,248,214,.96),rgba(185,209,148,.92));color:#52683d;border-color:rgba(115,143,72,.20);}
@@ -198,7 +209,7 @@ button,input{font-family:inherit;}
 .petShell{
   display:none;
   top:22.0%;
-  height:57.4%;
+  height:68.0%;
 }
 .petShell.is-active{display:flex;}
 .petShell .petShellHeader{
@@ -484,6 +495,13 @@ button,input{font-family:inherit;}
 #careView.petCareFloatView.is-active .careActions{top:41.2%!important;}
 .careTalkCard .careHint{font-weight:850;}
 @media(max-width:540px){.petCareFloatView .careActions,#careView.petCareFloatView.is-active .careActions{top:auto!important;}}
+@media(max-width:540px){
+  .petShell{min-height:980px!important;}
+  #adoptView.is-active{grid-template-rows:minmax(470px,1fr) minmax(410px,auto)!important;}
+  .adoptDetailPanel{min-height:410px!important;}
+  .adoptSourceBox{flex:1 1 auto;min-height:190px;max-height:none;}
+  .adoptSourceList{flex:1 1 auto;max-height:none;}
+}
 
 .giftResultLine{display:flex;align-items:center;gap:calc(8px * var(--ui-scale));font-weight:900;color:#745b4a;}
 .giftResultLine img{width:calc(28px * var(--ui-scale));height:calc(28px * var(--ui-scale));object-fit:contain;filter:drop-shadow(0 2px 3px rgba(96,65,35,.12));}
@@ -512,6 +530,7 @@ button,input{font-family:inherit;}
 }
 .adoptDetailPanel.is-locked-detail .adoptMeta,
 .adoptDetailPanel.is-locked-detail .progressBox,
+.adoptDetailPanel.is-locked-detail .adoptSourceBox,
 .adoptDetailPanel.is-locked-detail .adoptDesc,
 .adoptDetailPanel.is-locked-detail .mainBtn{
   display:none!important;
@@ -1969,6 +1988,10 @@ button,input{font-family:inherit;}
           <aside class="panel adoptDetailPanel" id="adoptDetailPanel">
             <div class="adoptTop"><div class="adoptPreview" id="adoptPreview"><span class="unknownMark">?</span></div><div class="adoptMeta"><div class="adoptName" id="adoptName">读取中</div><div class="statePill" id="adoptStatePill">读取中</div></div></div>
             <div class="progressBox"><div class="progressText"><span>收集进度</span><strong id="adoptProgressValue">- / -</strong></div><div class="progressTrack"><div class="progressFill" id="adoptProgressFill" style="width:0%"></div></div></div>
+            <section class="adoptSourceBox" id="adoptSourceBox" aria-label="图片卡获取来源">
+              <div class="adoptSourceHead"><span>获取来源</span><span class="adoptSourceSummary" id="adoptSourceSummary"></span></div>
+              <div class="adoptSourceList" id="adoptSourceList"><div class="adoptSourceEmpty">选择图片卡后查看获取记录。</div></div>
+            </section>
             <div class="adoptDesc" id="adoptDesc">正在读取领养状态。</div>
             <button class="mainBtn" id="adoptMainBtn" type="button" disabled>读取中</button>
           </aside>
@@ -2055,6 +2078,7 @@ if(window.supabase && typeof window.supabase.createClient === "function"){
 }
 const RPC = {
   adoptionState:"get_pet_adoption_page_state",
+  cardSources:"get_pet_card_source_history",
   petTypesImages:"get_pet_types_with_images",
   adopt:"adopt_pet_from_card_fragments",
   upgrade:"upgrade_pet_from_card_fragments",
@@ -2087,6 +2111,8 @@ let petTypeImagesLoaded = false;
 let petTypeImagesLoading = null;
 let petTypeImagesByNo = new Map();
 let petTypeImagesByKey = new Map();
+let petCardSourceCache = new Map();
+let petCardSourceRequestToken = 0;
 let pageTexts = {};
 let pageTextsLoaded = false;
 let pageTextsLoading = null;
@@ -2270,6 +2296,8 @@ async function submitPetLogin(){
     setPetLoginMessage("欢迎回家",true);
 
     adoptionPets=[];
+    petCardSourceCache.clear();
+    petCardSourceRequestToken++;
     carePets=[];
     careState=null;
     selectedCareAdoptionId=null;
@@ -2482,6 +2510,7 @@ function normalizePet(row){
     pet_no:id,
     pet_key:row.pet_key||meta.pet_key||"",
     pet_code:row.pet_code||meta.pet_code||"",
+    cardItemKey:row.card_item_key||`pet_card_${id}`,
     card_type:row.card_type||row.rarity||meta.card_type||"normal",
     name:row.animal_name||row.pet_name||row.name||meta.animal_name||"未知宠物",
     relatedName:row.related_name||meta.related_name||"",
@@ -2519,10 +2548,149 @@ function renderAdoptionGrid(){
   }).join("");
   grid.querySelectorAll(".adoptCard").forEach(btn=>btn.addEventListener("click",()=>{
     selectedPetId=Number(btn.dataset.petId);
+    const selectedPet=adoptionPets.find(p=>p.id===selectedPetId);
     renderAdoptionGrid();
-    renderAdoptDetail(adoptionPets.find(p=>p.id===selectedPetId));
+    renderAdoptDetail(selectedPet);
+    void loadPetCardSourceHistory(selectedPet);
   }));
 }
+
+function setAdoptSourceMessage(message,summary=""){
+  const list=document.getElementById("adoptSourceList");
+  const summaryEl=document.getElementById("adoptSourceSummary");
+  if(summaryEl)summaryEl.textContent=String(summary||"");
+  if(list)list.innerHTML=`<div class="adoptSourceEmpty">${escapeHtml(message||"暂无获取记录。")}</div>`;
+}
+function formatPetSourceTime(value){
+  if(!value)return "";
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime()))return "";
+  return date.toLocaleString("zh-CN",{
+    timeZone:"America/New_York",
+    year:"numeric",month:"2-digit",day:"2-digit",
+    hour:"2-digit",minute:"2-digit",hour12:false
+  }).replace(/\//g,"-");
+}
+function petCardSourceLabel(row){
+  const type=String(row?.source_type||"").trim().toLowerCase();
+  const detail=String(row?.source_detail||"").trim();
+  const detailKey=detail.toLowerCase();
+
+  if(type==="animal_encounter"){
+    const encounterLabels={
+      studio_vocal_submit:"工作间交音动物偶遇",
+      game_room_general_finish:"游戏间结算动物偶遇",
+      game_2048_end:"2048结算动物偶遇"
+    };
+    return encounterLabels[detailKey]||"动物偶遇";
+  }
+
+  if(type==="gacha"){
+    const gachaLabels={
+      white_reward:"扭蛋机 · 普通扭蛋",
+      white_stored_ball_open:"扭蛋机 · 普通扭蛋",
+      purple_reward:"扭蛋机 · 紫金扭蛋",
+      purple_stored_ball_open:"扭蛋机 · 紫金扭蛋",
+      gold_reward:"扭蛋机 · 黄金扭蛋",
+      gold_stored_ball_open:"扭蛋机 · 黄金扭蛋"
+    };
+    return gachaLabels[detailKey]||"宠物扭蛋机";
+  }
+
+  if(type==="honor_achievement_reward")return detail?`成就奖励 · ${detail}`:"荣誉墙成就奖励";
+  if(type==="honor_title_reward")return detail?`称号奖励 · ${detail}`:"荣誉墙称号奖励";
+  if(type==="holiday_gift"||type==="holiday_reward")return detail?`节日礼包 · ${detail}`:"节日礼包";
+  if(type==="pet_daily_gift")return "宠物每日小礼";
+  if(type==="manual"||type==="admin"||type==="repair"||type==="backfill")return detail?`管理补发 · ${detail}`:"管理补发";
+  if(detail&&/[\u3400-\u9fff]/u.test(detail))return detail;
+  if(type)return type.replace(/_/g," ");
+  return "其他来源";
+}
+function petCardSourceNote(row,label){
+  const note=String(row?.note||"").trim();
+  const detail=String(row?.source_detail||"").trim();
+  const internalDetails=new Set([
+    "white_reward","white_stored_ball_open",
+    "purple_reward","purple_stored_ball_open",
+    "gold_reward","gold_stored_ball_open"
+  ]);
+  const internalPhrases=new Set([
+    "打开普通未打开扭蛋",
+    "打开紫金未打开扭蛋",
+    "打开黄金未打开扭蛋"
+  ]);
+  const candidates=[note,detail].filter(Boolean);
+  return candidates.find(value=>{
+    const key=String(value).trim().toLowerCase();
+    return value!==label
+      && !/^pet_card_\d+$/i.test(value)
+      && !internalDetails.has(key)
+      && !internalPhrases.has(value);
+  })||"图片卡入账";
+}
+function renderPetCardSourceHistory(payload,p){
+  const list=document.getElementById("adoptSourceList");
+  const summaryEl=document.getElementById("adoptSourceSummary");
+  if(!list||!summaryEl)return;
+
+  const rows=Array.isArray(payload?.records)?payload.records:[];
+  const current=numberOrZero(payload?.current_quantity??p?.owned);
+  const total=numberOrZero(payload?.total_received);
+  summaryEl.textContent=`当前 ${current} 张 · 历史获得 ${total} 张`;
+
+  if(!rows.length){
+    list.innerHTML='<div class="adoptSourceEmpty">暂未找到这张图片卡的获取流水。</div>';
+    return;
+  }
+
+  list.innerHTML=rows.map(row=>{
+    const label=petCardSourceLabel(row);
+    const note=petCardSourceNote(row,label);
+    const time=formatPetSourceTime(row.created_at);
+    const quantity=Math.max(1,numberOrZero(row.quantity));
+    return `<article class="adoptSourceItem">
+      <div class="adoptSourceMain"><span>${escapeHtml(label)}</span><span class="adoptSourceQty">+${quantity} 张</span></div>
+      <div class="adoptSourceMeta"><span class="adoptSourceNote">${escapeHtml(note||"图片卡入账")}</span><time class="adoptSourceTime">${escapeHtml(time)}</time></div>
+    </article>`;
+  }).join("");
+}
+async function loadPetCardSourceHistory(p,options={}){
+  if(!p||!p.discovered)return;
+  if(isGuestView()){
+    setAdoptSourceMessage("登录后可查看自己的图片卡获取来源。");
+    return;
+  }
+
+  const petNo=Number(p.id);
+  if(!Number.isInteger(petNo)||petNo<=0){
+    setAdoptSourceMessage("图片卡编号无效，无法读取获取来源。");
+    return;
+  }
+
+  const cacheKey=String(petNo);
+  if(options.force!==true&&petCardSourceCache.has(cacheKey)){
+    renderPetCardSourceHistory(petCardSourceCache.get(cacheKey),p);
+    return;
+  }
+
+  const requestToken=++petCardSourceRequestToken;
+  setAdoptSourceMessage("正在读取获取来源…");
+  try{
+    const identity=getPetIdentityRpcParams();
+    const data=await callRpc(RPC.cardSources,{...identity,p_pet_no:petNo});
+    if(requestToken!==petCardSourceRequestToken||Number(selectedPetId)!==petNo)return;
+    if(!data||typeof data!=="object"||data.success!==true){
+      throw new Error(data?.message||"获取来源读取失败。");
+    }
+    petCardSourceCache.set(cacheKey,data);
+    renderPetCardSourceHistory(data,p);
+  }catch(err){
+    if(requestToken!==petCardSourceRequestToken||Number(selectedPetId)!==petNo)return;
+    console.error("图片卡获取来源读取失败：",err);
+    setAdoptSourceMessage(err?.message||"获取来源读取失败，请稍后重试。");
+  }
+}
+
 function renderAdoptDetail(p,msg){
   const preview=document.getElementById("adoptPreview"),name=document.getElementById("adoptName"),pill=document.getElementById("adoptStatePill"),prog=document.getElementById("adoptProgressValue"),fill=document.getElementById("adoptProgressFill"),desc=document.getElementById("adoptDesc"),btn=document.getElementById("adoptMainBtn");
   pill.className="statePill";
@@ -2538,6 +2706,7 @@ function renderAdoptDetail(p,msg){
     prog.textContent="- / -";
     fill.style.width="0%";
     desc.textContent=msg||t("adopt.detail.no_pet_data");
+    setAdoptSourceMessage("暂无可显示的获取来源。");
     btn.textContent=t("adopt.detail.not_available");
     return;
   }
@@ -2550,12 +2719,14 @@ function renderAdoptDetail(p,msg){
     prog.textContent="";
     fill.style.width="0%";
     desc.textContent="";
+    setAdoptSourceMessage("收集到图片卡后即可查看获取来源。");
     btn.textContent="";
     btn.dataset.action="";
     btn.disabled=true;
     return;
   }
   preview.innerHTML=imageHtml(p);
+  setAdoptSourceMessage(isGuestView()?"登录后可查看自己的图片卡获取来源。":"正在读取获取来源…");
   name.textContent=p.card_type==="special"?`${p.name} · ${t("adopt.detail.special_suffix")}`:p.name;
   prog.textContent=`${p.owned} / ${p.required}`;
   fill.style.width=`${pct(p.owned,p.required)}%`;
@@ -2612,7 +2783,11 @@ async function loadAdoptionState(){
       adoptionPets=buildGuestAdoptionPets();
       selectedPetId=adoptionPets.some(p=>p.id===selectedPetId)?selectedPetId:(adoptionPets[0]?.id||null);
       renderAdoptionGrid();
-      renderAdoptDetail(adoptionPets.find(p=>p.id===selectedPetId));
+      {
+        const selectedPet=adoptionPets.find(p=>p.id===selectedPetId);
+        renderAdoptDetail(selectedPet);
+        void loadPetCardSourceHistory(selectedPet);
+      }
       return;
     }
 
@@ -2624,7 +2799,11 @@ async function loadAdoptionState(){
     adoptionPets=rows.map(normalizePet).filter(p=>Number.isFinite(p.id));
     selectedPetId=adoptionPets.some(p=>p.id===selectedPetId)?selectedPetId:(adoptionPets[0]?.id||null);
     renderAdoptionGrid();
-    renderAdoptDetail(adoptionPets.find(p=>p.id===selectedPetId));
+    {
+      const selectedPet=adoptionPets.find(p=>p.id===selectedPetId);
+      renderAdoptDetail(selectedPet);
+      void loadPetCardSourceHistory(selectedPet,{force:true});
+    }
   }catch(err){
     adoptionPets=[];
     selectedPetId=null;
@@ -3436,7 +3615,7 @@ function showRewardModal(options={}){
 function closeRewardModal(){const mask=document.getElementById("rewardMask");mask.classList.remove("show");mask.style.display="";mask.setAttribute("aria-hidden","true");document.body.style.overflow="";}
 function hydrateActionIcons(){document.querySelectorAll("[data-item-icon]").forEach(el=>{const url=room10AssetUrl(el.dataset.itemIcon,"");if(url)el.innerHTML=`<img src="${escapeHtml(url)}" alt="">`;});}
 
-window.addEventListener("resize",syncOverlayToImage);if(img){img.addEventListener("load",syncOverlayToImage);}document.addEventListener("DOMContentLoaded",async()=>{setIdentityState();setupRoomNav();syncOverlayToImage();hydrateActionIcons();try{await loadPageTexts();}catch(err){pageTexts={};pageTextsLoaded=true;console.warn("宠物区文案配置读取失败：",err);}hydratePageTexts();document.getElementById("identityNoticeBtn").addEventListener("click",()=>document.getElementById("identityNoticePanel").classList.toggle("show"));const petLoginMask=document.getElementById("petLoginMask");if(petLoginMask)petLoginMask.addEventListener("click",e=>{if(e.target===petLoginMask)closePetLoginModal();});const petLoginCloseBtn=document.getElementById("petLoginCloseBtn");if(petLoginCloseBtn)petLoginCloseBtn.addEventListener("click",closePetLoginModal);const petLoginToggleBtn=document.getElementById("petLoginToggleBtn");if(petLoginToggleBtn)petLoginToggleBtn.addEventListener("click",togglePetLoginCode);const petLoginSubmitBtn=document.getElementById("petLoginSubmitBtn");if(petLoginSubmitBtn)petLoginSubmitBtn.addEventListener("click",submitPetLogin);const petRegisterLink=document.getElementById("petRegisterLink");if(petRegisterLink)petRegisterLink.addEventListener("click",goRegisterFromPet);["petLoginNickname","petLoginCode"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("keydown",e=>{if(e.key==="Enter")submitPetLogin();});});document.getElementById("identityAuthBtn").addEventListener("click",()=>{if(!isGuestView()){localStorage.setItem(STORAGE_KEYS.loggedIn,"false");[STORAGE_KEYS.user,STORAGE_KEYS.role,STORAGE_KEYS.memberId,STORAGE_KEYS.memberCode,"room10_user","room10_current_user","currentUser","room10ApplicantSession","room10ApplicationDraft"].forEach(k=>localStorage.removeItem(k));sessionStorage.clear();adoptionPets=[];carePets=[];careState=null;selectedCareAdoptionId=null;lastDailyGift=null;const frame=document.getElementById("gachaFrame");if(frame)frame.src="about:blank";closeGachaPopup();setIdentityState();setMode("adopt");}else{openPetLoginModal();}});document.getElementById("modeAdoptBtn").addEventListener("click",()=>setMode("adopt"));document.getElementById("modeCareBtn").addEventListener("click",()=>setMode("care"));document.getElementById("goGachaBtn").addEventListener("click",goGacha);document.getElementById("gachaCloseBtn").addEventListener("click",closeGachaPopup);document.getElementById("gachaMask").addEventListener("click",e=>{if(e.target.id==="gachaMask")closeGachaPopup();});document.getElementById("refreshBtn").addEventListener("click",()=>activeMode==="adopt"?loadAdoptionState():loadCareState({skipAutoGift:true}));document.getElementById("adoptMainBtn").addEventListener("click",()=>{const p=adoptionPets.find(x=>x.id===selectedPetId);const action=document.getElementById("adoptMainBtn").dataset.action;if(action==="gacha")goGacha();else if(action==="adopt"&&p)openAdoptNameDialog(p);else if(action==="upgrade"&&p)upgradePet(p);});document.getElementById("nameCancelBtn").addEventListener("click",closeAdoptNameDialog);document.getElementById("nameConfirmBtn").addEventListener("click",confirmAdoption);document.getElementById("nameMask").addEventListener("click",e=>{if(e.target.id==="nameMask")closeAdoptNameDialog();});document.querySelectorAll("[data-care-action]").forEach(btn=>btn.addEventListener("click",()=>doCareAction(btn.dataset.careAction)));{const dailyBtn=document.getElementById("dailyGiftBtn");if(dailyBtn)dailyBtn.addEventListener("click",claimDailyGift);}document.getElementById("rewardMask").addEventListener("click",e=>{if(e.target.id==="rewardMask")closeRewardModal();});document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeRewardModal();closeAdoptNameDialog();closeGachaPopup();closePetLoginModal();}});setMode("adopt");});
+window.addEventListener("resize",syncOverlayToImage);if(img){img.addEventListener("load",syncOverlayToImage);}document.addEventListener("DOMContentLoaded",async()=>{setIdentityState();setupRoomNav();syncOverlayToImage();hydrateActionIcons();try{await loadPageTexts();}catch(err){pageTexts={};pageTextsLoaded=true;console.warn("宠物区文案配置读取失败：",err);}hydratePageTexts();document.getElementById("identityNoticeBtn").addEventListener("click",()=>document.getElementById("identityNoticePanel").classList.toggle("show"));const petLoginMask=document.getElementById("petLoginMask");if(petLoginMask)petLoginMask.addEventListener("click",e=>{if(e.target===petLoginMask)closePetLoginModal();});const petLoginCloseBtn=document.getElementById("petLoginCloseBtn");if(petLoginCloseBtn)petLoginCloseBtn.addEventListener("click",closePetLoginModal);const petLoginToggleBtn=document.getElementById("petLoginToggleBtn");if(petLoginToggleBtn)petLoginToggleBtn.addEventListener("click",togglePetLoginCode);const petLoginSubmitBtn=document.getElementById("petLoginSubmitBtn");if(petLoginSubmitBtn)petLoginSubmitBtn.addEventListener("click",submitPetLogin);const petRegisterLink=document.getElementById("petRegisterLink");if(petRegisterLink)petRegisterLink.addEventListener("click",goRegisterFromPet);["petLoginNickname","petLoginCode"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("keydown",e=>{if(e.key==="Enter")submitPetLogin();});});document.getElementById("identityAuthBtn").addEventListener("click",()=>{if(!isGuestView()){localStorage.setItem(STORAGE_KEYS.loggedIn,"false");[STORAGE_KEYS.user,STORAGE_KEYS.role,STORAGE_KEYS.memberId,STORAGE_KEYS.memberCode,"room10_user","room10_current_user","currentUser","room10ApplicantSession","room10ApplicationDraft"].forEach(k=>localStorage.removeItem(k));sessionStorage.clear();adoptionPets=[];petCardSourceCache.clear();petCardSourceRequestToken++;carePets=[];careState=null;selectedCareAdoptionId=null;lastDailyGift=null;const frame=document.getElementById("gachaFrame");if(frame)frame.src="about:blank";closeGachaPopup();setIdentityState();setMode("adopt");}else{openPetLoginModal();}});document.getElementById("modeAdoptBtn").addEventListener("click",()=>setMode("adopt"));document.getElementById("modeCareBtn").addEventListener("click",()=>setMode("care"));document.getElementById("goGachaBtn").addEventListener("click",goGacha);document.getElementById("gachaCloseBtn").addEventListener("click",closeGachaPopup);document.getElementById("gachaMask").addEventListener("click",e=>{if(e.target.id==="gachaMask")closeGachaPopup();});document.getElementById("refreshBtn").addEventListener("click",()=>activeMode==="adopt"?loadAdoptionState():loadCareState({skipAutoGift:true}));document.getElementById("adoptMainBtn").addEventListener("click",()=>{const p=adoptionPets.find(x=>x.id===selectedPetId);const action=document.getElementById("adoptMainBtn").dataset.action;if(action==="gacha")goGacha();else if(action==="adopt"&&p)openAdoptNameDialog(p);else if(action==="upgrade"&&p)upgradePet(p);});document.getElementById("nameCancelBtn").addEventListener("click",closeAdoptNameDialog);document.getElementById("nameConfirmBtn").addEventListener("click",confirmAdoption);document.getElementById("nameMask").addEventListener("click",e=>{if(e.target.id==="nameMask")closeAdoptNameDialog();});document.querySelectorAll("[data-care-action]").forEach(btn=>btn.addEventListener("click",()=>doCareAction(btn.dataset.careAction)));{const dailyBtn=document.getElementById("dailyGiftBtn");if(dailyBtn)dailyBtn.addEventListener("click",claimDailyGift);}document.getElementById("rewardMask").addEventListener("click",e=>{if(e.target.id==="rewardMask")closeRewardModal();});document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeRewardModal();closeAdoptNameDialog();closeGachaPopup();closePetLoginModal();}});setMode("adopt");});
 </script>
 
 <script id="room10FinalPlayingPresets">
