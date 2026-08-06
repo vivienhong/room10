@@ -16,6 +16,7 @@ window.ROOM10_PATHS = {
     gamePasswordMaster: "game/pwmaster.html",
     gameKnight: "game/knight.html",
     gameTime: "game/time.html",
+    gameGomoku: "game/gomoku.html",
 
     gameBomb: "game/bomb/bomb.html",
     gameMango: "game/mango/mango.html",
@@ -141,7 +142,29 @@ window.ROOM10_PATHS = {
     },
 
     drink: {
-      drinkCoin: "game/drink/drink-coin.png"
+      drinkCoin: "game/drink/drink-coin.png",
+
+      cup: {
+        teaCup01To03: "game/drink/cup/01-03 tea.png"
+      },
+
+      finish: {
+        blackTea01: "game/drink/finish/01-03.Tea-Cup/01.Black-Tea.png"
+      },
+
+      ingredient: {
+        blackTeaLeaves01: "game/drink/ingredient/01-red tea.png"
+      },
+
+      store: {
+        redTeaTin01: "game/drink/store/01.png",
+        greenTeaTin02: "game/drink/store/02.png",
+        floralTeaTin03: "game/drink/store/03.png",
+        teaTins01To03: "game/drink/store/01-03.png",
+
+        // 兼容此前预留的通用茶罐键；默认指向三个茶罐组合图。
+        teaTin: "game/drink/store/01-03.png"
+      }
     },
 
     mango: {
@@ -302,6 +325,19 @@ window.ROOM10_PATHS = {
       halloween: "万圣节：南瓜糖袋",
       thanksgiving: "感恩节：节日火鸡",
       christmas: "圣诞节：圣诞树"
+    },
+
+    drink: {
+      folderRule: "game/drink/ 下按 cup（空杯）、finish（成品饮料）、ingredient（原料）、store（商店入口素材）分类。",
+      drinkCoin: "饮料店金币素材，文件位置：game/drink/drink-coin.png",
+      teaCup01To03: "01 至 03 号纯茶共用空茶杯，文件位置：game/drink/cup/01-03 tea.png",
+      blackTea01: "01 号红茶成品图，文件位置：game/drink/finish/01-03.Tea-Cup/01.Black-Tea.png",
+      blackTeaLeaves01: "01 号红茶茶叶原料图，文件位置：game/drink/ingredient/01-red tea.png",
+      redTeaTin01: "01 号红茶罐商店入口素材，文件位置：game/drink/store/01.png",
+      greenTeaTin02: "02 号绿茶罐商店入口素材，文件位置：game/drink/store/02.png",
+      floralTeaTin03: "03 号花茶罐商店入口素材，文件位置：game/drink/store/03.png",
+      teaTins01To03: "01 至 03 号三个茶罐组合素材，文件位置：game/drink/store/01-03.png",
+      teaTin: "兼容通用茶罐键，当前指向三个茶罐组合素材：game/drink/store/01-03.png"
     },
 
     mango: {
