@@ -52,24 +52,24 @@ html,body{
   --game-panel-left:55%;
   --game-panel-top:49.5%;
   --game-panel-width:48%;
-  --game-panel-design-width:500;
-  --game-panel-design-height:310;
-  --game-panel-scale:1.1;
+  --game-panel-design-width:540;
+  --game-panel-design-height:332;
+  --game-panel-scale:1.03;
   --game-panel-max-width:none;
-  --game-panel-padding:13px;
+  --game-panel-padding:14px;
   --game-panel-radius:24px;
-  --game-menu-gap:8px;
-  --game-card-height:59px;
-  --game-card-radius:15px;
-  --game-card-padding-y:12px;
-  --game-card-padding-x:10px;
+  --game-menu-gap:9px;
+  --game-card-height:54px;
+  --game-card-radius:16px;
+  --game-card-padding-y:10px;
+  --game-card-padding-x:9px;
   --game-card-padding:var(--game-card-padding-y) var(--game-card-padding-x);
-  --game-card-gap:13px;
-  --game-icon-size:32px;
-  --game-icon-radius:12px;
-  --game-icon-font-size:18px;
-  --game-name-size:17px;
-  --game-status-size:10px;
+  --game-card-gap:9px;
+  --game-icon-size:28px;
+  --game-icon-radius:11px;
+  --game-icon-font-size:16px;
+  --game-name-size:15px;
+  --game-status-size:9px;
   --gacha-entry-left:26%;
   --gacha-entry-top:49.6%;
   --gacha-entry-width:280px;
@@ -215,13 +215,14 @@ button{
 }
 .menu{
   display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
+  grid-template-columns:repeat(3, minmax(0, 1fr));
   grid-auto-rows:minmax(var(--game-card-height), auto);
+  align-content:start;
   gap:var(--game-menu-gap);
   min-height:0;
   overflow-x:hidden;
   overflow-y:auto;
-  padding:0 4px 0 0;
+  padding:0 2px 0 0;
   scrollbar-width:thin;
 }
 .menu::-webkit-scrollbar{width:6px;}
@@ -290,6 +291,12 @@ button{
 }
 .game-btn.is-coming-soon{opacity:.82;filter:saturate(.86);}
 .game-btn.is-coming-soon:hover{opacity:.95;}
+.game-btn > div{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
 .game-icon{
   position:relative;
   z-index:2;
@@ -314,28 +321,30 @@ button{
   position:relative;
   z-index:2;
   color:#744a2a;
-  font-size:clamp(15px, var(--game-name-size), 30px);
+  font-size:clamp(14px, var(--game-name-size), 28px);
   font-weight:900;
-  line-height:1.15;
+  line-height:1.12;
   margin:0;
-  white-space:nowrap;
-  overflow:visible;
-  text-overflow:clip;
+  white-space:normal;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  overflow-wrap:anywhere;
   letter-spacing:.01em;
-  padding:.08em 0 .12em;
+  padding:.02em 0 .08em;
 }
 .game-status{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-height:18px;
+  align-self:flex-start;
+  min-height:17px;
   margin-top:2px;
-  padding:0 8px;
+  padding:0 7px;
   border-radius:999px;
   color:#8a6547;
   background:rgba(255,255,255,.50);
   border:1px solid rgba(180,135,92,.14);
-  font-size:clamp(9px, var(--game-status-size), 14px);
+  font-size:clamp(8px, var(--game-status-size), 13px);
   font-weight:900;
 }
 .game-status.ready{
