@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-room10-version="gacha-13-machine-frame-animation-fixed">
+<html lang="zh-CN" data-room10-version="gacha-15-desktop-machine-frame-cache-fixed">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜扭蛋机</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../../room10-paths.js"></script>
+<script src="../../room10-paths.js?v=20260810-gacha15"></script>
 
 <style>
 *{box-sizing:border-box;}
@@ -549,6 +549,9 @@ img{display:block; max-width:100%; user-select:none; -webkit-user-drag:none;}
   object-fit:contain;
   filter:drop-shadow(0 14px 18px rgba(143,86,72,.18));
   pointer-events:none;
+  will-change:transform;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
 }
 
 /*
@@ -1778,11 +1781,27 @@ function room10PageUrl(key, fallbackPath = ""){
   return fallbackPath || "";
 }
 
+const GACHA_MACHINE_FRAME_VERSION = "20260810-gacha15";
+
+function gachaMachineFrameUrl(fileName){
+  const cleanName = String(fileName || "").replace(/^\/+/, "");
+  const relativePath = `game/gacha/${cleanName}`;
+  const baseUrl = typeof window.room10Path === "function"
+    ? window.room10Path(relativePath)
+    : cleanName;
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  return `${baseUrl}${separator}v=${encodeURIComponent(GACHA_MACHINE_FRAME_VERSION)}`;
+}
+
 const ASSETS = {
+  /*
+   * 机身切帧直接使用确定的 game/gacha 路径，不再依赖 assets.gacha 的旧映射。
+   * 同时附加版本参数，避免桌面浏览器 / CDN 继续复用旧的同名 PNG 缓存。
+   */
   machineFrames: [
-    room10AssetUrl("gacha.gachaMachine", "gacha-machine.png"),
-    room10AssetUrl("gacha.gachaMachine2", "gacha-machine2.png"),
-    room10AssetUrl("gacha.gachaMachine3", "gacha-machine3.png")
+    gachaMachineFrameUrl("gacha-machine.png"),
+    gachaMachineFrameUrl("gacha-machine2.png"),
+    gachaMachineFrameUrl("gacha-machine3.png")
   ],
   handleIdle: room10AssetUrl("gacha.gachaHandleSpin", "gacha-handle-spin.png"),
   ballPink: room10AssetUrl("gacha.gachaBallPink", "gacha-ball-pink.png"),
@@ -1931,11 +1950,30 @@ function setAssetImage(selector, src){
   img.dataset.imgPath = src;
 }
 
+let machineFramesReadyPromise = Promise.resolve();
+
 function preloadMachineFrames(){
-  ASSETS.machineFrames.filter(Boolean).forEach(src => {
+  const frames = ASSETS.machineFrames.filter(Boolean);
+  machineFramesReadyPromise = Promise.all(frames.map(src => new Promise(resolve => {
     const img = new Image();
+    img.decoding = "async";
+    img.onload = async () => {
+      try{
+        if(typeof img.decode === "function") await img.decode();
+      }catch(_error){}
+      resolve(src);
+    };
+    img.onerror = () => {
+      console.error("扭蛋机切帧图片预载失败：", src);
+      resolve(src);
+    };
     img.src = src;
-  });
+    if(img.complete && img.naturalWidth > 0){
+      Promise.resolve(typeof img.decode === "function" ? img.decode().catch(()=>{}) : null)
+        .finally(() => resolve(src));
+    }
+  })));
+  return machineFramesReadyPromise;
 }
 
 function applyConfiguredAssetPaths(){
@@ -2410,11 +2448,25 @@ function normalizeBall(source = {}){
 function normalizeDrawResult(raw,tierKey,payType){
   const data = unwrapRpcData(raw) || {};
   if(rpcFailed(data)) throw new Error(rpcMessage(data,"扭蛋失败。"));
+
+  const normalizedPayType = String(payType || "").trim().toLowerCase();
+  const rewardType = String(data.reward_type || "").trim().toLowerCase();
+  const isEmpty = data.is_empty === true || rewardType === "empty";
+
+  /*
+    页面只做数据库规则的第二道防线。
+    真正防止扣费后抽到空，必须执行配套 SQL，让抽奖事务在数据库内排除 empty。
+  */
+  if(isEmpty && normalizedPayType !== "free"){
+    console.error("付费抽取异常返回空扭蛋：", data);
+    throw new Error("数据库规则异常：付费抽取不得抽到空。请执行扭蛋机付费空奖项修复 SQL 后再试。");
+  }
+
   return {
     id:textFrom(data,["draw_id","id","gacha_draw_id"],""),
     tierKey,
-    payType,
-    isEmpty: !!(data.is_empty || data.reward_type === "empty"),
+    payType:normalizedPayType,
+    isEmpty,
     message: textFrom(data,["message","reward_desc","description"],""),
     freeEmptyCount: numberFrom(data,["free_empty_count"],0),
     achievementUnlocked: !!data.achievement_unlocked,
@@ -2905,7 +2957,10 @@ function playTokenInsertAnimation(tierKey, payType){
   });
 }
 
-function playAnimation(drawResult){
+async function playAnimation(drawResult){
+  /* 桌面端先确认三张机身图已经进入缓存/完成解码，再开始 1→2→3 切帧。 */
+  try{ await machineFramesReadyPromise; }catch(_error){}
+
   return new Promise(resolve => {
     const machineWrap = document.getElementById("machineWrap");
     const machineImg = document.getElementById("machineImg");
@@ -2916,8 +2971,14 @@ function playAnimation(drawResult){
     const showMachineFrame = index => {
       if(!machineImg || !machineFrames.length) return;
       const src = machineFrames[index] || machineFrames[0];
-      machineImg.src = src;
+      if(machineImg.getAttribute("src") !== src){
+        machineImg.setAttribute("src", src);
+      }
       machineImg.dataset.imgPath = src;
+      machineImg.dataset.machineFrame = String(index);
+
+      /* 强制桌面 Chromium 为切换后的 img 建立新的合成帧。 */
+      machineImg.style.transform = `translateZ(${index % 2 ? "0.001px" : "0px"})`;
     };
 
     showMachineFrame(0);
@@ -2936,7 +2997,7 @@ function playAnimation(drawResult){
         const machineFrameTimer = window.setInterval(() => {
           machineFrameIndex = (machineFrameIndex + 1) % machineFrames.length;
           showMachineFrame(machineFrameIndex);
-        }, 120);
+        }, 160);
         state.timers.push(machineFrameTimer);
       }
     });
