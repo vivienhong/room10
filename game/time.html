@@ -436,6 +436,10 @@
       gap: 7px;
     }
 
+    .result-grid.with-rate {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
     .result-item {
       min-width: 0;
       padding: 8px;
@@ -1323,6 +1327,10 @@
       .guest-row { grid-template-columns: 1fr; }
 
       .auth-btn { width: 100%; }
+
+      .result-grid.with-rate {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 540px) {
@@ -1352,6 +1360,10 @@
         grid-column: 2;
         width: auto;
         text-align: left;
+      }
+
+      .result-grid.with-rate {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
@@ -1403,7 +1415,7 @@
               <strong>本次结果</strong>
               <span class="result-grade" id="resultGrade">--</span>
             </div>
-            <div class="result-grid">
+            <div class="result-grid" id="resultGrid">
               <div class="result-item">
                 <div class="result-name">目标</div>
                 <div class="result-value" id="resultTarget">--</div>
@@ -1419,6 +1431,10 @@
               <div class="result-item">
                 <div class="result-name">当前排名</div>
                 <div class="result-value" id="resultRank">--</div>
+              </div>
+              <div class="result-item hidden" id="resultRateItem">
+                <div class="result-name">误差率</div>
+                <div class="result-value" id="resultRate">--</div>
               </div>
             </div>
           </div>
@@ -1552,6 +1568,9 @@
       resultActual: document.getElementById("resultActual"),
       resultError: document.getElementById("resultError"),
       resultRank: document.getElementById("resultRank"),
+      resultGrid: document.getElementById("resultGrid"),
+      resultRateItem: document.getElementById("resultRateItem"),
+      resultRate: document.getElementById("resultRate"),
       resultNames: document.querySelectorAll(".result-name"),
       leaderboard: document.getElementById("leaderboard"),
       rankNote: document.getElementById("rankNote"),
@@ -2168,23 +2187,46 @@
       const endedAt = performance.now();
       const actualSeconds = round3((endedAt - startedAt) / 1000);
       const targetSeconds = getCurrentTargetSeconds();
+      const errorSeconds = round3(Math.abs(actualSeconds - targetSeconds));
+      const errorRate = targetSeconds > 0 ? (errorSeconds / targetSeconds) * 100 : null;
+      const record = {
+        mode: currentMode,
+        playerName: actor.playerName,
+        isGuest: actor.isGuest,
+        targetSeconds,
+        actualSeconds,
+        errorSeconds,
+        errorRate,
+        grade: getGrade(errorSeconds),
+        savedToBoard: false,
+        fallbackRank: null,
+        boardRank: null,
+        enteredVisibleBoard: false,
+        rankPending: true,
+        rankRefreshFailed: false,
+        saveFailed: false,
+        awards: []
+      };
 
       running = false;
       cancelAnimationFrame(rafId);
       rafId = null;
 
-      els.startBtn.disabled = false;
+      els.startBtn.disabled = true;
       els.stopBtn.disabled = true;
-      setModeControlsDisabled(false);
+      setModeControlsDisabled(true);
       els.timerZone.classList.remove("running");
       els.timerDisplay.classList.remove("hidden-time");
       els.timerDisplay.textContent = formatMs(actualSeconds * 1000);
-      els.timerHint.textContent = "正在保存你的答案……";
+
+      lastSubmittedRecord = record;
+      showResult(record);
+      els.timerHint.textContent = "答案出现了，正在保存成绩……";
 
       try {
         const { data, error } = await client.rpc("submit_time_answer_score", {
-          p_mode: currentMode,
-          p_issue_id: currentMode === "daily" ? currentIssue.id : null,
+          p_mode: record.mode,
+          p_issue_id: record.mode === "daily" ? currentIssue.id : null,
           p_member_id: actor.memberId,
           p_member_code: actor.memberCode,
           p_nickname: actor.playerName,
@@ -2196,61 +2238,41 @@
         if (error) throw error;
 
         const saved = Array.isArray(data) ? data[0] : data;
-        const record = {
-          mode: currentMode,
-          playerName: actor.playerName,
-          isGuest: actor.isGuest,
-          targetSeconds,
-          actualSeconds,
-          errorSeconds: Number(saved?.error_seconds ?? Math.abs(actualSeconds - targetSeconds)),
-          errorRate: Number(saved?.error_rate ?? ((Math.abs(actualSeconds - targetSeconds) / targetSeconds) * 100)),
-          grade: saved?.result_grade || getGrade(Math.abs(actualSeconds - targetSeconds)),
-          savedToBoard: saved?.saved === true,
-          fallbackRank: saved?.temp_rank ?? null,
-          boardRank: null,
-          enteredVisibleBoard: false,
-          awards: saved?.awards || []
-        };
+        record.errorSeconds = Number(saved?.error_seconds ?? record.errorSeconds);
+        record.errorRate = Number(saved?.error_rate ?? record.errorRate);
+        record.grade = saved?.result_grade || record.grade;
+        record.savedToBoard = saved?.saved === true;
+        record.fallbackRank = saved?.temp_rank ?? null;
+        record.awards = saved?.awards || [];
 
-        let freshRows = [];
-        let boardRefreshFailed = false;
-
-        try {
-          freshRows = await fetchLeaderboardRows(record.mode);
-          if (record.savedToBoard) {
-            applyVisibleBoardRank(record, freshRows);
-          } else {
-            applyGuestVirtualRank(record, freshRows);
-          }
-        } catch (rankErr) {
-          boardRefreshFailed = true;
-          console.warn("成绩已保存，但排行榜刷新失败：", rankErr);
+        if (isCurrentSubmittedResult(record)) {
+          showResult(record);
+          els.timerHint.textContent = "成绩已保存，正在计算排名……";
         }
 
-        lastSubmittedRecord = record;
-        showResult(record);
-        els.timerHint.textContent = boardRefreshFailed
-          ? "成绩已保存，排行榜刷新失败，请刷新页面查看。"
-          : getResultHint(record);
-
-        if (currentMode === "free") {
+        if (record.mode === "free") {
           freeTargetSeconds = makeRandomTarget(CONFIG.freeTargetMin, CONFIG.freeTargetMax);
         }
 
         activeActor = null;
+        els.startBtn.disabled = false;
+        setModeControlsDisabled(false);
         renderTarget();
-
-        if (!boardRefreshFailed && record.mode === currentRank) {
-          renderLeaderboardRows(freshRows, currentRank, record);
-        } else {
-          await renderLeaderboard();
-        }
-
         playAwardModals(record.awards || []);
+
+        void refreshSubmittedRank(record);
       } catch (err) {
         console.error("保存成绩失败：", err);
-        els.timerHint.textContent = "成绩保存失败，请稍后再试。";
+        record.rankPending = false;
+        record.saveFailed = true;
         activeActor = null;
+        els.startBtn.disabled = false;
+        setModeControlsDisabled(false);
+
+        if (isCurrentSubmittedResult(record)) {
+          showResult(record);
+          els.timerHint.textContent = "成绩保存失败，请稍后再试。";
+        }
       }
     }
 
@@ -2335,17 +2357,16 @@
       cleanupStarterTimers();
       running = false;
       starterState = "idle";
-      els.startBtn.disabled = false;
+      els.startBtn.disabled = true;
       els.stopBtn.disabled = true;
       els.stopBtn.textContent = "停止";
-      setModeControlsDisabled(false);
+      setModeControlsDisabled(true);
       els.timerZone.classList.remove("running");
       renderSignalPanel(mode, mode === "athlete" ? 3 : 1, "red", true);
       els.timerDisplay.classList.remove("hidden-time");
       els.timerDisplay.textContent = "抢跑";
-      els.timerHint.textContent = "抢跑失败，正在记录本次结果……";
 
-      let record = {
+      const record = {
         mode,
         playerName: actor.ok ? actor.playerName : "",
         isGuest: actor.ok ? actor.isGuest : true,
@@ -2360,26 +2381,35 @@
         fallbackRank: null,
         boardRank: null,
         enteredVisibleBoard: false,
+        rankPending: false,
+        rankRefreshFailed: false,
+        saveFailed: false,
         awards: []
       };
 
+      lastSubmittedRecord = record;
+      showStarterResult(record);
+      els.timerHint.textContent = actor.ok ? "抢跑失败，正在记录本次结果……" : "抢跑失败，本局不进入排行榜。";
+
       try {
         if (actor.ok) {
-          record = await submitStarterScore(record, actor);
+          Object.assign(record, await submitStarterScore(record, actor));
         }
-        lastSubmittedRecord = record;
-        showStarterResult(record);
-        els.timerHint.textContent = record.savedToBoard
-          ? "抢跑已记录，本局不进入排行榜。"
-          : "抢跑失败，本局不进入排行榜。";
-        await renderLeaderboard();
+        if (isCurrentSubmittedResult(record)) {
+          showStarterResult(record);
+          els.timerHint.textContent = "抢跑已记录，本局不进入排行榜。";
+        }
       } catch (err) {
         console.error("保存抢跑结果失败：", err);
-        lastSubmittedRecord = record;
-        showStarterResult(record);
-        els.timerHint.textContent = "抢跑失败。本次记录保存失败，请稍后再试。";
+        record.saveFailed = true;
+        if (isCurrentSubmittedResult(record)) {
+          showStarterResult(record);
+          els.timerHint.textContent = "抢跑失败。本次记录保存失败，请稍后再试。";
+        }
       } finally {
         activeActor = null;
+        els.startBtn.disabled = false;
+        setModeControlsDisabled(false);
       }
     }
 
@@ -2391,16 +2421,15 @@
       cleanupStarterTimers();
       running = false;
       starterState = "idle";
-      els.startBtn.disabled = false;
+      els.startBtn.disabled = true;
       els.stopBtn.disabled = true;
       els.stopBtn.textContent = "停止";
-      setModeControlsDisabled(false);
+      setModeControlsDisabled(true);
       els.timerZone.classList.remove("running");
       els.timerDisplay.classList.remove("hidden-time");
       els.timerDisplay.textContent = formatMs(reactionSeconds * 1000);
-      els.timerHint.textContent = "正在保存发令枪成绩……";
 
-      let record = {
+      const record = {
         mode: "reaction",
         playerName: actor.ok ? actor.playerName : "",
         isGuest: actor.ok ? actor.isGuest : true,
@@ -2415,42 +2444,47 @@
         fallbackRank: null,
         boardRank: null,
         enteredVisibleBoard: false,
+        rankPending: true,
+        rankRefreshFailed: false,
+        saveFailed: false,
         awards: []
       };
 
-      let freshRows = [];
-      let boardRefreshFailed = false;
+      lastSubmittedRecord = record;
+      showStarterResult(record);
+      els.timerHint.textContent = "成绩出现了，正在保存发令枪成绩……";
 
       try {
         if (actor.ok) {
-          record = await submitStarterScore(record, actor);
-        }
-        freshRows = await fetchLeaderboardRows("reaction");
-        if (record.savedToBoard) {
-          applyVisibleBoardRank(record, freshRows);
+          Object.assign(record, await submitStarterScore(record, actor));
         } else {
-          applyGuestVirtualRank(record, freshRows);
+          record.rankPending = false;
         }
+
+        activeActor = null;
+        els.startBtn.disabled = false;
+        setModeControlsDisabled(false);
+
+        if (isCurrentSubmittedResult(record)) {
+          showStarterResult(record);
+          els.timerHint.textContent = actor.ok ? "成绩已保存，正在计算排名……" : getResultHint(record);
+        }
+
+        playAwardModals(record.awards || []);
+        if (actor.ok) void refreshSubmittedRank(record);
       } catch (err) {
-        boardRefreshFailed = true;
         console.error("保存发令枪成绩失败：", err);
+        record.rankPending = false;
+        record.saveFailed = true;
+        activeActor = null;
+        els.startBtn.disabled = false;
+        setModeControlsDisabled(false);
+
+        if (isCurrentSubmittedResult(record)) {
+          showStarterResult(record);
+          els.timerHint.textContent = "本次成绩已完成，但保存失败，请稍后再试。";
+        }
       }
-
-      lastSubmittedRecord = record;
-      showStarterResult(record);
-      els.timerHint.textContent = boardRefreshFailed
-        ? "本次成绩已完成，但保存或排行榜刷新失败。"
-        : getResultHint(record);
-
-      activeActor = null;
-
-      if (!boardRefreshFailed && currentRank === "reaction") {
-        renderLeaderboardRows(freshRows, "reaction", record);
-      } else {
-        await renderLeaderboard();
-      }
-
-      playAwardModals(record.awards || []);
     }
 
     async function finishAthleteRound() {
@@ -2464,16 +2498,15 @@
       cleanupStarterTimers();
       running = false;
       starterState = "idle";
-      els.startBtn.disabled = false;
+      els.startBtn.disabled = true;
       els.stopBtn.disabled = true;
       els.stopBtn.textContent = "停止";
-      setModeControlsDisabled(false);
+      setModeControlsDisabled(true);
       els.timerZone.classList.remove("running");
       els.timerDisplay.classList.remove("hidden-time");
       els.timerDisplay.textContent = formatMs(actualSeconds * 1000);
-      els.timerHint.textContent = "正在保存运动员模式成绩……";
 
-      let record = {
+      const record = {
         mode: "athlete",
         playerName: actor.ok ? actor.playerName : "",
         isGuest: actor.ok ? actor.isGuest : true,
@@ -2488,44 +2521,49 @@
         fallbackRank: null,
         boardRank: null,
         enteredVisibleBoard: false,
+        rankPending: true,
+        rankRefreshFailed: false,
+        saveFailed: false,
         awards: []
       };
 
-      let freshRows = [];
-      let boardRefreshFailed = false;
+      lastSubmittedRecord = record;
+      showStarterResult(record);
+      els.timerHint.textContent = "成绩出现了，正在保存运动员模式成绩……";
 
       try {
         if (actor.ok) {
-          record = await submitStarterScore(record, actor);
-        }
-        freshRows = await fetchLeaderboardRows("athlete");
-        if (record.savedToBoard) {
-          applyVisibleBoardRank(record, freshRows);
+          Object.assign(record, await submitStarterScore(record, actor));
         } else {
-          applyGuestVirtualRank(record, freshRows);
+          record.rankPending = false;
         }
+
+        athleteTargetSeconds = makeRandomTarget(CONFIG.athleteTargetMin, CONFIG.athleteTargetMax);
+        activeActor = null;
+        els.startBtn.disabled = false;
+        setModeControlsDisabled(false);
+        renderTarget();
+
+        if (isCurrentSubmittedResult(record)) {
+          showStarterResult(record);
+          els.timerHint.textContent = actor.ok ? "成绩已保存，正在更新排行榜……" : getResultHint(record);
+        }
+
+        playAwardModals(record.awards || []);
+        if (actor.ok) void refreshSubmittedRank(record);
       } catch (err) {
-        boardRefreshFailed = true;
         console.error("保存运动员模式成绩失败：", err);
+        record.rankPending = false;
+        record.saveFailed = true;
+        activeActor = null;
+        els.startBtn.disabled = false;
+        setModeControlsDisabled(false);
+
+        if (isCurrentSubmittedResult(record)) {
+          showStarterResult(record);
+          els.timerHint.textContent = "本次成绩已完成，但保存失败，请稍后再试。";
+        }
       }
-
-      lastSubmittedRecord = record;
-      showStarterResult(record);
-      els.timerHint.textContent = boardRefreshFailed
-        ? "本次成绩已完成，但保存或排行榜刷新失败。"
-        : getResultHint(record);
-
-      athleteTargetSeconds = makeRandomTarget(CONFIG.athleteTargetMin, CONFIG.athleteTargetMax);
-      activeActor = null;
-      renderTarget();
-
-      if (!boardRefreshFailed && currentRank === "athlete") {
-        renderLeaderboardRows(freshRows, "athlete", record);
-      } else {
-        await renderLeaderboard();
-      }
-
-      playAwardModals(record.awards || []);
     }
 
     async function submitStarterScore(record, actor) {
@@ -2579,6 +2617,9 @@
 
     function getRecordRankText(record) {
       if (record.isFalseStart) return "不进榜";
+      if (record.saveFailed) return "保存失败";
+      if (record.rankRefreshFailed) return "暂未取得";
+      if (record.rankPending) return "计算中…";
       if (record.savedToBoard) {
         return record.enteredVisibleBoard && record.boardRank
           ? `第 ${record.boardRank} 名`
@@ -2653,10 +2694,23 @@
       return "还在热身";
     }
 
-    function showSpecialResult(values, labels = ["目标", "你的时间", "误差", "当前排名"]) {
+    const DEFAULT_RESULT_LABELS = ["目标", "你的时间", "误差", "当前排名", "误差率"];
+
+    function setResultLabels(labels = DEFAULT_RESULT_LABELS) {
       els.resultNames.forEach((node, index) => {
-        node.textContent = labels[index] || node.textContent;
+        node.textContent = labels[index] ?? DEFAULT_RESULT_LABELS[index] ?? "";
       });
+    }
+
+    function setResultRate(show, value = null) {
+      els.resultGrid?.classList.toggle("with-rate", show);
+      els.resultRateItem?.classList.toggle("hidden", !show);
+      if (els.resultRate) els.resultRate.textContent = show ? formatPercent(value) : "--";
+    }
+
+    function showSpecialResult(values, labels = DEFAULT_RESULT_LABELS) {
+      setResultRate(false);
+      setResultLabels(labels);
       els.resultBox.classList.add("show");
       els.resultGrade.textContent = values.grade || "--";
       els.resultTarget.textContent = values.target || "--";
@@ -2707,15 +2761,26 @@
     }
 
     function showResult(record) {
-      ["目标", "你的时间", "误差", "当前排名"].forEach((label, index) => {
-        if (els.resultNames[index]) els.resultNames[index].textContent = label;
-      });
+      setResultLabels();
+      setResultRate(record.mode === "free", record.errorRate);
       els.resultBox.classList.add("show");
       els.resultGrade.textContent = record.grade || getGrade(record.errorSeconds);
       els.resultTarget.textContent = formatSeconds(record.targetSeconds);
       els.resultActual.textContent = formatSeconds(record.actualSeconds);
       els.resultError.textContent = formatSeconds(record.errorSeconds);
 
+      if (record.saveFailed) {
+        els.resultRank.textContent = "保存失败";
+        return;
+      }
+      if (record.rankRefreshFailed) {
+        els.resultRank.textContent = "暂未取得";
+        return;
+      }
+      if (record.rankPending) {
+        els.resultRank.textContent = "计算中…";
+        return;
+      }
       if (record.savedToBoard) {
         els.resultRank.textContent = record.enteredVisibleBoard && record.boardRank
           ? `第 ${record.boardRank} 名`
@@ -2728,10 +2793,54 @@
         : "未进榜";
     }
 
+    function renderSubmittedResult(record) {
+      if (record.mode === "reaction" || record.mode === "athlete") {
+        showStarterResult(record);
+      } else {
+        showResult(record);
+      }
+    }
+
+    function isCurrentSubmittedResult(record) {
+      return lastSubmittedRecord === record && currentMode === record.mode && !running;
+    }
+
+    async function refreshSubmittedRank(record) {
+      try {
+        const rows = await fetchLeaderboardRows(record.mode);
+        if (record.savedToBoard) {
+          applyVisibleBoardRank(record, rows);
+        } else {
+          applyGuestVirtualRank(record, rows);
+        }
+        record.rankPending = false;
+        record.rankRefreshFailed = false;
+
+        if (isCurrentSubmittedResult(record)) {
+          renderSubmittedResult(record);
+          els.timerHint.textContent = getResultHint(record);
+        }
+
+        if (currentRank === record.mode) {
+          updateModeFeaturedSummaryFromRows(record.mode, rows);
+          renderFeaturedRecord();
+          renderLeaderboardRows(rows, record.mode, record);
+        }
+      } catch (err) {
+        console.warn("成绩已保存，但排行榜刷新失败：", err);
+        record.rankPending = false;
+        record.rankRefreshFailed = true;
+
+        if (isCurrentSubmittedResult(record)) {
+          renderSubmittedResult(record);
+          els.timerHint.textContent = "成绩已保存，排行榜刷新失败，请稍后刷新查看。";
+        }
+      }
+    }
+
     function clearResult() {
-      ["目标", "你的时间", "误差", "当前排名"].forEach((label, index) => {
-        if (els.resultNames[index]) els.resultNames[index].textContent = label;
-      });
+      setResultLabels();
+      setResultRate(false);
       if (!running && (currentMode === "reaction" || currentMode === "athlete")) {
         renderSignalPanel(currentMode, currentMode === "athlete" ? 3 : 1, "red");
       } else if (!running) {
