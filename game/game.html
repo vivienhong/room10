@@ -2523,9 +2523,15 @@ function validateGameEntry(entry){
   if(entry.isEnabled && !entry.pageKey && !entry.fallbackUrl) return false;
   return true;
 }
+function isGuestOpenGameEntry(entry){
+  return entry?.gameKey === "2048"
+    || entry?.gameKey === "gomoku"
+    || entry?.pageKey === "gomoku"
+    || entry?.displayName === "五子棋";
+}
 function renderGameButton(entry){
   const statusClass = entry.isEnabled ? "ready" : "";
-  const statusText = entry.statusText;
+  const statusText = isGuestOpenGameEntry(entry) && entry.memberOnly ? "开放游玩" : entry.statusText;
   return `
     <button class="game-btn${entry.isEnabled ? "" : " is-coming-soon"}" type="button" data-game-key="${escapeHtml(entry.gameKey)}">
       <span class="game-icon" aria-hidden="true">${escapeHtml(entry.iconText)}</span>
@@ -2596,7 +2602,7 @@ function openDbGame(gameKey){
     showTip(entry.disabledMessage || `《${entry.displayName}》当前不可用。`);
     return;
   }
-  const isPublicGuestGame = entry.gameKey === "2048";
+  const isPublicGuestGame = isGuestOpenGameEntry(entry);
   if(entry.memberOnly && !isPublicGuestGame && !isRoom10GameMember()){
     showTip(`《${entry.displayName}》仅限十号房成员进入。`);
     return;
