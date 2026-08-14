@@ -1030,10 +1030,12 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 .modal p{margin:8px 0 16px;color:var(--muted);font-size:13px;font-weight:850}
 .board-modal{
   width:min(640px,100%);
+  height:min(720px,86dvh);
   max-height:min(720px,86dvh);
   display:flex;
   flex-direction:column;
   text-align:left;
+  overflow:hidden;
 }
 .tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:16px 0 12px}
 .tab{
@@ -1079,10 +1081,13 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 }
 .table tr.current td{background:rgba(255,239,203,.86);color:#70492a}
 .leader-shell{
+  flex:1 1 auto;
+  min-height:0;
   display:grid;
   grid-template-columns:190px minmax(0,1fr);
+  grid-template-rows:minmax(0,1fr);
   gap:12px;
-  min-height:360px;
+  overflow:hidden;
 }
 .leader-shell .tabs{
   display:grid;
@@ -1115,9 +1120,12 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 }
 .tab.active .leader-tab-desc{color:rgba(104,64,31,.72)}
 .leader-shell .board-content{
+  min-height:0;
   padding:0 2px 0 0;
+  overflow-y:auto;
 }
 .leader-explain{
+  min-height:104px;
   margin-bottom:10px;
   padding:12px 13px;
   border-radius:18px;
@@ -1167,7 +1175,11 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
   border:1px solid rgba(255,255,255,.76);
 }
 @media(max-width:680px){
-  .leader-shell{grid-template-columns:1fr}
+  .leader-explain{min-height:0;}
+  .leader-shell{
+    grid-template-columns:1fr;
+    grid-template-rows:auto minmax(0,1fr);
+  }
   .leader-shell .tabs{
     display:flex;
     flex-wrap:nowrap;
@@ -1620,6 +1632,50 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 (() => {
   "use strict";
   const GAME_KEY = "knight_spirit";
+  const LEADERBOARD_ORDER = [
+    "guard_rate",
+    "guard_master",
+    "popular_knight_all",
+    "flip_master",
+    "lucky_x9",
+    "clear_board"
+  ];
+  const LEADERBOARD_UI = {
+    flip_master: {
+      title: "单局翻牌榜",
+      shortDesc: "单局翻牌",
+      description: "按单局最终翻牌数排名。",
+      valueLabel: "翻牌数",
+      unit: "张",
+      memberLabel: "玩家 × 骑士"
+    },
+    guard_rate: {
+      title: "天选情缘榜",
+      shortDesc: "实际出现率",
+      description: "选择某位骑士后，看他实际被翻出的概率；不按守护总次数排名。",
+      valueLabel: "出现率",
+      unit: "%",
+      memberLabel: "组合"
+    },
+    guard_master: {
+      title: "双向奔赴榜",
+      shortDesc: "互选次数",
+      description: "两人都选过对方才上榜，按真正完成的互选次数排名。",
+      valueLabel: "互选次数",
+      unit: "次",
+      memberLabel: "组合"
+    },
+    lucky_x9: { title: "全家福榜", shortDesc: "全家福" },
+    clear_board: { title: "清台榜", shortDesc: "清台次数" },
+    popular_knight_all: {
+      title: "骑士显灵榜",
+      shortDesc: "整体出现率",
+      description: "谁被选作骑士后，更容易被实际翻到。",
+      valueLabel: "出现率",
+      unit: "%",
+      memberLabel: "骑士"
+    }
+  };
   const RPC = {
     bootstrap: "get_knight_spirit_bootstrap",
     start: "start_knight_spirit_game",
@@ -1673,22 +1729,10 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     "result.reward_title",
     "result.no_reward",
     "leaderboard.title",
-    "leaderboard.flip_master.description",
-    "leaderboard.flip_master.value_label",
-    "leaderboard.guard_rate.description",
-    "leaderboard.guard_rate.value_label",
-    "leaderboard.guard_master.description",
-    "leaderboard.guard_master.value_label",
     "leaderboard.lucky_x9.description",
     "leaderboard.lucky_x9.value_label",
     "leaderboard.clear_board.description",
     "leaderboard.clear_board.value_label",
-    "leaderboard.popular_knight_all.description",
-    "leaderboard.popular_knight_all.value_label",
-    "leaderboard.popular_knight_month.description",
-    "leaderboard.popular_knight_month.value_label",
-    "leaderboard.reliable_knight_month.description",
-    "leaderboard.reliable_knight_month.value_label",
     "unlock.title",
     "unlock.body",
     "hint.select_knight",
@@ -1821,11 +1865,9 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     state.currentMember = payload.current_member || null;
     state.canPlay = Boolean(payload.can_play);
     state.candidates = normalizeCandidates(payload.candidates || payload.knights || []);
-    state.leaderboards = normalizeLeaderboards(payload.leaderboards || {});
-    renderSideLeaderboards();
-    if (!Object.keys(state.leaderboards).length){
-      loadLeaderboards(false);
-    }
+    state.leaderboards = {};
+    // 排行榜统一由公开 RPC 读取，避免 bootstrap 中旧榜单结构短暂闪现。
+    loadLeaderboards(false);
     state.goldCost = Number(payload.gold_cost || 0);
     state.costText = payload.cost_text || payload.status_text || "";
     state.dailyFreeAvailable = Boolean(payload.daily_free_available);
@@ -2894,12 +2936,11 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     desc.textContent = meta.description;
     const metaRow = document.createElement("div");
     metaRow.className = "leader-meta";
-    const valueChip = document.createElement("span");
-    valueChip.textContent = "成绩：" + meta.valueLabel;
-    const unitChip = document.createElement("span");
-    unitChip.textContent = "单位：" + (meta.unit || "无");
-    metaRow.appendChild(valueChip);
-    metaRow.appendChild(unitChip);
+    const metricChip = document.createElement("span");
+    metricChip.textContent = meta.unit
+      ? `${meta.valueLabel} · ${meta.unit}`
+      : meta.valueLabel;
+    metaRow.appendChild(metricChip);
     explain.appendChild(title);
     explain.appendChild(desc);
     explain.appendChild(metaRow);
@@ -2915,7 +2956,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     table.className = "table";
     const thead = document.createElement("thead");
     const headRow = document.createElement("tr");
-    ["排名","成员", meta.valueLabel].forEach(text => {
+    ["排名", meta.memberLabel || "成员", meta.valueLabel].forEach(text => {
       const th = document.createElement("th");
       th.textContent = text;
       headRow.appendChild(th);
@@ -2941,29 +2982,24 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     el.leaderContent.appendChild(table);
   }
   function orderedLeaderboardKeys(){
-    return Object.keys(state.leaderboards || {}).sort((a, b) => {
-      const aRawOrder = state.leaderboards[a]?.sortOrder;
-      const bRawOrder = state.leaderboards[b]?.sortOrder;
-      const aHasOrder = aRawOrder !== null && aRawOrder !== undefined && aRawOrder !== "" && Number.isFinite(Number(aRawOrder));
-      const bHasOrder = bRawOrder !== null && bRawOrder !== undefined && bRawOrder !== "" && Number.isFinite(Number(bRawOrder));
-      const aOrder = aHasOrder ? Number(aRawOrder) : null;
-      const bOrder = bHasOrder ? Number(bRawOrder) : null;
-      if (aHasOrder && bHasOrder && aOrder !== bOrder) return aOrder - bOrder;
-      if (aHasOrder !== bHasOrder) return aHasOrder ? -1 : 1;
-      return 0;
-    });
+    const keys = Object.keys(state.leaderboards || {});
+    const fixed = LEADERBOARD_ORDER.filter(key => keys.includes(key));
+    const remaining = keys.filter(key => !LEADERBOARD_ORDER.includes(key));
+    return [...fixed, ...remaining];
   }
   function getLeaderboardMeta(key, board){
+    const ui = LEADERBOARD_UI[key] || {};
     const descriptionKey = `leaderboard.${key}.description`;
     const valueLabelKey = `leaderboard.${key}.value_label`;
-    const description = state.texts[descriptionKey] || "";
-    const valueLabel = state.texts[valueLabelKey] || "";
+    const description = ui.description || board?.description || state.texts[descriptionKey] || "";
+    const valueLabel = ui.valueLabel || board?.valueLabel || state.texts[valueLabelKey] || "";
     return {
-      title: board?.title || missingConfigText(`leaderboard.${key}.title`),
-      shortDesc: valueLabel || missingConfigText(valueLabelKey),
+      title: ui.title || board?.title || missingConfigText(`leaderboard.${key}.title`),
+      shortDesc: ui.shortDesc || board?.shortDesc || valueLabel || missingConfigText(valueLabelKey),
       description: description || missingConfigText(descriptionKey),
       valueLabel: valueLabel || missingConfigText(valueLabelKey),
-      unit: board?.unit || ""
+      unit: ui.unit ?? board?.unit ?? "",
+      memberLabel: ui.memberLabel || board?.memberLabel || "成员"
     };
   }
   function formatLeaderboardValue(value){
@@ -3223,6 +3259,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       description: board.description || "",
       valueLabel: board.value_label || board.valueLabel || "",
       unit: board.unit || "",
+      memberLabel: board.member_label || board.memberLabel || "",
       sortOrder: board.sort_order ?? board.sortOrder ?? null,
       rows: rows.map((row, index) => ({
         rank: row.rank || index + 1,
