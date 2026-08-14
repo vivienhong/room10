@@ -6,8 +6,6 @@
 <title>十号房｜花房</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
-<!-- flower clean db-driven v22-market-limit-fix: 通用模板导航路径统一；业务展示与领取状态统一由数据库驱动；每日首次进入自动领取水与肥料；支持 trainee 练习生身份 -->
-
 <style>
 *{box-sizing:border-box;}
 
@@ -18,7 +16,6 @@
   --identity-scale:var(--ui-scale);
   --reward-modal-scale:1;
 
-  /* 身份组件：使用全站通用模板 */
   --identity-right:7.35%;
   --identity-top:6.46%;
   --identity-base-width:232;
@@ -34,7 +31,6 @@
   --identity-notice-y:0em;
   --identity-button-y:0em;
 
-  /* 手机版身份文字独立校准 */
   --identity-mobile-name-y:0em;
   --identity-mobile-separator-y:0em;
   --identity-mobile-role-y:0em;
@@ -42,7 +38,6 @@
   --identity-mobile-button-y:0em;
   --identity-notice-mobile-top:58px;
 
-  /* 房间按钮：使用全站通用模板，底图百分比绑定 */
   --room-nav-top:6.35%;
   --room-nav-start-left:25.83%;
   --room-nav-btn-width:4.72%;
@@ -68,7 +63,6 @@
   --room-nav-wash:rgba(214,185,157,.20);
   --room-nav-current-bg:rgba(239,224,205,.86);
 
-  /* 奖励弹窗基础颜色 */
   --reward-ink:#6b5141;
   --reward-text:#7d6557;
   --reward-line:rgba(190,143,112,0.24);
@@ -157,7 +151,6 @@ button,input{
   pointer-events:auto;
 }
 
-/* 通用模板点击层控制 */
 #overlay .roomNavLayer{
   pointer-events:none!important;
 }
@@ -176,10 +169,6 @@ button,input{
   pointer-events:auto!important;
 }
 
-/* =========================================================
-   花房背景特效：柔光 / 花瓣 / 叶片
-   背景氛围层，不影响点击，不遮挡顶部组件
-========================================================= */
 #flowerBgFx{
   position:absolute;
   inset:0;
@@ -293,9 +282,6 @@ button,input{
   }
 }
 
-/* =========================================================
-   房间按钮组件
-========================================================= */
 .roomNavLayer{
   position:absolute;
   inset:0;
@@ -446,9 +432,6 @@ button,input{
 .navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82);}
 .navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82);}
 
-/* =========================================================
-   身份组件
-========================================================= */
 .roomIdentity{
   --s:var(--identity-scale,1);
   position:absolute;
@@ -696,9 +679,6 @@ button,input{
   line-height:1.55;
 }
 
-/* =========================================================
-   花房真实功能面板：花市 + 我的花盆
-========================================================= */
 #flowerApp{
   position:absolute;
   left:var(--flower-app-left);
@@ -890,6 +870,7 @@ button,input{
 .priceUp{color:#b36446;}
 .priceDown{color:#56805a;}
 .priceFlat{color:#8a6b4a;}
+
 
 .flowerActions{
   display:grid;
@@ -1566,9 +1547,6 @@ button,input{
   transform:translateY(calc(5px * var(--ui-scale)));
 }
 
-/* =========================================================
-   花房商人：数量选择 + 卡片内确认
-========================================================= */
 .flowerMerchantQtyLabel{
   color:#8a6848;
   font-size:calc(10px * var(--ui-scale));
@@ -1640,10 +1618,6 @@ button,input{
   font-weight:950;
 }
 
-/* =========================================================
-   手机版花房商人：按钮下方内嵌展开
-   电脑端仍使用原弹窗；手机端避免 fixed 弹窗跳到视口上方。
-========================================================= */
 .flowerMerchantInlinePanel{
   display:none;
   width:100%;
@@ -1763,9 +1737,6 @@ button,input{
   }
 }
 
-/* =========================================================
-   右侧花盆栏压缩：网页版尽量完整显示，不让右栏内部滚动
-========================================================= */
 @media(min-width:541px){
   .potPanel .flowerPanelBody{
     overflow:hidden;
@@ -1878,9 +1849,6 @@ button,input{
   }
 }
 
-/* =========================================================
-   手机版花市操作提示：固定在视口下方，不撑长页面
-========================================================= */
 @media(max-width:540px){
   #marketMessage{
     position:fixed;
@@ -1904,10 +1872,6 @@ button,input{
     display:none!important;
   }
 }
-
-/* =========================
-   统一奖励弹窗（来自独立测试页）
-========================= */
 
 .reward-mask {
   position: fixed;
@@ -2280,8 +2244,6 @@ button,input{
   filter: brightness(1.02);
 }
 
-/* 不同类型轻微换色 */
-
 .reward-mask[data-type="title"] .reward-card {
   background:
     radial-gradient(circle at 12% 16%, rgba(255,235,204,.72), transparent 30%),
@@ -2325,7 +2287,6 @@ button,input{
   }
 }
 
-/* 登录弹窗 */
 #loginUI{
   position:fixed;
   inset:0;
@@ -2451,9 +2412,6 @@ button,input{
   font-size:18px;
 }
 
-/* =========================================================
-   540px 及以下手机版
-========================================================= */
 @media(max-width:540px){
   html,body{
     overflow-x:hidden;
@@ -2912,7 +2870,6 @@ button,input{
   </div>
 
   <div id="overlay">
-    <!-- 房间按钮 -->
     <nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换">
       <button class="navBtn" data-room="hall" type="button" data-page="index" data-login="false">
         <span class="navLabel">大堂</span>
@@ -2960,7 +2917,6 @@ button,input{
       </button>
     </nav>
 
-    <!-- 身份组件 -->
     <section class="roomIdentity" id="roomIdentity" aria-label="当前身份">
       <div class="roomIdentityBar">
         <div class="identityNameBox">
@@ -2989,7 +2945,6 @@ button,input{
       </div>
     </section>
 
-    <!-- 花房真实功能面板 -->
     <main id="flowerApp" aria-label="花房">
       <section class="flowerPanel marketPanel">
         <div class="flowerPanelHeader">
@@ -3111,7 +3066,6 @@ button,input{
   </div>
 </div>
 
-<!-- 统一奖励弹窗 -->
 <div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
     <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
       <div class="reward-petals" aria-hidden="true">
@@ -3337,6 +3291,8 @@ const flowerToast = document.getElementById("flowerToast");
 
 let flowerRewardAutoCloseTimer = null;
 let rewardConfirmHandler = null;
+let pendingFlowerAnimalEncounter = null;
+let flowerAnimalEncounterBusy = false;
 
 const flowerState = {
   marketRows:[],
@@ -3349,6 +3305,7 @@ const flowerState = {
   goldBalance:null,
   dailyTipMessage:"",
   paperTips:[],
+  marketCostBasis:{},
   merchantRows:[],
   merchantGroups:[],
   busy:false
@@ -3830,6 +3787,96 @@ function renderRewards(rewards){
   });
 }
 
+function getFlowerAnimalEncounterImage(data={}){
+  const imagePath = String(data?.image_path || "").trim();
+  if(imagePath) return flowerAssetFromFile(imagePath, imagePath);
+
+  const petNo = Math.max(0, Math.floor(Number(data?.pet_no) || 0));
+  return petNo > 0 ? `../game/gacha/pet/${petNo}.jpg` : "";
+}
+
+function isFlowerRewardModalOpen(){
+  const mask = document.getElementById("rewardMask");
+  return !!mask && (mask.classList.contains("show") || mask.getAttribute("aria-hidden") === "false");
+}
+
+function showFlowerAnimalEncounter(encounter){
+  if(!encounter || encounter.triggered !== true) return false;
+
+  const data = encounter.data && typeof encounter.data === "object" ? encounter.data : {};
+  const petName = String(data.pet_name || "小动物").trim() || "小动物";
+  const quantity = Math.max(1, Math.floor(Number(data.quantity) || 1));
+  const image = getFlowerAnimalEncounterImage(data);
+  const message = String(data.message || `${petName}循着花香来到花房，好奇地停在你身边。`).trim();
+
+  if(isFlowerRewardModalOpen()){
+    pendingFlowerAnimalEncounter = encounter;
+    return true;
+  }
+
+  showRewardModal({
+    type:"item",
+    icon:"🐾",
+    label:"动物偶遇",
+    title:`遇见了${petName}！`,
+    desc:message,
+    rewards:[{
+      img:image,
+      icon:"🐾",
+      name:`${petName}图片卡`,
+      amount:`×${quantity}`
+    }],
+    confirmText:"收下图片卡"
+  });
+  return true;
+}
+
+function flushPendingFlowerAnimalEncounter(){
+  if(!pendingFlowerAnimalEncounter || isFlowerRewardModalOpen()) return;
+  const encounter = pendingFlowerAnimalEncounter;
+  pendingFlowerAnimalEncounter = null;
+  setTimeout(() => showFlowerAnimalEncounter(encounter), 80);
+}
+
+async function tryFlowerAnimalEncounter(sourceDetail="花房互动"){
+  const auth = getFlowerAuth();
+  if(!auth || flowerAnimalEncounterBusy) return null;
+
+  flowerAnimalEncounterBusy = true;
+  try{
+    const relatedKey = `flower:${auth.memberId}:${getFlowerLocalDateKey()}:${Date.now()}:${Math.random().toString(36).slice(2,10)}`;
+    const { data, error } = await supabaseClient.rpc("trigger_room10_animal_encounter", {
+      p_member_id:auth.memberId,
+      p_trigger_key:"flower_room_action",
+      p_related_table:null,
+      p_related_id:null,
+      p_source_detail:String(sourceDetail || "花房互动"),
+      p_related_key:relatedKey
+    });
+
+    if(error){
+      console.warn("花房动物偶遇判定失败：", error);
+      return null;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if(result?.ok === false){
+      console.warn("花房动物偶遇处理失败：", result?.message || result?.reason || result);
+      return result || null;
+    }
+
+    if(result?.triggered === true){
+      showFlowerAnimalEncounter(result);
+    }
+    return result || null;
+  }catch(err){
+    console.warn("花房动物偶遇判定异常：", err);
+    return null;
+  }finally{
+    flowerAnimalEncounterBusy = false;
+  }
+}
+
 function showRewardModal(options={}){
   const mask = document.getElementById("rewardMask");
   if(!mask) return;
@@ -3894,6 +3941,7 @@ function closeRewardModal(){
   mask.style.display = "";
   mask.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
+  flushPendingFlowerAnimalEncounter();
 }
 
 function closeFlowerRewardModal(){
@@ -4065,10 +4113,77 @@ function updateMarketCountdown(){
   marketSubText.textContent = `下次价格刷新：${getNextMarketRefreshCountdown()}`;
 }
 
+function formatFlowerMoney(value, digits=1){
+  const n = Number(value);
+  if(!Number.isFinite(n)) return "--";
+  const rounded = Math.round(n * (10 ** digits)) / (10 ** digits);
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(digits);
+}
+
 function getPriceChangeHtml(change){
   const n = Number(change) || 0;
   if(n > 0) return `<span class="priceUp">↑ ${n}</span>`;
   if(n < 0) return `<span class="priceDown">↓ ${Math.abs(n)}</span>`;
+  return `<span class="priceFlat">—</span>`;
+}
+
+async function loadMarketCostBasis(){
+  const auth = getFlowerAuth();
+  flowerState.marketCostBasis = {};
+  if(!auth) return flowerState.marketCostBasis;
+
+  try{
+    const { data, error } = await supabaseClient.rpc("get_flower_market_buy_prices", {
+      p_member_id:auth.memberId,
+      p_member_code:auth.memberCode
+    });
+
+    if(error) throw error;
+
+    (Array.isArray(data) ? data : []).forEach(row => {
+      const key = String(row?.flower_key || "").trim();
+      const quantity = Math.max(0, Number(row?.current_quantity) || 0);
+      const averageBuyPrice = Number(row?.average_buy_price);
+      if(!key || quantity <= 0) return;
+
+      flowerState.marketCostBasis[key] = {
+        quantity,
+        complete:Number.isFinite(averageBuyPrice) && averageBuyPrice > 0,
+        averageBuyPrice:Number.isFinite(averageBuyPrice) && averageBuyPrice > 0 ? averageBuyPrice : null
+      };
+    });
+  }catch(err){
+    console.warn("读取花市买入价失败：", err);
+    flowerState.marketCostBasis = {};
+  }
+
+  return flowerState.marketCostBasis;
+}
+
+function getMarketPersonalPriceSnapshot(row){
+  const flowerKey = String(row?.flower_key || "");
+  const holdingQuantity = getMarketActiveHoldingQuantity(row);
+  const cached = flowerState.marketCostBasis?.[flowerKey] || null;
+  const cachedQuantity = Math.max(0, Number(cached?.quantity) || 0);
+  const averageBuyPrice = cached?.complete && Math.abs(cachedQuantity - holdingQuantity) < 0.0001
+    ? Number(cached.averageBuyPrice)
+    : null;
+  const currentPrice = getMarketPrice(row);
+  const hasBuyPrice = holdingQuantity > 0 && Number.isFinite(averageBuyPrice) && averageBuyPrice > 0;
+
+  return {
+    averageBuyPrice:hasBuyPrice ? averageBuyPrice : null,
+    personalChange:hasBuyPrice ? currentPrice - averageBuyPrice : null,
+    hasBuyPrice
+  };
+}
+
+function getPersonalPriceChangeHtml(value){
+  const n = Number(value);
+  if(!Number.isFinite(n)) return `<span class="priceFlat">--</span>`;
+  const amount = formatFlowerMoney(Math.abs(n), 1);
+  if(n > 0) return `<span class="priceUp">↑ ${amount}</span>`;
+  if(n < 0) return `<span class="priceDown">↓ ${amount}</span>`;
   return `<span class="priceFlat">—</span>`;
 }
 
@@ -5068,6 +5183,7 @@ async function confirmSellMerchantGroup(groupKey){
 
     const incomeText = totalIncome > 0 ? `，获得 ${totalIncome} 金币` : "";
     showFlowerToast(`花房商人收购成功：${group.displayName} ×${soldQuantity}${incomeText}`);
+    await tryFlowerAnimalEncounter("花房商人交易完成");
   }catch(err){
     console.error("花房商人交易失败：", err);
     const message = err?.message || err?.details || err?.hint || "花房商人交易失败";
@@ -5292,6 +5408,7 @@ function renderLoggedOutFlower(){
   flowerState.goldBalance = null;
   flowerState.dailyTipMessage = "";
   flowerState.paperTips = [];
+  flowerState.marketCostBasis = {};
   setFlowerResources(0, 0, 0);
   if(flowerGoldPill) flowerGoldPill.textContent = "金币：--";
   if(marketContent){
@@ -5328,6 +5445,8 @@ function renderMarket(rows){
     <div class="flowerMarketGrid">
       ${list.map(row => {
         const owned = Number(row.owned_quantity) || 0;
+        const marketHeld = getMarketActiveHoldingQuantity(row);
+        const personalPrice = getMarketPersonalPriceSnapshot(row);
         const sellable = getSellableQuantity(row);
         const withered = getMarketWitheredQuantity(row);
         const wilting = getMarketWiltingQuantity(row);
@@ -5350,7 +5469,10 @@ function renderMarket(rows){
             <div class="flowerCardMeta">
               <div class="flowerMetaLine"><span>当前价格</span><strong>${Number(row.price) || 0} 金币</strong></div>
               <div class="flowerMetaLine"><span>本轮变化</span><strong>${getPriceChangeHtml(row.price_change)}</strong></div>
-              <div class="flowerMetaLine"><span>我拥有</span><strong>${owned} 朵</strong></div>
+              <div class="flowerMetaLine"><span>当前持仓</span><strong>${marketHeld} 朵</strong></div>
+              <div class="flowerMetaLine"><span>平均买入价</span><strong>${personalPrice.hasBuyPrice ? `${formatFlowerMoney(personalPrice.averageBuyPrice, 1)} 金币` : "--"}</strong></div>
+              <div class="flowerMetaLine"><span>个人涨跌</span><strong>${getPersonalPriceChangeHtml(personalPrice.personalChange)}</strong></div>
+              ${owned !== marketHeld ? `<div class="flowerMetaLine"><span>全部拥有</span><strong>${owned} 朵</strong></div>` : ""}
               ${wilting > 0 ? `<div class="flowerMetaLine"><span>折扣可卖</span><strong>${wilting} 朵</strong></div>` : ""}
               ${withered > 0 ? `<div class="flowerMetaLine"><span>待清理</span><strong>${withered} 朵</strong></div>` : ""}
               <div class="flowerMetaLine"><span>枯萎倒计时</span><strong data-wither-countdown="${escapeHtml(row.earliest_wither_at || "")}">${formatWitherCountdown(row.earliest_wither_at)}</strong></div>
@@ -5536,6 +5658,7 @@ async function loadFlowerMarket(){
     if(error) throw error;
 
     flowerState.marketRows = Array.isArray(data) ? data : [];
+    await loadMarketCostBasis();
     renderMarket(flowerState.marketRows);
     showBoxMessage(marketMessage, "");
   }catch(err){
@@ -5676,6 +5799,7 @@ async function buyFlower(flowerKey, quantity=1){
 
     await loadFlowerPage();
     showMarketOperationMessage(message, false);
+    await tryFlowerAnimalEncounter("花市买入完成");
   }catch(err){
     console.error("买花失败：", err);
     await loadFlowerMarket();
@@ -5729,6 +5853,7 @@ async function sellFlower(flowerKey, quantity=1){
     const actualQuantity = Number(row?.quantity) || sellQuantity;
     await loadFlowerPage();
     showMarketOperationMessage(`${displayName}卖出成功：实际卖出 ${actualQuantity} 朵。`, false);
+    await tryFlowerAnimalEncounter("花市卖出完成");
   }catch(err){
     console.error("卖花失败：", err);
     await loadFlowerMarket();
@@ -5763,6 +5888,7 @@ async function plantSeed(){
     updateFlowerResourcesFromRow(row);
     showFlowerToast(row?.message || "种下成功");
     await loadFlowerPage();
+    await tryFlowerAnimalEncounter("种下种子");
   }catch(err){
     console.error("种下失败：", err);
     showFlowerToast(err?.message || "种下失败", "error");
@@ -5840,6 +5966,7 @@ async function careFlowerPot(careType){
     addDailyCareCount(careType);
     showFlowerToast(row?.message || "照顾成功");
     await loadFlowerPage();
+    await tryFlowerAnimalEncounter(careType === "water" ? "花盆浇水" : "花盆施肥");
   }catch(err){
     console.error("照顾失败：", err);
     showFlowerToast(err?.message || "照顾失败", "error");
@@ -5867,6 +5994,7 @@ async function harvestFlowerPot(){
     const row = Array.isArray(data) ? data[0] : data;
     showFlowerToast(row?.message || "收获成功");
     await loadFlowerPage();
+    await tryFlowerAnimalEncounter("花盆收获");
   }catch(err){
     console.error("收获失败：", err);
     showFlowerToast(err?.message || "收获失败", "error");
@@ -5907,6 +6035,7 @@ async function clearWitheredFlowerPot(){
     }else{
       showFlowerToast(row?.message || "已清理花盆");
     }
+    await tryFlowerAnimalEncounter("清理枯萎花盆");
   }catch(err){
     console.error("清理失败：", err);
     showFlowerToast(err?.message || "清理失败", "error");
@@ -5971,6 +6100,7 @@ async function clearWitheredMarketFlower(flowerKey){
     }else{
       showMarketOperationMessage(row?.message || `${displayName}枯萎市场花已清理。`, false);
     }
+    await tryFlowerAnimalEncounter("清理枯萎市场花");
   }catch(err){
     console.error("清理枯萎市场花失败：", err);
     showMarketOperationMessage(err?.message || `${displayName}清理失败`, true);
