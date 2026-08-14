@@ -47,7 +47,7 @@ body{
   justify-content:center;
   align-items:center;
   overflow:hidden;
-  background:#f3ecdf;
+  background:linear-gradient(180deg, #f3ecdf 0%, #eee4d4 48%, #e4d4bf 100%);
   color:var(--text);
   transition:background .35s ease;
 }
@@ -60,28 +60,64 @@ button{
   display:none !important;
 }
 
-#pageError{
+
+/* ===== 全站统一操作失败弹窗 ===== */
+body.room10ModalOpen{overflow:hidden!important;}
+
+.room10ErrorMask{
   position:fixed;
-  left:50%;
-  bottom:18px;
-  transform:translateX(-50%);
-  z-index:1600;
-  max-width:min(680px, calc(100vw - 28px));
-  padding:12px 16px;
-  border-radius:16px;
-  background:rgba(255,248,240,0.97);
-  border:1px solid rgba(165,94,64,0.28);
-  color:#7a3f2b;
-  box-shadow:0 12px 30px rgba(87,50,31,0.16);
-  font-size:13px;
-  font-weight:800;
-  line-height:1.55;
-  text-align:left;
-  white-space:pre-line;
+  inset:0;
+  z-index:2200;
   display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(60,42,23,.22);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
 }
 
-#pageError.show{display:block;}
+.room10ErrorMask.show{display:flex;}
+
+.room10ErrorDialog{
+  width:min(430px,92vw);
+  max-height:calc(100dvh - 40px);
+  overflow:auto;
+  padding:24px 22px 20px;
+  border:1px solid rgba(203,167,123,.30);
+  border-radius:22px;
+  background:rgba(255,249,241,.98);
+  color:#6a4525;
+  text-align:center;
+  box-shadow:0 18px 45px rgba(85,58,34,.20),inset 0 1px 0 rgba(255,255,255,.94);
+}
+
+.room10ErrorTitle{margin:0 0 10px;color:#6f4726;font-size:20px;font-weight:900;line-height:1.25;}
+.room10ErrorMessage{margin:0;font-size:14px;font-weight:700;line-height:1.75;white-space:pre-line;}
+.room10ErrorMeta{margin-top:10px;color:#9a7656;font-size:10px;line-height:1.45;white-space:pre-line;}
+.room10ErrorConfirm{
+  appearance:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:108px;
+  height:40px;
+  margin:16px auto 0;
+  padding:0 18px;
+  border:0;
+  border-radius:12px;
+  background:linear-gradient(180deg,#efd5ab 0%,#dfbd8a 100%);
+  color:#6a4120;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:900;
+  line-height:1;
+  cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,247,230,.95),0 4px 12px rgba(112,83,52,.10);
+  transition:transform .18s ease,filter .18s ease;
+}
+.room10ErrorConfirm:hover{transform:translateY(-1px);filter:brightness(1.03);}
+.room10ErrorConfirm:focus-visible{outline:2px solid rgba(151,111,82,.55);outline-offset:3px;}
 
 
 /* ===== 首页舞台 ===== */
@@ -579,7 +615,6 @@ button.siteNoticeItem:hover{
 /* =========================
    统一奖励弹窗：首页礼包领取共用
 ========================= */
-body.room10ModalOpen{overflow:hidden!important;}
 
 .reward-mask{
   position:fixed;
@@ -1073,6 +1108,7 @@ body.room10ModalOpen{overflow:hidden!important;}
 }
 
 @media (max-width: 540px){
+  .room10ErrorMask,
   .reward-mask{padding:14px;}
 }
 
@@ -1086,7 +1122,7 @@ body.room10ModalOpen{overflow:hidden!important;}
 </head>
 
 <body>
-<!-- index-v10: secure text RPC, strict identity validation, stale-login cleanup, upgrade data integrity -->
+<!-- index-final: unified login events, daily gold + animal encounter, safe identity sync, unified error handling -->
 
 <div id="home">
   <div id="homeStage">
@@ -1124,7 +1160,7 @@ body.room10ModalOpen{overflow:hidden!important;}
     <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="">
       <a href="#" data-room-key="dorm" data-need-login="true"><rect x="16.7" y="25.9" width="27.7" height="22.5"></rect></a>
       <a href="#" data-room-key="studioTodo" data-need-login="true"><rect x="57" y="25.9" width="27.5" height="22.5"></rect></a>
-      <a href="#" data-room-key="living" data-need-login="true"><rect x="16.6" y="49.4" width="27" height="21.5"></rect></a>
+      <a href="#" data-room-key="living" data-need-login="false"><rect x="16.6" y="49.4" width="27" height="21.5"></rect></a>
       <a href="#" data-room-key="game" data-need-login="false"><rect x="57" y="49.4" width="27.5" height="21.5"></rect></a>
       <a href="#" data-room-key="honor" data-need-login="false"><rect x="16.7" y="72" width="27" height="22"></rect></a>
       <a href="#" data-manager-room="true"><rect x="57" y="72" width="27.5" height="22"></rect></a>
@@ -1135,15 +1171,15 @@ body.room10ModalOpen{overflow:hidden!important;}
   </div>
 </div>
 
-<div id="loginUI">
-  <div class="login-panel">
+<div id="loginUI" aria-hidden="true">
+  <div class="login-panel" role="dialog" aria-modal="true" aria-label="十号房登录">
     <img id="loginFrameImage" src="" alt="">
 
     <input id="username" type="text" autocomplete="username">
     <input id="password" type="password" autocomplete="current-password">
 
-    <button id="togglePassword" type="button"></button>
-    <button id="loginBtn" type="button"></button>
+    <button id="togglePassword" type="button" aria-label="显示或隐藏钥匙"></button>
+    <button id="loginBtn" type="button" aria-label="开启大门"></button>
 
     <button id="registerLink" type="button"></button>
 
@@ -1151,6 +1187,15 @@ body.room10ModalOpen{overflow:hidden!important;}
 
     <div id="loginMessage"></div>
   </div>
+</div>
+
+<div class="room10ErrorMask" id="room10ErrorMask" aria-hidden="true">
+  <section class="room10ErrorDialog" role="alertdialog" aria-modal="true" aria-labelledby="room10ErrorTitle" aria-describedby="room10ErrorMessage">
+    <h2 class="room10ErrorTitle" id="room10ErrorTitle">操作失败</h2>
+    <p class="room10ErrorMessage" id="room10ErrorMessage"></p>
+    <div class="room10ErrorMeta" id="room10ErrorMeta"></div>
+    <button class="room10ErrorConfirm" id="room10ErrorConfirm" type="button">知道了</button>
+  </section>
 </div>
 
 <div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement">
@@ -1185,6 +1230,7 @@ const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 const root = document.documentElement;
 const homeImg = document.getElementById("homeImage");
 const loginFrameImage = document.getElementById("loginFrameImage");
+const loginUI = document.getElementById("loginUI");
 const homeStage = document.getElementById("homeStage");
 const topActions = document.getElementById("topActions");
 const currentUserText = document.getElementById("currentUserText");
@@ -1204,6 +1250,10 @@ const loginCloseBtn = document.getElementById("loginCloseBtn");
 const togglePasswordBtn = document.getElementById("togglePassword");
 const loginBtn = document.getElementById("loginBtn");
 const registerLink = document.getElementById("registerLink");
+const room10ErrorMask = document.getElementById("room10ErrorMask");
+const room10ErrorMessage = document.getElementById("room10ErrorMessage");
+const room10ErrorMeta = document.getElementById("room10ErrorMeta");
+const room10ErrorConfirm = document.getElementById("room10ErrorConfirm");
 const rewardMask = document.getElementById("rewardMask");
 const rewardCloseBtn = document.getElementById("rewardCloseBtn");
 const rewardConfirmBtn = document.getElementById("rewardConfirmBtn");
@@ -1219,25 +1269,29 @@ const NOTICE_ACK_KEY = "room10_notice_ack_v4";
 const HOLIDAY_GIFT_CHECK_KEY = "room10_holiday_gift_checked_v1";
 const PAGE_KEY = "index";
 const VALID_MEMBER_ROLES = new Set(["owner","admin","member","roomer","trainee","applying"]);
+const MEMBER_ACCESS_ROLES = new Set(["owner","admin","member","roomer","trainee"]);
 
 const STORAGE_KEYS = Object.freeze({
   loggedIn:"room10LoggedIn",
   user:"room10User",
   role:"room10Role",
   memberId:"room10MemberId",
-  memberCode:"room10MemberCode",
-  applicantSession:"room10ApplicantSession",
-  applicationDraft:"room10ApplicationDraft"
+  memberCode:"room10MemberCode"
 });
 
-const LOGIN_STORAGE_KEYS = Object.freeze(Object.values(STORAGE_KEYS));
+const LOGIN_STORAGE_KEYS = Object.freeze([
+  STORAGE_KEYS.loggedIn,
+  STORAGE_KEYS.user,
+  STORAGE_KEYS.role,
+  STORAGE_KEYS.memberId,
+  STORAGE_KEYS.memberCode
+]);
 const SYNC_STORAGE_KEYS = new Set([
   STORAGE_KEYS.loggedIn,
   STORAGE_KEYS.user,
   STORAGE_KEYS.role,
   STORAGE_KEYS.memberId,
-  STORAGE_KEYS.memberCode,
-  NOTICE_ACK_KEY
+  STORAGE_KEYS.memberCode
 ]);
 
 const REQUIRED_TEXT_KEYS = [
@@ -1275,10 +1329,8 @@ const REQUIRED_TEXT_KEYS = [
   "role.invalid",
   "error.path_missing",
   "error.asset_missing",
-  "error.member_missing",
   "error.member_read_failed",
   "error.page_text_missing",
-  "error.page_text_read_failed",
   "error.notice_config_invalid",
   "error.reward_config_invalid",
   "reward.close_label",
@@ -1291,6 +1343,8 @@ const REQUIRED_TEXT_KEYS = [
 ];
 
 let pageTexts = new Map();
+let room10ErrorReturnFocus = null;
+let room10ErrorAfterCloseCallback = null;
 let pageTextReady = false;
 let currentMember = null;
 let rewardQueue = [];
@@ -1299,6 +1353,9 @@ let rewardAfterCloseCallback = null;
 let currentRewardClaimAction = null;
 let rewardClaimInFlight = false;
 let dailyLoginCheckInFlight = false;
+let loginInFlight = false;
+let homeSyncPromise = null;
+let lastPassiveSyncAt = 0;
 let holidayGiftCheckInFlight = false;
 let anniversaryCheckInFlight = false;
 let seasonEffectState = { rafId: 0, onResize: null };
@@ -1307,24 +1364,61 @@ let noticeState = { signature: "", items: [] };
 let noticeCache = { at: 0, memberId: "", items: [], signature: "" };
 
 function showPageError(message, detail = ""){
-  let panel = document.getElementById("pageError");
-  if(!panel){
-    panel = document.createElement("div");
-    panel.id = "pageError";
-    document.body.appendChild(panel);
+  const title = normalizeTextValue(message) || "本次操作未成功";
+  const rawDetail = normalizeTextValue(detail);
+  console.error(title, rawDetail || "");
+
+  room10ErrorMessage.textContent = `${title}。\n请截图此提示，并及时反馈给维修工。`;
+  room10ErrorMeta.textContent = [
+    rawDetail ? `详情：${rawDetail}` : "",
+    `页面：${document.title || location.pathname}`,
+    `时间：${new Date().toLocaleString("zh-CN", { hour12:false })}`
+  ].filter(Boolean).join("\n");
+
+  if(!room10ErrorMask.classList.contains("show")){
+    room10ErrorReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   }
-  panel.textContent = detail ? `${message}\n${detail}` : message;
-  panel.classList.add("show");
+
+  room10ErrorMask.classList.add("show");
+  room10ErrorMask.setAttribute("aria-hidden", "false");
+  syncRoom10BodyLock();
+  requestAnimationFrame(() => room10ErrorConfirm.focus());
 }
 
-function clearPageError(){
-  const panel = document.getElementById("pageError");
-  if(panel) panel.classList.remove("show");
+function clearPageError(runCallback = true){
+  room10ErrorMask.classList.remove("show");
+  room10ErrorMask.setAttribute("aria-hidden", "true");
+  syncRoom10BodyLock();
+
+  const target = room10ErrorReturnFocus;
+  const callback = room10ErrorAfterCloseCallback;
+  room10ErrorReturnFocus = null;
+  room10ErrorAfterCloseCallback = null;
+
+  if(target?.isConnected) target.focus();
+  if(runCallback && typeof callback === "function") callback();
+}
+
+function formatSupabaseError(error){
+  if(!error) return "";
+  return [
+    normalizeTextValue(error.code) ? `code=${normalizeTextValue(error.code)}` : "",
+    normalizeTextValue(error.message) ? `message=${normalizeTextValue(error.message)}` : "",
+    normalizeTextValue(error.details) ? `details=${normalizeTextValue(error.details)}` : "",
+    normalizeTextValue(error.hint) ? `hint=${normalizeTextValue(error.hint)}` : ""
+  ].filter(Boolean).join(" | ") || normalizeTextValue(String(error));
+}
+
+function reportPageError(error, message, detail = ""){
+  if(error?.room10Reported) return;
+  showPageError(message, detail || formatSupabaseError(error) || error?.message || String(error || ""));
 }
 
 function fail(message, detail = ""){
   showPageError(message, detail);
-  throw new Error(detail ? `${message} ${detail}` : message);
+  const error = new Error(detail ? `${message} ${detail}` : message);
+  error.room10Reported = true;
+  throw error;
 }
 
 function escapeHtml(value){
@@ -1365,8 +1459,7 @@ async function loadPageTexts(){
   });
 
   if(error){
-    showPageError("INDEX_TEXT_READ_FAILED", error.message || "get_room10_page_texts");
-    throw error;
+    fail("首页文案读取失败", error.message || "get_room10_page_texts");
   }
 
   pageTexts = new Map();
@@ -1377,9 +1470,8 @@ async function loadPageTexts(){
 
   const missingKeys = REQUIRED_TEXT_KEYS.filter(key => !normalizeTextValue(pageTexts.get(key)));
   if(missingKeys.length){
-    const message = pageTexts.get("error.page_text_missing") || "INDEX_TEXT_MISSING";
-    showPageError(message, missingKeys.join("、"));
-    throw new Error(`${message}：${missingKeys.join(", ")}`);
+    const message = pageTexts.get("error.page_text_missing") || "首页文案配置缺失";
+    fail(message, missingKeys.join("、"));
   }
 
   pageTextReady = true;
@@ -1402,9 +1494,13 @@ function applyStaticTexts(){
   rewardConfirmBtn.textContent = text("reward.confirm_button");
 }
 
+function isUnsafeUrl(value){
+  return /^(?:javascript|data|vbscript):/i.test(normalizeTextValue(value));
+}
+
 function requirePage(key){
   const path = window.room10Page ? window.room10Page(key) : "";
-  if(!normalizeTextValue(path)){
+  if(!normalizeTextValue(path) || isUnsafeUrl(path)){
     fail(text("error.path_missing"), key);
   }
   return path;
@@ -1412,7 +1508,7 @@ function requirePage(key){
 
 function requireAsset(keyPath){
   const path = window.room10Asset ? window.room10Asset(keyPath) : "";
-  if(!normalizeTextValue(path)){
+  if(!normalizeTextValue(path) || isUnsafeUrl(path)){
     fail(text("error.asset_missing"), keyPath);
   }
   return path;
@@ -1442,6 +1538,19 @@ function getStoredMemberId(){
 
 function getStoredMemberCode(){
   return normalizeTextValue(localStorage.getItem(STORAGE_KEYS.memberCode));
+}
+
+function getStoredMemberSnapshot(){
+  if(!isLoggedIn()) return null;
+  const id = getStoredMemberId();
+  const memberCode = getStoredMemberCode();
+  const nickname = normalizeTextValue(localStorage.getItem(STORAGE_KEYS.user));
+  const role = normalizeTextValue(localStorage.getItem(STORAGE_KEYS.role)).toLowerCase();
+  return id && memberCode && nickname && role ? { id, memberCode, nickname, role } : null;
+}
+
+function hasMemberAccess(member = currentMember || getStoredMemberSnapshot()){
+  return MEMBER_ACCESS_ROLES.has(normalizeTextValue(member?.role).toLowerCase());
 }
 
 function saveStoredMember(member){
@@ -1503,7 +1612,9 @@ function extractIdentityMember(data){
 }
 
 function identityPayloadExplicitlyMissing(data){
-  if(!data || typeof data !== "object" || Array.isArray(data)) return false;
+  if(data === null || data === undefined) return true;
+  if(Array.isArray(data)) return data.length === 0;
+  if(typeof data !== "object") return false;
   const status = normalizeTextValue(data.status || data.code).toLowerCase();
   return data.found === false || status === "not_found" || status === "member_not_found";
 }
@@ -1516,22 +1627,21 @@ async function fetchCurrentMember(){
 
   const memberId = getStoredMemberId();
   const memberCode = getStoredMemberCode();
-
   if(!memberId || !memberCode){
     clearStoredLogin();
-    clearPageError();
     return null;
   }
 
+  const previousMember = currentMember;
   const { data, error } = await client.rpc("get_index_member_identity", {
     p_member_id:memberId,
     p_member_code:memberCode
   });
 
   if(error){
-    currentMember = null;
+    currentMember = previousMember?.id === memberId ? previousMember : null;
     showPageError(text("error.member_read_failed"), error.message || "get_index_member_identity RPC 失败");
-    return null;
+    return currentMember;
   }
 
   const identityRow = extractIdentityMember(data);
@@ -1539,16 +1649,22 @@ async function fetchCurrentMember(){
     currentMember = null;
     if(identityPayloadExplicitlyMissing(data)){
       clearStoredLogin();
-      clearPageError();
     }else{
       showPageError(text("error.member_read_failed"), "get_index_member_identity 返回结构无法识别");
     }
     return null;
   }
 
-  currentMember = validateMember(identityRow, "get_index_member_identity 返回值");
-  saveStoredMember(currentMember);
-  return currentMember;
+  const member = validateMember(identityRow, "get_index_member_identity 返回值");
+  if(member.invalidRole){
+    clearStoredLogin();
+    showPageError(text("role.invalid"), member.role);
+    return null;
+  }
+
+  currentMember = member;
+  saveStoredMember(member);
+  return member;
 }
 
 function getRoleLabel(role){
@@ -1560,8 +1676,9 @@ function getRoleLabel(role){
 }
 
 function updateIdentityDisplay(){
-  if(isLoggedIn() && currentMember){
-    currentUserText.textContent = `${currentMember.nickname} | ${getRoleLabel(currentMember.role)}`;
+  const member = currentMember || getStoredMemberSnapshot();
+  if(member){
+    currentUserText.textContent = `${member.nickname} | ${getRoleLabel(member.role)}`;
     loginOpenBtn.classList.add("hidden");
     logoutBtn.classList.remove("hidden");
     return;
@@ -1648,7 +1765,9 @@ function resolveRewardIcon(rawIcon, rewardName){
 
   if(!icon) return "";
 
-  if(/^(https?:|data:|blob:|\/)/i.test(icon)){
+  if(isUnsafeUrl(icon)) return "";
+
+  if(/^(https?:|blob:|\/)/i.test(icon)){
     return icon;
   }
 
@@ -1808,10 +1927,9 @@ function showUpgradeLoginNoticeIfNeeded(loginRow, afterClose = null){
 }
 
 function syncRoom10BodyLock(){
-  const hasOpenModal = Boolean(
-    document.getElementById("loginUI")?.classList.contains("show")
-    || rewardMask?.classList.contains("show")
-  );
+  const hasOpenModal = loginUI.classList.contains("show")
+    || rewardMask.classList.contains("show")
+    || room10ErrorMask.classList.contains("show");
   document.body.classList.toggle("room10ModalOpen", hasOpenModal);
 }
 
@@ -1850,7 +1968,9 @@ function playNextRewardModal(){
   openRewardModal(next.modal);
 }
 
-function closeRewardModal(){
+function closeRewardModal(force = false){
+  if(rewardClaimInFlight && !force) return;
+
   rewardMask.classList.remove("show");
   rewardMask.setAttribute("aria-hidden", "true");
   syncRoom10BodyLock();
@@ -1886,7 +2006,7 @@ function buildDailyLoginRewardModal(result){
     desc:["每日登录奖励已到账。", encounterMessage].filter(Boolean).join("\n"),
     rewards:encounter
       ? [{
-          name:normalizeTextValue(encounter.pet_name) || "动物图片卡",
+          name:`${normalizeTextValue(encounter.pet_name) || "动物"}图片卡`,
           icon:encounter.image_path || "🐾",
           amount:Number(encounter.quantity) || 1,
           unit:"张"
@@ -1895,7 +2015,7 @@ function buildDailyLoginRewardModal(result){
   }, "claim_index_daily_login_reward");
 }
 
-async function maybeClaimIndexDailyLoginReward(options = {}){
+async function maybeClaimIndexDailyLoginReward(){
   if(!isLoggedIn() || dailyLoginCheckInFlight || !currentMember) return false;
 
   dailyLoginCheckInFlight = true;
@@ -1921,10 +2041,10 @@ async function maybeClaimIndexDailyLoginReward(options = {}){
 
     if(!data?.show_modal) return false;
 
-    showRewardModal(buildDailyLoginRewardModal(data), options.afterClose);
+    showRewardModal(buildDailyLoginRewardModal(data));
     return true;
   }catch(err){
-    showPageError("每日登录奖励处理失败", err.message || String(err));
+    reportPageError(err, "每日登录奖励处理失败");
     return false;
   }finally{
     dailyLoginCheckInFlight = false;
@@ -1932,6 +2052,7 @@ async function maybeClaimIndexDailyLoginReward(options = {}){
 }
 
 function runAfterRewardQueue(callback, hasRewards){
+  if(typeof callback !== "function") return;
   if(!hasRewards){
     callback();
     return;
@@ -1947,23 +2068,73 @@ function runAfterRewardQueue(callback, hasRewards){
   }
 }
 
-async function maybeClaimJoinAnniversaryAchievements(options = {}){
+async function runIndexLoginEvents(afterAll = null){
+  if(!isLoggedIn() || !currentMember || !hasMemberAccess()){
+    if(typeof afterAll === "function") afterAll();
+    return false;
+  }
+
+  if(room10ErrorMask.classList.contains("show")){
+    if(typeof afterAll === "function"){
+      room10ErrorAfterCloseCallback = () => runIndexLoginEvents(afterAll);
+    }
+    return false;
+  }
+
+  let hasRewards = false;
+  for(const check of [
+    maybeClaimIndexDailyLoginReward,
+    maybeClaimJoinAnniversaryAchievements,
+    maybeClaimLoginHolidayGifts
+  ]){
+    hasRewards = (await check()) || hasRewards;
+    if(room10ErrorMask.classList.contains("show")){
+      if(typeof afterAll === "function"){
+        room10ErrorAfterCloseCallback = () => runAfterRewardQueue(afterAll, hasRewards);
+      }
+      return hasRewards;
+    }
+  }
+
+  if(typeof afterAll === "function") runAfterRewardQueue(afterAll, hasRewards);
+  return hasRewards;
+}
+
+async function maybeClaimJoinAnniversaryAchievements(){
   if(!isLoggedIn() || anniversaryCheckInFlight || !currentMember) return false;
 
   anniversaryCheckInFlight = true;
 
   try{
-    const { data, error } = await client.rpc("claim_join_anniversary_achievements", {
-      p_member_id: currentMember.id,
-      p_member_code: currentMember.memberCode,
+    const memberId = currentMember.id;
+    const memberCode = currentMember.memberCode;
+    const rpcArgs = {
+      p_member_id: memberId,
+      p_member_code: memberCode,
       p_local_date: getLocalDateString()
-    });
+    };
 
-    if(error){
-      showPageError("加入周年成就读取失败", error.message || "claim_join_anniversary_achievements RPC 失败");
-      return false;
+    let { data, error } = await client.rpc("claim_join_anniversary_achievements", rpcArgs);
+
+    /*
+     * PostgREST 偶尔会在函数刚新增/改签名后仍持有旧 schema cache。
+     * 若缓存仍只认识带默认日期参数的旧签名，改用 2 参数调用一次；
+     * 数据库函数会自行使用 p_local_date 的默认值。
+     */
+    if(error && normalizeTextValue(error.code).toUpperCase() === "PGRST202"){
+      ({ data, error } = await client.rpc("claim_join_anniversary_achievements", {
+        p_member_id: memberId,
+        p_member_code: memberCode
+      }));
     }
 
+    if(error){
+      showPageError(
+        "加入周年成就读取失败",
+        formatSupabaseError(error) || "claim_join_anniversary_achievements RPC 失败"
+      );
+      return false;
+    }
 
     const claims = Array.isArray(data?.claims) ? data.claims : [];
     if(!data?.claimed_any || claims.length === 0) return false;
@@ -1971,10 +2142,9 @@ async function maybeClaimJoinAnniversaryAchievements(options = {}){
     claims.forEach((claim, index) => {
       const modal = normalizeRewardModalPayload(claim?.modal, `claim_join_anniversary_achievements.claims[${index}]`);
       const achievementId = normalizeTextValue(claim?.achievement_id);
-      const isLast = index === claims.length - 1;
       showRewardModal(
         modal,
-        isLast ? options.afterAllRewards : null,
+        null,
         achievementId
           ? { type:"honor", itemType:"achievement", itemId:achievementId }
           : null
@@ -1983,17 +2153,17 @@ async function maybeClaimJoinAnniversaryAchievements(options = {}){
 
     return true;
   }catch(err){
-    showPageError("加入周年成就处理失败", err.message || String(err));
+    reportPageError(err, "加入周年成就处理失败");
     return false;
   }finally{
     anniversaryCheckInFlight = false;
   }
 }
 
-async function maybeClaimLoginHolidayGifts(options = {}){
+async function maybeClaimLoginHolidayGifts(){
   if(!isLoggedIn() || holidayGiftCheckInFlight || !currentMember) return false;
 
-  if(!options.force && hasCheckedHolidayGiftToday(currentMember.id)){
+  if(hasCheckedHolidayGiftToday(currentMember.id)){
     return false;
   }
 
@@ -2019,10 +2189,9 @@ async function maybeClaimLoginHolidayGifts(options = {}){
     claims.forEach((claim, index) => {
       const modal = normalizeRewardModalPayload(claim?.modal, `claim_login_holiday_gifts.claims[${index}]`);
       const pendingRewardId = normalizeTextValue(claim?.pending_reward_id);
-      const isLast = index === claims.length - 1;
       showRewardModal(
         modal,
-        isLast ? options.afterAllRewards : null,
+        null,
         pendingRewardId
           ? { type:"holiday", pendingRewardId }
           : null
@@ -2031,7 +2200,7 @@ async function maybeClaimLoginHolidayGifts(options = {}){
 
     return true;
   }catch(err){
-    showPageError("登录礼包处理失败", err.message || String(err));
+    reportPageError(err, "登录礼包处理失败");
     return false;
   }finally{
     holidayGiftCheckInFlight = false;
@@ -2081,17 +2250,19 @@ async function claimCurrentReward(){
       return;
     }
 
-    const result = response.data || {};
-    if(result.ok === false){
+    const result = Array.isArray(response.data) ? (response.data[0] || {}) : (response.data || {});
+    if(result.ok === false || result.success === false){
       showPageError("领取失败", result.message || "奖励领取失败。");
       return;
     }
 
-    clearPageError();
+    clearPageError(false);
     noticeCache.at = 0;
-    closeRewardModal();
+    rewardClaimInFlight = false;
+    closeRewardModal(true);
+    await renderNotices();
   }catch(err){
-    showPageError("领取失败", err.message || String(err));
+    reportPageError(err, "领取失败");
   }finally{
     rewardClaimInFlight = false;
     rewardConfirmBtn.disabled = false;
@@ -2185,7 +2356,7 @@ async function renderNotices(){
     return;
   }
 
-  if(!isLoggedIn() || !currentMember){
+  if(!isLoggedIn() || !currentMember || !hasMemberAccess()){
     noticeState = { signature: "", items: [] };
     siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">${escapeHtml(text("notice.login_required"))}</div>`;
     setNoticeCount(0);
@@ -2235,7 +2406,7 @@ async function renderNotices(){
   }catch(err){
     noticeState = { signature: "", items: [] };
     siteNoticeContent.innerHTML = `<div class="siteNoticeEmpty">${escapeHtml(text("notice.read_error"))}</div>`;
-    showPageError(text("notice.read_error"), err.message || String(err));
+    reportPageError(err, text("notice.read_error"));
     setNoticeCount(0);
   }
 }
@@ -2302,9 +2473,10 @@ function initAssets(){
 
 function goRegisterFromIndex(){
   const returnPath = requirePage("index");
-  const registerPath = requirePage("managerRegister");
+  const url = new URL(requirePage("managerRegister"), window.location.href);
   sessionStorage.setItem("room10RegisterReturn", returnPath);
-  window.location.href = `${registerPath}?from=${encodeURIComponent(returnPath)}`;
+  url.searchParams.set("from", returnPath);
+  window.location.href = url.href;
 }
 
 function getManagerPageByRole(member = currentMember){
@@ -2331,7 +2503,7 @@ async function enterManagerRoom(){
       if(!verifiedMember && isLoggedIn()) return;
     }catch(err){
       currentMember = null;
-      showPageError(text("error.member_read_failed"), err.message || String(err));
+      reportPageError(err, text("error.member_read_failed"));
       return;
     }
   }
@@ -2348,8 +2520,15 @@ function enterRoom(pageKey, needLogin, allowGuestMode){
     return;
   }
 
-  if(allowGuestMode && !isLoggedIn()){
-    window.location.href = `${page}?mode=guest`;
+  if(needLogin && !hasMemberAccess()){
+    window.location.href = getManagerPageByRole(currentMember || getStoredMemberSnapshot());
+    return;
+  }
+
+  if(allowGuestMode && !hasMemberAccess()){
+    const url = new URL(page, window.location.href);
+    url.searchParams.set("mode", "guest");
+    window.location.href = url.href;
     return;
   }
 
@@ -2368,13 +2547,16 @@ function openLogin(targetPage = ""){
   }
 
   if(targetPage) setPendingRedirect(targetPage);
-  document.getElementById("loginUI").classList.add("show");
+  loginUI.classList.add("show");
+  loginUI.setAttribute("aria-hidden", "false");
   syncRoom10BodyLock();
   loginMessage.innerText = "";
+  setTimeout(() => usernameInput.focus(), 30);
 }
 
 function closeLogin(keepRedirect = true){
-  document.getElementById("loginUI").classList.remove("show");
+  loginUI.classList.remove("show");
+  loginUI.setAttribute("aria-hidden", "true");
   syncRoom10BodyLock();
   loginMessage.innerText = "";
   if(!keepRedirect) clearPendingRedirect();
@@ -2385,6 +2567,8 @@ function togglePassword(){
 }
 
 async function login(){
+  if(loginInFlight) return;
+
   const nickname = normalizeLoginInput(usernameInput.value);
   const key = normalizeLoginInput(passwordInput.value);
   loginMessage.innerText = "";
@@ -2394,75 +2578,88 @@ async function login(){
     return;
   }
 
+  loginInFlight = true;
+  loginBtn.disabled = true;
+
   try{
     const { data, error } = await client.rpc("room10_member_login", {
-      p_nickname: nickname,
-      p_key_code: key
+      p_nickname:nickname,
+      p_key_code:key
     });
 
     if(error){
-      setLoginMessage(`${text("login.check_failed")}：${error.message || "room10_member_login"}`);
+      setLoginMessage(text("login.check_failed"));
+      showPageError(text("login.check_failed"), error.message || "room10_member_login");
       return;
     }
 
-    const loginRow = Array.isArray(data) && data.length ? data[0] : null;
-
+    const loginRow = Array.isArray(data) ? data[0] : data;
     if(!loginRow?.success){
       setLoginMessage(normalizeTextValue(loginRow?.message) || text("login.no_record"));
       return;
     }
 
     const member = validateMember(loginRow, "room10_member_login 返回值");
+    if(member.invalidRole){
+      clearStoredLogin();
+      setLoginMessage(text("role.invalid"));
+      return;
+    }
+
     saveStoredMember(member);
     currentMember = member;
     noticeCache.at = 0;
 
-    if(member.invalidRole){
-      setLoginMessage(text("role.invalid"));
-      await safeSyncHomeUI({ skipDailyLoginCheck:true, skipHolidayGiftCheck:true, skipAnniversaryCheck:true });
-      return;
-    }
+    const textRole = member.role === "roomer" ? "member" : member.role;
+    setLoginMessage(text(`login.success.${textRole}`), true);
+    await safeSyncHomeUI({ checkEvents:false, force:true });
+    await new Promise(resolve => setTimeout(resolve, 420));
 
-    setLoginMessage(text(`login.success.${member.role}`), true);
-    await safeSyncHomeUI({ skipDailyLoginCheck:true, skipHolidayGiftCheck:true, skipAnniversaryCheck:true });
+    const targetPage = getPendingRedirect();
+    const goTarget = () => {
+      if(!targetPage) return;
+      clearPendingRedirect();
+      window.location.href = hasMemberAccess(member)
+        ? targetPage
+        : getManagerPageByRole(member);
+    };
 
-    setTimeout(async () => {
-      const targetPage = getPendingRedirect();
-      const goTarget = () => {
-        if(targetPage){
-          clearPendingRedirect();
-          window.location.href = targetPage;
-        }
-      };
+    usernameInput.value = "";
+    passwordInput.value = "";
+    passwordInput.type = "password";
+    closeLogin(true);
 
-      usernameInput.value = "";
-      passwordInput.value = "";
-      closeLogin(true);
-
-      const continueAfterUpgradeNotice = async () => {
-        const claimedDaily = await maybeClaimIndexDailyLoginReward();
-        const claimedAnniversary = await maybeClaimJoinAnniversaryAchievements({ force:true });
-        const claimedGift = await maybeClaimLoginHolidayGifts({ force:true });
-        runAfterRewardQueue(goTarget, claimedDaily || claimedAnniversary || claimedGift);
-      };
-
-      if(showUpgradeLoginNoticeIfNeeded(loginRow, continueAfterUpgradeNotice)){
-        return;
-      }
-
+    const continueAfterUpgradeNotice = () => runIndexLoginEvents(goTarget);
+    if(!showUpgradeLoginNoticeIfNeeded(loginRow, continueAfterUpgradeNotice)){
       await continueAfterUpgradeNotice();
-    }, 420);
+    }
   }catch(err){
-    setLoginMessage(`${text("login.failed")}：${err.message || String(err)}`);
+    setLoginMessage(text("login.failed"));
+    reportPageError(err, text("login.failed"));
+  }finally{
+    loginInFlight = false;
+    loginBtn.disabled = false;
   }
+}
+
+function resetRewardState(){
+  rewardQueue.length = 0;
+  rewardModalShowing = false;
+  rewardAfterCloseCallback = null;
+  currentRewardClaimAction = null;
+  rewardMask.classList.remove("show");
+  rewardMask.setAttribute("aria-hidden", "true");
+  syncRoom10BodyLock();
 }
 
 function handleLogout(){
   clearStoredLogin();
   closeNoticePanel();
-  noticeCache.at = 0;
+  clearPageError(false);
+  resetRewardState();
+  noticeCache = { at:0, memberId:"", items:[], signature:"" };
   closeLogin(false);
-  safeSyncHomeUI();
+  safeSyncHomeUI({ checkEvents:false, force:true });
 }
 
 function bindHomeImageLoadOnce(){
@@ -2470,7 +2667,6 @@ function bindHomeImageLoadOnce(){
   homeImageLoadBound = true;
 
   homeImg.addEventListener("load", () => {
-    applyHomeShellBackground();
     syncHomeTopbarScale();
     initSeasonEffect();
   });
@@ -2480,10 +2676,6 @@ function bindHomeImageLoadOnce(){
   });
 }
 
-function applyHomeShellBackground(){
-  document.body.style.background = "linear-gradient(180deg, #f3ecdf 0%, #eee4d4 48%, #e4d4bf 100%)";
-}
-
 function syncHomeTopbarScale(){
   const rect = homeStage?.getBoundingClientRect() || homeImg?.getBoundingClientRect();
   const stageWidth = Number(rect?.width || 0);
@@ -2491,8 +2683,6 @@ function syncHomeTopbarScale(){
 
   const identityScale = Math.max(0.34, Math.min(3.2, stageWidth / 1629));
   root.style.setProperty("--identity-scale", String(identityScale));
-  root.style.setProperty("--identity-top", "5.15%");
-  root.style.setProperty("--identity-right", "5.20%");
 }
 
 /* ===== 四季特效 ===== */
@@ -2781,32 +2971,35 @@ function initSeasonEffect(){
   seasonEffectState.onResize = onResize;
 }
 
-async function safeSyncHomeUI(options = {}){
-  if(!pageTextReady) return;
+async function safeSyncHomeUI({ checkEvents = false, force = false } = {}){
+  if(!pageTextReady) return false;
+  if(homeSyncPromise) return homeSyncPromise;
+  if(!force && !checkEvents && Date.now() - lastPassiveSyncAt < 15000) return false;
 
-  try{
-    await fetchCurrentMember();
-    updateIdentityDisplay();
-    await updateHomeImageByTime();
-    applyHomeShellBackground();
-    syncHomeTopbarScale();
-    await renderNotices();
+  homeSyncPromise = (async () => {
+    try{
+      await fetchCurrentMember();
+      updateIdentityDisplay();
+      await updateHomeImageByTime();
+      syncHomeTopbarScale();
+      await renderNotices();
 
-    if(currentMember?.invalidRole) return;
+      if(checkEvents && !room10ErrorMask.classList.contains("show")){
+        await runIndexLoginEvents();
+      }
 
-    if(!options.skipDailyLoginCheck){
-      await maybeClaimIndexDailyLoginReward();
+      lastPassiveSyncAt = Date.now();
+      return true;
+    }catch(err){
+      reportPageError(err, "首页同步失败");
+      syncHomeTopbarScale();
+      return false;
+    }finally{
+      homeSyncPromise = null;
     }
-    if(!options.skipAnniversaryCheck){
-      await maybeClaimJoinAnniversaryAchievements();
-    }
-    if(!options.skipHolidayGiftCheck){
-      await maybeClaimLoginHolidayGifts();
-    }
-  }catch(err){
-    showPageError("首页同步失败", err.message || String(err));
-    syncHomeTopbarScale();
-  }
+  })();
+
+  return homeSyncPromise;
 }
 
 function bindEvents(){
@@ -2878,26 +3071,44 @@ function bindEvents(){
     }
   });
 
-  rewardCloseBtn.addEventListener("click", closeRewardModal);
+  room10ErrorMask.addEventListener("click", (event) => {
+    if(event.target === room10ErrorMask) clearPageError();
+  });
+  room10ErrorConfirm.addEventListener("click", () => clearPageError());
+  rewardCloseBtn.addEventListener("click", () => closeRewardModal());
   rewardConfirmBtn.addEventListener("click", claimCurrentReward);
 
   document.addEventListener("keydown", (event) => {
-    if(event.key === "Escape"){
-      closeRewardModal();
-    }
+    if(event.key !== "Escape") return;
+    if(room10ErrorMask.classList.contains("show")) clearPageError();
+    else if(rewardMask.classList.contains("show")) closeRewardModal();
+    else if(loginUI.classList.contains("show")) closeLogin(false);
   });
 
-  window.addEventListener("pageshow", () => safeSyncHomeUI());
-  window.addEventListener("resize", () => syncHomeTopbarScale());
+  window.addEventListener("pageshow", (event) => {
+    if(event.persisted) safeSyncHomeUI({ checkEvents:false, force:true });
+  });
+  window.addEventListener("resize", syncHomeTopbarScale);
   document.addEventListener("visibilitychange", () => {
-    if(!document.hidden) safeSyncHomeUI();
+    if(!document.hidden) safeSyncHomeUI({ checkEvents:false });
   });
   window.addEventListener("storage", (event) => {
     const isNoticeAckKey = event.key === NOTICE_ACK_KEY
       || String(event.key || "").startsWith(`${NOTICE_ACK_KEY}:`);
-    if(SYNC_STORAGE_KEYS.has(event.key) || isNoticeAckKey){
+
+    if(isNoticeAckKey){
+      const unread = noticeState.signature && noticeState.signature !== getAckSignature();
+      setNoticeCount(unread ? noticeState.items.length : 0);
+      return;
+    }
+
+    if(event.key === null || SYNC_STORAGE_KEYS.has(event.key)){
       noticeCache.at = 0;
-      safeSyncHomeUI();
+      if(!isLoggedIn()){
+        clearPageError(false);
+        resetRewardState();
+      }
+      safeSyncHomeUI({ checkEvents:false, force:true });
     }
   });
 }
@@ -2912,14 +3123,13 @@ async function initIndexPage(){
     await updateHomeImageByTime();
 
     if(homeImg.complete && homeImg.naturalWidth){
-      applyHomeShellBackground();
       syncHomeTopbarScale();
       initSeasonEffect();
     }
 
-    await safeSyncHomeUI();
+    await safeSyncHomeUI({ checkEvents:true, force:true });
   }catch(err){
-    showPageError("首页初始化失败", err.message || String(err));
+    reportPageError(err, "首页初始化失败");
   }
 }
 
