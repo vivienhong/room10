@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light" />
 <title>2048｜十号房</title>
-<!-- 玩法页面：由游戏房弹窗/iframe加载；动物偶遇交由外层统一弹窗显示 -->
+<!-- 玩法页面：由游戏房弹窗/iframe加载；动物偶遇在 2048 本页显示 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../room10-paths.js"></script>
 <style>
@@ -503,6 +503,31 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
 }
 .modal h2{margin:0;font-size:22px;font-weight:950}
 .modal p{margin:9px 0 18px;color:var(--muted);font-size:13px;line-height:1.7;font-weight:850}
+.animal-modal{width:min(400px,100%)}
+.animal-kicker{margin-bottom:7px;color:#9a6a3f;font-size:12px;font-weight:950;letter-spacing:.08em}
+.animal-image-wrap{
+  width:150px;
+  height:150px;
+  margin:16px auto 12px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border-radius:24px;
+  background:rgba(255,252,246,.78);
+  border:1px solid rgba(255,255,255,.88);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.92),0 10px 28px rgba(92,63,37,.10);
+}
+.animal-image-wrap img{width:100%;height:100%;object-fit:contain;display:block}
+.animal-reward{
+  margin:0 0 18px;
+  padding:10px 12px;
+  border-radius:14px;
+  color:#755132;
+  font-size:13px;
+  font-weight:900;
+  background:rgba(255,249,238,.72);
+  border:1px solid rgba(255,255,255,.80);
+}
 .modal-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 
 @media(max-width:880px){
@@ -674,6 +699,21 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
   </div>
 </div>
 
+<div class="mask" id="animalEncounterMask" aria-hidden="true">
+  <div class="modal animal-modal" role="dialog" aria-modal="true" aria-labelledby="animalEncounterTitle">
+    <div class="animal-kicker">🐾 动物偶遇</div>
+    <h2 id="animalEncounterTitle">遇到了一只小动物</h2>
+    <div class="animal-image-wrap" id="animalImageWrap">
+      <img id="animalEncounterImage" alt="动物偶遇" />
+    </div>
+    <p id="animalEncounterMessage">一只小动物好奇地过来围观你的 2048 对局。</p>
+    <div class="animal-reward" id="animalEncounterReward">获得动物图片卡 × 1</div>
+    <div class="modal-actions">
+      <button class="btn" type="button" id="animalEncounterConfirmBtn">收下图片卡</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (() => {
   "use strict";
@@ -712,7 +752,6 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     playHint: "继续滑动，把相同数字合并起来。",
     guestHint: "游客可直接游玩；本局不会写入个人记录或排行榜。",
     guestRule: "游客可以直接游玩，但成绩不会计入个人记录和排行榜；登录成员完整结束一局后，可记录成绩并按规则获得奖励。",
-    encounterUnavailable: "动物偶遇已记录，但暂时无法显示。",
     gameUnavailable: "游戏暂时没有准备好，请稍后再试。"
   });
 
@@ -789,6 +828,13 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     restartMask: document.getElementById("restartMask"),
     restartCancelBtn: document.getElementById("restartCancelBtn"),
     restartConfirmBtn: document.getElementById("restartConfirmBtn"),
+    animalEncounterMask: document.getElementById("animalEncounterMask"),
+    animalEncounterTitle: document.getElementById("animalEncounterTitle"),
+    animalEncounterImage: document.getElementById("animalEncounterImage"),
+    animalImageWrap: document.getElementById("animalImageWrap"),
+    animalEncounterMessage: document.getElementById("animalEncounterMessage"),
+    animalEncounterReward: document.getElementById("animalEncounterReward"),
+    animalEncounterConfirmBtn: document.getElementById("animalEncounterConfirmBtn"),
     dpadButtons: Array.from(document.querySelectorAll("[data-direction]"))
   };
 
@@ -1402,25 +1448,50 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     }
   }
 
-  async function show2048AnimalEncounter(encounter){
+  function resolveAnimalImagePath(path){
+    const value = normalizeText(path);
+    if (!value) return "";
+    if (/^(https?:|data:|blob:|\/)/i.test(value)) return value;
+    try{
+      if (typeof window.room10Path === "function"){
+        return window.room10Path(value) || value;
+      }
+    }catch{}
+    return value;
+  }
+
+  function close2048AnimalEncounter(){
+    el.animalEncounterMask.classList.remove("show");
+    el.animalEncounterMask.setAttribute("aria-hidden","true");
+  }
+
+  function show2048AnimalEncounter(encounter){
     if (!encounter || encounter.triggered !== true) return false;
 
-    const host = window.parent !== window ? window.parent : window;
-    const showEncounter = host?.showAnimalEncounterModal;
+    const animal = encounter.data && typeof encounter.data === "object"
+      ? encounter.data
+      : encounter;
+    const petName = normalizeText(animal.pet_name) || "小动物";
+    const quantity = Math.max(1, Number(animal.quantity) || 1);
+    const imagePath = resolveAnimalImagePath(animal.image_path);
 
-    if (typeof showEncounter !== "function"){
-      showToast(UI_TEXT.encounterUnavailable, "error");
-      console.error("统一动物偶遇弹窗未找到", encounter);
-      return false;
+    el.animalEncounterTitle.textContent = `遇到了${petName}`;
+    el.animalEncounterMessage.textContent = normalizeText(animal.message) || `${petName}好奇地过来围观你的 2048 对局。`;
+    el.animalEncounterReward.textContent = `获得${petName}图片卡 × ${quantity}`;
+
+    if (imagePath){
+      el.animalEncounterImage.src = imagePath;
+      el.animalEncounterImage.alt = petName;
+      el.animalImageWrap.hidden = false;
+    }else{
+      el.animalEncounterImage.removeAttribute("src");
+      el.animalImageWrap.hidden = true;
     }
 
-    try{
-      return await showEncounter(encounter);
-    }catch(error){
-      console.error("显示动物偶遇失败：", error);
-      showToast(getFriendlyError(error, UI_TEXT.encounterUnavailable), "error");
-      return false;
-    }
+    el.animalEncounterMask.classList.add("show");
+    el.animalEncounterMask.setAttribute("aria-hidden","false");
+    requestAnimationFrame(() => el.animalEncounterConfirmBtn.focus());
+    return true;
   }
 
   function openRestartModal(){
@@ -1503,8 +1574,12 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     el.restartCancelBtn.addEventListener("click", closeRestartModal);
     el.restartConfirmBtn.addEventListener("click", restartGame);
     el.newGameBtn.addEventListener("click", startNewAfterResult);
+    el.animalEncounterConfirmBtn.addEventListener("click", close2048AnimalEncounter);
     el.restartMask.addEventListener("click", event => {
       if (event.target === el.restartMask) closeRestartModal();
+    });
+    el.animalEncounterMask.addEventListener("click", event => {
+      if (event.target === el.animalEncounterMask) close2048AnimalEncounter();
     });
 
     el.dpadButtons.forEach(btn => {
@@ -1512,6 +1587,10 @@ button:focus-visible{outline:3px solid rgba(164,119,73,.28);outline-offset:2px}
     });
 
     window.addEventListener("keydown", event => {
+      if (el.animalEncounterMask.classList.contains("show")){
+        if (event.key === "Escape") close2048AnimalEncounter();
+        return;
+      }
       if (el.restartMask.classList.contains("show")){
         if (event.key === "Escape") closeRestartModal();
         return;
