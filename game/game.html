@@ -2514,8 +2514,7 @@ function normalizeGameEntry(row){
     imageUrl:String(row?.image_url || "").trim(),
     isEnabled:row?.is_enabled !== false,
     memberOnly:row?.member_only === true,
-    disabledMessage:String(row?.disabled_message || "").trim(),
-    statusText:String(row?.status_text || "").trim()
+    disabledMessage:String(row?.disabled_message || "").trim()
   };
 }
 function validateGameEntry(entry){
@@ -2523,15 +2522,11 @@ function validateGameEntry(entry){
   if(entry.isEnabled && !entry.pageKey && !entry.fallbackUrl) return false;
   return true;
 }
-function isGuestOpenGameEntry(entry){
-  return entry?.gameKey === "2048"
-    || entry?.gameKey === "gomoku"
-    || entry?.pageKey === "gomoku"
-    || entry?.displayName === "五子棋";
-}
 function renderGameButton(entry){
-  const statusClass = entry.isEnabled ? "ready" : "";
-  const statusText = isGuestOpenGameEntry(entry) && entry.memberOnly ? "开放游玩" : entry.statusText;
+  // 统一规则：只有 member_only=true 的游戏显示“成员限定”。
+  // 公开游戏 member_only=false，不显示任何权限标签。
+  const statusText = entry.memberOnly ? "成员限定" : "";
+  const statusClass = statusText ? "ready" : "";
   return `
     <button class="game-btn${entry.isEnabled ? "" : " is-coming-soon"}" type="button" data-game-key="${escapeHtml(entry.gameKey)}">
       <span class="game-icon" aria-hidden="true">${escapeHtml(entry.iconText)}</span>
@@ -2562,7 +2557,7 @@ async function loadGameEntries(){
   }
   const { data, error } = await client
     .from("game_room_entries")
-    .select("game_key,display_name,icon_text,page_key,fallback_url,entry_type,image_asset_key,image_url,is_active,is_enabled,member_only,disabled_message,status_text,sort_order")
+    .select("game_key,display_name,icon_text,page_key,fallback_url,entry_type,image_asset_key,image_url,is_active,is_enabled,member_only,disabled_message,sort_order")
     .eq("is_active", true)
     .order("sort_order", { ascending:true })
     .order("created_at", { ascending:true });
@@ -2602,8 +2597,7 @@ function openDbGame(gameKey){
     showTip(entry.disabledMessage || `《${entry.displayName}》当前不可用。`);
     return;
   }
-  const isPublicGuestGame = isGuestOpenGameEntry(entry);
-  if(entry.memberOnly && !isPublicGuestGame && !isRoom10GameMember()){
+  if(entry.memberOnly && !isRoom10GameMember()){
     showTip(`《${entry.displayName}》仅限十号房成员进入。`);
     return;
   }
@@ -2922,7 +2916,12 @@ function openGameModal(url, title = "小游戏"){
   if(!safeUrl) return;
   closeSiteNoticePanel();
   const safeTitle = String(title || "小游戏").trim() || "小游戏";
-  if(isTinyScreen()){
+
+  // 游戏房本身若已运行在上层页面的 iframe / 弹窗中，
+  // 直接在当前 iframe 内进入小游戏，避免再次套一层游戏弹窗，
+  // 从而出现“两层边框 + 两个关闭按钮”。
+  const isEmbeddedInParent = window.self !== window.top;
+  if(isTinyScreen() || isEmbeddedInParent){
     window.location.href = safeUrl;
     return;
   }
