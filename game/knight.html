@@ -3030,6 +3030,25 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
     await loadBootstrap();
   }
   function backToGameRoom(){
+    /*
+      游戏从游戏房的 iframe 弹窗中打开时，“返回游戏房”应关闭父级游戏弹窗，
+      而不是把 game.html 再加载进当前 iframe，否则会出现“游戏房套在弹窗里”的情况。
+    */
+    try{
+      if (
+        window.parent &&
+        window.parent !== window &&
+        typeof window.parent.closeGameModal === "function"
+      ){
+        // 兼容需要 reason="manual" 的游戏房版本；
+        // 对不接收参数的版本，多传参数也不会产生影响。
+        window.parent.closeGameModal("manual");
+        return;
+      }
+    }catch(error){
+      console.warn("关闭父级游戏弹窗失败，将改为返回游戏房页面。", error);
+    }
+
     const path = typeof window.room10Page === "function"
       ? window.room10Page("game")
       : "";
@@ -3037,6 +3056,17 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
       showFatalError(new Error(missingConfigText("room10Page(game)")));
       return;
     }
+
+    // 独立打开时正常返回游戏房；若仍处于其他 iframe 中，则让最外层回到游戏房。
+    try{
+      if (window.top && window.top !== window){
+        window.top.location.href = path;
+        return;
+      }
+    }catch(error){
+      console.warn("顶层返回游戏房失败，将在当前页面跳转。", error);
+    }
+
     window.location.href = path;
   }
   function showScreen(name){
