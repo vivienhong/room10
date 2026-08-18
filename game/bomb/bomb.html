@@ -1489,7 +1489,6 @@ let pendingAwardGameId = null;
 let pendingAwardItems = [];
 let awardClaimBusy = false;
 let endingReplayBusy = false;
-let lastActiveGameSnapshot = null;
 
 function isLoggedIn(){ return localStorage.getItem("room10LoggedIn") === "true"; }
 function getCurrentUser(){ return localStorage.getItem("room10User") || ""; }
@@ -1578,7 +1577,8 @@ function firstValue(source, keys, fallback = ""){
 const ENDING_SEEN_PREFIX = "room10BombEndingSeen:";
 
 function getEndingSeenKey(gameId){
-  return `${ENDING_SEEN_PREFIX}${gameId || ""}`;
+  const memberId = getCurrentMemberId() || "guest";
+  return `${ENDING_SEEN_PREFIX}${memberId}:${gameId || ""}`;
 }
 
 function hasSeenEnding(gameId){
@@ -1592,6 +1592,58 @@ function markEndingSeen(gameId){
 
 function getGameIdFromItem(item){
   return firstValue(item, ["game_id", "id"], "");
+}
+
+function getGameNoFromItem(item){
+  const value = Number(firstValue(item, ["game_no", "game_number", "no"], NaN));
+  return Number.isFinite(value) ? value : null;
+}
+
+function getGameEndedAtMs(item){
+  const raw = firstValue(item, ["ended_at", "finished_at", "updated_at", "created_at"], "");
+  const value = raw ? new Date(raw).getTime() : NaN;
+  return Number.isFinite(value) ? value : -Infinity;
+}
+
+function sortBombHistoryLatestFirst(items){
+  return (Array.isArray(items) ? items : []).slice().sort((a, b) => {
+    const aTime = getGameEndedAtMs(a);
+    const bTime = getGameEndedAtMs(b);
+    if(aTime !== bTime){
+      if(aTime === -Infinity) return 1;
+      if(bTime === -Infinity) return -1;
+      return bTime - aTime;
+    }
+
+    const aNo = getGameNoFromItem(a);
+    const bNo = getGameNoFromItem(b);
+    if(aNo !== null && bNo !== null) return bNo - aNo;
+    return 0;
+  });
+}
+
+function findPreviousCompletedGame(items, activeGame){
+  if(!activeGame) return null;
+
+  const currentGameId = String(activeGame.game_id || activeGame.id || "");
+  const currentGameNo = getGameNoFromItem(activeGame);
+  const candidates = (Array.isArray(items) ? items : []).filter(item => {
+    const itemId = String(getGameIdFromItem(item) || "");
+    return !currentGameId || !itemId || itemId !== currentGameId;
+  });
+
+  if(currentGameNo !== null){
+    const numbered = candidates
+      .map(item => ({ item, gameNo:getGameNoFromItem(item) }))
+      .filter(entry => entry.gameNo !== null && entry.gameNo < currentGameNo)
+      .sort((a, b) => b.gameNo - a.gameNo);
+
+    const exactPrevious = numbered.find(entry => entry.gameNo === currentGameNo - 1);
+    if(exactPrevious) return exactPrevious.item;
+    if(numbered.length) return numbered[0].item;
+  }
+
+  return sortBombHistoryLatestFirst(candidates)[0] || null;
 }
 
 function isCurrentActorParticipant(game){
@@ -1673,49 +1725,39 @@ async function getHistoryResultForGame(game){
 
 async function getEndingPayloadForGame(game){
   if(!game) return null;
+
   const historyItem = await getHistoryResultForGame(game);
-  if(historyItem) return buildEndingPayloadFromRecord(historyItem, game);
+  if(historyItem){
+    return buildEndingPayloadFromRecord(historyItem, game);
+  }
 
   const gameId = game.game_id || game.id || "";
   if(!gameId) return null;
 
-  try{
-    const [{ data: gameRows }, { data: moveRows }] = await Promise.all([
-      client.from("bomb_games")
-        .select("id, game_no, game_mode, bomb_number, round_count, ended_at, exploded_guest_name")
-        .eq("id", gameId)
-        .limit(1),
-      client.from("bomb_moves")
-        .select("game_id, actor_name, claim_number, move_no, is_exploded")
-        .eq("game_id", gameId)
-        .eq("is_exploded", true)
-        .limit(1)
-    ]);
-
-    const gameRow = Array.isArray(gameRows) ? gameRows[0] : null;
-    const moveRow = Array.isArray(moveRows) ? moveRows[0] : null;
-
-    if(gameRow || moveRow){
-      return buildEndingPayloadFromRecord({
-        game_id:gameId,
-        game_no:gameRow?.game_no || game.game_no,
-        exploded_actor_name:moveRow?.actor_name || gameRow?.exploded_guest_name,
-        exploded_number:moveRow?.claim_number || gameRow?.bomb_number,
-        round_count:gameRow?.round_count || game.round_count,
-        participant_count:Array.isArray(game.participants) ? game.participants.length : ""
-      }, game);
-    }
-  }catch(err){
-    console.error(err);
-  }
-
   return buildEndingPayloadFromRecord({
-    game_id:gameId,
-    game_no:game.game_no,
-    exploded_actor_name:"未知玩家",
-    exploded_number:"--",
-    round_count:game.round_count,
-    participant_count:Array.isArray(game.participants) ? game.participants.length : "--"
+    game_id: gameId,
+    game_no: game.game_no,
+    exploded_actor_name:
+      game.exploded_actor_name
+      || game.actor_name
+      || game.exploded_guest_name
+      || "未知玩家",
+    exploded_number:
+      game.exploded_number
+      || game.bomb_number
+      || game.claim_number
+      || "--",
+    round_count:
+      game.round_count
+      || game.move_count
+      || "--",
+    participant_count:
+      game.participant_count
+      || (
+        Array.isArray(game.participants)
+          ? game.participants.length
+          : "--"
+      )
   }, game);
 }
 
@@ -1745,43 +1787,105 @@ async function replayFinishedGameForParticipant(finishedGame, options = {}){
 }
 
 async function checkPendingEndedResult(){
-  const actorKey = getCurrentActorKey();
-  if(endingReplayBusy || !actorKey) return false;
+  /*
+    只有同时满足以下条件才播报：
+    1. 当前是已登录成员；
+    2. 当前已有一局新的进行中战局；
+    3. 当前成员尚未参加这局新战局；
+    4. 当前成员确实参加过紧邻的新局之前那一局；
+    5. 该成员尚未看过该局播报。
+  */
+  if(endingReplayBusy || !isMemberAvailable()) return false;
+  if(!currentGame || !currentGame.has_active_game) return false;
+  if(isCurrentActorParticipant(currentGame)) return false;
 
   try{
     endingReplayBusy = true;
 
-    const { data: participantRows, error: participantError } = await client
-      .from("bomb_participants")
-      .select("game_id, actor_key, actor_name, first_joined_at")
-      .eq("actor_key", actorKey)
-      .order("first_joined_at", { ascending:false })
-      .limit(16);
+    const [
+      participationResult,
+      historyResult
+    ] = await Promise.all([
+      client.rpc(
+        "get_member_bomb_participation_history",
+        {
+          p_member_id: getCurrentMemberId(),
+          p_member_code: getCurrentMemberCode(),
+          p_limit: 16
+        }
+      ),
+      client.rpc(
+        "get_bomb_game_history_by_mode",
+        {
+          p_game_mode: currentMode
+        }
+      )
+    ]);
 
-    if(participantError || !Array.isArray(participantRows) || !participantRows.length) return false;
+    if(participationResult.error){
+      console.error(participationResult.error);
+      return false;
+    }
 
-    const ids = participantRows
-      .map(item => item.game_id)
-      .filter(Boolean);
+    if(historyResult.error){
+      console.error(historyResult.error);
+      return false;
+    }
 
-    if(!ids.length) return false;
+    const participationData = participationResult.data;
+    if(!participationData?.ok){
+      if(participationData?.message){
+        console.warn(participationData.message);
+      }
+      return false;
+    }
 
-    const { data: gameRows, error: gameError } = await client
-      .from("bomb_games")
-      .select("id, game_no, game_mode, bomb_number, round_count, ended_at, exploded_guest_name")
-      .in("id", ids)
-      .eq("game_mode", currentMode)
-      .not("ended_at", "is", null)
-      .order("ended_at", { ascending:false })
-      .limit(8);
+    const memberEntries = Array.isArray(participationData.entries)
+      ? participationData.entries
+      : [];
 
-    if(gameError || !Array.isArray(gameRows) || !gameRows.length) return false;
+    const completedGames = Array.isArray(historyResult.data)
+      ? historyResult.data
+      : [];
 
-    const target = gameRows.find(item => !hasSeenEnding(item.id));
-    if(!target) return false;
+    /*
+      不依赖历史 RPC 的返回顺序。
+      只补播当前进行中战局真正紧邻的上一局，避免把第 1 局反复当成最新结局。
+    */
+    const previousGame = findPreviousCompletedGame(completedGames, currentGame);
+    const previousGameId = getGameIdFromItem(previousGame);
 
-    const payload = await getEndingPayloadForGame(target);
-    return showEndingOnce(payload, { gameId:target.id, withBoom:false });
+    if(!previousGame || !previousGameId) return false;
+    if(hasSeenEnding(previousGameId)) return false;
+
+    /*
+      成员参与记录中必须存在同一个 game_id。
+      没参加上一局的人不播报。
+    */
+    const memberParticipation = memberEntries.find(item => {
+      return String(item?.game_id || "") === String(previousGameId);
+    });
+
+    if(!memberParticipation) return false;
+
+    const payload = buildEndingPayloadFromRecord(
+      previousGame,
+      memberParticipation
+    );
+
+    payload.inviteToCurrentGame = true;
+    payload.currentGameNo =
+      currentGame.game_no
+      || currentGame.game_number
+      || "";
+
+    return showEndingOnce(
+      payload,
+      {
+        gameId: previousGameId,
+        withBoom: false
+      }
+    );
   }catch(err){
     console.error(err);
     return false;
@@ -2056,9 +2160,7 @@ async function loadGame(options = {}){
       renderGame();
     }
 
-    if(currentGame && currentGame.has_active_game){
-      lastActiveGameSnapshot = currentGame;
-    }else if(previousActiveGame && oldGameId){
+    if((!currentGame || !currentGame.has_active_game) && previousActiveGame && oldGameId){
       replayFinishedGameForParticipant(previousActiveGame, { withBoom:true });
     }
 
@@ -2149,7 +2251,7 @@ async function loadHistory(){
 }
 
 function renderHistory(items){
-  const list = Array.isArray(items) ? items : [];
+  const list = sortBombHistoryLatestFirst(items);
   if(!list.length){
     historyList.innerHTML = '<div class="empty-state">还没有已结束的历史战局。</div>';
     return;
@@ -2225,10 +2327,22 @@ function buildEndingPayload(data, actor, claimNumberValue){
 
 function showEndingModal(payload){
   endingTitle.textContent = `${getModeLabel()}｜第 ${payload.gameNo} 局战局已结束`;
-  endingSubtitle.textContent = "本局拆弹结果已经播报。";
+
+  if(payload.inviteToCurrentGame){
+    endingSubtitle.textContent =
+      `新一局${payload.currentGameNo ? `（第 ${payload.currentGameNo} 局）` : ""}已经开始，快来加入吧。`;
+  }else{
+    endingSubtitle.textContent = "本局拆弹结果已经播报。";
+  }
+
   endingText.innerHTML = `
     <strong>${escapeHtml(payload.loser)}</strong> 认领到了最终爆炸数字。
     <br>本局在第 <strong>${escapeHtml(payload.roundCount)}</strong> 轮结束，记录已进入历史战局。
+    ${
+      payload.inviteToCurrentGame
+        ? "<br><strong>你还没有加入当前的新战局，快来一起拆弹！</strong>"
+        : ""
+    }
   `;
 
   endingStats.innerHTML = `
@@ -2334,13 +2448,6 @@ function getAchievementRouteInfo(item){
     progressValue:currentValue,
     isFirstStage:index === 0 || requirementValue <= 1
   };
-}
-
-function getProgressPercent(value, max){
-  const current = Number(value || 0);
-  const total = Number(max || 0);
-  if(!Number.isFinite(current) || !Number.isFinite(total) || total <= 0) return 0;
-  return Math.max(0, Math.min(100, Math.round((current / total) * 100)));
 }
 
 function getAwardItemDisplay(item){
@@ -2799,15 +2906,12 @@ async function initBombPage(){
 
 initBombPage();
 
-setInterval(() => {
+setInterval(async () => {
   if(document.hidden || busy || refreshBusy) return;
   if(!hasAnyPlayerInput()) return;
 
-  if(currentGame && currentGame.has_active_game){
-    loadGame({ silent:true });
-  }else{
-    checkPendingEndedResult();
-  }
+  await loadGame({ silent:true });
+  await checkPendingEndedResult();
 }, 8000);
 </script>
 </body>
