@@ -2105,26 +2105,45 @@ async function maybeClaimJoinAnniversaryAchievements(){
 
   anniversaryCheckInFlight = true;
 
+  const isTransientNetworkError = error => /load failed|failed to fetch|networkerror|network request failed|fetch failed/i.test(
+    formatSupabaseError(error) || error?.message || String(error || "")
+  );
+
+  const callAnniversaryRpc = async args => {
+    let lastError = null;
+
+    for(let attempt = 1; attempt <= 3; attempt++){
+      try{
+        const response = await client.rpc("claim_join_anniversary_achievements", args);
+        if(!response.error || !isTransientNetworkError(response.error)) return response;
+        lastError = response.error;
+      }catch(error){
+        if(!isTransientNetworkError(error)) throw error;
+        lastError = error;
+      }
+
+      if(attempt < 3){
+        await new Promise(resolve => setTimeout(resolve, 300 * attempt));
+      }
+    }
+
+    return { data:null, error:lastError };
+  };
+
   try{
     const memberId = currentMember.id;
     const memberCode = currentMember.memberCode;
-    const rpcArgs = {
-      p_member_id: memberId,
-      p_member_code: memberCode,
-      p_local_date: getLocalDateString()
-    };
 
-    let { data, error } = await client.rpc("claim_join_anniversary_achievements", rpcArgs);
+    let { data, error } = await callAnniversaryRpc({
+      p_member_id:memberId,
+      p_member_code:memberCode,
+      p_local_date:getLocalDateString()
+    });
 
-    /*
-     * PostgREST 偶尔会在函数刚新增/改签名后仍持有旧 schema cache。
-     * 若缓存仍只认识带默认日期参数的旧签名，改用 2 参数调用一次；
-     * 数据库函数会自行使用 p_local_date 的默认值。
-     */
     if(error && normalizeTextValue(error.code).toUpperCase() === "PGRST202"){
-      ({ data, error } = await client.rpc("claim_join_anniversary_achievements", {
-        p_member_id: memberId,
-        p_member_code: memberCode
+      ({ data, error } = await callAnniversaryRpc({
+        p_member_id:memberId,
+        p_member_code:memberCode
       }));
     }
 
