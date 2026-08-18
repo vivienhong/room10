@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜宿舍</title>
-<!-- dorm clean db-driven v25: 宿舍个人私有数据统一通过 get_dorm_member_private_state 安全读取；前端不直读 members/gold_ledger/member_items/member_titles/member_achievements；最近获得来源完全数据库驱动 -->
+<!-- dorm clean db-driven v26: 宿舍个人私有数据统一通过 get_dorm_member_private_state 安全读取；金币记录仅隐藏内部 *_id 技术标记；前端不直读 members/gold_ledger/member_items/member_titles/member_achievements；最近获得来源完全数据库驱动 -->
 
 <script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -4397,7 +4397,13 @@ function roleLabel(role){
 }
 
 function cleanGoldLedgerNote(value){
-  return String(value || "").trim();
+  return String(value || "")
+    .replace(/\b[a-z][a-z0-9_]*_id\s*[:：]\s*[^；;，,）)]+/gi,"")
+    .replace(/[（(]\s*[；;，,、\s]*[）)]/g,"")
+    .replace(/([（(])\s*[；;，,、]+\s*/g,"$1")
+    .replace(/\s*[；;，,、]+\s*([）)])/g,"$1")
+    .replace(/\s{2,}/g," ")
+    .trim();
 }
 
 function ledgerLabel(item){
