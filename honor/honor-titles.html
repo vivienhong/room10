@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>十号房｜成就称号馆</title>
-<!-- PAGE_VERSION: honor-titles-v13-final-one-click-supplement -->
+<!-- PAGE_VERSION: honor-titles-v14-supplement-item-names -->
 
 <script src="../room10-paths.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -3978,12 +3978,16 @@ async function claimAllHonorRewards(){
       return;
     }
 
+    const claimedItemText = snapshot
+      .map(item => `${item.itemType === "title" ? "称号" : "成就"}「${normalizeText(item.itemName) || "荣誉"}」`)
+      .join("、");
+
     showRewardModal({
       type:"gift",
       icon:"🎁",
       label:"补领完成",
       title:"荣誉奖励已到账",
-      desc:`已补领 ${count} 项此前未领取的奖励。`,
+      desc:`已补领 ${count} 项此前未领取的奖励。${claimedItemText ? `\n补领项目：${claimedItemText}` : ""}`,
       rewards,
       confirmText:"收下奖励"
     });
