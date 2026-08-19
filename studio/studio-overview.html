@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="auth-pending">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>十号房｜项目总览</title>
+<script src="../room10-paths.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --ui-scale:1;
+  --bg-ui-scale:1;
+  --room-nav-scale:var(--ui-scale);
+  --identity-scale:var(--ui-scale);
+  --project-panel-scale:var(--ui-scale);
+
+  --bg-top:#e7dfd4;
+  --bg-mid:#e2d8cb;
+  --bg-bottom:#ddd4c8;
+  --bg-side-left:#e5ddd1;
+  --bg-side-right:#e1d7ca;
+
+  --room-nav-top:6.35%;
+  --room-nav-start-left:25.83%;
+  --room-nav-btn-width:4.72%;
+  --room-nav-btn-height:5.10%;
+  --room-nav-gap:.486%;
+  --room-nav-text:#6f5746;
+  --room-nav-border:rgba(158,122,93,.26);
+  --room-nav-current-text:#5d4738;
+  --room-nav-current-border:rgba(151,111,82,.42);
+  --room-nav-paper:rgba(255,250,242,.78);
+  --room-nav-paper-2:rgba(246,235,219,.74);
+  --room-nav-wash:rgba(214,185,157,.20);
+  --room-nav-current-bg:rgba(239,224,205,.86);
+
+  --identity-right:7.35%;
+  --identity-top:6.46%;
+  --identity-base-width:232;
+  --identity-base-height:38;
+  --identity-bg:rgba(255,250,244,.88);
+  --identity-inner-bg:rgba(255,253,249,.92);
+  --identity-border:rgba(170,132,101,.20);
+  --identity-text:#6f5746;
+  --identity-shadow:rgba(106,78,55,.08);
+
+  --panel-radius:calc(30px * var(--project-panel-scale));
+  --panel-radius-md:calc(18px * var(--project-panel-scale));
+  --font-xs:calc(10px * var(--project-panel-scale));
+  --font-sm:calc(11px * var(--project-panel-scale));
+  --font-base:calc(13px * var(--project-panel-scale));
+  --font-lg:calc(16px * var(--project-panel-scale));
+  --font-xl:calc(20px * var(--project-panel-scale));
+}
+*{box-sizing:border-box}
+html.auth-pending body{visibility:hidden;pointer-events:none}
+html.auth-ready body{visibility:visible;pointer-events:auto}
+html,body{
+  margin:0;width:100%;height:100%;overflow:hidden;
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left,color-mix(in srgb,var(--bg-side-left) 82%,white 18%) 0%,transparent 36%),
+    radial-gradient(circle at top right,color-mix(in srgb,var(--bg-side-right) 80%,white 20%) 0%,transparent 38%),
+    linear-gradient(180deg,var(--bg-top) 0%,var(--bg-mid) 52%,var(--bg-bottom) 100%);
+}
+body{display:flex;align-items:center;justify-content:center}
+button,input,select{font:inherit}
+button{font-family:inherit}
+.hidden{display:none!important}
+
+#room{position:relative;width:100vw;height:100vh;height:100dvh;overflow:hidden;background:#e7dfd4}
+#bgFrame{position:absolute;inset:0;z-index:0;overflow:hidden}
+#bg{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;
+  display:block;user-select:none;pointer-events:none;-webkit-user-drag:none
+}
+#overlay{position:absolute;inset:0;z-index:2;overflow:visible;pointer-events:none}
+#overlay *{pointer-events:auto}
+
+/* 顶部导航层本身必须穿透事件，否则其全屏绝对定位会挡住下方项目面板 */
+#overlay .roomNavLayer{pointer-events:none!important}
+#overlay .roomNavLayer .navBtn{pointer-events:auto!important}
+
+/* 顶部房间导航 */
+.roomNavLayer{
+  --s:var(--room-nav-scale,var(--ui-scale,1));
+  --nav-btn-radius:calc(15px * var(--s));
+  --nav-btn-font:calc(15px * var(--s));
+  --nav-btn-border:calc(1px * var(--s));
+  position:absolute;inset:0;z-index:55;pointer-events:none
+}
+.navBtn{
+  appearance:none;cursor:pointer;position:absolute;top:var(--room-nav-top);
+  width:var(--room-nav-btn-width);height:var(--room-nav-btn-height);min-width:0;min-height:0;padding:0;
+  border-radius:var(--nav-btn-radius);color:var(--room-nav-text);font-size:var(--nav-btn-font);font-weight:900;
+  white-space:nowrap;overflow:visible;isolation:isolate;
+  background:
+    radial-gradient(circle at 18% 22%,rgba(255,255,255,.56),transparent 40%),
+    radial-gradient(circle at 78% 74%,var(--room-nav-wash),transparent 48%),
+    linear-gradient(180deg,var(--room-nav-paper) 0%,var(--room-nav-paper-2) 100%);
+  border:var(--nav-btn-border) solid var(--room-nav-border);
+  box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.64),0 calc(2px * var(--s)) calc(7px * var(--s)) rgba(96,70,48,.10);
+  color:#6f5746;text-shadow:0 calc(1px * var(--s)) 0 rgba(255,255,255,.38);
+  transition:.18s ease;pointer-events:auto
+}
+.navBtn[data-room="hall"]{left:var(--room-nav-start-left)}
+.navBtn[data-room="living"]{left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap))*1)}
+.navBtn[data-room="manager"]{left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap))*2)}
+.navBtn[data-room="honor"]{left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap))*3)}
+.navBtn[data-room="studio"]{left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap))*4)}
+.navBtn[data-room="game"]{left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap))*5)}
+.navBtn[data-room="dorm"]{left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap))*6)}
+.navBtn[data-room="flower"]{left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap))*7)}
+.navBtn[data-room="pets"]{left:calc(var(--room-nav-start-left) + (var(--room-nav-btn-width) + var(--room-nav-gap))*8)}
+.navBtn:not(.is-current):hover{
+  color:#5f3d22;border-color:rgba(151,112,84,.36);filter:saturate(1.02) brightness(1.02);
+  box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.7),0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.12)
+}
+.navBtn.is-current{
+  cursor:default;color:var(--room-nav-current-text);
+  background:
+    radial-gradient(circle at 22% 22%,rgba(255,255,255,.62),transparent 42%),
+    radial-gradient(circle at 80% 80%,rgba(190,151,126,.26),transparent 50%),
+    linear-gradient(180deg,rgba(246,235,222,.94) 0%,var(--room-nav-current-bg) 100%);
+  border-color:var(--room-nav-current-border);
+  box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.68),0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.13),0 0 0 calc(2px * var(--s)) rgba(255,253,248,.46)
+}
+.navLabel{position:relative;z-index:5;width:100%;height:100%;display:inline-flex;align-items:center;justify-content:center;overflow:visible;white-space:nowrap;line-height:normal;padding-top:.06em}
+.navEffect{position:absolute;pointer-events:none;opacity:0;z-index:4;display:block;font-weight:900;line-height:1;text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.82),0 0 calc(8px * var(--s)) rgba(255,246,210,.52);filter:saturate(.95)}
+.navEffectA{left:8%;top:-54%;font-size:calc(var(--nav-btn-font) * .92)}
+.navEffectB{right:8%;top:-62%;font-size:calc(var(--nav-btn-font) * .86)}
+.navEffectC{left:50%;top:-72%;transform:translateX(-50%);font-size:calc(var(--nav-btn-font) * 1.02)}
+@keyframes navFloatA{0%,100%{transform:translateY(calc(4px * var(--s))) rotate(-8deg) scale(.82);opacity:0}20%,72%{opacity:.86}50%{transform:translateY(calc(-5px * var(--s))) rotate(6deg) scale(1);opacity:.76}}
+@keyframes navFloatB{0%,100%{transform:translateY(calc(5px * var(--s))) rotate(9deg) scale(.78);opacity:0}24%,70%{opacity:.78}52%{transform:translateY(calc(-6px * var(--s))) rotate(-7deg) scale(1);opacity:.68}}
+@keyframes navFloatC{0%,100%{transform:translateX(-50%) translateY(calc(6px * var(--s))) rotate(0deg) scale(.76);opacity:0}24%,70%{opacity:.88}50%{transform:translateX(-50%) translateY(calc(-6px * var(--s))) rotate(2deg) scale(1);opacity:.78}}
+.navBtn:not(.is-current):hover .navEffectA,.navBtn:not(.is-current):focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite}
+.navBtn:not(.is-current):hover .navEffectB,.navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite}
+.navBtn:not(.is-current):hover .navEffectC,.navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite}
+.navBtn.is-current .navEffect{display:none}
+.navBtn[data-room="hall"] .navEffect{color:rgba(255,205,96,.86)}
+.navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82)}
+.navBtn[data-room="honor"] .navEffect{color:rgba(205,143,45,.86)}
+.navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82)}
+.navBtn[data-room="studio"] .navEffect{color:rgba(96,112,145,.84)}
+.navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82)}
+.navBtn[data-room="dorm"] .navEffect{color:rgba(148,112,171,.78)}
+.navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82)}
+.navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82)}
+
+/* 身份栏：同步全站通用模板 */
+.roomIdentity{
+  --s:var(--identity-scale,var(--ui-scale,1));position:absolute;right:var(--identity-right);top:var(--identity-top);
+  width:calc(var(--identity-base-width) * 1px * var(--s));height:calc(var(--identity-base-height) * 1px * var(--s));
+  min-width:calc(var(--identity-base-width) * 1px * var(--s));min-height:calc(var(--identity-base-height) * 1px * var(--s));
+  z-index:70;pointer-events:none;overflow:visible
+}
+.roomIdentityBar{
+  width:100%;height:100%;display:grid;grid-template-columns:minmax(calc(130px * var(--s)),1fr) calc(30px * var(--s)) calc(42px * var(--s));
+  gap:calc(5px * var(--s));padding:calc(4px * var(--s)) calc(5px * var(--s));border-radius:calc(13px * var(--s));
+  background:var(--identity-bg);border:calc(1px * var(--s)) solid var(--identity-border);
+  box-shadow:0 calc(10px * var(--s)) calc(24px * var(--s)) var(--identity-shadow),inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.9);
+  backdrop-filter:blur(calc(8px * var(--s)));-webkit-backdrop-filter:blur(calc(8px * var(--s)));pointer-events:auto;overflow:visible;white-space:nowrap
+}
+.identityNameBox,.identityNoticeBtn,.identityAuthBtn{
+  min-width:0;min-height:0;height:100%;border-radius:calc(9px * var(--s));background:var(--identity-inner-bg);color:var(--identity-text);
+  border:calc(1px * var(--s)) solid rgba(160,116,78,.12);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.95),0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,.05)
+}
+.identityNameBox{display:flex;align-items:center;justify-content:center;padding:0 calc(8px * var(--s));overflow:hidden}
+.identityNameText{display:inline-flex;align-items:center;justify-content:center;max-width:100%;font-size:calc(13px * var(--s));font-weight:850;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.identityNamePart{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;line-height:1;white-space:nowrap}
+.identitySeparator{margin:0 .08em;color:rgba(111,87,70,.78);font-weight:800}
+.identityNoticeWrap{position:relative;width:100%;height:100%;overflow:visible}
+.identityNoticeBtn,.identityAuthBtn{appearance:none;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;line-height:1;transition:transform .18s ease,background .18s ease,box-shadow .18s ease}
+.identityNoticeBtn{width:100%;height:100%;font-size:calc(14px * var(--s))}
+.identityNoticeIcon{display:flex;width:100%;height:100%;align-items:center;justify-content:center;line-height:1;filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,.55))}
+.identityNoticeCount{position:absolute;right:calc(-6px * var(--s));top:calc(-6px * var(--s));min-width:calc(18px * var(--s));height:calc(18px * var(--s));padding:0 calc(5px * var(--s));border-radius:999px;background:#b98f72;color:#fffaf6;font-size:calc(9px * var(--s));font-weight:900;display:none;align-items:center;justify-content:center;border:calc(2px * var(--s)) solid rgba(255,248,239,.98);z-index:3}
+.identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex}
+.identityAuthBtn{width:100%;height:100%;font-size:calc(12px * var(--s));font-weight:850;color:#6f5746}
+.identityAuthText{display:inline-flex;align-items:center;justify-content:center;line-height:1.18}
+.identityNoticeBtn:hover,.identityAuthBtn:hover{transform:translateY(calc(-1px * var(--s)));background:rgba(255,255,255,.94)}
+.identityNoticePanel{position:absolute;top:calc(100% + 10px * var(--s));right:0;width:min(calc(360px * var(--s)),72vw);max-height:min(calc(540px * var(--s)),70vh);overflow:auto;padding:calc(12px * var(--s));border-radius:calc(16px * var(--s));background:rgba(255,249,241,.98);border:calc(1px * var(--s)) solid rgba(203,167,123,.28);box-shadow:0 calc(16px * var(--s)) calc(36px * var(--s)) rgba(85,58,34,.16);display:none;z-index:950;text-align:left}
+.identityNoticePanel.show{display:block}
+.identityNoticeTitle{color:#6f4726;font-size:calc(13px * var(--s));font-weight:900;margin-bottom:calc(10px * var(--s))}
+.identityNoticeEmpty{color:#8a6644;font-size:calc(12px * var(--s));line-height:1.6;padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s))}
+
+/* 主面板 */
+#taskPanel{
+  position:absolute;left:9.2%;right:22.4%;top:18%;bottom:12%;
+  min-width:0;min-height:0;border-radius:var(--panel-radius);
+  background:rgba(255,255,255,.34);border:1px solid rgba(255,255,255,.52);
+  box-shadow:0 16px 42px rgba(122,96,68,.10),inset 0 1px 0 rgba(255,255,255,.62),inset 0 -1px 0 rgba(255,255,255,.20);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);overflow:visible
+}
+#taskPanel::before{
+  content:"";position:absolute;inset:calc(10px * var(--project-panel-scale));border-radius:calc(22px * var(--project-panel-scale));
+  border:1px solid rgba(255,255,255,.22);pointer-events:none
+}
+#panelSwitch{
+  position:absolute;left:104.9%;top:8.5%;width:16.55%;height:36.2%;
+  padding:calc(14px * var(--project-panel-scale)) calc(12px * var(--project-panel-scale));
+  border-radius:calc(20px * var(--project-panel-scale));background:rgba(255,248,239,.9);
+  border:1px solid rgba(186,146,103,.24);
+  box-shadow:0 10px 24px rgba(116,86,54,.12),inset 0 1px 0 rgba(255,255,255,.86);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:flex;flex-direction:column;justify-content:space-between;gap:calc(8px * var(--project-panel-scale));z-index:30
+}
+.switchBtn{
+  appearance:none;border:none;cursor:pointer;width:100%;flex:1 1 0;min-height:0;padding:0 calc(8px * var(--project-panel-scale));
+  border-radius:calc(13px * var(--project-panel-scale));background:rgba(231,214,185,.92);color:#744b25;text-decoration:none;
+  font-size:var(--font-base);font-weight:700;display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 1px 0 rgba(255,247,233,.95),0 2px 6px rgba(116,86,54,.08);transition:.18s ease;white-space:nowrap
+}
+.switchBtn:hover{transform:translateY(-1px);filter:brightness(1.03)}
+.switchBtn.active{
+  background:linear-gradient(180deg,#d9a364 0%,#c98c4f 100%);color:#fff9f1;
+  box-shadow:inset 0 1px 0 rgba(255,224,188,.55),0 4px 10px rgba(116,86,54,.14)
+}
+
+#overviewInner{
+  position:relative;z-index:1;width:100%;height:100%;min-height:0;
+  padding:calc(18px * var(--project-panel-scale)) calc(18px * var(--project-panel-scale)) calc(15px * var(--project-panel-scale));
+  display:flex;flex-direction:column
+}
+.overviewHeader{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:18px;
+  margin-bottom:calc(11px * var(--project-panel-scale));padding:0 calc(3px * var(--project-panel-scale))
+}
+.titleWrap{min-width:0}
+.overviewTitle{color:#6f4726;font-size:var(--font-xl);font-weight:900;line-height:1.2}
+.overviewSubtitle{margin-top:4px;color:#8a6644;font-size:var(--font-sm);font-weight:600}
+.headerCount{
+  flex:0 0 auto;min-width:calc(92px * var(--project-panel-scale));height:calc(36px * var(--project-panel-scale));
+  padding:0 calc(12px * var(--project-panel-scale));display:flex;align-items:center;justify-content:center;
+  border-radius:calc(12px * var(--project-panel-scale));background:rgba(255,252,247,.55);color:#744b25;font-size:var(--font-sm);font-weight:800
+}
+
+.overviewToolbar{
+  display:grid;
+  grid-template-columns:minmax(180px,1fr) auto auto auto auto;
+  gap:calc(7px * var(--project-panel-scale));
+  margin-bottom:calc(9px * var(--project-panel-scale));
+  align-items:center
+}
+.toolbarSelect{
+  min-width:calc(104px * var(--project-panel-scale))
+}
+.sortSelect{
+  min-width:calc(132px * var(--project-panel-scale))
+}
+.searchInput,.filterSelect{
+  height:calc(36px * var(--project-panel-scale));border:none;outline:none;border-radius:calc(12px * var(--project-panel-scale));
+  background:rgba(255,252,247,.67);color:#5f3b1d;font-size:var(--font-base);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 2px 8px rgba(120,92,63,.05)
+}
+.searchInput{width:100%;padding:0 calc(12px * var(--project-panel-scale))}
+.searchInput::placeholder{color:#9a7b5b}
+.filterSelect{min-width:calc(112px * var(--project-panel-scale));padding:0 calc(9px * var(--project-panel-scale));cursor:pointer}
+.refreshBtn{
+  appearance:none;border:0;cursor:pointer;min-width:calc(72px * var(--project-panel-scale));
+  height:calc(36px * var(--project-panel-scale));padding:0 calc(12px * var(--project-panel-scale));
+  border-radius:calc(12px * var(--project-panel-scale));background:linear-gradient(180deg,#efd5ab 0%,#dfbd8a 100%);
+  color:#6a4120;font-size:var(--font-sm);font-weight:800;
+  box-shadow:inset 0 1px 0 rgba(255,247,230,.95),0 4px 12px rgba(112,83,52,.10)
+}
+.refreshBtn:hover{transform:translateY(-1px);filter:brightness(1.03)}
+
+.summaryRow{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:calc(7px * var(--project-panel-scale));
+  margin-bottom:calc(9px * var(--project-panel-scale))
+}
+.summaryCard{
+  min-width:0;padding:calc(7px * var(--project-panel-scale)) calc(10px * var(--project-panel-scale));
+  border-radius:calc(12px * var(--project-panel-scale));background:rgba(255,252,247,.34);border:1px solid rgba(255,255,255,.34)
+}
+.summaryLabel{color:#8a6644;font-size:var(--font-xs);font-weight:700}
+.summaryValue{margin-top:2px;color:#5f3b1d;font-size:var(--font-lg);font-weight:900}
+
+.tableShell{
+  flex:1 1 auto;min-height:0;overflow:hidden;border-radius:calc(16px * var(--project-panel-scale));
+  background:rgba(255,252,247,.30);border:1px solid rgba(255,255,255,.34)
+}
+.projectTable{
+  width:100%;height:100%;display:flex;flex-direction:column;min-width:0
+}
+.tableHeader,.projectRow{
+  display:grid;
+  grid-template-columns:
+    minmax(0,.56fr)
+    minmax(0,1.34fr)
+    minmax(0,.72fr)
+    minmax(0,1.06fr)
+    minmax(0,1.18fr)
+    minmax(0,.48fr)
+    minmax(0,.58fr)
+    minmax(0,.66fr)
+    minmax(0,.82fr);
+  gap:calc(5px * var(--project-panel-scale));align-items:center
+}
+.tableHeader{
+  flex:0 0 auto;padding:calc(9px * var(--project-panel-scale)) calc(11px * var(--project-panel-scale));
+  background:rgba(255,248,240,.58);border-bottom:1px solid rgba(196,159,121,.18);
+  color:#7b5735;font-size:var(--font-xs);font-weight:900
+}
+.tableBody{
+  flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:calc(5px * var(--project-panel-scale)) calc(6px * var(--project-panel-scale));
+  scrollbar-width:thin;scrollbar-color:rgba(175,135,98,.55) transparent
+}
+.tableBody::-webkit-scrollbar{width:7px}.tableBody::-webkit-scrollbar-track{background:transparent}.tableBody::-webkit-scrollbar-thumb{background:rgba(175,135,98,.55);border-radius:999px}
+.projectRow{
+  width:100%;min-height:calc(54px * var(--project-panel-scale));
+  padding:calc(10px * var(--project-panel-scale)) calc(6px * var(--project-panel-scale));
+  margin-bottom:calc(5px * var(--project-panel-scale));border-radius:calc(11px * var(--project-panel-scale));
+  background:rgba(255,252,247,.38);border:1px solid transparent;color:#62411f;
+  transition:background .16s ease,transform .16s ease,border-color .16s ease
+}
+.projectRow:hover{background:rgba(255,252,247,.64);border-color:rgba(215,181,143,.28);transform:translateY(-1px)}
+.cell{min-width:0;max-width:100%;font-size:var(--font-sm);line-height:1.48}
+.cell.strong{font-weight:900;color:#5f3b1d}
+.ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.memberText{min-width:0;max-width:100%;overflow:hidden}
+.nameList{display:flex;flex-wrap:wrap;align-items:center;align-content:center;gap:calc(3px * var(--project-panel-scale)) calc(7px * var(--project-panel-scale));max-width:100%;line-height:1.42}
+.nameItem{display:inline-block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nameEmpty{color:#9a7b5b}
+.typeBadge,.statusBadge{
+  display:inline-flex;align-items:center;justify-content:center;max-width:100%;min-height:calc(22px * var(--project-panel-scale));
+  padding:calc(3px * var(--project-panel-scale)) calc(8px * var(--project-panel-scale));border-radius:999px;
+  font-size:var(--font-xs);font-weight:800;line-height:1.1;text-align:center
+}
+.typeBadge{background:rgba(247,236,220,.96);color:#8a6a48;border:1px solid rgba(216,190,153,.52)}
+.typeBadge.game{background:rgba(232,244,230,.96);color:#5f7c57;border-color:rgba(171,202,161,.5)}
+.statusBadge.todo{background:rgba(255,238,221,.98);color:#965e2f;border:1px solid rgba(224,179,132,.48)}
+.statusBadge.project{background:rgba(233,241,255,.98);color:#5f7196;border:1px solid rgba(169,183,216,.44)}
+.statusBadge.gallery{background:rgba(231,244,232,.98);color:#5f7c57;border:1px solid rgba(171,202,161,.5)}
+.statusBadge.other{background:rgba(245,239,230,.96);color:#806b55;border:1px solid rgba(205,188,167,.5)}
+.rowActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(3px * var(--project-panel-scale));width:100%;max-width:100%;min-width:0;overflow:hidden}
+.viewBtn,.editBtn{
+  appearance:none;border:0;cursor:pointer;min-width:0;max-width:100%;width:100%;height:calc(27px * var(--project-panel-scale));
+  padding:0 calc(2px * var(--project-panel-scale));
+  border-radius:calc(8px * var(--project-panel-scale));font-size:var(--font-xs);font-weight:800;
+  border:1px solid rgba(197,167,136,.42);overflow:hidden;white-space:nowrap
+}
+.viewBtn{background:rgba(255,250,245,.92);color:#7a5231}
+.editBtn{background:rgba(239,213,171,.88);color:#6a4120}
+.viewBtn:hover,.editBtn:hover{filter:brightness(1.03)}
+.emptyState,.loadingState,.errorState{
+  margin:calc(18px * var(--project-panel-scale));padding:calc(18px * var(--project-panel-scale));
+  border-radius:calc(14px * var(--project-panel-scale));text-align:center;
+  background:rgba(255,252,247,.34);color:#8b6947;font-size:var(--font-base);line-height:1.6
+}
+.errorState{color:#895445}
+
+
+/* 项目编辑弹窗 */
+#projectEditMask{
+  position:fixed;inset:0;z-index:12000;display:none;align-items:center;justify-content:center;padding:18px;
+  background:rgba(60,42,23,.25);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  pointer-events:none
+}
+#projectEditMask.show{display:flex;pointer-events:auto}
+#projectEditDialog{pointer-events:auto}
+#projectEditDialog{
+  width:min(760px,94vw);max-height:calc(100dvh - 36px);overflow:hidden;display:flex;flex-direction:column;
+  border-radius:22px;background:rgba(255,249,241,.985);border:1px solid rgba(203,167,123,.30);
+  box-shadow:0 22px 54px rgba(85,58,34,.22),inset 0 1px 0 rgba(255,255,255,.94);color:#6a4525
+}
+.projectEditHeader{padding:18px 20px 12px;border-bottom:1px solid rgba(194,151,108,.16)}
+.projectEditTitle{font-size:18px;font-weight:900;color:#6f4726}
+.projectEditSubtitle{margin-top:4px;font-size:11px;color:#9a7656;font-weight:700}
+#projectEditBody{padding:14px 18px 18px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+.editSection{padding:12px;border-radius:16px;background:rgba(255,252,247,.62);border:1px solid rgba(203,167,123,.15)}
+.editSectionTitle{margin-bottom:9px;font-size:12px;font-weight:900;color:#7a5231}
+.editLoadHint{margin-top:7px;font-size:10px;line-height:1.5;color:#9a7656}
+.editLoadHint.error{color:#9a5f4c}
+
+.editGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.editField{display:flex;flex-direction:column;gap:5px;min-width:0}
+.editField.wide{grid-column:span 2}
+.editLabel{font-size:10px;font-weight:800;color:#8a6644}
+.editInput,.editSelect{
+  width:100%;height:34px;padding:0 10px;border:1px solid rgba(194,151,108,.20);outline:none;border-radius:10px;
+  background:rgba(255,255,255,.76);color:#5f3b1d;font-size:12px;font-family:inherit
+}
+.editInput:focus,.editSelect:focus{border-color:rgba(191,139,88,.48);box-shadow:0 0 0 2px rgba(222,186,145,.16)}
+.modeRow,.pickerGrid,.singerGrid{display:flex;flex-wrap:wrap;gap:7px}
+.modeBtn,.pickerBtn,.singerBtn{
+  appearance:none;cursor:pointer;min-height:30px;padding:0 11px;border-radius:10px;border:1px solid rgba(194,151,108,.20);
+  background:rgba(255,252,247,.92);color:#7a5231;font-size:11px;font-weight:800
+}
+.modeBtn.active,.pickerBtn.active,.singerBtn.active{background:linear-gradient(180deg,#d9a364 0%,#c98c4f 100%);color:#fff9f1;border-color:transparent}
+
+/* 编辑框内：交音 / 交付状态 */
+.editDeliveryHint{
+  margin:-2px 0 9px;
+  color:#9a7656;
+  font-size:10px;
+  line-height:1.55;
+}
+.editDeliveryList{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+.editDeliveryRow{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  min-height:38px;
+  padding:6px 8px 6px 10px;
+  border-radius:11px;
+  background:rgba(255,255,255,.56);
+  border:1px solid rgba(194,151,108,.14);
+}
+.editDeliveryInfo{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.editDeliveryRole{
+  flex:0 0 auto;
+  min-width:34px;
+  color:#9a7656;
+  font-size:10px;
+  font-weight:800;
+}
+.editDeliveryName{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#644322;
+  font-size:11px;
+  font-weight:900;
+}
+.editDeliveryState{
+  flex:0 0 auto;
+  padding:2px 7px;
+  border-radius:999px;
+  font-size:9px;
+  font-weight:800;
+  line-height:1.35;
+  background:rgba(245,239,230,.96);
+  color:#806b55;
+}
+.editDeliveryState.done{
+  background:rgba(231,244,232,.98);
+  color:#5f7c57;
+}
+.editDeliveryState.waiting{
+  background:rgba(255,238,221,.98);
+  color:#965e2f;
+}
+.editDeliveryAction{
+  appearance:none;
+  cursor:pointer;
+  min-width:70px;
+  height:29px;
+  padding:0 10px;
+  border-radius:9px;
+  border:1px solid rgba(197,167,136,.42);
+  background:linear-gradient(180deg,#efd5ab 0%,#dfbd8a 100%);
+  color:#6a4120;
+  font-family:inherit;
+  font-size:10px;
+  font-weight:900;
+}
+.editDeliveryAction.withdraw{
+  background:rgba(255,250,245,.94);
+  color:#8a5c3a;
+}
+.editDeliveryAction:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+.editDeliveryEmpty{
+  padding:8px 2px;
+  color:#9a7656;
+  font-size:10px;
+  line-height:1.5;
+}
+
+.partRows{display:flex;flex-direction:column;gap:7px}
+.partRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,.75fr);gap:8px}
+.partRow .editInput,.partRow .editSelect{height:32px}
+.projectEditFooter{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16px;border-top:1px solid rgba(194,151,108,.16)}
+.projectEditFooter button{appearance:none;cursor:pointer;min-width:76px;height:34px;border-radius:11px;font-family:inherit;font-size:12px;font-weight:900}
+#projectEditCancelBtn{background:rgba(255,252,247,.92);color:#7a5231;border:1px solid rgba(194,151,108,.22)}
+#projectEditSaveBtn{border:0;background:linear-gradient(180deg,#d9a364 0%,#c98c4f 100%);color:#fff9f1}
+#projectEditSaveBtn:disabled{opacity:.6;cursor:not-allowed}
+
+/* Toast */
+#toastMask{
+  position:fixed;inset:0;z-index:13000;display:none;align-items:center;justify-content:center;padding:20px;
+  background:rgba(60,42,23,.18);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)
+}
+#toastMask.show{display:flex}
+#toastBox{
+  width:min(420px,92vw);padding:22px 20px 18px;text-align:center;border-radius:22px;
+  background:rgba(255,249,241,.96);border:1px solid rgba(203,167,123,.28);
+  box-shadow:0 18px 45px rgba(85,58,34,.18),inset 0 1px 0 rgba(255,255,255,.92)
+}
+#toastTitle{color:#6f4726;font-size:18px;font-weight:900;margin-bottom:9px}
+#toastMessage{color:#6a4525;font-size:13px;line-height:1.7;white-space:pre-line;margin-bottom:14px}
+#toastCloseBtn{
+  appearance:none;border:0;cursor:pointer;min-width:100px;height:38px;border-radius:12px;
+  background:linear-gradient(180deg,#efd5ab 0%,#dfbd8a 100%);color:#6a4120;font-weight:800
+}
+
+@media(max-width:540px){
+  html,body{overflow:auto;background:#e7dfd4}
+  #room{min-height:100dvh;height:auto;overflow:visible}
+  #bgFrame{display:none}
+  #overlay{position:relative!important;left:auto!important;top:auto!important;width:100%!important;height:auto!important;min-height:100dvh;padding:12px;display:flex;flex-direction:column;gap:10px}
+  .roomNavLayer{
+    position:relative;inset:auto;width:100%;height:106px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:repeat(3,32px);gap:5px;order:0
+  }
+  .navBtn{position:relative;left:auto!important;top:auto;width:100%;height:32px;border-radius:10px;font-size:12px}
+  .roomIdentity{position:relative;right:auto;top:auto;width:100%;height:40px;order:1}
+  .roomIdentityBar{grid-template-columns:minmax(0,1fr) 34px 42px;gap:6px;padding:5px 7px;border-radius:14px}
+  .identityNameText{font-size:12px}
+  #taskPanel{
+    position:relative;left:auto;right:auto;top:auto;bottom:auto;order:2;width:100%;height:auto;min-height:0;
+    border-radius:22px;padding:0;overflow:visible
+  }
+  #taskPanel::before{inset:8px;border-radius:16px}
+  #panelSwitch{
+    position:relative;left:auto;top:auto;width:auto;height:auto;margin:12px 12px 0;padding:8px;display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;border-radius:16px
+  }
+  .switchBtn{min-height:34px;font-size:12px}
+  #overviewInner{height:auto;padding:14px 12px 16px}
+  .overviewHeader{gap:8px}
+  .overviewTitle{font-size:18px}.overviewSubtitle{font-size:11px}
+  .headerCount{height:32px;min-width:82px;font-size:11px}
+  .overviewToolbar{grid-template-columns:1fr 1fr;gap:7px}
+  .overviewToolbar .searchInput{grid-column:1/-1}
+  .filterSelect,.refreshBtn{min-width:0;width:100%;height:36px}
+  .toolbarSelect,.sortSelect{min-width:0}
+  .refreshBtn{grid-column:auto}
+  .rowActions{width:min(116px,100%)}
+  #projectEditMask{padding:10px}
+  #projectEditDialog{width:100%;max-height:calc(100dvh - 20px);border-radius:18px}
+  .projectEditHeader{padding:15px 14px 10px}
+  #projectEditBody{padding:12px;gap:10px}
+  .editGrid{grid-template-columns:1fr 1fr}
+  .editField.wide{grid-column:1/-1}
+  .editDeliveryRow{grid-template-columns:minmax(0,1fr) auto;gap:7px;padding:7px 8px}
+  .editDeliveryInfo{gap:6px;flex-wrap:wrap}
+  .editDeliveryRole{min-width:auto}
+  .editDeliveryAction{min-width:66px;padding:0 8px}
+  .partRow{grid-template-columns:1fr}
+  .projectEditFooter{padding:10px 12px 12px}
+  .projectEditFooter button{flex:1}
+  .summaryRow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tableShell{overflow:visible;background:transparent;border:0}
+  .tableHeader{display:none}
+  .tableBody{overflow:visible;padding:0}
+  .projectRow{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px 10px;padding:14px 12px;margin-bottom:9px;
+    border:1px solid rgba(255,255,255,.5);background:rgba(255,252,247,.62)
+  }
+  .projectRow .cell{font-size:11px}
+  .projectRow .cell:nth-child(1){grid-column:1;grid-row:1;color:#9a7047}
+  .projectRow .cell:nth-child(2){grid-column:1/-1;grid-row:2;font-size:14px}
+  .projectRow .cell:nth-child(3){grid-column:2;grid-row:1;text-align:right}
+  .projectRow .cell:nth-child(4){grid-column:1/-1;grid-row:3}
+  .projectRow .cell:nth-child(4)::before{content:"原唱：";font-weight:800;color:#8a6644}
+  .projectRow .cell:nth-child(5){grid-column:1/-1;grid-row:4}
+  .projectRow .cell:nth-child(5)::before{content:"参与：";font-weight:800;color:#8a6644}
+  .projectRow .cell:nth-child(6){grid-column:1;grid-row:5}
+  .projectRow .cell:nth-child(6)::before{content:"后期：";font-weight:800;color:#8a6644}
+  .projectRow .cell:nth-child(7){grid-column:2;grid-row:5;text-align:right}
+  .projectRow .cell:nth-child(8){grid-column:1;grid-row:6}
+  .projectRow .cell:nth-child(8)::before{content:"发布：";font-weight:800;color:#8a6644}
+  .projectRow .cell:nth-child(9){grid-column:2;grid-row:6;width:122px}
+}
+</style>
+</head>
+<body>
+<div id="room">
+  <div id="bgFrame"><img id="bg" src="" alt="十号房工作间背景" /></div>
+  <div id="overlay">
+    <nav class="roomNavLayer" aria-label="房间切换">
+      <button class="navBtn" data-room="hall" type="button" data-page="index" data-login="false"><span class="navLabel">大堂</span><span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span></button>
+      <button class="navBtn" data-room="living" type="button" data-page="living" data-login="false"><span class="navLabel">客厅</span><span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span></button>
+      <button class="navBtn" data-room="manager" type="button" data-manager="true"><span class="navLabel">宿管室</span><span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span></button>
+      <button class="navBtn" data-room="honor" type="button" data-page="honor" data-login="false"><span class="navLabel">荣誉墙</span><span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span></button>
+      <button class="navBtn is-current" data-room="studio" type="button" data-page="studioOverview" data-login="true" aria-current="page" tabindex="-1"><span class="navLabel">工作间</span><span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span></button>
+      <button class="navBtn" data-room="game" type="button" data-page="game" data-login="false"><span class="navLabel">游戏房</span><span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span></button>
+      <button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-login="true"><span class="navLabel">宿舍</span><span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span></button>
+      <button class="navBtn" data-room="flower" type="button" data-page="flower" data-login="false"><span class="navLabel">花房区</span><span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span></button>
+      <button class="navBtn" data-room="pets" type="button" data-page="pet" data-login="false"><span class="navLabel">宠物区</span><span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span></button>
+    </nav>
+
+    <section class="roomIdentity" id="roomIdentity" aria-label="当前身份">
+      <div class="roomIdentityBar">
+        <div class="identityNameBox">
+          <span class="identityNameText" id="identityNameText">
+            <span class="identityNamePart identityNickname" id="identityNickname">读取中</span>
+            <span class="identityNamePart identitySeparator" id="identitySeparator">｜</span>
+            <span class="identityNamePart identityRole" id="identityRole">房客</span>
+          </span>
+        </div>
+        <div class="identityNoticeWrap" id="identityNoticeWrap">
+          <button class="identityNoticeBtn" id="identityNoticeBtn" type="button" aria-label="打开通知" aria-expanded="false">
+            <span class="identityNoticeIcon">🔔</span>
+          </button>
+          <span class="identityNoticeCount" id="identityNoticeCount">0</span>
+          <div class="identityNoticePanel" id="identityNoticePanel" aria-live="polite" aria-hidden="true">
+            <div class="identityNoticeTitle">通知</div>
+            <div class="identityNoticeEmpty" id="identityNoticeContent">暂无提醒</div>
+          </div>
+        </div>
+        <button class="identityAuthBtn" id="identityAuthBtn" type="button"><span class="identityAuthText">登出</span></button>
+      </div>
+    </section>
+
+    <section id="taskPanel" aria-label="项目总览">
+      <nav id="panelSwitch" aria-label="工作间页面切换">
+        <button class="switchBtn active" type="button" aria-current="page">项目总览</button>
+        <button class="switchBtn" id="goTodoBtn" type="button">待处理</button>
+        <button class="switchBtn" id="goProjectBtn" type="button">任务详情</button>
+        <button class="switchBtn" id="goSubmitBtn" type="button">项目委托</button>
+      </nav>
+
+      <div id="overviewInner">
+        <div class="overviewHeader">
+          <div class="titleWrap">
+            <div class="overviewTitle">项目总览</div>
+            <div class="overviewSubtitle">所有项目统一查看 · 点击“查看”进入当前所在页面</div>
+          </div>
+          <div class="headerCount" id="headerCount">共 0 项</div>
+        </div>
+
+        <div class="overviewToolbar">
+          <input id="searchInput" class="searchInput" type="search" placeholder="搜索编号、项目名、原唱、成员、后期" />
+
+          <select id="typeFilter" class="filterSelect toolbarSelect" aria-label="类型筛选">
+            <option value="all">全部类型</option>
+          </select>
+
+          <select id="statusFilter" class="filterSelect toolbarSelect" aria-label="状态筛选">
+            <option value="all">全部状态</option>
+            <option value="todo">待处理</option>
+            <option value="project">制作中</option>
+            <option value="gallery">已发布</option>
+            <option value="other">其他</option>
+          </select>
+
+          <select id="sortSelect" class="filterSelect sortSelect" aria-label="排列方式">
+            <option value="code-asc">编号：小 → 大</option>
+            <option value="code-desc">编号：大 → 小</option>
+            <option value="type">类型 → 编号</option>
+            <option value="status">状态标签 → 编号</option>
+            <option value="name">项目名称</option>
+            <option value="release-asc">发布日期：早 → 晚</option>
+            <option value="release-desc">发布日期：晚 → 早</option>
+          </select>
+
+          <button class="refreshBtn" id="refreshBtn" type="button">刷新</button>
+        </div>
+
+        <div class="summaryRow">
+          <div class="summaryCard"><div class="summaryLabel">全部项目</div><div class="summaryValue" id="countAll">0</div></div>
+          <div class="summaryCard"><div class="summaryLabel">待处理</div><div class="summaryValue" id="countTodo">0</div></div>
+          <div class="summaryCard"><div class="summaryLabel">制作中</div><div class="summaryValue" id="countProject">0</div></div>
+          <div class="summaryCard"><div class="summaryLabel">已发布</div><div class="summaryValue" id="countGallery">0</div></div>
+        </div>
+
+        <div class="tableShell">
+          <div class="projectTable">
+            <div class="tableHeader" aria-hidden="true">
+              <div>编号</div><div>项目名称</div><div>类型</div><div>原唱</div><div>参与成员</div>
+              <div>后期</div><div>状态</div><div>发布日期</div><div>操作</div>
+            </div>
+            <div class="tableBody" id="tableBody">
+              <div class="loadingState">正在读取项目...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+
+<div id="projectEditMask" aria-hidden="true">
+  <div id="projectEditDialog" role="dialog" aria-modal="true" aria-labelledby="projectEditTitle">
+    <div class="projectEditHeader">
+      <div class="projectEditTitle" id="projectEditTitle">编辑项目</div>
+      <div class="projectEditSubtitle">保存使用现有 save_project_bundle；未修改的数据会按原值一起保存</div>
+    </div>
+    <div id="projectEditBody">
+      <section class="editSection">
+        <div class="editSectionTitle">基础信息</div>
+        <div class="editGrid">
+          <label class="editField"><span class="editLabel">编号</span><input id="editProjectCode" class="editInput" type="text" readonly /></label>
+          <label class="editField wide"><span class="editLabel">项目名称</span><input id="editProjectName" class="editInput" type="text" /></label>
+          <label class="editField"><span class="editLabel">类型</span><select id="editProjectType" class="editSelect"></select></label>
+          <label class="editField"><span class="editLabel">演唱人数</span><input id="editSingerQuota" class="editInput" type="number" min="1" max="99" /></label>
+          <label class="editField"><span class="editLabel">调</span><input id="editProjectTone" class="editInput" type="text" placeholder="原调 / +3 / -2" /></label>
+          <label class="editField"><span class="editLabel">发布日期</span><input id="editReleaseDate" class="editInput" type="date" /></label>
+          <div class="editField wide"><span class="editLabel">任务模式</span><div class="modeRow"><button id="editModeNormal" class="modeBtn active" type="button">普通</button><button id="editModeSpecial" class="modeBtn" type="button">特殊</button></div></div>
+        </div>
+      </section>
+      <section class="editSection">
+        <div class="editSectionTitle">后期负责人</div>
+        <div class="pickerGrid" id="editProducerPicker"></div><div class="editLoadHint" id="editProducerHint"></div>
+      </section>
+      <section class="editSection">
+        <div class="editSectionTitle">参与成员</div>
+        <div class="singerGrid" id="editSingerPicker"></div><div class="editLoadHint" id="editSingerHint"></div>
+      </section>
+      <section class="editSection">
+        <div class="editSectionTitle">交音 / 交付状态</div>
+        <div class="editDeliveryHint">这里的交音、交付和撤回会立即生效；如果刚修改了参与成员或后期负责人，请先点底部“保存”后再操作。</div>
+        <div class="editDeliveryList" id="editDeliveryList"></div>
+      </section>
+      <section class="editSection">
+        <div class="editSectionTitle">歌词分配</div>
+        <div class="partRows" id="editPartRows"></div>
+      </section>
+    </div>
+    <div class="projectEditFooter">
+      <button id="projectEditCancelBtn" type="button">取消</button>
+      <button id="projectEditSaveBtn" type="button">保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastMask" aria-hidden="true">
+  <div id="toastBox">
+    <div id="toastTitle">提示</div>
+    <div id="toastMessage"></div>
+    <button id="toastCloseBtn" type="button">知道了</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_CONFIG = {
+  url:"https://tfevitwoqmxwaguvtyms.supabase.co",
+  key:"sb_publishable_0cFYhwx_9uEcrXnMJzzNMQ_cEng8xmI"
+};
+const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url,SUPABASE_CONFIG.key);
+
+const STORAGE_KEYS = {
+  loggedIn:"room10LoggedIn",
+  user:"room10User",
+  role:"room10Role",
+  memberId:"room10MemberId",
+  memberCode:"room10MemberCode",
+  studioJumpIntent:"room10_studio_jump_intent"
+};
+const authState = {loggedIn:false,nickname:"",role:"visitor",memberId:"",memberCode:""};
+const ROOM_NAV_PAGE_KEYS = {
+  hall:"index",living:"living",honor:"honor",studio:"studioOverview",
+  game:"game",dorm:"dorm",flower:"flower",pets:"pet"
+};
+
+const room = document.getElementById("room");
+const bg = document.getElementById("bg");
+const overlay = document.getElementById("overlay");
+const identityNickname = document.getElementById("identityNickname");
+const identitySeparator = document.getElementById("identitySeparator");
+const identityRole = document.getElementById("identityRole");
+const identityNoticeWrap = document.getElementById("identityNoticeWrap");
+const identityNoticeBtn = document.getElementById("identityNoticeBtn");
+const identityNoticePanel = document.getElementById("identityNoticePanel");
+const identityAuthBtn = document.getElementById("identityAuthBtn");
+const tableBody = document.getElementById("tableBody");
+const searchInput = document.getElementById("searchInput");
+const typeFilter = document.getElementById("typeFilter");
+const statusFilter = document.getElementById("statusFilter");
+const sortSelect = document.getElementById("sortSelect");
+const refreshBtn = document.getElementById("refreshBtn");
+const headerCount = document.getElementById("headerCount");
+const toastMask = document.getElementById("toastMask");
+const toastTitle = document.getElementById("toastTitle");
+const toastMessage = document.getElementById("toastMessage");
+const projectEditMask = document.getElementById("projectEditMask");
+const projectEditTitle = document.getElementById("projectEditTitle");
+const projectEditCancelBtn = document.getElementById("projectEditCancelBtn");
+const projectEditSaveBtn = document.getElementById("projectEditSaveBtn");
+const editProjectCode = document.getElementById("editProjectCode");
+const editProjectName = document.getElementById("editProjectName");
+const editProjectType = document.getElementById("editProjectType");
+const editSingerQuota = document.getElementById("editSingerQuota");
+const editProjectTone = document.getElementById("editProjectTone");
+const editReleaseDate = document.getElementById("editReleaseDate");
+const editModeNormal = document.getElementById("editModeNormal");
+const editModeSpecial = document.getElementById("editModeSpecial");
+const editProducerPicker = document.getElementById("editProducerPicker");
+const editSingerPicker = document.getElementById("editSingerPicker");
+const editProducerHint = document.getElementById("editProducerHint");
+const editSingerHint = document.getElementById("editSingerHint");
+const editDeliveryList = document.getElementById("editDeliveryList");
+const editPartRows = document.getElementById("editPartRows");
+
+let projects = [];
+let memberNameMap = new Map();
+let memberDirectoryRows = [];
+let currentEditingProjectId = "";
+let currentEditingProducerId = "";
+let currentEligibleSingers = [];
+let currentEligibleMixers = [];
+let editPartDraftRows = [];
+let editIsSpecial = false;
+
+
+
+function getRoom10Page(key){
+  const path = typeof window.room10Page === "function" ? window.room10Page(key) : "";
+  if(!path) throw new Error(`room10-paths.js 缺少页面配置：${key}`);
+  return path;
+}
+function getRoom10Asset(key){
+  const path = typeof window.room10Asset === "function" ? window.room10Asset(key) : "";
+  if(!path) throw new Error(`room10-paths.js 缺少素材配置：${key}`);
+  return path;
+}
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function safeText(value,fallback="—"){
+  const text = String(value ?? "").trim();
+  return text || fallback;
+}
+function renderNameList(names,emptyText){
+  const list = [...new Set((Array.isArray(names) ? names : []).map(name => String(name || "").trim()).filter(Boolean))];
+  if(!list.length) return `<span class="nameEmpty">${escapeHtml(emptyText || "—")}</span>`;
+  return `<span class="nameList">${list.map(name => `<span class="nameItem" title="${escapeHtml(name)}">${escapeHtml(name)}</span>`).join("")}</span>`;
+}
+function formatDate(value){
+  if(!value) return "未定";
+  const raw = String(value).trim();
+  const d = new Date(raw);
+  if(Number.isNaN(d.getTime())) return raw;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function codeNumber(code){
+  return Number(String(code || "").match(/\d+/)?.[0] || 0);
+}
+function showToast(title,message){
+  toastTitle.textContent = title || "提示";
+  toastMessage.textContent = message || "";
+  toastMask.classList.add("show");
+  toastMask.setAttribute("aria-hidden","false");
+}
+function closeToast(){
+  toastMask.classList.remove("show");
+  toastMask.setAttribute("aria-hidden","true");
+}
+
+function getRole(){
+  const role = String(localStorage.getItem(STORAGE_KEYS.role) || "visitor").toLowerCase();
+  return ["owner","admin","member","trainee","visitor","applying"].includes(role) ? role : "visitor";
+}
+function getRoleLabel(role){
+  return ({owner:"维修工",admin:"宿管",member:"房客",trainee:"练习生",applying:"申请中"})[role] || "参观者";
+}
+function clearLogin(){
+  Object.values(STORAGE_KEYS).slice(0,5).forEach(key => localStorage.removeItem(key));
+}
+function redirectLogin(){
+  document.documentElement.classList.remove("auth-ready");
+  document.documentElement.classList.add("auth-pending");
+  try{sessionStorage.setItem("room10LoginRequired","studioOverview")}catch(_){}
+  window.location.replace(getRoom10Page("index"));
+}
+async function ensureAuth(){
+  authState.loggedIn = localStorage.getItem(STORAGE_KEYS.loggedIn) === "true";
+  authState.nickname = String(localStorage.getItem(STORAGE_KEYS.user) || "").trim();
+  authState.role = getRole();
+  authState.memberId = String(localStorage.getItem(STORAGE_KEYS.memberId) || "").trim();
+  authState.memberCode = String(localStorage.getItem(STORAGE_KEYS.memberCode) || "").trim();
+
+  if(!authState.loggedIn || !authState.nickname || !authState.memberId || !authState.memberCode){
+    redirectLogin(); return false;
+  }
+  if(!["owner","admin","member","trainee"].includes(authState.role)){
+    redirectLogin(); return false;
+  }
+
+  try{
+    const {data,error} = await supabaseClient.rpc("get_member_directory_for_app",{
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode
+    });
+    if(error) throw error;
+    const rows = Array.isArray(data) ? data : [];
+    const verified = rows.some(row => String(row.nickname || "").trim() === authState.nickname);
+    if(!verified){redirectLogin();return false;}
+
+    memberDirectoryRows = rows.slice();
+    memberNameMap = new Map(rows.map(row => [
+      String(row.id || row.member_id || ""),
+      String(row.nickname || row.name || "").trim()
+    ]).filter(([id]) => id));
+
+    identityNickname.textContent = authState.nickname;
+    identitySeparator.classList.remove("hidden");
+    identityRole.textContent = getRoleLabel(authState.role);
+    identityRole.classList.remove("hidden");
+    document.documentElement.classList.remove("auth-pending");
+    document.documentElement.classList.add("auth-ready");
+    return true;
+  }catch(error){
+    console.error("登录状态校验失败：",error);
+    redirectLogin();
+    return false;
+  }
+}
+
+function unwrapRpc(value){
+  if(!value || Array.isArray(value) || typeof value !== "object") return value;
+  for(const key of ["payload","result","data","project_items","studio_project_items"]){
+    if(value[key] !== undefined && value[key] !== null) return value[key];
+  }
+  return value;
+}
+function normalizeRpc(rawData){
+  let payload = unwrapRpc(rawData);
+  if(Array.isArray(payload) && payload.length === 1){
+    const unwrapped = unwrapRpc(payload[0]);
+    if(unwrapped !== payload[0]) payload = unwrapped;
+  }
+
+  const projectRows=[], partRows=[], singerRows=[], statusRows=[];
+  const push = (target,rows) => {if(Array.isArray(rows)) target.push(...rows.filter(Boolean));};
+
+  const addBundle = bundle => {
+    if(!bundle || typeof bundle !== "object") return;
+    const project = bundle.project || bundle.project_data || bundle.project_item || bundle;
+    if(!project || typeof project !== "object" || !(project.id || project.project_id)) return;
+    const id = String(project.id || project.project_id);
+    projectRows.push({
+      ...project,
+      id,
+      producer_member:
+        project.producer_member || project.producer || project.producer_data ||
+        (project.producer_nickname ? {nickname:project.producer_nickname} : null)
+    });
+
+    const parts = bundle.parts || bundle.project_parts || project.parts || project.project_parts || [];
+    push(partRows,(parts || []).map(row => ({
+      ...row,
+      project_id:row.project_id || id,
+      members:row.members || row.assigned_member || row.member || (row.assigned_nickname ? {nickname:row.assigned_nickname} : null)
+    })));
+
+    const singers = bundle.singers || bundle.project_singers || project.singers || project.project_singers || [];
+    push(singerRows,(singers || []).map(row => ({
+      ...row,
+      project_id:row.project_id || id,
+      members:row.members || row.member || row.singer_member || (row.nickname ? {nickname:row.nickname} : null)
+    })));
+
+    const status = bundle.status_info || bundle.project_status || bundle.computed_status_info || project.status_info || null;
+    if(status && typeof status === "object") statusRows.push({...status,project_id:status.project_id || id});
+  };
+
+  if(payload && !Array.isArray(payload) && typeof payload === "object"){
+    push(projectRows,payload.projects || payload.project_rows || payload.items || []);
+    push(partRows,payload.parts || payload.project_parts || payload.part_rows || []);
+    push(singerRows,payload.singers || payload.project_singers || payload.singer_rows || []);
+    push(statusRows,payload.statuses || payload.project_statuses || payload.status_rows || []);
+    if(!projectRows.length && (payload.id || payload.project_id)) addBundle(payload);
+  }else if(Array.isArray(payload)){
+    const typed = payload.some(row => row && (row.item_type || row.row_type || row.type_key));
+    if(typed){
+      payload.forEach(row => {
+        const type = String(row.item_type || row.row_type || row.type_key || "").toLowerCase();
+        const item = row.item || row.item_data || row.row_data || row.payload || row.data || row;
+        if(type.includes("part")) partRows.push(item);
+        else if(type.includes("singer")) singerRows.push(item);
+        else if(type.includes("status")) statusRows.push(item);
+        else if(type.includes("project")) projectRows.push(item);
+      });
+    }else payload.forEach(addBundle);
+  }
+
+  if(projectRows.length && !partRows.length && !singerRows.length){
+    const original = [...projectRows];
+    projectRows.length = 0;
+    original.forEach(addBundle);
+  }
+
+  const knownStatus = new Set(statusRows.map(row => String(row.project_id || "")));
+  projectRows.forEach(project => {
+    const id = String(project.id || project.project_id || "");
+    if(id && !knownStatus.has(id)){
+      statusRows.push({
+        project_id:id,
+        computed_status:project.computed_status || project.status || project.project_status || "",
+        show_in_todo:project.show_in_todo,
+        show_in_project:project.show_in_project,
+        show_in_gallery:project.show_in_gallery,
+        page_area:project.page_area,
+        todo_tags:project.todo_tags
+      });
+    }
+  });
+  return {projectRows,partRows,singerRows,statusRows};
+}
+
+function buildProjects(projectRows,partRows,singerRows,statusRows){
+  const partMap = new Map();
+  const singerMap = new Map();
+  const statusMap = new Map();
+
+  partRows.forEach(row => {
+    const projectId = String(row.project_id || "");
+    if(!projectId) return;
+    if(!partMap.has(projectId)) partMap.set(projectId,[]);
+    const memberId = String(row.assigned_member_id || "");
+    partMap.get(projectId).push({
+      id:row.id || null,
+      part_order:Number(row.part_order) || 0,
+      original_name:String(row.original_name || "").trim(),
+      assigned_member_id:memberId || null,
+      assigned_member_name:String(row.members?.nickname || row.members?.name || row.assigned_nickname || memberNameMap.get(memberId) || "").trim()
+    });
+  });
+
+  singerRows.forEach(row => {
+    const projectId = String(row.project_id || "");
+    if(!projectId) return;
+    if(!singerMap.has(projectId)) singerMap.set(projectId,[]);
+    const memberId = String(row.member_id || "");
+    singerMap.get(projectId).push({
+      id:row.id || null,
+      member_id:memberId,
+      member_name:String(row.members?.nickname || row.members?.name || row.nickname || memberNameMap.get(memberId) || "").trim(),
+      is_submitted:!!row.is_submitted,
+      submitted_at:row.submitted_at || null
+    });
+  });
+  statusRows.forEach(row => statusMap.set(String(row.project_id || ""),row || {}));
+
+  return projectRows.map(project => {
+    const id = String(project.id || project.project_id || "");
+    const status = statusMap.get(id) || {};
+    const singers = singerMap.get(id) || [];
+    const parts = (partMap.get(id) || []).sort((a,b) => a.part_order - b.part_order);
+    const originalNames = [...new Set(parts.map(item => String(item.original_name || "").trim()).filter(Boolean))];
+    const singerNames = [...new Set(singers.map(item => item.member_name).filter(Boolean))];
+    const producerId = String(project.producer_member_id || "");
+    const producerName = String(
+      project.producer_member?.nickname || project.producer_member?.name || project.producer_nickname || memberNameMap.get(producerId) || ""
+    ).trim();
+    const pageArea = String(status.page_area || project.page_area || "").trim();
+    const showInTodo = (status.show_in_todo ?? project.show_in_todo) === true;
+    const showInProject = (status.show_in_project ?? project.show_in_project) === true;
+    const showInGallery = (status.show_in_gallery ?? project.show_in_gallery) === true;
+    const computedStatus = String(status.computed_status || project.computed_status || project.status || project.project_status || "").trim();
+
+    return {
+      id,
+      project_code:String(project.project_code || "").trim(),
+      project_name:String(project.project_name || "").trim(),
+      project_type:String(project.project_type || "").trim(),
+      game_type:String(project.game_type || "").trim(),
+      project_tone:String(project.project_tone || "").trim(),
+      is_collective_task:!!project.is_collective_task,
+      participant_count:Number(project.participant_count) || singers.length || parts.length || 1,
+      singer_bonus:Number(project.singer_bonus) || 0,
+      producer_bonus:Number(project.producer_bonus) || 0,
+      producer_member_id:producerId || null,
+      producer_completed:!!project.producer_completed,
+      producer_completed_at:project.producer_completed_at || null,
+      originalNames,
+      singerNames,
+      singers,
+      parts,
+      producerName,
+      release_date:project.release_date || null,
+      computedStatus,pageArea,showInTodo,showInProject,showInGallery,
+      created_at:project.created_at || null
+    };
+  }).filter(item => item.id);
+}
+
+function getArea(project){
+  if(project.pageArea === "gallery" || project.showInGallery) return "gallery";
+  if(project.pageArea === "project" || project.showInProject) return "project";
+  if(project.pageArea === "todo" || project.pageArea === "supplement" || project.showInTodo) return "todo";
+  return "other";
+}
+function getAreaLabel(area){
+  return ({todo:"待处理",project:"制作中",gallery:"已发布",other:"其他"})[area] || "其他";
+}
+function getStatusText(project){
+  return project.computedStatus || getAreaLabel(getArea(project));
+}
+function getTarget(project){
+  const area = getArea(project);
+  if(area === "gallery") return {pageKey:"honorGallery",area:"gallery"};
+  if(area === "todo") return {pageKey:"studioTodo",area:"todo"};
+  return {pageKey:"studioProject",area:"project"};
+}
+function normalizedTokens(text){
+  return String(text || "").trim().toLowerCase().split(/\s+/).filter(Boolean);
+}
+function matchesSearch(project,tokens){
+  if(!tokens.length) return true;
+  const haystack = [
+    project.project_code,project.project_name,project.project_type,project.game_type,
+    project.originalNames.join(" "),project.singerNames.join(" "),project.producerName,getStatusText(project)
+  ].join(" ").toLowerCase();
+  return tokens.every(token => haystack.includes(token));
+}
+
+function sortProjectsForDisplay(rows){
+  const list = [...rows];
+  const mode = sortSelect?.value || "code-asc";
+  const codeCmp = (a,b) => codeNumber(a.project_code) - codeNumber(b.project_code) || String(a.project_code || "").localeCompare(String(b.project_code || ""),"zh-CN");
+  const typeText = item => String(item.project_type || "");
+  const statusRank = {todo:0,project:1,gallery:2,other:3};
+  const dateValue = item => item.release_date ? new Date(item.release_date).getTime() : Number.POSITIVE_INFINITY;
+  if(mode === "code-desc") return list.sort((a,b) => -codeCmp(a,b));
+  if(mode === "type") return list.sort((a,b) => typeText(a).localeCompare(typeText(b),"zh-CN") || codeCmp(a,b));
+  if(mode === "status") return list.sort((a,b) => (statusRank[getArea(a)] ?? 9) - (statusRank[getArea(b)] ?? 9) || codeCmp(a,b));
+  if(mode === "name") return list.sort((a,b) => String(a.project_name || "").localeCompare(String(b.project_name || ""),"zh-CN") || codeCmp(a,b));
+  if(mode === "release-asc") return list.sort((a,b) => dateValue(a) - dateValue(b) || codeCmp(a,b));
+  if(mode === "release-desc") return list.sort((a,b) => {
+    const av = a.release_date ? new Date(a.release_date).getTime() : Number.NEGATIVE_INFINITY;
+    const bv = b.release_date ? new Date(b.release_date).getTime() : Number.NEGATIVE_INFINITY;
+    return bv - av || codeCmp(a,b);
+  });
+  return list.sort(codeCmp);
+}
+
+function getProjectTypeFilterValue(project){
+  return String(project?.project_type || "").trim() || "未分类";
+}
+
+function renderTypeFilterOptions(){
+  const current = String(typeFilter.value || "all");
+  const types = [...new Set(projects.map(getProjectTypeFilterValue))]
+    .sort((a,b) => a.localeCompare(b,"zh-CN"));
+
+  typeFilter.innerHTML = [
+    '<option value="all">全部类型</option>',
+    ...types.map(type => `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`)
+  ].join("");
+
+  typeFilter.value = types.includes(current) ? current : "all";
+}
+
+function projectMatchesLayerFilters(project){
+  const typeValue = String(typeFilter.value || "all");
+  const statusValue = String(statusFilter.value || "all");
+  const typeOk = typeValue === "all" || getProjectTypeFilterValue(project) === typeValue;
+  const statusOk = statusValue === "all" || getArea(project) === statusValue;
+  return typeOk && statusOk;
+}
+
+function renderSummary(){
+  const counts = {all:projects.length,todo:0,project:0,gallery:0};
+  projects.forEach(project => {
+    const area = getArea(project);
+    if(counts[area] !== undefined) counts[area]++;
+  });
+  document.getElementById("countAll").textContent = counts.all;
+  document.getElementById("countTodo").textContent = counts.todo;
+  document.getElementById("countProject").textContent = counts.project;
+  document.getElementById("countGallery").textContent = counts.gallery;
+}
+
+function renderTable(){
+  const tokens = normalizedTokens(searchInput.value);
+  const filteredRows = projects.filter(project =>
+    projectMatchesLayerFilters(project) && matchesSearch(project,tokens)
+  );
+  const rows = sortProjectsForDisplay(filteredRows);
+
+  headerCount.textContent = `共 ${rows.length} 项`;
+
+  if(!rows.length){
+    tableBody.innerHTML = '<div class="emptyState">没有符合当前条件的项目</div>';
+    return;
+  }
+
+  tableBody.innerHTML = rows.map(project => {
+    const area = getArea(project);
+    const typeText = safeText(project.project_type,"未分类");
+    const originals = project.originalNames.length ? project.originalNames.join("、") : "未填写";
+    const participants = project.singerNames.length ? project.singerNames.join("、") : "未分配";
+    const originalHtml = renderNameList(project.originalNames,"未填写");
+    const participantHtml = renderNameList(project.singerNames,"未分配");
+    const status = getStatusText(project);
+
+    return `
+      <div class="projectRow" data-project-id="${escapeHtml(project.id)}">
+        <div class="cell strong ellipsis" title="${escapeHtml(project.project_code)}">${escapeHtml(safeText(project.project_code))}</div>
+        <div class="cell strong ellipsis" title="${escapeHtml(project.project_name)}">${escapeHtml(safeText(project.project_name,"未命名项目"))}</div>
+        <div class="cell"><span class="typeBadge${project.project_type === "游戏" ? " game" : ""}" title="${escapeHtml(typeText)}">${escapeHtml(typeText)}</span></div>
+        <div class="cell memberText" title="${escapeHtml(originals)}">${originalHtml}</div>
+        <div class="cell memberText" title="${escapeHtml(participants)}">${participantHtml}</div>
+        <div class="cell ellipsis" title="${escapeHtml(project.producerName)}">${escapeHtml(safeText(project.producerName,"未定"))}</div>
+        <div class="cell"><span class="statusBadge ${area}" title="${escapeHtml(status)}">${escapeHtml(status)}</span></div>
+        <div class="cell ellipsis">${escapeHtml(formatDate(project.release_date))}</div>
+        <div class="cell"><div class="rowActions"><button class="viewBtn" type="button" data-view-id="${escapeHtml(project.id)}">查看</button><button class="editBtn" type="button" data-edit-id="${escapeHtml(project.id)}" onclick="event.stopPropagation();openProjectEdit(this.dataset.editId)">编辑</button></div></div>
+      </div>
+    `;
+  }).join("");
+}
+
+function openProject(projectId){
+  const project = projects.find(item => item.id === String(projectId || ""));
+  if(!project) return;
+
+  try{
+    const target = getTarget(project);
+    const page = getRoom10Page(target.pageKey);
+    localStorage.setItem(STORAGE_KEYS.studioJumpIntent,JSON.stringify({
+      page,
+      pageKey:target.pageKey,
+      taskId:project.id,
+      keyword:"",
+      sourcePageKey:"studioOverview",
+      targetArea:target.area,
+      createdAt:Date.now()
+    }));
+    const url = new URL(page,window.location.href);
+    url.searchParams.set("studio_jump","1");
+    url.searchParams.set("project_id",project.id);
+    url.searchParams.set("target_area",target.area);
+    window.location.href = url.href;
+  }catch(error){
+    console.error("项目跳转失败：",error);
+    showToast("无法跳转",error?.message || "目标页面路径配置不完整。");
+  }
+}
+
+
+function formatDateForInput(value){
+  if(!value) return "";
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return String(value).slice(0,10);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function getProjectById(id){return projects.find(item => String(item.id) === String(id || "")) || null;}
+function getMemberLabel(row){return String(row?.nickname || row?.name || memberNameMap.get(String(row?.member_id || row?.id || "")) || "未命名成员").trim();}
+function normalizeEligibleRows(rows){
+  return (Array.isArray(rows) ? rows : []).map(row => ({
+    ...row,
+    member_id:String(row?.member_id || row?.id || "").trim(),
+    nickname:getMemberLabel(row)
+  })).filter(row => row.member_id);
+}
+function mergeEligibleRows(base, assigned){
+  const out = normalizeEligibleRows(base), seen = new Set(out.map(row => row.member_id));
+  normalizeEligibleRows(assigned).forEach(row => {if(!seen.has(row.member_id)){out.push(row);seen.add(row.member_id);}});
+  return out;
+}
+async function loadEligibleForEdit(projectId){
+  const params = {p_member_id:authState.memberId,p_member_code:authState.memberCode,p_project_id:String(projectId)};
+  const [singersResult,mixersResult] = await Promise.all([
+    supabaseClient.rpc("get_project_eligible_singers",params),
+    supabaseClient.rpc("get_project_eligible_mixers",params)
+  ]);
+  if(singersResult.error) throw singersResult.error;
+  if(mixersResult.error) throw mixersResult.error;
+  return {singers:normalizeEligibleRows(singersResult.data),mixers:normalizeEligibleRows(mixersResult.data)};
+}
+function getSelectedSingerIds(){
+  return Array.from(editSingerPicker.querySelectorAll(".singerBtn.active[data-member-id]")).map(btn => String(btn.dataset.memberId));
+}
+function setEditMode(special){
+  editIsSpecial = !!special;
+  editModeNormal.classList.toggle("active",!editIsSpecial);
+  editModeSpecial.classList.toggle("active",editIsSpecial);
+}
+function renderProducerPicker(){
+  const rows = [{member_id:"",nickname:"暂不指定"},...currentEligibleMixers];
+  editProducerPicker.innerHTML = rows.map(row => `<button type="button" class="pickerBtn ${String(row.member_id) === String(currentEditingProducerId) ? "active" : ""}" data-producer-id="${escapeHtml(row.member_id)}">${escapeHtml(row.nickname)}</button>`).join("");
+}
+function renderSingerPicker(selectedIds=[]){
+  const selected = new Set(selectedIds.map(String));
+  editSingerPicker.innerHTML = currentEligibleSingers.map(row => `<button type="button" class="singerBtn ${selected.has(String(row.member_id)) ? "active" : ""}" data-member-id="${escapeHtml(row.member_id)}">${escapeHtml(row.nickname)}</button>`).join("") || '<div class="identityNoticeEmpty">当前没有可选成员</div>';
+}
+function collectPartRowsFromDom(){
+  return Array.from(editPartRows.querySelectorAll(".partRow")).map((row,index) => ({
+    original_name:String(row.querySelector('[data-part-name]')?.value || "").trim(),
+    assigned_member_id:String(row.querySelector('[data-part-member]')?.value || "").trim() || null,
+    part_order:index+1
+  }));
+}
+function renderPartRows(rows=editPartDraftRows){
+  editPartDraftRows = rows.map((row,index) => ({
+    original_name:String(row?.original_name || ""),
+    assigned_member_id:String(row?.assigned_member_id || ""),
+    part_order:index+1
+  }));
+  const selected = new Set(getSelectedSingerIds());
+  const memberOptions = currentEligibleSingers.filter(row => selected.has(String(row.member_id)));
+  editPartRows.innerHTML = editPartDraftRows.map((row,index) => `
+    <div class="partRow" data-part-index="${index}">
+      <input class="editInput" data-part-name type="text" value="${escapeHtml(row.original_name)}" placeholder="原唱 / 部分" />
+      <select class="editSelect" data-part-member>
+        <option value="">未分配</option>
+        ${memberOptions.map(member => `<option value="${escapeHtml(member.member_id)}" ${String(member.member_id) === String(row.assigned_member_id) ? "selected" : ""}>${escapeHtml(member.nickname)}</option>`).join("")}
+      </select>
+    </div>`).join("");
+}
+function syncPartRowsToQuota(){
+  const quota = Math.max(1,Math.floor(Number(editSingerQuota.value) || 1));
+  const current = collectPartRowsFromDom();
+  if(current.length > quota){
+    const trimmed = current.slice(quota);
+    if(trimmed.some(row => row.original_name || row.assigned_member_id)){
+      editSingerQuota.value = String(current.length);
+      showToast("无法减少人数","超出人数的歌词分配行仍有内容，请先清空后再减少演唱人数。");
+      return;
+    }
+  }
+  const next = current.slice(0,quota);
+  while(next.length < quota) next.push({original_name:"",assigned_member_id:null,part_order:next.length+1});
+  renderPartRows(next);
+}
+function populateTypeOptions(current){
+  const types = [...new Set(projects.map(item => String(item.project_type || "").trim()).filter(Boolean))];
+  if(current && !types.includes(current)) types.unshift(current);
+  editProjectType.innerHTML = types.map(type => `<option value="${escapeHtml(type)}" ${type === current ? "selected" : ""}>${escapeHtml(type)}</option>`).join("");
+}
+
+function areAllEditSingersSubmitted(project){
+  return Array.isArray(project?.singers)
+    && project.singers.length > 0
+    && project.singers.every(item => !!item.is_submitted);
+}
+
+function renderEditDeliveryActions(project = getProjectById(currentEditingProjectId)){
+  if(!project){
+    editDeliveryList.innerHTML = '<div class="editDeliveryEmpty">未找到当前项目状态。</div>';
+    return;
+  }
+
+  const singerRows = (project.singers || []).map(singer => {
+    const singerId = String(singer.id || "").trim();
+    const submitted = !!singer.is_submitted;
+    const name = safeText(singer.member_name,"未命名成员");
+    const canOperate = !!singerId;
+
+    return `
+      <div class="editDeliveryRow">
+        <div class="editDeliveryInfo">
+          <span class="editDeliveryRole">演唱</span>
+          <span class="editDeliveryName" title="${escapeHtml(name)}">${escapeHtml(name)}</span>
+          <span class="editDeliveryState ${submitted ? "done" : "waiting"}">${submitted ? "已交音" : "待交音"}</span>
+        </div>
+        <button
+          class="editDeliveryAction ${submitted ? "withdraw" : ""}"
+          type="button"
+          data-edit-singer-action="${escapeHtml(singerId)}"
+          data-current="${submitted ? "1" : "0"}"
+          ${canOperate ? "" : "disabled"}
+        >${submitted ? "撤回交音" : "交音"}</button>
+      </div>
+    `;
+  }).join("");
+
+  const hasProducer = !!String(project.producer_member_id || "").trim();
+  const producerDone = !!project.producer_completed;
+  const allSingersDone = areAllEditSingersSubmitted(project);
+  const producerName = safeText(project.producerName,"未指定");
+  let producerButtonText = "交付";
+  let producerDisabled = !hasProducer;
+  let producerButtonClass = "";
+
+  if(producerDone){
+    producerButtonText = "撤回交付";
+    producerButtonClass = "withdraw";
+  }else if(!allSingersDone){
+    producerButtonText = "等待交音";
+    producerDisabled = true;
+  }
+
+  const producerRow = `
+    <div class="editDeliveryRow">
+      <div class="editDeliveryInfo">
+        <span class="editDeliveryRole">后期</span>
+        <span class="editDeliveryName" title="${escapeHtml(producerName)}">${escapeHtml(producerName)}</span>
+        <span class="editDeliveryState ${producerDone ? "done" : (allSingersDone ? "waiting" : "")}">
+          ${producerDone ? "已交付" : (allSingersDone ? "待交付" : "等待交音")}
+        </span>
+      </div>
+      <button
+        class="editDeliveryAction ${producerButtonClass}"
+        type="button"
+        data-edit-producer-action="${escapeHtml(project.id)}"
+        data-current="${producerDone ? "1" : "0"}"
+        ${producerDisabled ? "disabled" : ""}
+      >${producerButtonText}</button>
+    </div>
+  `;
+
+  editDeliveryList.innerHTML = (singerRows || '<div class="editDeliveryEmpty">当前项目还没有演唱成员记录。</div>') + producerRow;
+}
+
+async function refreshEditDeliveryState(projectId){
+  const keepId = String(projectId || currentEditingProjectId || "").trim();
+  await loadProjects();
+  if(String(currentEditingProjectId || "") !== keepId) return;
+  renderEditDeliveryActions(getProjectById(keepId));
+}
+
+async function toggleEditSingerSubmitted(singerRecordId,currentValue,button){
+  const singerKey = String(singerRecordId || "").trim();
+  const project = getProjectById(currentEditingProjectId);
+  if(!project || !singerKey) return;
+
+  const singer = (project.singers || []).find(item => String(item.id || "") === singerKey);
+  if(!singer){
+    showToast("操作失败","未找到对应的演唱记录，请刷新后重试。");
+    return;
+  }
+
+  const previousText = button?.textContent || "";
+  try{
+    if(button){
+      button.disabled = true;
+      button.textContent = currentValue ? "撤回中…" : "交音中…";
+    }
+
+    const {data,error} = await supabaseClient.rpc("submit_project_singer_with_reward_v2",{
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode,
+      p_project_id:project.id,
+      p_singer_record_id:singerKey,
+      p_is_submitted:!currentValue
+    });
+    if(error) throw error;
+    if(!data?.ok) throw new Error(data?.message || "交音状态未更新，请刷新后重试。");
+
+    await refreshEditDeliveryState(project.id);
+
+    const targetName = String(data?.target_member_name || singer.member_name || "该成员").trim();
+    if(!currentValue){
+      const rewardAmount = Number(data?.reward_amount || 0);
+      let message = data?.reward_granted && rewardAmount > 0
+        ? `已为${targetName}记录交音，${rewardAmount} 金币已发放。`
+        : `已为${targetName}记录交音。`;
+
+      const encounter = data?.animal_encounter;
+      if(encounter?.triggered === true || data?.animal_encounter_triggered === true){
+        message += "\n同时触发了动物偶遇，奖励已按系统规则记录。";
+      }
+      showToast("交音成功",message);
+    }else{
+      const amount = Number(data?.reward_retracted_amount || 0);
+      let message = data?.reward_retracted && amount > 0
+        ? `已撤回${targetName}的交音，并扣回 ${amount} 金币。`
+        : `已撤回${targetName}的交音。`;
+
+      const encounter = data?.animal_encounter;
+      if(
+        data?.animal_encounter_reward_retracted === true
+        || encounter?.reward_retracted === true
+      ){
+        message += "\n相关动物偶遇奖励也已按系统规则撤回。";
+      }
+      showToast("已撤回交音",message);
+    }
+  }catch(error){
+    console.error("项目总览更新交音状态失败：",error);
+    showToast("操作失败",error?.message || "更新交音状态失败。");
+    if(button){
+      button.disabled = false;
+      button.textContent = previousText;
+    }
+  }
+}
+
+async function toggleEditProducerSubmitted(projectId,currentValue,button){
+  const project = getProjectById(projectId);
+  if(!project) return;
+
+  if(!project.producer_member_id){
+    showToast("暂不能交付","当前项目没有后期负责人。");
+    return;
+  }
+  if(!currentValue && !areAllEditSingersSubmitted(project)){
+    showToast("暂不能交付","演唱尚未全部交音，暂时不能交付后期。");
+    return;
+  }
+
+  const previousText = button?.textContent || "";
+  try{
+    if(button){
+      button.disabled = true;
+      button.textContent = currentValue ? "撤回中…" : "交付中…";
+    }
+
+    const {data,error} = await supabaseClient.rpc("submit_project_mixer_with_reward",{
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode,
+      p_project_id:project.id,
+      p_is_submitted:!currentValue
+    });
+    if(error) throw error;
+    if(!data?.ok) throw new Error(data?.message || "后期交付状态未更新，请刷新后重试。");
+
+    await refreshEditDeliveryState(project.id);
+
+    const targetName = String(data?.target_member_name || project.producerName || "后期负责人").trim();
+    const operatedForOther = data?.operated_for_other === true;
+
+    if(!currentValue){
+      const amount = Number(data?.reward_amount || 0);
+      showToast(
+        "交付成功",
+        data?.reward_granted && amount > 0
+          ? `${operatedForOther ? "已代为" : "已"}记录${targetName}的后期交付，并发放 ${amount} 金币。`
+          : `${operatedForOther ? "已代为" : "已"}记录${targetName}的后期交付。`
+      );
+    }else{
+      const amount = Number(data?.reward_retracted_amount || 0);
+      showToast(
+        "已撤回交付",
+        data?.reward_retracted && amount > 0
+          ? `已撤回${targetName}的后期交付，并扣回 ${amount} 金币。`
+          : `已撤回${targetName}的后期交付。`
+      );
+    }
+  }catch(error){
+    console.error("项目总览更新后期交付状态失败：",error);
+    showToast("操作失败",error?.message || "更新后期交付状态失败。");
+    if(button){
+      button.disabled = false;
+      button.textContent = previousText;
+    }
+  }
+}
+
+function openProjectEdit(projectId){
+  const project = getProjectById(projectId);
+  if(!project){showToast("无法编辑","未找到这个项目。");return;}
+
+  currentEditingProjectId = project.id;
+  currentEditingProducerId = String(project.producer_member_id || "");
+  currentEligibleSingers = mergeEligibleRows(
+    [],
+    project.singers.map(row => ({member_id:row.member_id,nickname:row.member_name}))
+  );
+  currentEligibleMixers = mergeEligibleRows(
+    [],
+    project.producer_member_id ? [{member_id:project.producer_member_id,nickname:project.producerName}] : []
+  );
+
+  projectEditTitle.textContent = `编辑｜${project.project_code || ""}.${project.project_name || ""}`;
+  editProjectCode.value = project.project_code || "";
+  editProjectName.value = project.project_name || "";
+  populateTypeOptions(project.project_type || "");
+  editSingerQuota.value = String(Math.max(1,Number(project.participant_count) || project.singers.length || project.parts.length || 1));
+  editProjectTone.value = project.project_tone || "";
+  editReleaseDate.value = formatDateForInput(project.release_date);
+  setEditMode(!!project.is_collective_task);
+  renderProducerPicker();
+  renderSingerPicker(project.singers.map(row => String(row.member_id)));
+
+  const quota = Math.max(1,Number(editSingerQuota.value) || 1);
+  const rows = project.parts.map(row => ({
+    original_name:row.original_name,
+    assigned_member_id:row.assigned_member_id
+  }));
+  while(rows.length < quota) rows.push({original_name:"",assigned_member_id:null});
+  renderPartRows(rows);
+  renderEditDeliveryActions(project);
+
+  editProducerHint.className = "editLoadHint";
+  editSingerHint.className = "editLoadHint";
+  editProducerHint.textContent = "正在读取可选后期成员…";
+  editSingerHint.textContent = "正在读取可选参与成员…";
+
+  projectEditMask.classList.add("show");
+  projectEditMask.setAttribute("aria-hidden","false");
+  document.body.classList.add("project-edit-open");
+  setTimeout(() => editProjectName.focus(),0);
+
+  hydrateProjectEditOptions(project);
+}
+
+async function hydrateProjectEditOptions(project){
+  const params = {
+    p_member_id:authState.memberId,
+    p_member_code:authState.memberCode,
+    p_project_id:String(project.id)
+  };
+
+  const [singersResult,mixersResult] = await Promise.allSettled([
+    supabaseClient.rpc("get_project_eligible_singers",params),
+    supabaseClient.rpc("get_project_eligible_mixers",params)
+  ]);
+
+  if(String(currentEditingProjectId) !== String(project.id)) return;
+
+  if(singersResult.status === "fulfilled" && !singersResult.value.error){
+    const selectedIds = getSelectedSingerIds();
+    const partDraft = collectPartRowsFromDom();
+    currentEligibleSingers = mergeEligibleRows(
+      normalizeEligibleRows(singersResult.value.data),
+      project.singers.map(row => ({member_id:row.member_id,nickname:row.member_name}))
+    );
+    renderSingerPicker(selectedIds);
+    renderPartRows(partDraft);
+    editSingerHint.textContent = "";
+  }else{
+    const error = singersResult.status === "fulfilled" ? singersResult.value.error : singersResult.reason;
+    console.warn("读取可选参与成员失败，保留当前成员：",error);
+    editSingerHint.className = "editLoadHint error";
+    editSingerHint.textContent = "可选成员读取失败；当前已分配成员仍可编辑。";
+  }
+
+  if(mixersResult.status === "fulfilled" && !mixersResult.value.error){
+    currentEligibleMixers = mergeEligibleRows(
+      normalizeEligibleRows(mixersResult.value.data),
+      project.producer_member_id ? [{member_id:project.producer_member_id,nickname:project.producerName}] : []
+    );
+    renderProducerPicker();
+    editProducerHint.textContent = "";
+  }else{
+    const error = mixersResult.status === "fulfilled" ? mixersResult.value.error : mixersResult.reason;
+    console.warn("读取可选后期成员失败，保留当前负责人：",error);
+    editProducerHint.className = "editLoadHint error";
+    editProducerHint.textContent = "可选后期读取失败；当前负责人仍会保留。";
+  }
+}
+function closeProjectEdit(){
+  projectEditMask.classList.remove("show");
+  projectEditMask.setAttribute("aria-hidden","true");
+  document.body.classList.remove("project-edit-open");
+  currentEditingProjectId = "";
+  currentEditingProducerId = "";
+  currentEligibleSingers = [];
+  currentEligibleMixers = [];
+  editPartDraftRows = [];
+  editProducerHint.textContent = "";
+  editSingerHint.textContent = "";
+}
+async function saveProjectEdit(){
+  const project = getProjectById(currentEditingProjectId);
+  if(!project){showToast("保存失败","未找到正在编辑的项目。");return;}
+  try{
+    const projectName = String(editProjectName.value || "").trim();
+    const projectType = String(editProjectType.value || "").trim();
+    const singerQuota = Math.max(1,Math.floor(Number(editSingerQuota.value) || 0));
+    const selectedSingerIds = getSelectedSingerIds();
+    const partRows = collectPartRowsFromDom().slice(0,singerQuota);
+    if(!projectName) throw new Error("项目名称不能为空。");
+    if(!projectType) throw new Error("项目类型不能为空。");
+    if(selectedSingerIds.length > singerQuota) throw new Error("已选择的参与成员人数不能超过演唱人数。");
+    const selectedSet = new Set(selectedSingerIds);
+    if(partRows.some(row => row.assigned_member_id && !selectedSet.has(String(row.assigned_member_id)))) throw new Error("歌词分配中还有已移除的参与成员，请重新选择后再保存。");
+    const assignedIds = partRows.map(row => row.assigned_member_id).filter(Boolean);
+    if(new Set(assignedIds).size !== assignedIds.length) throw new Error("歌词分配中同一个成员不能重复分配。");
+
+    const existingSingerMap = new Map(project.singers.map(row => [String(row.member_id),row]));
+    const singerRows = selectedSingerIds.map(memberId => {
+      const existing = existingSingerMap.get(String(memberId));
+      return {member_id:memberId,is_submitted:!!existing?.is_submitted,submitted_at:existing?.submitted_at || null};
+    });
+
+    projectEditSaveBtn.disabled = true;
+    projectEditSaveBtn.textContent = "保存中...";
+    const {error} = await supabaseClient.rpc("save_project_bundle",{
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode,
+      p_project_id:project.id,
+      p_task_code:project.project_code,
+      p_task_name:projectName,
+      p_release_date:editReleaseDate.value || null,
+      p_task_type:projectType,
+      p_game_type:project.game_type || null,
+      p_is_collective_task:editIsSpecial,
+      p_project_tone:String(editProjectTone.value || "").trim() || null,
+      p_producer_member_id:currentEditingProducerId || null,
+      p_singer_quota:singerQuota,
+      p_singer_bonus:Number(project.singer_bonus) || 0,
+      p_producer_bonus:Number(project.producer_bonus) || 0,
+      p_parts:partRows.map(row => ({original_name:row.original_name || null,assigned_member_id:row.assigned_member_id || null})),
+      p_singers:singerRows
+    });
+    if(error) throw error;
+    closeProjectEdit();
+    await loadProjects();
+    showToast("保存成功","项目内容已更新。");
+  }catch(error){
+    console.error("保存项目编辑失败：",error);
+    showToast("保存失败",error?.message || "保存项目时出现问题。");
+  }finally{
+    projectEditSaveBtn.disabled = false;
+    projectEditSaveBtn.textContent = "保存";
+  }
+}
+
+async function loadProjects(){
+  tableBody.innerHTML = '<div class="loadingState">正在读取项目...</div>';
+  refreshBtn.disabled = true;
+  try{
+    const {data,error} = await supabaseClient.rpc("get_studio_project_items",{
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode
+    });
+    if(error) throw error;
+    const {projectRows,partRows,singerRows,statusRows} = normalizeRpc(data);
+    projects = buildProjects(projectRows,partRows,singerRows,statusRows);
+    renderTypeFilterOptions();
+    renderSummary();
+    renderTable();
+  }catch(error){
+    console.error("读取项目总览失败：",error);
+    tableBody.innerHTML = `<div class="errorState">项目读取失败<br>${escapeHtml(error?.message || "请稍后刷新重试")}</div>`;
+  }finally{
+    refreshBtn.disabled = false;
+  }
+}
+
+function goPage(key){
+  try{window.location.href = getRoom10Page(key)}
+  catch(error){showToast("页面配置错误",error?.message || "无法打开页面。")}
+}
+function syncOverlayToImage(){
+  if(window.matchMedia("(max-width:540px)").matches){
+    document.documentElement.style.setProperty("--ui-scale","1");
+    overlay.style.left="";overlay.style.top="";overlay.style.width="";overlay.style.height="";
+    return;
+  }
+  const rect = room.getBoundingClientRect();
+  const naturalW = bg.naturalWidth || 1600;
+  const naturalH = bg.naturalHeight || 900;
+  const imgRatio = naturalW / naturalH;
+  const roomRatio = rect.width / rect.height;
+  let w,h,left,top;
+  if(roomRatio > imgRatio){
+    h=rect.height;w=h*imgRatio;left=(rect.width-w)/2;top=0;
+  }else{
+    w=rect.width;h=w/imgRatio;left=0;top=(rect.height-h)/2;
+  }
+  overlay.style.left=`${left}px`;
+  overlay.style.top=`${top}px`;
+  overlay.style.width=`${w}px`;
+  overlay.style.height=`${h}px`;
+  const scale=Math.max(.45,Math.min(3.2,w/1440));
+  const navScale=Math.max(.38,Math.min(3.2,w/1440));
+  document.documentElement.style.setProperty("--ui-scale",String(scale));
+  document.documentElement.style.setProperty("--bg-ui-scale",String(scale));
+  document.documentElement.style.setProperty("--room-nav-scale",String(navScale));
+  document.documentElement.style.setProperty("--identity-scale",String(scale));
+  overlay.style.setProperty("--ui-scale",String(scale));
+  overlay.style.setProperty("--project-panel-scale",String(scale));
+}
+
+document.getElementById("toastCloseBtn").addEventListener("click",closeToast);
+toastMask.addEventListener("click",event => {if(event.target === toastMask) closeToast()});
+document.addEventListener("keydown",event => {if(event.key === "Escape"){closeToast();if(projectEditMask.classList.contains("show")) closeProjectEdit();}});
+identityAuthBtn.addEventListener("click",() => {clearLogin();goPage("index")});
+identityNoticeBtn.addEventListener("click",event => {
+  event.stopPropagation();
+  const show = !identityNoticePanel.classList.contains("show");
+  identityNoticePanel.classList.toggle("show",show);
+  identityNoticePanel.setAttribute("aria-hidden",show ? "false" : "true");
+  identityNoticeBtn.setAttribute("aria-expanded",show ? "true" : "false");
+});
+document.addEventListener("click",event => {
+  if(!event.target.closest("#identityNoticeWrap")){
+    identityNoticePanel.classList.remove("show");
+    identityNoticePanel.setAttribute("aria-hidden","true");
+    identityNoticeBtn.setAttribute("aria-expanded","false");
+  }
+});
+document.getElementById("goTodoBtn").addEventListener("click",() => goPage("studioTodo"));
+document.getElementById("goProjectBtn").addEventListener("click",() => goPage("studioProject"));
+document.getElementById("goSubmitBtn").addEventListener("click",() => goPage("studioSubmit"));
+searchInput.addEventListener("input",renderTable);
+typeFilter.addEventListener("change",renderTable);
+statusFilter.addEventListener("change",renderTable);
+sortSelect.addEventListener("change",renderTable);
+refreshBtn.addEventListener("click",loadProjects);
+tableBody.addEventListener("click",event => {
+  const editBtn = event.target.closest("[data-edit-id]");
+  if(editBtn){openProjectEdit(editBtn.dataset.editId);return;}
+  const viewBtn = event.target.closest("[data-view-id]");
+  if(viewBtn) openProject(viewBtn.dataset.viewId);
+});
+projectEditCancelBtn.addEventListener("click",closeProjectEdit);
+projectEditSaveBtn.addEventListener("click",saveProjectEdit);
+projectEditMask.addEventListener("click",event => {if(event.target === projectEditMask) closeProjectEdit();});
+editDeliveryList.addEventListener("click",event => {
+  const singerBtn = event.target.closest("[data-edit-singer-action]");
+  if(singerBtn){
+    const current = singerBtn.dataset.current === "1";
+    toggleEditSingerSubmitted(singerBtn.dataset.editSingerAction,current,singerBtn);
+    return;
+  }
+
+  const producerBtn = event.target.closest("[data-edit-producer-action]");
+  if(producerBtn){
+    const current = producerBtn.dataset.current === "1";
+    toggleEditProducerSubmitted(producerBtn.dataset.editProducerAction,current,producerBtn);
+  }
+});
+editModeNormal.addEventListener("click",() => setEditMode(false));
+editModeSpecial.addEventListener("click",() => setEditMode(true));
+editProducerPicker.addEventListener("click",event => {
+  const btn = event.target.closest("[data-producer-id]");
+  if(!btn) return;
+  currentEditingProducerId = String(btn.dataset.producerId || "");
+  renderProducerPicker();
+});
+editSingerPicker.addEventListener("click",event => {
+  const btn = event.target.closest("[data-member-id]");
+  if(!btn) return;
+  btn.classList.toggle("active");
+  editPartDraftRows = collectPartRowsFromDom();
+  renderPartRows(editPartDraftRows);
+});
+editSingerQuota.addEventListener("change",syncPartRowsToQuota);
+document.querySelectorAll(".navBtn").forEach(btn => {
+  btn.addEventListener("click",() => {
+    const roomKey = btn.dataset.room;
+    if(roomKey === "studio") return;
+    if(roomKey === "manager"){
+      const role = getRole();
+      return goPage(role === "owner" ? "managerOwner" : role === "admin" ? "managerAdmin" : ["member","trainee"].includes(role) ? "managerMember" : "managerVisitor");
+    }
+    const key = ROOM_NAV_PAGE_KEYS[roomKey];
+    if(key) goPage(key);
+  });
+});
+
+window.addEventListener("resize",syncOverlayToImage);
+window.addEventListener("orientationchange",syncOverlayToImage);
+bg.addEventListener("load",syncOverlayToImage);
+
+window.addEventListener("DOMContentLoaded",async () => {
+  try{
+    const savedSort = localStorage.getItem("room10_studio_overview_sort");
+    if(savedSort && Array.from(sortSelect.options).some(option => option.value === savedSort)) sortSelect.value = savedSort;
+  }catch(_){}
+  sortSelect.addEventListener("change",() => {try{localStorage.setItem("room10_studio_overview_sort",sortSelect.value)}catch(_){}});
+  try{
+    bg.src = getRoom10Asset("studio.roomStudio");
+  }catch(error){
+    console.error("工作间背景读取失败：",error);
+  }
+  syncOverlayToImage();
+  const ok = await ensureAuth();
+  if(!ok) return;
+  await loadProjects();
+});
+</script>
+</body>
+</html>
