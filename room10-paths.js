@@ -37,6 +37,7 @@ window.ROOM10_PATHS = {
 
     pet: "pet/pets.html",
 
+    studioOverview: "studio/studio-overview.html",
     studioProject: "studio/studio-project.html",
     studioSubmit: "studio/studio-Submit.html",
     studioTodo: "studio/studio-todo.html",
