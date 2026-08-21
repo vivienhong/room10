@@ -1,9 +1,6 @@
-<!DOCTYPE html><html lang="zh-CN" class="auth-pending"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>十号房｜任务详情</title><script src="../room10-paths.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>*{box-sizing:border-box}html.auth-pending body{visibility:hidden;pointer-events:none}html.auth-ready body{visibility:visible;pointer-events:auto}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;background:linear-gradient(180deg,#e7dfd4 0%, #ddd4c8 100%)}body{display:flex;justify-content:center;align-items:center}#room{position:relative;width:100vw;height:100vh;height:100dvh;overflow:hidden;background:linear-gradient(180deg,#e7dfd4 0%, #ddd4c8 100%)}#bg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;display:block;user-select:none;pointer-events:none;-webkit-user-drag:none}#overlay *{pointer-events:auto}#taskPanel{position:absolute;left:43%;top:18%;transform:translateX(-50%);transform-origin:top center;width:69.5%;height:70%;min-height:360px;border-radius:var(--project-radius-lg);background:rgba(255,255,255,0.34);border:1px solid rgba(255,255,255,0.52);box-shadow:0 16px 42px rgba(122,96,68,0.10),
+<!DOCTYPE html><html lang="zh-CN" class="auth-pending"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>十号房｜任务详情</title><script src="../room10-paths.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>*{box-sizing:border-box}html.auth-pending body{visibility:hidden;pointer-events:none}html.auth-ready body{visibility:visible;pointer-events:auto}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;background:linear-gradient(180deg,#e7dfd4 0%, #ddd4c8 100%)}body{display:flex;justify-content:center;align-items:center}#room{position:relative;width:100vw;height:100vh;height:100dvh;overflow:hidden;background:linear-gradient(180deg,#e7dfd4 0%, #ddd4c8 100%)}#bg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;display:block;user-select:none;pointer-events:none;-webkit-user-drag:none}#overlay *{pointer-events:auto}#taskPanel{position:absolute;left:9.2%;right:22.4%;top:18%;bottom:12%;transform:none;transform-origin:top left;width:auto;height:auto;min-height:360px;border-radius:var(--project-radius-lg);background:rgba(255,255,255,0.34);border:1px solid rgba(255,255,255,0.52);box-shadow:0 16px 42px rgba(122,96,68,0.10),
       inset 0 1px 0 rgba(255,255,255,0.62),
-      inset 0 -1px 0 rgba(255,255,255,0.20);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);overflow:visible}#taskPanel::before{content:"";position:absolute;inset:calc(10px * var(--project-panel-scale));border-radius:calc(22px * var(--project-panel-scale));border:1px solid rgba(255,255,255,0.22);pointer-events:none}#panelSwitch{position:absolute;right:calc(-194px * var(--project-panel-scale));top:24.6%;transform:translateY(-50%);transform-origin:top right;width:calc(170px * var(--project-panel-scale));padding:calc(18px * var(--project-panel-scale)) calc(14px * var(--project-panel-scale));border-radius:var(--project-radius-md);background:rgba(255,248,239,0.9);border:1px solid rgba(186,146,103,0.24);box-shadow:0 10px 24px rgba(116,86,54,0.12),
-      inset 0 1px 0 rgba(255,255,255,0.86);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;flex-direction:column;gap:calc(10px * var(--project-panel-scale));z-index:30}.switchBtn{appearance:none;border:none;cursor:pointer;width:100%;min-height:var(--project-btn-h);padding:calc(8px * var(--project-panel-scale)) calc(12px * var(--project-panel-scale));border-radius:calc(13px * var(--project-panel-scale));background:rgba(231,214,185,0.92);color:#744b25;font-size:var(--project-font-base);font-weight:700;line-height:1.2;text-align:center;box-shadow:inset 0 1px 0 rgba(255,247,233,0.95),
-      0 2px 6px rgba(116,86,54,0.08);transition:transform .18s ease, filter .18s ease, background .18s ease}.switchBtn:hover{transform:translateY(-1px);filter:brightness(1.03)}.switchBtn.active{background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);color:#fff9f1;box-shadow:inset 0 1px 0 rgba(255,224,188,0.55),
-      0 4px 10px rgba(116,86,54,0.14)}#browsePanelInner{position:relative;z-index:1;width:100%;height:100%;display:grid;grid-template-columns:26.5% 73.5%;min-width:0}#browseListPane{padding:calc(16px * var(--project-panel-scale)) calc(10px * var(--project-panel-scale)) calc(14px * var(--project-panel-scale)) calc(14px * var(--project-panel-scale));border-right:1px solid rgba(255,255,255,0.20);display:flex;flex-direction:column;min-height:0;background:transparent;min-width:0}#browseListTitleTask{display:none}.taskFilterRow{display:flex;flex-wrap:wrap;gap:var(--project-gap-xs);margin:0 0 var(--project-gap-sm);padding-right:calc(4px * var(--project-panel-scale))}.taskFilterBtn{appearance:none;border:none;cursor:pointer;min-width:calc(52px * var(--project-panel-scale));height:calc(28px * var(--project-panel-scale));padding:0 calc(10px * var(--project-panel-scale));border-radius:calc(9px * var(--project-panel-scale));background:rgba(255,252,247,0.62);color:#6a4120;font-size:var(--project-font-sm);font-weight:700;box-shadow:inset 0 1px 0 rgba(255,255,255,0.78),
+      inset 0 -1px 0 rgba(255,255,255,0.20);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);overflow:visible}#taskPanel::before{content:"";position:absolute;inset:calc(10px * var(--project-panel-scale));border-radius:calc(22px * var(--project-panel-scale));border:1px solid rgba(255,255,255,0.22);pointer-events:none}#browsePanelInner{position:relative;z-index:1;width:100%;height:100%;display:grid;grid-template-columns:26.5% 73.5%;min-width:0}#browseListPane{padding:calc(16px * var(--project-panel-scale)) calc(10px * var(--project-panel-scale)) calc(14px * var(--project-panel-scale)) calc(14px * var(--project-panel-scale));border-right:1px solid rgba(255,255,255,0.20);display:flex;flex-direction:column;min-height:0;background:transparent;min-width:0}#browseListTitleTask{display:none}.taskFilterRow{display:flex;flex-wrap:wrap;gap:var(--project-gap-xs);margin:0 0 var(--project-gap-sm);padding-right:calc(4px * var(--project-panel-scale))}.taskFilterBtn{appearance:none;border:none;cursor:pointer;min-width:calc(52px * var(--project-panel-scale));height:calc(28px * var(--project-panel-scale));padding:0 calc(10px * var(--project-panel-scale));border-radius:calc(9px * var(--project-panel-scale));background:rgba(255,252,247,0.62);color:#6a4120;font-size:var(--project-font-sm);font-weight:700;box-shadow:inset 0 1px 0 rgba(255,255,255,0.78),
       0 2px 6px rgba(116,86,54,0.06);transition:transform .18s ease, filter .18s ease, background .18s ease;white-space:nowrap}.taskFilterBtn:hover{transform:translateY(-1px);filter:brightness(1.03)}.taskFilterBtn.active{background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);color:#fff9f1}.searchWrap{flex:0 0 auto;margin:0 0 var(--project-gap-sm);padding-right:calc(4px * var(--project-panel-scale))}.searchInput{width:100%;height:calc(36px * var(--project-panel-scale));border:none;outline:none;border-radius:calc(12px * var(--project-panel-scale));padding:0 calc(12px * var(--project-panel-scale));background:rgba(255,252,247,0.62);color:#5f3b1d;font-size:var(--project-font-md);box-shadow:inset 0 1px 0 rgba(255,255,255,0.75),
       0 2px 8px rgba(120,92,63,0.05)}.searchInput::placeholder{color:#9a7b5b}#browseListTask{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(175,135,98,0.55) transparent}#browseListTask::-webkit-scrollbar{width:8px}#browseListTask::-webkit-scrollbar-track{background:transparent}#browseListTask::-webkit-scrollbar-thumb{background:rgba(175,135,98,0.55);border-radius:999px}.taskItem{width:100%;appearance:none;border:none;cursor:pointer;text-align:left;padding:calc(9px * var(--project-panel-scale)) calc(10px * var(--project-panel-scale));margin:0 0 calc(6px * var(--project-panel-scale));border-radius:calc(13px * var(--project-panel-scale));background:rgba(255,252,247,0.34);color:#6c4523;box-shadow:inset 0 1px 0 rgba(255,255,255,0.52),
       0 3px 10px rgba(120,92,63,0.05);transition:transform .18s ease, background .18s ease, box-shadow .18s ease;position:relative;min-width:0;overflow:hidden;isolation:isolate}.taskItem:hover{transform:translateY(-1px);background:rgba(255,252,247,0.52)}.taskItem.active:hover{transform:none}.taskItem.active{background:linear-gradient(180deg, rgba(240,219,185,0.98) 0%, rgba(230,200,157,0.98) 100%);color:#5c3819;border:1px solid rgba(217,163,100,0.90);box-shadow:inset 0 0 0 1px rgba(255,247,229,0.96),
@@ -45,9 +42,9 @@
       0 2px 6px rgba(112,83,52,0.06);transition:transform .18s ease, filter .18s ease, background .18s ease, color .18s ease;}.taskEditPickerBtn:hover{transform:translateY(-1px);filter:brightness(1.02)}.taskEditPickerBtn.active{background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);color:#fff9f1;border-color:rgba(194,151,108,0.12);box-shadow:inset 0 1px 0 rgba(255,224,188,0.55),
       0 4px 10px rgba(116,86,54,0.14)}.taskEditPickerBtn.ghost{background:rgba(255,252,247,0.88);color:#8b6a46}.taskEditPickerEmpty{min-height:40px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.90);border:1px solid rgba(194,151,108,0.20);color:#8b6947;font-size:12px;line-height:1.6}.taskEditModeRow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.taskEditModeButtons{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.taskEditModeButtonsCompact{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.taskEditModeBtn{appearance:none;border:none;cursor:pointer;min-width:96px;height:36px;padding:0 14px;border-radius:12px;background:rgba(255,252,247,0.9);color:#7c4d25;font-size:12px;font-weight:800;box-shadow:inset 0 1px 0 rgba(255,255,255,0.95),
       0 2px 6px rgba(112,83,52,0.06);transition:transform .18s ease, filter .18s ease, background .18s ease, color .18s ease}.taskEditModeBtn:hover{transform:translateY(-1px);filter:brightness(1.03)}.taskEditModeBtn.active{background:linear-gradient(180deg,#d9a364 0%, #c98c4f 100%);color:#fff9f1;box-shadow:inset 0 1px 0 rgba(255,224,188,0.55),
-      0 4px 10px rgba(116,86,54,0.14)}.taskEditModeBtn.compact{min-width:0;width:100%;padding:0;font-size:13px;letter-spacing:.4px}.taskEditModeBtn:disabled{cursor:not-allowed;opacity:.55;transform:none;filter:none}.detailActionBtn[disabled]{opacity:.6;cursor:not-allowed;transform:none;filter:none}#bgNoteLayer{position:absolute;inset:calc(12px * var(--project-panel-scale));z-index:0;pointer-events:none;overflow:hidden;border-radius:22px}#taskView{position:absolute;inset:0;padding:0;z-index:1}.bgNote{position:absolute;left:0;top:0;color:var(--note-color, rgba(210,152,88,0.54));text-shadow:0 2px 8px rgba(120,92,63,0.10);line-height:1;pointer-events:none;user-select:none;will-change:transform,opacity;animation:bgNoteRise var(--note-duration,4.6s) ease-out forwards}@keyframes bgNoteRise{0%{transform:translate3d(0,0,0) rotate(var(--note-rot-start,-6deg)) scale(var(--note-scale,1));opacity:0}12%{opacity:.58}65%{opacity:.46}100%{transform:translate3d(var(--note-drift-x,14px),var(--note-drift-y,-72px),0) rotate(var(--note-rot-end,10deg)) scale(calc(var(--note-scale,1) * 1.04));opacity:0}}.hidden{display:none!important}#bgFrame{position:absolute;inset:0;z-index:0;overflow:hidden}#overlay{position:absolute;inset:0;pointer-events:none;--project-radius-lg:calc(30px * var(--project-panel-scale));--project-radius-md:calc(20px * var(--project-panel-scale));--project-radius-sm:calc(14px * var(--project-panel-scale));--project-gap-xs:calc(5px * var(--project-panel-scale));--project-gap-sm:calc(8px * var(--project-panel-scale));--project-gap-md:calc(12px * var(--project-panel-scale));--project-gap-lg:calc(16px * var(--project-panel-scale));--project-pad-xs:calc(8px * var(--project-panel-scale));--project-pad-sm:calc(10px * var(--project-panel-scale));--project-pad-md:calc(12px * var(--project-panel-scale));--project-pad-lg:calc(14px * var(--project-panel-scale));--project-pad-xl:calc(18px * var(--project-panel-scale));--project-font-xs:calc(11px * var(--project-panel-scale));--project-font-sm:calc(12px * var(--project-panel-scale));--project-font-md:calc(13px * var(--project-panel-scale));--project-font-base:calc(13px * var(--project-panel-scale));--project-font-lg:calc(18px * var(--project-panel-scale));--project-font-xl:calc(16px * var(--project-panel-scale));--project-font-hero:calc(18px * var(--project-panel-scale));--project-btn-h:calc(40px * var(--project-panel-scale));--project-assignment-min-h:calc(96px * var(--project-panel-scale));left:0;top:0;width:100%;height:100%;z-index:2;overflow:visible!important;--ui-scale:var(--bg-ui-scale,1);--overlay-ui-scale:var(--bg-ui-scale,1);--project-panel-scale:var(--bg-ui-scale,1);}#overlay .roomNavLayer,#overlay .roomIdentity{pointer-events:none!important}#overlay .roomNavLayer .navBtn,#overlay .roomIdentity .roomIdentityBar,#overlay .roomIdentity button,#overlay .roomIdentity .identityNoticePanel{pointer-events:auto!important}.navBtn{appearance:none;cursor:pointer;position:absolute;top:var(--room-nav-top);width:var(--room-nav-btn-width);height:var(--room-nav-btn-height);min-width:0;min-height:0;padding:0;border-radius:var(--nav-btn-radius);color:var(--room-nav-text);font-size:var(--nav-btn-font);font-weight:900;white-space:nowrap;overflow:visible;isolation:isolate;background:radial-gradient(circle at 18% 22%, rgba(255,255,255,.56), transparent 40%),radial-gradient(circle at 78% 74%, var(--room-nav-wash), transparent 48%),linear-gradient(180deg, var(--room-nav-paper) 0%, var(--room-nav-paper-2) 100%);border:var(--nav-btn-border) solid var(--room-nav-border);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.64),0 calc(2px * var(--s)) calc(7px * var(--s)) rgba(96,70,48,.10);text-shadow:0 calc(1px * var(--s)) 0 rgba(255,255,255,.38);transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;}.navBtn[data-room="hall"]{left:var(--room-nav-hall-left)}.navBtn[data-room="living"]{left:var(--room-nav-living-left)}.navBtn[data-room="manager"]{left:var(--room-nav-manager-left)}.navBtn[data-room="honor"]{left:var(--room-nav-honor-left)}.navBtn[data-room="studio"]{left:var(--room-nav-studio-left)}.navBtn[data-room="game"]{left:var(--room-nav-game-left)}.navBtn[data-room="dorm"]{left:var(--room-nav-dorm-left)}.navBtn[data-room="flower"]{left:var(--room-nav-flower-left)}.navBtn[data-room="pets"]{left:var(--room-nav-pets-left)}.navBtn:not(.is-current):hover,.navBtn:not(.is-current):focus-visible{color:#5f3d22;background:radial-gradient(circle at 20% 24%, rgba(255,255,255,.66), transparent 42%),radial-gradient(circle at 80% 78%, rgba(207,170,143,.24), transparent 50%),linear-gradient(180deg, rgba(255,252,246,.88) 0%, rgba(239,226,210,.82) 100%);border-color:rgba(151,112,84,.36);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.70),0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.12);filter:saturate(1.02)}.navBtn.is-current{cursor:default;color:var(--room-nav-current-text);background:radial-gradient(circle at 22% 22%, rgba(255,255,255,.62), transparent 42%),radial-gradient(circle at 80% 80%, rgba(190,151,126,.26), transparent 50%),linear-gradient(180deg, rgba(246,235,222,.94) 0%, var(--room-nav-current-bg) 100%);border-color:var(--room-nav-current-border);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.68),0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.13),0 0 0 calc(2px * var(--s)) rgba(255,253,248,.46);filter:none}.navLabel{position:relative;z-index:5;width:100%;height:100%;display:inline-flex;align-items:center;justify-content:center;overflow:visible;white-space:nowrap;line-height:normal;padding-top:.06em}.navEffect{position:absolute;pointer-events:none;opacity:0;z-index:4;display:block;font-weight:900;line-height:1;text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.82),0 0 calc(8px * var(--s)) rgba(255,246,210,.52);filter:saturate(.95)}.navEffectA{left:8%;top:-54%;font-size:calc(var(--nav-btn-font) * .92)}.navEffectB{right:8%;top:-62%;font-size:calc(var(--nav-btn-font) * .86)}.navEffectC{left:50%;top:-72%;transform:translateX(-50%);font-size:calc(var(--nav-btn-font) * 1.02)}@keyframes navFloatA{0%,100%{transform:translateY(calc(4px * var(--s))) rotate(-8deg) scale(.82);opacity:0}20%,72%{opacity:.86}50%{transform:translateY(calc(-5px * var(--s))) rotate(6deg) scale(1);opacity:.76}}@keyframes navFloatB{0%,100%{transform:translateY(calc(5px * var(--s))) rotate(9deg) scale(.78);opacity:0}24%,70%{opacity:.78}52%{transform:translateY(calc(-6px * var(--s))) rotate(-7deg) scale(1);opacity:.68}}@keyframes navFloatC{0%,100%{transform:translateX(-50%) translateY(calc(6px * var(--s))) rotate(0deg) scale(.76);opacity:0}24%,70%{opacity:.88}50%{transform:translateX(-50%) translateY(calc(-6px * var(--s))) rotate(2deg) scale(1);opacity:.78}}.navBtn:not(.is-current):hover .navEffectA,.navBtn:not(.is-current):focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite}.navBtn:not(.is-current):hover .navEffectB,.navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite}.navBtn:not(.is-current):hover .navEffectC,.navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite}.navBtn.is-current .navEffect{display:none}.navBtn[data-room="hall"] .navEffect{color:rgba(255,205,96,.86)}.navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82)}.navBtn[data-room="honor"] .navEffect{color:rgba(205,143,45,.86)}.navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82)}.navBtn[data-room="studio"] .navEffect{color:rgba(96,112,145,.84)}.navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82)}.navBtn[data-room="dorm"] .navEffect{color:rgba(148,112,171,.78)}.navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82)}.navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82)}.identityNameBox,.identityNoticeBtn,.identityAuthBtn{min-width:0;min-height:0;height:100%;border-radius:calc(9px * var(--s));background:var(--identity-inner-bg);color:var(--identity-text);border:calc(1px * var(--s)) solid rgba(160,116,78,0.12);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.95),0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,0.05)}.identityNameBox{display:flex;align-items:center;justify-content:center;padding:0 calc(8px * var(--s));overflow:visible}.identityNameText{display:inline-flex;align-items:center;justify-content:center;max-width:100%;color:var(--identity-text);font-size:calc(13px * var(--s));font-weight:850;line-height:1.22;letter-spacing:0;white-space:nowrap;overflow:visible;text-overflow:clip;transform:translateY(var(--identity-name-y))}.identityNameText.isOverflowSafe{overflow:hidden;text-overflow:ellipsis}.identityNoticeWrap{position:relative;width:100%;height:100%;overflow:visible}.identityNoticeBtn,.identityAuthBtn{appearance:none;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;line-height:1;transition:transform .18s ease,background .18s ease,box-shadow .18s ease}.identityNoticeBtn{width:100%;height:100%;font-size:calc(14px * var(--s))}.identityNoticeIcon{display:flex;width:100%;height:100%;align-items:center;justify-content:center;line-height:1;transform:translateY(var(--identity-notice-y));filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,0.55))}.identityNoticeCount{position:absolute;right:calc(-6px * var(--s));top:calc(-6px * var(--s));min-width:calc(18px * var(--s));height:calc(18px * var(--s));padding:0 calc(5px * var(--s));border-radius:999px;background:#b98f72;color:#fffaf6;font-size:calc(9px * var(--s));font-weight:900;line-height:1;display:none;align-items:center;justify-content:center;border:calc(2px * var(--s)) solid rgba(255,248,239,0.98);box-shadow:0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(116,86,54,0.16);z-index:3}.identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex}.identityAuthBtn{width:100%;height:100%;color:#6f5746;font-size:calc(12px * var(--s));font-weight:850;line-height:1.18;white-space:nowrap;overflow:visible}.identityAuthText{display:inline-flex;align-items:center;justify-content:center;line-height:1.18;transform:translateY(var(--identity-button-y))}.identityNoticeBtn:hover,.identityAuthBtn:hover{transform:translateY(calc(-1px * var(--s)));background:rgba(255,255,255,0.94)}.identityNoticePanel.show{display:block}.identityNoticeTitle{color:#6f4726;font-size:calc(13px * var(--s));font-weight:900;margin-bottom:calc(10px * var(--s))}.identityNoticeEmpty{color:#8a6644;font-size:calc(12px * var(--s));line-height:1.6;padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s))}.siteNoticeList{display:flex;flex-direction:column;gap:calc(8px * var(--ui-scale))}.siteNoticeItem{padding:calc(10px * var(--ui-scale));border-radius:calc(12px * var(--ui-scale));background:rgba(255,252,247,0.82);box-shadow:inset 0 1px 0 rgba(255,255,255,0.92),0 2px 8px rgba(120,92,63,0.05)}.siteNoticeItemTitle{color:#6f4726;font-size:calc(12px * var(--ui-scale));font-weight:800;line-height:1.5;margin-bottom:4px}.siteNoticeItemDesc{color:#8a6644;font-size:calc(11px * var(--ui-scale));line-height:1.55;margin-bottom:calc(10px * var(--ui-scale))}.siteNoticeAction{appearance:none;border:none;cursor:pointer;min-height:calc(31px * var(--ui-scale));padding:0 12px;border-radius:10px;background:linear-gradient(180deg,#efd5ab 0%,#dfbd8a 100%);color:#6a4120;font-size:calc(11px * var(--ui-scale));font-weight:800}@media (min-width:541px){#taskPanel{left:var(--task-panel-left-bound,9.2%)!important;right:var(--task-panel-right-bound,22.4%)!important;top:var(--task-panel-top-bound,18%)!important;bottom:var(--task-panel-bottom-bound,12%)!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;transform:none!important;transform-origin:top left!important}#panelSwitch{position:absolute!important;right:auto!important;left:var(--panel-switch-left)!important;top:var(--panel-switch-top)!important;transform:none!important;width:var(--panel-switch-w)!important;height:var(--panel-switch-h)!important;padding:var(--panel-switch-pad-y) var(--panel-switch-pad-x)!important;border-radius:var(--panel-switch-radius)!important;gap:var(--panel-switch-gap)!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important;align-items:stretch!important;overflow:hidden!important}.taskNameText{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;word-break:break-word!important;overflow-wrap:anywhere!important}}.searchLocationBox{padding:12px 10px;border-radius:15px;background:rgba(255,252,247,0.34);color:#7a5231;font-size:12px;line-height:1.6;text-align:left;box-shadow:inset 0 1px 0 rgba(255,255,255,0.52),0 3px 10px rgba(120,92,63,0.05)}.searchLocationTitle{color:#6f4726;font-size:13px;font-weight:900;line-height:1.45;margin-bottom:6px}.searchLocationDesc{color:#8a6644;font-size:11px;font-weight:700;line-height:1.55;margin-bottom:9px}.searchLocationList{display:flex;flex-direction:column;gap:7px}.searchLocationItem{width:100%;appearance:none;border:none;cursor:pointer;padding:8px 9px;border-radius:12px;background:rgba(255,252,247,0.76);color:#6a4120;text-align:left;box-shadow:inset 0 1px 0 rgba(255,255,255,0.88),0 2px 6px rgba(112,83,52,0.06);transition:transform .18s ease,filter .18s ease,background .18s ease}.searchLocationItem:hover{transform:translateY(-1px);filter:brightness(1.03)}.searchLocationWhere{display:block;font-size:11px;font-weight:900;color:#8a5b30;line-height:1.35;margin-bottom:2px}.searchLocationName{display:block;font-size:12px;font-weight:800;color:#5f3b1d;line-height:1.42;word-break:break-word;overflow-wrap:anywhere}@media (max-width:540px){html,
+      0 4px 10px rgba(116,86,54,0.14)}.taskEditModeBtn.compact{min-width:0;width:100%;padding:0;font-size:13px;letter-spacing:.4px}.taskEditModeBtn:disabled{cursor:not-allowed;opacity:.55;transform:none;filter:none}.detailActionBtn[disabled]{opacity:.6;cursor:not-allowed;transform:none;filter:none}#bgNoteLayer{position:absolute;inset:calc(12px * var(--project-panel-scale));z-index:0;pointer-events:none;overflow:hidden;border-radius:22px}#taskView{position:absolute;inset:0;padding:0;z-index:1}.bgNote{position:absolute;left:0;top:0;color:var(--note-color, rgba(210,152,88,0.54));text-shadow:0 2px 8px rgba(120,92,63,0.10);line-height:1;pointer-events:none;user-select:none;will-change:transform,opacity;animation:bgNoteRise var(--note-duration,4.6s) ease-out forwards}@keyframes bgNoteRise{0%{transform:translate3d(0,0,0) rotate(var(--note-rot-start,-6deg)) scale(var(--note-scale,1));opacity:0}12%{opacity:.58}65%{opacity:.46}100%{transform:translate3d(var(--note-drift-x,14px),var(--note-drift-y,-72px),0) rotate(var(--note-rot-end,10deg)) scale(calc(var(--note-scale,1) * 1.04));opacity:0}}.hidden{display:none!important}#bgFrame{position:absolute;inset:0;z-index:0;overflow:hidden}#overlay{position:absolute;inset:0;pointer-events:none;--project-radius-lg:calc(30px * var(--project-panel-scale));--project-radius-md:calc(20px * var(--project-panel-scale));--project-radius-sm:calc(14px * var(--project-panel-scale));--project-gap-xs:calc(5px * var(--project-panel-scale));--project-gap-sm:calc(8px * var(--project-panel-scale));--project-gap-md:calc(12px * var(--project-panel-scale));--project-gap-lg:calc(16px * var(--project-panel-scale));--project-pad-xs:calc(8px * var(--project-panel-scale));--project-pad-sm:calc(10px * var(--project-panel-scale));--project-pad-md:calc(12px * var(--project-panel-scale));--project-pad-lg:calc(14px * var(--project-panel-scale));--project-pad-xl:calc(18px * var(--project-panel-scale));--project-font-xs:calc(11px * var(--project-panel-scale));--project-font-sm:calc(12px * var(--project-panel-scale));--project-font-md:calc(13px * var(--project-panel-scale));--project-font-base:calc(13px * var(--project-panel-scale));--project-font-lg:calc(18px * var(--project-panel-scale));--project-font-xl:calc(16px * var(--project-panel-scale));--project-font-hero:calc(18px * var(--project-panel-scale));--project-btn-h:calc(40px * var(--project-panel-scale));--project-assignment-min-h:calc(96px * var(--project-panel-scale));left:0;top:0;width:100%;height:100%;z-index:2;overflow:visible!important;--ui-scale:var(--bg-ui-scale,1);--overlay-ui-scale:var(--bg-ui-scale,1);--project-panel-scale:var(--bg-ui-scale,1);}#overlay .roomNavLayer,#overlay .roomIdentity{pointer-events:none!important}#overlay .roomNavLayer .navBtn,#overlay .roomIdentity .roomIdentityBar,#overlay .roomIdentity button,#overlay .roomIdentity .identityNoticePanel{pointer-events:auto!important}.navBtn{appearance:none;cursor:pointer;position:absolute;top:var(--room-nav-top);width:var(--room-nav-btn-width);height:var(--room-nav-btn-height);min-width:0;min-height:0;padding:0;border-radius:var(--nav-btn-radius);color:var(--room-nav-text);font-size:var(--nav-btn-font);font-weight:900;white-space:nowrap;overflow:visible;isolation:isolate;background:radial-gradient(circle at 18% 22%, rgba(255,255,255,.56), transparent 40%),radial-gradient(circle at 78% 74%, var(--room-nav-wash), transparent 48%),linear-gradient(180deg, var(--room-nav-paper) 0%, var(--room-nav-paper-2) 100%);border:var(--nav-btn-border) solid var(--room-nav-border);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.64),0 calc(2px * var(--s)) calc(7px * var(--s)) rgba(96,70,48,.10);text-shadow:0 calc(1px * var(--s)) 0 rgba(255,255,255,.38);transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,filter .18s ease;font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif;}.navBtn[data-room="hall"]{left:var(--room-nav-hall-left)}.navBtn[data-room="living"]{left:var(--room-nav-living-left)}.navBtn[data-room="manager"]{left:var(--room-nav-manager-left)}.navBtn[data-room="honor"]{left:var(--room-nav-honor-left)}.navBtn[data-room="studio"]{left:var(--room-nav-studio-left)}.navBtn[data-room="game"]{left:var(--room-nav-game-left)}.navBtn[data-room="dorm"]{left:var(--room-nav-dorm-left)}.navBtn[data-room="flower"]{left:var(--room-nav-flower-left)}.navBtn[data-room="pets"]{left:var(--room-nav-pets-left)}.navBtn:not(.is-current):hover,.navBtn:not(.is-current):focus-visible{color:#5f3d22;background:radial-gradient(circle at 20% 24%, rgba(255,255,255,.66), transparent 42%),radial-gradient(circle at 80% 78%, rgba(207,170,143,.24), transparent 50%),linear-gradient(180deg, rgba(255,252,246,.88) 0%, rgba(239,226,210,.82) 100%);border-color:rgba(151,112,84,.36);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.70),0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.12);filter:saturate(1.02)}.navBtn.is-current{cursor:default;color:var(--room-nav-current-text);background:radial-gradient(circle at 22% 22%, rgba(255,255,255,.62), transparent 42%),radial-gradient(circle at 80% 80%, rgba(190,151,126,.26), transparent 50%),linear-gradient(180deg, rgba(246,235,222,.94) 0%, var(--room-nav-current-bg) 100%);border-color:var(--room-nav-current-border);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,.68),0 calc(3px * var(--s)) calc(9px * var(--s)) rgba(96,70,48,.13),0 0 0 calc(2px * var(--s)) rgba(255,253,248,.46);filter:none}.navLabel{position:relative;z-index:5;width:100%;height:100%;display:inline-flex;align-items:center;justify-content:center;overflow:visible;white-space:nowrap;line-height:normal;padding-top:.06em}.navEffect{position:absolute;pointer-events:none;opacity:0;z-index:4;display:block;font-weight:900;line-height:1;text-shadow:0 calc(1px * var(--s)) calc(2px * var(--s)) rgba(255,250,232,.82),0 0 calc(8px * var(--s)) rgba(255,246,210,.52);filter:saturate(.95)}.navEffectA{left:8%;top:-54%;font-size:calc(var(--nav-btn-font) * .92)}.navEffectB{right:8%;top:-62%;font-size:calc(var(--nav-btn-font) * .86)}.navEffectC{left:50%;top:-72%;transform:translateX(-50%);font-size:calc(var(--nav-btn-font) * 1.02)}@keyframes navFloatA{0%,100%{transform:translateY(calc(4px * var(--s))) rotate(-8deg) scale(.82);opacity:0}20%,72%{opacity:.86}50%{transform:translateY(calc(-5px * var(--s))) rotate(6deg) scale(1);opacity:.76}}@keyframes navFloatB{0%,100%{transform:translateY(calc(5px * var(--s))) rotate(9deg) scale(.78);opacity:0}24%,70%{opacity:.78}52%{transform:translateY(calc(-6px * var(--s))) rotate(-7deg) scale(1);opacity:.68}}@keyframes navFloatC{0%,100%{transform:translateX(-50%) translateY(calc(6px * var(--s))) rotate(0deg) scale(.76);opacity:0}24%,70%{opacity:.88}50%{transform:translateX(-50%) translateY(calc(-6px * var(--s))) rotate(2deg) scale(1);opacity:.78}}.navBtn:not(.is-current):hover .navEffectA,.navBtn:not(.is-current):focus-visible .navEffectA{animation:navFloatA 2.2s ease-in-out infinite}.navBtn:not(.is-current):hover .navEffectB,.navBtn:not(.is-current):focus-visible .navEffectB{animation:navFloatB 2.5s ease-in-out infinite}.navBtn:not(.is-current):hover .navEffectC,.navBtn:not(.is-current):focus-visible .navEffectC{animation:navFloatC 2.35s ease-in-out infinite}.navBtn.is-current .navEffect{display:none}.navBtn[data-room="hall"] .navEffect{color:rgba(255,205,96,.86)}.navBtn[data-room="manager"] .navEffect{color:rgba(128,91,58,.82)}.navBtn[data-room="honor"] .navEffect{color:rgba(205,143,45,.86)}.navBtn[data-room="game"] .navEffect{color:rgba(117,91,150,.82)}.navBtn[data-room="studio"] .navEffect{color:rgba(96,112,145,.84)}.navBtn[data-room="living"] .navEffect{color:rgba(202,132,70,.82)}.navBtn[data-room="dorm"] .navEffect{color:rgba(148,112,171,.78)}.navBtn[data-room="pets"] .navEffect{color:rgba(131,111,78,.82)}.navBtn[data-room="flower"] .navEffect{color:rgba(198,119,145,.82)}.identityNameBox,.identityNoticeBtn,.identityAuthBtn{min-width:0;min-height:0;height:100%;border-radius:calc(9px * var(--s));background:var(--identity-inner-bg);color:var(--identity-text);border:calc(1px * var(--s)) solid rgba(160,116,78,0.12);box-shadow:inset 0 calc(1px * var(--s)) 0 rgba(255,255,255,0.95),0 calc(1px * var(--s)) calc(4px * var(--s)) rgba(112,83,52,0.05)}.identityNameBox{display:flex;align-items:center;justify-content:center;padding:0 calc(8px * var(--s));overflow:visible}.identityNameText{display:inline-flex;align-items:center;justify-content:center;max-width:100%;color:var(--identity-text);font-size:calc(13px * var(--s));font-weight:850;line-height:1.22;letter-spacing:0;white-space:nowrap;overflow:visible;text-overflow:clip;transform:translateY(var(--identity-name-y))}.identityNameText.isOverflowSafe{overflow:hidden;text-overflow:ellipsis}.identityNoticeWrap{position:relative;width:100%;height:100%;overflow:visible}.identityNoticeBtn,.identityAuthBtn{appearance:none;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;line-height:1;transition:transform .18s ease,background .18s ease,box-shadow .18s ease}.identityNoticeBtn{width:100%;height:100%;font-size:calc(14px * var(--s))}.identityNoticeIcon{display:flex;width:100%;height:100%;align-items:center;justify-content:center;line-height:1;transform:translateY(var(--identity-notice-y));filter:drop-shadow(0 calc(1px * var(--s)) 0 rgba(255,255,255,0.55))}.identityNoticeCount{position:absolute;right:calc(-6px * var(--s));top:calc(-6px * var(--s));min-width:calc(18px * var(--s));height:calc(18px * var(--s));padding:0 calc(5px * var(--s));border-radius:999px;background:#b98f72;color:#fffaf6;font-size:calc(9px * var(--s));font-weight:900;line-height:1;display:none;align-items:center;justify-content:center;border:calc(2px * var(--s)) solid rgba(255,248,239,0.98);box-shadow:0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(116,86,54,0.16);z-index:3}.identityNoticeBtn.hasNotice + .identityNoticeCount{display:flex}.identityAuthBtn{width:100%;height:100%;color:#6f5746;font-size:calc(12px * var(--s));font-weight:850;line-height:1.18;white-space:nowrap;overflow:visible}.identityAuthText{display:inline-flex;align-items:center;justify-content:center;line-height:1.18;transform:translateY(var(--identity-button-y))}.identityNoticeBtn:hover,.identityAuthBtn:hover{transform:translateY(calc(-1px * var(--s)));background:rgba(255,255,255,0.94)}.identityNoticePanel.show{display:block}.identityNoticeTitle{color:#6f4726;font-size:calc(13px * var(--s));font-weight:900;margin-bottom:calc(10px * var(--s))}.identityNoticeEmpty{color:#8a6644;font-size:calc(12px * var(--s));line-height:1.6;padding:calc(6px * var(--s)) calc(2px * var(--s)) calc(2px * var(--s))}.siteNoticeList{display:flex;flex-direction:column;gap:calc(8px * var(--ui-scale))}.siteNoticeItem{padding:calc(10px * var(--ui-scale));border-radius:calc(12px * var(--ui-scale));background:rgba(255,252,247,0.82);box-shadow:inset 0 1px 0 rgba(255,255,255,0.92),0 2px 8px rgba(120,92,63,0.05)}.siteNoticeItemTitle{color:#6f4726;font-size:calc(12px * var(--ui-scale));font-weight:800;line-height:1.5;margin-bottom:4px}.siteNoticeItemDesc{color:#8a6644;font-size:calc(11px * var(--ui-scale));line-height:1.55;margin-bottom:calc(10px * var(--ui-scale))}.siteNoticeAction{appearance:none;border:none;cursor:pointer;min-height:calc(31px * var(--ui-scale));padding:0 12px;border-radius:10px;background:linear-gradient(180deg,#efd5ab 0%,#dfbd8a 100%);color:#6a4120;font-size:calc(11px * var(--ui-scale));font-weight:800}@media (min-width:541px){#taskPanel{left:var(--task-panel-left-bound,9.2%)!important;right:var(--task-panel-right-bound,22.4%)!important;top:var(--task-panel-top-bound,18%)!important;bottom:var(--task-panel-bottom-bound,12%)!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;transform:none!important;transform-origin:top left!important}.taskNameText{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;word-break:break-word!important;overflow-wrap:anywhere!important}}.searchLocationBox{padding:12px 10px;border-radius:15px;background:rgba(255,252,247,0.34);color:#7a5231;font-size:12px;line-height:1.6;text-align:left;box-shadow:inset 0 1px 0 rgba(255,255,255,0.52),0 3px 10px rgba(120,92,63,0.05)}.searchLocationTitle{color:#6f4726;font-size:13px;font-weight:900;line-height:1.45;margin-bottom:6px}.searchLocationDesc{color:#8a6644;font-size:11px;font-weight:700;line-height:1.55;margin-bottom:9px}.searchLocationList{display:flex;flex-direction:column;gap:7px}.searchLocationItem{width:100%;appearance:none;border:none;cursor:pointer;padding:8px 9px;border-radius:12px;background:rgba(255,252,247,0.76);color:#6a4120;text-align:left;box-shadow:inset 0 1px 0 rgba(255,255,255,0.88),0 2px 6px rgba(112,83,52,0.06);transition:transform .18s ease,filter .18s ease,background .18s ease}.searchLocationItem:hover{transform:translateY(-1px);filter:brightness(1.03)}.searchLocationWhere{display:block;font-size:11px;font-weight:900;color:#8a5b30;line-height:1.35;margin-bottom:2px}.searchLocationName{display:block;font-size:12px;font-weight:800;color:#5f3b1d;line-height:1.42;word-break:break-word;overflow-wrap:anywhere}@media (max-width:540px){html,
   body{width:100%!important;min-height:100%!important;height:auto!important;overflow-x:hidden!important;overflow-y:auto!important}body{display:block!important;background:linear-gradient(180deg,#efe4d5 0%,#e4d5c4 100%)!important}#room{width:100%!important;min-height:100vh!important;min-height:100dvh!important;height:auto!important;display:block!important;overflow:visible!important;padding:10px 12px 14px!important;background:linear-gradient(180deg,#efe4d5 0%,#e4d5c4 100%)!important}#bg{position:fixed!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;opacity:.16!important;filter:saturate(.92) blur(.2px)!important}#bgFrame{display:none!important}.navBtn{position:relative!important;left:auto!important;top:auto!important;width:100%!important;height:32px!important;min-width:0!important;min-height:32px!important;border-radius:10px!important;font-size:12px!important;overflow:hidden!important}.navLabel{padding-top:.04em!important}.navEffect{display:none!important}#taskPanel::before,
-  #bgNoteLayer{display:none!important}#panelSwitch{position:relative!important;transform:none!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:100%!important;height:auto!important;display:flex!important;flex-direction:row!important;gap:6px!important;padding:4px!important;margin:0 0 8px!important;border-radius:16px!important;background:rgba(255,248,239,.38)!important;border:1px solid rgba(168,123,81,.16)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.56),0 2px 7px rgba(116,86,54,.06)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}.switchBtn{flex:1 1 0!important;min-width:0!important;min-height:30px!important;height:30px!important;padding:0 6px!important;border-radius:10px!important;font-size:12px!important;line-height:1!important;display:flex!important;align-items:center!important;justify-content:center!important;white-space:nowrap!important;overflow:hidden!important}#taskView,
+  #bgNoteLayer{display:none!important}#taskView,
   .panelView,
   #browsePanelInner{position:relative!important;inset:auto!important;width:100%!important;height:auto!important;overflow:visible!important}#browsePanelInner{display:flex!important;flex-direction:column!important;gap:8px!important}#browseListPane,
   #browseDetailPane{width:100%!important;min-width:0!important;min-height:auto!important;height:auto!important;padding:10px!important;border-radius:18px!important;border:1px solid rgba(255,255,255,.36)!important;background:rgba(255,252,247,.30)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.50),0 3px 10px rgba(120,92,63,.05)!important}#browseListPane{border-right:1px solid rgba(255,255,255,.36)!important}.taskFilterRow{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;margin:0 0 8px!important;padding-right:0!important}.taskFilterBtn{width:100%!important;min-width:0!important;height:28px!important;padding:0 6px!important;border-radius:10px!important;font-size:11px!important;line-height:1!important}.searchWrap{margin:0 0 8px!important;padding-right:0!important}.searchInput{height:34px!important;border-radius:12px!important;padding:0 11px!important;font-size:12px!important}#browseListTask{max-height:36dvh!important;min-height:auto!important;overflow:auto!important;padding-right:4px!important}.taskItem{padding:8px 10px!important;margin-bottom:7px!important;border-radius:13px!important}.taskTitleLine{align-items:center!important;gap:6px!important}.taskItemName,
@@ -109,7 +106,7 @@
   .taskFilterBtn,
   .taskQuickBtn,
   .tinyActionBtn,
-  .detailActionBtn{transform:none;line-height:1}.switchBtn{flex:1 1 0!important;min-height:0!important;height:auto!important;line-height:1.05!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;white-space:nowrap!important;transform:none!important;font-size:var(--switch-font)!important;border-radius:var(--switch-btn-radius)!important;padding:0 var(--switch-btn-pad-x)!important;}.taskFilterBtn{font-weight:800!important;line-height:1!important;min-width:calc(56px * var(--btn-scale))!important;height:calc(28px * var(--btn-scale))!important;padding:0 calc(10px * var(--btn-scale))!important;border-radius:calc(10px * var(--btn-scale))!important;font-size:calc(11px * var(--btn-scale))!important;}.taskQuickBtn{min-height:calc(22px * var(--bg-ui-scale, 1))!important;font-weight:600!important;min-width:calc(34px * var(--btn-scale))!important;height:calc(22px * var(--btn-scale))!important;padding:0 calc(9px * var(--btn-scale))!important;border-radius:999px!important;font-size:calc(10px * var(--btn-scale))!important;}.tinyActionBtn,
+  .detailActionBtn{transform:none;line-height:1}.taskFilterBtn{font-weight:800!important;line-height:1!important;min-width:calc(56px * var(--btn-scale))!important;height:calc(28px * var(--btn-scale))!important;padding:0 calc(10px * var(--btn-scale))!important;border-radius:calc(10px * var(--btn-scale))!important;font-size:calc(11px * var(--btn-scale))!important;}.taskQuickBtn{min-height:calc(22px * var(--bg-ui-scale, 1))!important;font-weight:600!important;min-width:calc(34px * var(--btn-scale))!important;height:calc(22px * var(--btn-scale))!important;padding:0 calc(9px * var(--btn-scale))!important;border-radius:999px!important;font-size:calc(10px * var(--btn-scale))!important;}.tinyActionBtn,
   .detailActionBtn{font-weight:800!important;line-height:1!important;min-width:calc(58px * var(--btn-scale))!important;min-height:calc(28px * var(--btn-scale))!important;height:calc(28px * var(--btn-scale))!important;padding:0 calc(10px * var(--btn-scale))!important;border-radius:calc(10px * var(--btn-scale))!important;font-size:calc(12px * var(--btn-scale))!important;}#browseDetailFooter{gap:calc(6px * var(--btn-scale))!important;margin-top:calc(12px * var(--btn-scale))!important;padding-right:calc(14px * var(--btn-scale))!important}.switchBtn:hover,
   .taskFilterBtn:hover,
   .taskQuickBtn:hover,
@@ -148,7 +145,118 @@
 .identityAuthBtn{min-width:0}.identityNoticePanel{position:absolute;top:calc(100% + 10px * var(--s));right:0;width:min(calc(360px * var(--s)),72vw);max-height:min(calc(540px * var(--s)),70vh);padding:calc(12px * var(--s));border-radius:calc(16px * var(--s));background:rgba(255,249,241,0.98);border:calc(1px * var(--s)) solid rgba(203,167,123,0.28);box-shadow:0 calc(16px * var(--s)) calc(36px * var(--s)) rgba(85,58,34,0.16);display:none;z-index:80;text-align:left;overflow:auto;}@media (max-width:540px){#overlay{inset:auto!important;min-height:100dvh!important;--bg-ui-scale:1!important;--ui-scale:1!important;--overlay-ui-scale:1!important;--project-panel-scale:1!important;--project-radius-lg:18px!important;--project-radius-md:16px!important;--project-radius-sm:10px!important;--project-gap-xs:5px!important;--project-gap-sm:8px!important;--project-gap-md:10px!important;--project-gap-lg:12px!important;--project-pad-xs:7px!important;--project-pad-sm:9px!important;--project-pad-md:10px!important;--project-pad-lg:12px!important;--project-pad-xl:14px!important;--project-font-xs:10px!important;--project-font-sm:11px!important;--project-font-md:12px!important;--project-font-base:13px!important;--project-font-lg:14px!important;--project-font-xl:15px!important;--project-font-hero:18px!important;--project-btn-h:34px!important;--project-assignment-min-h:auto!important;position:relative!important;left:auto!important;top:auto!important;width:100%!important;height:auto!important;display:flex!important;flex-direction:column!important;gap:10px!important;margin:0!important;padding:0!important;overflow:visible!important;pointer-events:auto!important;}.roomNavLayer{position:relative!important;inset:auto!important;width:100%!important;height:106px!important;min-height:106px!important;max-height:106px!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-rows:repeat(3,32px)!important;gap:5px!important;margin:0!important;padding:0!important;align-content:start!important;order:0!important;z-index:20!important;pointer-events:auto!important;--s:1!important}.roomNavLayer .navBtn{position:relative!important;left:auto!important;top:auto!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:32px!important;min-width:0!important;min-height:32px!important;max-height:32px!important;margin:0!important;padding:0!important;border-radius:10px!important;font-size:12px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important}.roomNavLayer .navLabel{height:100%!important;padding-top:.04em!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important}.roomNavLayer .navEffect{display:none!important}.roomIdentity{--s:1!important;position:relative!important;right:auto!important;left:auto!important;top:auto!important;width:100%!important;min-width:0!important;height:40px!important;min-height:40px!important;order:1!important;z-index:30!important}.roomIdentityBar{grid-template-columns:minmax(0,1fr) 34px 42px!important;gap:6px!important;padding:5px 7px!important;border-radius:14px!important}.identityNameBox{padding:0 9px!important;border-radius:10px!important}.identityNameText{font-size:12px!important;line-height:1.22!important}.identityNoticeBtn{font-size:14px!important;border-radius:10px!important}.identityAuthBtn{font-size:11px!important;border-radius:10px!important}.identityNoticePanel{position:fixed!important;top:58px!important;left:12px!important;right:12px!important;width:auto!important;max-height:60dvh!important;padding:14px!important;border-radius:18px!important;z-index:999!important}#taskPanel{position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:100%!important;max-width:100%!important;height:auto!important;min-height:auto!important;transform:none!important;margin:0!important;border-radius:0!important;background:transparent!important;border:none!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;overflow:visible!important;order:2!important;}}
 /* 工作间交音动物偶遇：统一奖励弹窗扩展 */
 .reward-item-image{display:block;width:calc(62px * var(--reward-scale));height:calc(62px * var(--reward-scale));margin:0 auto calc(7px * var(--reward-scale));object-fit:contain;object-position:center;border-radius:calc(12px * var(--reward-scale));filter:drop-shadow(0 calc(4px * var(--reward-scale)) calc(8px * var(--reward-scale)) rgba(86,62,42,.12))}.reward-mask[data-type="animal"] .reward-card{background:radial-gradient(circle at 12% 16%,rgba(228,244,218,.78),transparent 30%),radial-gradient(circle at 88% 82%,rgba(255,224,188,.58),transparent 34%),linear-gradient(180deg,rgba(255,253,247,.99),rgba(241,248,229,.97))}.reward-mask[data-type="animal"] .reward-icon{filter:drop-shadow(0 calc(3px * var(--reward-scale)) calc(7px * var(--reward-scale)) rgba(93,119,74,.18))}.reward-mask[data-type="animal"] .reward-item{min-height:calc(126px * var(--reward-scale));background:linear-gradient(180deg,rgba(255,255,255,.84),rgba(247,251,239,.92));border-color:rgba(139,170,111,.22)}.reward-item-note{margin-top:calc(4px * var(--reward-scale));color:var(--reward-text);font-size:calc(11px * var(--reward-scale));font-weight:600;line-height:1.45}
-</style></head><body><div id="room"><div id="bgFrame"><img id="bg" src="" alt="十号房工作间背景" /></div><div id="overlay"><nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换"><button class="navBtn" data-room="hall" type="button" data-page="index" data-login="false"><span class="navLabel">大堂</span><span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span></button><button class="navBtn" data-room="living" type="button" data-page="living" data-login="true"><span class="navLabel">客厅</span><span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span></button><button class="navBtn" data-room="manager" type="button" data-manager="true"><span class="navLabel">宿管室</span><span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span></button><button class="navBtn" data-room="honor" type="button" data-page="honor" data-login="false"><span class="navLabel">荣誉墙</span><span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span></button><button class="navBtn is-current" data-room="studio" type="button" data-page="studioTodo" data-login="true" aria-current="page" tabindex="-1"><span class="navLabel">工作间</span><span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span></button><button class="navBtn" data-room="game" type="button" data-page="game" data-login="false"><span class="navLabel">游戏房</span><span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span></button><button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-login="true"><span class="navLabel">宿舍</span><span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span></button><button class="navBtn" data-room="flower" type="button" data-page="flower" data-login="false"><span class="navLabel">花房区</span><span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span></button><button class="navBtn" data-room="pets" type="button" data-page="pet" data-login="false"><span class="navLabel">宠物区</span><span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span></button></nav><section class="roomIdentity" id="roomIdentity" aria-label="当前身份"><div class="roomIdentityBar"><div class="identityNameBox"><span class="identityNameText" id="currentUserText">读取中</span></div><div class="identityNoticeWrap" id="siteNoticeWrap"><button class="identityNoticeBtn" id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="查看提醒"><span class="identityNoticeIcon" id="siteNoticeIcon" aria-hidden="true">🔔</span></button><span class="identityNoticeCount" id="siteNoticeCount">0</span><div class="identityNoticePanel" id="siteNoticePanel" aria-hidden="true"><div class="identityNoticeTitle">待处理提醒</div><div id="siteNoticeBody" class="identityNoticeEmpty">暂无提醒</div></div></div><button class="identityAuthBtn hidden" id="loginOpenBtn" type="button"><span class="identityAuthText">登录</span></button><button class="identityAuthBtn" id="logoutBtn" type="button"><span class="identityAuthText">登出</span></button></div></section><section id="taskPanel" aria-label="任务详情"><div id="bgNoteLayer" aria-hidden="true"></div><div id="panelSwitch"><button class="switchBtn" id="goClaimBtn" type="button">待处理</button><button class="switchBtn active" id="goProjectBtn" type="button">任务详情</button><button class="switchBtn" id="goTaskBtn" type="button">项目委托</button></div><div id="taskView"><div id="browsePanelInner"><div id="browseListPane"><div id="browseListTitleTask">制作中</div><div class="taskFilterRow"><button class="taskFilterBtn active" data-task-filter="all">全部</button><button class="taskFilterBtn" data-task-filter="mine">我参与</button><button class="taskFilterBtn" data-task-filter="pendingSinger">待交音</button><button class="taskFilterBtn" data-task-filter="pendingProducer">待后期</button><button class="taskFilterBtn" data-task-filter="myProducer">我的后期</button><button class="taskFilterBtn" data-task-filter="onlyme">只等我</button></div><div class="searchWrap"><input id="taskSearchTask" class="searchInput" type="text" placeholder="搜索编号、歌名、类型、成员" /></div><div id="browseListTask"></div></div><div id="browseDetailPane"><div id="browseDetailHeader"><div class="detailTitleWrap"><div id="browseDetailTitleTask"></div></div><div id="browseDetailStatusTask"></div></div><div id="browseDetailBody"><div id="browseDetailContentTask"></div></div><div id="browseDetailFooter"><button class="detailActionBtn" id="browseEditBtnTask" type="button">编辑</button><button class="detailActionBtn" id="browsePrimaryBtnTask" type="button">刷新</button></div></div></div></div></section></div></div><div id="taskEditMask" aria-hidden="true"><div id="taskEditDialog" role="dialog" aria-modal="true" aria-labelledby="taskEditTitle"><div class="taskEditHeader"><div class="taskEditTitleWrap"><div id="taskEditTitle">编辑项目</div><div id="taskEditSubtitle">保存后会自动按最新数据重新归类状态</div></div></div><div id="taskEditBody"><div class="taskEditSection"><div class="taskEditSectionTitle">基础信息</div><div class="taskEditGrid taskEditGridProject"><div class="taskEditRowGroup taskEditRowTop"><label class="taskEditField taskEditFieldCode"><span class="taskEditLabel">编号</span><input id="editTaskCode" class="taskEditInput" type="text" readonly /></label><label class="taskEditField taskEditFieldName"><span class="taskEditLabel">歌名</span><input id="editTaskName" class="taskEditInput" type="text" /></label><div class="taskEditField taskEditFieldMode"><span class="taskEditLabel">任务模式</span><div class="taskEditModeRow"><div class="taskEditModeButtons taskEditModeButtonsCompact" role="group" aria-label="任务模式切换"><button id="editTaskModeNormalBtn" class="taskEditModeBtn compact active" type="button" title="普通任务">普</button><button id="editTaskModeSpecialBtn" class="taskEditModeBtn compact" type="button" title="特别任务，每人额外+10金币">特</button></div><input id="editIsCollectiveTask" type="hidden" value="0" /></div></div></div><div class="taskEditRowGroup taskEditRowMeta"><label class="taskEditField"><span class="taskEditLabel">类型</span><select id="editTaskType" class="taskEditSelect"></select></label><label id="editGameTypeField" class="taskEditField" hidden><span class="taskEditLabel">游戏类型</span><select id="editGameType" class="taskEditSelect"><option value="">请选择</option><option value="各唱各">各唱各</option><option value="接龙">接龙</option><option value="升调挑战">升调挑战</option><option value="变速挑战">变速挑战</option><option value="接不了龙">接不了龙</option><option value="其他游戏">其他游戏</option></select></label><label class="taskEditField"><span class="taskEditLabel">演唱人数</span><input id="editSingerQuota" class="taskEditInput" type="number" min="1" max="20" /></label><label class="taskEditField"><span class="taskEditLabel">调</span><input id="editProjectTone" class="taskEditInput" type="text" placeholder="例如：+3 / 原调" /></label></div><div class="taskEditRowGroup taskEditRowBottom"><label class="taskEditField"><span class="taskEditLabel">预计发布日期</span><input id="editReleaseDate" class="taskEditInput" type="date" /></label><div class="taskEditField"><span class="taskEditLabel">混音负责人</span><div id="editProducerPicker" class="taskEditPickerGroup" role="group" aria-label="混音负责人备选池"></div></div></div></div></div><div class="taskEditSection"><div class="taskEditSectionTitle">演唱者</div><div id="editSingerMemberList" class="memberCheckGrid"></div></div><div class="taskEditSection"><div class="taskEditSectionHead"><div class="taskEditSectionTitle">歌词分配</div></div><div id="editPartRows" class="taskEditRows"></div></div></div><div class="taskEditFooter"><button id="taskEditCancelBtn" type="button">取消</button><button id="taskEditSaveBtn" type="button">保存</button></div></div></div><div id="toastMask" aria-hidden="true"><div id="toastBox"><div id="toastTitle">提示</div><div id="toastMessage"></div><button id="toastCloseBtn" type="button">知道了</button></div></div><div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement" hidden><section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle"><div class="reward-petals" aria-hidden="true"><span>✿</span><span>❀</span><span>✽</span><span>✿</span><span>❀</span></div><button class="reward-close" type="button" aria-label="关闭" onclick="closeRewardModal()">×</button><div class="reward-content"><div class="reward-icon" id="rewardIcon" aria-hidden="true">🏆</div><div class="reward-label" id="rewardLabel">成就达成</div><h2 class="reward-title" id="rewardTitle">新手照顾员</h2><p class="reward-desc" id="rewardDesc">
+
+.traineeCandidate:not(.active){background:rgba(245,239,248,.94)!important;border-color:rgba(177,157,188,.42)!important;color:#756078!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.94),0 2px 6px rgba(108,88,116,.07)!important}
+.traineeCandidate:not(.active):hover{background:rgba(248,243,250,.98)!important;filter:brightness(1.01)}
+.traineeCandidate.active{border-color:rgba(177,157,188,.58)!important;box-shadow:inset 0 1px 0 rgba(255,224,188,.55),0 0 0 2px rgba(177,157,188,.24),0 4px 10px rgba(116,86,54,.14)!important}
+
+</style>
+<style id="room10-crosspage-sync">
+
+.memberCheckItem,.taskEditPickerBtn{display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.externalProducerDone{display:inline-flex;align-items:center;min-height:26px;padding:0 9px;border-radius:999px;background:rgba(231,244,232,.98);color:#5f7c57;font-size:10px;font-weight:900}
+</style>
+
+<style id="workspace-switch-canonical">
+#panelSwitch{
+  --workspace-switch-scale:var(--project-panel-scale,var(--ui-scale,1));
+  position:absolute;
+  left:104.9%;
+  top:8.5%;
+  width:16.55%;
+  height:36.2%;
+  box-sizing:border-box;
+  padding:calc(14px * var(--workspace-switch-scale)) calc(12px * var(--workspace-switch-scale));
+  border-radius:calc(20px * var(--workspace-switch-scale));
+  background:rgba(255,248,239,.9);
+  border:1px solid rgba(186,146,103,.24);
+  box-shadow:0 10px 24px rgba(116,86,54,.12),inset 0 1px 0 rgba(255,255,255,.86);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  align-items:stretch;
+  gap:calc(8px * var(--workspace-switch-scale));
+  z-index:30;
+  overflow:hidden;
+  transform:none;
+}
+#panelSwitch .switchBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  width:100%;
+  flex:1 1 0;
+  min-width:0;
+  min-height:0;
+  height:auto;
+  padding:0 calc(8px * var(--workspace-switch-scale));
+  border-radius:calc(13px * var(--workspace-switch-scale));
+  background:rgba(231,214,185,.92);
+  color:#744b25;
+  text-decoration:none;
+  font-size:calc(13px * var(--workspace-switch-scale));
+  font-weight:700;
+  line-height:1.05;
+  text-align:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:inset 0 1px 0 rgba(255,247,233,.95),0 2px 6px rgba(116,86,54,.08);
+  transition:transform .18s ease,filter .18s ease,background .18s ease;
+  white-space:nowrap;
+  overflow:hidden;
+}
+#panelSwitch .switchBtn:hover{
+  transform:translateY(calc(-1px * var(--workspace-switch-scale)));
+  filter:brightness(1.03);
+}
+#panelSwitch .switchBtn.active{
+  background:linear-gradient(180deg,#d9a364 0%,#c98c4f 100%);
+  color:#fff9f1;
+  box-shadow:inset 0 1px 0 rgba(255,224,188,.55),0 4px 10px rgba(116,86,54,.14);
+}
+@media(max-width:540px){
+  #panelSwitch{
+    position:relative!important;
+    left:auto!important;
+    right:auto!important;
+    top:auto!important;
+    bottom:auto!important;
+    width:auto!important;
+    height:auto!important;
+    margin:12px 12px 0!important;
+    padding:4px!important;
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:6px!important;
+    border-radius:16px!important;
+    background:rgba(255,248,239,.38)!important;
+    border:1px solid rgba(168,123,81,.16)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.56),0 2px 7px rgba(116,86,54,.06)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    transform:none!important;
+    overflow:visible!important;
+  }
+  #panelSwitch .switchBtn{
+    width:100%!important;
+    min-width:0!important;
+    min-height:36px!important;
+    height:36px!important;
+    padding:0 4px!important;
+    border-radius:11px!important;
+    font-size:13px!important;
+    font-weight:800!important;
+    line-height:1.15!important;
+    letter-spacing:0!important;
+    white-space:nowrap!important;
+  }
+}
+</style>
+
+</head><body><div id="room"><div id="bgFrame"><img id="bg" src="" alt="十号房工作间背景" /></div><div id="overlay"><nav class="roomNavLayer" id="roomNavLayer" aria-label="房间切换"><button class="navBtn" data-room="hall" type="button" data-page="index" data-login="false"><span class="navLabel">大堂</span><span class="navEffect navEffectA">✦</span><span class="navEffect navEffectB">✧</span><span class="navEffect navEffectC">★</span></button><button class="navBtn" data-room="living" type="button" data-page="living" data-login="true"><span class="navLabel">客厅</span><span class="navEffect navEffectA">☕</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">💬</span></button><button class="navBtn" data-room="manager" type="button" data-manager="true"><span class="navLabel">宿管室</span><span class="navEffect navEffectA">✎</span><span class="navEffect navEffectB">▱</span><span class="navEffect navEffectC">✐</span></button><button class="navBtn" data-room="honor" type="button" data-page="honor" data-login="false"><span class="navLabel">荣誉墙</span><span class="navEffect navEffectA">🏆</span><span class="navEffect navEffectB">🏅</span><span class="navEffect navEffectC">✦</span></button><button class="navBtn is-current" data-room="studio" type="button" data-page="studioOverview" data-login="true" aria-current="page" tabindex="-1"><span class="navLabel">工作间</span><span class="navEffect navEffectA">🎙</span><span class="navEffect navEffectB">🎧</span><span class="navEffect navEffectC">◇</span></button><button class="navBtn" data-room="game" type="button" data-page="game" data-login="false"><span class="navLabel">游戏房</span><span class="navEffect navEffectA">🎮</span><span class="navEffect navEffectB">🎲</span><span class="navEffect navEffectC">👾</span></button><button class="navBtn" data-room="dorm" type="button" data-page="dorm" data-login="true"><span class="navLabel">宿舍</span><span class="navEffect navEffectA">☾</span><span class="navEffect navEffectB">✦</span><span class="navEffect navEffectC">🛏</span></button><button class="navBtn" data-room="flower" type="button" data-page="flower" data-login="false"><span class="navLabel">花房区</span><span class="navEffect navEffectA">✿</span><span class="navEffect navEffectB">❀</span><span class="navEffect navEffectC">🌸</span></button><button class="navBtn" data-room="pets" type="button" data-page="pet" data-login="false"><span class="navLabel">宠物区</span><span class="navEffect navEffectA">🐾</span><span class="navEffect navEffectB">♡</span><span class="navEffect navEffectC">🐱</span></button></nav><section class="roomIdentity" id="roomIdentity" aria-label="当前身份"><div class="roomIdentityBar"><div class="identityNameBox"><span class="identityNameText" id="currentUserText">读取中</span></div><div class="identityNoticeWrap" id="siteNoticeWrap"><button class="identityNoticeBtn" id="siteNoticeBtn" type="button" aria-expanded="false" aria-controls="siteNoticePanel" aria-label="查看提醒"><span class="identityNoticeIcon" id="siteNoticeIcon" aria-hidden="true">🔔</span></button><span class="identityNoticeCount" id="siteNoticeCount">0</span><div class="identityNoticePanel" id="siteNoticePanel" aria-hidden="true"><div class="identityNoticeTitle">待处理提醒</div><div id="siteNoticeBody" class="identityNoticeEmpty">暂无提醒</div></div></div><button class="identityAuthBtn hidden" id="loginOpenBtn" type="button"><span class="identityAuthText">登录</span></button><button class="identityAuthBtn" id="logoutBtn" type="button"><span class="identityAuthText">登出</span></button></div></section><section id="taskPanel" aria-label="任务详情"><div id="bgNoteLayer" aria-hidden="true"></div><div id="panelSwitch"><button class="switchBtn" id="goOverviewBtn" type="button">项目总览</button><button class="switchBtn" id="goClaimBtn" type="button">待处理</button><button class="switchBtn active" id="goProjectBtn" type="button">任务详情</button><button class="switchBtn" id="goTaskBtn" type="button">项目委托</button></div><div id="taskView"><div id="browsePanelInner"><div id="browseListPane"><div id="browseListTitleTask">制作中</div><div class="taskFilterRow"><button class="taskFilterBtn active" data-task-filter="all">全部</button><button class="taskFilterBtn" data-task-filter="mine">我参与</button><button class="taskFilterBtn" data-task-filter="pendingSinger">待交音</button><button class="taskFilterBtn" data-task-filter="pendingProducer">待后期</button><button class="taskFilterBtn" data-task-filter="myProducer">我的后期</button><button class="taskFilterBtn" data-task-filter="onlyme">只等我</button></div><div class="searchWrap"><input id="taskSearchTask" class="searchInput" type="text" placeholder="搜索编号、歌名、类型、成员" /></div><div id="browseListTask"></div></div><div id="browseDetailPane"><div id="browseDetailHeader"><div class="detailTitleWrap"><div id="browseDetailTitleTask"></div></div><div id="browseDetailStatusTask"></div></div><div id="browseDetailBody"><div id="browseDetailContentTask"></div></div><div id="browseDetailFooter"><button class="detailActionBtn" id="browseEditBtnTask" type="button">编辑</button><button class="detailActionBtn" id="browsePrimaryBtnTask" type="button">刷新</button></div></div></div></div></section></div></div><div id="taskEditMask" aria-hidden="true"><div id="taskEditDialog" role="dialog" aria-modal="true" aria-labelledby="taskEditTitle"><div class="taskEditHeader"><div class="taskEditTitleWrap"><div id="taskEditTitle">编辑项目</div><div id="taskEditSubtitle">保存后会自动按最新数据重新归类状态</div></div></div><div id="taskEditBody"><div class="taskEditSection"><div class="taskEditSectionTitle">基础信息</div><div class="taskEditGrid taskEditGridProject"><div class="taskEditRowGroup taskEditRowTop"><label class="taskEditField taskEditFieldCode"><span class="taskEditLabel">编号</span><input id="editTaskCode" class="taskEditInput" type="text" readonly /></label><label class="taskEditField taskEditFieldName"><span class="taskEditLabel">歌名</span><input id="editTaskName" class="taskEditInput" type="text" /></label><div class="taskEditField taskEditFieldMode"><span class="taskEditLabel">任务模式</span><div class="taskEditModeRow"><div class="taskEditModeButtons taskEditModeButtonsCompact" role="group" aria-label="任务模式切换"><button id="editTaskModeNormalBtn" class="taskEditModeBtn compact active" type="button" title="普通任务">普</button><button id="editTaskModeSpecialBtn" class="taskEditModeBtn compact" type="button" title="特别任务，每人额外+10金币">特</button></div><input id="editIsCollectiveTask" type="hidden" value="0" /></div></div></div><div class="taskEditRowGroup taskEditRowMeta"><label class="taskEditField"><span class="taskEditLabel">类型</span><select id="editTaskType" class="taskEditSelect"></select></label><label class="taskEditField"><span class="taskEditLabel">演唱人数</span><input id="editSingerQuota" class="taskEditInput" type="number" min="1" max="20" /></label><label class="taskEditField"><span class="taskEditLabel">调</span><input id="editProjectTone" class="taskEditInput" type="text" placeholder="例如：+3 / 原调" /></label></div><div class="taskEditRowGroup taskEditRowBottom"><label class="taskEditField"><span class="taskEditLabel">预计发布日期</span><input id="editReleaseDate" class="taskEditInput" type="date" /></label><div class="taskEditField"><span class="taskEditLabel">混音负责人</span><div id="editProducerPicker" class="taskEditPickerGroup" role="group" aria-label="混音负责人备选池"></div></div></div></div></div><div class="taskEditSection"><div class="taskEditSectionTitle">项目原唱名单</div><textarea id="editOriginalArtists" class="taskOriginalTextarea" placeholder="完整原唱名单，可用顿号、逗号或换行分隔"></textarea></div><div class="taskEditSection"><div class="taskEditSectionTitle">演唱者</div><div id="editSingerMemberList" class="memberCheckGrid"></div></div><div class="taskEditSection"><div class="taskEditSectionHead"><div class="taskEditSectionTitle">歌词分配</div></div><div id="editPartRows" class="taskEditRows"></div></div></div><div class="taskEditFooter"><button id="taskEditCancelBtn" type="button">取消</button><button id="taskEditSaveBtn" type="button">保存</button></div></div></div><div id="toastMask" aria-hidden="true"><div id="toastBox"><div id="toastTitle">提示</div><div id="toastMessage"></div><button id="toastCloseBtn" type="button">知道了</button></div></div><div class="reward-mask" id="rewardMask" aria-hidden="true" data-type="achievement" hidden><section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle"><div class="reward-petals" aria-hidden="true"><span>✿</span><span>❀</span><span>✽</span><span>✿</span><span>❀</span></div><button class="reward-close" type="button" aria-label="关闭" onclick="closeRewardModal()">×</button><div class="reward-content"><div class="reward-icon" id="rewardIcon" aria-hidden="true">🏆</div><div class="reward-label" id="rewardLabel">成就达成</div><h2 class="reward-title" id="rewardTitle">新手照顾员</h2><p class="reward-desc" id="rewardDesc">
           成就达成：累计照顾宠物 1 次
         </p><div class="reward-section-title" id="rewardSectionTitle">奖励内容</div><div class="reward-list" id="rewardList"></div><button class="reward-confirm" type="button" onclick="closeRewardModal()">收下奖励</button></div></section></div><script>  const SUPABASE_CONFIG = {
     url: "https://tfevitwoqmxwaguvtyms.supabase.co",
@@ -235,8 +343,6 @@ const authState = {
   const editTaskCode = document.getElementById("editTaskCode");
   const editTaskName = document.getElementById("editTaskName");
   const editTaskType = document.getElementById("editTaskType");
-  const editGameTypeField = document.getElementById("editGameTypeField");
-  const editGameType = document.getElementById("editGameType");
   const editTaskModeNormalBtn = document.getElementById("editTaskModeNormalBtn");
   const editTaskModeSpecialBtn = document.getElementById("editTaskModeSpecialBtn");
   const editIsCollectiveTask = document.getElementById("editIsCollectiveTask");
@@ -244,12 +350,15 @@ const authState = {
   const editProjectTone = document.getElementById("editProjectTone");
   const editReleaseDate = document.getElementById("editReleaseDate");
   const editProducerPicker = document.getElementById("editProducerPicker");
+  const editOriginalArtists = document.getElementById("editOriginalArtists");
   const editSingerMemberList = document.getElementById("editSingerMemberList");
   const editPartRows = document.getElementById("editPartRows");
   let currentEditingTaskId = "";
   let currentEditingProducerMemberId = "";
+  let currentEditingProducerIsExternal = false;
   let editPartDraftRows = [];
   let taskEditOriginalSnapshot = null;
+  let editEligibleRefreshSeq = 0;
   let pendingStudioJumpIntent = null;
   let jumpFlashTimer = null;
   const CURRENT_STUDIO_PAGE = getRoom10Page("studioProject");
@@ -1120,6 +1229,8 @@ const authState = {
         producer_name: producerName,
         producer_completed: !!project.producer_completed,
         producer_completed_at: project.producer_completed_at || null,
+        producer_is_external: project.producer_is_external === true,
+        original_artists: Array.isArray(project.original_artists) ? project.original_artists : [],
         release_date: project.release_date || null,
         display_link: project.display_link || "",
         project_tone: project.project_tone || "",
@@ -1357,11 +1468,22 @@ const authState = {
       if (!currentMemberId || !currentMemberCode) {
         throw new Error("当前成员身份读取失败，请重新登录。");
       }
-      const { data, error } = await supabaseClient.rpc("get_studio_project_items", {
-        p_member_id: currentMemberId,
-        p_member_code: currentMemberCode
-      });
-      if (error) throw error;
+      const [itemsResult, extrasResult] = await Promise.all([
+        supabaseClient.rpc("get_studio_project_items", {
+          p_member_id: currentMemberId,
+          p_member_code: currentMemberCode
+        }),
+        supabaseClient.rpc("get_studio_project_overview_extras", {
+          p_member_id: currentMemberId,
+          p_member_code: currentMemberCode
+        })
+      ]);
+      if (itemsResult.error) throw itemsResult.error;
+      const data = itemsResult.data;
+      const extrasMap = new Map(
+        (Array.isArray(extrasResult.data) ? extrasResult.data : [])
+          .map(row => [String(row.project_id || ""), row])
+      );
       const {
         projectsData,
         partsData,
@@ -1369,6 +1491,11 @@ const authState = {
         vocalRangeData,
         statusData
       } = normalizeStudioProjectRpcPayload(data);
+      projectsData.forEach(row => {
+        const extra = extrasMap.get(String(row.id || row.project_id || "")) || {};
+        row.original_artists = Array.isArray(extra.original_artists) ? extra.original_artists : [];
+        row.producer_is_external = extra.producer_is_external === true;
+      });
       if (!projectsData.length && data !== null && data !== undefined) {
         console.warn("get_studio_project_items 返回格式未识别：", data);
       }
@@ -1441,7 +1568,7 @@ const authState = {
     overlay.style.setProperty("--panel-switch-left", "104.9%");
     overlay.style.setProperty("--panel-switch-top", "10.9%");
     overlay.style.setProperty("--panel-switch-w", "16.55%");
-    overlay.style.setProperty("--panel-switch-h", "27.15%");
+    overlay.style.setProperty("--panel-switch-h", "36.2%");
     overlay.style.setProperty("--panel-switch-pad-y", `${(14 * scale).toFixed(2)}px`);
     overlay.style.setProperty("--panel-switch-pad-x", `${(12 * scale).toFixed(2)}px`);
     overlay.style.setProperty("--panel-switch-radius", `${(20 * scale).toFixed(2)}px`);
@@ -1995,15 +2122,17 @@ const authState = {
     });
     return result;
   }
-  function getEligibleMemberRpcParams(projectId) {
+  function getEligibleMemberRpcParams(projectId, projectType, isCollectiveTask) {
     const p_project_id = String(projectId || "").trim();
     const p_member_id = String(getCurrentMemberId() || "").trim();
     const p_member_code = getCurrentMemberCode();
+    const p_project_type = String(projectType || "").trim();
+    const p_is_collective_task = !!isCollectiveTask;
     if (!p_project_id) throw new Error("项目编号缺失，无法读取可选成员。");
     if (!p_member_id || !p_member_code) {
       throw new Error("当前成员身份资料不完整，请重新登录后再试。");
     }
-    return { p_member_id, p_member_code, p_project_id };
+    return { p_member_id, p_member_code, p_project_id, p_project_type, p_is_collective_task };
   }
   function getEligibleMemberErrorMessage(error, memberType) {
     const raw = String(error?.message || error?.details || error?.hint || "").trim();
@@ -2011,40 +2140,80 @@ const authState = {
       return `当前成员身份验证失败，无法读取可选${memberType}成员，请重新登录。`;
     }
     if (/function|schema cache|does not exist|ambiguous/i.test(raw)) {
-      return `可选${memberType}成员接口版本不匹配，请检查已部署的三参数 RPC。`;
+      return `可选${memberType}成员接口版本不匹配，请检查已部署的编辑候选 RPC。`;
     }
     return raw ? `无法读取可选${memberType}成员：${raw}` : `无法读取可选${memberType}成员，请稍后重试。`;
   }
-  async function loadEligibleSingersForProject(projectId) {
+  async function loadEligibleSingersForProject(projectId, projectType, isCollectiveTask) {
     try {
-      const params = getEligibleMemberRpcParams(projectId);
-      const { data, error } = await supabaseClient.rpc("get_project_eligible_singers", params);
+      const params = getEligibleMemberRpcParams(projectId, projectType, isCollectiveTask);
+      const { data, error } = await supabaseClient.rpc("get_project_edit_eligible_singers", params);
       if (error) throw error;
-      currentEligibleSingers = normalizeEligibleMemberRows(data);
-      return currentEligibleSingers;
+      return normalizeEligibleMemberRows(data);
     } catch (error) {
-      currentEligibleSingers = [];
       throw new Error(getEligibleMemberErrorMessage(error, "演唱"));
     }
   }
-  async function loadEligibleMixersForProject(projectId) {
+  async function loadEligibleMixersForProject(projectId, projectType, isCollectiveTask) {
     try {
-      const params = getEligibleMemberRpcParams(projectId);
-      const { data, error } = await supabaseClient.rpc("get_project_eligible_mixers", params);
+      const params = getEligibleMemberRpcParams(projectId, projectType, isCollectiveTask);
+      const { data, error } = await supabaseClient.rpc("get_project_edit_eligible_mixers", params);
       if (error) throw error;
-      currentEligibleMixers = normalizeEligibleMemberRows(data);
-      return currentEligibleMixers;
+      return normalizeEligibleMemberRows(data);
     } catch (error) {
-      currentEligibleMixers = [];
       throw new Error(getEligibleMemberErrorMessage(error, "混音"));
     }
+  }
+  async function refreshTaskEditEligibleMembers() {
+    const projectId = String(currentEditingTaskId || "").trim();
+    if (!projectId) return;
+
+    const refreshSeq = ++editEligibleRefreshSeq;
+    const selectedSingerIds = getEditableSingerIds();
+    const selectedProducerId = String(currentEditingProducerMemberId || "").trim();
+    const projectType = String(editTaskType?.value || "").trim();
+    const isSpecialTask = String(editIsCollectiveTask?.value || "0") === "1";
+
+    const [singerResult, mixerResult] = await Promise.allSettled([
+      loadEligibleSingersForProject(projectId, projectType, isSpecialTask),
+      loadEligibleMixersForProject(projectId, projectType, isSpecialTask)
+    ]);
+    if (refreshSeq !== editEligibleRefreshSeq) return;
+
+    const candidateErrors = [];
+    if (singerResult.status === "rejected") candidateErrors.push(singerResult.reason?.message || "可选演唱成员读取失败");
+    if (mixerResult.status === "rejected") candidateErrors.push(mixerResult.reason?.message || "可选混音成员读取失败");
+    if (candidateErrors.length) {
+      console.error("刷新项目可选成员失败：", singerResult, mixerResult);
+      showToast("读取失败", candidateErrors.join("\n"));
+      return;
+    }
+
+    currentEligibleSingers = mergeEligibleMembers(
+      singerResult.value,
+      selectedSingerIds.map(memberId => ({
+        member_id: memberId,
+        nickname: getMemberDisplayNameById(memberId, "")
+      }))
+    );
+    currentEligibleMixers = mergeEligibleMembers(
+      mixerResult.value,
+      selectedProducerId ? [{
+        member_id: selectedProducerId,
+        nickname: getMemberDisplayNameById(selectedProducerId, "当前负责人")
+      }] : []
+    );
+
+    renderEditSingerMemberList(selectedSingerIds);
+    renderProducerPicker(selectedProducerId);
+    refreshAllPartSuggestions();
   }
   function renderEditSingerMemberList(selectedIds = []) {
     const selectedSet = new Set((selectedIds || []).map(String));
     editSingerMemberList.innerHTML = currentEligibleSingers.map(member => {
       const memberId = String(member.member_id || member.id || "");
       const label = `${member.nickname || member.name || "未命名成员"}`;
-      return `<button type="button" class="memberCheckItem ${selectedSet.has(memberId) ? "active" : ""}" data-member-id="${escapeHtml(memberId)}">${escapeHtml(label)}</button>`;
+      return `<button type="button" class="memberCheckItem ${isTraineeCandidateId(memberId) ? "traineeCandidate" : ""} ${selectedSet.has(memberId) ? "active" : ""}" data-member-id="${escapeHtml(memberId)}">${escapeHtml(label)}</button>`;
     }).join("") || '<div class="loadingText">当前项目没有可选演唱成员。</div>';
   }
   function getCurrentPartDraftFromDom() {
@@ -2263,13 +2432,17 @@ const authState = {
         ghost: true
       });
     }
-    editProducerPicker.innerHTML = options.map(item => `
-      <button
-        type="button"
-        class="taskEditPickerBtn ${item.ghost ? "ghost" : ""} ${item.id === currentEditingProducerMemberId ? "active" : ""}"
-        data-producer-option="${escapeHtml(item.id)}"
-      >${escapeHtml(item.label)}</button>
-    `).join("");
+    editProducerPicker.innerHTML = [
+      ...options.map(item => `
+        <button
+          type="button"
+          class="taskEditPickerBtn ${item.ghost ? "ghost" : ""} ${isTraineeCandidateId(item.id) ? "traineeCandidate" : ""} ${!currentEditingProducerIsExternal && item.id === currentEditingProducerMemberId ? "active" : ""}"
+          data-producer-option="${escapeHtml(item.id)}"
+          data-producer-kind="internal"
+        >${escapeHtml(item.label)}</button>
+      `),
+      `<button type="button" class="taskEditPickerBtn ${currentEditingProducerIsExternal ? "active" : ""}" data-producer-kind="external">编外</button>`
+    ].join("");
   }
   function getMeaningfulPartRows(rows) {
     return (rows || []).filter(row => String(row?.original_name || "").trim() || String(row?.assigned_member_id || "").trim());
@@ -2293,14 +2466,12 @@ const authState = {
   function isGameProjectType(projectType) {
     return String(projectType || "").trim() === "游戏";
   }
-  function isToneRequiredByEditValues(projectType, gameType) {
+  function isToneRequiredByEditValues(projectType, gameType = "") {
     return !isGameProjectType(projectType) || String(gameType || "").trim() === "各唱各";
   }
-  function syncGameTypeAndToneFields() {
-    const isGame = isGameProjectType(editTaskType?.value);
-    if (editGameTypeField) editGameTypeField.hidden = !isGame;
-    if (!isGame && editGameType) editGameType.value = "";
-    const toneRequired = isToneRequiredByEditValues(editTaskType?.value, editGameType?.value);
+  function syncToneField() {
+    const legacyGameType = String(getTaskById(currentEditingTaskId)?.game_type || "").trim();
+    const toneRequired = isToneRequiredByEditValues(editTaskType?.value, legacyGameType);
     const toneLabel = editProjectTone?.closest("label")?.querySelector(".taskEditLabel");
     if (toneLabel) toneLabel.textContent = toneRequired ? "调" : "调（可不填）";
     if (editProjectTone) editProjectTone.placeholder = toneRequired ? "例如：+3 / 原调" : "游戏项目可留空";
@@ -2312,11 +2483,14 @@ const authState = {
       project_code: String(safeTask.project_code || ""),
       project_name: String(safeTask.project_name || ""),
       project_type: String(safeTask.project_type || "").trim(),
+      game_type: String(safeTask.game_type || "").trim(),
       is_collective_task: !!safeTask.is_collective_task,
       participant_count: Number.isFinite(Number(safeTask.participant_count)) && Number(safeTask.participant_count) > 0 ? String(Math.floor(Number(safeTask.participant_count))) : "",
       project_tone: String(safeTask.project_tone || ""),
       release_date: formatDateForInput(safeTask.release_date),
       producer_member_id: String(safeTask.producer_member_id || ""),
+      producer_is_external: safeTask.producer_is_external === true,
+      original_artists: Array.isArray(safeTask.original_artists) ? safeTask.original_artists : [],
       singer_ids: (safeTask.singers || []).map(item => String(item.member_id || "")).filter(Boolean),
       parts: (safeTask.parts || []).length
         ? (safeTask.parts || []).map((part, index) => ({
@@ -2334,20 +2508,15 @@ const authState = {
     editTaskCode.value = snapshot.project_code || "";
     editTaskName.value = snapshot.project_name || "";
     populateTaskTypeSelect(snapshot.project_type || "");
-    if (editGameType) {
-      const value = String(snapshot.game_type || "").trim();
-      if (value && !Array.from(editGameType.options).some(option => option.value === value)) {
-        editGameType.add(new Option(value, value));
-      }
-      editGameType.value = value;
-    }
-    syncGameTypeAndToneFields();
+    syncToneField();
     setTaskEditMode(!!snapshot.is_collective_task);
     editSingerQuota.value = String(snapshot.participant_count || "");
     editSingerQuota.dataset.prevQuota = String(snapshot.participant_count || "");
     editProjectTone.value = snapshot.project_tone || "";
     editReleaseDate.value = snapshot.release_date || "";
     currentEditingProducerMemberId = String(snapshot.producer_member_id || "");
+    currentEditingProducerIsExternal = snapshot.producer_is_external === true;
+    if (editOriginalArtists) editOriginalArtists.value = (snapshot.original_artists || []).join("、");
     renderProducerPicker(currentEditingProducerMemberId);
     renderEditSingerMemberList((snapshot.singer_ids || []).map(String));
     editPartDraftRows = (snapshot.parts || []).map((part, index) => ({
@@ -2376,8 +2545,8 @@ const authState = {
       return;
     }
     const [singerResult, mixerResult] = await Promise.allSettled([
-      loadEligibleSingersForProject(task.id),
-      loadEligibleMixersForProject(task.id)
+      loadEligibleSingersForProject(task.id, task.project_type, !!task.is_collective_task),
+      loadEligibleMixersForProject(task.id, task.project_type, !!task.is_collective_task)
     ]);
     const candidateErrors = [];
     if (singerResult.status === "rejected") candidateErrors.push(singerResult.reason?.message || "可选演唱成员读取失败");
@@ -2388,14 +2557,14 @@ const authState = {
       return;
     }
     currentEligibleSingers = mergeEligibleMembers(
-      currentEligibleSingers,
+      singerResult.value,
       (task.singers || []).map(item => ({
         member_id: item.member_id,
         nickname: item.member_name
       }))
     );
     currentEligibleMixers = mergeEligibleMembers(
-      currentEligibleMixers,
+      mixerResult.value,
       task.producer_member_id ? [{
         member_id: task.producer_member_id,
         nickname: task.producer_name
@@ -2416,9 +2585,24 @@ const authState = {
     taskEditMask.setAttribute("aria-hidden", "true");
     currentEditingTaskId = "";
     currentEditingProducerMemberId = "";
+    currentEditingProducerIsExternal = false;
+    if (editOriginalArtists) editOriginalArtists.value = "";
     editPartDraftRows = [];
     taskEditOriginalSnapshot = null;
   }
+  function parseProjectOriginalArtists(value) {
+    return [...new Set(
+      String(value || "").split(/[\n\r,，、;；]+/).map(item => item.trim()).filter(Boolean)
+    )];
+  }
+  function isTraineeCandidateId(memberId) {
+    const id = String(memberId || "");
+    const member = members.find(item => String(item.id || "") === id);
+    const role = String(member?.role || "").toLowerCase();
+    const code = String(member?.member_code || member?.memberCode || "").trim().toUpperCase();
+    return role === "trainee" || /^B\d{2}$/.test(code);
+  }
+  
   function collectTaskEditPayload() {
     const task = getTaskById(currentEditingTaskId);
     const singerQuotaRaw = Number(editSingerQuota.value);
@@ -2426,7 +2610,7 @@ const authState = {
     const selectedSingerIds = getEditableSingerIds();
     const projectName = String(editTaskName.value || "").trim();
     const projectType = String(editTaskType.value || "").trim();
-    const gameType = isGameProjectType(projectType) ? String(editGameType?.value || "").trim() : "";
+    const gameType = String(task?.game_type || "").trim();
     const projectTone = String(editProjectTone.value || "").trim();
     const isSpecialTask = String(editIsCollectiveTask?.value || "0") === "1";
     if (!task) {
@@ -2437,9 +2621,6 @@ const authState = {
     }
     if (!projectType) {
       throw new Error("项目分类配置缺失，请先检查数据库数据。");
-    }
-    if (isGameProjectType(projectType) && !gameType) {
-      throw new Error("游戏项目必须选择游戏类型。");
     }
     if (isToneRequiredByEditValues(projectType, gameType) && !projectTone) {
       throw new Error(gameType === "各唱各" ? "各唱各项目必须填写调。" : "非游戏项目必须填写调。");
@@ -2466,7 +2647,9 @@ const authState = {
       throw new Error("同一个项目里的歌词分配，演唱成员不能重复。");
     }
     const partRows = rawPartRows.filter(row => row.original_name || row.assigned_member_id);
-    const finalProducerId = String(currentEditingProducerMemberId || "").trim() || null;
+    const finalProducerId = currentEditingProducerIsExternal
+      ? null
+      : (String(currentEditingProducerMemberId || "").trim() || null);
     return {
       projectId: task.id,
       projectCode: String(task.project_code || "").trim(),
@@ -2477,6 +2660,8 @@ const authState = {
       projectTone: projectTone || null,
       releaseDate: editReleaseDate.value || null,
       producerMemberId: finalProducerId,
+      producerIsExternal: currentEditingProducerIsExternal,
+      originalArtists: parseProjectOriginalArtists(editOriginalArtists?.value || ""),
       singerQuota,
       selectedSingerIds,
       existingSingerRecords: task.singers || [],
@@ -2511,7 +2696,7 @@ const authState = {
       if (!currentMemberId || !currentMemberCode) {
         throw new Error("当前成员身份读取失败，请重新登录后再试。");
       }
-      const { error: saveError } = await supabaseClient.rpc("save_project_bundle", {
+      const { error: saveError } = await supabaseClient.rpc("save_studio_project_overview_edit", {
         p_member_id: currentMemberId,
         p_member_code: currentMemberCode,
         p_project_id: payload.projectId,
@@ -2527,7 +2712,9 @@ const authState = {
         p_singer_bonus: payload.singerBonus,
         p_producer_bonus: payload.producerBonus,
         p_parts: partRows,
-        p_singers: singerRows
+        p_singers: singerRows,
+        p_original_artists: payload.originalArtists,
+        p_producer_is_external: payload.producerIsExternal
       });
       if (saveError) throw saveError;
       const editedProjectId = payload.projectId;
@@ -2558,6 +2745,9 @@ const authState = {
     }
   }
   function buildTaskDetailHtml(task) {
+    if (task?.producer_is_external) {
+      task = {...task, producer_name:"编外", producer_completed:true};
+    }
     const rewardValues = [
       task.singer_reward_total,
       task.singer_reward_submit,
@@ -2602,6 +2792,10 @@ const authState = {
           </div>
         </div>
         <div class="assignmentList">${singersHtml}</div>
+      </div>
+      <div class="sectionCard">
+        <div class="sectionHeader"><h3 class="sectionTitle">项目原唱名单</h3></div>
+        <div class="taskItemInfo">${escapeHtml((task.original_artists || []).join("、") || "未填写")}</div>
       </div>
       <div class="bottomGrid">
         <div class="sectionCard">
@@ -2934,10 +3128,16 @@ const authState = {
     });
   }
   if (editTaskModeNormalBtn) {
-    editTaskModeNormalBtn.addEventListener("click", () => setTaskEditMode(false));
+    editTaskModeNormalBtn.addEventListener("click", async () => {
+      setTaskEditMode(false);
+      await refreshTaskEditEligibleMembers();
+    });
   }
   if (editTaskModeSpecialBtn) {
-    editTaskModeSpecialBtn.addEventListener("click", () => setTaskEditMode(true));
+    editTaskModeSpecialBtn.addEventListener("click", async () => {
+      setTaskEditMode(true);
+      await refreshTaskEditEligibleMembers();
+    });
   }
   taskEditCancelBtn.addEventListener("click", () => closeTaskEditModal(true));
   taskEditMask.addEventListener("click", (event) => {
@@ -2949,16 +3149,25 @@ const authState = {
   taskEditSaveBtn.addEventListener("click", saveTaskEditModal);
   if (editProducerPicker) {
     editProducerPicker.addEventListener("click", (event) => {
-      const btn = event.target.closest("button[data-producer-option]");
+      const btn = event.target.closest("button[data-producer-kind]");
       if (!btn || !editProducerPicker.contains(btn) || event.target === editProducerPicker) return;
       event.preventDefault();
       event.stopPropagation();
-      currentEditingProducerMemberId = String(btn.dataset.producerOption || "").trim();
+      const kind = String(btn.dataset.producerKind || "internal");
+      if (kind === "external") {
+        currentEditingProducerIsExternal = !currentEditingProducerIsExternal;
+        currentEditingProducerMemberId = "";
+      } else {
+        currentEditingProducerIsExternal = false;
+        currentEditingProducerMemberId = String(btn.dataset.producerOption || "").trim();
+      }
       renderProducerPicker(currentEditingProducerMemberId);
     });
   }
-  editTaskType?.addEventListener("change", syncGameTypeAndToneFields);
-  editGameType?.addEventListener("change", syncGameTypeAndToneFields);
+  editTaskType?.addEventListener("change", async () => {
+    syncToneField();
+    await refreshTaskEditEligibleMembers();
+  });
   editSingerQuota.addEventListener("change", () => {
     const currentQuota = Math.max(1, Math.floor(Number(editSingerQuota.dataset.prevQuota || editSingerQuota.value) || 1));
     const quota = Math.max(1, Math.floor(Number(editSingerQuota.value) || 1));
@@ -3024,7 +3233,10 @@ const authState = {
       renderBrowseDetail();
     });
   });
-  document.getElementById("goClaimBtn").addEventListener("click", () => {
+  document.getElementById("goOverviewBtn").addEventListener("click", () => {
+  window.location.href = getRoom10Page("studioOverview");
+});
+document.getElementById("goClaimBtn").addEventListener("click", () => {
     window.location.href = getRoom10Page("studioTodo");
   });
 document.getElementById("goProjectBtn").addEventListener("click", () => {
