@@ -195,26 +195,10 @@ button{font-family:inherit}
   content:"";position:absolute;inset:calc(10px * var(--project-panel-scale));border-radius:calc(22px * var(--project-panel-scale));
   border:1px solid rgba(255,255,255,.22);pointer-events:none
 }
-#panelSwitch{
-  position:absolute;left:104.9%;top:8.5%;width:16.55%;height:36.2%;
-  padding:calc(14px * var(--project-panel-scale)) calc(12px * var(--project-panel-scale));
-  border-radius:calc(20px * var(--project-panel-scale));background:rgba(255,248,239,.9);
-  border:1px solid rgba(186,146,103,.24);
-  box-shadow:0 10px 24px rgba(116,86,54,.12),inset 0 1px 0 rgba(255,255,255,.86);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  display:flex;flex-direction:column;justify-content:space-between;gap:calc(8px * var(--project-panel-scale));z-index:30
-}
-.switchBtn{
-  appearance:none;border:none;cursor:pointer;width:100%;flex:1 1 0;min-height:0;padding:0 calc(8px * var(--project-panel-scale));
-  border-radius:calc(13px * var(--project-panel-scale));background:rgba(231,214,185,.92);color:#744b25;text-decoration:none;
-  font-size:var(--font-base);font-weight:700;display:flex;align-items:center;justify-content:center;
-  box-shadow:inset 0 1px 0 rgba(255,247,233,.95),0 2px 6px rgba(116,86,54,.08);transition:.18s ease;white-space:nowrap
-}
-.switchBtn:hover{transform:translateY(-1px);filter:brightness(1.03)}
-.switchBtn.active{
-  background:linear-gradient(180deg,#d9a364 0%,#c98c4f 100%);color:#fff9f1;
-  box-shadow:inset 0 1px 0 rgba(255,224,188,.55),0 4px 10px rgba(116,86,54,.14)
-}
+
+
+
+
 
 #overviewInner{
   position:relative;z-index:1;width:100%;height:100%;min-height:0;
@@ -388,75 +372,51 @@ button{font-family:inherit}
 }
 .modeBtn.active,.pickerBtn.active,.singerBtn.active{background:linear-gradient(180deg,#d9a364 0%,#c98c4f 100%);color:#fff9f1;border-color:transparent}
 
-/* 编辑框内：交音 / 交付状态 */
-.editDeliveryHint{
-  margin:-2px 0 9px;
+/* 编辑框内：人员标识 / 原唱名单 / 行内交音交付 */
+.modeBtn,.pickerBtn,.singerBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+}
+.editTextarea:focus{
+  border-color:rgba(191,139,88,.48);
+  box-shadow:0 0 0 2px rgba(222,186,145,.16)
+}
+.editSubHint{
+  margin-top:6px;
   color:#9a7656;
   font-size:10px;
-  line-height:1.55;
-}
-.editDeliveryList{
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-}
-.editDeliveryRow{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  align-items:center;
-  gap:10px;
-  min-height:38px;
-  padding:6px 8px 6px 10px;
-  border-radius:11px;
-  background:rgba(255,255,255,.56);
-  border:1px solid rgba(194,151,108,.14);
-}
-.editDeliveryInfo{
-  min-width:0;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.editDeliveryRole{
-  flex:0 0 auto;
-  min-width:34px;
-  color:#9a7656;
-  font-size:10px;
-  font-weight:800;
-}
-.editDeliveryName{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  color:#644322;
-  font-size:11px;
-  font-weight:900;
+  line-height:1.55
 }
 .editDeliveryState{
-  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:48px;
   padding:2px 7px;
   border-radius:999px;
+  background:rgba(245,239,230,.96);
+  color:#806b55;
   font-size:9px;
   font-weight:800;
   line-height:1.35;
-  background:rgba(245,239,230,.96);
-  color:#806b55;
+  white-space:nowrap
 }
 .editDeliveryState.done{
   background:rgba(231,244,232,.98);
-  color:#5f7c57;
+  color:#5f7c57
 }
 .editDeliveryState.waiting{
   background:rgba(255,238,221,.98);
-  color:#965e2f;
+  color:#965e2f
 }
 .editDeliveryAction{
   appearance:none;
   cursor:pointer;
   min-width:70px;
   height:29px;
-  padding:0 10px;
+  padding:0 9px;
   border-radius:9px;
   border:1px solid rgba(197,167,136,.42);
   background:linear-gradient(180deg,#efd5ab 0%,#dfbd8a 100%);
@@ -464,25 +424,53 @@ button{font-family:inherit}
   font-family:inherit;
   font-size:10px;
   font-weight:900;
+  white-space:nowrap
 }
 .editDeliveryAction.withdraw{
   background:rgba(255,250,245,.94);
-  color:#8a5c3a;
+  color:#8a5c3a
 }
 .editDeliveryAction:disabled{
   opacity:.5;
-  cursor:not-allowed;
+  cursor:not-allowed
 }
-.editDeliveryEmpty{
-  padding:8px 2px;
-  color:#9a7656;
-  font-size:10px;
-  line-height:1.5;
+.inlineDeliveryCell{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:5px;
+  min-width:0
 }
-
-.partRows{display:flex;flex-direction:column;gap:7px}
-.partRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,.75fr);gap:8px}
-.partRow .editInput,.partRow .editSelect{height:32px}
+.partRows{
+  display:flex;
+  flex-direction:column;
+  gap:7px
+}
+.partRow{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(130px,.72fr) minmax(126px,auto);
+  gap:8px;
+  align-items:center
+}
+.partRow .editInput,
+.partRow .editSelect{
+  height:32px
+}
+.producerAssignmentRow{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(126px,auto);
+  gap:10px;
+  align-items:center
+}
+.producerMain{
+  min-width:0
+}
+.externalProducerInput{
+  margin-top:8px
+}
+.externalProducerInput[hidden]{
+  display:none!important
+}
 .projectEditFooter{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16px;border-top:1px solid rgba(194,151,108,.16)}
 .projectEditFooter button{appearance:none;cursor:pointer;min-width:76px;height:34px;border-radius:11px;font-family:inherit;font-size:12px;font-weight:900}
 #projectEditCancelBtn{background:rgba(255,252,247,.92);color:#7a5231;border:1px solid rgba(194,151,108,.22)}
@@ -525,11 +513,8 @@ button{font-family:inherit}
     border-radius:22px;padding:0;overflow:visible
   }
   #taskPanel::before{inset:8px;border-radius:16px}
-  #panelSwitch{
-    position:relative;left:auto;top:auto;width:auto;height:auto;margin:12px 12px 0;padding:8px;display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;border-radius:16px
-  }
-  .switchBtn{min-height:34px;font-size:12px}
+  
+  
   #overviewInner{height:auto;padding:14px 12px 16px}
   .overviewHeader{gap:8px}
   .overviewTitle{font-size:18px}.overviewSubtitle{font-size:11px}
@@ -546,11 +531,11 @@ button{font-family:inherit}
   #projectEditBody{padding:12px;gap:10px}
   .editGrid{grid-template-columns:1fr 1fr}
   .editField.wide{grid-column:1/-1}
-  .editDeliveryRow{grid-template-columns:minmax(0,1fr) auto;gap:7px;padding:7px 8px}
-  .editDeliveryInfo{gap:6px;flex-wrap:wrap}
-  .editDeliveryRole{min-width:auto}
-  .editDeliveryAction{min-width:66px;padding:0 8px}
+  .editDeliveryAction{min-width:64px;padding:0 7px}
   .partRow{grid-template-columns:1fr}
+  .inlineDeliveryCell{justify-content:flex-start}
+  .producerAssignmentRow{grid-template-columns:1fr}
+  .producerAssignmentRow > .inlineDeliveryCell{justify-content:flex-start}
   .projectEditFooter{padding:10px 12px 12px}
   .projectEditFooter button{flex:1}
   .summaryRow{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -576,7 +561,112 @@ button{font-family:inherit}
   .projectRow .cell:nth-child(8)::before{content:"发布：";font-weight:800;color:#8a6644}
   .projectRow .cell:nth-child(9){grid-column:2;grid-row:6;width:122px}
 }
+
+.traineeCandidate:not(.active){background:rgba(245,239,248,.94)!important;border-color:rgba(177,157,188,.42)!important;color:#756078!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.94),0 2px 6px rgba(108,88,116,.07)!important}
+.traineeCandidate:not(.active):hover{background:rgba(248,243,250,.98)!important;filter:brightness(1.01)}
+.traineeCandidate.active{border-color:rgba(177,157,188,.58)!important;box-shadow:inset 0 1px 0 rgba(255,224,188,.55),0 0 0 2px rgba(177,157,188,.24),0 4px 10px rgba(116,86,54,.14)!important}
+
 </style>
+
+<style id="workspace-switch-canonical">
+#panelSwitch{
+  --workspace-switch-scale:var(--project-panel-scale,var(--ui-scale,1));
+  position:absolute;
+  left:104.9%;
+  top:8.5%;
+  width:16.55%;
+  height:36.2%;
+  box-sizing:border-box;
+  padding:calc(14px * var(--workspace-switch-scale)) calc(12px * var(--workspace-switch-scale));
+  border-radius:calc(20px * var(--workspace-switch-scale));
+  background:rgba(255,248,239,.9);
+  border:1px solid rgba(186,146,103,.24);
+  box-shadow:0 10px 24px rgba(116,86,54,.12),inset 0 1px 0 rgba(255,255,255,.86);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  align-items:stretch;
+  gap:calc(8px * var(--workspace-switch-scale));
+  z-index:30;
+  overflow:hidden;
+  transform:none;
+}
+#panelSwitch .switchBtn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  width:100%;
+  flex:1 1 0;
+  min-width:0;
+  min-height:0;
+  height:auto;
+  padding:0 calc(8px * var(--workspace-switch-scale));
+  border-radius:calc(13px * var(--workspace-switch-scale));
+  background:rgba(231,214,185,.92);
+  color:#744b25;
+  text-decoration:none;
+  font-size:calc(13px * var(--workspace-switch-scale));
+  font-weight:700;
+  line-height:1.05;
+  text-align:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:inset 0 1px 0 rgba(255,247,233,.95),0 2px 6px rgba(116,86,54,.08);
+  transition:transform .18s ease,filter .18s ease,background .18s ease;
+  white-space:nowrap;
+  overflow:hidden;
+}
+#panelSwitch .switchBtn:hover{
+  transform:translateY(calc(-1px * var(--workspace-switch-scale)));
+  filter:brightness(1.03);
+}
+#panelSwitch .switchBtn.active{
+  background:linear-gradient(180deg,#d9a364 0%,#c98c4f 100%);
+  color:#fff9f1;
+  box-shadow:inset 0 1px 0 rgba(255,224,188,.55),0 4px 10px rgba(116,86,54,.14);
+}
+@media(max-width:540px){
+  #panelSwitch{
+    position:relative!important;
+    left:auto!important;
+    right:auto!important;
+    top:auto!important;
+    bottom:auto!important;
+    width:auto!important;
+    height:auto!important;
+    margin:12px 12px 0!important;
+    padding:4px!important;
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:6px!important;
+    border-radius:16px!important;
+    background:rgba(255,248,239,.38)!important;
+    border:1px solid rgba(168,123,81,.16)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.56),0 2px 7px rgba(116,86,54,.06)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    transform:none!important;
+    overflow:visible!important;
+  }
+  #panelSwitch .switchBtn{
+    width:100%!important;
+    min-width:0!important;
+    min-height:36px!important;
+    height:36px!important;
+    padding:0 4px!important;
+    border-radius:11px!important;
+    font-size:13px!important;
+    font-weight:800!important;
+    line-height:1.15!important;
+    letter-spacing:0!important;
+    white-space:nowrap!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="room">
@@ -690,7 +780,7 @@ button{font-family:inherit}
   <div id="projectEditDialog" role="dialog" aria-modal="true" aria-labelledby="projectEditTitle">
     <div class="projectEditHeader">
       <div class="projectEditTitle" id="projectEditTitle">编辑项目</div>
-      <div class="projectEditSubtitle">保存使用现有 save_project_bundle；未修改的数据会按原值一起保存</div>
+      <div class="projectEditSubtitle">保留原歌词对应分配；编外后期无需姓名，保存后默认视为已完成</div>
     </div>
     <div id="projectEditBody">
       <section class="editSection">
@@ -706,21 +796,29 @@ button{font-family:inherit}
         </div>
       </section>
       <section class="editSection">
-        <div class="editSectionTitle">后期负责人</div>
-        <div class="pickerGrid" id="editProducerPicker"></div><div class="editLoadHint" id="editProducerHint"></div>
+        <div class="editSectionTitle">项目原唱名单</div>
+        <textarea id="editOriginalArtists" class="editTextarea" placeholder="例如：萧蔷、李心洁、范玮琪；可用顿号、逗号或换行分隔"></textarea>
+        <div class="editSubHint">这里只记录项目完整原唱名单，不要求与翻唱成员对应；下面原有的“原唱 / 部分 → 翻唱成员”分配方式仍然保留。</div>
       </section>
       <section class="editSection">
         <div class="editSectionTitle">参与成员</div>
-        <div class="singerGrid" id="editSingerPicker"></div><div class="editLoadHint" id="editSingerHint"></div>
+        <div class="singerGrid" id="editSingerPicker"></div>
+        <div class="editLoadHint" id="editSingerHint"></div>
       </section>
       <section class="editSection">
-        <div class="editSectionTitle">交音 / 交付状态</div>
-        <div class="editDeliveryHint">这里的交音、交付和撤回会立即生效；如果刚修改了参与成员或后期负责人，请先点底部“保存”后再操作。</div>
-        <div class="editDeliveryList" id="editDeliveryList"></div>
-      </section>
-      <section class="editSection">
-        <div class="editSectionTitle">歌词分配</div>
+        <div class="editSectionTitle">歌词分配 / 交音</div>
+        <div class="editSubHint" style="margin:0 0 8px">交音 / 撤回交音放在对应分配行最右侧；如果成员或分配刚被修改，请先保存后再操作。</div>
         <div class="partRows" id="editPartRows"></div>
+      </section>
+      <section class="editSection">
+        <div class="editSectionTitle">后期负责人</div>
+        <div class="producerAssignmentRow">
+          <div class="producerMain">
+            <div class="pickerGrid" id="editProducerPicker"></div>
+            <div class="editLoadHint" id="editProducerHint"></div>
+          </div>
+          <div class="inlineDeliveryCell" id="editProducerDeliveryCell"></div>
+        </div>
       </section>
     </div>
     <div class="projectEditFooter">
@@ -791,11 +889,12 @@ const editProjectTone = document.getElementById("editProjectTone");
 const editReleaseDate = document.getElementById("editReleaseDate");
 const editModeNormal = document.getElementById("editModeNormal");
 const editModeSpecial = document.getElementById("editModeSpecial");
+const editOriginalArtists = document.getElementById("editOriginalArtists");
 const editProducerPicker = document.getElementById("editProducerPicker");
+const editProducerDeliveryCell = document.getElementById("editProducerDeliveryCell");
 const editSingerPicker = document.getElementById("editSingerPicker");
 const editProducerHint = document.getElementById("editProducerHint");
 const editSingerHint = document.getElementById("editSingerHint");
-const editDeliveryList = document.getElementById("editDeliveryList");
 const editPartRows = document.getElementById("editPartRows");
 
 let projects = [];
@@ -803,10 +902,12 @@ let memberNameMap = new Map();
 let memberDirectoryRows = [];
 let currentEditingProjectId = "";
 let currentEditingProducerId = "";
+let currentEditingProducerMode = "none";
 let currentEligibleSingers = [];
 let currentEligibleMixers = [];
 let editPartDraftRows = [];
 let editIsSpecial = false;
+let editEligibilityRequestId = 0;
 
 
 
@@ -834,6 +935,17 @@ function renderNameList(names,emptyText){
   if(!list.length) return `<span class="nameEmpty">${escapeHtml(emptyText || "—")}</span>`;
   return `<span class="nameList">${list.map(name => `<span class="nameItem" title="${escapeHtml(name)}">${escapeHtml(name)}</span>`).join("")}</span>`;
 }
+function parseOriginalArtistInput(value){
+  const names = String(value || "")
+    .split(/[\n\r,，、;；]+/)
+    .map(name => name.trim())
+    .filter(Boolean);
+  return [...new Set(names)];
+}
+function isTraineeRow(row){
+  return row?.is_trainee === true;
+}
+function renderPersonButtonLabel(row){return escapeHtml(getMemberLabel(row));}
 function formatDate(value){
   if(!value) return "未定";
   const raw = String(value).trim();
@@ -1046,7 +1158,8 @@ function buildProjects(projectRows,partRows,singerRows,statusRows){
     const status = statusMap.get(id) || {};
     const singers = singerMap.get(id) || [];
     const parts = (partMap.get(id) || []).sort((a,b) => a.part_order - b.part_order);
-    const originalNames = [...new Set(parts.map(item => String(item.original_name || "").trim()).filter(Boolean))];
+    const partOriginalNames = [...new Set(parts.map(item => String(item.original_name || "").trim()).filter(Boolean))];
+    const originalNames = [...partOriginalNames];
     const singerNames = [...new Set(singers.map(item => item.member_name).filter(Boolean))];
     const producerId = String(project.producer_member_id || "");
     const producerName = String(
@@ -1072,7 +1185,11 @@ function buildProjects(projectRows,partRows,singerRows,statusRows){
       producer_member_id:producerId || null,
       producer_completed:!!project.producer_completed,
       producer_completed_at:project.producer_completed_at || null,
+      partOriginalNames,
+      projectOriginalNames:[],
       originalNames,
+      producerIsExternal:false,
+      producerLabel:producerName,
       singerNames,
       singers,
       parts,
@@ -1082,6 +1199,38 @@ function buildProjects(projectRows,partRows,singerRows,statusRows){
       created_at:project.created_at || null
     };
   }).filter(item => item.id);
+}
+
+function applyProjectOverviewExtras(projectList,extraRows){
+  const map = new Map(
+    (Array.isArray(extraRows) ? extraRows : []).map(row => [
+      String(row?.project_id || ""),
+      row || {}
+    ])
+  );
+
+  projectList.forEach(project => {
+    const extra = map.get(String(project.id)) || {};
+    const projectOriginalNames = [...new Set(
+      (Array.isArray(extra.original_artists) ? extra.original_artists : [])
+        .map(name => String(name || "").trim())
+        .filter(Boolean)
+    )];
+    project.projectOriginalNames = projectOriginalNames;
+    project.originalNames = projectOriginalNames.length
+      ? projectOriginalNames
+      : [...(project.partOriginalNames || [])];
+
+    project.producerIsExternal =
+      !project.producer_member_id
+      && extra.producer_is_external === true;
+
+    project.producerLabel = project.producerIsExternal
+      ? "编外"
+      : project.producerName;
+  });
+
+  return projectList;
 }
 
 function getArea(project){
@@ -1109,7 +1258,7 @@ function matchesSearch(project,tokens){
   if(!tokens.length) return true;
   const haystack = [
     project.project_code,project.project_name,project.project_type,project.game_type,
-    project.originalNames.join(" "),project.singerNames.join(" "),project.producerName,getStatusText(project)
+    project.originalNames.join(" "),project.singerNames.join(" "),project.producerLabel || project.producerName,getStatusText(project)
   ].join(" ").toLowerCase();
   return tokens.every(token => haystack.includes(token));
 }
@@ -1201,7 +1350,7 @@ function renderTable(){
         <div class="cell"><span class="typeBadge${project.project_type === "游戏" ? " game" : ""}" title="${escapeHtml(typeText)}">${escapeHtml(typeText)}</span></div>
         <div class="cell memberText" title="${escapeHtml(originals)}">${originalHtml}</div>
         <div class="cell memberText" title="${escapeHtml(participants)}">${participantHtml}</div>
-        <div class="cell ellipsis" title="${escapeHtml(project.producerName)}">${escapeHtml(safeText(project.producerName,"未定"))}</div>
+        <div class="cell ellipsis" title="${escapeHtml(project.producerLabel || project.producerName)}">${escapeHtml(safeText(project.producerLabel || project.producerName,"未定"))}</div>
         <div class="cell"><span class="statusBadge ${area}" title="${escapeHtml(status)}">${escapeHtml(status)}</span></div>
         <div class="cell ellipsis">${escapeHtml(formatDate(project.release_date))}</div>
         <div class="cell"><div class="rowActions"><button class="viewBtn" type="button" data-view-id="${escapeHtml(project.id)}">查看</button><button class="editBtn" type="button" data-edit-id="${escapeHtml(project.id)}" onclick="event.stopPropagation();openProjectEdit(this.dataset.editId)">编辑</button></div></div>
@@ -1258,31 +1407,137 @@ function mergeEligibleRows(base, assigned){
   normalizeEligibleRows(assigned).forEach(row => {if(!seen.has(row.member_id)){out.push(row);seen.add(row.member_id);}});
   return out;
 }
-async function loadEligibleForEdit(projectId){
-  const params = {p_member_id:authState.memberId,p_member_code:authState.memberCode,p_project_id:String(projectId)};
-  const [singersResult,mixersResult] = await Promise.all([
-    supabaseClient.rpc("get_project_eligible_singers",params),
-    supabaseClient.rpc("get_project_eligible_mixers",params)
-  ]);
-  if(singersResult.error) throw singersResult.error;
-  if(mixersResult.error) throw mixersResult.error;
-  return {singers:normalizeEligibleRows(singersResult.data),mixers:normalizeEligibleRows(mixersResult.data)};
-}
 function getSelectedSingerIds(){
   return Array.from(editSingerPicker.querySelectorAll(".singerBtn.active[data-member-id]")).map(btn => String(btn.dataset.memberId));
 }
-function setEditMode(special){
+function setEditMode(special,{refresh=true}={}){
+  const changed = editIsSpecial !== !!special;
   editIsSpecial = !!special;
   editModeNormal.classList.toggle("active",!editIsSpecial);
   editModeSpecial.classList.toggle("active",editIsSpecial);
+
+  if(refresh && changed && currentEditingProjectId){
+    refreshEditEligibleForDraft();
+  }
 }
+function normalizeDraftEligibleMembers(rawMembers){
+  return (Array.isArray(rawMembers) ? rawMembers : []).map((item,index) => ({
+    member_id:String(item?.id || item?.member_id || "").trim(),
+    nickname:String(item?.nickname || item?.name || `成员${index+1}`).trim(),
+    is_trainee:item?.is_trainee === true || item?.isTrainee === true,
+    can_sing:item?.can_sing === true || item?.canSing === true,
+    can_mix:item?.can_mix === true || item?.canMix === true
+  })).filter(item => item.member_id);
+}
+
+async function refreshEditEligibleForDraft(project = getProjectById(currentEditingProjectId)){
+  if(!project || !currentEditingProjectId) return;
+
+  const requestId = ++editEligibilityRequestId;
+
+  const selectedSingerIds = getSelectedSingerIds();
+  const partDraft = collectPartRowsFromDom();
+
+  const preservedSingerRows = mergeEligibleRows(
+    currentEligibleSingers.filter(row => selectedSingerIds.includes(String(row.member_id))),
+    project.singers.map(row => ({
+      member_id:row.member_id,
+      nickname:row.member_name
+    }))
+  );
+
+  const preservedMixerRows = mergeEligibleRows(
+    currentEligibleMixers.filter(row =>
+      currentEditingProducerMode === "internal"
+      && String(row.member_id) === String(currentEditingProducerId)
+    ),
+    currentEditingProducerMode === "internal" && project.producer_member_id
+      ? [{member_id:project.producer_member_id,nickname:project.producerName}]
+      : []
+  );
+
+  editSingerHint.className = "editLoadHint";
+  editProducerHint.className = "editLoadHint";
+  editSingerHint.textContent = editIsSpecial
+    ? "正在按“特殊项目”规则刷新可选参与成员…"
+    : "正在按“普通项目”规则刷新可选参与成员…";
+  editProducerHint.textContent = editIsSpecial
+    ? "正在按“特殊项目”规则刷新可选后期成员…"
+    : "正在按“普通项目”规则刷新可选后期成员…";
+
+  try{
+    const {data,error} = await supabaseClient.rpc("get_studio_submit_form_data",{
+      p_member_id:authState.memberId,
+      p_member_code:authState.memberCode,
+      p_project_type:String(editProjectType.value || project.project_type || "").trim() || null,
+      p_game_type:String(project.game_type || "").trim() || null,
+      p_participant_count:Math.max(1,Math.floor(Number(editSingerQuota.value) || 1)),
+      p_is_collective_task:editIsSpecial
+    });
+    if(error) throw error;
+    if(requestId !== editEligibilityRequestId) return;
+    if(String(currentEditingProjectId) !== String(project.id)) return;
+
+    const members = normalizeDraftEligibleMembers(data?.members);
+
+    currentEligibleSingers = mergeEligibleRows(
+      members
+        .filter(item => item.can_sing)
+        .map(item => ({member_id:item.member_id,nickname:item.nickname,is_trainee:item.is_trainee})),
+      preservedSingerRows
+    );
+
+    currentEligibleMixers = mergeEligibleRows(
+      members
+        .filter(item => item.can_mix)
+        .map(item => ({member_id:item.member_id,nickname:item.nickname,is_trainee:item.is_trainee})),
+      preservedMixerRows
+    );
+
+    renderSingerPicker(selectedSingerIds);
+    renderProducerPicker();
+    renderPartRows(partDraft);
+
+    editSingerHint.textContent = "";
+    editProducerHint.textContent = "";
+  }catch(error){
+    if(requestId !== editEligibilityRequestId) return;
+    console.error("刷新编辑候选成员失败：",error);
+
+    editSingerHint.className = "editLoadHint error";
+    editProducerHint.className = "editLoadHint error";
+    editSingerHint.textContent = "候选成员刷新失败；当前已选择成员已保留。";
+    editProducerHint.textContent = "候选后期刷新失败；当前负责人已保留。";
+  }
+}
+
 function renderProducerPicker(){
-  const rows = [{member_id:"",nickname:"暂不指定"},...currentEligibleMixers];
-  editProducerPicker.innerHTML = rows.map(row => `<button type="button" class="pickerBtn ${String(row.member_id) === String(currentEditingProducerId) ? "active" : ""}" data-producer-id="${escapeHtml(row.member_id)}">${escapeHtml(row.nickname)}</button>`).join("");
+  const internalButtons = currentEligibleMixers.map(row => `
+    <button
+      type="button"
+      class="pickerBtn ${isTraineeRow(row) ? "traineeCandidate" : ""} ${currentEditingProducerMode === "internal" && String(row.member_id) === String(currentEditingProducerId) ? "active" : ""}"
+      data-producer-mode="internal"
+      data-producer-id="${escapeHtml(row.member_id)}"
+    >${renderPersonButtonLabel(row)}</button>
+  `).join("");
+
+  editProducerPicker.innerHTML = `
+    <button type="button" class="pickerBtn ${currentEditingProducerMode === "none" ? "active" : ""}" data-producer-mode="none">暂不指定</button>
+    ${internalButtons}
+    <button type="button" class="pickerBtn ${currentEditingProducerMode === "external" ? "active" : ""}" data-producer-mode="external">编外</button>
+  `;
+
+  renderProducerDeliveryControl();
 }
 function renderSingerPicker(selectedIds=[]){
   const selected = new Set(selectedIds.map(String));
-  editSingerPicker.innerHTML = currentEligibleSingers.map(row => `<button type="button" class="singerBtn ${selected.has(String(row.member_id)) ? "active" : ""}" data-member-id="${escapeHtml(row.member_id)}">${escapeHtml(row.nickname)}</button>`).join("") || '<div class="identityNoticeEmpty">当前没有可选成员</div>';
+  editSingerPicker.innerHTML = currentEligibleSingers.map(row => `
+    <button
+      type="button"
+      class="singerBtn ${isTraineeRow(row) ? "traineeCandidate" : ""} ${selected.has(String(row.member_id)) ? "active" : ""}"
+      data-member-id="${escapeHtml(row.member_id)}"
+    >${renderPersonButtonLabel(row)}</button>
+  `).join("") || '<div class="identityNoticeEmpty">当前没有可选成员</div>';
 }
 function collectPartRowsFromDom(){
   return Array.from(editPartRows.querySelectorAll(".partRow")).map((row,index) => ({
@@ -1290,6 +1545,38 @@ function collectPartRowsFromDom(){
     assigned_member_id:String(row.querySelector('[data-part-member]')?.value || "").trim() || null,
     part_order:index+1
   }));
+}
+function getPersistedSingerByMemberId(project,memberId){
+  const key = String(memberId || "");
+  return (project?.singers || []).find(row => String(row.member_id || "") === key) || null;
+}
+function renderSingerInlineDelivery(project,memberId){
+  const key = String(memberId || "").trim();
+  if(!key){
+    return `
+      <span class="editDeliveryState">未分配</span>
+      <button class="editDeliveryAction" type="button" disabled>交音</button>
+    `;
+  }
+
+  const singer = getPersistedSingerByMemberId(project,key);
+  if(!singer || !String(singer.id || "").trim()){
+    return `
+      <span class="editDeliveryState waiting">待保存</span>
+      <button class="editDeliveryAction" type="button" disabled>先保存</button>
+    `;
+  }
+
+  const submitted = !!singer.is_submitted;
+  return `
+    <span class="editDeliveryState ${submitted ? "done" : "waiting"}">${submitted ? "已交音" : "待交音"}</span>
+    <button
+      class="editDeliveryAction ${submitted ? "withdraw" : ""}"
+      type="button"
+      data-edit-singer-action="${escapeHtml(singer.id)}"
+      data-current="${submitted ? "1" : "0"}"
+    >${submitted ? "撤回交音" : "交音"}</button>
+  `;
 }
 function renderPartRows(rows=editPartDraftRows){
   editPartDraftRows = rows.map((row,index) => ({
@@ -1299,6 +1586,8 @@ function renderPartRows(rows=editPartDraftRows){
   }));
   const selected = new Set(getSelectedSingerIds());
   const memberOptions = currentEligibleSingers.filter(row => selected.has(String(row.member_id)));
+  const project = getProjectById(currentEditingProjectId);
+
   editPartRows.innerHTML = editPartDraftRows.map((row,index) => `
     <div class="partRow" data-part-index="${index}">
       <input class="editInput" data-part-name type="text" value="${escapeHtml(row.original_name)}" placeholder="原唱 / 部分" />
@@ -1306,6 +1595,9 @@ function renderPartRows(rows=editPartDraftRows){
         <option value="">未分配</option>
         ${memberOptions.map(member => `<option value="${escapeHtml(member.member_id)}" ${String(member.member_id) === String(row.assigned_member_id) ? "selected" : ""}>${escapeHtml(member.nickname)}</option>`).join("")}
       </select>
+      <div class="inlineDeliveryCell">
+        ${renderSingerInlineDelivery(project,row.assigned_member_id)}
+      </div>
     </div>`).join("");
 }
 function syncPartRowsToQuota(){
@@ -1335,79 +1627,85 @@ function areAllEditSingersSubmitted(project){
     && project.singers.every(item => !!item.is_submitted);
 }
 
-function renderEditDeliveryActions(project = getProjectById(currentEditingProjectId)){
+function producerDraftMatchesPersisted(project){
+  if(!project) return false;
+
+  if(currentEditingProducerMode === "none"){
+    return !project.producer_member_id
+      && !project.producerIsExternal;
+  }
+
+  if(currentEditingProducerMode === "internal"){
+    return !!project.producer_member_id
+      && !project.producerIsExternal
+      && String(project.producer_member_id) === String(currentEditingProducerId);
+  }
+
+  if(currentEditingProducerMode === "external"){
+    return project.producerIsExternal === true;
+  }
+
+  return false;
+}
+
+function renderProducerDeliveryControl(project = getProjectById(currentEditingProjectId)){
   if(!project){
-    editDeliveryList.innerHTML = '<div class="editDeliveryEmpty">未找到当前项目状态。</div>';
+    editProducerDeliveryCell.innerHTML = "";
     return;
   }
 
-  const singerRows = (project.singers || []).map(singer => {
-    const singerId = String(singer.id || "").trim();
-    const submitted = !!singer.is_submitted;
-    const name = safeText(singer.member_name,"未命名成员");
-    const canOperate = !!singerId;
-
-    return `
-      <div class="editDeliveryRow">
-        <div class="editDeliveryInfo">
-          <span class="editDeliveryRole">演唱</span>
-          <span class="editDeliveryName" title="${escapeHtml(name)}">${escapeHtml(name)}</span>
-          <span class="editDeliveryState ${submitted ? "done" : "waiting"}">${submitted ? "已交音" : "待交音"}</span>
-        </div>
-        <button
-          class="editDeliveryAction ${submitted ? "withdraw" : ""}"
-          type="button"
-          data-edit-singer-action="${escapeHtml(singerId)}"
-          data-current="${submitted ? "1" : "0"}"
-          ${canOperate ? "" : "disabled"}
-        >${submitted ? "撤回交音" : "交音"}</button>
-      </div>
+  if(currentEditingProducerMode === "none"){
+    editProducerDeliveryCell.innerHTML = `
+      <span class="editDeliveryState">未指定</span>
+      <button class="editDeliveryAction" type="button" disabled>交付</button>
     `;
-  }).join("");
-
-  const hasProducer = !!String(project.producer_member_id || "").trim();
-  const producerDone = !!project.producer_completed;
-  const allSingersDone = areAllEditSingersSubmitted(project);
-  const producerName = safeText(project.producerName,"未指定");
-  let producerButtonText = "交付";
-  let producerDisabled = !hasProducer;
-  let producerButtonClass = "";
-
-  if(producerDone){
-    producerButtonText = "撤回交付";
-    producerButtonClass = "withdraw";
-  }else if(!allSingersDone){
-    producerButtonText = "等待交音";
-    producerDisabled = true;
+    return;
   }
 
-  const producerRow = `
-    <div class="editDeliveryRow">
-      <div class="editDeliveryInfo">
-        <span class="editDeliveryRole">后期</span>
-        <span class="editDeliveryName" title="${escapeHtml(producerName)}">${escapeHtml(producerName)}</span>
-        <span class="editDeliveryState ${producerDone ? "done" : (allSingersDone ? "waiting" : "")}">
-          ${producerDone ? "已交付" : (allSingersDone ? "待交付" : "等待交音")}
-        </span>
-      </div>
-      <button
-        class="editDeliveryAction ${producerButtonClass}"
-        type="button"
-        data-edit-producer-action="${escapeHtml(project.id)}"
-        data-current="${producerDone ? "1" : "0"}"
-        ${producerDisabled ? "disabled" : ""}
-      >${producerButtonText}</button>
-    </div>
-  `;
+  if(currentEditingProducerMode === "external"){
+    editProducerDeliveryCell.innerHTML = `
+      <span class="editDeliveryState done">默认完成</span>
+    `;
+    return;
+  }
 
-  editDeliveryList.innerHTML = (singerRows || '<div class="editDeliveryEmpty">当前项目还没有演唱成员记录。</div>') + producerRow;
+  if(!producerDraftMatchesPersisted(project)){
+    editProducerDeliveryCell.innerHTML = `
+      <span class="editDeliveryState waiting">待保存</span>
+      <button class="editDeliveryAction" type="button" disabled>先保存</button>
+    `;
+    return;
+  }
+
+  const producerDone = !!project.producer_completed;
+  const allSingersDone = areAllEditSingersSubmitted(project);
+  const disabled = !producerDone && !allSingersDone;
+  const buttonText = producerDone
+    ? "撤回交付"
+    : (allSingersDone ? "交付" : "等待交音");
+
+  editProducerDeliveryCell.innerHTML = `
+    <span class="editDeliveryState ${producerDone ? "done" : "waiting"}">
+      ${producerDone ? "已交付" : (allSingersDone ? "待交付" : "等待交音")}
+    </span>
+    <button
+      class="editDeliveryAction ${producerDone ? "withdraw" : ""}"
+      type="button"
+      data-edit-producer-action="${escapeHtml(project.id)}"
+      data-current="${producerDone ? "1" : "0"}"
+      data-producer-kind="${project.producerIsExternal ? "external" : "internal"}"
+      ${disabled ? "disabled" : ""}
+    >${buttonText}</button>
+  `;
 }
 
 async function refreshEditDeliveryState(projectId){
   const keepId = String(projectId || currentEditingProjectId || "").trim();
+  const partDraft = collectPartRowsFromDom();
   await loadProjects();
   if(String(currentEditingProjectId || "") !== keepId) return;
-  renderEditDeliveryActions(getProjectById(keepId));
+  renderPartRows(partDraft);
+  renderProducerPicker();
 }
 
 async function toggleEditSingerSubmitted(singerRecordId,currentValue,button){
@@ -1481,8 +1779,12 @@ async function toggleEditProducerSubmitted(projectId,currentValue,button){
   const project = getProjectById(projectId);
   if(!project) return;
 
+  if(project.producerIsExternal){
+    return;
+  }
+
   if(!project.producer_member_id){
-    showToast("暂不能交付","当前项目没有后期负责人。");
+    showToast("暂不能交付","当前项目没有站内后期负责人。");
     return;
   }
   if(!currentValue && !areAllEditSingersSubmitted(project)){
@@ -1508,9 +1810,13 @@ async function toggleEditProducerSubmitted(projectId,currentValue,button){
 
     await refreshEditDeliveryState(project.id);
 
-    const targetName = String(data?.target_member_name || project.producerName || "后期负责人").trim();
-    const operatedForOther = data?.operated_for_other === true;
+    const targetName = String(
+      data?.target_member_name
+      || project.producerName
+      || "后期负责人"
+    ).trim();
 
+    const operatedForOther = data?.operated_for_other === true;
     if(!currentValue){
       const amount = Number(data?.reward_amount || 0);
       showToast(
@@ -1544,13 +1850,23 @@ function openProjectEdit(projectId){
 
   currentEditingProjectId = project.id;
   currentEditingProducerId = String(project.producer_member_id || "");
+  currentEditingProducerMode = project.producerIsExternal
+    ? "external"
+    : (project.producer_member_id ? "internal" : "none");
+  editOriginalArtists.value = (
+    project.projectOriginalNames?.length
+      ? project.projectOriginalNames
+      : project.originalNames
+  ).join("、");
   currentEligibleSingers = mergeEligibleRows(
     [],
     project.singers.map(row => ({member_id:row.member_id,nickname:row.member_name}))
   );
   currentEligibleMixers = mergeEligibleRows(
     [],
-    project.producer_member_id ? [{member_id:project.producer_member_id,nickname:project.producerName}] : []
+    currentEditingProducerMode === "internal" && project.producer_member_id
+      ? [{member_id:project.producer_member_id,nickname:project.producerName}]
+      : []
   );
 
   projectEditTitle.textContent = `编辑｜${project.project_code || ""}.${project.project_name || ""}`;
@@ -1560,7 +1876,7 @@ function openProjectEdit(projectId){
   editSingerQuota.value = String(Math.max(1,Number(project.participant_count) || project.singers.length || project.parts.length || 1));
   editProjectTone.value = project.project_tone || "";
   editReleaseDate.value = formatDateForInput(project.release_date);
-  setEditMode(!!project.is_collective_task);
+  setEditMode(!!project.is_collective_task,{refresh:false});
   renderProducerPicker();
   renderSingerPicker(project.singers.map(row => String(row.member_id)));
 
@@ -1571,7 +1887,6 @@ function openProjectEdit(projectId){
   }));
   while(rows.length < quota) rows.push({original_name:"",assigned_member_id:null});
   renderPartRows(rows);
-  renderEditDeliveryActions(project);
 
   editProducerHint.className = "editLoadHint";
   editSingerHint.className = "editLoadHint";
@@ -1583,60 +1898,18 @@ function openProjectEdit(projectId){
   document.body.classList.add("project-edit-open");
   setTimeout(() => editProjectName.focus(),0);
 
-  hydrateProjectEditOptions(project);
+  refreshEditEligibleForDraft(project);
 }
 
-async function hydrateProjectEditOptions(project){
-  const params = {
-    p_member_id:authState.memberId,
-    p_member_code:authState.memberCode,
-    p_project_id:String(project.id)
-  };
-
-  const [singersResult,mixersResult] = await Promise.allSettled([
-    supabaseClient.rpc("get_project_eligible_singers",params),
-    supabaseClient.rpc("get_project_eligible_mixers",params)
-  ]);
-
-  if(String(currentEditingProjectId) !== String(project.id)) return;
-
-  if(singersResult.status === "fulfilled" && !singersResult.value.error){
-    const selectedIds = getSelectedSingerIds();
-    const partDraft = collectPartRowsFromDom();
-    currentEligibleSingers = mergeEligibleRows(
-      normalizeEligibleRows(singersResult.value.data),
-      project.singers.map(row => ({member_id:row.member_id,nickname:row.member_name}))
-    );
-    renderSingerPicker(selectedIds);
-    renderPartRows(partDraft);
-    editSingerHint.textContent = "";
-  }else{
-    const error = singersResult.status === "fulfilled" ? singersResult.value.error : singersResult.reason;
-    console.warn("读取可选参与成员失败，保留当前成员：",error);
-    editSingerHint.className = "editLoadHint error";
-    editSingerHint.textContent = "可选成员读取失败；当前已分配成员仍可编辑。";
-  }
-
-  if(mixersResult.status === "fulfilled" && !mixersResult.value.error){
-    currentEligibleMixers = mergeEligibleRows(
-      normalizeEligibleRows(mixersResult.value.data),
-      project.producer_member_id ? [{member_id:project.producer_member_id,nickname:project.producerName}] : []
-    );
-    renderProducerPicker();
-    editProducerHint.textContent = "";
-  }else{
-    const error = mixersResult.status === "fulfilled" ? mixersResult.value.error : mixersResult.reason;
-    console.warn("读取可选后期成员失败，保留当前负责人：",error);
-    editProducerHint.className = "editLoadHint error";
-    editProducerHint.textContent = "可选后期读取失败；当前负责人仍会保留。";
-  }
-}
 function closeProjectEdit(){
+  editEligibilityRequestId++;
   projectEditMask.classList.remove("show");
   projectEditMask.setAttribute("aria-hidden","true");
   document.body.classList.remove("project-edit-open");
   currentEditingProjectId = "";
   currentEditingProducerId = "";
+  currentEditingProducerMode = "none";
+  editOriginalArtists.value = "";
   currentEligibleSingers = [];
   currentEligibleMixers = [];
   editPartDraftRows = [];
@@ -1668,7 +1941,9 @@ async function saveProjectEdit(){
 
     projectEditSaveBtn.disabled = true;
     projectEditSaveBtn.textContent = "保存中...";
-    const {error} = await supabaseClient.rpc("save_project_bundle",{
+    const originalArtists = parseOriginalArtistInput(editOriginalArtists.value);
+
+    const {error} = await supabaseClient.rpc("save_studio_project_overview_edit",{
       p_member_id:authState.memberId,
       p_member_code:authState.memberCode,
       p_project_id:project.id,
@@ -1679,12 +1954,14 @@ async function saveProjectEdit(){
       p_game_type:project.game_type || null,
       p_is_collective_task:editIsSpecial,
       p_project_tone:String(editProjectTone.value || "").trim() || null,
-      p_producer_member_id:currentEditingProducerId || null,
+      p_producer_member_id:currentEditingProducerMode === "internal" ? (currentEditingProducerId || null) : null,
       p_singer_quota:singerQuota,
       p_singer_bonus:Number(project.singer_bonus) || 0,
       p_producer_bonus:Number(project.producer_bonus) || 0,
       p_parts:partRows.map(row => ({original_name:row.original_name || null,assigned_member_id:row.assigned_member_id || null})),
-      p_singers:singerRows
+      p_singers:singerRows,
+      p_original_artists:originalArtists,
+      p_producer_is_external:currentEditingProducerMode === "external" 
     });
     if(error) throw error;
     closeProjectEdit();
@@ -1703,13 +1980,27 @@ async function loadProjects(){
   tableBody.innerHTML = '<div class="loadingState">正在读取项目...</div>';
   refreshBtn.disabled = true;
   try{
-    const {data,error} = await supabaseClient.rpc("get_studio_project_items",{
-      p_member_id:authState.memberId,
-      p_member_code:authState.memberCode
-    });
-    if(error) throw error;
-    const {projectRows,partRows,singerRows,statusRows} = normalizeRpc(data);
-    projects = buildProjects(projectRows,partRows,singerRows,statusRows);
+    const [baseResult,extrasResult] = await Promise.all([
+      supabaseClient.rpc("get_studio_project_items",{
+        p_member_id:authState.memberId,
+        p_member_code:authState.memberCode
+      }),
+      supabaseClient.rpc("get_studio_project_overview_extras",{
+        p_member_id:authState.memberId,
+        p_member_code:authState.memberCode
+      })
+    ]);
+
+    if(baseResult.error) throw baseResult.error;
+    if(extrasResult.error){
+      console.warn("项目扩展字段读取失败：",extrasResult.error);
+    }
+
+    const {projectRows,partRows,singerRows,statusRows} = normalizeRpc(baseResult.data);
+    projects = applyProjectOverviewExtras(
+      buildProjects(projectRows,partRows,singerRows,statusRows),
+      extrasResult.error ? [] : extrasResult.data
+    );
     renderTypeFilterOptions();
     renderSummary();
     renderTable();
@@ -1791,26 +2082,44 @@ tableBody.addEventListener("click",event => {
 projectEditCancelBtn.addEventListener("click",closeProjectEdit);
 projectEditSaveBtn.addEventListener("click",saveProjectEdit);
 projectEditMask.addEventListener("click",event => {if(event.target === projectEditMask) closeProjectEdit();});
-editDeliveryList.addEventListener("click",event => {
-  const singerBtn = event.target.closest("[data-edit-singer-action]");
-  if(singerBtn){
-    const current = singerBtn.dataset.current === "1";
-    toggleEditSingerSubmitted(singerBtn.dataset.editSingerAction,current,singerBtn);
-    return;
-  }
-
-  const producerBtn = event.target.closest("[data-edit-producer-action]");
-  if(producerBtn){
-    const current = producerBtn.dataset.current === "1";
-    toggleEditProducerSubmitted(producerBtn.dataset.editProducerAction,current,producerBtn);
-  }
-});
 editModeNormal.addEventListener("click",() => setEditMode(false));
 editModeSpecial.addEventListener("click",() => setEditMode(true));
-editProducerPicker.addEventListener("click",event => {
-  const btn = event.target.closest("[data-producer-id]");
+editProjectType.addEventListener("change",() => refreshEditEligibleForDraft());
+
+editPartRows.addEventListener("change",event => {
+  if(event.target.matches("[data-part-member]")){
+    editPartDraftRows = collectPartRowsFromDom();
+    renderPartRows(editPartDraftRows);
+  }
+});
+editPartRows.addEventListener("click",event => {
+  const btn = event.target.closest("[data-edit-singer-action]");
   if(!btn) return;
-  currentEditingProducerId = String(btn.dataset.producerId || "");
+  toggleEditSingerSubmitted(
+    btn.dataset.editSingerAction,
+    btn.dataset.current === "1",
+    btn
+  );
+});
+editProducerDeliveryCell.addEventListener("click",event => {
+  const btn = event.target.closest("[data-edit-producer-action]");
+  if(!btn) return;
+  toggleEditProducerSubmitted(
+    btn.dataset.editProducerAction,
+    btn.dataset.current === "1",
+    btn
+  );
+});
+editProducerPicker.addEventListener("click",event => {
+  const btn = event.target.closest("[data-producer-mode]");
+  if(!btn) return;
+
+  const mode = String(btn.dataset.producerMode || "none");
+  currentEditingProducerMode = ["internal","external"].includes(mode) ? mode : "none";
+  currentEditingProducerId = currentEditingProducerMode === "internal"
+    ? String(btn.dataset.producerId || "")
+    : "";
+
   renderProducerPicker();
 });
 editSingerPicker.addEventListener("click",event => {
