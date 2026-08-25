@@ -341,8 +341,8 @@ button{font-family:inherit}
   pointer-events:none
 }
 #projectEditMask.show{display:flex;pointer-events:auto}
-#projectEditDialog{pointer-events:auto}
 #projectEditDialog{
+  pointer-events:auto;
   width:min(760px,94vw);max-height:calc(100dvh - 36px);overflow:hidden;display:flex;flex-direction:column;
   border-radius:22px;background:rgba(255,249,241,.985);border:1px solid rgba(203,167,123,.30);
   box-shadow:0 22px 54px rgba(85,58,34,.22),inset 0 1px 0 rgba(255,255,255,.94);color:#6a4525
@@ -368,17 +368,12 @@ button{font-family:inherit}
 .modeRow,.pickerGrid,.singerGrid{display:flex;flex-wrap:wrap;gap:7px}
 .modeBtn,.pickerBtn,.singerBtn{
   appearance:none;cursor:pointer;min-height:30px;padding:0 11px;border-radius:10px;border:1px solid rgba(194,151,108,.20);
-  background:rgba(255,252,247,.92);color:#7a5231;font-size:11px;font-weight:800
+  background:rgba(255,252,247,.92);color:#7a5231;font-size:11px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;gap:5px
 }
 .modeBtn.active,.pickerBtn.active,.singerBtn.active{background:linear-gradient(180deg,#d9a364 0%,#c98c4f 100%);color:#fff9f1;border-color:transparent}
 
 /* 编辑框内：人员标识 / 原唱名单 / 行内交音交付 */
-.modeBtn,.pickerBtn,.singerBtn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:5px;
-}
 .editTextarea:focus{
   border-color:rgba(191,139,88,.48);
   box-shadow:0 0 0 2px rgba(222,186,145,.16)
@@ -495,80 +490,14 @@ button{font-family:inherit}
   background:linear-gradient(180deg,#efd5ab 0%,#dfbd8a 100%);color:#6a4120;font-weight:800
 }
 
-@media(max-width:540px){
-  html,body{overflow:auto;background:#e7dfd4}
-  #room{min-height:100dvh;height:auto;overflow:visible}
-  #bgFrame{display:none}
-  #overlay{position:relative!important;left:auto!important;top:auto!important;width:100%!important;height:auto!important;min-height:100dvh;padding:12px;display:flex;flex-direction:column;gap:10px}
-  .roomNavLayer{
-    position:relative;inset:auto;width:100%;height:106px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
-    grid-template-rows:repeat(3,32px);gap:5px;order:0
-  }
-  .navBtn{position:relative;left:auto!important;top:auto;width:100%;height:32px;border-radius:10px;font-size:12px}
-  .roomIdentity{position:relative;right:auto;top:auto;width:100%;height:40px;order:1}
-  .roomIdentityBar{grid-template-columns:minmax(0,1fr) 34px 42px;gap:6px;padding:5px 7px;border-radius:14px}
-  .identityNameText{font-size:12px}
-  #taskPanel{
-    position:relative;left:auto;right:auto;top:auto;bottom:auto;order:2;width:100%;height:auto;min-height:0;
-    border-radius:22px;padding:0;overflow:visible
-  }
-  #taskPanel::before{inset:8px;border-radius:16px}
-  
-  
-  #overviewInner{height:auto;padding:14px 12px 16px}
-  .overviewHeader{gap:8px}
-  .overviewTitle{font-size:18px}.overviewSubtitle{font-size:11px}
-  .headerCount{height:32px;min-width:82px;font-size:11px}
-  .overviewToolbar{grid-template-columns:1fr 1fr;gap:7px}
-  .overviewToolbar .searchInput{grid-column:1/-1}
-  .filterSelect,.refreshBtn{min-width:0;width:100%;height:36px}
-  .toolbarSelect,.sortSelect{min-width:0}
-  .refreshBtn{grid-column:auto}
-  .rowActions{width:min(116px,100%)}
-  #projectEditMask{padding:10px}
-  #projectEditDialog{width:100%;max-height:calc(100dvh - 20px);border-radius:18px}
-  .projectEditHeader{padding:15px 14px 10px}
-  #projectEditBody{padding:12px;gap:10px}
-  .editGrid{grid-template-columns:1fr 1fr}
-  .editField.wide{grid-column:1/-1}
-  .editDeliveryAction{min-width:64px;padding:0 7px}
-  .partRow{grid-template-columns:1fr}
-  .inlineDeliveryCell{justify-content:flex-start}
-  .producerAssignmentRow{grid-template-columns:1fr}
-  .producerAssignmentRow > .inlineDeliveryCell{justify-content:flex-start}
-  .projectEditFooter{padding:10px 12px 12px}
-  .projectEditFooter button{flex:1}
-  .summaryRow{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .tableShell{overflow:visible;background:transparent;border:0}
-  .tableHeader{display:none}
-  .tableBody{overflow:visible;padding:0}
-  .projectRow{
-    display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px 10px;padding:14px 12px;margin-bottom:9px;
-    border:1px solid rgba(255,255,255,.5);background:rgba(255,252,247,.62)
-  }
-  .projectRow .cell{font-size:11px}
-  .projectRow .cell:nth-child(1){grid-column:1;grid-row:1;color:#9a7047}
-  .projectRow .cell:nth-child(2){grid-column:1/-1;grid-row:2;font-size:14px}
-  .projectRow .cell:nth-child(3){grid-column:2;grid-row:1;text-align:right}
-  .projectRow .cell:nth-child(4){grid-column:1/-1;grid-row:3}
-  .projectRow .cell:nth-child(4)::before{content:"原唱：";font-weight:800;color:#8a6644}
-  .projectRow .cell:nth-child(5){grid-column:1/-1;grid-row:4}
-  .projectRow .cell:nth-child(5)::before{content:"参与：";font-weight:800;color:#8a6644}
-  .projectRow .cell:nth-child(6){grid-column:1;grid-row:5}
-  .projectRow .cell:nth-child(6)::before{content:"后期：";font-weight:800;color:#8a6644}
-  .projectRow .cell:nth-child(7){grid-column:2;grid-row:5;text-align:right}
-  .projectRow .cell:nth-child(8){grid-column:1;grid-row:6}
-  .projectRow .cell:nth-child(8)::before{content:"发布：";font-weight:800;color:#8a6644}
-  .projectRow .cell:nth-child(9){grid-column:2;grid-row:6;width:122px}
-}
 
-.traineeCandidate:not(.active){background:rgba(245,239,248,.94)!important;border-color:rgba(177,157,188,.42)!important;color:#756078!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.94),0 2px 6px rgba(108,88,116,.07)!important}
-.traineeCandidate:not(.active):hover{background:rgba(248,243,250,.98)!important;filter:brightness(1.01)}
-.traineeCandidate.active{border-color:rgba(177,157,188,.58)!important;box-shadow:inset 0 1px 0 rgba(255,224,188,.55),0 0 0 2px rgba(177,157,188,.24),0 4px 10px rgba(116,86,54,.14)!important}
 
-</style>
+.traineeCandidate:not(.active){background:rgba(245,239,248,.94);border-color:rgba(177,157,188,.42);color:#756078;box-shadow:inset 0 1px 0 rgba(255,255,255,.94),0 2px 6px rgba(108,88,116,.07)}
+.traineeCandidate:not(.active):hover{background:rgba(248,243,250,.98);filter:brightness(1.01)}
+.traineeCandidate.active{border-color:rgba(177,157,188,.58);box-shadow:inset 0 1px 0 rgba(255,224,188,.55),0 0 0 2px rgba(177,157,188,.24),0 4px 10px rgba(116,86,54,.14)}
 
-<style id="workspace-switch-canonical">
+
+/* 工作间页面切换 */
 #panelSwitch{
   --workspace-switch-scale:var(--project-panel-scale,var(--ui-scale,1));
   position:absolute;
@@ -628,43 +557,393 @@ button{font-family:inherit}
   color:#fff9f1;
   box-shadow:inset 0 1px 0 rgba(255,224,188,.55),0 4px 10px rgba(116,86,54,.14);
 }
+
 @media(max-width:540px){
+  /* 手机版：单一规则源。保持桌面视觉/逻辑不变，并使用紧凑信息密度。 */
+  html{
+    height:auto;
+    min-height:100%;
+    overflow-x:hidden;
+    overflow-y:auto;
+    background:#e7dfd4;
+  }
+  body{
+    display:block;
+    height:auto;
+    min-height:100dvh;
+    overflow-x:hidden;
+    overflow-y:auto;
+    background:#e7dfd4;
+  }
+
+  #room{
+    width:100%;
+    max-width:100%;
+    min-height:100dvh;
+    height:auto;
+    overflow:visible;
+  }
+  #bgFrame{display:none}
+  #overlay{
+    position:relative;
+    inset:auto;
+    width:100%;
+    max-width:100%;
+    height:auto;
+    min-height:100dvh;
+    padding:6px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    overflow-x:hidden;
+  }
+
+  .roomNavLayer{
+    position:relative;
+    inset:auto;
+    width:100%;
+    height:78px;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:repeat(3,24px);
+    gap:3px;
+    order:0;
+  }
+  .roomNavLayer .navBtn{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    height:24px;
+    border-radius:8px;
+    font-size:10.5px;
+  }
+
+  .roomIdentity{
+    position:relative;
+    right:auto;
+    top:auto;
+    width:100%;
+    height:32px;
+    min-height:32px;
+    order:1;
+  }
+  .roomIdentityBar{
+    grid-template-columns:minmax(0,1fr) 28px 38px;
+    gap:4px;
+    padding:3px 5px;
+    border-radius:10px;
+  }
+  .identityNameText{font-size:10.5px}
+  .identityNoticeBtn{font-size:12px}
+  .identityAuthBtn{font-size:10px}
+
+  #taskPanel{
+    position:relative;
+    left:auto;
+    right:auto;
+    top:auto;
+    bottom:auto;
+    order:2;
+    width:100%;
+    max-width:100%;
+    height:auto;
+    min-height:0;
+    border-radius:16px;
+    padding:0;
+    overflow:visible;
+  }
+  #taskPanel::before{
+    inset:5px;
+    border-radius:12px;
+  }
+
   #panelSwitch{
-    position:relative!important;
-    left:auto!important;
-    right:auto!important;
-    top:auto!important;
-    bottom:auto!important;
-    width:auto!important;
-    height:auto!important;
-    margin:12px 12px 0!important;
-    padding:4px!important;
-    display:grid!important;
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;
-    gap:6px!important;
-    border-radius:16px!important;
-    background:rgba(255,248,239,.38)!important;
-    border:1px solid rgba(168,123,81,.16)!important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.56),0 2px 7px rgba(116,86,54,.06)!important;
-    backdrop-filter:none!important;
-    -webkit-backdrop-filter:none!important;
-    transform:none!important;
-    overflow:visible!important;
+    position:relative;
+    left:auto;
+    right:auto;
+    top:auto;
+    bottom:auto;
+    width:auto;
+    height:auto;
+    margin:6px 7px 0;
+    padding:3px;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:3px;
+    border-radius:11px;
+    background:rgba(255,248,239,.38);
+    border:1px solid rgba(168,123,81,.16);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.56),0 2px 7px rgba(116,86,54,.06);
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+    transform:none;
+    overflow:visible;
   }
   #panelSwitch .switchBtn{
-    width:100%!important;
-    min-width:0!important;
-    min-height:36px!important;
-    height:36px!important;
-    padding:0 4px!important;
-    border-radius:11px!important;
-    font-size:13px!important;
-    font-weight:800!important;
-    line-height:1.15!important;
-    letter-spacing:0!important;
-    white-space:nowrap!important;
+    width:100%;
+    min-width:0;
+    min-height:26px;
+    height:26px;
+    padding:0 2px;
+    border-radius:8px;
+    font-size:11px;
+    font-weight:800;
+    line-height:1.15;
+    letter-spacing:0;
+    white-space:nowrap;
   }
+
+  #overviewInner{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    height:auto;
+    padding:7px 7px 10px;
+  }
+  .overviewHeader{
+    align-items:center;
+    gap:5px;
+    margin-bottom:5px;
+    padding:0 1px;
+  }
+  .overviewTitle{
+    font-size:15px;
+    line-height:1.1;
+  }
+  .overviewSubtitle{display:none}
+  .headerCount{
+    height:25px;
+    min-width:66px;
+    padding:0 7px;
+    border-radius:8px;
+    font-size:9.5px;
+  }
+
+  .overviewToolbar{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:4px;
+    margin-bottom:5px;
+  }
+  .overviewToolbar .searchInput{
+    grid-column:1/-1;
+    height:29px;
+    padding:0 9px;
+    font-size:10.5px;
+    border-radius:8px;
+  }
+  .filterSelect,.refreshBtn{
+    min-width:0;
+    width:100%;
+    height:27px;
+    padding:0 3px;
+    border-radius:8px;
+    font-size:9.5px;
+  }
+  .toolbarSelect,.sortSelect{min-width:0}
+  .refreshBtn{grid-column:auto}
+
+  .summaryRow{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:4px;
+    margin-bottom:5px;
+  }
+  .summaryCard{
+    padding:4px;
+    border-radius:8px;
+    text-align:center;
+  }
+  .summaryLabel{
+    font-size:8.5px;
+    line-height:1.15;
+    white-space:nowrap;
+  }
+  .summaryValue{
+    margin-top:0;
+    font-size:13px;
+    line-height:1.15;
+  }
+
+  .tableShell{
+    width:100%;
+    max-width:100%;
+    overflow:visible;
+    background:transparent;
+    border:0;
+  }
+  .tableHeader{display:none}
+  .tableBody{
+    width:100%;
+    max-width:100%;
+    overflow:visible;
+    padding:0;
+  }
+  .projectRow{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto auto auto;
+    gap:2px 6px;
+    width:100%;
+    max-width:100%;
+    min-height:0;
+    padding:5px 7px;
+    margin-bottom:5px;
+    border-radius:9px;
+    border:1px solid rgba(255,255,255,.5);
+    background:rgba(255,252,247,.62);
+    overflow:hidden;
+  }
+  .projectRow .cell{
+    font-size:10px;
+    line-height:1.2;
+  }
+  .projectRow .cell:nth-child(1){
+    grid-column:1;
+    grid-row:1;
+    color:#9a7047;
+  }
+  .projectRow .cell:nth-child(2){
+    grid-column:1/-1;
+    grid-row:2;
+    font-size:12.5px;
+    line-height:1.2;
+  }
+  .projectRow .cell:nth-child(3){
+    grid-column:4;
+    grid-row:1;
+    text-align:right;
+  }
+  .projectRow .cell:nth-child(4){
+    grid-column:1/-1;
+    grid-row:3;
+    min-width:0;
+  }
+  .projectRow .cell:nth-child(5){
+    grid-column:1/-1;
+    grid-row:4;
+    min-width:0;
+  }
+  .projectRow .cell:nth-child(6){
+    grid-column:1;
+    grid-row:5;
+    min-width:0;
+  }
+  .projectRow .cell:nth-child(7){
+    grid-column:2;
+    grid-row:5;
+    text-align:right;
+  }
+  .projectRow .cell:nth-child(8){
+    grid-column:3;
+    grid-row:5;
+    white-space:nowrap;
+  }
+  .projectRow .cell:nth-child(9){
+    grid-column:4;
+    grid-row:5;
+    width:auto;
+  }
+
+  .projectRow .cell:nth-child(4)::before{content:"原唱：";font-weight:800;color:#8a6644}
+  .projectRow .cell:nth-child(5)::before{content:"参与：";font-weight:800;color:#8a6644}
+  .projectRow .cell:nth-child(6)::before{content:"后期：";font-weight:800;color:#8a6644}
+  .projectRow .cell:nth-child(8)::before{content:"发布：";font-weight:800;color:#8a6644}
+  .projectRow .cell:nth-child(4)::before,
+  .projectRow .cell:nth-child(5)::before,
+  .projectRow .cell:nth-child(6)::before,
+  .projectRow .cell:nth-child(8)::before{font-size:9.5px}
+
+  .projectRow .cell:nth-child(4),
+  .projectRow .cell:nth-child(5){
+    display:flex;
+    align-items:center;
+    gap:4px;
+    overflow:hidden;
+    white-space:nowrap;
+  }
+  .projectRow .cell:nth-child(4)::before,
+  .projectRow .cell:nth-child(5)::before{flex:0 0 auto}
+
+  .projectRow .nameList{
+    flex:1 1 auto;
+    min-width:0;
+    flex-wrap:nowrap;
+    gap:0 5px;
+    width:auto;
+    max-width:100%;
+    overflow:hidden;
+    white-space:nowrap;
+    line-height:1.2;
+  }
+  .projectRow .nameItem{
+    flex:0 0 auto;
+    max-width:none;
+    overflow:visible;
+    text-overflow:clip;
+  }
+
+  .typeBadge,.statusBadge{
+    min-height:16px;
+    padding:1px 5px;
+    font-size:8.5px;
+  }
+  .rowActions{
+    grid-template-columns:repeat(2,40px);
+    gap:3px;
+    width:auto;
+    max-width:none;
+  }
+  .viewBtn,.editBtn{
+    height:19px;
+    padding:0 2px;
+    border-radius:6px;
+    font-size:8.5px;
+  }
+
+  /* 编辑弹窗手机版布局 */
+  #projectEditMask{padding:10px}
+  #projectEditDialog{
+    width:100%;
+    max-height:calc(100dvh - 20px);
+    border-radius:18px;
+  }
+  .projectEditHeader{padding:15px 14px 10px}
+  #projectEditBody{
+    padding:12px;
+    gap:10px;
+  }
+  .editGrid{grid-template-columns:1fr 1fr}
+  .editField.wide{grid-column:1/-1}
+  .editDeliveryAction{
+    min-width:64px;
+    padding:0 7px;
+  }
+  .partRow{grid-template-columns:1fr}
+  .inlineDeliveryCell{justify-content:flex-start}
+  .producerAssignmentRow{grid-template-columns:1fr}
+  .producerAssignmentRow > .inlineDeliveryCell{justify-content:flex-start}
+  .projectEditFooter{padding:10px 12px 12px}
+  .projectEditFooter button{flex:1}
 }
+
+@media(max-width:360px){
+  #panelSwitch .switchBtn{font-size:10px}
+  .projectRow{grid-template-columns:minmax(0,1fr) auto auto}
+  .projectRow .cell:nth-child(3){grid-column:3}
+  .projectRow .cell:nth-child(6){grid-column:1}
+  .projectRow .cell:nth-child(7){grid-column:2}
+  .projectRow .cell:nth-child(8){
+    grid-column:1;
+    grid-row:6;
+  }
+  .projectRow .cell:nth-child(9){
+    grid-column:2/4;
+    grid-row:6;
+    justify-self:end;
+  }
+  .editGrid{grid-template-columns:1fr}
+  .editField.wide{grid-column:auto}
+}
+
 </style>
 
 </head>
@@ -2018,7 +2297,13 @@ function goPage(key){
 }
 function syncOverlayToImage(){
   if(window.matchMedia("(max-width:540px)").matches){
+    /* 从桌面切换到手机版时，清除桌面计算后残留的所有缩放比例 */
     document.documentElement.style.setProperty("--ui-scale","1");
+    document.documentElement.style.setProperty("--bg-ui-scale","1");
+    document.documentElement.style.setProperty("--room-nav-scale","1");
+    document.documentElement.style.setProperty("--identity-scale","1");
+    overlay.style.setProperty("--ui-scale","1");
+    overlay.style.setProperty("--project-panel-scale","1");
     overlay.style.left="";overlay.style.top="";overlay.style.width="";overlay.style.height="";
     return;
   }
