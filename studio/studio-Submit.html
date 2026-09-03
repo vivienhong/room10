@@ -301,6 +301,12 @@
   let members = [];
   let tasks = [];
   let selectedType = "";
+  const LEGACY_GAME_TYPE_FALLBACK = "其他游戏";
+
+  function getRpcGameType() {
+    return selectedType === "游戏" ? LEGACY_GAME_TYPE_FALLBACK : null;
+  }
+
   let selectedTaskMode = "normal";
   let selectedSingerIds = [];
   let selectedProducerId = "";
@@ -716,7 +722,7 @@
       p_member_id: memberId,
       p_member_code: memberCode,
       p_project_type: selectedType,
-      p_game_type: null,
+      p_game_type: getRpcGameType(),
       p_participant_count: getSingerQuota({ write: false }),
       p_is_collective_task: selectedTaskMode === "special"
     });
@@ -1325,7 +1331,7 @@
         integration_mode: "submit",
         channel_id: studioWheelChannelId,
         task_type: selectedType,
-        game_type: null,
+        game_type: getRpcGameType(),
         task_mode: selectedTaskMode,
         singer_quota: quota,
         fixed_assignment_count: quota - pendingRows.length,
@@ -1538,7 +1544,6 @@
     signupStatus.textContent = "填写中";
 
     renderTypeOptions();
-    document.querySelectorAll("[data-game-type]").forEach(btn => btn.classList.remove("active"));
     document.querySelectorAll(".submitModeBtn").forEach(btn => {
       btn.classList.toggle("active", btn.dataset.mode === "normal");
     });
@@ -1632,7 +1637,7 @@
         p_member_code: authState.memberCode,
         p_project_name: String(songNameInput.value || "").trim(),
         p_project_type: selectedType,
-        p_game_type: null,
+        p_game_type: getRpcGameType(),
         p_participant_count: getSingerQuota(),
         p_is_collective_task: selectedTaskMode === "special",
         p_project_tone: String(projectToneInput.value || "").trim() || null,
