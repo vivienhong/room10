@@ -3838,7 +3838,7 @@ function flushPendingFlowerAnimalEncounter(){
   setTimeout(() => showFlowerAnimalEncounter(encounter), 80);
 }
 
-async function tryFlowerAnimalEncounter(sourceDetail="花房互动"){
+async function tryFlowerAnimalEncounter(sourceDetail="花房互动", options={}){
   const auth = getFlowerAuth();
   if(!auth || flowerAnimalEncounterBusy) return null;
 
@@ -3865,7 +3865,7 @@ async function tryFlowerAnimalEncounter(sourceDetail="花房互动"){
       return result || null;
     }
 
-    if(result?.triggered === true){
+    if(result?.triggered === true && options.show !== false){
       showFlowerAnimalEncounter(result);
     }
     return result || null;
@@ -3904,6 +3904,9 @@ function showRewardModal(options={}){
   if(label) label.textContent = options.label || meta.label;
   if(title) title.textContent = options.title || "奖励已领取";
   if(desc) desc.textContent = options.desc || "奖励已经记录完成。";
+
+  const sectionTitle = document.getElementById("rewardSectionTitle");
+  if(sectionTitle) sectionTitle.textContent = options.sectionTitle || "奖励内容";
 
   renderRewards(rewards);
 
@@ -5992,9 +5995,50 @@ async function harvestFlowerPot(){
     if(error) throw error;
 
     const row = Array.isArray(data) ? data[0] : data;
-    showFlowerToast(row?.message || "收获成功");
+    if(!row || row.success === false){
+      throw new Error(row?.message || "收获失败");
+    }
+
+    const flowerName = String(row.result_flower_name || "花束").trim() || "花束";
+    const flowerKey = String(row.result_flower_key || "").trim();
+    const quantity = Math.max(1, Math.floor(Number(row.harvested_quantity) || 1));
+
     await loadFlowerPage();
-    await tryFlowerAnimalEncounter("花盆收获");
+
+    const encounter = await tryFlowerAnimalEncounter("花盆收获", { show:false });
+    const marketRow = getMarketRow(flowerKey);
+    const flowerImage = getFreshBouquetImg(marketRow);
+    const rewards = [{
+      img:flowerImage,
+      icon:"💐",
+      name:flowerName,
+      amount:`×${quantity}`
+    }];
+
+    let extraRewardText = "本次没有额外奖励。";
+    if(encounter?.triggered === true){
+      const encounterData = encounter.data && typeof encounter.data === "object" ? encounter.data : {};
+      const petName = String(encounterData.pet_name || "小动物").trim() || "小动物";
+      const petQuantity = Math.max(1, Math.floor(Number(encounterData.quantity) || 1));
+      rewards.push({
+        img:getFlowerAnimalEncounterImage(encounterData),
+        icon:"🐾",
+        name:`额外奖励 · ${petName}图片卡`,
+        amount:`×${petQuantity}`
+      });
+      extraRewardText = `额外奖励：遇见${petName}，获得图片卡 ×${petQuantity}。`;
+    }
+
+    showRewardModal({
+      type:"item",
+      icon:"💐",
+      label:"收获完成",
+      title:`收获了${flowerName}`,
+      desc:`${flowerName} ×${quantity} 已放入花束库存。${extraRewardText}`,
+      sectionTitle:"本次收获",
+      rewards,
+      confirmText:"收下收获"
+    });
   }catch(err){
     console.error("收获失败：", err);
     showFlowerToast(err?.message || "收获失败", "error");
@@ -6057,29 +6101,11 @@ async function clearWitheredMarketFlower(flowerKey){
 
   setFlowerBusy(true);
   try{
-    const { data:holdings, error:holdingError } = await supabaseClient
-      .from("flower_holdings")
-      .select("id,flower_key,quantity,source,status,quality,wither_at,acquired_at")
-      .eq("member_id", auth.memberId)
-      .eq("flower_key", key)
-      .eq("source", "market")
-      .gt("quantity", 0)
-      .or(`status.eq.withered,quality.eq.market_withered,wither_at.lte.${new Date().toISOString()}`)
-      .order("acquired_at", { ascending:true });
-
-    if(holdingError) throw holdingError;
-
-    const target = Array.isArray(holdings) ? holdings[0] : null;
-    if(!target?.id){
-      showMarketOperationMessage(`${displayName}当前没有需要清理的枯萎市场花。`, true);
-      await loadFlowerMarket();
-      return;
-    }
-
-    const { data, error } = await supabaseClient.rpc("clear_withered_market_flower", {
+    // 数据库端验证成员并清理本人该花种最早的一批枯萎市场花。
+    const { data, error } = await supabaseClient.rpc("clear_withered_market_flower_by_key", {
       p_member_id:auth.memberId,
       p_member_code:auth.memberCode,
-      p_holding_id:target.id
+      p_flower_key:key
     });
 
     if(error) throw error;
