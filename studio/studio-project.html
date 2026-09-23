@@ -1114,6 +1114,14 @@ const authState = {
       .map(part => String(part.original_name || "").trim())
       .filter(Boolean);
   }
+  function getProjectOriginalArtists(task) {
+    const saved = (task?.original_artists || [])
+      .map(name => String(name || "").trim()).filter(Boolean);
+    if (saved.length) return saved;
+    return [...new Set((task?.parts || [])
+      .flatMap(part => String(part.original_name || "").split(/[、,，;；/／]+/))
+      .map(name => name.trim()).filter(Boolean))];
+  }
   function isMyProject(task) {
     return task?.current_member_is_singer === true
       || task?.current_member_is_producer === true;
@@ -2490,7 +2498,7 @@ const authState = {
       release_date: formatDateForInput(safeTask.release_date),
       producer_member_id: String(safeTask.producer_member_id || ""),
       producer_is_external: safeTask.producer_is_external === true,
-      original_artists: Array.isArray(safeTask.original_artists) ? safeTask.original_artists : [],
+      original_artists: getProjectOriginalArtists(safeTask),
       singer_ids: (safeTask.singers || []).map(item => String(item.member_id || "")).filter(Boolean),
       parts: (safeTask.parts || []).length
         ? (safeTask.parts || []).map((part, index) => ({
@@ -2795,7 +2803,7 @@ const authState = {
       </div>
       <div class="sectionCard">
         <div class="sectionHeader"><h3 class="sectionTitle">项目原唱名单</h3></div>
-        <div class="taskItemInfo">${escapeHtml((task.original_artists || []).join("、") || "未填写")}</div>
+        <div class="taskItemInfo">${escapeHtml(getProjectOriginalArtists(task).join("、") || "未填写")}</div>
       </div>
       <div class="bottomGrid">
         <div class="sectionCard">
