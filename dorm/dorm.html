@@ -1393,14 +1393,6 @@ button{
   justify-content:flex-end;
 }
 
-.taskDoneText{
-  color:#92745a;
-  font-size:12px;
-  line-height:1.35;
-  font-weight:800;
-  white-space:nowrap;
-}
-
 .taskCard,
 .profileCard{
   border-radius:18px;
@@ -2249,12 +2241,7 @@ button{
     font-size:9.4px;
   }
 
-  .taskDoneText{
-    font-size:9.4px;
-  }
-
-  .taskCompactLine .dormMiniBtn,
-  .taskCompactLine .dormSubBtn{
+  .taskCompactLine .dormMiniBtn{
     min-height:23px;
     padding:0 8px;
     border-radius:8px;
@@ -2730,20 +2717,11 @@ button{
     align-self:center;
   }
 
-  #view-tasks .taskCompactLine .dormMiniBtn,
-  #view-tasks .taskCompactLine .dormSubBtn{
+  #view-tasks .taskCompactLine .dormMiniBtn{
     min-height:32px;
     padding:0 12px;
     flex:0 0 auto;
     white-space:nowrap;
-  }
-
-  #view-tasks .taskDoneText{
-    display:inline-block;
-    max-width:118px;
-    white-space:normal;
-    text-align:right;
-    line-height:1.35;
   }
 
   #view-wallet .ledgerList{
@@ -2802,8 +2780,7 @@ button{
     column-gap:8px;
   }
 
-  #view-tasks .taskCompactLine .dormMiniBtn,
-  #view-tasks .taskCompactLine .dormSubBtn{
+  #view-tasks .taskCompactLine .dormMiniBtn{
     padding:0 10px;
     font-size:11px;
   }
@@ -4295,7 +4272,6 @@ let profileEditMode = false;
 let honorSummaryState = null;
 let dormTaskRows = [];
 let activeDormTaskTab = "vocal_submit";
-const recentDormTaskActions = new Map();
 const DORM_ACTIVE_VIEW_KEY = "room10DormActiveView";
 const DORM_VIEW_KEYS = new Set(["tasks","notice","wallet","inventory","profile"]);
 
@@ -4840,16 +4816,14 @@ function jumpToSystemNotice(){
    我的任务：读取 / 渲染 / 快捷操作
 ========================================================= */
 function taskTypeLabel(type){
-  if(type === "vocal_submit" || type === "vocal_submitted") return t("tasks.tab.vocal_submit");
-  if(type === "mix_submit" || type === "mix_submitted") return t("tasks.tab.mix_submit");
-  if(type === "claim" || type === "singer_claim" || type === "mix_claim" || type === "singer_claimed" || type === "mix_claimed") return t("tasks.tab.claim");
+  if(type === "vocal_submit") return t("tasks.tab.vocal_submit");
+  if(type === "mix_submit") return t("tasks.tab.mix_submit");
+  if(type === "claim" || type === "singer_claim" || type === "mix_claim") return t("tasks.tab.claim");
   return t("tasks.title");
 }
 
 function taskTabKey(type){
-  if(type === "vocal_submitted") return "vocal_submit";
-  if(type === "mix_submitted") return "mix_submit";
-  if(type === "singer_claim" || type === "mix_claim" || type === "singer_claimed" || type === "mix_claimed") return "claim";
+  if(type === "singer_claim" || type === "mix_claim") return "claim";
   return type;
 }
 
@@ -4953,22 +4927,6 @@ function taskMainButtonHtml(task){
     return `<button class="dormMiniBtn dormTaskActionBtn" type="button" data-action="claim_mix" data-project-id="${projectId}">${tHtml("tasks.action.claim_mix")}</button>`;
   }
 
-  if(task.task_type === "vocal_submitted"){
-    return `<button class="dormSubBtn dormTaskActionBtn" type="button" data-action="undo_vocal" data-project-id="${projectId}">${tHtml("tasks.action.undo_vocal")}</button>`;
-  }
-
-  if(task.task_type === "mix_submitted"){
-    return `<button class="dormSubBtn dormTaskActionBtn" type="button" data-action="undo_mix" data-project-id="${projectId}">${tHtml("tasks.action.undo_mix")}</button>`;
-  }
-
-  if(task.task_type === "singer_claimed"){
-    return `<span class="taskDoneText">${tHtml("tasks.claimed_singer_hint")}</span>`;
-  }
-
-  if(task.task_type === "mix_claimed"){
-    return `<span class="taskDoneText">${tHtml("tasks.claimed_mix_hint")}</span>`;
-  }
-
   return "";
 }
 
@@ -4981,11 +4939,11 @@ function taskMetaItems(task){
   const original = taskOriginalLine(task);
   if(original) items.push(original);
 
-  if(task.task_type === "singer_claim" || task.task_type === "singer_claimed"){
+  if(task.task_type === "singer_claim"){
     items.push(taskSingerNeedLine(task));
   }
 
-  if(task.task_type === "mix_claim" || task.task_type === "mix_claimed"){
+  if(task.task_type === "mix_claim"){
     items.push(taskSingerCountLine(task));
   }
 
@@ -5066,8 +5024,8 @@ function sortDormTaskRows(rows,tabKey){
 
   if(tabKey === "claim"){
     return list.sort((a,b) => {
-      const ag = a.task_type === "singer_claim" || a.task_type === "singer_claimed" ? 1 : 2;
-      const bg = b.task_type === "singer_claim" || b.task_type === "singer_claimed" ? 1 : 2;
+      const ag = a.task_type === "singer_claim" ? 1 : 2;
+      const bg = b.task_type === "singer_claim" ? 1 : 2;
       if(ag !== bg) return ag - bg;
 
       const diff = Number(b.singer_count || 0) - Number(a.singer_count || 0);
@@ -5076,13 +5034,6 @@ function sortDormTaskRows(rows,tabKey){
   }
 
   return list;
-}
-
-function mergedDormTaskRows(){
-  const recentRows = Array.from(recentDormTaskActions.values());
-  const recentIds = new Set(recentRows.map(item => String(item.project_id)));
-  const normalRows = (Array.isArray(dormTaskRows) ? dormTaskRows : []).filter(item => !recentIds.has(String(item.project_id)));
-  return recentRows.concat(normalRows);
 }
 
 function updateDormTaskTabs(rows){
@@ -5100,148 +5051,11 @@ function updateDormTaskTabs(rows){
   });
 }
 
-function normalizeDormTaskType(item){
-  const raw = firstTaskText(item,[
-    "task_type",
-    "taskType",
-    "type",
-    "task_kind",
-    "taskKind",
-    "work_type",
-    "workType",
-    "assignment_type",
-    "assignmentType"
-  ]).toLowerCase().replace(/[\s-]+/g,"_");
-
-  const statusText = firstTaskText(item,[
-    "task_status",
-    "taskStatus",
-    "status",
-    "submission_status",
-    "submissionStatus",
-    "my_status",
-    "myStatus"
-  ]).toLowerCase().replace(/[\s-]+/g,"_");
-
-  const roleText = firstTaskText(item,[
-    "task_role",
-    "taskRole",
-    "member_role",
-    "memberRole",
-    "assignment_role",
-    "assignmentRole",
-    "my_role",
-    "myRole"
-  ]).toLowerCase().replace(/[\s-]+/g,"_");
-
-  const truthy = value => value === true || value === 1 || value === "1" || String(value || "").toLowerCase() === "true";
-
-  /*
-   * 先判断当前成员在项目中的真实动作状态。
-   * RPC 可能把多种任务统一返回为 task_type=claim；如果先按 raw 分类，
-   * 待交音和待后期会全部被错误归入“待认领”。
-   */
-  if(
-    truthy(item.can_submit_vocal) ||
-    truthy(item.needs_vocal_submit) ||
-    truthy(item.is_vocal_task) ||
-    truthy(item.pending_vocal_submit) ||
-    truthy(item.has_unsubmitted_vocal) ||
-    ["pending_vocal","pending_vocal_submit","need_vocal","needs_vocal","待交音"].includes(statusText)
-  ) return "vocal_submit";
-
-  if(
-    truthy(item.can_submit_mix) ||
-    truthy(item.needs_mix_submit) ||
-    truthy(item.is_mix_task) ||
-    truthy(item.pending_mix_submit) ||
-    truthy(item.has_unsubmitted_mix) ||
-    ["pending_mix","pending_mix_submit","need_mix","needs_mix","待后期"].includes(statusText)
-  ) return "mix_submit";
-
-  if(
-    truthy(item.my_singer_submitted) ||
-    truthy(item.vocal_submitted) ||
-    truthy(item.has_submitted_vocal) ||
-    ["vocal_submitted","submitted_vocal","已交音"].includes(statusText)
-  ) return "vocal_submitted";
-
-  if(
-    truthy(item.producer_completed) ||
-    truthy(item.mix_submitted) ||
-    truthy(item.has_submitted_mix) ||
-    ["mix_submitted","submitted_mix","已交后期"].includes(statusText)
-  ) return "mix_submitted";
-
-  if(truthy(item.can_claim_singer)) return "singer_claim";
-  if(truthy(item.can_claim_mix)) return "mix_claim";
-
-  const aliases = {
-    vocal:"vocal_submit",
-    vocal_submit:"vocal_submit",
-    vocal_submission:"vocal_submit",
-    submit_vocal:"vocal_submit",
-    singer_submit:"vocal_submit",
-    singer_submission:"vocal_submit",
-    audio_submit:"vocal_submit",
-    pending_vocal:"vocal_submit",
-    pending_vocal_submit:"vocal_submit",
-    待交音:"vocal_submit",
-    交音:"vocal_submit",
-
-    mix:"mix_submit",
-    mix_submit:"mix_submit",
-    mix_submission:"mix_submit",
-    submit_mix:"mix_submit",
-    producer_submit:"mix_submit",
-    post_production:"mix_submit",
-    postproduction:"mix_submit",
-    pending_mix:"mix_submit",
-    pending_mix_submit:"mix_submit",
-    后期:"mix_submit",
-    待后期:"mix_submit",
-
-    vocal_submitted:"vocal_submitted",
-    submitted_vocal:"vocal_submitted",
-    mix_submitted:"mix_submitted",
-    submitted_mix:"mix_submitted",
-
-    singer_claim:"singer_claim",
-    claim_singer:"singer_claim",
-    mix_claim:"mix_claim",
-    claim_mix:"mix_claim",
-    singer_claimed:"singer_claimed",
-    mix_claimed:"mix_claimed"
-  };
-
-  if(aliases[raw]) return aliases[raw];
-
-  /* generic claim 必须结合角色判断，不能直接把所有项目都归入待认领 */
-  if(raw === "claim"){
-    if(["singer","vocal","歌手","演唱"].includes(roleText)) return "singer_claim";
-    if(["mixer","mix","producer","后期","混音"].includes(roleText)) return "mix_claim";
-    return "claim";
-  }
-
-  return raw;
-}
-
 function normalizeDormTaskRows(rows){
-  return (Array.isArray(rows) ? rows : []).map(row => {
-    const item = { ...row };
-
-    item.task_type = normalizeDormTaskType(item);
-    item.project_id = firstTaskText(item,["project_id","id","projectId","project_code"]);
-    item.project_code = firstTaskText(item,["project_code","code","project_no","project_number"]);
-    item.project_name = firstTaskText(item,["project_name","name","title","song_name","work_name"]);
-    item.project_tone = firstTaskText(item,["project_tone","tone","key","song_key"]);
-    item.release_date = firstTaskText(item,["release_date","project_release_date","scheduled_release_date","publish_date","publish_at","scheduled_at","release_at"]);
-    item.my_original_names = firstTaskText(item,["my_original_names","my_original_name","assigned_original_names","assigned_original_name","original_names","original_name","part_names","part_name","my_part_names","my_part_name"]);
-
-    return item;
-  }).filter(item =>
-    (item.project_id || item.project_code || item.project_name) &&
-    ["vocal_submit","mix_submit","claim","singer_claim","mix_claim","vocal_submitted","mix_submitted","singer_claimed","mix_claimed"].includes(item.task_type)
+  // get_dorm_work_tasks 只返回当前成员可执行的四类动作。
+  const actionable = new Set(["vocal_submit", "mix_submit", "singer_claim", "mix_claim"]);
+  return (Array.isArray(rows) ? rows : []).filter(row =>
+    row && actionable.has(row.task_type) && row.project_id && row.project_name
   );
 }
 
@@ -5258,7 +5072,7 @@ function renderDormTasks(rows){
   const list = document.getElementById("taskList");
   if(!list) return;
 
-  const allRows = mergedDormTaskRows();
+  const allRows = dormTaskRows;
   updateDormTaskTabs(allRows);
 
   if(!allRows.length){
@@ -5319,21 +5133,12 @@ async function loadDormTasks(){
   }
 }
 
-function findDormTask(projectId){
-  return dormTaskRows.find(item => String(item.project_id) === String(projectId))
-    || recentDormTaskActions.get(String(projectId))
-    || null;
-}
-
 async function runDormTaskAction(action,projectId){
   if(!action || !projectId) return;
 
-  const task = findDormTask(projectId);
   const fnMap = {
     submit_vocal:"submit_dorm_vocal",
-    undo_vocal:"undo_dorm_vocal_submit",
     submit_mix:"submit_dorm_mix",
-    undo_mix:"undo_dorm_mix_submit",
     claim_singer:"claim_dorm_singer",
     claim_mix:"claim_dorm_mix"
   };
@@ -5355,44 +5160,6 @@ async function runDormTaskAction(action,projectId){
       alert(result?.message || t("tasks.action_failed"));
       await loadDormTasks();
       return;
-    }
-
-    if(action === "submit_vocal" && task){
-      recentDormTaskActions.set(String(projectId),{
-        ...task,
-        task_type:"vocal_submitted",
-        my_singer_submitted:true
-      });
-    }
-
-    if(action === "submit_mix" && task){
-      recentDormTaskActions.set(String(projectId),{
-        ...task,
-        task_type:"mix_submitted",
-        producer_completed:true
-      });
-    }
-
-    if(action === "claim_singer" && task){
-      recentDormTaskActions.set(String(projectId),{
-        ...task,
-        task_type:"singer_claimed",
-        singer_count:Number(task.singer_count || 0) + 1,
-        missing_singer_count:Math.max(Number(task.missing_singer_count || 0) - 1, 0)
-      });
-    }
-
-    if(action === "claim_mix" && task){
-      recentDormTaskActions.set(String(projectId),{
-        ...task,
-        task_type:"mix_claimed",
-        producer_member_id:authState.memberId,
-        producer_nickname:authState.nickname
-      });
-    }
-
-    if(action === "undo_vocal" || action === "undo_mix"){
-      recentDormTaskActions.delete(String(projectId));
     }
 
     await loadDormTasks();
