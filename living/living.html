@@ -825,6 +825,207 @@ body.room10ModalOpen{overflow:hidden!important;}
   box-shadow:0 1px 5px rgba(105,66,34,.23);
 }
 
+.boardHeaderTools{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:calc(8px * var(--ui-scale));
+  min-width:0;
+}
+
+.boardViewSwitch{
+  display:inline-flex;
+  padding:calc(2px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(255,252,247,.58);
+  border:1px solid rgba(165,120,79,.14);
+}
+
+.boardViewBtn,.calendarNavBtn,.calendarTodayBtn{
+  appearance:none;
+  cursor:pointer;
+  border:0;
+  color:#825b3c;
+  background:transparent;
+  font-family:inherit;
+  font-weight:900;
+}
+
+.boardViewBtn{
+  min-height:calc(24px * var(--ui-scale));
+  padding:0 calc(9px * var(--ui-scale));
+  border-radius:999px;
+  font-size:calc(10px * var(--ui-scale));
+}
+
+.boardViewBtn.is-active{
+  color:#684327;
+  background:rgba(239,221,198,.86);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+.calendarView{
+  grid-column:1 / -1;
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+  gap:calc(8px * var(--ui-scale));
+}
+
+.calendarToolbar{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:calc(6px * var(--ui-scale));
+}
+
+.calendarMonthLabel{
+  color:#70482d;
+  font-size:calc(14px * var(--ui-scale));
+  font-weight:900;
+  text-align:center;
+}
+
+.calendarNavBtn,.calendarTodayBtn{
+  min-height:calc(27px * var(--ui-scale));
+  padding:0 calc(9px * var(--ui-scale));
+  border-radius:999px;
+  background:rgba(255,252,247,.66);
+  border:1px solid rgba(153,109,69,.14);
+  font-size:calc(11px * var(--ui-scale));
+}
+
+.calendarNavBtn{
+  width:calc(29px * var(--ui-scale));
+  padding:0;
+  font-size:calc(17px * var(--ui-scale));
+}
+
+.calendarWeekdays,.calendarGrid{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+}
+
+.calendarWeekdays{
+  color:#a47957;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  text-align:center;
+}
+
+.calendarWeekdays span{padding:calc(2px * var(--ui-scale)) 0;}
+
+.calendarGrid{
+  flex:1 1 auto;
+  grid-auto-rows:minmax(calc(60px * var(--ui-scale)),1fr);
+  gap:calc(4px * var(--ui-scale));
+}
+
+.calendarDay{
+  min-width:0;
+  min-height:0;
+  padding:calc(5px * var(--ui-scale));
+  border-radius:calc(11px * var(--ui-scale));
+  background:rgba(255,253,248,.48);
+  border:1px solid rgba(160,115,76,.11);
+  overflow:hidden;
+}
+
+.calendarDay.is-other{opacity:.38;}
+.calendarDay.is-today{
+  background:rgba(255,239,204,.72);
+  border-color:rgba(193,136,78,.26);
+}
+
+.calendarDayNum{
+  display:block;
+  margin-bottom:calc(3px * var(--ui-scale));
+  color:#81583a;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  line-height:1;
+}
+
+.calendarEvents{
+  display:flex;
+  flex-direction:column;
+  gap:calc(2px * var(--ui-scale));
+}
+
+.calendarEvent{
+  display:block;
+  min-width:0;
+  padding:calc(2px * var(--ui-scale)) calc(4px * var(--ui-scale));
+  border-radius:calc(6px * var(--ui-scale));
+  color:#765137;
+  background:rgba(255,255,255,.58);
+  border:1px solid rgba(151,107,70,.10);
+  font-size:calc(8px * var(--ui-scale));
+  font-weight:850;
+  line-height:1.22;
+  text-decoration:none;
+  overflow:hidden;
+}
+
+.calendarEvent.is-project{
+  padding:calc(3px * var(--ui-scale)) calc(4px * var(--ui-scale));
+}
+
+.calendarEvent.is-project.is-planned{
+  color:#5d7190;
+  background:rgba(226,237,250,.72);
+  border-color:rgba(105,139,178,.19);
+}
+
+.calendarEvent.is-project.is-published{
+  color:#58704f;
+  background:rgba(226,242,220,.76);
+  border-color:rgba(103,145,91,.20);
+}
+
+.calendarEvent.is-birthday{
+  color:#9a6174;
+  background:rgba(252,230,238,.78);
+  border-color:rgba(190,116,142,.18);
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.calendarEvent.is-holiday{
+  color:#916736;
+  background:rgba(255,241,207,.78);
+  border-color:rgba(193,145,76,.18);
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.calendarSongTitle,
+.calendarSongSingers{
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.calendarSongTitle{
+  font-weight:900;
+}
+
+.calendarSongSingers{
+  margin-top:calc(1px * var(--ui-scale));
+  font-size:calc(7px * var(--ui-scale));
+  font-weight:800;
+  opacity:.82;
+}
+
+.calendarMore{
+  color:#a37655;
+  font-size:calc(8px * var(--ui-scale));
+  font-weight:900;
+  line-height:1.2;
+}
+
 .boardFloatLayer{
   position:absolute;
   inset:0;
@@ -1094,6 +1295,184 @@ body.room10ModalOpen{overflow:hidden!important;}
   --section-radius:22px 18px 24px 20px / 19px 24px 18px 23px;
 }
 
+
+.boardViewSwitch{ display:none !important; }
+
+.boardCalendarCard{
+  grid-column:1 / -1;
+  padding:calc(14px * var(--ui-scale)) calc(16px * var(--ui-scale));
+  --section-bg:
+    radial-gradient(circle at 15% 12%, rgba(255,255,255,.52), transparent 35%),
+    linear-gradient(180deg, rgba(255,250,238,.82), rgba(255,247,232,.68));
+  --section-border:rgba(186,139,93,.24);
+  --section-radius:24px 22px 26px 20px / 20px 24px 22px 25px;
+}
+
+.boardCalendarCard .calendarView{
+  grid-column:auto;
+  min-height:auto;
+}
+
+.boardCalendarCard .calendarGrid{
+  grid-auto-rows:minmax(calc(86px * var(--ui-scale)),1fr);
+}
+
+.boardReleaseNoteCard{
+  grid-column:1 / -1;
+  --section-bg:
+    radial-gradient(circle at 84% 16%, rgba(255,255,255,.44), transparent 32%),
+    linear-gradient(180deg, rgba(255,241,222,.78), rgba(255,248,236,.62));
+  --section-border:rgba(199,146,96,.24);
+  --section-radius:20px 24px 18px 24px / 23px 18px 23px 20px;
+}
+
+.boardReleaseList,
+.boardMiniList{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:calc(8px * var(--ui-scale));
+}
+
+.boardReleaseItem,
+.boardMiniList li{
+  display:flex;
+  align-items:flex-start;
+  gap:calc(8px * var(--ui-scale));
+  min-width:0;
+}
+
+.boardMiniList li{
+  color:#795536;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:850;
+  line-height:1.4;
+}
+
+.boardDateBadge{
+  flex:0 0 auto;
+  min-width:calc(42px * var(--ui-scale));
+  padding:calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale));
+  border-radius:calc(10px * var(--ui-scale));
+  color:#6f482b;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(172,127,88,.18);
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  line-height:1.1;
+  text-align:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.78);
+}
+
+.boardReleaseBody,
+.boardMiniBody{
+  min-width:0;
+  flex:1 1 auto;
+}
+
+.boardReleaseHead{
+  display:flex;
+  align-items:center;
+  gap:calc(6px * var(--ui-scale));
+  min-width:0;
+  flex-wrap:wrap;
+}
+
+.boardReleaseTitle{
+  color:#704a2f;
+  font-size:calc(13px * var(--ui-scale));
+  font-weight:900;
+  line-height:1.3;
+}
+
+.boardReleaseSingers,
+.boardMiniSub{
+  margin-top:calc(2px * var(--ui-scale));
+  color:#946949;
+  font-size:calc(11px * var(--ui-scale));
+  font-weight:800;
+  line-height:1.35;
+  overflow-wrap:anywhere;
+}
+
+.boardStateChip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:calc(2px * var(--ui-scale)) calc(7px * var(--ui-scale));
+  border-radius:999px;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+  line-height:1.1;
+}
+
+.boardStateChip.is-planned{
+  color:#5d7190;
+  background:rgba(226,237,250,.9);
+  border:1px solid rgba(105,139,178,.22);
+}
+
+.boardStateChip.is-published{
+  color:#58704f;
+  background:rgba(226,242,220,.92);
+  border:1px solid rgba(103,145,91,.22);
+}
+
+.boardMiniCard{
+  min-width:0;
+}
+
+.boardMiniCardTitle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:calc(8px * var(--ui-scale));
+  margin:0 0 calc(8px * var(--ui-scale));
+  color:#6f482b;
+  font-size:calc(14px * var(--ui-scale));
+  font-weight:900;
+  line-height:1.2;
+}
+
+.boardMiniCardTitle small{
+  flex:0 0 auto;
+  color:#aa7b53;
+  font-size:calc(10px * var(--ui-scale));
+  font-weight:900;
+}
+
+.boardMiniEmpty{
+  color:#9b7251;
+  font-size:calc(12px * var(--ui-scale));
+  font-weight:800;
+  line-height:1.4;
+}
+
+.calendarEvent.is-birthday,
+.calendarEvent.is-holiday{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  line-height:1.16;
+  word-break:break-word;
+}
+
+.calendarEvent.is-holiday{
+  font-size:calc(7px * var(--ui-scale));
+}
+
+.calendarEvent.is-birthday{
+  font-size:calc(7px * var(--ui-scale));
+}
+
+.calendarEvent.is-birthday.is-idol-birthday{
+  background:rgba(247,231,252,.86);
+  border-color:rgba(153,112,180,.20);
+  color:#7d5b8c;
+}
+
 @container (max-width:460px){
   .boardLayout{
     grid-template-columns:1fr;
@@ -1134,7 +1513,6 @@ body.room10ModalOpen{overflow:hidden!important;}
     background-repeat:no-repeat;
     background-attachment:fixed;
   }
-
 
   #livingPanel{
     order:2;
@@ -1179,6 +1557,19 @@ body.room10ModalOpen{overflow:hidden!important;}
     width:100%;
     transform:none;
   }
+
+  .boardHeader{align-items:flex-start;}
+  .boardHeaderTools{flex-direction:column-reverse;align-items:flex-end;gap:5px;}
+  .boardViewBtn{min-height:24px;padding:0 9px;font-size:10px;}
+  .calendarGrid{grid-auto-rows:minmax(56px,auto);gap:3px;}
+  .calendarDay{padding:4px;border-radius:9px;}
+  .calendarDayNum{font-size:9px;}
+  .calendarEvent,.calendarMore{font-size:7px;}
+  .boardCalendarCard .calendarGrid{grid-auto-rows:minmax(72px,auto);}
+  .boardReleaseItem,.boardMiniList li{gap:7px;}
+  .boardDateBadge{min-width:38px;font-size:9px;padding:4px 5px;}
+  .boardReleaseTitle{font-size:12px;}
+  .boardReleaseSingers,.boardMiniSub{font-size:10px;}
 }
 
 .identityNoticeHeader{
@@ -1372,6 +1763,988 @@ body.room10ModalOpen{overflow:hidden!important;}
   #livingLoginMessage{top:32.5%;left:53.35%;width:43%;font-size:6.8px;line-height:1.1;}
   #livingLoginSubmit{top:67.8%;}
 }
+
+
+/* =========================================================
+   WALL-MOUNTED LIVING BOARD
+   日历与公告直接作为墙面挂件，不再使用“大公告栏”外框
+   ========================================================= */
+
+.boardHeader{display:none!important;}
+.boardViewSwitch{display:none!important;}
+
+#livingPanel{
+  left:13.2%;
+  top:16.1%;
+  width:43.3%;
+  height:64.8%;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  overflow:visible;
+  isolation:auto;
+}
+
+#livingPanel::before{display:none!important;}
+
+#livingBoard{
+  height:100%;
+  padding:0 3px 6px;
+  overflow-y:auto;
+  overflow-x:visible;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+#livingBoard::-webkit-scrollbar{display:none;}
+
+.boardLayout{
+  min-height:0;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:calc(12px * var(--ui-scale));
+  padding:calc(8px * var(--ui-scale)) calc(7px * var(--ui-scale)) calc(18px * var(--ui-scale));
+}
+
+.boardSection{
+  animation:none!important;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  box-shadow:
+    0 calc(8px * var(--ui-scale)) calc(17px * var(--ui-scale)) rgba(92,67,42,.13),
+    inset 0 1px 0 rgba(255,255,255,.78);
+}
+
+/* 主挂历纸 */
+.boardCalendarCard{
+  grid-column:1 / -1;
+  position:relative;
+  padding:calc(15px * var(--ui-scale)) calc(15px * var(--ui-scale)) calc(14px * var(--ui-scale));
+  border:calc(1px * var(--ui-scale)) solid rgba(170,126,83,.18);
+  border-radius:calc(10px * var(--ui-scale)) calc(13px * var(--ui-scale)) calc(11px * var(--ui-scale)) calc(9px * var(--ui-scale));
+  background:
+    repeating-linear-gradient(0deg,rgba(164,122,78,.024) 0,rgba(164,122,78,.024) 1px,transparent 1px,transparent calc(22px * var(--ui-scale))),
+    radial-gradient(circle at 16% 8%,rgba(255,255,255,.76),transparent 30%),
+    linear-gradient(180deg,rgba(255,253,244,.97),rgba(252,246,232,.96));
+  transform:rotate(-.18deg);
+  overflow:visible;
+}
+
+.boardCalendarCard::before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  left:50%!important;
+  right:auto!important;
+  top:calc(-8px * var(--ui-scale))!important;
+  width:calc(78px * var(--ui-scale))!important;
+  height:calc(16px * var(--ui-scale))!important;
+  transform:translateX(-50%) rotate(-2deg)!important;
+  border-radius:calc(2px * var(--ui-scale))!important;
+  background:linear-gradient(90deg,rgba(226,203,159,.78),rgba(246,226,187,.86),rgba(219,194,151,.76))!important;
+  border:1px solid rgba(149,112,73,.10)!important;
+  box-shadow:0 2px 5px rgba(82,58,36,.08)!important;
+  opacity:.92!important;
+  z-index:4!important;
+}
+
+.boardCalendarCard::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:calc(-3px * var(--ui-scale));
+  width:calc(5px * var(--ui-scale));
+  height:calc(5px * var(--ui-scale));
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff2cf,#b97b48 60%,#805331);
+  box-shadow:0 1px 3px rgba(73,48,28,.28);
+  z-index:5;
+}
+
+.boardCalendarCard > .boardSectionTitle{
+  margin:0 0 calc(7px * var(--ui-scale));
+  padding:0 calc(2px * var(--ui-scale));
+  font-size:calc(15px * var(--ui-scale));
+  color:#68452d;
+}
+
+.boardCalendarCard > .boardSectionTitle small{display:none;}
+
+.boardCalendarCard .calendarView{
+  gap:calc(6px * var(--ui-scale));
+}
+
+.calendarToolbar{
+  grid-template-columns:calc(30px * var(--ui-scale)) minmax(0,1fr) calc(30px * var(--ui-scale)) auto;
+  gap:calc(5px * var(--ui-scale));
+  padding:0 calc(1px * var(--ui-scale));
+}
+
+.calendarMonthLabel{
+  font-size:calc(14px * var(--ui-scale));
+  letter-spacing:.035em;
+}
+
+.calendarNavBtn,.calendarTodayBtn{
+  min-height:calc(25px * var(--ui-scale));
+  border-color:rgba(139,98,60,.13);
+  background:rgba(255,251,242,.76);
+  box-shadow:0 1px 3px rgba(95,67,39,.05);
+}
+
+.calendarNavBtn{
+  width:calc(28px * var(--ui-scale));
+  font-size:calc(16px * var(--ui-scale));
+}
+
+.calendarTodayBtn{
+  padding:0 calc(8px * var(--ui-scale));
+  font-size:calc(10px * var(--ui-scale));
+}
+
+.calendarWeekdays{
+  padding-top:calc(1px * var(--ui-scale));
+  color:#987050;
+  font-size:calc(9px * var(--ui-scale));
+}
+
+.boardCalendarCard .calendarGrid{
+  grid-auto-rows:minmax(calc(58px * var(--ui-scale)),auto);
+  gap:calc(3px * var(--ui-scale));
+}
+
+.calendarDay{
+  position:relative;
+  padding:calc(4px * var(--ui-scale)) calc(4px * var(--ui-scale)) calc(3px * var(--ui-scale));
+  border-radius:calc(7px * var(--ui-scale));
+  background:rgba(255,255,251,.42);
+  border:1px solid rgba(151,111,72,.09);
+  overflow:visible;
+}
+
+.calendarDay.is-other{
+  opacity:.32;
+  background:rgba(246,241,232,.28);
+}
+
+.calendarDay.is-today{
+  background:rgba(255,238,196,.63);
+  border-color:rgba(193,136,78,.27);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.62);
+}
+
+.calendarDayNum{
+  margin-bottom:calc(3px * var(--ui-scale));
+  font-size:calc(9px * var(--ui-scale));
+  color:#725139;
+}
+
+.calendarEvents{gap:calc(2px * var(--ui-scale));}
+
+/* 日历内事件不再做成被截断的“药丸” */
+.calendarEvent{
+  padding:calc(1px * var(--ui-scale)) calc(2px * var(--ui-scale));
+  border:0;
+  border-radius:calc(3px * var(--ui-scale));
+  background:transparent;
+  font-size:calc(7.2px * var(--ui-scale));
+  line-height:1.18;
+  overflow:visible;
+  white-space:normal;
+  text-overflow:clip;
+  word-break:break-word;
+}
+
+.calendarEvent.is-project{
+  padding:calc(2px * var(--ui-scale)) calc(3px * var(--ui-scale));
+  border-left:calc(2px * var(--ui-scale)) solid transparent;
+}
+
+.calendarEvent.is-project.is-planned{
+  color:#536b8a;
+  background:rgba(224,236,249,.64);
+  border-left-color:rgba(93,129,170,.62);
+}
+
+.calendarEvent.is-project.is-published{
+  color:#516a49;
+  background:rgba(224,241,218,.68);
+  border-left-color:rgba(91,137,79,.62);
+}
+
+.calendarEvent.is-birthday{
+  color:#986078;
+  background:rgba(249,226,235,.45);
+}
+
+.calendarEvent.is-holiday{
+  color:#865e34;
+  background:rgba(253,237,201,.35);
+  font-weight:900;
+}
+
+.calendarSongTitle,
+.calendarSongSingers{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  word-break:break-word;
+}
+
+.calendarSongSingers{
+  margin-top:calc(1px * var(--ui-scale));
+  font-size:calc(6.5px * var(--ui-scale));
+  line-height:1.14;
+  opacity:.82;
+}
+
+.calendarMore{
+  font-size:calc(7px * var(--ui-scale));
+  padding-left:calc(2px * var(--ui-scale));
+}
+
+/* CSS 小国旗，避免 Windows 上国旗 Emoji 缺失 */
+.calendarHolidayLine{
+  display:inline-flex;
+  align-items:flex-start;
+  gap:calc(2px * var(--ui-scale));
+  max-width:100%;
+}
+.calendarHolidayText{
+  min-width:0;
+  white-space:normal;
+  word-break:break-word;
+}
+.calendarFlag{
+  position:relative;
+  flex:0 0 auto;
+  display:inline-block;
+  width:calc(12px * var(--ui-scale));
+  height:calc(8px * var(--ui-scale));
+  margin-top:calc(.5px * var(--ui-scale));
+  border-radius:calc(1px * var(--ui-scale));
+  overflow:hidden;
+  box-shadow:0 0 0 1px rgba(91,62,38,.12);
+}
+.calendarFlag-cn{background:#de2910;}
+.calendarFlag-cn::before{
+  content:"★";
+  position:absolute;
+  left:calc(1px * var(--ui-scale));
+  top:calc(-1.2px * var(--ui-scale));
+  color:#ffde00;
+  font-size:calc(5.4px * var(--ui-scale));
+  line-height:1;
+}
+.calendarFlag-us{
+  background:repeating-linear-gradient(
+    180deg,
+    #b22234 0,
+    #b22234 14.28%,
+    #fff 14.28%,
+    #fff 28.56%
+  );
+}
+.calendarFlag-us::before{
+  content:"✦";
+  position:absolute;
+  left:0;
+  top:0;
+  width:45%;
+  height:54%;
+  background:#3c3b6e;
+  color:#fff;
+  font-size:calc(3.6px * var(--ui-scale));
+  line-height:1.15;
+  text-align:center;
+}
+
+/* 发歌提醒：像贴在主日历下方的窄便签 */
+.boardReleaseNoteCard{
+  grid-column:1 / -1;
+  position:relative;
+  padding:calc(10px * var(--ui-scale)) calc(14px * var(--ui-scale)) calc(11px * var(--ui-scale));
+  border:1px solid rgba(185,132,89,.16);
+  border-radius:calc(5px * var(--ui-scale)) calc(8px * var(--ui-scale)) calc(6px * var(--ui-scale)) calc(7px * var(--ui-scale));
+  background:
+    linear-gradient(180deg,rgba(255,244,212,.96),rgba(255,238,199,.93));
+  transform:rotate(.28deg);
+  box-shadow:0 calc(5px * var(--ui-scale)) calc(12px * var(--ui-scale)) rgba(91,64,39,.11);
+}
+
+.boardReleaseNoteCard::before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  left:calc(24px * var(--ui-scale))!important;
+  right:auto!important;
+  top:calc(-6px * var(--ui-scale))!important;
+  width:calc(48px * var(--ui-scale))!important;
+  height:calc(12px * var(--ui-scale))!important;
+  transform:rotate(-5deg)!important;
+  border-radius:2px!important;
+  background:rgba(232,205,161,.78)!important;
+  border:1px solid rgba(147,109,68,.08)!important;
+  opacity:.9!important;
+}
+
+.boardReleaseNoteCard .boardSectionTitle{
+  margin-bottom:calc(6px * var(--ui-scale));
+  font-size:calc(13px * var(--ui-scale));
+}
+.boardReleaseNoteCard .boardSectionTitle small{display:none;}
+
+.boardReleaseList{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+}
+
+.boardReleaseItem{
+  gap:calc(6px * var(--ui-scale));
+  padding:0;
+}
+
+.boardDateBadge{
+  min-width:calc(35px * var(--ui-scale));
+  padding:calc(3px * var(--ui-scale)) calc(5px * var(--ui-scale));
+  border:0;
+  border-radius:calc(5px * var(--ui-scale));
+  background:rgba(255,255,255,.52);
+  color:#7a5537;
+  font-size:calc(9px * var(--ui-scale));
+  box-shadow:none;
+}
+
+.boardReleaseTitle{
+  font-size:calc(11.5px * var(--ui-scale));
+  color:#6b472f;
+}
+
+.boardReleaseSingers{
+  margin-top:calc(1px * var(--ui-scale));
+  font-size:calc(9px * var(--ui-scale));
+  line-height:1.25;
+}
+
+.boardStateChip{display:none;}
+
+/* 其余公告：各自是一张独立贴纸 */
+.boardMiniCard{
+  position:relative;
+  padding:calc(11px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border-width:1px;
+  border-radius:calc(7px * var(--ui-scale)) calc(10px * var(--ui-scale)) calc(8px * var(--ui-scale)) calc(6px * var(--ui-scale));
+  overflow:visible;
+}
+
+.boardMiniCard::before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  left:50%!important;
+  right:auto!important;
+  top:calc(-6px * var(--ui-scale))!important;
+  width:calc(40px * var(--ui-scale))!important;
+  height:calc(11px * var(--ui-scale))!important;
+  transform:translateX(-50%) rotate(2deg)!important;
+  border-radius:2px!important;
+  background:rgba(235,214,176,.72)!important;
+  border:1px solid rgba(149,108,68,.08)!important;
+  opacity:.88!important;
+}
+
+.boardMiniCard.quick{transform:rotate(-.35deg);}
+.boardMiniCard.game{transform:rotate(.32deg);}
+.boardMiniCard.member{transform:rotate(-.24deg);}
+.boardMiniCard.pet{transform:rotate(.38deg);}
+.boardMiniCard.focus{transform:rotate(-.28deg);}
+.boardMiniCard.release{transform:rotate(.2deg);}
+
+.boardMiniCard .boardSectionTitle{
+  margin-bottom:calc(6px * var(--ui-scale));
+  font-size:calc(12.5px * var(--ui-scale));
+}
+
+.boardMiniCard .boardList li{
+  padding-left:calc(8px * var(--ui-scale));
+  font-size:calc(10.5px * var(--ui-scale));
+  line-height:1.38;
+}
+
+.boardMiniCard .boardList li em{
+  font-size:calc(8.8px * var(--ui-scale));
+}
+
+@media(max-width:540px){
+  #livingPanel{
+    position:relative!important;
+    left:auto!important;
+    top:auto!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    padding:4px 0 10px!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  #livingBoard{height:auto;overflow:visible;padding:0;}
+  .boardLayout{padding:7px 2px 16px;gap:12px;}
+  .boardCalendarCard{transform:none;padding:14px 10px 12px;}
+  .boardCalendarCard .calendarGrid{grid-auto-rows:minmax(67px,auto);gap:3px;}
+  .calendarDay{padding:4px 3px;}
+  .calendarEvent{font-size:7px;}
+  .calendarSongSingers{font-size:6.4px;}
+  .calendarFlag{width:11px;height:7px;}
+  .boardReleaseNoteCard{transform:none;}
+  .boardReleaseList{grid-template-columns:1fr;}
+  .boardMiniCard{transform:none!important;}
+}
+
+
+/* =========================================================
+   WALL CALENDAR LAYOUT V2
+   左：当月日历 + 发歌提醒；右：游戏通知 + 成员动态
+   ========================================================= */
+#livingPanel{
+  left:11.5%;
+  top:15.0%;
+  width:61%;
+  height:68%;
+}
+
+#livingBoard{
+  height:100%;
+  overflow:visible;
+  padding:0 2px 3px;
+}
+
+.boardLayout{
+  display:block;
+  min-height:0;
+  padding:calc(7px * var(--ui-scale)) calc(5px * var(--ui-scale)) calc(8px * var(--ui-scale));
+}
+
+.wallDashboard{
+  display:grid;
+  grid-template-columns:minmax(0,2.52fr) minmax(calc(170px * var(--ui-scale)),.90fr);
+  gap:calc(14px * var(--ui-scale));
+  align-items:start;
+}
+
+.wallCalendarColumn{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:calc(9px * var(--ui-scale));
+}
+
+.wallSideColumn{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:calc(11px * var(--ui-scale));
+  align-self:start;
+}
+
+.wallSideColumn .boardMiniCard{
+  width:100%;
+  min-height:0;
+  height:auto;
+  margin:0;
+  align-self:flex-start;
+}
+
+.wallOtherNotices{
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:calc(11px * var(--ui-scale));
+  margin-top:calc(11px * var(--ui-scale));
+}
+
+.boardCalendarCard{
+  grid-column:auto;
+  margin:0;
+  padding:calc(12px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(10px * var(--ui-scale));
+}
+
+.boardCalendarCard .calendarView{gap:calc(5px * var(--ui-scale));}
+
+.boardCalendarCard .calendarGrid{
+  grid-auto-rows:minmax(calc(50px * var(--ui-scale)),auto);
+  gap:calc(4px * var(--ui-scale));
+}
+
+.calendarDay{
+  min-height:calc(50px * var(--ui-scale));
+  padding:calc(4px * var(--ui-scale));
+}
+
+.calendarDay.is-empty{
+  visibility:hidden;
+  pointer-events:none;
+  border-color:transparent;
+  background:transparent;
+  box-shadow:none;
+}
+
+.calendarDayNum{
+  margin-bottom:calc(2px * var(--ui-scale));
+  font-size:calc(9.4px * var(--ui-scale));
+}
+
+.calendarEvent{
+  font-size:calc(7.6px * var(--ui-scale));
+  line-height:1.18;
+}
+.calendarSongSingers{font-size:calc(6.7px * var(--ui-scale));line-height:1.18;}
+
+.boardReleaseNoteCard{
+  grid-column:auto;
+  margin:0;
+  padding:calc(8px * var(--ui-scale)) calc(11px * var(--ui-scale)) calc(9px * var(--ui-scale));
+}
+.boardReleaseNoteCard .boardSectionTitle{
+  margin-bottom:calc(4px * var(--ui-scale));
+}
+.boardReleaseList{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:calc(4px * var(--ui-scale)) calc(8px * var(--ui-scale));
+}
+.boardReleaseItem{gap:calc(5px * var(--ui-scale));}
+.boardDateBadge{
+  min-width:calc(31px * var(--ui-scale));
+  padding:calc(2px * var(--ui-scale)) calc(4px * var(--ui-scale));
+  font-size:calc(8px * var(--ui-scale));
+}
+.boardReleaseTitle{font-size:calc(10.3px * var(--ui-scale));}
+.boardReleaseSingers{font-size:calc(8px * var(--ui-scale));}
+
+.wallSideColumn .boardMiniCard .boardSectionTitle{
+  font-size:calc(12px * var(--ui-scale));
+  margin-bottom:calc(6px * var(--ui-scale));
+}
+.wallSideColumn .boardMiniCard .boardList{
+  gap:calc(4px * var(--ui-scale));
+}
+.wallSideColumn .boardMiniCard .boardList li{
+  font-size:calc(10.4px * var(--ui-scale));
+  line-height:1.42;
+}
+.wallSideColumn .boardMiniCard .boardList li em{
+  font-size:calc(8.7px * var(--ui-scale));
+}
+
+.boardReleaseSentence{
+  color:#765034;
+  font-size:calc(12.2px * var(--ui-scale));
+  font-weight:850;
+  line-height:1.48;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:540px){
+  #livingPanel{width:100%!important;}
+  .wallDashboard{display:flex;flex-direction:column;gap:12px;}
+  .wallCalendarColumn,.wallSideColumn{width:100%;}
+  .wallSideColumn{display:flex;flex-direction:column;gap:12px;}
+  .wallSideColumn .boardMiniCard{min-height:0;}
+  .wallOtherNotices{display:flex;flex-direction:column;gap:12px;margin-top:12px;}
+  .boardCalendarCard .calendarGrid{grid-auto-rows:minmax(60px,auto);}
+  .calendarDay{min-height:60px;}
+  .boardReleaseList{grid-template-columns:1fr;}
+}
+
+
+
+/* =========================================================
+   ADAPTIVE CALENDAR CELLS V3
+   保持周一～周日七列对齐；日期格按当日内容自适应高度。
+   空白日更轻更矮，事件越多空间越大，不再所有格子等高硬撑。
+   ========================================================= */
+.boardCalendarCard .calendarGrid{
+  grid-auto-rows:auto!important;
+  align-items:start!important;
+  row-gap:calc(6px * var(--ui-scale))!important;
+}
+
+.calendarDay{
+  align-self:start!important;
+  height:auto!important;
+  min-height:calc(44px * var(--ui-scale))!important;
+  overflow:visible!important;
+  transition:min-height .18s ease, opacity .18s ease, background .18s ease;
+}
+
+/* 当天没有任何歌曲 / 生日 / 节日：缩成轻量日期格。 */
+.calendarDay.is-quiet{
+  min-height:calc(34px * var(--ui-scale))!important;
+  padding:calc(4px * var(--ui-scale))!important;
+  background:rgba(255,253,248,.30)!important;
+  border-color:rgba(160,115,76,.075)!important;
+  opacity:.78;
+}
+
+/* 有内容的日期按信息量给出不同的最低空间；实际内容更多时仍可继续向下撑开。 */
+.calendarDay.has-one-event{
+  min-height:calc(60px * var(--ui-scale))!important;
+}
+.calendarDay.has-two-events{
+  min-height:calc(78px * var(--ui-scale))!important;
+}
+.calendarDay.has-many-events{
+  min-height:calc(98px * var(--ui-scale))!important;
+  background:rgba(255,253,248,.62);
+}
+
+/* 今天即使没有事件也要保持可辨识度。 */
+.calendarDay.is-today{
+  opacity:1!important;
+}
+
+/* 内容格不再以省略号硬截断，允许歌曲名 / 参与人 / 生日 / 节日自然换行。 */
+.calendarEvent{
+  overflow:visible!important;
+}
+.calendarSongTitle,
+.calendarSongSingers,
+.calendarEvent.is-birthday,
+.calendarEvent.is-holiday{
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  overflow-wrap:anywhere;
+}
+
+.calendarEvents{
+  gap:calc(3px * var(--ui-scale))!important;
+}
+
+@media(max-width:540px){
+  .boardCalendarCard .calendarGrid{
+    grid-auto-rows:auto!important;
+    row-gap:5px!important;
+  }
+  .calendarDay{
+    min-height:50px!important;
+  }
+  .calendarDay.is-quiet{
+    min-height:38px!important;
+  }
+  .calendarDay.has-one-event{
+    min-height:68px!important;
+  }
+  .calendarDay.has-two-events{
+    min-height:88px!important;
+  }
+  .calendarDay.has-many-events{
+    min-height:108px!important;
+  }
+}
+
+
+
+/* =========================================================
+   BALANCED READABLE CALENDAR V4
+   在清晰字号与整体高度之间取平衡：不再把月历纵向拉得过长。
+   ========================================================= */
+@media(min-width:541px){
+  #livingPanel{
+    height:68.5%;
+  }
+
+  .boardCalendarCard{
+    padding-bottom:calc(11px * var(--ui-scale));
+  }
+
+  .boardCalendarCard .calendarView{
+    gap:calc(5px * var(--ui-scale));
+  }
+
+  .boardCalendarCard .calendarGrid{
+    row-gap:calc(5px * var(--ui-scale))!important;
+  }
+
+  /* 空日期保持轻量，把纵向空间留给真正有内容的日期。 */
+  .calendarDay.is-quiet{
+    min-height:calc(34px * var(--ui-scale))!important;
+  }
+
+  /* 有内容时按信息量适度增高；实际内容仍可自然撑开。 */
+  .calendarDay.has-one-event{
+    min-height:calc(56px * var(--ui-scale))!important;
+  }
+  .calendarDay.has-two-events{
+    min-height:calc(72px * var(--ui-scale))!important;
+  }
+  .calendarDay.has-many-events{
+    min-height:calc(90px * var(--ui-scale))!important;
+  }
+
+  .calendarDay{
+    padding:calc(4px * var(--ui-scale))!important;
+  }
+
+  .calendarMonthLabel{
+    font-size:calc(15px * var(--ui-scale));
+  }
+
+  .calendarWeekdays{
+    font-size:calc(10.8px * var(--ui-scale));
+  }
+
+  .calendarDayNum{
+    margin-bottom:calc(3px * var(--ui-scale));
+    font-size:calc(10.8px * var(--ui-scale));
+  }
+
+  .calendarEvents{
+    gap:calc(3px * var(--ui-scale))!important;
+  }
+
+  .calendarEvent{
+    padding:calc(2px * var(--ui-scale)) calc(4px * var(--ui-scale));
+    font-size:calc(9.6px * var(--ui-scale));
+    line-height:1.24;
+  }
+
+  .calendarEvent.is-project{
+    padding:calc(3px * var(--ui-scale)) calc(4px * var(--ui-scale));
+  }
+
+  .calendarSongTitle{
+    line-height:1.24;
+  }
+
+  .calendarSongSingers{
+    margin-top:calc(1px * var(--ui-scale));
+    font-size:calc(8.6px * var(--ui-scale));
+    line-height:1.22;
+  }
+
+  .calendarEvent.is-birthday,
+  .calendarEvent.is-holiday{
+    line-height:1.24;
+  }
+
+  /* 右侧通知也略提字号，避免日历放大后显得更加难读。 */
+  .wallSideColumn .boardMiniCard .boardSectionTitle{
+    font-size:calc(13px * var(--ui-scale));
+  }
+  .wallSideColumn .boardMiniCard .boardList li{
+    font-size:calc(11.2px * var(--ui-scale));
+    line-height:1.48;
+  }
+  .wallSideColumn .boardMiniCard .boardList li em{
+    font-size:calc(9.2px * var(--ui-scale));
+  }
+}
+
+@media(max-width:540px){
+  .calendarMonthLabel{font-size:16px;}
+  .calendarWeekdays{font-size:11px;}
+  .calendarDayNum{font-size:11px;}
+  .calendarEvent{font-size:8.8px;line-height:1.25;}
+  .calendarSongSingers{font-size:7.8px;line-height:1.22;}
+  .calendarDay.is-quiet{min-height:38px!important;}
+  .calendarDay.has-one-event{min-height:66px!important;}
+  .calendarDay.has-two-events{min-height:84px!important;}
+  .calendarDay.has-many-events{min-height:104px!important;}
+}
+
+
+/* =========================================================
+   REFINED WALL CALENDAR V5
+   回到原有挂墙月历结构，只提升信息完整性和右侧便签可读性
+   ========================================================= */
+@media(min-width:541px){
+  /* 日历保持原来的自然大小，不再使用参考图式大方格。 */
+  #livingPanel{
+    height:68.5%;
+  }
+
+  .calendarDay.is-quiet{
+    min-height:calc(34px * var(--ui-scale))!important;
+  }
+  .calendarDay.has-one-event{
+    min-height:calc(60px * var(--ui-scale))!important;
+  }
+  .calendarDay.has-two-events{
+    min-height:calc(78px * var(--ui-scale))!important;
+  }
+  .calendarDay.has-many-events{
+    min-height:calc(96px * var(--ui-scale))!important;
+  }
+
+  .calendarEvent{
+    font-size:calc(9.8px * var(--ui-scale));
+    line-height:1.28;
+  }
+
+  .calendarSongTitle,
+  .calendarSongSingers{
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    overflow-wrap:anywhere;
+  }
+
+  .calendarSongSingers{
+    display:block!important;
+    font-size:calc(8.7px * var(--ui-scale));
+    line-height:1.24;
+  }
+
+  .calendarEvent.is-birthday,
+  .calendarEvent.is-holiday{
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    overflow-wrap:anywhere;
+  }
+
+  /* 右侧两张便签提高不透明度，避免与背景角色混在一起。 */
+  .wallSideColumn .boardMiniCard.game{
+    --section-bg:
+      radial-gradient(circle at 12% 12%, rgba(255,255,255,.90), transparent 35%),
+      linear-gradient(180deg, rgba(247,245,255,.96), rgba(234,247,255,.94));
+    --section-border:rgba(126,111,185,.30);
+    box-shadow:
+      0 calc(8px * var(--ui-scale)) calc(18px * var(--ui-scale)) rgba(86,74,60,.12),
+      inset 0 1px 0 rgba(255,255,255,.92);
+    backdrop-filter:blur(5px);
+    -webkit-backdrop-filter:blur(5px);
+  }
+
+  .wallSideColumn .boardMiniCard.member{
+    --section-bg:
+      radial-gradient(circle at 18% 12%, rgba(255,255,255,.90), transparent 35%),
+      linear-gradient(180deg, rgba(241,252,232,.97), rgba(250,245,216,.95));
+    --section-border:rgba(117,158,112,.31);
+    box-shadow:
+      0 calc(8px * var(--ui-scale)) calc(18px * var(--ui-scale)) rgba(86,74,60,.13),
+      inset 0 1px 0 rgba(255,255,255,.92);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+  }
+
+  .wallSideColumn .boardMiniCard .boardSectionTitle{
+    font-size:calc(13.2px * var(--ui-scale));
+    color:#65442d;
+  }
+
+  .wallSideColumn .boardMiniCard .boardList li{
+    font-size:calc(11.4px * var(--ui-scale));
+    line-height:1.5;
+    color:#694a34;
+  }
+
+  .wallSideColumn .boardMiniCard .boardList li em{
+    font-size:calc(9.4px * var(--ui-scale));
+    color:#8c6a4b;
+  }
+}
+
+@media(max-width:540px){
+  .calendarSongTitle,
+  .calendarSongSingers,
+  .calendarEvent.is-birthday,
+  .calendarEvent.is-holiday{
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+
+  .wallSideColumn .boardMiniCard.game,
+  .wallSideColumn .boardMiniCard.member{
+    background:rgba(255,252,242,.94)!important;
+    backdrop-filter:blur(5px);
+    -webkit-backdrop-filter:blur(5px);
+  }
+}
+
+
+/* =========================================================
+   COMPACT SIDE NOTICES V6
+   游戏通知合并同类模式；成员动态合并同成员成就，右侧便签更短更轻。
+   ========================================================= */
+@media(min-width:541px){
+  .wallSideColumn{
+    gap:calc(9px * var(--ui-scale));
+  }
+
+  .wallSideColumn .boardMiniCard{
+    padding:calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  }
+
+  .wallSideColumn .boardMiniCard .boardSectionTitle{
+    margin-bottom:calc(5px * var(--ui-scale));
+  }
+
+  .wallSideColumn .boardMiniCard .boardList{
+    gap:calc(3px * var(--ui-scale));
+  }
+
+  .wallSideColumn .boardMiniCard .boardList li{
+    font-size:calc(10.9px * var(--ui-scale));
+    line-height:1.40;
+    padding-left:calc(8px * var(--ui-scale));
+  }
+
+  .wallSideColumn .boardMiniCard .boardList li em{
+    margin-left:calc(5px * var(--ui-scale));
+    font-size:calc(8.9px * var(--ui-scale));
+  }
+
+  .wallSideColumn .boardMiniCard.member .boardList li,
+  .wallSideColumn .boardMiniCard.game .boardList li{
+    margin:0;
+  }
+}
+
+@media(max-width:540px){
+  .wallSideColumn .boardMiniCard{
+    padding:10px 12px;
+  }
+  .wallSideColumn .boardMiniCard .boardList{
+    gap:4px;
+  }
+}
+
+
+
+/* =========================================================
+   CALENDAR ROW ALIGN FIX V7
+   如果同一周里有一个日期格因为内容更多而变高，
+   则这一整行的所有日期格都跟随拉成同样高度。
+   ========================================================= */
+.boardCalendarCard .calendarGrid{
+  align-items:stretch !important;
+}
+
+.calendarDay,
+.calendarDay.is-empty,
+.calendarDay.is-quiet,
+.calendarDay.has-one-event,
+.calendarDay.has-two-events,
+.calendarDay.has-many-events{
+  align-self:stretch !important;
+  height:100% !important;
+}
+
+.calendarDay{
+  display:flex;
+  flex-direction:column;
+}
+
+.calendarEvents{
+  flex:1 1 auto;
+}
+
 </style>
 </head>
 
@@ -1485,7 +2858,13 @@ body.room10ModalOpen{overflow:hidden!important;}
 
       <div class="boardHeader">
         <h1 id="livingPanelTitle">读取中</h1>
-        <div class="boardHeaderNote" id="boardTodayDate">读取中</div>
+        <div class="boardHeaderTools">
+          <div class="boardViewSwitch" aria-label="视图切换">
+            <button class="boardViewBtn is-active" type="button" data-board-view="list" aria-pressed="true">公告</button>
+            <button class="boardViewBtn" type="button" data-board-view="calendar" aria-pressed="false">日历</button>
+          </div>
+          <div class="boardHeaderNote" id="boardTodayDate">读取中</div>
+        </div>
       </div>
 
       <div id="livingBoard">
@@ -1576,6 +2955,7 @@ const client = window.supabase?.createClient
   ? window.supabase.createClient(supabaseUrl, supabaseKey)
   : null;
 const livingBoardLayout = document.getElementById("livingBoardLayout");
+const boardViewButtons = Array.from(document.querySelectorAll("[data-board-view]"));
 const livingLoginMask = document.getElementById("livingLoginMask");
 const livingLoginImage = document.getElementById("livingLoginImage");
 const livingLoginNickname = document.getElementById("livingLoginNickname");
@@ -1659,7 +3039,7 @@ function syncOverlayToImage(){
   root.style.setProperty("--ui-scale", String(scale));
   root.style.setProperty("--room-nav-scale", String(navScale));
   root.style.setProperty("--identity-scale", String(scale));
-  root.style.setProperty("--board-scale", String(scale));
+  root.style.setProperty("--board-scale", String(Math.max(0.86, scale)));
 }
 
 function refreshTemplateLayout(){
@@ -2036,6 +3416,12 @@ const DEFAULT_PAGE_TEXTS = Object.freeze({
 let boardCategories = [];
 let boardCategoryMap = new Map();
 let pageTexts = {};
+let livingAnnouncements = [];
+let livingCalendarProjects = [];
+let livingCalendarBirthdays = [];
+let livingCalendarIdolBirthdays = [];
+let boardView = "list";
+let calendarCursor = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
 const ANNOUNCEMENT_DAY = 24 * 60 * 60 * 1000;
 
@@ -2323,11 +3709,16 @@ function getBoardLink(category){
   return `<a class="boardGoBtn" href="${escapeHtml(safeTarget)}">${escapeHtml(requirePageText("go_button"))}</a>`;
 }
 
-function renderLivingBoard(rows){
-  if(!livingBoardLayout) return;
-
+function renderCategorySections(rows, options = {}){
   const groups = groupBoardRows(rows);
-  const sections = boardCategories.map(category => {
+  const excluded = new Set(options.excludeKeys || []);
+  const included = new Set(options.includeKeys || []);
+  const excludedClasses = new Set(options.excludeClasses || []);
+  const includedClasses = new Set(options.includeClasses || []);
+  const hasIncludeFilter = included.size > 0 || includedClasses.size > 0;
+  return boardCategories.map(category => {
+    if(excluded.has(category.key) || excludedClasses.has(category.cls)) return "";
+    if(hasIncludeFilter && !included.has(category.key) && !includedClasses.has(category.cls)) return "";
     const items = groups.get(category.key) || [];
     if(!items.length) return "";
 
@@ -2339,7 +3730,7 @@ function renderLivingBoard(rows){
     const titleText = `${category.icon ? `${category.icon} ` : ""}${category.label}`;
 
     return `
-      <article class="boardSection ${escapeHtml(category.cls)}" data-category="${escapeHtml(category.key)}">
+      <article class="boardSection boardMiniCard ${escapeHtml(category.cls)}" data-category="${escapeHtml(category.key)}">
         <h2 class="boardSectionTitle">
           <span>${escapeHtml(titleText)}</span>
           ${headerAside}
@@ -2349,38 +3740,746 @@ function renderLivingBoard(rows){
         </ul>
       </article>
     `;
-  }).filter(Boolean);
+  }).filter(Boolean).join("");
+}
 
-  if(!sections.length){
-    livingBoardLayout.innerHTML = `<div class="boardEmpty">${escapeHtml(requirePageText("empty_text"))}</div>`;
-  }else{
-    livingBoardLayout.innerHTML = sections.join("");
+function formatMonthDayText(date){
+  const d = calendarDateValue(date);
+  return d ? `${d.getMonth() + 1}/${d.getDate()}` : "--";
+}
+
+function calendarProjectsForMonth(){
+  const year = calendarCursor.getFullYear();
+  const month = calendarCursor.getMonth();
+  return livingCalendarProjects.map(project => {
+    const date = calendarDateValue(project.release_date);
+    if(!date) return null;
+    if(date.getFullYear() !== year || date.getMonth() !== month) return null;
+    return {
+      project,
+      date,
+      singers:calendarProjectSingerNames(project),
+      published:calendarProjectIsPublished(project)
+    };
+  }).filter(Boolean).sort((a, b) => {
+    const diff = a.date - b.date;
+    if(diff !== 0) return diff;
+    return String(a.project?.project_name || "").localeCompare(String(b.project?.project_name || ""), "zh-CN");
+  });
+}
+
+function calendarBirthdaysForMonth(){
+  const month = calendarCursor.getMonth() + 1;
+  return livingCalendarBirthdays
+    .filter(member => member.birthday_month === month)
+    .slice()
+    .sort((a, b) => a.birthday_day - b.birthday_day || String(a.nickname || "").localeCompare(String(b.nickname || ""), "zh-CN"));
+}
+
+function calendarHolidaysForMonth(){
+  const year = calendarCursor.getFullYear();
+  const month = calendarCursor.getMonth();
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const result = [];
+  for(let day = 1; day <= lastDay; day += 1){
+    const date = new Date(year, month, day);
+    calendarHolidayItems(date).forEach(item => {
+      result.push({ date, ...item });
+    });
+  }
+  return result;
+}
+
+function upcomingReleaseProjects(limit = 4){
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  return livingCalendarProjects.map(project => {
+    const date = calendarDateValue(project.release_date);
+    if(!date) return null;
+    const localDate = calendarLocalDay(date);
+    return {
+      project,
+      date:localDate,
+      singers:calendarProjectSingerNames(project),
+      published:calendarProjectIsPublished(project)
+    };
+  }).filter(item => item && !item.published && item.date >= today)
+    .sort((a,b) => a.date - b.date || String(a.project?.project_name || "").localeCompare(String(b.project?.project_name || ""), "zh-CN"))
+    .slice(0, limit);
+}
+
+function buildReleaseNoteCard(rows = []){
+  // 发歌提醒只保留一句话。优先使用数据库 living_announcements_feed 中原有文案，
+  // 避免与日历里的“日期 + 歌名 + 参与人”详细信息重复。
+  const normalizedRows = normalizeBoardRows(rows);
+  const releaseRow = normalizedRows.find(row => {
+    const category = boardCategoryMap.get(String(row?.category || ""));
+    return category?.key === "release" || category?.cls === "release" || String(row?.event_kind || "") === "song_release";
+  });
+
+  let sentence = String(releaseRow?.content || releaseRow?.title || "").trim();
+
+  // 数据库当前没有可展示的发歌公告时，仅用最近一首计划做一句话兜底。
+  if(!sentence){
+    const next = upcomingReleaseProjects(1)[0];
+    if(next){
+      const title = String(next.project?.project_name || "未命名作品").trim();
+      sentence = `《${title}》将在 ${next.date.getMonth() + 1}月${next.date.getDate()}日 发布，记得来听~`;
+    }else{
+      sentence = "近期没有新的发歌安排。";
+    }
+  }
+
+  return `
+    <article class="boardSection boardReleaseNoteCard">
+      <h2 class="boardSectionTitle"><span>♪ 发歌提醒</span></h2>
+      <div class="boardReleaseSentence">${escapeHtml(sentence)}</div>
+    </article>
+  `;
+}
+
+function buildBirthdayCard(){
+  const items = calendarBirthdaysForMonth();
+  const body = items.length
+    ? `<ul class="boardMiniList">${items.map(item => `
+        <li>
+          <span class="boardDateBadge">${escapeHtml(`${item.birthday_month}/${item.birthday_day}`)}</span>
+          <div class="boardMiniBody">
+            <div>🎂 ${escapeHtml(item.nickname)} 生日</div>
+          </div>
+        </li>
+      `).join("")}</ul>`
+    : `<div class="boardMiniEmpty">本月没有成员生日。</div>`;
+
+  return `
+    <article class="boardSection boardMiniCard member">
+      <h2 class="boardMiniCardTitle"><span>🎂 成员生日</span><small>当前月份</small></h2>
+      ${body}
+    </article>
+  `;
+}
+
+function buildHolidayCard(){
+  const items = calendarHolidaysForMonth();
+  const body = items.length
+    ? `<ul class="boardMiniList">${items.map(item => `
+        <li>
+          <span class="boardDateBadge">${escapeHtml(formatMonthDayText(item.date))}</span>
+          <div class="boardMiniBody">
+            <div>${escapeHtml(item.label)}</div>
+          </div>
+        </li>
+      `).join("")}</ul>`
+    : `<div class="boardMiniEmpty">本月没有特别节日。</div>`;
+
+  return `
+    <article class="boardSection boardMiniCard focus">
+      <h2 class="boardMiniCardTitle"><span>🎊 节日提醒</span><small>当前月份</small></h2>
+      ${body}
+    </article>
+  `;
+}
+
+function buildCalendarViewHtml(){
+  const year = calendarCursor.getFullYear();
+  const month = calendarCursor.getMonth();
+  const first = new Date(year, month, 1);
+  const leadingBlankCount = (first.getDay() + 6) % 7;
+  const monthDayCount = new Date(year, month + 1, 0).getDate();
+  const totalCells = Math.ceil((leadingBlankCount + monthDayCount) / 7) * 7;
+  const todayKey = calendarDayKey(new Date());
+  const projectMap = calendarProjectItemsByDay();
+
+  const days = Array.from({length:totalCells}, (_,index) => {
+    const dayNumber = index - leadingBlankCount + 1;
+    if(dayNumber < 1 || dayNumber > monthDayCount){
+      return `<div class="calendarDay is-empty" aria-hidden="true"></div>`;
+    }
+
+    const date = new Date(year, month, dayNumber);
+    const key = calendarDayKey(date);
+    const items = [
+      ...(projectMap.get(key) || []),
+      ...calendarBirthdayItems(date),
+      ...calendarHolidayItems(date)
+    ];
+    const visible = items.map(renderCalendarItem).join("");
+    const classes = ["calendarDay"];
+
+    // 日历维持七列对齐，但每个日期格按内容密度决定自身高度。
+    // 同一周由内容最多的日期决定行高；空日期不会再被强行拉满。
+    if(items.length === 0){
+      classes.push("is-quiet");
+    }else if(items.length === 1){
+      classes.push("has-one-event");
+    }else if(items.length === 2){
+      classes.push("has-two-events");
+    }else{
+      classes.push("has-many-events");
+    }
+
+    if(key === todayKey) classes.push("is-today");
+    const dayLabel = `${year}年${month + 1}月${dayNumber}日`;
+    return `<div class="${classes.join(" ")}" data-event-count="${items.length}" aria-label="${dayLabel}"><span class="calendarDayNum">${dayNumber}</span><div class="calendarEvents">${visible}</div></div>`;
+  }).join("");
+
+  return `
+    <div class="calendarView">
+      <div class="calendarToolbar">
+        <button class="calendarNavBtn" type="button" data-calendar-shift="-1" aria-label="上个月">‹</button>
+        <strong class="calendarMonthLabel">${year}年${month + 1}月</strong>
+        <button class="calendarNavBtn" type="button" data-calendar-shift="1" aria-label="下个月">›</button>
+        <button class="calendarTodayBtn" type="button" data-calendar-today>今天</button>
+      </div>
+      <div class="calendarWeekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+      <div class="calendarGrid">${days}</div>
+    </div>`;
+}
+
+
+function boardCategoryMatches(category, keyOrClass){
+  if(!category) return false;
+  const target = String(keyOrClass || "").trim();
+  return category.key === target || category.cls === target;
+}
+
+function findBoardCategory(keyOrClass){
+  return boardCategories.find(category => boardCategoryMatches(category, keyOrClass)) || null;
+}
+
+function compactGameAnnouncementRows(items){
+  const rows = Array.isArray(items) ? items : [];
+  const grouped = new Map();
+  const leftovers = [];
+
+  rows.forEach(row => {
+    const content = String(row?.content || row?.title || "").trim();
+    const match = content.match(/^\s*([^：:]+)[：:]\s*(.+?)模式已开始[，,]?\s*快来加入吧[。！!]?\s*$/);
+    if(!match){
+      leftovers.push(row);
+      return;
+    }
+
+    const gameName = match[1].trim();
+    const modeName = match[2].trim();
+    if(!gameName || !modeName){
+      leftovers.push(row);
+      return;
+    }
+
+    if(!grouped.has(gameName)){
+      grouped.set(gameName, {
+        ...row,
+        _gameName:gameName,
+        _modes:[],
+        _latestTime:getEventSortTime(row)
+      });
+    }
+
+    const group = grouped.get(gameName);
+    if(!group._modes.includes(modeName)) group._modes.push(modeName);
+    if(getEventSortTime(row) > group._latestTime){
+      group._latestTime = getEventSortTime(row);
+      group.event_at = row.event_at;
+      group.created_at = row.created_at;
+      group.link_url = row.link_url || group.link_url;
+    }
+  });
+
+  const merged = Array.from(grouped.values()).map(group => ({
+    ...group,
+    content:`${group._gameName}：${group._modes.join("、")}模式已开始，快来加入吧。`
+  }));
+
+  return [...merged, ...leftovers]
+    .sort((a,b) => getEventSortTime(b) - getEventSortTime(a))
+    .slice(0, 3);
+}
+
+function compactMemberAnnouncementRows(items){
+  const rows = Array.isArray(items) ? items : [];
+  const achievementGroups = new Map();
+  const others = [];
+
+  rows.forEach(row => {
+    const content = String(row?.content || row?.title || "").trim();
+    const match = content.match(/^\s*(.+?)\s*达成成就[「『](.+?)[」』][。！!]?\s*$/);
+    if(!match){
+      others.push(row);
+      return;
+    }
+
+    const name = match[1].trim();
+    const achievement = match[2].trim();
+    if(!name || !achievement){
+      others.push(row);
+      return;
+    }
+
+    if(!achievementGroups.has(name)){
+      achievementGroups.set(name, {
+        ...row,
+        _name:name,
+        _achievements:[],
+        _latestTime:getEventSortTime(row)
+      });
+    }
+
+    const group = achievementGroups.get(name);
+    if(!group._achievements.includes(achievement)) group._achievements.push(achievement);
+    if(getEventSortTime(row) > group._latestTime){
+      group._latestTime = getEventSortTime(row);
+      group.event_at = row.event_at;
+      group.created_at = row.created_at;
+      group.link_url = row.link_url || group.link_url;
+    }
+  });
+
+  const mergedAchievements = Array.from(achievementGroups.values()).map(group => {
+    const names = group._achievements.map(item => `「${item}」`).join("、");
+    return {
+      ...group,
+      content:`${group._name} 达成成就 ${names}`
+    };
+  });
+
+  return [...mergedAchievements, ...others]
+    .sort((a,b) => getEventSortTime(b) - getEventSortTime(a))
+    .slice(0, 3);
+}
+
+function renderCompactSideCategory(rows, keyOrClass){
+  const category = findBoardCategory(keyOrClass);
+  if(!category) return "";
+
+  const groups = groupBoardRows(rows);
+  const originalItems = groups.get(category.key) || [];
+  if(!originalItems.length) return "";
+
+  const items = boardCategoryMatches(category, "game")
+    ? compactGameAnnouncementRows(originalItems)
+    : boardCategoryMatches(category, "member")
+      ? compactMemberAnnouncementRows(originalItems)
+      : originalItems.slice(0, Math.min(category.limit || 3, 3));
+
+  const meta = category.meta ? `<small>${escapeHtml(category.meta)}</small>` : "";
+  const link = getBoardLink(category);
+  const headerAside = link || meta;
+  const showItemLink = Boolean(category.show_go_button && !link);
+  const titleText = `${category.icon ? `${category.icon} ` : ""}${category.label}`;
+
+  return `
+    <article class="boardSection boardMiniCard ${escapeHtml(category.cls)}" data-category="${escapeHtml(category.key)}">
+      <h2 class="boardSectionTitle">
+        <span>${escapeHtml(titleText)}</span>
+        ${headerAside}
+      </h2>
+      <ul class="boardList">
+        ${items.map(item => renderBoardLine(item, { showItemLink })).join("")}
+      </ul>
+    </article>
+  `;
+}
+
+function renderCompactSideNotices(rows){
+  return [
+    renderCompactSideCategory(rows, "game"),
+    renderCompactSideCategory(rows, "member")
+  ].filter(Boolean).join("");
+}
+
+function renderLivingBoard(rows){
+  if(!livingBoardLayout) return;
+
+  // 右侧公告采用紧凑版：游戏同类模式合并，成员同人成就合并。
+  const sideNoticesHtml = renderCompactSideNotices(rows);
+
+  const otherNoticesHtml = renderCategorySections(rows, {
+    excludeKeys:["release", "birthday", "game", "member"],
+    excludeClasses:["release", "game", "member"]
+  });
+
+  livingBoardLayout.innerHTML = `
+    <div class="wallDashboard">
+      <div class="wallCalendarColumn">
+        <article class="boardSection boardCalendarCard">
+          <h2 class="boardSectionTitle"><span>日历</span></h2>
+          ${buildCalendarViewHtml()}
+        </article>
+        ${buildReleaseNoteCard(rows)}
+      </div>
+
+      <aside class="wallSideColumn" aria-label="客厅公告">
+        ${sideNoticesHtml || `<article class="boardSection boardMiniCard quick"><h2 class="boardSectionTitle"><span>📌 公告</span></h2><div class="boardMiniEmpty">暂时没有新的动态。</div></article>`}
+      </aside>
+
+      ${otherNoticesHtml ? `<div class="wallOtherNotices">${otherNoticesHtml}</div>` : ""}
+    </div>
+  `;
+}
+
+function calendarDateValue(value){
+  if(!value) return null;
+  if(value instanceof Date){
+    return Number.isNaN(value.getTime()) ? null : new Date(value);
+  }
+
+  const text = String(value).trim();
+  const dateOnly = text.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|T|\s)/);
+  if(dateOnly){
+    const date = new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]));
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function calendarLocalDay(date){
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function calendarDayKey(date){
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+}
+
+function uniqueCalendarNames(values){
+  const seen = new Set();
+  const result = [];
+  (values || []).forEach(value => {
+    const name = String(value || "").trim();
+    if(!name || seen.has(name)) return;
+    seen.add(name);
+    result.push(name);
+  });
+  return result;
+}
+
+function calendarProjectSingerNames(project){
+  const names = [];
+  (project?.singers || []).forEach(item => names.push(item.member_name));
+  (project?.parts || []).forEach(item => names.push(item.assigned_member_name));
+  return uniqueCalendarNames(names);
+}
+
+function calendarProjectIsPublished(project){
+  const singerQuota = Math.max(1, Number(project?.participant_count ?? project?.singer_quota) || 1);
+  const singers = Array.isArray(project?.singers) ? project.singers : [];
+  const parts = Array.isArray(project?.parts) ? project.parts : [];
+  const singerCount = singers.length;
+  const normalizedPartNames = parts.map(part => String(part?.original_name || "").trim());
+  const filledPartNames = normalizedPartNames.filter(Boolean);
+  const hasPartText = filledPartNames.length > 0;
+  const hasEnoughPartRows = parts.length >= singerQuota;
+  const hasPlaceholderPart = filledPartNames.some(name => /^(待分配|未分配)$/i.test(name));
+  const hasIncompletePartRow = parts.some(part => {
+    const originalName = String(part?.original_name || "").trim();
+    const assignedId = String(part?.assigned_member_id || "").trim();
+    return !originalName || !assignedId;
+  });
+  const assignedIds = new Set(parts.map(part => String(part?.assigned_member_id || "").trim()).filter(Boolean));
+  const allSubmitted = singerCount > 0 && singers.every(item => !!item.is_submitted);
+
+  return Boolean(
+    String(project?.display_link || "").trim() &&
+    singerCount >= singerQuota &&
+    String(project?.project_tone || "").trim() &&
+    hasPartText &&
+    hasEnoughPartRows &&
+    !hasPlaceholderPart &&
+    !hasIncompletePartRow &&
+    assignedIds.size >= singerCount &&
+    allSubmitted &&
+    String(project?.producer_member_id || "").trim() &&
+    project?.producer_completed &&
+    String(project?.release_date || "").trim()
+  );
+}
+
+async function fetchLivingCalendarData(){
+  if(!client) throw new Error("Supabase 客户端没有加载成功");
+
+  const user = currentMember || getStoredUser();
+  if(!user?.member_id || !user?.member_code){
+    throw new Error("请重新登录后再试");
+  }
+
+  const { data, error } = await client.rpc("get_living_calendar_data", {
+    p_member_id:user.member_id,
+    p_member_code:user.member_code
+  });
+
+  if(error) throw error;
+
+  const payload = data && typeof data === "object" && !Array.isArray(data)
+    ? data
+    : (Array.isArray(data) && data[0] && typeof data[0] === "object" ? data[0] : {});
+
+  const birthdays = (Array.isArray(payload.member_birthdays) ? payload.member_birthdays : []).map(row => ({
+    id:String(row?.id || ""),
+    nickname:String(row?.nickname || "").trim(),
+    role:String(row?.role || "").trim().toLowerCase(),
+    birthday_month:Number(row?.birthday_month),
+    birthday_day:Number(row?.birthday_day)
+  })).filter(row =>
+    row.nickname &&
+    row.birthday_month >= 1 && row.birthday_month <= 12 &&
+    row.birthday_day >= 1 && row.birthday_day <= 31
+  );
+
+  const idolBirthdays = (Array.isArray(payload.idol_birthdays) ? payload.idol_birthdays : []).map((row, index) => ({
+    id:String(row?.id || ""),
+    idol_name:String(row?.idol_name || "").trim(),
+    birthday_month:Number(row?.birthday_month),
+    birthday_day:Number(row?.birthday_day),
+    sort_order:Number.isFinite(Number(row?.sort_order)) ? Number(row.sort_order) : index + 1
+  })).filter(row =>
+    row.idol_name &&
+    row.birthday_month >= 1 && row.birthday_month <= 12 &&
+    row.birthday_day >= 1 && row.birthday_day <= 31
+  );
+
+  const cancelledStatuses = new Set(["已取消", "取消", "作废"]);
+  const projects = (Array.isArray(payload.projects) ? payload.projects : []).map(project => ({
+    ...project,
+    id:String(project?.id || ""),
+    project_name:String(project?.project_name || project?.task_name || "").trim(),
+    release_date:project?.release_date || null,
+    singers:Array.isArray(project?.singers) ? project.singers.map(item => ({
+      member_id:String(item?.member_id || ""),
+      member_name:String(item?.member_name || "").trim(),
+      is_submitted:!!item?.is_submitted
+    })) : [],
+    parts:Array.isArray(project?.parts) ? project.parts.map(item => ({
+      part_order:Number(item?.part_order || 0),
+      original_name:String(item?.original_name || "").trim(),
+      assigned_member_id:String(item?.assigned_member_id || ""),
+      assigned_member_name:String(item?.assigned_member_name || "").trim()
+    })).sort((a,b) => a.part_order - b.part_order) : []
+  })).filter(project =>
+    project.project_name &&
+    calendarDateValue(project.release_date) &&
+    !cancelledStatuses.has(String(project.status || "").trim())
+  );
+
+  console.info("[客厅日历] 数据读取完成", {
+    projects:projects.length,
+    memberBirthdays:birthdays.length,
+    idolBirthdays:idolBirthdays.length
+  });
+
+  return { projects, birthdays, idolBirthdays };
+}
+
+function qingmingDay(year){
+  if(year >= 2000 && year <= 2099){
+    const y = year % 100;
+    const corrections = {2008:-1};
+    return Math.floor(y * 0.2422 + 4.81) - Math.floor(y / 4) + (corrections[year] || 0);
+  }
+  if(year >= 1900 && year <= 1999){
+    const y = year % 100;
+    return Math.floor(y * 0.2422 + 5.59) - Math.floor(y / 4);
+  }
+  return 5;
+}
+
+function nthWeekdayDay(year, monthIndex, weekday, nth){
+  const firstWeekday = new Date(year, monthIndex, 1).getDay();
+  return 1 + ((weekday - firstWeekday + 7) % 7) + (nth - 1) * 7;
+}
+
+let chineseCalendarFormatter = null;
+try{
+  chineseCalendarFormatter = new Intl.DateTimeFormat("zh-CN-u-ca-chinese", { month:"numeric", day:"numeric" });
+}catch(err){
+  console.warn("当前浏览器不支持农历节日计算：", err);
+}
+
+function chineseCalendarMonthDay(date){
+  if(!chineseCalendarFormatter) return null;
+  try{
+    const parts = chineseCalendarFormatter.formatToParts(date);
+    const month = Number(parts.find(part => part.type === "month")?.value);
+    const day = Number(parts.find(part => part.type === "day")?.value);
+    return Number.isFinite(month) && Number.isFinite(day) ? { month, day } : null;
+  }catch(err){
+    return null;
   }
 }
 
-async function fetchLivingAnnouncements(){
-  if(!client){
-    throw new Error("Supabase 客户端没有加载成功");
+function calendarHolidayItems(date){
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const items = [];
+
+  const fixed = new Map([
+    ["1-1", { icon:"🎆", label:"元旦" }],
+    ["2-14", { icon:"💝", label:"情人节" }],
+    ["6-1", { icon:"🎈", label:"儿童节" }],
+    ["7-4", { flag:"us", label:"美国独立日" }],
+    ["10-1", { flag:"cn", label:"中国国庆节" }],
+    ["10-31", { icon:"🎃", label:"万圣节" }],
+    ["12-24", { icon:"✨", label:"平安夜" }],
+    ["12-25", { icon:"🎄", label:"圣诞节" }]
+  ]);
+
+  const fixedItem = fixed.get(`${month}-${day}`);
+  if(fixedItem) items.push({ type:"holiday", ...fixedItem });
+
+  if(month === 4 && day === qingmingDay(year)){
+    items.push({ type:"holiday", icon:"🌿", label:"清明节" });
   }
 
+  if(month === 11 && day === nthWeekdayDay(year, 10, 4, 4)){
+    items.push({ type:"holiday", icon:"🦃", label:"感恩节" });
+  }
+
+  const lunar = chineseCalendarMonthDay(date);
+  if(lunar){
+    const lunarLabels = new Map([
+      ["1-1", { icon:"🧧", label:"春节" }],
+      ["1-15", { icon:"🏮", label:"元宵节" }],
+      ["5-5", { icon:"🐉", label:"端午节" }],
+      ["7-7", { icon:"🌌", label:"七夕" }],
+      ["8-15", { icon:"🥮", label:"中秋节" }]
+    ]);
+    const lunarItem = lunarLabels.get(`${lunar.month}-${lunar.day}`);
+    if(lunarItem) items.push({ type:"holiday", ...lunarItem });
+  }
+
+  return items;
+}
+
+function holidayPlainText(item){
+  return `${item?.icon ? `${item.icon} ` : ""}${String(item?.label || "").trim()}`.trim();
+}
+
+function renderHolidayLabel(item){
+  const label = escapeHtml(String(item?.label || "").trim());
+  if(item?.flag === "cn"){
+    return `<span class="calendarHolidayLine"><span class="calendarFlag calendarFlag-cn" aria-hidden="true"></span><span class="calendarHolidayText">${label}</span></span>`;
+  }
+  if(item?.flag === "us"){
+    return `<span class="calendarHolidayLine"><span class="calendarFlag calendarFlag-us" aria-hidden="true"></span><span class="calendarHolidayText">${label}</span></span>`;
+  }
+  const icon = item?.icon ? `<span aria-hidden="true">${escapeHtml(item.icon)}</span>` : "";
+  return `<span class="calendarHolidayLine">${icon}<span class="calendarHolidayText">${label}</span></span>`;
+}
+
+function calendarBirthdayItems(date){
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  const memberItems = livingCalendarBirthdays
+    .filter(member => member.birthday_month === month && member.birthday_day === day)
+    .map(member => ({
+      type:"birthday",
+      birthdayKind:"member",
+      label:`🎂 ${member.nickname} 生日`,
+      member
+    }));
+
+  const idolItems = livingCalendarIdolBirthdays
+    .filter(idol => idol.birthday_month === month && idol.birthday_day === day)
+    .sort((a,b) => a.sort_order - b.sort_order || String(a.idol_name).localeCompare(String(b.idol_name), "zh-CN"))
+    .map(idol => ({
+      type:"birthday",
+      birthdayKind:"idol",
+      label:`🎂 ${idol.idol_name} 生日`,
+      idol
+    }));
+
+  return [...memberItems, ...idolItems];
+}
+
+function calendarProjectItemsByDay(){
+  const grouped = new Map();
+  livingCalendarProjects.forEach(project => {
+    const date = calendarDateValue(project.release_date);
+    if(!date) return;
+    const key = calendarDayKey(calendarLocalDay(date));
+    if(!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push({
+      type:"project",
+      project,
+      published:calendarProjectIsPublished(project),
+      singers:calendarProjectSingerNames(project)
+    });
+  });
+  return grouped;
+}
+
+function renderCalendarItem(item){
+  if(item.type === "project"){
+    const project = item.project || {};
+    const title = String(project.project_name || "未命名作品").trim();
+    const singers = (item.singers || []).join(" · ");
+    const target = normalizeInternalLink(project.display_link);
+    const tag = target ? "a" : "span";
+    const href = target ? ` href="${escapeHtml(target)}"` : "";
+    const stateClass = item.published ? "is-published" : "is-planned";
+    const stateTitle = item.published ? "已发布" : "预计发布";
+    const singersHtml = singers ? `<span class="calendarSongSingers">${escapeHtml(singers)}</span>` : "";
+    const tooltip = singers ? `${stateTitle}｜${title}｜${singers}` : `${stateTitle}｜${title}`;
+    return `<${tag} class="calendarEvent is-project ${stateClass}"${href} title="${escapeHtml(tooltip)}"><span class="calendarSongTitle">${escapeHtml(title)}</span>${singersHtml}</${tag}>`;
+  }
+
+  if(item.type === "birthday"){
+    const extraClass = item.birthdayKind === "idol" ? " is-idol-birthday" : "";
+    return `<span class="calendarEvent is-birthday${extraClass}" title="${escapeHtml(item.label)}">${escapeHtml(item.label)}</span>`;
+  }
+
+  const holidayTitle = holidayPlainText(item);
+  return `<span class="calendarEvent is-holiday" title="${escapeHtml(holidayTitle)}">${renderHolidayLabel(item)}</span>`;
+}
+
+function renderLivingCalendar(){
+  renderLivingBoard(livingAnnouncements);
+}
+
+function renderLivingView(){
+  renderLivingBoard(livingAnnouncements);
+}
+
+function setBoardView(){
+  renderLivingView();
+}
+
+async function fetchLivingAnnouncements(){
+  if(!client) throw new Error("Supabase 客户端没有加载成功");
+
   const fields = "id, category, event_kind, event_scope, title, content, priority, is_pinned, link_url, event_at, start_at, end_at, created_at";
-  const result = await client
+  const { data, error } = await client
     .from("living_announcements_feed")
     .select(fields)
     .order("created_at", { ascending:false });
 
-  if(result.error) throw result.error;
-  return result.data || [];
+  if(error) throw error;
+  return data || [];
 }
 
 async function loadLivingBoard(){
   if(!livingBoardLayout) return;
   livingBoardLayout.innerHTML = `<div class="boardLoading">${escapeHtml(requirePageText("loading_text"))}</div>`;
   try{
-    const rows = await fetchLivingAnnouncements();
-    renderLivingBoard(rows);
+    const [announcements, calendarData] = await Promise.all([
+      fetchLivingAnnouncements(),
+      fetchLivingCalendarData()
+    ]);
+    livingAnnouncements = announcements;
+    livingCalendarProjects = calendarData.projects || [];
+    livingCalendarBirthdays = calendarData.birthdays || [];
+    livingCalendarIdolBirthdays = calendarData.idolBirthdays || [];
+    renderLivingView();
   }catch(err){
     console.error("读取客厅公告栏失败：", err);
+    livingAnnouncements = [];
+    livingCalendarProjects = [];
+    livingCalendarBirthdays = [];
+    livingCalendarIdolBirthdays = [];
     livingBoardLayout.innerHTML = `<div class="boardError">${escapeHtml(requirePageText("error_text"))}<br>${escapeHtml(requirePageText("database_error_hint"))}</div>`;
   }
 }
@@ -2505,6 +4604,20 @@ async function initLivingPage(){
   }catch(err){
     renderLivingConfigError(err);
   }
+
+  livingBoardLayout?.addEventListener("click", event => {
+    const shiftBtn = event.target.closest("[data-calendar-shift]");
+    if(shiftBtn){
+      calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + Number(shiftBtn.dataset.calendarShift || 0), 1);
+      renderLivingView();
+      return;
+    }
+    if(event.target.closest("[data-calendar-today]")){
+      const now = new Date();
+      calendarCursor = new Date(now.getFullYear(), now.getMonth(), 1);
+      renderLivingView();
+    }
+  });
 
   identityNoticeBtn?.addEventListener("click", event => {
     event.stopPropagation();
